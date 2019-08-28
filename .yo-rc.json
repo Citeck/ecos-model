@@ -1,0 +1,42 @@
+{
+  "generator-jhipster": {
+    "applicationType": "microservice",
+    "gitCompany": "",
+    "baseName": "ecosModel",
+    "packageName": "ru.citeck.ecos.model",
+    "packageFolder": "ru/citeck/ecos/model",
+    "serverPort": 8081,
+    "serviceDiscoveryType": "eureka",
+    "authenticationType": "jwt",
+    "uaaBaseName": "../uaa",
+    "cacheProvider": "hazelcast",
+    "enableHibernateCache": true,
+    "websocket": false,
+    "databaseType": "sql",
+    "devDatabaseType": "h2Memory",
+    "prodDatabaseType": "postgresql",
+    "searchEngine": false,
+    "enableSwaggerCodegen": false,
+    "messageBroker": false,
+    "buildTool": "maven",
+    "useSass": false,
+    "clientPackageManager": "npm",
+    "testFrameworks": [],
+    "enableTranslation": true,
+    "nativeLanguage": "en",
+    "languages": [
+      "ru",
+      "en"
+    ],
+    "clientFramework": "angularX",
+    "jhiPrefix": "jhi",
+    "jhipsterVersion": "6.2.0",
+    "jwtSecretKey": "OTcxMGU5OWE4N2M1Mjc2NWJiM2MyYmQxNTg5MDIwNjU1M2YxOWQxNjRiMjM5NDcwNjg3NDhiNWRlNzVkNTE3NmE0MWFkOGJkZTAxYjM0NTM5YjdmNTc2OThjODU2Y2Q1MzJkNTY4ZWQxOGU4MjRlNWZhNGE4NWI0M2E2MGE1ODk=",
+    "entitySuffix": "",
+    "dtoSuffix": "DTO",
+    "otherModules": [],
+    "blueprints": [],
+    "skipClient": true,
+    "skipUserManagement": true
+  }
+}
