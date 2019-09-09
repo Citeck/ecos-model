@@ -84,7 +84,7 @@ server:
 # Full reference is available at: https://www.jhipster.tech/common-application-properties/
 # ===================================================================
 
-jhipster:
+ecos:
   clientApp:
     name: 'ecosModelApp'
   logging:

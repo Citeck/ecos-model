@@ -3,7 +3,7 @@ services:
   ecosmodel-postgresql:
     image: postgres:11.4
     # volumes:
-    #     - ~/volumes/jhipster/ecosModel/postgresql/:/var/lib/postgresql/data/
+    #     - ~/volumes/ecos/ecosModel/postgresql/:/var/lib/postgresql/data/
     environment:
       - POSTGRES_USER=ecosModel
       - POSTGRES_PASSWORD=

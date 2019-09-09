@@ -9,11 +9,11 @@ public interface EcosTypeService {
 
     List<EcosTypeDto> getAll();
 
-    List<EcosTypeDto> getAll(List<Long> ids);
+    List<EcosTypeDto> getAll(List<String> uuids);
 
-    Optional<EcosTypeDto> getById(Long id);
+    Optional<EcosTypeDto> getByUuid(String uuid);
 
-    void delete(Long id);
+    void delete(String uuid);
 
-    void update(EcosTypeDto mutable);
+    EcosTypeDto update(EcosTypeDto dto);
 }

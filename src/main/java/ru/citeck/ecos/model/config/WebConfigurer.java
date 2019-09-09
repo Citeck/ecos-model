@@ -30,11 +30,11 @@ public class WebConfigurer implements ServletContextInitializer, WebServerFactor
 
     private final Environment env;
 
-    private final JHipsterProperties jHipsterProperties;
+    private final JHipsterProperties ecosRegistryProperties;
 
-    public WebConfigurer(Environment env, JHipsterProperties jHipsterProperties) {
+    public WebConfigurer(Environment env, JHipsterProperties ecosRegistryProperties) {
         this.env = env;
-        this.jHipsterProperties = jHipsterProperties;
+        this.ecosRegistryProperties = ecosRegistryProperties;
     }
 
     @Override
@@ -59,7 +59,6 @@ public class WebConfigurer implements ServletContextInitializer, WebServerFactor
     private void setMimeMappings(WebServerFactory server) {
         if (server instanceof ConfigurableServletWebServerFactory) {
             MimeMappings mappings = new MimeMappings(MimeMappings.DEFAULT);
-            // IE issue, see https://github.com/jhipster/generator-jhipster/pull/711
             mappings.add("html", MediaType.TEXT_HTML_VALUE + ";charset=" + StandardCharsets.UTF_8.name().toLowerCase());
             // CloudFoundry issue, see https://github.com/cloudfoundry/gorouter/issues/64
             mappings.add("json", MediaType.TEXT_HTML_VALUE + ";charset=" + StandardCharsets.UTF_8.name().toLowerCase());
@@ -71,7 +70,7 @@ public class WebConfigurer implements ServletContextInitializer, WebServerFactor
     @Bean
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        CorsConfiguration config = jHipsterProperties.getCors();
+        CorsConfiguration config = ecosRegistryProperties.getCors();
         if (config.getAllowedOrigins() != null && !config.getAllowedOrigins().isEmpty()) {
             log.debug("Registering CORS filter");
             source.registerCorsConfiguration("/api/**", config);

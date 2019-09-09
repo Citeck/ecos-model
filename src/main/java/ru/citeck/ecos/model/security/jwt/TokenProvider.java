@@ -1,10 +1,9 @@
 package ru.citeck.ecos.model.security.jwt;
 
-import java.nio.charset.StandardCharsets;
-import java.security.Key;
-import java.util.*;
-import java.util.stream.Collectors;
-
+import io.github.jhipster.config.JHipsterProperties;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -16,10 +15,12 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import io.github.jhipster.config.JHipsterProperties;
-import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.stream.Collectors;
 
 @Component
 public class TokenProvider implements InitializingBean {
@@ -34,29 +35,29 @@ public class TokenProvider implements InitializingBean {
 
     private long tokenValidityInMillisecondsForRememberMe;
 
-    private final JHipsterProperties jHipsterProperties;
+    private final JHipsterProperties ecosRegistryProperties;
 
-    public TokenProvider(JHipsterProperties jHipsterProperties) {
-        this.jHipsterProperties = jHipsterProperties;
+    public TokenProvider(JHipsterProperties ecosRegistryProperties) {
+        this.ecosRegistryProperties = ecosRegistryProperties;
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
         byte[] keyBytes;
-        String secret = jHipsterProperties.getSecurity().getAuthentication().getJwt().getSecret();
+        String secret = ecosRegistryProperties.getSecurity().getAuthentication().getJwt().getSecret();
         if (!StringUtils.isEmpty(secret)) {
             log.warn("Warning: the JWT key used is not Base64-encoded. " +
                 "We recommend using the `jhipster.security.authentication.jwt.base64-secret` key for optimum security.");
             keyBytes = secret.getBytes(StandardCharsets.UTF_8);
         } else {
             log.debug("Using a Base64-encoded JWT secret key");
-            keyBytes = Decoders.BASE64.decode(jHipsterProperties.getSecurity().getAuthentication().getJwt().getBase64Secret());
+            keyBytes = Decoders.BASE64.decode(ecosRegistryProperties.getSecurity().getAuthentication().getJwt().getBase64Secret());
         }
         this.key = Keys.hmacShaKeyFor(keyBytes);
         this.tokenValidityInMilliseconds =
-            1000 * jHipsterProperties.getSecurity().getAuthentication().getJwt().getTokenValidityInSeconds();
+            1000 * ecosRegistryProperties.getSecurity().getAuthentication().getJwt().getTokenValidityInSeconds();
         this.tokenValidityInMillisecondsForRememberMe =
-            1000 * jHipsterProperties.getSecurity().getAuthentication().getJwt()
+            1000 * ecosRegistryProperties.getSecurity().getAuthentication().getJwt()
                 .getTokenValidityInSecondsForRememberMe();
     }
 

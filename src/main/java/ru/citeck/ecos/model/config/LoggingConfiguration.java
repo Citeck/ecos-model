@@ -25,7 +25,7 @@ public class LoggingConfiguration {
 
     public LoggingConfiguration(@Value("${spring.application.name}") String appName,
                                 @Value("${server.port}") String serverPort,
-                                JHipsterProperties jHipsterProperties,
+                                JHipsterProperties ecosRegistryProperties,
                                 ObjectProvider<BuildProperties> buildProperties,
                                 ObjectMapper mapper) throws JsonProcessingException {
 
@@ -37,7 +37,7 @@ public class LoggingConfiguration {
         buildProperties.ifAvailable(it -> map.put("version", it.getVersion()));
         String customFields = mapper.writeValueAsString(map);
 
-        JHipsterProperties.Logging loggingProperties = jHipsterProperties.getLogging();
+        JHipsterProperties.Logging loggingProperties = ecosRegistryProperties.getLogging();
         JHipsterProperties.Logging.Logstash logstashProperties = loggingProperties.getLogstash();
 
         if (loggingProperties.isUseJsonFormat()) {
@@ -49,7 +49,7 @@ public class LoggingConfiguration {
         if (loggingProperties.isUseJsonFormat() || logstashProperties.isEnabled()) {
             addContextListener(context, customFields, loggingProperties);
         }
-        if (jHipsterProperties.getMetrics().getLogs().isEnabled()) {
+        if (ecosRegistryProperties.getMetrics().getLogs().isEnabled()) {
             setMetricsMarkerLogbackFilter(context, loggingProperties.isUseJsonFormat());
         }
     }

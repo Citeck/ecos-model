@@ -2,13 +2,15 @@ package ru.citeck.ecos.model.dto;
 
 import lombok.*;
 import ru.citeck.ecos.records2.RecordRef;
+import ru.citeck.ecos.records2.graphql.meta.annotation.DisplayName;
+
+import java.util.Set;
 
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-//@JsonDeserialize(using = EcosTypeDtoDeserializer.class)
-public class EcosTypeDto {
+public class EcosSectionDto {
 
     @Getter @Setter private String uuid;
 
@@ -18,20 +20,18 @@ public class EcosTypeDto {
 
     @Getter @Setter private String tenant;
 
-    @Getter @Setter private RecordRef parent;
+    @Getter @Setter private Set<RecordRef> types;
 
-    @Getter @Setter private RecordRef section;
-
-    public EcosTypeDto(EcosTypeDto dto) {
+    public EcosSectionDto(EcosSectionDto dto) {
         this.name = dto.name;
         this.description = dto.description;
         this.tenant = dto.tenant;
-        this.parent = dto.parent;
         this.uuid = dto.uuid;
+        this.types = dto.types;
     }
 
-    public EcosTypeDto(String uuid) {
-        this.uuid = uuid;
+    @DisplayName
+    public String getDisplayName() {
+        return name;
     }
-
 }

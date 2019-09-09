@@ -2,10 +2,10 @@ package ru.citeck.ecos.model.dao;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.citeck.ecos.model.dto.EcosTypeDto;
-import ru.citeck.ecos.model.record.EcosTypeRecord;
-import ru.citeck.ecos.model.record.mutable.EcosTypeMutable;
-import ru.citeck.ecos.model.service.EcosTypeService;
+import ru.citeck.ecos.model.dto.EcosSectionDto;
+import ru.citeck.ecos.model.record.EcosSectionRecord;
+import ru.citeck.ecos.model.record.mutable.EcosSectionMutable;
+import ru.citeck.ecos.model.service.EcosSectionService;
 import ru.citeck.ecos.predicate.Elements;
 import ru.citeck.ecos.predicate.PredicateService;
 import ru.citeck.ecos.predicate.model.Predicate;
@@ -30,72 +30,72 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-public class EcosTypeRecordsDao extends LocalRecordsDAO
-                                implements RecordsQueryWithMetaLocalDAO<EcosTypeRecord>,
-                                           RecordsMetaLocalDAO<EcosTypeRecord>,
-                                           MutableRecordsLocalDAO<EcosTypeMutable> {
+public class EcosSectionRecordsDao extends LocalRecordsDAO
+    implements RecordsQueryWithMetaLocalDAO<EcosSectionRecord>,
+    RecordsMetaLocalDAO<EcosSectionRecord>,
+    MutableRecordsLocalDAO<EcosSectionMutable> {
 
-    private static final String ID = "type";
+    private static final String ID = "section";
 
-    private final EcosTypeService typeService;
+    private final EcosSectionService sectionService;
 
     private final PredicateService predicateService;
 
     @Autowired
-    public EcosTypeRecordsDao(EcosTypeService typeService,
+    public EcosSectionRecordsDao(EcosSectionService sectionService,
                               PredicateService predicateService) {
         setId(ID);
-        this.typeService = typeService;
+        this.sectionService = sectionService;
         this.predicateService = predicateService;
     }
 
     @Override
-    public RecordsQueryResult<EcosTypeRecord> getMetaValues(RecordsQuery query) {
+    public RecordsQueryResult<EcosSectionRecord> getMetaValues(RecordsQuery query) {
 
-        RecordsQueryResult<EcosTypeRecord> result = new RecordsQueryResult<>();
+        RecordsQueryResult<EcosSectionRecord> result = new RecordsQueryResult<>();
 
         if (query.getLanguage().equals(PredicateService.LANGUAGE_PREDICATE)) {
             Predicate predicate = predicateService.readJson(query.getQuery());
 
-            query.setSourceId("type");
+            query.setSourceId("section");
             query.setLanguage("");
             Elements<RecordElement> elements = new RecordElements(recordsService, query);
 
             List<RecordElement> result2 = predicateService.filter(elements, predicate);
 
-            RecordsQueryResult<EcosTypeRecord> resultPredicate = new RecordsQueryResult<>();
+            RecordsQueryResult<EcosSectionRecord> resultPredicate = new RecordsQueryResult<>();
             result2.forEach(e -> {
                 resultPredicate.addRecord(
-                    typeService.getByUuid(e.getRecordRef().getId())
-                        .map(EcosTypeRecord::new).orElse(null));
+                    sectionService.getByUuid(e.getRecordRef().getId())
+                        .map(EcosSectionRecord::new).orElse(null));
             });
 
             return resultPredicate;
         }
 
-        result.setRecords(typeService.getAll().stream()
-            .map(EcosTypeRecord::new)
+        result.setRecords(sectionService.getAll().stream()
+            .map(EcosSectionRecord::new)
             .collect(Collectors.toList()));
         return result;
     }
 
     @Override
-    public List<EcosTypeRecord> getMetaValues(List<RecordRef> records) {
+    public List<EcosSectionRecord> getMetaValues(List<RecordRef> records) {
         return records.stream().map(ref -> {
             if (ref.getId().isEmpty()) {
-                return new EcosTypeRecord(new EcosTypeDto());
+                return new EcosSectionRecord(new EcosSectionDto());
             }
-            return new EcosTypeRecord(typeService.getByUuid(ref.toString()).orElseThrow(() ->
+            return new EcosSectionRecord(sectionService.getByUuid(ref.toString()).orElseThrow(() ->
                 new IllegalArgumentException("Record doesn't exists: " + ref)));
         }).collect(Collectors.toList());
     }
 
     @Override
-    public List<EcosTypeMutable> getValuesToMutate(List<RecordRef> records) {
+    public List<EcosSectionMutable> getValuesToMutate(List<RecordRef> records) {
 
-        Map<RecordRef, EcosTypeDto> instances = new HashMap<>();
+        Map<RecordRef, EcosSectionDto> instances = new HashMap<>();
 
-        typeService.getAll(records.stream()
+        sectionService.getAll(records.stream()
             .map(RecordRef::toString)
             .collect(Collectors.toList()))
             .forEach(dto -> {
@@ -104,9 +104,9 @@ public class EcosTypeRecordsDao extends LocalRecordsDAO
 
         return records.stream().map(ref -> {
             if (instances.containsKey(ref)) {
-                return new EcosTypeMutable(instances.get(ref));
+                return new EcosSectionMutable(instances.get(ref));
             } else {
-                EcosTypeMutable mutable = new EcosTypeMutable();
+                EcosSectionMutable mutable = new EcosSectionMutable();
                 mutable.setUuid(ref.getId());
                 return mutable;
             }
@@ -114,23 +114,19 @@ public class EcosTypeRecordsDao extends LocalRecordsDAO
     }
 
     @Override
-    public RecordsMutResult save(List<EcosTypeMutable> values) {
+    public RecordsMutResult save(List<EcosSectionMutable> values) {
 
         List<RecordMeta> resultMeta = new ArrayList<>();
         values.stream()
             .filter(e -> e.getUuid() != null)
             .forEach(e -> {
-                EcosTypeDto storedDto = typeService.update(e);
+                EcosSectionDto storedDto = sectionService.update(e);
                 RecordRef ref = RecordRef.valueOf(storedDto.getUuid());
                 RecordMeta meta = new RecordMeta(ref);
                 meta.setAttribute("uuid", storedDto.getUuid());
                 meta.setAttribute("name", storedDto.getName());
                 meta.setAttribute("description", storedDto.getDescription());
                 meta.setAttribute("tenant", storedDto.getTenant());
-                RecordRef parent = storedDto.getParent();
-                if (parent != null) {
-                    meta.setAttribute("parent", parent.toString());
-                }
                 resultMeta.add(meta);
             });
 
@@ -144,7 +140,7 @@ public class EcosTypeRecordsDao extends LocalRecordsDAO
         RecordsDelResult result = new RecordsDelResult();
 
         deletion.getRecords().forEach(ref -> {
-            typeService.delete(ref.getId());
+            sectionService.delete(ref.getId());
             result.addRecord(new RecordMeta(ref));
         });
 

@@ -1,36 +1,34 @@
 package ru.citeck.ecos.model.domain;
 
-import javax.persistence.*;
+import lombok.*;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 @Table(name = "ecos_section")
-
 @AllArgsConstructor
 @NoArgsConstructor
 public class EcosSectionEntity {
 
-    @Getter
-    @Setter
+    @Column(unique = true, nullable = false)
+    @Getter @Setter private String uuid;
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
     @SequenceGenerator(name = "sequenceGenerator")
-    private Long id;
+    @Getter @Setter private Long id;
 
-    @Getter
-    @Setter
-    private String name;
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "section_id")
+    @Getter @Setter private Set<EcosTypeEntity> types;
 
-    @Getter
-    @Setter
-    private String decription;
+    @NonNull
+    @Getter @Setter private String name;
 
-    @Getter
-    @Setter
-    private String tenant;
+    @Getter @Setter private String description;
+
+    @Getter @Setter private String tenant;
+
 
 }
