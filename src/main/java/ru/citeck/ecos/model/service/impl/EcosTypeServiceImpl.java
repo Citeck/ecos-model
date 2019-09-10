@@ -47,13 +47,13 @@ public class EcosTypeServiceImpl implements EcosTypeService {
 
     @Override
     public Optional<EcosTypeDto> getByUuid(String uuid) {
-        return typeRepository.findByExtIds(uuid).map(this::entityToDto);
+        return typeRepository.findByExtId(uuid).map(this::entityToDto);
     }
 
     @Override
     @Transactional
     public void delete(String uuid) {
-        Optional<EcosTypeEntity> optional = typeRepository.findByExtIds(uuid);
+        Optional<EcosTypeEntity> optional = typeRepository.findByExtId(uuid);
         optional.ifPresent(e -> typeRepository.deleteById(e.getId()));
     }
 
@@ -61,15 +61,10 @@ public class EcosTypeServiceImpl implements EcosTypeService {
     @Transactional
     public EcosTypeDto update(EcosTypeDto dto) {
         EcosTypeEntity entity = dtoToEntity(dto);
-        if (dto.getParent() != null && Strings.isNotBlank(dto.getParent().getId())) {
-            EcosTypeEntity parent = typeRepository.findByExtIds(dto.getParent().getId())
-                .orElseThrow(() -> new ParentNotFoundException(dto.getParent().getId()));
-            entity.setParent(parent);
-        }
         if (Strings.isBlank(entity.getExtId())) {
             entity.setExtId(UUID.randomUUID().toString());
         } else {
-            Optional<EcosTypeEntity> stored = typeRepository.findByExtIds(entity.getExtId());
+            Optional<EcosTypeEntity> stored = typeRepository.findByExtId(entity.getExtId());
             entity.setId(stored.map(EcosTypeEntity::getId).orElse(null));
         }
         typeRepository.save(entity);
@@ -103,12 +98,12 @@ public class EcosTypeServiceImpl implements EcosTypeService {
         ecosTypeEntity.setDescription(dto.getDescription());
         ecosTypeEntity.setTenant(dto.getTenant());
 
-        RecordRef parent = dto.getParent();
-        Optional<EcosTypeEntity> optional = Optional.empty();
-        if (parent != null && parent.getId() != null) {
-            optional = typeRepository.findByExtIds(dto.getParent().getId());
+        EcosTypeEntity parent = null;
+        if (dto.getParent() != null && Strings.isNotBlank(dto.getParent().getId())) {
+            parent = typeRepository.findByExtId(dto.getParent().getId())
+                .orElseThrow(() -> new ParentNotFoundException(dto.getParent().getId()));
         }
-        ecosTypeEntity.setParent(optional.orElse(null));
+        ecosTypeEntity.setParent(parent);
 
         Set<RecordRef> sectionsExtIds = dto.getSections();
         Set<EcosSectionEntity> sections = null;

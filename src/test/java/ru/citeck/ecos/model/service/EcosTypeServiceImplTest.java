@@ -41,9 +41,9 @@ public class EcosTypeServiceImplTest {
     public void getAllReturnTypes() {
 
         EcosTypeEntity ecosTypeEntity = new EcosTypeEntity("a", 1L, "a",
-            "a_desc", "a_tenant", null, null, null);
+            "a_desc", "a_tenant", null, null, null, null);
         EcosTypeEntity ecosTypeEntity2 = new EcosTypeEntity("b", 2L, "b",
-            "b_desc", "b_tenant", ecosTypeEntity, null, null);
+            "b_desc", "b_tenant", ecosTypeEntity, null, null, null);
 
         ecosTypeEntity.setChilds(new HashSet<>(Arrays.asList(ecosTypeEntity2)));
 
@@ -76,9 +76,9 @@ public class EcosTypeServiceImplTest {
     public void getAllSelectedReturnTypes() {
 
         EcosTypeEntity ecosTypeEntity = new EcosTypeEntity("a", 1L, "a",
-            "a_desc", "a_tenant", null, null, null);
+            "a_desc", "a_tenant", null, null, null, null);
         EcosTypeEntity ecosTypeEntity2 = new EcosTypeEntity("b", 2L, "b",
-            "b_desc", "b_tenant", ecosTypeEntity, null, null);
+            "b_desc", "b_tenant", ecosTypeEntity, null, null, null);
 
         ecosTypeEntity.setChilds(new HashSet<>(Arrays.asList(ecosTypeEntity2)));
 
@@ -106,13 +106,13 @@ public class EcosTypeServiceImplTest {
     @Test
     public void getByIdReturnTypeDto() {
         EcosTypeEntity ecosTypeEntity = new EcosTypeEntity("a", 1L, "a",
-            "a_desc", "a_tenant", null, null, null);
+            "a_desc", "a_tenant", null, null, null, null);
         EcosTypeEntity ecosTypeEntity2 = new EcosTypeEntity("b", 2L, "b",
-            "b_desc", "b_tenant", ecosTypeEntity, null, null);
+            "b_desc", "b_tenant", ecosTypeEntity, null, null, null);
 
         ecosTypeEntity.setChilds(new HashSet<>(Arrays.asList(ecosTypeEntity2)));
 
-        given(typeRepository.findByExtIds("b")).willReturn(Optional.of(ecosTypeEntity2));
+        given(typeRepository.findByExtId("b")).willReturn(Optional.of(ecosTypeEntity2));
 
 
         Optional<EcosTypeDto> optionalDto = ecosTypeService.getByUuid("b");
@@ -129,7 +129,7 @@ public class EcosTypeServiceImplTest {
     @Test
     public void getByIdReturnNothing() {
 
-        given(typeRepository.findByExtIds("b")).willReturn(Optional.empty());
+        given(typeRepository.findByExtId("b")).willReturn(Optional.empty());
 
 
         Optional<EcosTypeDto> optionalDto = ecosTypeService.getByUuid("b");
@@ -141,9 +141,9 @@ public class EcosTypeServiceImplTest {
     @Test
     public void deleteSuccess() {
         EcosTypeEntity ecosTypeEntity = new EcosTypeEntity("a", 1L, "a",
-            "a_desc", "a_tenant", null, null,null);
+            "a_desc", "a_tenant", null, null,null, null);
 
-        given(typeRepository.findByExtIds("a")).willReturn(Optional.of(ecosTypeEntity));
+        given(typeRepository.findByExtId("a")).willReturn(Optional.of(ecosTypeEntity));
 
 
         ecosTypeService.delete("a");
@@ -156,7 +156,7 @@ public class EcosTypeServiceImplTest {
     @Test
     public void deleteNoDeletion() {
 
-        given(typeRepository.findByExtIds("a")).willReturn(Optional.empty());
+        given(typeRepository.findByExtId("a")).willReturn(Optional.empty());
 
 
         ecosTypeService.delete("a");
@@ -168,9 +168,9 @@ public class EcosTypeServiceImplTest {
     @Test
     public void updateSuccessNoParentNewEntity() {
         EcosTypeEntity ecosTypeEntity = new EcosTypeEntity("a", 1L, "aname",
-            "a_desc", "a_tenant", null, null, null);
+            "a_desc", "a_tenant", null, null, null, null);
 
-        given(typeRepository.findByExtIds("a")).willReturn(Optional.empty());
+        given(typeRepository.findByExtId("a")).willReturn(Optional.empty());
 
 
         EcosTypeDto dto = ecosTypeService.update(entityToDto(ecosTypeEntity));
@@ -186,11 +186,13 @@ public class EcosTypeServiceImplTest {
 
     @Test
     public void updateSuccessWithParentNewEntity() {
-        EcosTypeEntity parent = new EcosTypeEntity("b",2L,"b","b","b",null,null, null);
-        EcosTypeEntity ecosTypeEntity = new EcosTypeEntity("a", 1L, "aname", "a_desc", "a_tenant", parent, null, null);
+        EcosTypeEntity parent = new EcosTypeEntity("b",2L,"b","b","b",
+            null, null, null, null);
+        EcosTypeEntity ecosTypeEntity = new EcosTypeEntity("a", 1L, "aname", "a_desc", "a_tenant", parent,
+            null, null, null);
 
-        given(typeRepository.findByExtIds("a")).willReturn(Optional.empty());
-        given(typeRepository.findByExtIds("b")).willReturn(Optional.of(parent));
+        given(typeRepository.findByExtId("a")).willReturn(Optional.empty());
+        given(typeRepository.findByExtId("b")).willReturn(Optional.of(parent));
 
 
         EcosTypeDto dto = ecosTypeService.update(entityToDto(ecosTypeEntity));
@@ -206,7 +208,8 @@ public class EcosTypeServiceImplTest {
 
     @Test
     public void updateSuccessWithNoUUIDNewEntity() {
-        EcosTypeEntity ecosTypeEntity = new EcosTypeEntity(null, 1L, "aname", "a_desc", "a_tenant", null, null, null);
+        EcosTypeEntity ecosTypeEntity = new EcosTypeEntity(null, 1L, "aname",
+            "a_desc", "a_tenant", null, null, null, null);
 
 
         EcosTypeDto dto = ecosTypeService.update(entityToDto(ecosTypeEntity));
@@ -223,11 +226,11 @@ public class EcosTypeServiceImplTest {
     @Test(expected = ParentNotFoundException.class)
     public void updateException() {
         EcosTypeEntity parent = new EcosTypeEntity("b", 2L, "a",
-            "a_desc", "a_tenant", null , null, null);
+            "a_desc", "a_tenant", null , null, null, null);
         EcosTypeEntity ecosTypeEntity = new EcosTypeEntity("a", 1L, "a",
-            "a_desc", "a_tenant", parent, null, null);
+            "a_desc", "a_tenant", parent, null, null, null);
 
-        given(typeRepository.findByExtIds("b")).willReturn(Optional.empty());
+        given(typeRepository.findByExtId("b")).willReturn(Optional.empty());
 
 
         ecosTypeService.update(entityToDto(ecosTypeEntity));
