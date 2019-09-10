@@ -12,7 +12,7 @@ import java.util.Set;
 @ToString
 public class EcosSectionDto {
 
-    @Getter @Setter private String uuid;
+    @Getter @Setter private String extId;
 
     @Getter @Setter private String name;
 
@@ -26,7 +26,7 @@ public class EcosSectionDto {
         this.name = dto.name;
         this.description = dto.description;
         this.tenant = dto.tenant;
-        this.uuid = dto.uuid;
+        this.extId = dto.extId;
         this.types = dto.types;
     }
 

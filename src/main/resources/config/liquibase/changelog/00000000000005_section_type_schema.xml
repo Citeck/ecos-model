@@ -6,21 +6,21 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd
                         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
-    <changeSet id="00000000000004" author="citeck">
+    <changeSet id="00000000000005" author="citeck">
 
-        <createTable tableName="ecos_section">
-            <column name="ext_id" type="VARCHAR(36)">
-                <constraints nullable="false" unique="true" />
-            </column>
-            <column name="id" type="BIGINT" autoIncrement="${autoIncrement}">
-                <constraints primaryKey="true" nullable="false" />
-            </column>
-            <column name="name" type="VARCHAR(255)">
+        <createTable tableName="section_type">
+            <column name="section_id" type="BIGINT">
                 <constraints nullable="false" />
             </column>
-            <column name="description" type="VARCHAR(1023)" />
-            <column name="tenant" type="VARCHAR(36)" />
+            <column name="type_id" type="BIGINT">
+                <constraints nullable="false" />
+            </column>
         </createTable>
+
+        <addUniqueConstraint
+            columnNames="section_id, type_id"
+            constraintName="UNIQUE_CONSTRAINT"
+            tableName="section_type"/>
 
     </changeSet>
 

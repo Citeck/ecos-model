@@ -16,7 +16,7 @@ import java.util.Set;
 public class EcosTypeEntity {
 
     @Column(unique = true, nullable = false)
-    @Getter @Setter private String uuid;
+    @Getter @Setter private String extId;
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
@@ -37,8 +37,7 @@ public class EcosTypeEntity {
     @OneToMany(mappedBy="parent", cascade = CascadeType.DETACH)
     @Getter @Setter private Set<EcosTypeEntity> childs = new HashSet<>();
 
-    @ManyToOne
-    @JoinColumn(name = "section_id")
-    @Getter @Setter private EcosSectionEntity section;
+    @ManyToMany(mappedBy = "types", fetch = FetchType.EAGER)
+    @Getter @Setter private Set<EcosSectionEntity> sections;
 
 }

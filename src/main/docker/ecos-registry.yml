@@ -1,7 +1,7 @@
 version: '2'
 services:
   ecos-registry:
-    image: ecos/ecos-registry:release-1.0.0
+    image: jhipster/jhipster-registry:v5.0.2
     volumes:
       - ./central-server-config:/central-config
     # When run with the "dev" Spring profile, the ECOS-Registry will

@@ -2,14 +2,14 @@ package ru.citeck.ecos.model.service;
 
 import ru.citeck.ecos.model.dto.EcosSectionDto;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface EcosSectionService {
 
-    List<EcosSectionDto> getAll();
+    Set<EcosSectionDto> getAll();
 
-    List<EcosSectionDto> getAll(List<String> uuids);
+    Set<EcosSectionDto> getAll(Set<String> uuids);
 
     Optional<EcosSectionDto> getByUuid(String uuid);
 

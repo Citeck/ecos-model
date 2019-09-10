@@ -25,10 +25,7 @@ import ru.citeck.ecos.records2.request.mutation.RecordsMutResult;
 import ru.citeck.ecos.records2.request.query.RecordsQuery;
 import ru.citeck.ecos.records2.request.query.RecordsQueryResult;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.mockito.BDDMockito.given;
 
@@ -54,8 +51,8 @@ public class EcosSectionRecordsDaoTest {
 
     @Test
     public void getMetaValuesReturnRecords() {
-        EcosSectionDto dto = new EcosSectionDto("uuid", "a", "adesc","atenant", null);
-        List<EcosSectionDto> dtos = Collections.singletonList(dto);
+        EcosSectionDto dto = new EcosSectionDto("extId", "a", "adesc","atenant", null);
+        Set<EcosSectionDto> dtos = Collections.singleton(dto);
         RecordsQuery query = new RecordsQuery();
 
         given(sectionService.getAll()).willReturn(dtos);
@@ -67,7 +64,7 @@ public class EcosSectionRecordsDaoTest {
         MetaField foo = new MetaFieldImpl(new Field(""));
         Assert.assertEquals(1L, result.getTotalCount());
         Assert.assertFalse(result.getHasMore());
-        Assert.assertEquals("uuid", result.getRecords().get(0).getId());
+        Assert.assertEquals("extId", result.getRecords().get(0).getId());
         Assert.assertEquals("a", result.getRecords().get(0).getAttribute("name", foo));
         Assert.assertEquals("adesc", result.getRecords().get(0).getAttribute("description", foo));
         Assert.assertEquals("atenant", result.getRecords().get(0).getAttribute("tenant", foo));
@@ -76,13 +73,13 @@ public class EcosSectionRecordsDaoTest {
 
     @Test
     public void getMetaValuesReturnRecordsWithPredicate() {
-        EcosSectionDto dto = new EcosSectionDto("uuid", "a", "adesc","atenant", null);
+        EcosSectionDto dto = new EcosSectionDto("extId", "a", "adesc","atenant", null);
         RecordsQuery query = new RecordsQuery();
         query.setLanguage(PredicateService.LANGUAGE_PREDICATE);
 
-        given(sectionService.getByUuid("uuid")).willReturn(Optional.of(dto));
+        given(sectionService.getByUuid("extId")).willReturn(Optional.of(dto));
 
-        RecordElement element = new RecordElement(null, RecordRef.create("", "type", "uuid"));
+        RecordElement element = new RecordElement(null, RecordRef.create("", "type", "extId"));
 
         given(predicateService.filter(Mockito.any(), Mockito.any())).willReturn(Arrays.asList(
             element
@@ -95,7 +92,7 @@ public class EcosSectionRecordsDaoTest {
         MetaField foo = new MetaFieldImpl(new Field(""));
         Assert.assertEquals(1L, result.getTotalCount());
         Assert.assertFalse(result.getHasMore());
-        Assert.assertEquals("uuid", result.getRecords().get(0).getId());
+        Assert.assertEquals("extId", result.getRecords().get(0).getId());
         Assert.assertEquals("a", result.getRecords().get(0).getAttribute("name", foo));
         Assert.assertEquals("adesc", result.getRecords().get(0).getAttribute("description", foo));
         Assert.assertEquals("atenant", result.getRecords().get(0).getAttribute("tenant", foo));
@@ -105,35 +102,35 @@ public class EcosSectionRecordsDaoTest {
 
     @Test
     public void getValuesToMutateReturnOldElements() {
-        EcosSectionDto dto = new EcosSectionDto("uuid", "a", "adesc","atenant", null);
+        EcosSectionDto dto = new EcosSectionDto("extId", "a", "adesc","atenant", null);
 
-        List<RecordRef> refs = Arrays.asList(RecordRef.create("", "type", "uuid"));
+        List<RecordRef> refs = Arrays.asList(RecordRef.create("", "type", "extId"));
 
 
         List<EcosSectionMutable> mutables = recordsDao.getValuesToMutate(refs);
 
 
         Assert.assertEquals(1L, mutables.size());
-        Assert.assertEquals(dto.getUuid(), mutables.get(0).getUuid());
+        Assert.assertEquals(dto.getExtId(), mutables.get(0).getExtId());
     }
 
     @Test
     public void getValuesToMutateReturnNewElements() {
-        EcosSectionDto dto = new EcosSectionDto("uuid", "a", "adesc","atenant", null);
+        EcosSectionDto dto = new EcosSectionDto("extId", "a", "adesc","atenant", null);
 
-        List<RecordRef> refs = Arrays.asList(RecordRef.create("", "type", "uuid"));
+        List<RecordRef> refs = Arrays.asList(RecordRef.create("", "type", "extId"));
 
 
         List<EcosSectionMutable> mutables = recordsDao.getValuesToMutate(refs);
 
 
         Assert.assertEquals(1L, mutables.size());
-        Assert.assertEquals(dto.getUuid(), mutables.get(0).getUuid());
+        Assert.assertEquals(dto.getExtId(), mutables.get(0).getExtId());
     }
 
     @Test
     public void saveReturnSavedIds() {
-        EcosSectionDto dto = new EcosSectionDto("uuid", "a", "desc", "", null);
+        EcosSectionDto dto = new EcosSectionDto("extId", "a", "desc", "", null);
         List<EcosSectionMutable> mutables = Arrays.asList(new EcosSectionMutable(dto));
 
         given(sectionService.update(dto)).willReturn(dto);
@@ -142,7 +139,7 @@ public class EcosSectionRecordsDaoTest {
 
 
         Mockito.verify(sectionService, Mockito.times(1)).update(Mockito.any());
-        Assert.assertEquals("uuid", result1.getRecords().get(0).getId().getId());
+        Assert.assertEquals("extId", result1.getRecords().get(0).getId().getId());
     }
 
     @Test
@@ -160,7 +157,7 @@ public class EcosSectionRecordsDaoTest {
     @Test
     public void deleteSuccess() {
         RecordsDeletion deletion = new RecordsDeletion();
-        List<RecordRef> refs = Arrays.asList(RecordRef.create("", "type", "uuid"));
+        List<RecordRef> refs = Arrays.asList(RecordRef.create("", "type", "extId"));
         deletion.setRecords(refs);
 
 

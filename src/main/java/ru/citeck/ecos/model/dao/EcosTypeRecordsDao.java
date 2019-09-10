@@ -99,7 +99,7 @@ public class EcosTypeRecordsDao extends LocalRecordsDAO
             .map(RecordRef::toString)
             .collect(Collectors.toList()))
             .forEach(dto -> {
-                instances.put(RecordRef.valueOf(dto.getUuid()), dto);
+                instances.put(RecordRef.valueOf(dto.getExtId()), dto);
             });
 
         return records.stream().map(ref -> {
@@ -107,7 +107,7 @@ public class EcosTypeRecordsDao extends LocalRecordsDAO
                 return new EcosTypeMutable(instances.get(ref));
             } else {
                 EcosTypeMutable mutable = new EcosTypeMutable();
-                mutable.setUuid(ref.getId());
+                mutable.setExtId(ref.getId());
                 return mutable;
             }
         }).collect(Collectors.toList());
@@ -118,12 +118,12 @@ public class EcosTypeRecordsDao extends LocalRecordsDAO
 
         List<RecordMeta> resultMeta = new ArrayList<>();
         values.stream()
-            .filter(e -> e.getUuid() != null)
+            .filter(e -> e.getExtId() != null)
             .forEach(e -> {
                 EcosTypeDto storedDto = typeService.update(e);
-                RecordRef ref = RecordRef.valueOf(storedDto.getUuid());
+                RecordRef ref = RecordRef.valueOf(storedDto.getExtId());
                 RecordMeta meta = new RecordMeta(ref);
-                meta.setAttribute("uuid", storedDto.getUuid());
+                meta.setAttribute("extId", storedDto.getExtId());
                 meta.setAttribute("name", storedDto.getName());
                 meta.setAttribute("description", storedDto.getDescription());
                 meta.setAttribute("tenant", storedDto.getTenant());

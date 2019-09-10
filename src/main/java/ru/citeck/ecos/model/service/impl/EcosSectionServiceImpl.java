@@ -30,28 +30,28 @@ public class EcosSectionServiceImpl implements EcosSectionService {
     }
 
     @Cacheable("sections")
-    public List<EcosSectionDto> getAll() {
+    public Set<EcosSectionDto> getAll() {
         return sectionRepository.findAll().stream()
             .map(this::entityToDto)
-            .collect(Collectors.toList());
+            .collect(Collectors.toSet());
     }
 
     @Override
-    public List<EcosSectionDto> getAll(List<String> uuids) {
-        return sectionRepository.findAllByUuid(uuids).stream()
+    public Set<EcosSectionDto> getAll(Set<String> extIds) {
+        return sectionRepository.findAllByExtIds(extIds).stream()
             .map(this::entityToDto)
-            .collect(Collectors.toList());
+            .collect(Collectors.toSet());
     }
 
     @Override
     public Optional<EcosSectionDto> getByUuid(String uuid) {
-        return sectionRepository.findByUuid(uuid).map(this::entityToDto);
+        return sectionRepository.findByExtId(uuid).map(this::entityToDto);
     }
 
     @Override
     @Transactional
     public void delete(String uuid) {
-        Optional<EcosSectionEntity> optional = sectionRepository.findByUuid(uuid);
+        Optional<EcosSectionEntity> optional = sectionRepository.findByExtId(uuid);
         optional.ifPresent(e -> sectionRepository.deleteById(e.getId()));
     }
 
@@ -59,10 +59,10 @@ public class EcosSectionServiceImpl implements EcosSectionService {
     @Transactional
     public EcosSectionDto update(EcosSectionDto dto) {
         EcosSectionEntity entity = dtoToEntity(dto);
-        if (Strings.isBlank(entity.getUuid())) {
-            entity.setUuid(UUID.randomUUID().toString());
+        if (Strings.isBlank(entity.getExtId())) {
+            entity.setExtId(UUID.randomUUID().toString());
         } else {
-            Optional<EcosSectionEntity> stored = sectionRepository.findByUuid(entity.getUuid());
+            Optional<EcosSectionEntity> stored = sectionRepository.findByExtId(entity.getExtId());
             entity.setId(stored.map(EcosSectionEntity::getId).orElse(null));
         }
         sectionRepository.save(entity);
@@ -71,10 +71,10 @@ public class EcosSectionServiceImpl implements EcosSectionService {
 
     private EcosSectionDto entityToDto(EcosSectionEntity entity) {
         Set<RecordRef> typesRefs = entity.getTypes().stream()
-            .map(e -> RecordRef.create("type", e.getUuid()))
+            .map(e -> RecordRef.create("type", e.getExtId()))
             .collect(Collectors.toSet());
         return new EcosSectionDto(
-            entity.getUuid(),
+            entity.getExtId(),
             entity.getName(),
             entity.getDescription(),
             entity.getTenant(),
@@ -84,12 +84,12 @@ public class EcosSectionServiceImpl implements EcosSectionService {
     private EcosSectionEntity dtoToEntity(EcosSectionDto dto) {
         EcosSectionEntity ecosSectionEntity = new EcosSectionEntity();
         ecosSectionEntity.setName(dto.getName());
-        ecosSectionEntity.setUuid(dto.getUuid());
+        ecosSectionEntity.setExtId(dto.getExtId());
         ecosSectionEntity.setDescription(dto.getDescription());
         ecosSectionEntity.setTenant(dto.getTenant());
         Set<String> dtoTypesUuids = dto.getTypes().stream()
             .map(RecordRef::getId).collect(Collectors.toSet());
-        Set<EcosTypeEntity> storedTypes = typeRepository.findAllByUuid(new ArrayList<>(dtoTypesUuids));
+        Set<EcosTypeEntity> storedTypes = typeRepository.findAllByExtIds(new ArrayList<>(dtoTypesUuids));
         ecosSectionEntity.setTypes(storedTypes);
         return ecosSectionEntity;
     }

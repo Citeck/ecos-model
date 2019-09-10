@@ -17,14 +17,14 @@ public class EcosTypeRecord implements MetaValue {
 
     @Override
     public String getId() {
-        return dto.getUuid();
+        return dto.getExtId();
     }
 
     @Override
     public String getDisplayName() {
         String dispName = dto.getName();
         if (dispName == null) {
-            dispName = dto.getUuid();
+            dispName = dto.getExtId();
         }
         return dispName;
     }
@@ -36,16 +36,16 @@ public class EcosTypeRecord implements MetaValue {
                 return TYPE_FORMKEY;
             case "name":
                 return dto.getName();
-            case "uuid":
-                return dto.getUuid();
+            case "extId":
+                return dto.getExtId();
             case "description":
                 return dto.getDescription();
             case "tenant":
                 return dto.getTenant();
             case "parent":
                 return dto.getParent();
-            case "section":
-                return dto.getSection();
+            case "sections":
+                return dto.getSections();
         }
         return null;
     }

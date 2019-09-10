@@ -1,4 +1,4 @@
-# ecosModel
+# emodel
 
 This is a "microservice" application intended to be part of a microservice architecture.
 
@@ -14,7 +14,7 @@ To start your application in the dev profile, simply run:
 
 ### Packaging as jar
 
-To build the final jar and optimize the ecosModel application for production, run:
+To build the final jar and optimize the emodel application for production, run:
 
     ./mvnw -Pprod clean verify
 

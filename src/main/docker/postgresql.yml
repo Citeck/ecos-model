@@ -1,11 +1,11 @@
 version: '2'
 services:
-  ecosmodel-postgresql:
+  emodel-postgresql:
     image: postgres:11.4
     # volumes:
-    #     - ~/volumes/ecos/ecosModel/postgresql/:/var/lib/postgresql/data/
+    #     - ~/volumes/ecos/emodel/postgresql/:/var/lib/postgresql/data/
     environment:
-      - POSTGRES_USER=ecosModel
+      - POSTGRES_USER=emodel
       - POSTGRES_PASSWORD=
     ports:
       - 5432:5432
