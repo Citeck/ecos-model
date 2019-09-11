@@ -11,7 +11,6 @@ import ru.citeck.ecos.model.domain.EcosTypeEntity;
 import ru.citeck.ecos.model.dto.EcosTypeDto;
 import ru.citeck.ecos.model.repository.EcosSectionRepository;
 import ru.citeck.ecos.model.repository.EcosTypeRepository;
-import ru.citeck.ecos.model.service.exception.ForgottenChildsException;
 import ru.citeck.ecos.model.service.exception.ParentNotFoundException;
 import ru.citeck.ecos.model.service.impl.EcosTypeServiceImpl;
 import ru.citeck.ecos.records2.RecordRef;
@@ -23,7 +22,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 
 @RunWith(MockitoJUnitRunner.class)
-public class EcosTypeServiceImplTest {
+public class EcosAssociationServiceImplTest {
 
     @Mock
     private EcosTypeRepository typeRepository;
@@ -79,7 +78,7 @@ public class EcosTypeServiceImplTest {
         EcosTypeEntity ecosTypeEntity2 = new EcosTypeEntity("b", 2L, "b",
             "b_desc", "b_tenant", ecosTypeEntity, null, null, null);
 
-        ecosTypeEntity.setChilds(new HashSet<>(Arrays.asList(ecosTypeEntity2)));
+        ecosTypeEntity.setChilds(new HashSet<>(Collections.singleton(ecosTypeEntity2)));
 
         Set<EcosTypeEntity> entities = new HashSet<>();
         entities.add(ecosTypeEntity2);
@@ -115,6 +114,7 @@ public class EcosTypeServiceImplTest {
 
         EcosTypeDto dto = ecosTypeService.getByExtId("b");
 
+
         Assert.assertEquals("b", dto.getExtId());
         Assert.assertEquals("b", dto.getName());
         Assert.assertEquals("b_desc", dto.getDescription());
@@ -124,6 +124,9 @@ public class EcosTypeServiceImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void getByIdReturnNothing() {
+
+        given(typeRepository.findByExtId("b")).willReturn(Optional.empty());
+
 
         ecosTypeService.getByExtId("b");
     }
@@ -153,17 +156,6 @@ public class EcosTypeServiceImplTest {
 
 
         Mockito.verify(typeRepository, times(0)).deleteById(Mockito.anyLong());
-    }
-
-    @Test(expected = ForgottenChildsException.class)
-    public void deleteChildsException() {
-        EcosTypeEntity ecosTypeEntity = new EcosTypeEntity("a", 1L, "a",
-            "a_desc", "a_tenant", null, Collections.singleton(new EcosTypeEntity()),null, null);
-
-        given(typeRepository.findByExtId("a")).willReturn(Optional.of(ecosTypeEntity));
-
-
-        ecosTypeService.delete("a");
     }
 
     @Test

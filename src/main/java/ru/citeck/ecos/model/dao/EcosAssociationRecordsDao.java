@@ -23,10 +23,7 @@ import ru.citeck.ecos.records2.source.dao.local.MutableRecordsLocalDAO;
 import ru.citeck.ecos.records2.source.dao.local.RecordsMetaLocalDAO;
 import ru.citeck.ecos.records2.source.dao.local.RecordsQueryWithMetaLocalDAO;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -36,10 +33,13 @@ public class EcosAssociationRecordsDao extends LocalRecordsDAO
                                                   MutableRecordsLocalDAO<EcosAssociationMutable> {
 
     private static final String ID = "association";
+    private static final String LANGUAGE_EMPTY = "";
 
     private final EcosAssociationService associationService;
 
     private final PredicateService predicateService;
+
+    private static final EcosAssociationRecord EMPTY_RECORD = new EcosAssociationRecord(new EcosAssociationDto());
 
     @Autowired
     public EcosAssociationRecordsDao(EcosAssociationService associationService,
@@ -51,32 +51,34 @@ public class EcosAssociationRecordsDao extends LocalRecordsDAO
 
     @Override
     public List<EcosAssociationMutable> getValuesToMutate(List<RecordRef> records) {
-        Map<RecordRef, EcosAssociationDto> instances = new HashMap<>();
 
-        associationService.getAll(records.stream()
-            .map(RecordRef::toString)
-            .collect(Collectors.toSet()))
-            .forEach(dto -> {
-                instances.put(RecordRef.valueOf(dto.getExtId()), dto);
-            });
+        Map<String, EcosAssociationDto> stored =
+            associationService.getAll(
+                records.stream()
+                    .map(RecordRef::getId)
+                    .collect(Collectors.toSet()))
+                .stream()
+                    .collect(Collectors.toMap(EcosAssociationDto::getExtId, dto -> dto));
 
-        return records.stream().map(ref -> {
-            if (instances.containsKey(ref)) {
-                return new EcosAssociationMutable(instances.get(ref));
-            } else {
-                EcosAssociationMutable mutable = new EcosAssociationMutable();
-                mutable.setExtId(ref.getId());
-                return mutable;
-            }
-        }).collect(Collectors.toList());
+        return records.stream()
+            .map(RecordRef::getId)
+            .map(id -> {
+                    if (stored.containsKey(id)) {
+                        return new EcosAssociationMutable(stored.get(id));
+                    } else {
+                        return new EcosAssociationMutable(id);
+                    }
+                }).collect(Collectors.toList());
     }
 
     @Override
     public RecordsMutResult save(List<EcosAssociationMutable> values) {
-        List<RecordMeta> resultMeta = new ArrayList<>();
-        values.stream()
+
+        RecordsMutResult result = new RecordsMutResult();
+
+        result.setRecords(values.stream()
             .filter(e -> e.getExtId() != null)
-            .forEach(e -> {
+            .map(e -> {
                 EcosAssociationDto storedDto = associationService.update(e);
                 RecordRef ref = RecordRef.valueOf(storedDto.getExtId());
                 RecordMeta meta = new RecordMeta(ref);
@@ -87,63 +89,67 @@ public class EcosAssociationRecordsDao extends LocalRecordsDAO
                 if (type != null) {
                     meta.setAttribute("type", type.toString());
                 }
-                resultMeta.add(meta);
-            });
+                return meta;
+            })
+            .collect(Collectors.toList()));
 
-        RecordsMutResult result = new RecordsMutResult();
-        result.setRecords(resultMeta);
         return result;
     }
 
     @Override
     public RecordsDelResult delete(RecordsDeletion recordsDeletion) {
+
         RecordsDelResult result = new RecordsDelResult();
 
-        recordsDeletion.getRecords().forEach(ref -> {
-            associationService.delete(ref.getId());
-            result.addRecord(new RecordMeta(ref));
-        });
+        result.addRecords(
+            recordsDeletion.getRecords().stream()
+                .filter(ref -> ref.getId() != null)
+                .map(ref -> {
+                    associationService.delete(ref.getId());
+                    return new RecordMeta(ref);
+                })
+                .collect(Collectors.toList()));
 
         return result;
     }
 
     @Override
     public List<EcosAssociationRecord> getMetaValues(List<RecordRef> list) {
-        return list.stream().map(ref -> {
-            if (ref.getId().isEmpty()) {
-                return new EcosAssociationRecord(new EcosAssociationDto());
-            }
-            return new EcosAssociationRecord(associationService.getByExtId(ref.toString()).orElseThrow(() ->
-                new IllegalArgumentException("Record doesn't exists: " + ref)));
-        }).collect(Collectors.toList());
+        if (list.size() == 1 && list.get(0).getId().isEmpty()) {
+            return Collections.singletonList(EMPTY_RECORD);
+        }
+
+        return list.stream()
+            .map(ref -> new EcosAssociationRecord(associationService.getByExtId(ref.toString())))
+            .collect(Collectors.toList());
     }
 
     @Override
     public RecordsQueryResult<EcosAssociationRecord> getMetaValues(RecordsQuery query) {
+
         RecordsQueryResult<EcosAssociationRecord> result = new RecordsQueryResult<>();
 
         if (query.getLanguage().equals(PredicateService.LANGUAGE_PREDICATE)) {
             Predicate predicate = predicateService.readJson(query.getQuery());
 
-            query.setSourceId("association");
-            query.setLanguage("");
+            query.setSourceId(ID);
+            query.setLanguage(LANGUAGE_EMPTY);
+
             Elements<RecordElement> elements = new RecordElements(recordsService, query);
 
-            List<RecordElement> filtredResult = predicateService.filter(elements, predicate);
+            Set<String> filteredResultIds = predicateService.filter(elements, predicate).stream()
+                .map(e -> e.getRecordRef().getId())
+                .collect(Collectors.toSet());
 
-            RecordsQueryResult<EcosAssociationRecord> resultPredicate = new RecordsQueryResult<>();
-            filtredResult.forEach(e -> {
-                resultPredicate.addRecord(
-                    associationService.getByExtId(e.getRecordRef().getId())
-                        .map(EcosAssociationRecord::new).orElse(null));
-            });
+            result.addRecords(associationService.getAll(filteredResultIds).stream()
+                    .map(EcosAssociationRecord::new)
+                    .collect(Collectors.toList()));
 
-            return resultPredicate;
+        } else {
+            result.setRecords(associationService.getAll().stream()
+                .map(EcosAssociationRecord::new)
+                .collect(Collectors.toList()));
         }
-
-        result.setRecords(associationService.getAll().stream()
-            .map(EcosAssociationRecord::new)
-            .collect(Collectors.toList()));
         return result;
     }
 }

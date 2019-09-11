@@ -77,13 +77,12 @@ public class EcosSectionRecordsDaoTest {
         RecordsQuery query = new RecordsQuery();
         query.setLanguage(PredicateService.LANGUAGE_PREDICATE);
 
-        given(sectionService.getByUuid("extId")).willReturn(Optional.of(dto));
+        given(sectionService.getByExtId("extId")).willReturn(dto);
 
         RecordElement element = new RecordElement(null, RecordRef.create("", "type", "extId"));
 
-        given(predicateService.filter(Mockito.any(), Mockito.any())).willReturn(Arrays.asList(
-            element
-        ));
+        given(predicateService.filter(Mockito.any(), Mockito.any())).willReturn(Arrays.asList(element));
+        given(sectionService.getAll(Collections.singleton("extId"))).willReturn(Collections.singleton(dto));
 
 
         RecordsQueryResult<EcosSectionRecord> result = recordsDao.getMetaValues(query);

@@ -2,18 +2,17 @@ package ru.citeck.ecos.model.service;
 
 import ru.citeck.ecos.model.dto.EcosTypeDto;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.Set;
 
 public interface EcosTypeService {
 
-    List<EcosTypeDto> getAll();
+    Set<EcosTypeDto> getAll();
 
-    List<EcosTypeDto> getAll(List<String> uuids);
+    Set<EcosTypeDto> getAll(Set<String> extIds);
 
-    Optional<EcosTypeDto> getByUuid(String uuid);
+    EcosTypeDto getByExtId(String extId);
 
-    void delete(String uuid);
+    void delete(String extId);
 
     EcosTypeDto update(EcosTypeDto dto);
 }

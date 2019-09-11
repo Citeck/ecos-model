@@ -13,4 +13,8 @@ public class EcosSectionMutable extends EcosSectionDto {
     public EcosSectionMutable(EcosSectionDto dto) {
         super(dto);
     }
+
+    public EcosSectionMutable(String extId) {
+        super(extId, null, null,null,null);
+    }
 }

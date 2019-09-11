@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import ru.citeck.ecos.model.domain.EcosTypeEntity;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -16,5 +15,5 @@ public interface EcosTypeRepository extends JpaRepository<EcosTypeEntity, Long> 
     Optional<EcosTypeEntity> findByExtId(String extId);
 
     @Query("SELECT TYPE FROM EcosTypeEntity TYPE WHERE TYPE.extId IN ?1")
-    Set<EcosTypeEntity> findAllByExtIds(List<String> extIds);
+    Set<EcosTypeEntity> findAllByExtIds(Set<String> extIds);
 }

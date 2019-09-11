@@ -23,10 +23,7 @@ import ru.citeck.ecos.records2.source.dao.local.MutableRecordsLocalDAO;
 import ru.citeck.ecos.records2.source.dao.local.RecordsMetaLocalDAO;
 import ru.citeck.ecos.records2.source.dao.local.RecordsQueryWithMetaLocalDAO;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -36,17 +33,92 @@ public class EcosSectionRecordsDao extends LocalRecordsDAO
     MutableRecordsLocalDAO<EcosSectionMutable> {
 
     private static final String ID = "section";
+    private static final String LANGUAGE_EMPTY = "";
 
     private final EcosSectionService sectionService;
 
     private final PredicateService predicateService;
 
+    private static final EcosSectionRecord EMPTY_RECORD = new EcosSectionRecord(new EcosSectionDto());
+
     @Autowired
     public EcosSectionRecordsDao(EcosSectionService sectionService,
-                              PredicateService predicateService) {
+                                     PredicateService predicateService) {
         setId(ID);
         this.sectionService = sectionService;
         this.predicateService = predicateService;
+    }
+
+    @Override
+    public List<EcosSectionMutable> getValuesToMutate(List<RecordRef> records) {
+
+        Map<String, EcosSectionDto> stored =
+            sectionService.getAll(
+                records.stream()
+                    .map(RecordRef::getId)
+                    .collect(Collectors.toSet()))
+                .stream()
+                .collect(Collectors.toMap(EcosSectionDto::getExtId, dto -> dto));
+
+        return records.stream()
+            .map(RecordRef::getId)
+            .map(id -> {
+                if (stored.containsKey(id)) {
+                    return new EcosSectionMutable(stored.get(id));
+                } else {
+                    return new EcosSectionMutable(id);
+                }
+            }).collect(Collectors.toList());
+    }
+
+    @Override
+    public RecordsMutResult save(List<EcosSectionMutable> values) {
+
+        RecordsMutResult result = new RecordsMutResult();
+
+        result.setRecords(values.stream()
+            .filter(e -> e.getExtId() != null)
+            .map(e -> {
+                EcosSectionDto storedDto = sectionService.update(e);
+                RecordRef ref = RecordRef.valueOf(storedDto.getExtId());
+                RecordMeta meta = new RecordMeta(ref);
+                meta.setAttribute("extId", storedDto.getExtId());
+                meta.setAttribute("name", storedDto.getName());
+                meta.setAttribute("description", storedDto.getDescription());
+                meta.setAttribute("tenant", storedDto.getTenant());
+                return meta;
+            })
+            .collect(Collectors.toList()));
+
+        return result;
+    }
+
+    @Override
+    public RecordsDelResult delete(RecordsDeletion recordsDeletion) {
+
+        RecordsDelResult result = new RecordsDelResult();
+
+        result.addRecords(
+            recordsDeletion.getRecords().stream()
+                .filter(ref -> ref.getId() != null)
+                .map(ref -> {
+                    sectionService.delete(ref.getId());
+                    return new RecordMeta(ref);
+                })
+                .collect(Collectors.toList()));
+
+        return result;
+    }
+
+    @Override
+    public List<EcosSectionRecord> getMetaValues(List<RecordRef> list) {
+        if (list.size() == 1 && list.get(0).getId().isEmpty()) {
+            return Collections.singletonList(EMPTY_RECORD);
+        }
+
+        return list.stream()
+            .map(ref -> new EcosSectionRecord(sectionService.getByExtId(ref.toString())))
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -57,93 +129,24 @@ public class EcosSectionRecordsDao extends LocalRecordsDAO
         if (query.getLanguage().equals(PredicateService.LANGUAGE_PREDICATE)) {
             Predicate predicate = predicateService.readJson(query.getQuery());
 
-            query.setSourceId("section");
-            query.setLanguage("");
+            query.setSourceId(ID);
+            query.setLanguage(LANGUAGE_EMPTY);
+
             Elements<RecordElement> elements = new RecordElements(recordsService, query);
 
-            List<RecordElement> result2 = predicateService.filter(elements, predicate);
+            Set<String> filteredResultIds = predicateService.filter(elements, predicate).stream()
+                .map(e -> e.getRecordRef().getId())
+                .collect(Collectors.toSet());
 
-            RecordsQueryResult<EcosSectionRecord> resultPredicate = new RecordsQueryResult<>();
-            result2.forEach(e -> {
-                resultPredicate.addRecord(
-                    sectionService.getByUuid(e.getRecordRef().getId())
-                        .map(EcosSectionRecord::new).orElse(null));
-            });
+            result.addRecords(sectionService.getAll(filteredResultIds).stream()
+                .map(EcosSectionRecord::new)
+                .collect(Collectors.toList()));
 
-            return resultPredicate;
+        } else {
+            result.setRecords(sectionService.getAll().stream()
+                .map(EcosSectionRecord::new)
+                .collect(Collectors.toList()));
         }
-
-        result.setRecords(sectionService.getAll().stream()
-            .map(EcosSectionRecord::new)
-            .collect(Collectors.toList()));
-        return result;
-    }
-
-    @Override
-    public List<EcosSectionRecord> getMetaValues(List<RecordRef> records) {
-        return records.stream().map(ref -> {
-            if (ref.getId().isEmpty()) {
-                return new EcosSectionRecord(new EcosSectionDto());
-            }
-            return new EcosSectionRecord(sectionService.getByUuid(ref.toString()).orElseThrow(() ->
-                new IllegalArgumentException("Record doesn't exists: " + ref)));
-        }).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<EcosSectionMutable> getValuesToMutate(List<RecordRef> records) {
-
-        Map<RecordRef, EcosSectionDto> instances = new HashMap<>();
-
-        sectionService.getAll(records.stream()
-            .map(RecordRef::toString)
-            .collect(Collectors.toSet()))
-            .forEach(dto -> {
-                instances.put(RecordRef.valueOf(dto.getExtId()), dto);
-            });
-
-        return records.stream().map(ref -> {
-            if (instances.containsKey(ref)) {
-                return new EcosSectionMutable(instances.get(ref));
-            } else {
-                EcosSectionMutable mutable = new EcosSectionMutable();
-                mutable.setExtId(ref.getId());
-                return mutable;
-            }
-        }).collect(Collectors.toList());
-    }
-
-    @Override
-    public RecordsMutResult save(List<EcosSectionMutable> values) {
-
-        List<RecordMeta> resultMeta = new ArrayList<>();
-        values.stream()
-            .filter(e -> e.getExtId() != null)
-            .forEach(e -> {
-                EcosSectionDto storedDto = sectionService.update(e);
-                RecordRef ref = RecordRef.valueOf(storedDto.getExtId());
-                RecordMeta meta = new RecordMeta(ref);
-                meta.setAttribute("extId", storedDto.getExtId());
-                meta.setAttribute("name", storedDto.getName());
-                meta.setAttribute("description", storedDto.getDescription());
-                meta.setAttribute("tenant", storedDto.getTenant());
-                resultMeta.add(meta);
-            });
-
-        RecordsMutResult result = new RecordsMutResult();
-        result.setRecords(resultMeta);
-        return result;
-    }
-
-    @Override
-    public RecordsDelResult delete(RecordsDeletion deletion) {
-        RecordsDelResult result = new RecordsDelResult();
-
-        deletion.getRecords().forEach(ref -> {
-            sectionService.delete(ref.getId());
-            result.addRecord(new RecordMeta(ref));
-        });
-
         return result;
     }
 }

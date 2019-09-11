@@ -25,10 +25,7 @@ import ru.citeck.ecos.records2.request.mutation.RecordsMutResult;
 import ru.citeck.ecos.records2.request.query.RecordsQuery;
 import ru.citeck.ecos.records2.request.query.RecordsQueryResult;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.mockito.BDDMockito.given;
 
@@ -55,7 +52,7 @@ public class EcosTypeRecordsDaoTest {
     @Test
     public void getMetaValuesReturnRecords() {
         EcosTypeDto dto = new EcosTypeDto("extId", "a", "adesc","atenant", null, null);
-        List<EcosTypeDto> dtos = Collections.singletonList(dto);
+        Set<EcosTypeDto> dtos = Collections.singleton(dto);
         RecordsQuery query = new RecordsQuery();
 
         given(typeService.getAll()).willReturn(dtos);
@@ -80,20 +77,18 @@ public class EcosTypeRecordsDaoTest {
         RecordsQuery query = new RecordsQuery();
         query.setLanguage(PredicateService.LANGUAGE_PREDICATE);
 
-        given(typeService.getByUuid("extId")).willReturn(Optional.of(dto));
 
         RecordElement element = new RecordElement(null, RecordRef.create("", "type", "extId"));
 
-        given(predicateService.filter(Mockito.any(), Mockito.any())).willReturn(Arrays.asList(
-            element
-        ));
+        given(predicateService.filter(Mockito.any(), Mockito.any())).willReturn(Arrays.asList(element));
+        given(typeService.getAll(Collections.singleton("extId"))).willReturn(Collections.singleton(dto));
 
 
         RecordsQueryResult<EcosTypeRecord> result = recordsDao.getMetaValues(query);
 
 
         MetaField foo = new MetaFieldImpl(new Field(""));
-        Assert.assertEquals(1L, result.getTotalCount());
+        Assert.assertEquals(1, result.getTotalCount());
         Assert.assertFalse(result.getHasMore());
         Assert.assertEquals("extId", result.getRecords().get(0).getId());
         Assert.assertEquals("a", result.getRecords().get(0).getAttribute("name", foo));
