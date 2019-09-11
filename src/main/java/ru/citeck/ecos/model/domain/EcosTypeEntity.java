@@ -40,4 +40,8 @@ public class EcosTypeEntity {
     @ManyToMany(mappedBy = "types", fetch = FetchType.EAGER)
     @Getter @Setter private Set<EcosSectionEntity> sections;
 
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "type_id")
+    @Getter @Setter private Set<EcosAssociationEntity> associations;
+
 }

@@ -13,7 +13,7 @@ import java.util.Set;
 public interface EcosTypeRepository extends JpaRepository<EcosTypeEntity, Long> {
 
     @Query("SELECT TYPE FROM EcosTypeEntity TYPE WHERE TYPE.extId = ?1")
-    Optional<EcosTypeEntity> findByExtIds(String extId);
+    Optional<EcosTypeEntity> findByExtId(String extId);
 
     @Query("SELECT TYPE FROM EcosTypeEntity TYPE WHERE TYPE.extId IN ?1")
     Set<EcosTypeEntity> findAllByExtIds(List<String> extIds);
