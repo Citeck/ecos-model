@@ -5,18 +5,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import ru.citeck.ecos.model.domain.EcosSectionEntity;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface EcosSectionRepository extends JpaRepository<EcosSectionEntity, Long> {
 
-    @Query("select section from EcosSectionEntity section")
-    List<EcosSectionEntity> findAll();
+    @Query("SELECT SECTION FROM EcosSectionEntity SECTION WHERE SECTION.extId = ?1")
+    Optional<EcosSectionEntity> findByExtId(String extId);
 
-    @Query("SELECT section FROM EcosSectionEntity section WHERE section.uuid = ?1")
-    Optional<EcosSectionEntity> findByUuid(String uuid);
-
-    @Query("SELECT section FROM EcosSectionEntity section WHERE section.uuid IN ?1")
-    List<EcosSectionEntity> findAllByUuid(List<String> uuid);
+    @Query("SELECT SECTION FROM EcosSectionEntity SECTION WHERE SECTION.extId IN ?1")
+    Set<EcosSectionEntity> findAllByExtIds(Set<String> extIds);
 }

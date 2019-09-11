@@ -15,10 +15,7 @@ import ru.citeck.ecos.model.repository.EcosTypeRepository;
 import ru.citeck.ecos.model.service.impl.EcosSectionServiceImpl;
 import ru.citeck.ecos.records2.RecordRef;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.mockito.BDDMockito.given;
@@ -57,12 +54,12 @@ public class EcosSectionServiceImplTest {
         given(sectionRepository.findAll()).willReturn(entities);
 
 
-        List<EcosSectionDto> dtos = ecosSectionService.getAll();
+        Set<EcosSectionDto> dtos = ecosSectionService.getAll();
 
 
         Assert.assertEquals(2, dtos.size());
-        Assert.assertEquals("a", dtos.get(0).getUuid());
-        Assert.assertEquals("b", dtos.get(1).getUuid());
+        Assert.assertTrue(dtos.contains(ecosSectionEntity));
+        Assert.assertTrue(dtos.contains(ecosSectionEntity2));
     }
 
     @Test(expected = NullPointerException.class)
@@ -71,38 +68,34 @@ public class EcosSectionServiceImplTest {
         given(sectionRepository.findAll()).willReturn(null);
 
 
-        List<EcosSectionDto> dtos = ecosSectionService.getAll();
+        ecosSectionService.getAll();
     }
 
     @Test
     public void getAllSelectedReturnTypes() {
 
-        EcosSectionEntity ecosSectionEntity = new EcosSectionEntity("a",1L, null, "a",
-            "a_desc", "a_tenant");
-        EcosSectionEntity ecosSectionEntity2 = new EcosSectionEntity("b", 2L, null, "b",
+        EcosSectionEntity ecosSectionEntity = new EcosSectionEntity("b", 2L, null, "b",
             "b_desc", "b_tenant");
 
-        List<EcosSectionEntity> entities = Arrays.asList(
-            ecosSectionEntity2
-        );
+        Set<EcosSectionEntity> entities = Collections.singleton(ecosSectionEntity);
 
-        given(sectionRepository.findAllByUuid(Arrays.asList("b"))).willReturn(entities);
+        given(sectionRepository.findAllByExtIds(Collections.singleton("b"))).willReturn(entities);
 
 
-        List<EcosSectionDto> dtos = ecosSectionService.getAll(Arrays.asList("b"));
+        Set<EcosSectionDto> dtos = ecosSectionService.getAll(Collections.singleton("b"));
 
 
         Assert.assertEquals(1, dtos.size());
-        Assert.assertEquals("b", dtos.get(0).getUuid());
+        Assert.assertTrue(dtos.contains(entities));
     }
 
     @Test(expected = NullPointerException.class)
     public void getAllSelectedNothing() {
 
-        given(sectionRepository.findAllByUuid(Arrays.asList("b"))).willReturn(null);
+        given(sectionRepository.findAllByExtIds(Collections.singleton("b"))).willReturn(null);
 
 
-        List<EcosSectionDto> dtos = ecosSectionService.getAll(Arrays.asList("b"));
+        ecosSectionService.getAll(Collections.singleton("b"));
     }
 
     @Test
@@ -112,14 +105,14 @@ public class EcosSectionServiceImplTest {
         EcosSectionEntity ecosSectionEntity2 = new EcosSectionEntity("b", 2L, null, "b",
             "b_desc", "b_tenant");
 
-        given(sectionRepository.findByUuid("b")).willReturn(Optional.of(ecosSectionEntity2));
+        given(sectionRepository.findByExtId("b")).willReturn(Optional.of(ecosSectionEntity2));
 
 
         Optional<EcosSectionDto> optionalDto = ecosSectionService.getByUuid("b");
 
 
         Assert.assertTrue(optionalDto.isPresent());
-        Assert.assertEquals("b", optionalDto.get().getUuid());
+        Assert.assertEquals("b", optionalDto.get().getExtId());
         Assert.assertEquals("b", optionalDto.get().getName());
         Assert.assertEquals("b_desc", optionalDto.get().getDescription());
         Assert.assertEquals("b_tenant", optionalDto.get().getTenant());
@@ -140,7 +133,7 @@ public class EcosSectionServiceImplTest {
         EcosSectionEntity ecosSectionEntity = new EcosSectionEntity("a",1L, null, "a",
             "a_desc", "a_tenant");
 
-        given(sectionRepository.findByUuid("a")).willReturn(Optional.of(ecosSectionEntity));
+        given(sectionRepository.findByExtId("a")).willReturn(Optional.of(ecosSectionEntity));
 
 
         ecosSectionService.delete("a");
@@ -152,7 +145,7 @@ public class EcosSectionServiceImplTest {
 
     @Test
     public void deleteNoDeletion() {
-        given(sectionRepository.findByUuid("a")).willReturn(Optional.empty());
+        given(sectionRepository.findByExtId("a")).willReturn(Optional.empty());
 
 
         ecosSectionService.delete("a");
@@ -166,14 +159,14 @@ public class EcosSectionServiceImplTest {
         EcosSectionEntity ecosSectionEntity = new EcosSectionEntity("a", 1L, null, "aname",
             "a_desc", "a_tenant");
 
-        given(sectionRepository.findByUuid("a")).willReturn(Optional.empty());
+        given(sectionRepository.findByExtId("a")).willReturn(Optional.empty());
 
 
         EcosSectionDto dto = ecosSectionService.update(entityToDto(ecosSectionEntity));
 
 
         Mockito.verify(sectionRepository, times(1)).save(Mockito.any());
-        Assert.assertEquals("a", dto.getUuid());
+        Assert.assertEquals("a", dto.getExtId());
         Assert.assertEquals("aname", dto.getName());
         Assert.assertEquals("a_desc", dto.getDescription());
         Assert.assertEquals("a_tenant", dto.getTenant());
@@ -183,14 +176,14 @@ public class EcosSectionServiceImplTest {
     public void updateSuccessWithNoUUIDNewEntity() {
         EcosSectionEntity ecosSectionEntity = new EcosSectionEntity(null, 1L, null, "aname", "a_desc", "a_tenant");
 
-        given(sectionRepository.findByUuid(Mockito.anyString())).willReturn(Optional.empty());
+        given(sectionRepository.findByExtId(Mockito.anyString())).willReturn(Optional.empty());
 
 
         EcosSectionDto dto = ecosSectionService.update(entityToDto(ecosSectionEntity));
 
 
         Mockito.verify(sectionRepository, times(1)).save(Mockito.any());
-        Assert.assertNotNull(dto.getUuid());
+        Assert.assertNotNull(dto.getExtId());
         Assert.assertEquals("aname", dto.getName());
         Assert.assertEquals("a_desc", dto.getDescription());
         Assert.assertEquals("a_tenant", dto.getTenant());
@@ -198,10 +191,10 @@ public class EcosSectionServiceImplTest {
 
     private EcosSectionDto entityToDto(EcosSectionEntity entity) {
         Set<RecordRef> typesRefs = entity.getTypes().stream()
-            .map(e -> RecordRef.create("ecosmodel", "type", e.getUuid()))
+            .map(e -> RecordRef.create("emodel", "type", e.getExtId()))
             .collect(Collectors.toSet());
         return new EcosSectionDto(
-            entity.getUuid(),
+            entity.getExtId(),
             entity.getName(),
             entity.getDescription(),
             entity.getTenant(),

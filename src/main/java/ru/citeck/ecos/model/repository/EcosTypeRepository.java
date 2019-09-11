@@ -12,12 +12,9 @@ import java.util.Set;
 @Repository
 public interface EcosTypeRepository extends JpaRepository<EcosTypeEntity, Long> {
 
-    @Query("select type from EcosTypeEntity type")
-    List<EcosTypeEntity> findAll();
+    @Query("SELECT TYPE FROM EcosTypeEntity TYPE WHERE TYPE.extId = ?1")
+    Optional<EcosTypeEntity> findByExtIds(String extId);
 
-    @Query("SELECT type FROM EcosTypeEntity type WHERE type.uuid = ?1")
-    Optional<EcosTypeEntity> findByUuid(String uuid);
-
-    @Query("SELECT type FROM EcosTypeEntity type WHERE type.uuid IN ?1")
-    Set<EcosTypeEntity> findAllByUuid(List<String> uuid);
+    @Query("SELECT TYPE FROM EcosTypeEntity TYPE WHERE TYPE.extId IN ?1")
+    Set<EcosTypeEntity> findAllByExtIds(List<String> extIds);
 }

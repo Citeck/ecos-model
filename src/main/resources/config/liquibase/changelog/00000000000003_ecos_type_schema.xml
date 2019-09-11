@@ -9,7 +9,7 @@
     <changeSet id="00000000000003" author="citeck">
 
         <createTable tableName="ecos_type">
-            <column name="uuid" type="VARCHAR(36)">
+            <column name="ext_id" type="VARCHAR(36)">
                 <constraints nullable="false" unique="true" />
             </column>
             <column name="id" type="BIGINT" autoIncrement="${autoIncrement}">
@@ -19,11 +19,10 @@
                 <constraints nullable="false" />
             </column>
             <column name="description" type="VARCHAR(1023)" />
-            <column name="tenant" type="VARCHAR(255)" />
+            <column name="tenant" type="VARCHAR(36)" />
             <column name="parent_id" type="BIGINT">
                 <constraints nullable="true" foreignKeyName="parent_id" references="ecos_type(id)"/>
             </column>
-            <column name="section_id" type="BIGINT" />
         </createTable>
 
     </changeSet>

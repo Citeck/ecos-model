@@ -12,15 +12,19 @@ import java.util.Set;
 public class EcosSectionEntity {
 
     @Column(unique = true, nullable = false)
-    @Getter @Setter private String uuid;
+    @Getter @Setter private String extId;
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
     @SequenceGenerator(name = "sequenceGenerator")
     @Getter @Setter private Long id;
 
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinColumn(name = "section_id")
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "section_type",
+        joinColumns = { @JoinColumn(name = "section_id") },
+        inverseJoinColumns = { @JoinColumn(name = "type_id") }
+    )
     @Getter @Setter private Set<EcosTypeEntity> types;
 
     @NonNull

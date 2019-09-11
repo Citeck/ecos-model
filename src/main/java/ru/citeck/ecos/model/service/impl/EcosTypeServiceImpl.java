@@ -15,9 +15,7 @@ import ru.citeck.ecos.model.service.exception.ParentNotFoundException;
 import ru.citeck.ecos.records2.RecordRef;
 import springfox.documentation.annotations.Cacheable;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,20 +40,20 @@ public class EcosTypeServiceImpl implements EcosTypeService {
 
     @Override
     public List<EcosTypeDto> getAll(List<String> uuids) {
-        return typeRepository.findAllByUuid(uuids).stream()
+        return typeRepository.findAllByExtIds(uuids).stream()
             .map(this::entityToDto)
             .collect(Collectors.toList());
     }
 
     @Override
     public Optional<EcosTypeDto> getByUuid(String uuid) {
-        return typeRepository.findByUuid(uuid).map(this::entityToDto);
+        return typeRepository.findByExtIds(uuid).map(this::entityToDto);
     }
 
     @Override
     @Transactional
     public void delete(String uuid) {
-        Optional<EcosTypeEntity> optional = typeRepository.findByUuid(uuid);
+        Optional<EcosTypeEntity> optional = typeRepository.findByExtIds(uuid);
         optional.ifPresent(e -> typeRepository.deleteById(e.getId()));
     }
 
@@ -64,14 +62,14 @@ public class EcosTypeServiceImpl implements EcosTypeService {
     public EcosTypeDto update(EcosTypeDto dto) {
         EcosTypeEntity entity = dtoToEntity(dto);
         if (dto.getParent() != null && Strings.isNotBlank(dto.getParent().getId())) {
-            EcosTypeEntity parent = typeRepository.findByUuid(dto.getParent().getId())
+            EcosTypeEntity parent = typeRepository.findByExtIds(dto.getParent().getId())
                 .orElseThrow(() -> new ParentNotFoundException(dto.getParent().getId()));
             entity.setParent(parent);
         }
-        if (Strings.isBlank(entity.getUuid())) {
-            entity.setUuid(UUID.randomUUID().toString());
+        if (Strings.isBlank(entity.getExtId())) {
+            entity.setExtId(UUID.randomUUID().toString());
         } else {
-            Optional<EcosTypeEntity> stored = typeRepository.findByUuid(entity.getUuid());
+            Optional<EcosTypeEntity> stored = typeRepository.findByExtIds(entity.getExtId());
             entity.setId(stored.map(EcosTypeEntity::getId).orElse(null));
         }
         typeRepository.save(entity);
@@ -81,31 +79,46 @@ public class EcosTypeServiceImpl implements EcosTypeService {
     private EcosTypeDto entityToDto(EcosTypeEntity entity) {
         RecordRef parent = null;
         if (entity.getParent() != null) {
-            parent = RecordRef.create("type", entity.getParent().getUuid());
+            parent = RecordRef.create("type", entity.getParent().getExtId());
         }
-        RecordRef section = null;
-        if (entity.getSection() != null) {
-            section = RecordRef.create("section", entity.getSection().getUuid());
+        Set<RecordRef> sections = null;
+        if (entity.getSections() != null) {
+            sections = entity.getSections().stream()
+                .map(s -> RecordRef.create("section", s.getExtId()))
+                .collect(Collectors.toSet());
         }
         return new EcosTypeDto(
-            entity.getUuid(),
+            entity.getExtId(),
             entity.getName(),
             entity.getDescription(),
             entity.getTenant(),
             parent,
-            section);
+            sections);
     }
 
     private EcosTypeEntity dtoToEntity(EcosTypeDto dto) {
         EcosTypeEntity ecosTypeEntity = new EcosTypeEntity();
         ecosTypeEntity.setName(dto.getName());
-        ecosTypeEntity.setUuid(dto.getUuid());
+        ecosTypeEntity.setExtId(dto.getExtId());
         ecosTypeEntity.setDescription(dto.getDescription());
         ecosTypeEntity.setTenant(dto.getTenant());
-        Optional<EcosTypeEntity> parent = typeRepository.findByUuid(dto.getParent().getId());
-        ecosTypeEntity.setParent(parent.orElse(null));
-        Optional<EcosSectionEntity> opSection = sectionRepository.findByUuid(dto.getSection().getId());
-        ecosTypeEntity.setSection(opSection.orElse(null));
+
+        RecordRef parent = dto.getParent();
+        Optional<EcosTypeEntity> optional = Optional.empty();
+        if (parent != null && parent.getId() != null) {
+            optional = typeRepository.findByExtIds(dto.getParent().getId());
+        }
+        ecosTypeEntity.setParent(optional.orElse(null));
+
+        Set<RecordRef> sectionsExtIds = dto.getSections();
+        Set<EcosSectionEntity> sections = null;
+        if (sectionsExtIds != null) {
+            sections = sectionRepository.findAllByExtIds(sectionsExtIds.stream()
+                .filter(Objects::nonNull)
+                .map(RecordRef::getId)
+                .collect(Collectors.toSet()));
+        }
+        ecosTypeEntity.setSections(sections);
         return ecosTypeEntity;
     }
 
