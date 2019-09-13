@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(code = HttpStatus.NOT_FOUND, reason = "Parent Not Found")
 public class ParentNotFoundException extends RuntimeException {
 
-    public ParentNotFoundException(String uuid) {
-        super("Parent not found with UUID: " + uuid);
+    public ParentNotFoundException(String extId) {
+        super("Parent not found with id: " + extId);
     }
 }

@@ -49,8 +49,9 @@ public class EcosAssociationServiceImpl implements EcosAssociationService {
     }
 
     @Override
-    public Optional<EcosAssociationDto> getByExtId(String extId) {
-        return associationRepository.findByExtId(extId).map(this::entityToDto);
+    public EcosAssociationDto getByExtId(String extId) {
+        return associationRepository.findByExtId(extId).map(this::entityToDto)
+            .orElseThrow(() -> new IllegalArgumentException("Association doesnt exists: " + extId));
     }
 
     @Override

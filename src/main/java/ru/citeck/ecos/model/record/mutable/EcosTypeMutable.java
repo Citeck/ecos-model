@@ -13,4 +13,8 @@ public class EcosTypeMutable extends EcosTypeDto {
     public EcosTypeMutable(EcosTypeDto dto) {
         super(dto);
     }
+
+    public EcosTypeMutable(String extId) {
+        super(extId, null, null, null, null, null);
+    }
 }

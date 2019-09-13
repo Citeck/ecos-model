@@ -44,14 +44,15 @@ public class EcosSectionServiceImpl implements EcosSectionService {
     }
 
     @Override
-    public Optional<EcosSectionDto> getByUuid(String uuid) {
-        return sectionRepository.findByExtId(uuid).map(this::entityToDto);
+    public EcosSectionDto getByExtId(String extId) {
+        return sectionRepository.findByExtId(extId).map(this::entityToDto)
+            .orElseThrow(() -> new IllegalArgumentException("Section doesnt exists: " + extId));
     }
 
     @Override
     @Transactional
-    public void delete(String uuid) {
-        Optional<EcosSectionEntity> optional = sectionRepository.findByExtId(uuid);
+    public void delete(String extId) {
+        Optional<EcosSectionEntity> optional = sectionRepository.findByExtId(extId);
         optional.ifPresent(e -> sectionRepository.deleteById(e.getId()));
     }
 
@@ -70,9 +71,12 @@ public class EcosSectionServiceImpl implements EcosSectionService {
     }
 
     private EcosSectionDto entityToDto(EcosSectionEntity entity) {
-        Set<RecordRef> typesRefs = entity.getTypes().stream()
-            .map(e -> RecordRef.create("type", e.getExtId()))
-            .collect(Collectors.toSet());
+        Set<RecordRef> typesRefs = null;
+        if (entity.getTypes() != null) {
+            typesRefs = entity.getTypes().stream()
+                .map(e -> RecordRef.create("type", e.getExtId()))
+                .collect(Collectors.toSet());
+        }
         return new EcosSectionDto(
             entity.getExtId(),
             entity.getName(),
@@ -87,10 +91,12 @@ public class EcosSectionServiceImpl implements EcosSectionService {
         ecosSectionEntity.setExtId(dto.getExtId());
         ecosSectionEntity.setDescription(dto.getDescription());
         ecosSectionEntity.setTenant(dto.getTenant());
-        Set<String> dtoTypesUuids = dto.getTypes().stream()
-            .map(RecordRef::getId).collect(Collectors.toSet());
-        Set<EcosTypeEntity> storedTypes = typeRepository.findAllByExtIds(new ArrayList<>(dtoTypesUuids));
-        ecosSectionEntity.setTypes(storedTypes);
+        if (dto.getTypes() != null) {
+            Set<String> dtoTypesExtIds = dto.getTypes().stream()
+                .map(RecordRef::getId).collect(Collectors.toSet());
+            Set<EcosTypeEntity> storedTypes = typeRepository.findAllByExtIds(dtoTypesExtIds);
+            ecosSectionEntity.setTypes(storedTypes);
+        }
         return ecosSectionEntity;
     }
 

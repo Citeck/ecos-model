@@ -11,11 +11,15 @@ import ru.citeck.ecos.model.dto.EcosTypeDto;
 import ru.citeck.ecos.model.repository.EcosSectionRepository;
 import ru.citeck.ecos.model.repository.EcosTypeRepository;
 import ru.citeck.ecos.model.service.EcosTypeService;
+import ru.citeck.ecos.model.service.exception.ForgottenChildsException;
 import ru.citeck.ecos.model.service.exception.ParentNotFoundException;
 import ru.citeck.ecos.records2.RecordRef;
 import springfox.documentation.annotations.Cacheable;
 
-import java.util.*;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,29 +36,35 @@ public class EcosTypeServiceImpl implements EcosTypeService {
     }
 
     @Cacheable("types")
-    public List<EcosTypeDto> getAll() {
+    public Set<EcosTypeDto> getAll() {
         return typeRepository.findAll().stream()
             .map(this::entityToDto)
-            .collect(Collectors.toList());
+            .collect(Collectors.toSet());
     }
 
     @Override
-    public List<EcosTypeDto> getAll(List<String> uuids) {
-        return typeRepository.findAllByExtIds(uuids).stream()
+    public Set<EcosTypeDto> getAll(Set<String> extIds) {
+        return typeRepository.findAllByExtIds(extIds).stream()
             .map(this::entityToDto)
-            .collect(Collectors.toList());
+            .collect(Collectors.toSet());
     }
 
     @Override
-    public Optional<EcosTypeDto> getByUuid(String uuid) {
-        return typeRepository.findByExtId(uuid).map(this::entityToDto);
+    public EcosTypeDto getByExtId(String extId) {
+        return typeRepository.findByExtId(extId).map(this::entityToDto)
+            .orElseThrow(() -> new IllegalArgumentException("Type doesnt exists: " + extId));
     }
 
     @Override
     @Transactional
-    public void delete(String uuid) {
-        Optional<EcosTypeEntity> optional = typeRepository.findByExtId(uuid);
-        optional.ifPresent(e -> typeRepository.deleteById(e.getId()));
+    public void delete(String extId) {
+        Optional<EcosTypeEntity> optional = typeRepository.findByExtId(extId);
+        optional.ifPresent(e -> {
+            if (e.getChilds() != null) {
+                throw new ForgottenChildsException();
+            }
+            typeRepository.deleteById(e.getId());
+        });
     }
 
     @Override
