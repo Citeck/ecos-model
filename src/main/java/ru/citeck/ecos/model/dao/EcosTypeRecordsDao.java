@@ -23,7 +23,10 @@ import ru.citeck.ecos.records2.source.dao.local.MutableRecordsLocalDAO;
 import ru.citeck.ecos.records2.source.dao.local.RecordsMetaLocalDAO;
 import ru.citeck.ecos.records2.source.dao.local.RecordsQueryWithMetaLocalDAO;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -58,7 +61,7 @@ public class EcosTypeRecordsDao extends LocalRecordsDAO
                     .map(RecordRef::getId)
                     .collect(Collectors.toSet()))
                 .stream()
-                .collect(Collectors.toMap(EcosTypeDto::getExtId, dto -> dto));
+                .collect(Collectors.toMap(EcosTypeDto::getId, dto -> dto));
 
         return records.stream()
             .map(RecordRef::getId)
@@ -77,19 +80,26 @@ public class EcosTypeRecordsDao extends LocalRecordsDAO
         RecordsMutResult result = new RecordsMutResult();
 
         result.setRecords(values.stream()
-            .filter(e -> e.getExtId() != null)
+            .filter(e -> e.getId() != null)
             .map(e -> {
                 EcosTypeDto storedDto = typeService.update(e);
-                RecordRef ref = RecordRef.valueOf(storedDto.getExtId());
+                RecordRef ref = RecordRef.valueOf(storedDto.getId());
                 RecordMeta meta = new RecordMeta(ref);
-                meta.setAttribute("extId", storedDto.getExtId());
+                meta.setAttribute("id", storedDto.getId());
                 meta.setAttribute("name", storedDto.getName());
                 meta.setAttribute("description", storedDto.getDescription());
                 meta.setAttribute("tenant", storedDto.getTenant());
+
                 RecordRef parent = storedDto.getParent();
                 if (parent != null) {
                     meta.setAttribute("parent", parent.toString());
                 }
+
+                Set<RecordRef> assocs = storedDto.getAssociations();
+                if (assocs != null) {
+                    meta.setAttribute("associations", assocs.toString());
+                }
+
                 return meta;
             })
             .collect(Collectors.toList()));

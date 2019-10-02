@@ -5,10 +5,10 @@ import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.citeck.ecos.model.domain.EcosSectionEntity;
+import ru.citeck.ecos.model.domain.EcosAssociationEntity;
 import ru.citeck.ecos.model.domain.EcosTypeEntity;
 import ru.citeck.ecos.model.dto.EcosTypeDto;
-import ru.citeck.ecos.model.repository.EcosSectionRepository;
+import ru.citeck.ecos.model.repository.EcosAssociationRepository;
 import ru.citeck.ecos.model.repository.EcosTypeRepository;
 import ru.citeck.ecos.model.service.EcosTypeService;
 import ru.citeck.ecos.model.service.exception.ForgottenChildsException;
@@ -16,7 +16,6 @@ import ru.citeck.ecos.model.service.exception.ParentNotFoundException;
 import ru.citeck.ecos.records2.RecordRef;
 import springfox.documentation.annotations.Cacheable;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -26,13 +25,13 @@ import java.util.stream.Collectors;
 public class EcosTypeServiceImpl implements EcosTypeService {
 
     private final EcosTypeRepository typeRepository;
-    private final EcosSectionRepository sectionRepository;
+    private final EcosAssociationRepository associationRepository;
 
     @Autowired
     public EcosTypeServiceImpl(EcosTypeRepository typeRepository,
-                               EcosSectionRepository sectionRepository) {
+                               EcosAssociationRepository associationRepository) {
         this.typeRepository = typeRepository;
-        this.sectionRepository = sectionRepository;
+        this.associationRepository = associationRepository;
     }
 
     @Cacheable("types")
@@ -86,10 +85,10 @@ public class EcosTypeServiceImpl implements EcosTypeService {
         if (entity.getParent() != null) {
             parent = RecordRef.create("type", entity.getParent().getExtId());
         }
-        Set<RecordRef> sections = null;
-        if (entity.getSections() != null) {
-            sections = entity.getSections().stream()
-                .map(s -> RecordRef.create("section", s.getExtId()))
+        Set<RecordRef> associationsRefs = null;
+        if (entity.getAssocsToOther() != null) {
+            associationsRefs = entity.getAssocsToOther().stream()
+                .map(assoc -> RecordRef.create("association", assoc.getExtId()))
                 .collect(Collectors.toSet());
         }
         return new EcosTypeDto(
@@ -98,13 +97,13 @@ public class EcosTypeServiceImpl implements EcosTypeService {
             entity.getDescription(),
             entity.getTenant(),
             parent,
-            sections);
+            associationsRefs);
     }
 
     private EcosTypeEntity dtoToEntity(EcosTypeDto dto) {
         EcosTypeEntity ecosTypeEntity = new EcosTypeEntity();
         ecosTypeEntity.setName(dto.getName());
-        ecosTypeEntity.setExtId(dto.getExtId());
+        ecosTypeEntity.setExtId(dto.getId());
         ecosTypeEntity.setDescription(dto.getDescription());
         ecosTypeEntity.setTenant(dto.getTenant());
 
@@ -115,15 +114,17 @@ public class EcosTypeServiceImpl implements EcosTypeService {
         }
         ecosTypeEntity.setParent(parent);
 
-        Set<RecordRef> sectionsExtIds = dto.getSections();
-        Set<EcosSectionEntity> sections = null;
-        if (sectionsExtIds != null) {
-            sections = sectionRepository.findAllByExtIds(sectionsExtIds.stream()
-                .filter(Objects::nonNull)
-                .map(RecordRef::getId)
-                .collect(Collectors.toSet()));
+        Set<RecordRef> associationsRefs = dto.getAssociations();
+        Set<EcosAssociationEntity> associationEntities = null;
+        if (associationsRefs != null && associationsRefs.size() != 0) {
+            associationEntities = associationsRefs.stream()
+                .map(assoc -> associationRepository.findByExtId(assoc.getId()))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toSet());
         }
-        ecosTypeEntity.setSections(sections);
+        ecosTypeEntity.setAssocsToOther(associationEntities);
+
         return ecosTypeEntity;
     }
 

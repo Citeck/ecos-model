@@ -15,20 +15,15 @@ public class EcosAssociationRecord implements MetaValue {
     }
 
     @Override
-    public Object getJson() {
-        return dto;
-    }
-
-    @Override
     public String getId() {
-        return dto.getExtId();
+        return dto.getId();
     }
 
     @Override
     public String getDisplayName() {
         String dispName = dto.getName();
         if (dispName == null) {
-            dispName = dto.getExtId();
+            dispName = dto.getId();
         }
         return dispName;
     }
@@ -42,9 +37,17 @@ public class EcosAssociationRecord implements MetaValue {
                 return dto.getName();
             case "title":
                 return dto.getTitle();
-            case "type":
-                return dto.getType();
+            case "source":
+                return dto.getSourceType();
+            case "target":
+                return dto.getTargetType();
         }
         return null;
     }
+
+    @Override
+    public Object getJson() {
+        return dto;
+    }
+
 }

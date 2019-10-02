@@ -10,20 +10,21 @@ import ru.citeck.ecos.records2.RecordRef;
 @ToString
 public class EcosAssociationDto {
 
-
-    @Getter
-    @Setter private String extId;
+    @Getter @Setter private String id;
 
     @Getter @Setter private String name;
 
     @Getter @Setter private String title;
 
-    @Getter @Setter private RecordRef type;
+    @Getter @Setter private RecordRef sourceType;
+
+    @Getter @Setter private RecordRef targetType;
 
     public EcosAssociationDto(EcosAssociationDto dto) {
-        this.extId = dto.extId;
+        this.id = dto.id;
         this.name = dto.name;
         this.title = dto.title;
-        this.type = dto.type;
+        this.sourceType = dto.getSourceType();
+        this.targetType = dto.getTargetType();
     }
 }

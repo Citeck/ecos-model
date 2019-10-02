@@ -14,9 +14,7 @@ public class EcosAssociationMutable extends EcosAssociationDto {
         super(dto);
     }
 
-    public EcosAssociationMutable(String extId) {
-        super(extId, null, null, null);
+    public EcosAssociationMutable(String id) {
+        super(id, null, null,null, null);
     }
-
-
 }

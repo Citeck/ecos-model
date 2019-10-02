@@ -21,14 +21,14 @@ public class EcosSectionRecord implements MetaValue {
 
     @Override
     public String getId() {
-        return dto.getExtId();
+        return dto.getId();
     }
 
     @Override
     public String getDisplayName() {
         String dispName = dto.getName();
         if (dispName == null) {
-            dispName = dto.getExtId();
+            dispName = dto.getId();
         }
         return dispName;
     }

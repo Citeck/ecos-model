@@ -4,13 +4,12 @@ import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import ru.citeck.ecos.model.domain.EcosAssociationEntity;
-import ru.citeck.ecos.model.domain.EcosTypeEntity;
 import ru.citeck.ecos.model.dto.EcosAssociationDto;
 import ru.citeck.ecos.model.repository.EcosAssociationRepository;
 import ru.citeck.ecos.model.repository.EcosTypeRepository;
 import ru.citeck.ecos.model.service.EcosAssociationService;
-import ru.citeck.ecos.model.service.exception.AssociationCollisionException;
 import ru.citeck.ecos.model.service.exception.TypeNotFoundException;
 import ru.citeck.ecos.records2.RecordRef;
 import springfox.documentation.annotations.Cacheable;
@@ -42,8 +41,9 @@ public class EcosAssociationServiceImpl implements EcosAssociationService {
     }
 
     @Override
-    public Set<EcosAssociationDto> getAll(Set<String> extIds) {
-        return associationRepository.findAllByExtIds(extIds).stream()
+    public Set<EcosAssociationDto> getAll(Set<String> ids) {
+
+        return associationRepository.findAllByExtIds(ids).stream()
             .map(this::entityToDto)
             .collect(Collectors.toSet());
     }
@@ -65,63 +65,45 @@ public class EcosAssociationServiceImpl implements EcosAssociationService {
     @Transactional
     public EcosAssociationDto update(EcosAssociationDto dto) {
         EcosAssociationEntity entity = dtoToEntity(dto);
-        boolean isStored = false;
-        boolean isNameChanged = false;
         if (Strings.isBlank(entity.getExtId())) {
             entity.setExtId(UUID.randomUUID().toString());
         } else {
-            Optional<EcosAssociationEntity> stored = associationRepository.findByExtId(entity.getExtId());
-            entity.setId(stored.map(EcosAssociationEntity::getId).orElse(null));
-            if (stored.isPresent() && !stored.get().getName().equals(dto.getName())) {
-                isNameChanged = true;
+            Optional<EcosAssociationEntity> storedOptional = associationRepository.findByExtId(entity.getExtId());
+            if (storedOptional.isPresent()) {
+                EcosAssociationEntity stored = storedOptional.get();
+                entity.setId(stored.getId());
             }
-            isStored = true;
         }
-
-        if (!isStored || isNameChanged) {
-            checkName(entity);
-        }
-
         associationRepository.save(entity);
         return entityToDto(entity);
     }
 
-    private void checkName(EcosAssociationEntity assoc) {
-        EcosTypeEntity type = assoc.getType();
-        String checkedName = assoc.getName();
-        boolean nameExists = type.getAssociations().stream()
-            .map(EcosAssociationEntity::getName)
-            .anyMatch(e -> e.equals(checkedName));
-        if (nameExists) {
-            throw new AssociationCollisionException(checkedName);
-        }
-    }
-
     private EcosAssociationDto entityToDto(EcosAssociationEntity entity) {
-        RecordRef type = null;
-        if (entity.getType() != null) {
-            type = RecordRef.create("type", entity.getType().getExtId());
-        }
         return new EcosAssociationDto(
             entity.getExtId(),
             entity.getName(),
             entity.getTitle(),
-            type);
+            RecordRef.create("type", entity.getSource().getExtId()),
+            RecordRef.create("type", entity.getTarget().getExtId()));
     }
 
     private EcosAssociationEntity dtoToEntity(EcosAssociationDto dto) {
         EcosAssociationEntity entity = new EcosAssociationEntity();
         entity.setName(dto.getName());
-        entity.setExtId(dto.getExtId());
+        entity.setExtId(dto.getId());
         entity.setTitle(dto.getTitle());
 
-        RecordRef type = dto.getType();
-        EcosTypeEntity typeEntity = null;
-        if (type != null && Strings.isNotBlank(dto.getType().getId())) {
-            typeEntity = typeRepository.findByExtId(dto.getType().getId())
-                .orElseThrow(() -> new TypeNotFoundException(dto.getType().getId()));
+        RecordRef sourceRef = dto.getSourceType();
+        RecordRef targetRef = dto.getTargetType();
+        if (sourceRef == null || targetRef == null || StringUtils.isEmpty(sourceRef.getId()) ||
+            StringUtils.isEmpty(targetRef)) {
+            throw new TypeNotFoundException(null);
+        } else {
+            entity.setSource(typeRepository.findByExtId(sourceRef.getId())
+                .orElseThrow(() -> new TypeNotFoundException(sourceRef.getId())));
+            entity.setTarget(typeRepository.findByExtId(targetRef.getId())
+                .orElseThrow(() -> new TypeNotFoundException(targetRef.getId())));
         }
-        entity.setType(typeEntity);
 
         return entity;
     }
