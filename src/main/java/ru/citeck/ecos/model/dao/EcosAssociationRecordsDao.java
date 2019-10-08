@@ -58,7 +58,7 @@ public class EcosAssociationRecordsDao extends LocalRecordsDAO
                     .map(RecordRef::getId)
                     .collect(Collectors.toSet()))
                 .stream()
-                    .collect(Collectors.toMap(EcosAssociationDto::getExtId, dto -> dto));
+                    .collect(Collectors.toMap(EcosAssociationDto::getId, dto -> dto));
 
         return records.stream()
             .map(RecordRef::getId)
@@ -77,18 +77,18 @@ public class EcosAssociationRecordsDao extends LocalRecordsDAO
         RecordsMutResult result = new RecordsMutResult();
 
         result.setRecords(values.stream()
-            .filter(e -> e.getExtId() != null)
+            .filter(e -> e.getId() != null)
             .map(e -> {
                 EcosAssociationDto storedDto = associationService.update(e);
-                RecordRef ref = RecordRef.valueOf(storedDto.getExtId());
+                RecordRef ref = RecordRef.valueOf(storedDto.getId());
                 RecordMeta meta = new RecordMeta(ref);
-                meta.setAttribute("extId", storedDto.getExtId());
+                meta.setAttribute("id", storedDto.getId());
                 meta.setAttribute("name", storedDto.getName());
                 meta.setAttribute("title", storedDto.getTitle());
-                RecordRef type = storedDto.getType();
-                if (type != null) {
-                    meta.setAttribute("type", type.toString());
-                }
+                RecordRef source = storedDto.getSourceType();
+                meta.setAttribute("source", source.toString());
+                RecordRef target = storedDto.getTargetType();
+                meta.setAttribute("target", target.toString());
                 return meta;
             })
             .collect(Collectors.toList()));

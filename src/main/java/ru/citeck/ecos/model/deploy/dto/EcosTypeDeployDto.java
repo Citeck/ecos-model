@@ -1,8 +1,8 @@
-package ru.citeck.ecos.model.dto;
+package ru.citeck.ecos.model.deploy.dto;
 
 import lombok.*;
+import ru.citeck.ecos.model.dto.EcosAssociationDto;
 import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records2.graphql.meta.annotation.DisplayName;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -11,7 +11,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class EcosSectionDto {
+public class EcosTypeDeployDto {
 
     @Getter @Setter private String id;
 
@@ -21,20 +21,23 @@ public class EcosSectionDto {
 
     @Getter @Setter private String tenant;
 
-    @Getter @Setter private Set<RecordRef> types;
+    @Getter @Setter private RecordRef parent;
 
-    public EcosSectionDto(EcosSectionDto dto) {
+    @Getter @Setter private Set<EcosAssociationDto> associations;
+
+    public EcosTypeDeployDto(EcosTypeDeployDto dto) {
         this.name = dto.name;
         this.description = dto.description;
         this.tenant = dto.tenant;
+        this.parent = dto.parent;
         this.id = dto.id;
-        if (dto.types != null) {
-            this.types = new HashSet<>(dto.types);
+        if (dto.associations != null) {
+            this.associations = new HashSet<>(dto.associations);
         }
     }
 
-    @DisplayName
-    public String getDisplayName() {
-        return name;
+    public EcosTypeDeployDto(String id) {
+        this.id = id;
     }
+
 }

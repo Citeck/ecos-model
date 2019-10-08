@@ -88,7 +88,7 @@ public class EcosSectionServiceImpl implements EcosSectionService {
     private EcosSectionEntity dtoToEntity(EcosSectionDto dto) {
         EcosSectionEntity ecosSectionEntity = new EcosSectionEntity();
         ecosSectionEntity.setName(dto.getName());
-        ecosSectionEntity.setExtId(dto.getExtId());
+        ecosSectionEntity.setExtId(dto.getId());
         ecosSectionEntity.setDescription(dto.getDescription());
         ecosSectionEntity.setTenant(dto.getTenant());
         if (dto.getTypes() != null) {

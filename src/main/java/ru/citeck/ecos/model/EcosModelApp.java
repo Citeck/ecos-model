@@ -21,8 +21,11 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collection;
 
-@SpringBootApplication
 @EnableConfigurationProperties({LiquibaseProperties.class, ApplicationProperties.class})
+@SpringBootApplication(scanBasePackages = {
+    "ru.citeck.ecos.model",
+    "ru.citeck.ecos.apps.spring"
+})
 @EnableDiscoveryClient
 public class EcosModelApp implements InitializingBean {
 

@@ -2,12 +2,13 @@ package ru.citeck.ecos.model.service;
 
 
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.model.domain.EcosSectionEntity;
 import ru.citeck.ecos.model.dto.EcosSectionDto;
 import ru.citeck.ecos.model.repository.EcosSectionRepository;
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(SpringExtension.class)
 public class EcosSectionServiceImplTest {
 
     @Mock
@@ -32,7 +33,7 @@ public class EcosSectionServiceImplTest {
 
     private EcosSectionService ecosSectionService;
 
-    @Before
+    @BeforeEach
     public void init() {
         ecosSectionService = new EcosSectionServiceImpl(sectionRepository, typeRepository);
     }
@@ -60,13 +61,14 @@ public class EcosSectionServiceImplTest {
         Assert.assertEquals(2, dtos.size());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void getAllWhenReturnNothing() {
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            given(sectionRepository.findAll()).willReturn(null);
 
-        given(sectionRepository.findAll()).willReturn(null);
 
-
-        ecosSectionService.getAll();
+            ecosSectionService.getAll();
+        });
     }
 
     @Test
@@ -86,13 +88,14 @@ public class EcosSectionServiceImplTest {
         Assert.assertEquals(1, dtos.size());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void getAllSelectedNothing() {
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            given(sectionRepository.findAllByExtIds(Collections.singleton("b"))).willReturn(null);
 
-        given(sectionRepository.findAllByExtIds(Collections.singleton("b"))).willReturn(null);
 
-
-        ecosSectionService.getAll(Collections.singleton("b"));
+            ecosSectionService.getAll(Collections.singleton("b"));
+        });
     }
 
     @Test
@@ -108,15 +111,17 @@ public class EcosSectionServiceImplTest {
         EcosSectionDto dto = ecosSectionService.getByExtId("b");
 
 
-        Assert.assertEquals("b", dto.getExtId());
+        Assert.assertEquals("b", dto.getId());
         Assert.assertEquals("b", dto.getName());
         Assert.assertEquals("b_desc", dto.getDescription());
         Assert.assertEquals("b_tenant", dto.getTenant());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void getByIdReturnNothing() {
-        ecosSectionService.getByExtId("b");
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            ecosSectionService.getByExtId("b");
+        });
     }
 
     @Test
@@ -157,7 +162,7 @@ public class EcosSectionServiceImplTest {
 
 
         Mockito.verify(sectionRepository, times(1)).save(Mockito.any());
-        Assert.assertEquals("a", dto.getExtId());
+        Assert.assertEquals("a", dto.getId());
         Assert.assertEquals("aname", dto.getName());
         Assert.assertEquals("a_desc", dto.getDescription());
         Assert.assertEquals("a_tenant", dto.getTenant());
@@ -172,7 +177,7 @@ public class EcosSectionServiceImplTest {
 
 
         Mockito.verify(sectionRepository, times(1)).save(Mockito.any());
-        Assert.assertNotNull(dto.getExtId());
+        Assert.assertNotNull(dto.getId());
         Assert.assertEquals("aname", dto.getName());
         Assert.assertEquals("a_desc", dto.getDescription());
         Assert.assertEquals("a_tenant", dto.getTenant());

@@ -8,11 +8,11 @@ public interface EcosAssociationService {
 
     Set<EcosAssociationDto> getAll();
 
-    Set<EcosAssociationDto> getAll(Set<String> extIds);
+    Set<EcosAssociationDto> getAll(Set<String> ids);
 
-    EcosAssociationDto getByExtId(String extId);
+    EcosAssociationDto getByExtId(String id);
 
-    void delete(String extId);
+    void delete(String id);
 
     EcosAssociationDto update(EcosAssociationDto dto);
 }

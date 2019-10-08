@@ -6,8 +6,6 @@
 
 # ===================================================================
 # Standard Spring Boot properties.
-# Full reference is available at:
-# http://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
 # ===================================================================
 
 logging:
@@ -76,6 +74,19 @@ spring:
     locator:
       discovery:
         enabled: true
+  rabbitmq:
+    host: localhost
+    username: admin
+    password: admin
+    port: 5672
+
+ecos-apps:
+  rabbitmq:
+    module:
+      section:
+        enable: true
+      type:
+        enable: true
 
 # ===================================================================
 # To enable TLS in production, generate a certificate using:
@@ -150,4 +161,3 @@ jhipster:
 # to have type-safe configuration, like in the ECOS-Registry Properties above
 # ===================================================================
 
-# application:

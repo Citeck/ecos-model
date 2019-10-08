@@ -28,9 +28,9 @@ import java.util.stream.Collectors;
 
 @Component
 public class EcosSectionRecordsDao extends LocalRecordsDAO
-    implements RecordsQueryWithMetaLocalDAO<EcosSectionRecord>,
-    RecordsMetaLocalDAO<EcosSectionRecord>,
-    MutableRecordsLocalDAO<EcosSectionMutable> {
+                                   implements RecordsQueryWithMetaLocalDAO<EcosSectionRecord>,
+                                              RecordsMetaLocalDAO<EcosSectionRecord>,
+                                              MutableRecordsLocalDAO<EcosSectionMutable> {
 
     private static final String ID = "section";
     private static final String LANGUAGE_EMPTY = "";
@@ -58,7 +58,7 @@ public class EcosSectionRecordsDao extends LocalRecordsDAO
                     .map(RecordRef::getId)
                     .collect(Collectors.toSet()))
                 .stream()
-                .collect(Collectors.toMap(EcosSectionDto::getExtId, dto -> dto));
+                .collect(Collectors.toMap(EcosSectionDto::getId, dto -> dto));
 
         return records.stream()
             .map(RecordRef::getId)
@@ -77,12 +77,12 @@ public class EcosSectionRecordsDao extends LocalRecordsDAO
         RecordsMutResult result = new RecordsMutResult();
 
         result.setRecords(values.stream()
-            .filter(e -> e.getExtId() != null)
+            .filter(e -> e.getId() != null)
             .map(e -> {
                 EcosSectionDto storedDto = sectionService.update(e);
-                RecordRef ref = RecordRef.valueOf(storedDto.getExtId());
+                RecordRef ref = RecordRef.valueOf(storedDto.getId());
                 RecordMeta meta = new RecordMeta(ref);
-                meta.setAttribute("extId", storedDto.getExtId());
+                meta.setAttribute("id", storedDto.getId());
                 meta.setAttribute("name", storedDto.getName());
                 meta.setAttribute("description", storedDto.getDescription());
                 meta.setAttribute("tenant", storedDto.getTenant());

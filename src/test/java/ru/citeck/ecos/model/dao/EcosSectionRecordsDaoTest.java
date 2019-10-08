@@ -2,12 +2,12 @@ package ru.citeck.ecos.model.dao;
 
 import graphql.language.Field;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.model.dto.EcosSectionDto;
 import ru.citeck.ecos.model.record.EcosSectionRecord;
 import ru.citeck.ecos.model.record.mutable.EcosSectionMutable;
@@ -15,7 +15,7 @@ import ru.citeck.ecos.model.service.impl.EcosSectionServiceImpl;
 import ru.citeck.ecos.predicate.PredicateService;
 import ru.citeck.ecos.predicate.PredicateServiceImpl;
 import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records2.RecordsServiceImpl;
+import ru.citeck.ecos.records2.RecordsServiceFactory;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaFieldImpl;
 import ru.citeck.ecos.records2.predicate.RecordElement;
@@ -25,11 +25,14 @@ import ru.citeck.ecos.records2.request.mutation.RecordsMutResult;
 import ru.citeck.ecos.records2.request.query.RecordsQuery;
 import ru.citeck.ecos.records2.request.query.RecordsQueryResult;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 import static org.mockito.BDDMockito.given;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(SpringExtension.class)
 public class EcosSectionRecordsDaoTest {
 
     @Mock
@@ -38,20 +41,19 @@ public class EcosSectionRecordsDaoTest {
     @Mock
     private PredicateServiceImpl predicateService;
 
-    @Mock
-    private RecordsServiceImpl recordsService;
-    
     private EcosSectionRecordsDao recordsDao;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         recordsDao = new EcosSectionRecordsDao(sectionService, predicateService);
-        recordsDao.setRecordsService(recordsService);
+        RecordsServiceFactory factory = new RecordsServiceFactory();
+        recordsDao.setRecordsServiceFactory(factory);
     }
 
     @Test
     public void getMetaValuesReturnRecords() {
-        EcosSectionDto dto = new EcosSectionDto("extId", "a", "adesc","atenant", null);
+        Set<RecordRef> types = Collections.singleton(RecordRef.create("type","typeId"));
+        EcosSectionDto dto = new EcosSectionDto("extId", "a", "adesc","atenant", types);
         Set<EcosSectionDto> dtos = Collections.singleton(dto);
         RecordsQuery query = new RecordsQuery();
 
@@ -68,16 +70,16 @@ public class EcosSectionRecordsDaoTest {
         Assert.assertEquals("a", result.getRecords().get(0).getAttribute("name", foo));
         Assert.assertEquals("adesc", result.getRecords().get(0).getAttribute("description", foo));
         Assert.assertEquals("atenant", result.getRecords().get(0).getAttribute("tenant", foo));
+        Assert.assertEquals(types, result.getRecords().get(0).getAttribute("types", foo));
         Assert.assertNull(result.getRecords().get(0).getAttribute("parent", foo));
     }
 
     @Test
     public void getMetaValuesReturnRecordsWithPredicate() {
-        EcosSectionDto dto = new EcosSectionDto("extId", "a", "adesc","atenant", null);
+        Set<RecordRef> types = Collections.singleton(RecordRef.create("type","typeId"));
+        EcosSectionDto dto = new EcosSectionDto("extId", "a", "adesc","atenant", types);
         RecordsQuery query = new RecordsQuery();
         query.setLanguage(PredicateService.LANGUAGE_PREDICATE);
-
-        given(sectionService.getByExtId("extId")).willReturn(dto);
 
         RecordElement element = new RecordElement(null, RecordRef.create("", "type", "extId"));
 
@@ -95,6 +97,7 @@ public class EcosSectionRecordsDaoTest {
         Assert.assertEquals("a", result.getRecords().get(0).getAttribute("name", foo));
         Assert.assertEquals("adesc", result.getRecords().get(0).getAttribute("description", foo));
         Assert.assertEquals("atenant", result.getRecords().get(0).getAttribute("tenant", foo));
+        Assert.assertEquals(types, result.getRecords().get(0).getAttribute("types", foo));
         Assert.assertNull(result.getRecords().get(0).getAttribute("parent", foo));
     }
 
@@ -110,21 +113,21 @@ public class EcosSectionRecordsDaoTest {
 
 
         Assert.assertEquals(1L, mutables.size());
-        Assert.assertEquals(dto.getExtId(), mutables.get(0).getExtId());
+        Assert.assertEquals(dto.getId(), mutables.get(0).getId());
     }
 
     @Test
     public void getValuesToMutateReturnNewElements() {
         EcosSectionDto dto = new EcosSectionDto("extId", "a", "adesc","atenant", null);
 
-        List<RecordRef> refs = Arrays.asList(RecordRef.create("", "type", "extId"));
+        List<RecordRef> refs = Arrays.asList(RecordRef.create("type", "extId"));
 
 
         List<EcosSectionMutable> mutables = recordsDao.getValuesToMutate(refs);
 
 
         Assert.assertEquals(1L, mutables.size());
-        Assert.assertEquals(dto.getExtId(), mutables.get(0).getExtId());
+        Assert.assertEquals(dto.getId(), mutables.get(0).getId());
     }
 
     @Test

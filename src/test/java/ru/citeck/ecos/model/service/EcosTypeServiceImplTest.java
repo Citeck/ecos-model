@@ -1,15 +1,18 @@
 package ru.citeck.ecos.model.service;
 
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import ru.citeck.ecos.model.domain.EcosAssociationEntity;
+import ru.citeck.ecos.model.domain.EcosSectionEntity;
 import ru.citeck.ecos.model.domain.EcosTypeEntity;
 import ru.citeck.ecos.model.dto.EcosTypeDto;
-import ru.citeck.ecos.model.repository.EcosSectionRepository;
+import ru.citeck.ecos.model.repository.EcosAssociationRepository;
 import ru.citeck.ecos.model.repository.EcosTypeRepository;
 import ru.citeck.ecos.model.service.exception.ForgottenChildsException;
 import ru.citeck.ecos.model.service.exception.ParentNotFoundException;
@@ -22,36 +25,58 @@ import java.util.stream.Collectors;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(SpringExtension.class)
 public class EcosTypeServiceImplTest {
 
     @Mock
     private EcosTypeRepository typeRepository;
 
     @Mock
-    private EcosSectionRepository sectionRepository;
+    private EcosAssociationRepository associationRepository;
 
     private EcosTypeService ecosTypeService;
 
-    @Before
+    private EcosTypeEntity ecosTypeEntity;
+    private EcosTypeEntity ecosTypeEntity2;
+    private EcosTypeEntity parent;
+    private EcosAssociationEntity target;
+
+    @BeforeEach
     public void init() {
-        ecosTypeService = new EcosTypeServiceImpl(typeRepository, sectionRepository);
+        ecosTypeService = new EcosTypeServiceImpl(typeRepository, associationRepository);
+
+        parent = new EcosTypeEntity();
+        parent.setExtId("parentId");
+
+        EcosTypeEntity child = new EcosTypeEntity();
+        child.setExtId("childId");
+
+        EcosSectionEntity section = new EcosSectionEntity();
+        section.setExtId("sectionId");
+
+        EcosAssociationEntity source = new EcosAssociationEntity();
+        source.setExtId("sourceId");
+
+        target = new EcosAssociationEntity();
+        target.setExtId("targetId");
+
+        EcosTypeEntity targetType = new EcosTypeEntity();
+        targetType.setExtId("targetTypeId");
+        target.setTarget(targetType);
+
+        ecosTypeEntity = new EcosTypeEntity(
+            "a", 1L, "a_name", "a_desc", "a_tenant", parent, Collections.singleton(child),
+            Collections.singleton(section), Collections.singleton(source), Collections.singleton(target));
+        ecosTypeEntity2 = new EcosTypeEntity("b", 2L, "b",
+            "b_desc", "b_tenant", ecosTypeEntity, null, null, null, null);
+
     }
+
 
     @Test
     public void getAllReturnTypes() {
 
-        EcosTypeEntity ecosTypeEntity = new EcosTypeEntity("a", 1L, "a",
-            "a_desc", "a_tenant", null, null, null, null);
-        EcosTypeEntity ecosTypeEntity2 = new EcosTypeEntity("b", 2L, "b",
-            "b_desc", "b_tenant", ecosTypeEntity, null, null, null);
-
-        ecosTypeEntity.setChilds(new HashSet<>(Arrays.asList(ecosTypeEntity2)));
-
-        List<EcosTypeEntity> entities = Arrays.asList(
-            ecosTypeEntity,
-            ecosTypeEntity2
-        );
+        List<EcosTypeEntity> entities = Collections.singletonList(ecosTypeEntity);
 
         given(typeRepository.findAll()).willReturn(entities);
 
@@ -59,79 +84,86 @@ public class EcosTypeServiceImplTest {
         Set<EcosTypeDto> dtos = ecosTypeService.getAll();
 
 
-        Assert.assertEquals(2, dtos.size());
+        Assert.assertEquals(1, dtos.size());
+        Assert.assertEquals(dtos.iterator().next().getId(), ecosTypeEntity.getExtId());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void getAllWhenReturnNothing() {
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            given(typeRepository.findAll()).willReturn(null);
 
-        given(typeRepository.findAll()).willReturn(null);
 
-
-        ecosTypeService.getAll();
+            ecosTypeService.getAll();
+        });
     }
 
     @Test
     public void getAllSelectedReturnTypes() {
 
-        EcosTypeEntity ecosTypeEntity = new EcosTypeEntity("a", 1L, "a",
-            "a_desc", "a_tenant", null, null, null, null);
-        EcosTypeEntity ecosTypeEntity2 = new EcosTypeEntity("b", 2L, "b",
-            "b_desc", "b_tenant", ecosTypeEntity, null, null, null);
-
-        ecosTypeEntity.setChilds(new HashSet<>(Arrays.asList(ecosTypeEntity2)));
+        ecosTypeEntity.setChilds(new HashSet<>(Collections.singleton(ecosTypeEntity2)));
 
         Set<EcosTypeEntity> entities = new HashSet<>();
-        entities.add(ecosTypeEntity2);
-        given(typeRepository.findAllByExtIds(Collections.singleton("b"))).willReturn(entities);
+        entities.add(ecosTypeEntity);
+        given(typeRepository.findAllByExtIds(Collections.singleton("a"))).willReturn(entities);
 
 
-        Set<EcosTypeDto> dtos = ecosTypeService.getAll(Collections.singleton("b"));
+        Set<EcosTypeDto> dtos = ecosTypeService.getAll(Collections.singleton("a"));
 
 
         Assert.assertEquals(1, dtos.size());
+        EcosTypeDto resultDto = dtos.iterator().next();
+        Assert.assertEquals("a", resultDto.getId());
+        Assert.assertEquals("a_name", resultDto.getName());
+        Assert.assertEquals("a_desc", resultDto.getDescription());
+        Assert.assertEquals("a_tenant", resultDto.getTenant());
+        Assert.assertEquals("parentId", resultDto.getParent().getId());
+        Assert.assertEquals("targetId", resultDto.getAssociations().iterator().next().getId());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void getAllSelectedNothing() {
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            given(typeRepository.findAllByExtIds(Collections.singleton("b"))).willReturn(null);
 
-        given(typeRepository.findAllByExtIds(Collections.singleton("b"))).willReturn(null);
 
-
-        ecosTypeService.getAll(Collections.singleton("b"));
+            ecosTypeService.getAll(Collections.singleton("b"));
+        });
     }
 
     @Test
     public void getByIdReturnTypeDto() {
-        EcosTypeEntity ecosTypeEntity = new EcosTypeEntity("a", 1L, "a",
-            "a_desc", "a_tenant", null, null, null, null);
-        EcosTypeEntity ecosTypeEntity2 = new EcosTypeEntity("b", 2L, "b",
-            "b_desc", "b_tenant", ecosTypeEntity, null, null, null);
 
-        ecosTypeEntity.setChilds(new HashSet<>(Arrays.asList(ecosTypeEntity2)));
+        ecosTypeEntity.setChilds(Collections.singleton(ecosTypeEntity));
 
-        given(typeRepository.findByExtId("b")).willReturn(Optional.of(ecosTypeEntity2));
+        given(typeRepository.findByExtId("a")).willReturn(Optional.of(ecosTypeEntity));
 
 
-        EcosTypeDto dto = ecosTypeService.getByExtId("b");
+        EcosTypeDto dto = ecosTypeService.getByExtId("a");
 
-        Assert.assertEquals("b", dto.getExtId());
-        Assert.assertEquals("b", dto.getName());
-        Assert.assertEquals("b_desc", dto.getDescription());
-        Assert.assertEquals("b_tenant", dto.getTenant());
-        Assert.assertEquals("a", dto.getParent().getId());
+
+        Assert.assertEquals("a", dto.getId());
+        Assert.assertEquals("a_name", dto.getName());
+        Assert.assertEquals("a_desc", dto.getDescription());
+        Assert.assertEquals("a_tenant", dto.getTenant());
+        Assert.assertEquals("parentId", dto.getParent().getId());
+        Assert.assertEquals("targetId", dto.getAssociations().iterator().next().getId());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void getByIdReturnNothing() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            given(typeRepository.findByExtId("b")).willReturn(Optional.empty());
 
-        ecosTypeService.getByExtId("b");
+
+            ecosTypeService.getByExtId("b");
+        });
     }
 
     @Test
     public void deleteSuccess() {
-        EcosTypeEntity ecosTypeEntity = new EcosTypeEntity("a", 1L, "a",
-            "a_desc", "a_tenant", null, null,null, null);
+
+        ecosTypeEntity.setChilds(null);
 
         given(typeRepository.findByExtId("a")).willReturn(Optional.of(ecosTypeEntity));
 
@@ -141,6 +173,19 @@ public class EcosTypeServiceImplTest {
 
         Mockito.verify(typeRepository, times(1)).deleteById(Mockito.anyLong());
 
+    }
+
+    @Test
+    public void deleteException() {
+        Assertions.assertThrows(ForgottenChildsException.class, () -> {
+            given(typeRepository.findByExtId("a")).willReturn(Optional.of(ecosTypeEntity));
+
+
+            ecosTypeService.delete("a");
+
+
+            Mockito.verify(typeRepository, times(0)).deleteById(Mockito.anyLong());
+        });
     }
 
     @Test
@@ -155,21 +200,10 @@ public class EcosTypeServiceImplTest {
         Mockito.verify(typeRepository, times(0)).deleteById(Mockito.anyLong());
     }
 
-    @Test(expected = ForgottenChildsException.class)
-    public void deleteChildsException() {
-        EcosTypeEntity ecosTypeEntity = new EcosTypeEntity("a", 1L, "a",
-            "a_desc", "a_tenant", null, Collections.singleton(new EcosTypeEntity()),null, null);
-
-        given(typeRepository.findByExtId("a")).willReturn(Optional.of(ecosTypeEntity));
-
-
-        ecosTypeService.delete("a");
-    }
-
     @Test
     public void updateSuccessNoParentNewEntity() {
-        EcosTypeEntity ecosTypeEntity = new EcosTypeEntity("a", 1L, "aname",
-            "a_desc", "a_tenant", null, null, null, null);
+
+        ecosTypeEntity.setParent(null);
 
         given(typeRepository.findByExtId("a")).willReturn(Optional.empty());
 
@@ -178,8 +212,8 @@ public class EcosTypeServiceImplTest {
 
 
         Mockito.verify(typeRepository, times(1)).save(Mockito.any());
-        Assert.assertEquals("a", dto.getExtId());
-        Assert.assertEquals("aname", dto.getName());
+        Assert.assertEquals("a", dto.getId());
+        Assert.assertEquals("a_name", dto.getName());
         Assert.assertEquals("a_desc", dto.getDescription());
         Assert.assertEquals("a_tenant", dto.getTenant());
         Assert.assertNull(dto.getParent());
@@ -187,57 +221,55 @@ public class EcosTypeServiceImplTest {
 
     @Test
     public void updateSuccessWithParentNewEntity() {
-        EcosTypeEntity parent = new EcosTypeEntity("b",2L,"b","b","b",
-            null, null, null, null);
-        EcosTypeEntity ecosTypeEntity = new EcosTypeEntity("a", 1L, "aname", "a_desc", "a_tenant", parent,
-            null, null, null);
 
         given(typeRepository.findByExtId("a")).willReturn(Optional.empty());
-        given(typeRepository.findByExtId("b")).willReturn(Optional.of(parent));
+        given(typeRepository.findByExtId("parentId")).willReturn(Optional.of(parent));
+        given(associationRepository.findByExtId("targetId")).willReturn(Optional.of(target));
 
 
         EcosTypeDto dto = ecosTypeService.update(entityToDto(ecosTypeEntity));
 
 
         Mockito.verify(typeRepository, times(1)).save(Mockito.any());
-        Assert.assertEquals("a", dto.getExtId());
-        Assert.assertEquals("aname", dto.getName());
+        Assert.assertEquals("a", dto.getId());
+        Assert.assertEquals("a_name", dto.getName());
         Assert.assertEquals("a_desc", dto.getDescription());
         Assert.assertEquals("a_tenant", dto.getTenant());
-        Assert.assertEquals(parent.getExtId(), dto.getParent().getId());
+        Assert.assertEquals("parentId", dto.getParent().getId());
+        RecordRef associationRef = dto.getAssociations().iterator().next();
+        Assert.assertEquals("targetId", associationRef.getId());
     }
 
     @Test
-    public void updateSuccessWithNoUUIDNewEntity() {
-        EcosTypeEntity ecosTypeEntity = new EcosTypeEntity(null, 1L, "aname",
-            "a_desc", "a_tenant", null, null, null, null);
+    public void updateSuccessWithNoExtIdNewEntity() {
 
+        given(typeRepository.findByExtId("parentId")).willReturn(Optional.of(parent));
+        given(associationRepository.findByExtId("targetId")).willReturn(Optional.of(target));
 
         EcosTypeDto dto = ecosTypeService.update(entityToDto(ecosTypeEntity));
 
 
         Mockito.verify(typeRepository, times(1)).save(Mockito.any());
-        Assert.assertNotNull(dto.getExtId());
-        Assert.assertEquals("aname", dto.getName());
+        Assert.assertNotNull(dto.getId());
+        Assert.assertEquals("a", dto.getId());
+        Assert.assertEquals("a_name", dto.getName());
         Assert.assertEquals("a_desc", dto.getDescription());
         Assert.assertEquals("a_tenant", dto.getTenant());
-        Assert.assertNull(dto.getParent());
+        Assert.assertEquals("parentId", dto.getParent().getId());
+        Assert.assertEquals("targetId", dto.getAssociations().iterator().next().getId());
     }
 
-    @Test(expected = ParentNotFoundException.class)
+    @Test
     public void updateException() {
-        EcosTypeEntity parent = new EcosTypeEntity("b", 2L, "a",
-            "a_desc", "a_tenant", null , null, null, null);
-        EcosTypeEntity ecosTypeEntity = new EcosTypeEntity("a", 1L, "a",
-            "a_desc", "a_tenant", parent, null, null, null);
-
-        given(typeRepository.findByExtId("b")).willReturn(Optional.empty());
+        Assertions.assertThrows(ParentNotFoundException.class, () -> {
+            given(typeRepository.findByExtId("b")).willReturn(Optional.empty());
 
 
-        ecosTypeService.update(entityToDto(ecosTypeEntity));
+            ecosTypeService.update(entityToDto(ecosTypeEntity));
 
 
-        Mockito.verify(typeRepository, times(0)).save(Mockito.any());
+            Mockito.verify(typeRepository, times(0)).save(Mockito.any());
+        });
     }
 
     private EcosTypeDto entityToDto(EcosTypeEntity entity) {
@@ -245,10 +277,10 @@ public class EcosTypeServiceImplTest {
         if (entity.getParent() != null) {
             parent = RecordRef.create("type", entity.getParent().getExtId());
         }
-        Set<RecordRef> sections = null;
-        if (entity.getSections() != null) {
-            sections = entity.getSections().stream()
-                .map(s -> RecordRef.create("section", s.getExtId()))
+        Set<RecordRef> associationsRefs = null;
+        if (entity.getAssocsToOther() != null) {
+            associationsRefs = entity.getAssocsToOther().stream()
+                .map(assoc -> RecordRef.create("association", assoc.getExtId()))
                 .collect(Collectors.toSet());
         }
         return new EcosTypeDto(
@@ -257,7 +289,7 @@ public class EcosTypeServiceImplTest {
             entity.getDescription(),
             entity.getTenant(),
             parent,
-            sections);
+            associationsRefs);
     }
 
 }

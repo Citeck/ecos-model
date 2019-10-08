@@ -87,7 +87,7 @@ spring:
         enabled: true
 
 server:
-  port: 8081
+  port: 8094
 
 # ===================================================================
 # ECOS-Registry specific properties
