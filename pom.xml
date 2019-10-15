@@ -83,7 +83,7 @@
         <junit.utReportFolder>${project.testresult.directory}/test</junit.utReportFolder>
         <junit.itReportFolder>${project.testresult.directory}/integrationTest</junit.itReportFolder>
         <ecos-records.version>1.7.0-SNAPSHOT</ecos-records.version>
-        <ecos-apps-lib-spring>1.0.0-SNAPSHOT</ecos-apps-lib-spring>
+        <ecos-apps-lib-spring>1.1.0-SNAPSHOT</ecos-apps-lib-spring>
         <!-- jhipster-needle-maven-property -->
     </properties>
 
@@ -377,6 +377,11 @@
             <artifactId>mockito-core</artifactId>
             <version>2.27.0</version>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.amqp</groupId>
+            <artifactId>spring-rabbit</artifactId>
         </dependency>
         <!-- jhipster-needle-maven-add-dependency -->
     </dependencies>

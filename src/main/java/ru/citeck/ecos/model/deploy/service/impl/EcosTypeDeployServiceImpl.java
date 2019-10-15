@@ -56,12 +56,14 @@ public class EcosTypeDeployServiceImpl implements EcosTypeDeployService {
             }).collect(Collectors.toSet()));
         }
         typeRepository.save(entity);
-        associationRepository.saveAll(entity.getAssocsToOther().stream().
-            peek(assoc -> {
-                if (Strings.isBlank(assoc.getExtId())) {
-                    assoc.setExtId(UUID.randomUUID().toString());
-                }
-            }).collect(Collectors.toList()));
+        if (entity.getAssocsToOther() != null) {
+            associationRepository.saveAll(entity.getAssocsToOther().stream().
+                peek(assoc -> {
+                    if (Strings.isBlank(assoc.getExtId())) {
+                        assoc.setExtId(UUID.randomUUID().toString());
+                    }
+                }).collect(Collectors.toList()));
+        }
     }
 
     private EcosTypeEntity dtoToEntity(EcosTypeDeployDto dto) {
