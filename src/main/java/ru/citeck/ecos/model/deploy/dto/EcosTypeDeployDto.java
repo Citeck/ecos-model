@@ -1,11 +1,14 @@
 package ru.citeck.ecos.model.deploy.dto;
 
 import lombok.*;
+import org.apache.logging.log4j.util.Strings;
+import ru.citeck.ecos.apps.app.module.type.type.TypeModule;
 import ru.citeck.ecos.model.dto.EcosAssociationDto;
 import ru.citeck.ecos.records2.RecordRef;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @EqualsAndHashCode
 @AllArgsConstructor
@@ -33,6 +36,21 @@ public class EcosTypeDeployDto {
         this.id = dto.id;
         if (dto.associations != null) {
             this.associations = new HashSet<>(dto.associations);
+        }
+    }
+
+    public EcosTypeDeployDto(TypeModule module) {
+        this.id = module.getId();
+        this.name = module.getName();
+        this.description = module.getDescription();
+        this.tenant = Strings.EMPTY;
+        if (!Strings.isEmpty(module.getParent())) {
+            this.parent = RecordRef.create("type", module.getParent());
+        }
+        if (module.getAssociations() != null && !module.getAssociations().isEmpty()) {
+            this.associations = module.getAssociations().stream()
+                .map(a -> new EcosAssociationDto(a, module.getId()))
+                .collect(Collectors.toSet());
         }
     }
 

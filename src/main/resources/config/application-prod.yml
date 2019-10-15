@@ -74,19 +74,6 @@ spring:
     locator:
       discovery:
         enabled: true
-  rabbitmq:
-    host: localhost
-    username: admin
-    password: admin
-    port: 5672
-
-ecos-apps:
-  rabbitmq:
-    module:
-      section:
-        enable: true
-      type:
-        enable: true
 
 # ===================================================================
 # To enable TLS in production, generate a certificate using:
@@ -161,3 +148,7 @@ jhipster:
 # to have type-safe configuration, like in the ECOS-Registry Properties above
 # ===================================================================
 
+spring.rabbitmq:
+  host: localhost
+  username: admin
+  password: admin

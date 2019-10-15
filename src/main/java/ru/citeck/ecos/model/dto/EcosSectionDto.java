@@ -1,11 +1,14 @@
 package ru.citeck.ecos.model.dto;
 
 import lombok.*;
+import org.apache.logging.log4j.util.Strings;
+import ru.citeck.ecos.apps.app.module.type.section.SectionModule;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.graphql.meta.annotation.DisplayName;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @EqualsAndHashCode
 @AllArgsConstructor
@@ -30,6 +33,18 @@ public class EcosSectionDto {
         this.id = dto.id;
         if (dto.types != null) {
             this.types = new HashSet<>(dto.types);
+        }
+    }
+
+    public EcosSectionDto(SectionModule module) {
+        this.id = module.getId();
+        this.name = module.getName();
+        this.description = module.getDescription();
+        this.tenant = Strings.EMPTY;
+        if (module.getTypes() != null && !module.getTypes().isEmpty()) {
+            this.types = module.getTypes().stream()
+                .map(t -> RecordRef.create("type", t))
+                .collect(Collectors.toSet());
         }
     }
 
