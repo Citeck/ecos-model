@@ -41,18 +41,15 @@ spring:
       indent-output: true
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:h2:mem:emodel;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:postgresql://localhost:5441/emodel
     username: emodel
     password:
     hikari:
       poolName: Hikari
       auto-commit: false
-  h2:
-    console:
-      enabled: false
   jpa:
-    database-platform: io.github.jhipster.domain.util.FixedH2Dialect
-    database: H2
+    database-platform: io.github.jhipster.domain.util.FixedPostgreSQL82Dialect
+    database: POSTGRESQL
     show-sql: true
     properties:
       hibernate.id.new_generator_mappings: true
@@ -139,3 +136,6 @@ jhipster:
 # ===================================================================
 
 # application:
+
+spring.rabbitmq:
+  host: localhost
