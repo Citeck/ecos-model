@@ -84,6 +84,7 @@
         <junit.itReportFolder>${project.testresult.directory}/integrationTest</junit.itReportFolder>
         <ecos-records.version>1.10.0-SNAPSHOT</ecos-records.version>
         <ecos-apps-lib-spring>1.2.0-SNAPSHOT</ecos-apps-lib-spring>
+        <lombok.version>1.18.8</lombok.version>
         <!-- jhipster-needle-maven-property -->
     </properties>
 
@@ -358,7 +359,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.8</version>
+            <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -399,7 +400,7 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>1.16.22</version>
+                            <version>${lombok.version}</version>
                         </path>
                         <path>
                             <groupId>org.mapstruct</groupId>
@@ -520,7 +521,7 @@
                             <path>
                                 <groupId>org.projectlombok</groupId>
                                 <artifactId>lombok</artifactId>
-                                <version>1.16.18</version>
+                                <version>${lombok.version}</version>
                             </path>
                         </annotationProcessorPaths>
                     </configuration>
