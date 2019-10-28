@@ -8,4 +8,4 @@ services:
             - POSTGRES_USER=emodel
             - POSTGRES_PASSWORD=
         ports:
-            - 5432:5432
+            - 5441:5432
