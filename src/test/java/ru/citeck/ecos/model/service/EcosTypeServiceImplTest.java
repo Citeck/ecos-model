@@ -8,6 +8,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import ru.citeck.ecos.apps.app.module.type.type.action.ActionDto;
+import ru.citeck.ecos.model.domain.ActionEntity;
 import ru.citeck.ecos.model.domain.EcosAssociationEntity;
 import ru.citeck.ecos.model.domain.EcosSectionEntity;
 import ru.citeck.ecos.model.domain.EcosTypeEntity;
@@ -16,6 +18,7 @@ import ru.citeck.ecos.model.repository.EcosAssociationRepository;
 import ru.citeck.ecos.model.repository.EcosTypeRepository;
 import ru.citeck.ecos.model.service.exception.ForgottenChildsException;
 import ru.citeck.ecos.model.service.exception.ParentNotFoundException;
+import ru.citeck.ecos.model.service.factory.ActionFactory;
 import ru.citeck.ecos.model.service.impl.EcosTypeServiceImpl;
 import ru.citeck.ecos.records2.RecordRef;
 
@@ -43,7 +46,7 @@ public class EcosTypeServiceImplTest {
 
     @BeforeEach
     public void init() {
-        ecosTypeService = new EcosTypeServiceImpl(typeRepository, associationRepository);
+        /*ecosTypeService = new EcosTypeServiceImpl(typeRepository, associationRepository);
 
         parent = new EcosTypeEntity();
         parent.setExtId("parentId");
@@ -68,7 +71,7 @@ public class EcosTypeServiceImplTest {
             "a", 1L, "a_name", "a_desc", "a_tenant", parent, Collections.singleton(child),
             Collections.singleton(section), Collections.singleton(source), Collections.singleton(target));
         ecosTypeEntity2 = new EcosTypeEntity("b", 2L, "b",
-            "b_desc", "b_tenant", ecosTypeEntity, null, null, null, null);
+            "b_desc", "b_tenant", ecosTypeEntity, null, null, null, null);*/
 
     }
 
@@ -283,13 +286,20 @@ public class EcosTypeServiceImplTest {
                 .map(assoc -> RecordRef.create("association", assoc.getExtId()))
                 .collect(Collectors.toSet());
         }
+
+        List<ActionDto> actions = entity.getActions()
+            .stream()
+            .map(ActionFactory::toDto)
+            .collect(Collectors.toList());
+
         return new EcosTypeDto(
             entity.getExtId(),
             entity.getName(),
             entity.getDescription(),
             entity.getTenant(),
             parent,
-            associationsRefs);
+            associationsRefs,
+            actions);
     }
 
 }

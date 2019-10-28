@@ -117,3 +117,7 @@ ecos:
 # ===================================================================
 
 # application:
+spring.rabbitmq:
+  host: localhost
+  username: admin
+  password: admin

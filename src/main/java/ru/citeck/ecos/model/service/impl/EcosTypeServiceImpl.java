@@ -5,6 +5,8 @@ import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.citeck.ecos.apps.app.module.type.type.action.ActionDto;
+import ru.citeck.ecos.model.domain.ActionEntity;
 import ru.citeck.ecos.model.domain.EcosAssociationEntity;
 import ru.citeck.ecos.model.domain.EcosTypeEntity;
 import ru.citeck.ecos.model.dto.EcosTypeDto;
@@ -13,9 +15,11 @@ import ru.citeck.ecos.model.repository.EcosTypeRepository;
 import ru.citeck.ecos.model.service.EcosTypeService;
 import ru.citeck.ecos.model.service.exception.ForgottenChildsException;
 import ru.citeck.ecos.model.service.exception.ParentNotFoundException;
+import ru.citeck.ecos.model.service.factory.ActionFactory;
 import ru.citeck.ecos.records2.RecordRef;
 import springfox.documentation.annotations.Cacheable;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -91,13 +95,21 @@ public class EcosTypeServiceImpl implements EcosTypeService {
                 .map(assoc -> RecordRef.create("association", assoc.getExtId()))
                 .collect(Collectors.toSet());
         }
+
+        List<ActionDto> actions = entity.getActions()
+            .stream()
+            .map(ActionFactory::toDto)
+            .collect(Collectors.toList());
+
+
         return new EcosTypeDto(
             entity.getExtId(),
             entity.getName(),
             entity.getDescription(),
             entity.getTenant(),
             parent,
-            associationsRefs);
+            associationsRefs,
+            actions);
     }
 
     private EcosTypeEntity dtoToEntity(EcosTypeDto dto) {
@@ -124,6 +136,13 @@ public class EcosTypeServiceImpl implements EcosTypeService {
                 .collect(Collectors.toSet());
         }
         ecosTypeEntity.setAssocsToOther(associationEntities);
+
+        List<ActionEntity> actions  = dto.getActions()
+            .stream()
+            .map(ActionFactory::fromDto)
+            .collect(Collectors.toList());
+
+        ecosTypeEntity.setActions(actions);
 
         return ecosTypeEntity;
     }

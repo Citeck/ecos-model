@@ -56,7 +56,7 @@ public class EcosTypeRecordsDaoTest {
 
         EcosTypeDto dto = new EcosTypeDto("extId", "a", "adesc","atenant",
             RecordRef.create("type", "parentId"),
-            Collections.singleton(RecordRef.create("association", "assocId")));
+            Collections.singleton(RecordRef.create("association", "assocId")), Collections.EMPTY_LIST);
         Set<EcosTypeDto> dtos = Collections.singleton(dto);
         RecordsQuery query = new RecordsQuery();
 
@@ -82,7 +82,7 @@ public class EcosTypeRecordsDaoTest {
     public void getMetaValuesReturnRecordsWithPredicate() {
         EcosTypeDto dto = new EcosTypeDto("extId", "a", "adesc","atenant",
             RecordRef.create("type", "parentId"),
-            Collections.singleton(RecordRef.create("association", "assocId")));
+            Collections.singleton(RecordRef.create("association", "assocId")), Collections.EMPTY_LIST);
         RecordsQuery query = new RecordsQuery();
         query.setLanguage(PredicateService.LANGUAGE_PREDICATE);
 
@@ -110,7 +110,8 @@ public class EcosTypeRecordsDaoTest {
 
     @Test
     public void getValuesToMutateReturnOldElements() {
-        EcosTypeDto dto = new EcosTypeDto("extId", "a", "adesc","atenant", null, null);
+        EcosTypeDto dto = new EcosTypeDto("extId", "a", "adesc","atenant", null, null,
+            Collections.EMPTY_LIST);
 
         List<RecordRef> refs = Arrays.asList(RecordRef.create("", "type", "extId"));
 
@@ -124,7 +125,8 @@ public class EcosTypeRecordsDaoTest {
 
     @Test
     public void getValuesToMutateReturnNewElements() {
-        EcosTypeDto dto = new EcosTypeDto("extId", "a", "adesc","atenant", null, null);
+        EcosTypeDto dto = new EcosTypeDto("extId", "a", "adesc","atenant", null, null,
+            Collections.EMPTY_LIST);
 
         List<RecordRef> refs = Arrays.asList(RecordRef.create("", "type", "extId"));
 
@@ -138,7 +140,8 @@ public class EcosTypeRecordsDaoTest {
 
     @Test
     public void saveReturnSavedIds() {
-        EcosTypeDto dto = new EcosTypeDto("extId", "a", "desc", "", null, null);
+        EcosTypeDto dto = new EcosTypeDto("extId", "a", "desc", "", null, null,
+            Collections.EMPTY_LIST);
         List<EcosTypeMutable> mutables = Arrays.asList(new EcosTypeMutable(dto));
 
         given(typeService.update(dto)).willReturn(dto);
@@ -154,7 +157,8 @@ public class EcosTypeRecordsDaoTest {
     public void saveDontUpdate() {
         List<EcosTypeMutable> mutables = Arrays.asList(
             new EcosTypeMutable(
-                new EcosTypeDto(null, "a", "desc", "", null, null)));
+                new EcosTypeDto(null, "a", "desc", "", null, null,
+                    Collections.EMPTY_LIST)));
 
 
         RecordsMutResult result1 = recordsDao.save(mutables);

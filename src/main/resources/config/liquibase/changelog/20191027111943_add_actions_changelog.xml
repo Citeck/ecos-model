@@ -1,0 +1,64 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="Romancha (generated)" id="1572175193105-9">
+        <createTable tableName="ecos_actions">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="ecos_actionsPK"/>
+            </column>
+            <column name="config_json" type="TEXT"/>
+            <column name="ext_id" type="VARCHAR(255)"/>
+            <column name="icon" type="VARCHAR(255)"/>
+            <column name="key" type="VARCHAR(255)"/>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="action_order" type="FLOAT4"/>
+            <column name="type" type="VARCHAR(255)"/>
+            <column name="ecos_type_id" type="BIGINT"/>
+            <column name="ecos_evaluator_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="Romancha (generated)" id="1572175193105-10">
+        <createTable tableName="ecos_evaluators">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="ecos_evaluatorsPK"/>
+            </column>
+            <column name="config_json" type="TEXT"/>
+            <column name="ext_id" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="Romancha (generated)" id="1572175193105-11">
+        <addPrimaryKey columnNames="section_id, type_id" tableName="section_type"/>
+    </changeSet>
+    <changeSet author="Romancha (generated)" id="1572175193105-12">
+        <addForeignKeyConstraint baseColumnNames="ecos_evaluator_id" baseTableName="ecos_actions" constraintName="FK74d4frst1ngtgst2qi6u8bwsj" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="ecos_evaluators" validate="true"/>
+    </changeSet>
+    <changeSet author="Romancha (generated)" id="1572175193105-13">
+        <addForeignKeyConstraint baseColumnNames="type_id" baseTableName="section_type" constraintName="FKg6xvhwgq09vf1t52dwhtsem4y" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="ecos_type" validate="true"/>
+    </changeSet>
+    <changeSet author="Romancha (generated)" id="1572175193105-14">
+        <addForeignKeyConstraint baseColumnNames="section_id" baseTableName="section_type" constraintName="FKqx49n67rhtbrhnx7p38ygq857" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="ecos_section" validate="true"/>
+    </changeSet>
+    <changeSet author="Romancha (generated)" id="1572175193105-15">
+        <addForeignKeyConstraint baseColumnNames="ecos_type_id" baseTableName="ecos_actions" constraintName="FKt11b3qrd668pw1mt5kt7oul4l" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="ecos_type" validate="true"/>
+    </changeSet>
+    <changeSet author="Romancha (generated)" id="1572175193105-16">
+        <dropUniqueConstraint constraintName="unique_constraint" tableName="section_type"/>
+    </changeSet>
+    <changeSet author="Romancha (generated)" id="1572175193105-17">
+        <dropUniqueConstraint constraintName="unique_constraint2" tableName="ecos_association"/>
+    </changeSet>
+    <changeSet author="Romancha (generated)" id="1572175193105-1">
+        <dropNotNullConstraint columnDataType="varchar(255)" columnName="name" tableName="ecos_association"/>
+    </changeSet>
+    <changeSet author="Romancha (generated)" id="1572175193105-2">
+        <dropNotNullConstraint columnDataType="varchar(255)" columnName="name" tableName="ecos_section"/>
+    </changeSet>
+    <changeSet author="Romancha (generated)" id="1572175193105-3">
+        <dropNotNullConstraint columnDataType="bigint" columnName="source_id" tableName="ecos_association"/>
+    </changeSet>
+    <changeSet author="Romancha (generated)" id="1572175193105-4">
+        <dropNotNullConstraint columnDataType="bigint" columnName="target_id" tableName="ecos_association"/>
+    </changeSet>
+    <changeSet author="Romancha (generated)" id="1572175193105-5">
+        <dropNotNullConstraint columnDataType="varchar(255)" columnName="title" tableName="ecos_association"/>
+    </changeSet>
+</databaseChangeLog>

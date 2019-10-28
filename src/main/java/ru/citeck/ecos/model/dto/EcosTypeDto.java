@@ -1,28 +1,29 @@
 package ru.citeck.ecos.model.dto;
 
 import lombok.*;
+import ru.citeck.ecos.apps.app.module.type.type.action.ActionDto;
 import ru.citeck.ecos.records2.RecordRef;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@Getter
+@Setter
 public class EcosTypeDto {
 
-    @Getter @Setter private String id;
-
-    @Getter @Setter private String name;
-
-    @Getter @Setter private String description;
-
-    @Getter @Setter private String tenant;
-
-    @Getter @Setter private RecordRef parent;
-
-    @Getter @Setter private Set<RecordRef> associations;
+    private String id;
+    private String name;
+    private String description;
+    private String tenant;
+    private RecordRef parent;
+    private Set<RecordRef> associations;
+    private List<ActionDto> actions = new ArrayList<>();
 
     public EcosTypeDto(EcosTypeDto dto) {
         this.name = dto.name;
@@ -33,6 +34,7 @@ public class EcosTypeDto {
         if (dto.associations != null) {
             this.associations = new HashSet<>(dto.associations);
         }
+        this.actions = dto.getActions();
     }
 
     public EcosTypeDto(String id) {

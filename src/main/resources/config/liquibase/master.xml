@@ -18,6 +18,7 @@
     <include file="config/liquibase/changelog/00000000000004_ecos_section_schema.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/00000000000005_section_type_schema.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/00000000000006_ecos_association_schema.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20191027111943_add_actions_changelog.xml" relativeToChangelogFile="false"/>
     <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
     <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->
 </databaseChangeLog>

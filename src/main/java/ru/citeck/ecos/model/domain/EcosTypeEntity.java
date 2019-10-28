@@ -6,50 +6,57 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
 @Table(name = "ecos_type")
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class EcosTypeEntity {
 
     @Column(unique = true, nullable = false)
-    @Getter @Setter private String extId;
+    private String extId;
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
     @SequenceGenerator(name = "sequenceGenerator")
-    @Getter @Setter private Long id;
+    private Long id;
 
     @Column(nullable = false)
-    @Getter @Setter private String name;
+    private String name;
 
-    @Getter @Setter private String description;
+    private String description;
 
-    @Getter @Setter private String tenant;
+    private String tenant;
 
     @ManyToOne(cascade={CascadeType.DETACH})
     @JoinColumn(name="parent_id")
-    @Getter @Setter private EcosTypeEntity parent;
+    private EcosTypeEntity parent;
 
     @OneToMany(mappedBy="parent", cascade = CascadeType.DETACH)
-    @Getter @Setter private Set<EcosTypeEntity> childs = new HashSet<>();
+    private Set<EcosTypeEntity> childs = new HashSet<>();
 
     @ManyToMany(mappedBy = "types", fetch = FetchType.EAGER)
-    @Getter @Setter private Set<EcosSectionEntity> sections;
+    private Set<EcosSectionEntity> sections;
 
     /*
      * Set of associations to this type
      */
     @OneToMany(mappedBy = "source", fetch = FetchType.EAGER)
-    @Getter @Setter private Set<EcosAssociationEntity> assocsToThis;
+    private Set<EcosAssociationEntity> assocsToThis;
 
     /*
      * Set of associations to other types
      */
     @OneToMany(mappedBy = "target", fetch = FetchType.EAGER)
-    @Getter @Setter private Set<EcosAssociationEntity> assocsToOther;
+    private Set<EcosAssociationEntity> assocsToOther;
+
+    @OneToMany(mappedBy = "ecosType", cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, orphanRemoval = true)
+    private List<ActionEntity> actions = new ArrayList<>();
 
 }
