@@ -1,11 +1,11 @@
 version: '2'
 services:
-  emodel-postgresql:
-    image: postgres:11.4
-    # volumes:
-    #     - ~/volumes/ecos/emodel/postgresql/:/var/lib/postgresql/data/
-    environment:
-      - POSTGRES_USER=emodel
-      - POSTGRES_PASSWORD=
-    ports:
-      - 5432:5432
+    emodel-postgresql:
+        image: postgres:10.4
+        # volumes:
+        #     - ~/volumes/jhipster/emodel/postgresql/:/var/lib/postgresql/data/
+        environment:
+            - POSTGRES_USER=emodel
+            - POSTGRES_PASSWORD=
+        ports:
+            - 5432:5432

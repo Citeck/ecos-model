@@ -1,12 +1,14 @@
 package ru.citeck.ecos.model.web.rest.errors;
 
 import ru.citeck.ecos.model.EcosModelApp;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -17,10 +19,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Integration tests {@link ExceptionTranslator} controller advice.
+ * Test class for the ExceptionTranslator controller advice.
+ *
+ * @see ExceptionTranslator
  */
+@RunWith(SpringRunner.class)
 @SpringBootTest(classes = EcosModelApp.class)
-public class ExceptionTranslatorIT {
+public class ExceptionTranslatorIntTest {
 
     @Autowired
     private ExceptionTranslatorTestController controller;
@@ -33,7 +38,7 @@ public class ExceptionTranslatorIT {
 
     private MockMvc mockMvc;
 
-    @BeforeEach
+    @Before
     public void setup() {
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
             .setControllerAdvice(exceptionTranslator)
@@ -58,6 +63,26 @@ public class ExceptionTranslatorIT {
              .andExpect(jsonPath("$.fieldErrors.[0].objectName").value("testDTO"))
              .andExpect(jsonPath("$.fieldErrors.[0].field").value("test"))
              .andExpect(jsonPath("$.fieldErrors.[0].message").value("NotNull"));
+    }
+
+    @Test
+    public void testParameterizedError() throws Exception {
+        mockMvc.perform(get("/test/parameterized-error"))
+            .andExpect(status().isBadRequest())
+            .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+            .andExpect(jsonPath("$.message").value("test parameterized error"))
+            .andExpect(jsonPath("$.params.param0").value("param0_value"))
+            .andExpect(jsonPath("$.params.param1").value("param1_value"));
+    }
+
+    @Test
+    public void testParameterizedError2() throws Exception {
+        mockMvc.perform(get("/test/parameterized-error2"))
+            .andExpect(status().isBadRequest())
+            .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+            .andExpect(jsonPath("$.message").value("test parameterized error"))
+            .andExpect(jsonPath("$.params.foo").value("foo_value"))
+            .andExpect(jsonPath("$.params.bar").value("bar_value"));
     }
 
     @Test

@@ -1,6 +1,6 @@
 package ru.citeck.ecos.model.security;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -14,12 +14,14 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Test class for the {@link SecurityUtils} utility class.
+ * Test class for the SecurityUtils utility class.
+ *
+ * @see SecurityUtils
  */
 public class SecurityUtilsUnitTest {
 
     @Test
-    public void testGetCurrentUserLogin() {
+    public void testgetCurrentUserLogin() {
         SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
         securityContext.setAuthentication(new UsernamePasswordAuthenticationToken("admin", "admin"));
         SecurityContextHolder.setContext(securityContext);

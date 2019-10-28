@@ -2,8 +2,10 @@ package ru.citeck.ecos.model.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -19,6 +21,7 @@ import ru.citeck.ecos.model.security.jwt.TokenProvider;
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private final TokenProvider tokenProvider;
+
     private final SecurityProblemSupport problemSupport;
 
     public SecurityConfiguration(TokenProvider tokenProvider, SecurityProblemSupport problemSupport) {
@@ -27,30 +30,37 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     @Override
+    public void configure(WebSecurity web) throws Exception {
+        web.ignoring()
+            .antMatchers(HttpMethod.OPTIONS, "/**")
+            .antMatchers("/swagger-ui/index.html")
+            .antMatchers("/test/**");
+    }
+
+    @Override
     public void configure(HttpSecurity http) throws Exception {
-        // @formatter:off
         http
             .csrf()
             .disable()
             .exceptionHandling()
             .authenticationEntryPoint(problemSupport)
             .accessDeniedHandler(problemSupport)
-            .and()
+        .and()
             .headers()
             .frameOptions()
             .disable()
-            .and()
+        .and()
             .sessionManagement()
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            .and()
+        .and()
             .authorizeRequests()
             .antMatchers("/api/**").permitAll()
             .antMatchers("/management/health").permitAll()
             .antMatchers("/management/info").permitAll()
             .antMatchers("/management/**").hasAuthority(AuthoritiesConstants.ADMIN)
-            .and()
+        .and()
             .apply(securityConfigurerAdapter());
-        // @formatter:on
+
     }
 
     private JWTConfigurer securityConfigurerAdapter() {
