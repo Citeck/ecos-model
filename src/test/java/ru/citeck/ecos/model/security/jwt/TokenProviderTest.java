@@ -5,8 +5,9 @@ import ru.citeck.ecos.model.security.AuthoritiesConstants;
 import java.security.Key;
 import java.util.*;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -23,14 +24,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class TokenProviderTest {
 
-    private static final long ONE_MINUTE = 60000;
-
+    private final long ONE_MINUTE = 60000;
     private Key key;
+    private JHipsterProperties jHipsterProperties;
     private TokenProvider tokenProvider;
 
-    @BeforeEach
+    @Before
     public void setup() {
-        tokenProvider = new TokenProvider( new JHipsterProperties());
+        jHipsterProperties = Mockito.mock(JHipsterProperties.class);
+        tokenProvider = new TokenProvider(jHipsterProperties);
         key = Keys.hmacShaKeyFor(Decoders.BASE64
             .decode("fd54a45s65fds737b9aafcb3412e07ed99b267f33413274720ddbb7f6c5e64e9f14075f2d7ed041592f0b7657baf8"));
 

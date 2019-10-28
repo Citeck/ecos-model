@@ -18,13 +18,13 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.serviceregistry.Registration;
 import org.springframework.context.annotation.*;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.env.Environment;
-import org.springframework.core.env.Profiles;
+
+import javax.annotation.PreDestroy;
 
 @Configuration
 @EnableCaching
-public class CacheConfiguration implements DisposableBean {
+public class CacheConfiguration {
 
     private final Logger log = LoggerFactory.getLogger(CacheConfiguration.class);
 
@@ -47,8 +47,8 @@ public class CacheConfiguration implements DisposableBean {
         this.registration = registration;
     }
 
-    @Override
-    public void destroy() throws Exception {
+    @PreDestroy
+    public void destroy() {
         log.info("Closing Cache Manager");
         Hazelcast.shutdownAll();
     }
@@ -60,7 +60,7 @@ public class CacheConfiguration implements DisposableBean {
     }
 
     @Bean
-    public HazelcastInstance hazelcastInstance(JHipsterProperties ecosRegistryProperties) {
+    public HazelcastInstance hazelcastInstance(JHipsterProperties jHipsterProperties) {
         log.debug("Configuring Hazelcast");
         HazelcastInstance hazelCastInstance = Hazelcast.getHazelcastInstanceByName("emodel");
         if (hazelCastInstance != null) {
@@ -78,7 +78,7 @@ public class CacheConfiguration implements DisposableBean {
             String serviceId = registration.getServiceId();
             log.debug("Configuring Hazelcast clustering for instanceId: {}", serviceId);
             // In development, everything goes through 127.0.0.1, with a different port
-            if (env.acceptsProfiles(Profiles.of(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT))) {
+            if (env.acceptsProfiles(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT)) {
                 log.debug("Application is running with the \"dev\" profile, Hazelcast " +
                           "cluster will only work with localhost instances");
 
@@ -100,19 +100,19 @@ public class CacheConfiguration implements DisposableBean {
                 }
             }
         }
-        config.getMapConfigs().put("default", initializeDefaultMapConfig(ecosRegistryProperties));
+        config.getMapConfigs().put("default", initializeDefaultMapConfig(jHipsterProperties));
 
         // Full reference is available at: http://docs.hazelcast.org/docs/management-center/3.9/manual/html/Deploying_and_Starting.html
-        config.setManagementCenterConfig(initializeDefaultManagementCenterConfig(ecosRegistryProperties));
-        config.getMapConfigs().put("ru.citeck.ecos.model.domain.*", initializeDomainMapConfig(ecosRegistryProperties));
+        config.setManagementCenterConfig(initializeDefaultManagementCenterConfig(jHipsterProperties));
+        config.getMapConfigs().put("ru.citeck.ecos.model.domain.*", initializeDomainMapConfig(jHipsterProperties));
         return Hazelcast.newHazelcastInstance(config);
     }
 
-    private ManagementCenterConfig initializeDefaultManagementCenterConfig(JHipsterProperties ecosRegistryProperties) {
+    private ManagementCenterConfig initializeDefaultManagementCenterConfig(JHipsterProperties jHipsterProperties) {
         ManagementCenterConfig managementCenterConfig = new ManagementCenterConfig();
-        managementCenterConfig.setEnabled(ecosRegistryProperties.getCache().getHazelcast().getManagementCenter().isEnabled());
-        managementCenterConfig.setUrl(ecosRegistryProperties.getCache().getHazelcast().getManagementCenter().getUrl());
-        managementCenterConfig.setUpdateInterval(ecosRegistryProperties.getCache().getHazelcast().getManagementCenter().getUpdateInterval());
+        managementCenterConfig.setEnabled(jHipsterProperties.getCache().getHazelcast().getManagementCenter().isEnabled());
+        managementCenterConfig.setUrl(jHipsterProperties.getCache().getHazelcast().getManagementCenter().getUrl());
+        managementCenterConfig.setUpdateInterval(jHipsterProperties.getCache().getHazelcast().getManagementCenter().getUpdateInterval());
         return managementCenterConfig;
     }
 
@@ -146,9 +146,9 @@ public class CacheConfiguration implements DisposableBean {
         return mapConfig;
     }
 
-    private MapConfig initializeDomainMapConfig(JHipsterProperties ecosRegistryProperties) {
+    private MapConfig initializeDomainMapConfig(JHipsterProperties jHipsterProperties) {
         MapConfig mapConfig = new MapConfig();
-        mapConfig.setTimeToLiveSeconds(ecosRegistryProperties.getCache().getHazelcast().getTimeToLiveSeconds());
+        mapConfig.setTimeToLiveSeconds(jHipsterProperties.getCache().getHazelcast().getTimeToLiveSeconds());
         return mapConfig;
     }
 }

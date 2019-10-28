@@ -3,12 +3,14 @@ package ru.citeck.ecos.model.config.timezone;
 import ru.citeck.ecos.model.EcosModelApp;
 import ru.citeck.ecos.model.repository.timezone.DateTimeWrapper;
 import ru.citeck.ecos.model.repository.timezone.DateTimeWrapperRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.*;
@@ -18,10 +20,11 @@ import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Integration tests for the UTC Hibernate configuration.
+ * Unit tests for the UTC Hibernate configuration.
  */
+@RunWith(SpringRunner.class)
 @SpringBootTest(classes = EcosModelApp.class)
-public class HibernateTimeZoneIT {
+public class HibernateTimeZoneTest {
 
     @Autowired
     private DateTimeWrapperRepository dateTimeWrapperRepository;
@@ -33,7 +36,7 @@ public class HibernateTimeZoneIT {
     private DateTimeFormatter timeFormatter;
     private DateTimeFormatter dateFormatter;
 
-    @BeforeEach
+    @Before
     public void setup() {
         dateTimeWrapper = new DateTimeWrapper();
         dateTimeWrapper.setInstant(Instant.parse("2014-11-12T05:50:00.0Z"));

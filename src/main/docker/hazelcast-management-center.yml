@@ -1,6 +1,6 @@
 version: '2'
 services:
-  emodel-hazelcast-management-center:
-    image: hazelcast/management-center:3.12.2
-    ports:
-      - 8180:8080
+    emodel-hazelcast-management-center:
+        image: hazelcast/management-center:3.9.3
+        ports:
+            - 8180:8080

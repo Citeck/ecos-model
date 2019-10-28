@@ -5,6 +5,7 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.Map;
 
 /**
@@ -85,15 +86,17 @@ public class PersistentAuditEvent implements Serializable {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof PersistentAuditEvent)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        return id != null && id.equals(((PersistentAuditEvent) o).id);
+
+        PersistentAuditEvent persistentAuditEvent = (PersistentAuditEvent) o;
+        return !(persistentAuditEvent.getId() == null || getId() == null) && Objects.equals(getId(), persistentAuditEvent.getId());
     }
 
     @Override
     public int hashCode() {
-        return 31;
+        return Objects.hashCode(getId());
     }
 
     @Override
