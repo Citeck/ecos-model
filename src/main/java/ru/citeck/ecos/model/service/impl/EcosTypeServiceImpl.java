@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.citeck.ecos.apps.app.module.type.type.action.ActionDto;
-import ru.citeck.ecos.model.domain.ActionEntity;
 import ru.citeck.ecos.model.domain.EcosAssociationEntity;
 import ru.citeck.ecos.model.domain.EcosTypeEntity;
 import ru.citeck.ecos.model.dto.EcosTypeDto;
@@ -80,8 +79,8 @@ public class EcosTypeServiceImpl implements EcosTypeService {
             Optional<EcosTypeEntity> stored = typeRepository.findByExtId(entity.getExtId());
             entity.setId(stored.map(EcosTypeEntity::getId).orElse(null));
         }
-        typeRepository.save(entity);
-        return entityToDto(entity);
+        EcosTypeEntity saved = typeRepository.save(entity);
+        return entityToDto(saved);
     }
 
     private EcosTypeDto entityToDto(EcosTypeEntity entity) {
@@ -137,12 +136,10 @@ public class EcosTypeServiceImpl implements EcosTypeService {
         }
         ecosTypeEntity.setAssocsToOther(associationEntities);
 
-        List<ActionEntity> actions  = dto.getActions()
+        dto.getActions()
             .stream()
             .map(ActionFactory::fromDto)
-            .collect(Collectors.toList());
-
-        ecosTypeEntity.setActions(actions);
+            .forEach(ecosTypeEntity::addAction);
 
         return ecosTypeEntity;
     }

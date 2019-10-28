@@ -1,6 +1,7 @@
 package ru.citeck.ecos.model.domain;
 
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 

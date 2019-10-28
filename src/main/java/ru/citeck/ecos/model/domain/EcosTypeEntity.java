@@ -42,21 +42,35 @@ public class EcosTypeEntity {
     private Set<EcosTypeEntity> childs = new HashSet<>();
 
     @ManyToMany(mappedBy = "types", fetch = FetchType.EAGER)
-    private Set<EcosSectionEntity> sections;
+    private Set<EcosSectionEntity> sections = new HashSet<>();
 
     /*
      * Set of associations to this type
      */
     @OneToMany(mappedBy = "source", fetch = FetchType.EAGER)
-    private Set<EcosAssociationEntity> assocsToThis;
+    private Set<EcosAssociationEntity> assocsToThis = new HashSet<>();
 
     /*
      * Set of associations to other types
      */
     @OneToMany(mappedBy = "target", fetch = FetchType.EAGER)
-    private Set<EcosAssociationEntity> assocsToOther;
+    private Set<EcosAssociationEntity> assocsToOther = new HashSet<>();
 
     @OneToMany(mappedBy = "ecosType", cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<ActionEntity> actions = new ArrayList<>();
+
+    public void addAction(ActionEntity actionEntity) {
+        actions.add(actionEntity);
+        actionEntity.setEcosType(this);
+    }
+
+    public void removeAction(ActionEntity actionEntity) {
+        actions.remove(actionEntity);
+        actionEntity.setEcosType(null);
+    }
+
+    public void setActions(List<ActionEntity> actionEntities) {
+        throw new UnsupportedOperationException("You must use utility methods addAction/removeAction");
+    }
 
 }

@@ -33,7 +33,7 @@ public class ActionFactory {
 
         action.setExtId(actionDto.getId());
         action.setName(actionDto.getName());
-        action.setKey(action.getKey());
+        action.setKey(actionDto.getKey());
         action.setType(actionDto.getType());
         action.setIcon(actionDto.getIcon());
         action.setOrder(actionDto.getOrder());

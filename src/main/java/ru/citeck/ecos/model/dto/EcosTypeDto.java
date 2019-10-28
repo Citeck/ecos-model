@@ -22,7 +22,7 @@ public class EcosTypeDto {
     private String description;
     private String tenant;
     private RecordRef parent;
-    private Set<RecordRef> associations;
+    private Set<RecordRef> associations = new HashSet<>();
     private List<ActionDto> actions = new ArrayList<>();
 
     public EcosTypeDto(EcosTypeDto dto) {
