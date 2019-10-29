@@ -18,7 +18,7 @@ import ru.citeck.ecos.model.repository.EcosAssociationRepository;
 import ru.citeck.ecos.model.repository.EcosTypeRepository;
 import ru.citeck.ecos.model.service.exception.ForgottenChildsException;
 import ru.citeck.ecos.model.service.exception.ParentNotFoundException;
-import ru.citeck.ecos.model.service.factory.ActionFactory;
+import ru.citeck.ecos.model.service.converter.ActionConverter;
 import ru.citeck.ecos.model.service.impl.EcosTypeServiceImpl;
 import ru.citeck.ecos.records2.RecordRef;
 
@@ -289,7 +289,7 @@ public class EcosTypeServiceImplTest {
 
         List<ActionDto> actions = entity.getActions()
             .stream()
-            .map(ActionFactory::toDto)
+            .map(ActionConverter::toDto)
             .collect(Collectors.toList());
 
         return new EcosTypeDto(
@@ -299,7 +299,8 @@ public class EcosTypeServiceImplTest {
             entity.getTenant(),
             parent,
             associationsRefs,
-            actions);
+            actions,
+            entity.isInheritActions());
     }
 
 }

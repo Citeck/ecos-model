@@ -25,6 +25,9 @@ public class EcosTypeDto {
     private Set<RecordRef> associations = new HashSet<>();
     private List<ActionDto> actions = new ArrayList<>();
 
+    @Getter
+    private boolean inheritActions;
+
     public EcosTypeDto(EcosTypeDto dto) {
         this.name = dto.name;
         this.description = dto.description;
@@ -35,6 +38,7 @@ public class EcosTypeDto {
             this.associations = new HashSet<>(dto.associations);
         }
         this.actions = dto.getActions();
+        this.inheritActions = dto.isInheritActions();
     }
 
     public EcosTypeDto(String id) {

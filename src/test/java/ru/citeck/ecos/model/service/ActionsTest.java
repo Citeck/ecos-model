@@ -13,7 +13,7 @@ import ru.citeck.ecos.model.EcosModelApp;
 import ru.citeck.ecos.model.domain.ActionEntity;
 import ru.citeck.ecos.model.dto.EcosTypeDto;
 import ru.citeck.ecos.model.repository.ActionRepository;
-import ru.citeck.ecos.model.service.factory.ActionFactory;
+import ru.citeck.ecos.model.service.converter.ActionConverter;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -56,7 +56,7 @@ public class ActionsTest {
 
         deleteAction.setEvaluator(deleteEvaluator);
 
-        ActionEntity actionEntity = ActionFactory.fromDto(deleteAction);
+        ActionEntity actionEntity = ActionConverter.fromDto(deleteAction);
 
         ActionEntity save = actionRepository.save(actionEntity);
 
@@ -68,7 +68,7 @@ public class ActionsTest {
     @Test
     public void createTypeWithAction() throws IOException {
         String typeId = "test-type-id";
-        String typeName = "test-type-name";
+        String typeName = "";
         String typeDescription = "type-description";
         String typeTenant = "type-tenant";
 
