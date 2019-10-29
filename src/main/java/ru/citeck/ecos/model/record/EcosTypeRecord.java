@@ -8,7 +8,6 @@ import ru.citeck.ecos.records2.graphql.meta.value.MetaValue;
 
 public class EcosTypeRecord implements MetaValue {
 
-    private static final String TYPE_FORMKEY = "ecos_type";
     private final EcosTypeDto dto;
 
     public EcosTypeRecord(EcosTypeDto dto) {
@@ -32,8 +31,6 @@ public class EcosTypeRecord implements MetaValue {
     @Override
     public Object getAttribute(String name, MetaField field) {
         switch (name) {
-            case RecordConstants.ATT_FORM_KEY:
-                return TYPE_FORMKEY;
             case "name":
                 return dto.getName();
             case "extId":

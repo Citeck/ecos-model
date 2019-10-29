@@ -16,7 +16,8 @@ import ru.citeck.ecos.model.repository.ActionRepository;
 import ru.citeck.ecos.model.service.converter.ActionConverter;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -113,7 +114,10 @@ public class ActionsTest {
         typeDto.setName(typeName);
         typeDto.setDescription(typeDescription);
         typeDto.setTenant(typeTenant);
-        typeDto.setActions(Arrays.asList(deleteAction, viewAction));
+        Set<ActionDto> actionDtos = new HashSet<>();
+        actionDtos.add(deleteAction);
+        actionDtos.add(viewAction);
+        typeDto.setActions(actionDtos);
 
         ecosTypeService.update(typeDto);
 

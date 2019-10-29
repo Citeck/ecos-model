@@ -1,42 +1,31 @@
 package ru.citeck.ecos.model.dao;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.model.dto.EcosTypeDto;
 import ru.citeck.ecos.model.record.EcosTypeRecord;
-import ru.citeck.ecos.model.record.mutable.EcosTypeMutable;
 import ru.citeck.ecos.model.service.EcosTypeService;
 import ru.citeck.ecos.predicate.Elements;
 import ru.citeck.ecos.predicate.PredicateService;
 import ru.citeck.ecos.predicate.model.Predicate;
-import ru.citeck.ecos.records2.RecordMeta;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.predicate.RecordElement;
 import ru.citeck.ecos.records2.predicate.RecordElements;
-import ru.citeck.ecos.records2.request.delete.RecordsDelResult;
-import ru.citeck.ecos.records2.request.delete.RecordsDeletion;
-import ru.citeck.ecos.records2.request.mutation.RecordsMutResult;
 import ru.citeck.ecos.records2.request.query.RecordsQuery;
 import ru.citeck.ecos.records2.request.query.RecordsQueryResult;
 import ru.citeck.ecos.records2.source.dao.local.LocalRecordsDAO;
-import ru.citeck.ecos.records2.source.dao.local.MutableRecordsLocalDAO;
 import ru.citeck.ecos.records2.source.dao.local.RecordsMetaLocalDAO;
 import ru.citeck.ecos.records2.source.dao.local.RecordsQueryWithMetaLocalDAO;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
 public class EcosTypeRecordsDao extends LocalRecordsDAO
     implements RecordsQueryWithMetaLocalDAO<EcosTypeRecord>,
-    RecordsMetaLocalDAO<EcosTypeRecord>,
-    MutableRecordsLocalDAO<EcosTypeMutable> {
-
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    RecordsMetaLocalDAO<EcosTypeRecord> {
 
     private static final String ID = "type";
     private static final String LANGUAGE_EMPTY = "";
@@ -53,80 +42,6 @@ public class EcosTypeRecordsDao extends LocalRecordsDAO
         setId(ID);
         this.typeService = typeService;
         this.predicateService = predicateService;
-    }
-
-    @Override
-    public List<EcosTypeMutable> getValuesToMutate(List<RecordRef> records) {
-
-        Map<String, EcosTypeDto> stored =
-            typeService.getAll(
-                records.stream()
-                    .map(RecordRef::getId)
-                    .collect(Collectors.toSet()))
-                .stream()
-                .collect(Collectors.toMap(EcosTypeDto::getId, dto -> dto));
-
-        return records.stream()
-            .map(RecordRef::getId)
-            .map(id -> {
-                if (stored.containsKey(id)) {
-                    return new EcosTypeMutable(stored.get(id));
-                } else {
-                    return new EcosTypeMutable(id);
-                }
-            }).collect(Collectors.toList());
-    }
-
-    @Override
-    public RecordsMutResult save(List<EcosTypeMutable> values) {
-
-        RecordsMutResult result = new RecordsMutResult();
-
-        result.setRecords(values.stream()
-            .filter(e -> e.getId() != null)
-            .map(e -> {
-                EcosTypeDto storedDto = typeService.update(e);
-                RecordRef ref = RecordRef.valueOf(storedDto.getId());
-                RecordMeta meta = new RecordMeta(ref);
-                meta.setAttribute("id", storedDto.getId());
-                meta.setAttribute("name", storedDto.getName());
-                meta.setAttribute("description", storedDto.getDescription());
-                meta.setAttribute("tenant", storedDto.getTenant());
-                meta.setAttribute("inheritActions", storedDto.isInheritActions());
-                meta.setAttribute("actions", OBJECT_MAPPER.valueToTree(storedDto.getActions()));
-
-                RecordRef parent = storedDto.getParent();
-                if (parent != null) {
-                    meta.setAttribute("parent", parent.toString());
-                }
-
-                Set<RecordRef> assocs = storedDto.getAssociations();
-                if (assocs != null) {
-                    meta.setAttribute("associations", assocs.toString());
-                }
-
-                return meta;
-            })
-            .collect(Collectors.toList()));
-
-        return result;
-    }
-
-    @Override
-    public RecordsDelResult delete(RecordsDeletion recordsDeletion) {
-
-        RecordsDelResult result = new RecordsDelResult();
-
-        result.addRecords(
-            recordsDeletion.getRecords().stream()
-                .filter(ref -> ref.getId() != null)
-                .map(ref -> {
-                    typeService.delete(ref.getId());
-                    return new RecordMeta(ref);
-                })
-                .collect(Collectors.toList()));
-
-        return result;
     }
 
     @Override

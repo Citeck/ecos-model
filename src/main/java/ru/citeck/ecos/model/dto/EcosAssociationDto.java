@@ -1,6 +1,5 @@
 package ru.citeck.ecos.model.dto;
 
-
 import lombok.*;
 import ru.citeck.ecos.apps.app.module.type.type.association.AssociationDto;
 import ru.citeck.ecos.records2.RecordRef;

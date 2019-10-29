@@ -67,6 +67,10 @@ public class EcosTypeEntity {
         actionEntity.setEcosType(this);
     }
 
+    public void addActions(Set<ActionEntity> actions) {
+        actions.forEach(this::addAction);
+    }
+
     public void removeAction(ActionEntity actionEntity) {
         actions.remove(actionEntity);
         actionEntity.setEcosType(null);

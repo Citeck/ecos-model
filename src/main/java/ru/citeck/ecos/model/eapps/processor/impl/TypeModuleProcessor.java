@@ -4,24 +4,24 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.apps.app.module.type.type.TypeModule;
-import ru.citeck.ecos.model.deploy.dto.EcosTypeDeployDto;
-import ru.citeck.ecos.model.deploy.service.EcosTypeDeployService;
+import ru.citeck.ecos.model.dto.EcosTypeDto;
 import ru.citeck.ecos.model.eapps.processor.ModuleProcessor;
+import ru.citeck.ecos.model.service.EcosTypeService;
 
 @Component
 @Slf4j
 public class TypeModuleProcessor implements ModuleProcessor<TypeModule> {
 
-    private EcosTypeDeployService typeDeployService;
+    private EcosTypeService typeService;
 
     @Autowired
-    protected TypeModuleProcessor(EcosTypeDeployService typeDeployService) {
-        this.typeDeployService = typeDeployService;
+    protected TypeModuleProcessor(EcosTypeService typeService) {
+        this.typeService = typeService;
     }
 
     @Override
     public void process(TypeModule typeModule) {
-        EcosTypeDeployDto dto = new EcosTypeDeployDto(typeModule);
-        typeDeployService.deploy(dto);
+        EcosTypeDto dto = new EcosTypeDto(typeModule);
+        typeService.update(dto);
     }
 }
