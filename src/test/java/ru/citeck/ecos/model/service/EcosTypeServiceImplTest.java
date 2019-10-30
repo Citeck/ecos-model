@@ -16,6 +16,7 @@ import ru.citeck.ecos.model.dto.EcosTypeDto;
 import ru.citeck.ecos.model.repository.EcosAssociationRepository;
 import ru.citeck.ecos.model.repository.EcosTypeRepository;
 import ru.citeck.ecos.model.service.converter.ActionConverter;
+import ru.citeck.ecos.model.service.converter.EcosTypeConverter;
 import ru.citeck.ecos.model.service.exception.ForgottenChildsException;
 import ru.citeck.ecos.model.service.exception.ParentNotFoundException;
 import ru.citeck.ecos.model.service.impl.EcosTypeServiceImpl;
@@ -37,6 +38,7 @@ public class EcosTypeServiceImplTest {
     private EcosAssociationRepository associationRepository;
 
     private EcosTypeService ecosTypeService;
+    private EcosTypeConverter ecosTypeConverter;
 
     private EcosTypeEntity ecosTypeEntity;
     private EcosTypeEntity ecosTypeEntity2;
@@ -45,7 +47,8 @@ public class EcosTypeServiceImplTest {
 
     @BeforeEach
     public void init() {
-        ecosTypeService = new EcosTypeServiceImpl(typeRepository, associationRepository);
+        ecosTypeConverter = new EcosTypeConverter(typeRepository, associationRepository);
+        ecosTypeService = new EcosTypeServiceImpl(typeRepository, ecosTypeConverter);
 
         parent = new EcosTypeEntity();
         parent.setExtId("parentId");
