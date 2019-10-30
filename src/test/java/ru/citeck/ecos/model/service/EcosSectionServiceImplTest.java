@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.model.converter.impl.SectionConverter;
+import ru.citeck.ecos.model.dao.EcosTypeRecordsDao;
 import ru.citeck.ecos.model.domain.EcosSectionEntity;
 import ru.citeck.ecos.model.dto.EcosSectionDto;
 import ru.citeck.ecos.model.repository.EcosSectionRepository;
@@ -187,7 +188,7 @@ public class EcosSectionServiceImplTest {
         Set<RecordRef> typesRefs = null;
         if (entity.getTypes() != null) {
             typesRefs = entity.getTypes().stream()
-                .map(e -> RecordRef.create("type", e.getExtId()))
+                .map(e -> RecordRef.create(EcosTypeRecordsDao.ID, e.getExtId()))
                 .collect(Collectors.toSet());
         }
         return new EcosSectionDto(

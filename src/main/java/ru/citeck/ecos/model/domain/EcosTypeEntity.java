@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -60,7 +59,7 @@ public class EcosTypeEntity {
     private Set<EcosAssociationEntity> assocsToOther = new HashSet<>();
 
     @OneToMany(mappedBy = "ecosType", cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, orphanRemoval = true)
-    private List<ActionEntity> actions = new ArrayList<>();
+    private Set<ActionEntity> actions = new HashSet<>();
 
     public void addAction(ActionEntity actionEntity) {
         actions.add(actionEntity);

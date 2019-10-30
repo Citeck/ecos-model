@@ -27,7 +27,8 @@ public class EcosTypeRecordsDao extends LocalRecordsDAO
     implements RecordsQueryWithMetaLocalDAO<EcosTypeRecord>,
     RecordsMetaLocalDAO<EcosTypeRecord> {
 
-    private static final String ID = "type";
+    public static final String ID = "type";
+
     private static final String LANGUAGE_EMPTY = "";
 
     private final EcosTypeService typeService;

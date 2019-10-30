@@ -2,6 +2,7 @@ package ru.citeck.ecos.model.dto;
 
 import lombok.*;
 import ru.citeck.ecos.apps.app.module.type.type.association.AssociationDto;
+import ru.citeck.ecos.model.dao.EcosTypeRecordsDao;
 import ru.citeck.ecos.records2.RecordRef;
 
 @EqualsAndHashCode
@@ -32,7 +33,7 @@ public class EcosAssociationDto {
         this.id = deployDto.getId();
         this.name = deployDto.getName();
         this.title = deployDto.getTitle();
-        this.sourceType = RecordRef.create("type", sourceTypeId);
-        this.targetType = RecordRef.create("type", deployDto.getTarget());
+        this.sourceType = RecordRef.create(EcosTypeRecordsDao.ID, sourceTypeId);
+        this.targetType = RecordRef.create(EcosTypeRecordsDao.ID, deployDto.getTarget());
     }
 }

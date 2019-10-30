@@ -51,9 +51,9 @@ public class EcosTypeRecordsDaoTest {
     public void getMetaValuesReturnRecords() {
 
         EcosTypeDto dto = new EcosTypeDto("extId", "a", "adesc","atenant",
-            RecordRef.create("type", "parentId"),
+            RecordRef.create(EcosTypeRecordsDao.ID, "parentId"),
             Collections.singleton(new EcosAssociationDto("assocId", "name", "title",
-                RecordRef.create("type", "sourceId"),RecordRef.create("type", "targetId"))), Collections.EMPTY_SET, false);
+                RecordRef.create(EcosTypeRecordsDao.ID, "sourceId"),RecordRef.create(EcosTypeRecordsDao.ID, "targetId"))), Collections.EMPTY_SET, false);
         Set<EcosTypeDto> dtos = Collections.singleton(dto);
         RecordsQuery query = new RecordsQuery();
 
@@ -78,14 +78,14 @@ public class EcosTypeRecordsDaoTest {
     @Test
     public void getMetaValuesReturnRecordsWithPredicate() {
         EcosTypeDto dto = new EcosTypeDto("extId", "a", "adesc","atenant",
-            RecordRef.create("type", "parentId"),
+            RecordRef.create(EcosTypeRecordsDao.ID, "parentId"),
             Collections.singleton(new EcosAssociationDto("assocId", "name", "title",
-                RecordRef.create("type", "sourceId"),RecordRef.create("type", "targetId"))), Collections.EMPTY_SET, false);
+                RecordRef.create(EcosTypeRecordsDao.ID, "sourceId"),RecordRef.create(EcosTypeRecordsDao.ID, "targetId"))), Collections.EMPTY_SET, false);
         RecordsQuery query = new RecordsQuery();
         query.setLanguage(PredicateService.LANGUAGE_PREDICATE);
 
 
-        RecordElement element = new RecordElement(null, RecordRef.create("", "type", "extId"));
+        RecordElement element = new RecordElement(null, RecordRef.create("", EcosTypeRecordsDao.ID, "extId"));
 
         given(predicateService.filter(Mockito.any(), Mockito.any())).willReturn(Arrays.asList(element));
         given(typeService.getAll(Collections.singleton("extId"))).willReturn(Collections.singleton(dto));

@@ -47,7 +47,7 @@ public class EcosSectionRecordsDaoTest {
 
     @Test
     public void getMetaValuesReturnRecords() {
-        Set<RecordRef> types = Collections.singleton(RecordRef.create("type","typeId"));
+        Set<RecordRef> types = Collections.singleton(RecordRef.create(EcosTypeRecordsDao.ID,"typeId"));
         EcosSectionDto dto = new EcosSectionDto("extId", "a", "adesc","atenant", types);
         Set<EcosSectionDto> dtos = Collections.singleton(dto);
         RecordsQuery query = new RecordsQuery();
@@ -71,12 +71,12 @@ public class EcosSectionRecordsDaoTest {
 
     @Test
     public void getMetaValuesReturnRecordsWithPredicate() {
-        Set<RecordRef> types = Collections.singleton(RecordRef.create("type","typeId"));
+        Set<RecordRef> types = Collections.singleton(RecordRef.create(EcosTypeRecordsDao.ID,"typeId"));
         EcosSectionDto dto = new EcosSectionDto("extId", "a", "adesc","atenant", types);
         RecordsQuery query = new RecordsQuery();
         query.setLanguage(PredicateService.LANGUAGE_PREDICATE);
 
-        RecordElement element = new RecordElement(null, RecordRef.create("", "type", "extId"));
+        RecordElement element = new RecordElement(null, RecordRef.create("", EcosTypeRecordsDao.ID, "extId"));
 
         given(predicateService.filter(Mockito.any(), Mockito.any())).willReturn(Arrays.asList(element));
         given(sectionService.getAll(Collections.singleton("extId"))).willReturn(Collections.singleton(dto));

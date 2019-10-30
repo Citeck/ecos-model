@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.apps.app.module.type.type.action.ActionDto;
 import ru.citeck.ecos.model.converter.AbstractDtoConverter;
+import ru.citeck.ecos.model.dao.EcosTypeRecordsDao;
 import ru.citeck.ecos.model.domain.EcosAssociationEntity;
 import ru.citeck.ecos.model.domain.EcosTypeEntity;
 import ru.citeck.ecos.model.dto.EcosAssociationDto;
@@ -39,6 +40,7 @@ public class TypeConverter extends AbstractDtoConverter<EcosTypeDto, EcosTypeEnt
         ecosTypeEntity.setExtId(extId);
         ecosTypeEntity.setDescription(dto.getDescription());
         ecosTypeEntity.setTenant(dto.getTenant());
+        ecosTypeEntity.setInheritActions(dto.isInheritActions());
 
         EcosTypeEntity parent = null;
         if (dto.getParent() != null && Strings.isNotBlank(dto.getParent().getId())) {
@@ -55,9 +57,12 @@ public class TypeConverter extends AbstractDtoConverter<EcosTypeDto, EcosTypeEnt
         ecosTypeEntity.setAssocsToOther(associationEntities);
         handlingExtId(ecosTypeEntity);
 
-        ecosTypeEntity.addActions(dto.getActions()
-            .stream()
-            .map(ActionConverter::fromDto).collect(Collectors.toSet()));
+        ecosTypeEntity.addActions(
+            dto.getActions()
+                .stream()
+                .map(ActionConverter::fromDto)
+                .collect(Collectors.toSet())
+        );
 
         return ecosTypeEntity;
     }
@@ -108,9 +113,10 @@ public class TypeConverter extends AbstractDtoConverter<EcosTypeDto, EcosTypeEnt
         dto.setId(entity.getExtId());
         dto.setName(entity.getName());
         dto.setDescription(entity.getDescription());
+        dto.setInheritActions(entity.isInheritActions());
         EcosTypeEntity parent = entity.getParent();
         if (parent != null) {
-            dto.setParent(RecordRef.create("type", parent.getExtId()));
+            dto.setParent(RecordRef.create(EcosTypeRecordsDao.ID, parent.getExtId()));
         }
         Set<EcosAssociationEntity> associations = entity.getAssocsToOther();
         if (associations != null && !associations.isEmpty()) {
@@ -120,8 +126,8 @@ public class TypeConverter extends AbstractDtoConverter<EcosTypeDto, EcosTypeEnt
                     assocDto.setId(assocEntity.getExtId());
                     assocDto.setName(assocEntity.getName());
                     assocDto.setTitle(assocEntity.getTitle());
-                    assocDto.setTargetType(RecordRef.create("type", assocEntity.getTarget().getExtId()));
-                    assocDto.setSourceType(RecordRef.create("type", assocEntity.getSource().getExtId()));
+                    assocDto.setTargetType(RecordRef.create(EcosTypeRecordsDao.ID, assocEntity.getTarget().getExtId()));
+                    assocDto.setSourceType(RecordRef.create(EcosTypeRecordsDao.ID, assocEntity.getSource().getExtId()));
                     return assocDto;
                 })
                 .collect(Collectors.toSet()));

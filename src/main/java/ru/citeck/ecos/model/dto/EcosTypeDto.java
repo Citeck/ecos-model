@@ -1,12 +1,14 @@
 package ru.citeck.ecos.model.dto;
 
 import lombok.*;
-import ru.citeck.ecos.apps.app.module.type.type.action.ActionDto;
 import org.apache.logging.log4j.util.Strings;
 import ru.citeck.ecos.apps.app.module.type.type.TypeModule;
+import ru.citeck.ecos.apps.app.module.type.type.action.ActionDto;
+import ru.citeck.ecos.model.dao.EcosTypeRecordsDao;
 import ru.citeck.ecos.records2.RecordRef;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @EqualsAndHashCode
@@ -47,13 +49,14 @@ public class EcosTypeDto {
         this.description = module.getDescription();
         this.tenant = Strings.EMPTY;
         if (!Strings.isEmpty(module.getParent())) {
-            this.parent = RecordRef.create("type", module.getParent());
+            this.parent = RecordRef.create(EcosTypeRecordsDao.ID, module.getParent());
         }
-        if (module.getAssociations() != null && !module.getAssociations().isEmpty()) {
-            this.associations = module.getAssociations().stream()
-                .map(a -> new EcosAssociationDto(a, module.getId()))
-                .collect(Collectors.toSet());
-        }
+
+        this.associations = module.getAssociations().stream()
+            .map(a -> new EcosAssociationDto(a, module.getId()))
+            .collect(Collectors.toSet());
+
+        this.actions = new HashSet<>(module.getActions());
     }
 
     public EcosTypeDto(String id) {

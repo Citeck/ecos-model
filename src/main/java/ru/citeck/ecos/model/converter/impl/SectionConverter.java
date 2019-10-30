@@ -4,6 +4,7 @@ import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.model.converter.AbstractDtoConverter;
+import ru.citeck.ecos.model.dao.EcosTypeRecordsDao;
 import ru.citeck.ecos.model.domain.EcosSectionEntity;
 import ru.citeck.ecos.model.domain.EcosTypeEntity;
 import ru.citeck.ecos.model.dto.EcosSectionDto;
@@ -57,7 +58,7 @@ public class SectionConverter extends AbstractDtoConverter<EcosSectionDto, EcosS
         Set<RecordRef> typesRefs = null;
         if (entity.getTypes() != null) {
             typesRefs = entity.getTypes().stream()
-                .map(e -> RecordRef.create("type", e.getExtId()))
+                .map(e -> RecordRef.create(EcosTypeRecordsDao.ID, e.getExtId()))
                 .collect(Collectors.toSet());
         }
         return new EcosSectionDto(

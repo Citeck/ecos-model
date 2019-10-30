@@ -3,6 +3,7 @@ package ru.citeck.ecos.model.dto;
 import lombok.*;
 import org.apache.logging.log4j.util.Strings;
 import ru.citeck.ecos.apps.app.module.type.section.SectionModule;
+import ru.citeck.ecos.model.dao.EcosTypeRecordsDao;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.graphql.meta.annotation.DisplayName;
 
@@ -43,7 +44,7 @@ public class EcosSectionDto {
         this.tenant = Strings.EMPTY;
         if (module.getTypes() != null && !module.getTypes().isEmpty()) {
             this.types = module.getTypes().stream()
-                .map(t -> RecordRef.create("type", t))
+                .map(t -> RecordRef.create(EcosTypeRecordsDao.ID, t))
                 .collect(Collectors.toSet());
         }
     }
