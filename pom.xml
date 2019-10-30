@@ -39,7 +39,7 @@
         <profile.tls />
 
         <!-- Dependency versions -->
-        <jhipster-dependencies.version>2.1.1</jhipster-dependencies.version>
+        <ecos-registry-dependencies.version>2.1.1</ecos-registry-dependencies.version>
         <!-- The spring-boot version should match the one managed by
         https://mvnrepository.com/artifact/io.github.jhipster/jhipster-dependencies/${jhipster-dependencies.version} -->
         <spring-boot.version>2.0.8.RELEASE</spring-boot.version>
@@ -99,6 +99,7 @@
 
         <ecos-records.version>1.9.1-SNAPSHOT</ecos-records.version>
         <ecos-apps-lib-spring>1.1.0-SNAPSHOT</ecos-apps-lib-spring>
+        <mockito-core.version>2.27.0</mockito-core.version>
         <lombok.version>1.18.8</lombok.version>
         <!-- jhipster-needle-maven-property -->
     </properties>
@@ -108,7 +109,7 @@
             <dependency>
                 <groupId>io.github.jhipster</groupId>
                 <artifactId>jhipster-dependencies</artifactId>
-                <version>${jhipster-dependencies.version}</version>
+                <version>${ecos-registry-dependencies.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -378,6 +379,12 @@
             <version>${ecos-apps-lib-spring}</version>
         </dependency>
         <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito-core.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.amqp</groupId>
             <artifactId>spring-rabbit</artifactId>
         </dependency>
@@ -643,12 +650,11 @@
                     <configuration>
                         <rules>
                             <requireMavenVersion>
-                                <message>You are running an older version of Maven. JHipster requires at least Maven ${maven.version}</message>
+                                <message>You are running an older version of Maven. ECOS-Registry requires at least Maven ${maven.version}</message>
                                 <version>[${maven.version},)</version>
                             </requireMavenVersion>
                             <requireJavaVersion>
-                                <!-- Until JHipster supports JDK 9 -->
-                                <message>You are running an incompatible version of Java. JHipster requires JDK ${java.version}</message>
+                                <message>You are running an incompatible version of Java. ECOS-Registry supports JDK 8 to 12.</message>
                                 <version>[1.8,1.9)</version>
                             </requireJavaVersion>
                         </rules>

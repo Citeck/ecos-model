@@ -116,7 +116,7 @@ jhipster:
             jwt:
                 # This token must be encoded using Base64 and be at least 256 bits long (you can type `openssl rand -base64 64` on your command line to generate a 512 bits one)
                 # As this is the PRODUCTION configuration, you MUST change the default key, and store it securely:
-                # - In the JHipster Registry (which includes a Spring Cloud Config server)
+                # - In the ECOS Registry (which includes a Spring Cloud Config server)
                 # - In a separate `application-prod.yml` file, in the same folder as your executable WAR file
                 # - In the `JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET` environment variable
                 base64-secret: YzZiN2Y5NjkyMDIzMjM0M2E2NWU3ZTZjNmZiMmI4Nzg1ZWMyYTQ1YzVlODAyZTBhYjgyNzUxYjdkMDVjZWI2YTMyODEwY2U3ZmZiYzIwMTAzNzE4NzkwOTVmYWQ5ODY0NWEyMDkzNzA2Mjg5ZmY2YmNkOGNmYzFmOWU1ZDRlZjc=

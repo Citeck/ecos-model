@@ -1,13 +1,15 @@
 package ru.citeck.ecos.model.dto;
 
 import lombok.*;
+import org.apache.logging.log4j.util.Strings;
+import ru.citeck.ecos.apps.app.module.type.type.TypeModule;
 import ru.citeck.ecos.apps.app.module.type.type.action.ActionDto;
+import ru.citeck.ecos.model.dao.EcosTypeRecordsDao;
 import ru.citeck.ecos.records2.RecordRef;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @EqualsAndHashCode
 @AllArgsConstructor
@@ -22,8 +24,8 @@ public class EcosTypeDto {
     private String description;
     private String tenant;
     private RecordRef parent;
-    private Set<RecordRef> associations = new HashSet<>();
-    private List<ActionDto> actions = new ArrayList<>();
+    private Set<EcosAssociationDto> associations = new HashSet<>();
+    private Set<ActionDto> actions = new HashSet<>();
     private boolean inheritActions;
 
     public EcosTypeDto(EcosTypeDto dto) {
@@ -35,8 +37,26 @@ public class EcosTypeDto {
         if (dto.associations != null) {
             this.associations = new HashSet<>(dto.associations);
         }
-        this.actions = dto.getActions();
+        if (dto.actions != null) {
+            this.actions = new HashSet<>(dto.actions);
+        }
         this.inheritActions = dto.isInheritActions();
+    }
+
+    public EcosTypeDto(TypeModule module) {
+        this.id = module.getId();
+        this.name = module.getName();
+        this.description = module.getDescription();
+        this.tenant = Strings.EMPTY;
+        if (!Strings.isEmpty(module.getParent())) {
+            this.parent = RecordRef.create(EcosTypeRecordsDao.ID, module.getParent());
+        }
+
+        this.associations = module.getAssociations().stream()
+            .map(a -> new EcosAssociationDto(a, module.getId()))
+            .collect(Collectors.toSet());
+
+        this.actions = new HashSet<>(module.getActions());
     }
 
     public EcosTypeDto(String id) {
