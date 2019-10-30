@@ -5,6 +5,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.citeck.ecos.model.dto.EcosTypeDto;
 
+import java.util.ArrayList;
+
 @NoArgsConstructor
 public class EcosTypeMutable extends EcosTypeDto {
 
@@ -15,7 +17,7 @@ public class EcosTypeMutable extends EcosTypeDto {
     }
 
     public EcosTypeMutable(String extId) {
-        super(extId, null, null, null, null, null, null,
+        super(extId, null, null, null, null, null, new ArrayList<>(),
             false);
     }
 }

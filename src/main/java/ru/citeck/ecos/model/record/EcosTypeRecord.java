@@ -42,8 +42,14 @@ public class EcosTypeRecord implements MetaValue {
                 return dto.getDescription();
             case "tenant":
                 return dto.getTenant();
+            case "inheritActions":
+                return dto.isInheritActions();
             case "parent":
+            case RecordConstants.ATT_PARENT:
                 return dto.getParent();
+            case "actions":
+            case RecordConstants.ATT_ACTIONS:
+                return dto.getActions();
             case "associations":
                 return dto.getAssociations();
         }

@@ -24,8 +24,6 @@ public class EcosTypeDto {
     private RecordRef parent;
     private Set<RecordRef> associations = new HashSet<>();
     private List<ActionDto> actions = new ArrayList<>();
-
-    @Getter
     private boolean inheritActions;
 
     public EcosTypeDto(EcosTypeDto dto) {

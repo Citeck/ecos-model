@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.dao;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.model.dto.EcosTypeDto;
@@ -31,9 +32,11 @@ import java.util.stream.Collectors;
 
 @Component
 public class EcosTypeRecordsDao extends LocalRecordsDAO
-                                implements RecordsQueryWithMetaLocalDAO<EcosTypeRecord>,
-                                           RecordsMetaLocalDAO<EcosTypeRecord>,
-                                           MutableRecordsLocalDAO<EcosTypeMutable> {
+    implements RecordsQueryWithMetaLocalDAO<EcosTypeRecord>,
+    RecordsMetaLocalDAO<EcosTypeRecord>,
+    MutableRecordsLocalDAO<EcosTypeMutable> {
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private static final String ID = "type";
     private static final String LANGUAGE_EMPTY = "";
@@ -89,6 +92,8 @@ public class EcosTypeRecordsDao extends LocalRecordsDAO
                 meta.setAttribute("name", storedDto.getName());
                 meta.setAttribute("description", storedDto.getDescription());
                 meta.setAttribute("tenant", storedDto.getTenant());
+                meta.setAttribute("inheritActions", storedDto.isInheritActions());
+                meta.setAttribute("actions", OBJECT_MAPPER.valueToTree(storedDto.getActions()));
 
                 RecordRef parent = storedDto.getParent();
                 if (parent != null) {
