@@ -1,12 +1,12 @@
-package ru.citeck.ecos.model.service.factory;
+package ru.citeck.ecos.model.service.converter;
 
 import ru.citeck.ecos.apps.app.module.type.type.action.ActionDto;
 import ru.citeck.ecos.model.domain.ActionEntity;
 
-import static ru.citeck.ecos.model.service.factory.NodeConverter.fromString;
-import static ru.citeck.ecos.model.service.factory.NodeConverter.nodeAsString;
+import static ru.citeck.ecos.model.service.converter.NodeConverter.fromString;
+import static ru.citeck.ecos.model.service.converter.NodeConverter.nodeAsString;
 
-public class ActionFactory {
+public class ActionConverter {
 
 
     public static ActionDto toDto(ActionEntity action) {
@@ -22,7 +22,7 @@ public class ActionFactory {
         dto.setConfig(fromString(action.getConfigJson()));
 
         if (action.getEvaluator() != null) {
-            dto.setEvaluator(EvaluatorFactory.fromEvaluator(action.getEvaluator()));
+            dto.setEvaluator(EvaluatorConverter.fromEvaluator(action.getEvaluator()));
         }
 
         return dto;
@@ -40,7 +40,7 @@ public class ActionFactory {
         action.setConfigJson(nodeAsString(actionDto.getConfig()));
 
         if (actionDto.getEvaluator() != null) {
-            action.setEvaluator(EvaluatorFactory.fromDto(actionDto.getEvaluator()));
+            action.setEvaluator(EvaluatorConverter.fromDto(actionDto.getEvaluator()));
         }
 
         return action;

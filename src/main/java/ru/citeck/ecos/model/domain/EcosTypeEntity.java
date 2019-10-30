@@ -34,6 +34,9 @@ public class EcosTypeEntity {
 
     private String tenant;
 
+    @Column(name = "inherit_actions")
+    private boolean inheritActions;
+
     @ManyToOne(cascade={CascadeType.DETACH})
     @JoinColumn(name="parent_id")
     private EcosTypeEntity parent;
@@ -62,6 +65,10 @@ public class EcosTypeEntity {
     public void addAction(ActionEntity actionEntity) {
         actions.add(actionEntity);
         actionEntity.setEcosType(this);
+    }
+
+    public void addActions(List<ActionEntity> actions) {
+        actions.forEach(this::addAction);
     }
 
     public void removeAction(ActionEntity actionEntity) {

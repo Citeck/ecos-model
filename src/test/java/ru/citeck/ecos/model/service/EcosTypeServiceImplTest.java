@@ -8,22 +8,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.citeck.ecos.apps.app.module.type.type.action.ActionDto;
-import ru.citeck.ecos.model.domain.ActionEntity;
+import ru.citeck.ecos.model.converter.impl.TypeConverter;
 import ru.citeck.ecos.model.domain.EcosAssociationEntity;
 import ru.citeck.ecos.model.domain.EcosSectionEntity;
 import ru.citeck.ecos.model.domain.EcosTypeEntity;
+import ru.citeck.ecos.model.dto.EcosAssociationDto;
 import ru.citeck.ecos.model.dto.EcosTypeDto;
 import ru.citeck.ecos.model.repository.EcosAssociationRepository;
 import ru.citeck.ecos.model.repository.EcosTypeRepository;
 import ru.citeck.ecos.model.service.exception.ForgottenChildsException;
 import ru.citeck.ecos.model.service.exception.ParentNotFoundException;
-import ru.citeck.ecos.model.service.factory.ActionFactory;
 import ru.citeck.ecos.model.service.impl.EcosTypeServiceImpl;
-import ru.citeck.ecos.records2.RecordRef;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
@@ -37,6 +34,8 @@ public class EcosTypeServiceImplTest {
     @Mock
     private EcosAssociationRepository associationRepository;
 
+    private TypeConverter converter;
+
     private EcosTypeService ecosTypeService;
 
     private EcosTypeEntity ecosTypeEntity;
@@ -46,7 +45,8 @@ public class EcosTypeServiceImplTest {
 
     @BeforeEach
     public void init() {
-        /*ecosTypeService = new EcosTypeServiceImpl(typeRepository, associationRepository);
+        converter = new TypeConverter(typeRepository);
+        ecosTypeService = new EcosTypeServiceImpl(typeRepository, associationRepository, converter);
 
         parent = new EcosTypeEntity();
         parent.setExtId("parentId");
@@ -68,10 +68,10 @@ public class EcosTypeServiceImplTest {
         target.setTarget(targetType);
 
         ecosTypeEntity = new EcosTypeEntity(
-            "a", 1L, "a_name", "a_desc", "a_tenant", parent, Collections.singleton(child),
-            Collections.singleton(section), Collections.singleton(source), Collections.singleton(target));
+            "a", 1L, "a_name", "a_desc", "a_tenant", false, parent, Collections.singleton(child),
+            Collections.singleton(section), Collections.singleton(source), Collections.singleton(target), null);
         ecosTypeEntity2 = new EcosTypeEntity("b", 2L, "b",
-            "b_desc", "b_tenant", ecosTypeEntity, null, null, null, null);*/
+            "b_desc", "b_tenant", false, ecosTypeEntity, null, null, null, null, null);
 
     }
 
@@ -211,7 +211,7 @@ public class EcosTypeServiceImplTest {
         given(typeRepository.findByExtId("a")).willReturn(Optional.empty());
 
 
-        EcosTypeDto dto = ecosTypeService.update(entityToDto(ecosTypeEntity));
+        EcosTypeDto dto = ecosTypeService.update(converter.targetToSource(ecosTypeEntity));
 
 
         Mockito.verify(typeRepository, times(1)).save(Mockito.any());
@@ -230,7 +230,7 @@ public class EcosTypeServiceImplTest {
         given(associationRepository.findByExtId("targetId")).willReturn(Optional.of(target));
 
 
-        EcosTypeDto dto = ecosTypeService.update(entityToDto(ecosTypeEntity));
+        EcosTypeDto dto = ecosTypeService.update(converter.targetToSource(ecosTypeEntity));
 
 
         Mockito.verify(typeRepository, times(1)).save(Mockito.any());
@@ -239,8 +239,8 @@ public class EcosTypeServiceImplTest {
         Assert.assertEquals("a_desc", dto.getDescription());
         Assert.assertEquals("a_tenant", dto.getTenant());
         Assert.assertEquals("parentId", dto.getParent().getId());
-        RecordRef associationRef = dto.getAssociations().iterator().next();
-        Assert.assertEquals("targetId", associationRef.getId());
+        EcosAssociationDto assocDto = dto.getAssociations().iterator().next();
+        Assert.assertEquals("targetId", assocDto.getTargetType().getId());
     }
 
     @Test
@@ -249,7 +249,7 @@ public class EcosTypeServiceImplTest {
         given(typeRepository.findByExtId("parentId")).willReturn(Optional.of(parent));
         given(associationRepository.findByExtId("targetId")).willReturn(Optional.of(target));
 
-        EcosTypeDto dto = ecosTypeService.update(entityToDto(ecosTypeEntity));
+        EcosTypeDto dto = ecosTypeService.update(converter.targetToSource(ecosTypeEntity));
 
 
         Mockito.verify(typeRepository, times(1)).save(Mockito.any());
@@ -268,38 +268,11 @@ public class EcosTypeServiceImplTest {
             given(typeRepository.findByExtId("b")).willReturn(Optional.empty());
 
 
-            ecosTypeService.update(entityToDto(ecosTypeEntity));
+            ecosTypeService.update(converter.targetToSource(ecosTypeEntity));
 
 
             Mockito.verify(typeRepository, times(0)).save(Mockito.any());
         });
-    }
-
-    private EcosTypeDto entityToDto(EcosTypeEntity entity) {
-        RecordRef parent = null;
-        if (entity.getParent() != null) {
-            parent = RecordRef.create("type", entity.getParent().getExtId());
-        }
-        Set<RecordRef> associationsRefs = null;
-        if (entity.getAssocsToOther() != null) {
-            associationsRefs = entity.getAssocsToOther().stream()
-                .map(assoc -> RecordRef.create("association", assoc.getExtId()))
-                .collect(Collectors.toSet());
-        }
-
-        List<ActionDto> actions = entity.getActions()
-            .stream()
-            .map(ActionFactory::toDto)
-            .collect(Collectors.toList());
-
-        return new EcosTypeDto(
-            entity.getExtId(),
-            entity.getName(),
-            entity.getDescription(),
-            entity.getTenant(),
-            parent,
-            associationsRefs,
-            actions);
     }
 
 }

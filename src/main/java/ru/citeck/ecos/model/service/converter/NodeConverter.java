@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.service.factory;
+package ru.citeck.ecos.model.service.converter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;

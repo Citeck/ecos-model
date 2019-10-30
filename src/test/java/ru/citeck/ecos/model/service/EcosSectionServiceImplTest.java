@@ -9,10 +9,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import ru.citeck.ecos.model.converter.impl.SectionConverter;
+import ru.citeck.ecos.model.dao.EcosTypeRecordsDao;
 import ru.citeck.ecos.model.domain.EcosSectionEntity;
 import ru.citeck.ecos.model.dto.EcosSectionDto;
 import ru.citeck.ecos.model.repository.EcosSectionRepository;
-import ru.citeck.ecos.model.repository.EcosTypeRepository;
 import ru.citeck.ecos.model.service.impl.EcosSectionServiceImpl;
 import ru.citeck.ecos.records2.RecordRef;
 
@@ -29,13 +30,13 @@ public class EcosSectionServiceImplTest {
     private EcosSectionRepository sectionRepository;
 
     @Mock
-    private EcosTypeRepository typeRepository;
+    private SectionConverter converter;
 
     private EcosSectionService ecosSectionService;
 
     @BeforeEach
     public void init() {
-        ecosSectionService = new EcosSectionServiceImpl(sectionRepository, typeRepository);
+        ecosSectionService = new EcosSectionServiceImpl(sectionRepository, converter);
     }
 
 
@@ -187,7 +188,7 @@ public class EcosSectionServiceImplTest {
         Set<RecordRef> typesRefs = null;
         if (entity.getTypes() != null) {
             typesRefs = entity.getTypes().stream()
-                .map(e -> RecordRef.create("type", e.getExtId()))
+                .map(e -> RecordRef.create(EcosTypeRecordsDao.ID, e.getExtId()))
                 .collect(Collectors.toSet());
         }
         return new EcosSectionDto(
