@@ -37,14 +37,16 @@ public class EcosTypeServiceImpl implements EcosTypeService {
 
     @Cacheable("types")
     public Set<EcosTypeDto> getAll() {
-        return typeRepository.findAll().stream()
+        return typeRepository.findAll()
+            .stream()
             .map(converter::targetToSource)
             .collect(Collectors.toSet());
     }
 
     @Override
     public Set<EcosTypeDto> getAll(Set<String> extIds) {
-        return typeRepository.findAllByExtIds(extIds).stream()
+        return typeRepository.findAllByExtIds(extIds)
+            .stream()
             .map(converter::targetToSource)
             .collect(Collectors.toSet());
     }

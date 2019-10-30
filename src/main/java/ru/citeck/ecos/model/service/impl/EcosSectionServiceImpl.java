@@ -30,14 +30,16 @@ public class EcosSectionServiceImpl implements EcosSectionService {
 
     @Cacheable("sections")
     public Set<EcosSectionDto> getAll() {
-        return sectionRepository.findAll().stream()
+        return sectionRepository.findAll()
+            .stream()
             .map(converter::targetToSource)
             .collect(Collectors.toSet());
     }
 
     @Override
     public Set<EcosSectionDto> getAll(Set<String> extIds) {
-        return sectionRepository.findAllByExtIds(extIds).stream()
+        return sectionRepository.findAllByExtIds(extIds)
+            .stream()
             .map(converter::targetToSource)
             .collect(Collectors.toSet());
     }
