@@ -1,0 +1,46 @@
+{
+    "id": "type@type-second",
+    "attributes": {
+        "name": "second",
+        "description": "second",
+        "tenant": "second-tenant",
+        "inheritActions": true,
+        "parent": "type@type-first",
+        "actions": [
+            {
+                "id": "print",
+                "name": "print",
+                "key": "print-action",
+                "type": "client-action",
+                "icon": "print.png",
+                "order": 0.0,
+                "config": {
+                    "color": "green"
+                },
+                "evaluator": {
+                    "id": "evaluator-view",
+                    "config": {
+                        "permission": "Read"
+                    }
+                }
+            },
+            {
+                "id": "edit",
+                "name": "edit",
+                "key": "edit-action",
+                "type": "server-action",
+                "icon": "edit.png",
+                "order": 45.1,
+                "config": {
+                    "size": 34
+                },
+                "evaluator": {
+                    "id": "evaluator-edit",
+                    "config": {
+                        "permission": "Write"
+                    }
+                }
+            }
+        ]
+    }
+}

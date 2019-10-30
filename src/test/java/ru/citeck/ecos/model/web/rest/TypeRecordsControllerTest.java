@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -21,6 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = EcosModelApp.class)
+@ActiveProfiles(profiles = "test-type-data")
 public class TypeRecordsControllerTest {
 
     private MockMvc mockRecordsApi;
@@ -37,16 +39,122 @@ public class TypeRecordsControllerTest {
     }
 
     @Test
-    public void createTypeWithActions() throws Exception {
-        String createTypeJson = TestUtil.getJsonFromResource("/controller/type/create-type-test.json");
-        String createTypeResponseJson = TestUtil.getJsonFromResource("/controller/type/create-type-test-response.json");
+    public void typeWithActionsSchema() throws Exception {
+        String request = "{\n" +
+            "    \"record\": \"emodel/type@type-tree\",\n" +
+            "    \"attributes\": {\n" +
+            "        \"name\": \"name\",\n" +
+            "        \"parent\": \"parent?id\",\n" +
+            "        \"tenant\": \"tenant\",\n" +
+            "        \"description\": \"description\",\n" +
+            "        \"inheritActions\": \"inheritActions?bool\",\n" +
+            "        \"actions\": \"actions[]?json\"\n" +
+            "    }\n" +
+            "}";
+        String createTypeResponseJson = TestUtil.getJsonFromResource("/controller/type/type-tree-response.json");
 
         mockRecordsApi.perform(
-            post(TestUtil.URL_RECORDS_MUTATE)
+            post(TestUtil.URL_RECORDS_QUERY)
                 .contentType(TestUtil.APPLICATION_JSON_UTF8)
-                .content(createTypeJson))
+                .content(request))
             .andExpect(status().isOk())
-            .andExpect(content().json(createTypeResponseJson, true));
+            .andExpect(content().json(createTypeResponseJson, false));
+    }
+
+    @Test
+    public void inheritActionsWithActionsAtt() throws Exception {
+        String request = "{\n" +
+            "    \"record\": \"emodel/type@type-second\",\n" +
+            "    \"attributes\": {\n" +
+            "        \"name\": \"name\",\n" +
+            "        \"parent\": \"parent?id\",\n" +
+            "        \"tenant\": \"tenant\",\n" +
+            "        \"description\": \"description\",\n" +
+            "        \"inheritActions\": \"inheritActions?bool\",\n" +
+            "        \"actions\": \"actions[]?json\"\n" +
+            "    }\n" +
+            "}";
+        String createTypeResponseJson = TestUtil.getJsonFromResource("/controller/type/" +
+            "second-type-action-inherit-response-with-non-inherited-actions.json.json");
+
+        mockRecordsApi.perform(
+            post(TestUtil.URL_RECORDS_QUERY)
+                .contentType(TestUtil.APPLICATION_JSON_UTF8)
+                .content(request))
+            .andExpect(status().isOk())
+            .andExpect(content().json(createTypeResponseJson, false));
+    }
+
+    @Test
+    public void inheritActionsWithDoubleInherit() throws Exception {
+        String request = "{\n" +
+            "    \"record\": \"emodel/type@type-second\",\n" +
+            "    \"attributes\": {\n" +
+            "        \"name\": \"name\",\n" +
+            "        \"parent\": \"parent?id\",\n" +
+            "        \"tenant\": \"tenant\",\n" +
+            "        \"description\": \"description\",\n" +
+            "        \"inheritActions\": \"inheritActions?bool\",\n" +
+            "        \"actions\": \"_actions[]?json\"\n" +
+            "    }\n" +
+            "}";
+        String createTypeResponseJson = TestUtil.getJsonFromResource("/controller/type/" +
+            "second-type-action-inherit-response-with-inherited-actions.json");
+
+        mockRecordsApi.perform(
+            post(TestUtil.URL_RECORDS_QUERY)
+                .contentType(TestUtil.APPLICATION_JSON_UTF8)
+                .content(request))
+            .andExpect(status().isOk())
+            .andExpect(content().json(createTypeResponseJson, false));
+    }
+
+    @Test
+    public void inheritActionsWithTripleInherit() throws Exception {
+        String request = "{\n" +
+            "    \"record\": \"emodel/type@type-third\",\n" +
+            "    \"attributes\": {\n" +
+            "        \"name\": \"name\",\n" +
+            "        \"parent\": \"parent?id\",\n" +
+            "        \"tenant\": \"tenant\",\n" +
+            "        \"description\": \"description\",\n" +
+            "        \"inheritActions\": \"inheritActions?bool\",\n" +
+            "        \"actions\": \"_actions[]?json\"\n" +
+            "    }\n" +
+            "}";
+        String createTypeResponseJson = TestUtil.getJsonFromResource("/controller/type/" +
+            "second-type-action-inherit-response-with-triple-inherited-actions.json.json");
+
+        mockRecordsApi.perform(
+            post(TestUtil.URL_RECORDS_QUERY)
+                .contentType(TestUtil.APPLICATION_JSON_UTF8)
+                .content(request))
+            .andExpect(status().isOk())
+            .andExpect(content().json(createTypeResponseJson, false));
+    }
+
+    @Test
+    public void inheritActionsWithNonInheritMiddleSlice() throws Exception {
+        String request = "{\n" +
+            "    \"record\": \"emodel/type@type-third-to-second-non-inherit\",\n" +
+            "    \"attributes\": {\n" +
+            "        \"name\": \"name\",\n" +
+            "        \"parent\": \"parent?id\",\n" +
+            "        \"tenant\": \"tenant\",\n" +
+            "        \"description\": \"description\",\n" +
+            "        \"inheritActions\": \"inheritActions?bool\",\n" +
+            "        \"actions\": \"_actions[]?json\"\n" +
+            "    }\n" +
+            "}";
+        String createTypeResponseJson = TestUtil.getJsonFromResource("/controller/type/" +
+            "second-type-action-inherit-response-with-non-inherited-in-middle-slice-actions.json");
+
+        mockRecordsApi.perform(
+            post(TestUtil.URL_RECORDS_QUERY)
+                .contentType(TestUtil.APPLICATION_JSON_UTF8)
+                .content(request))
+            .andExpect(status().isOk())
+            .andExpect(content().json(createTypeResponseJson, false));
     }
 
 }

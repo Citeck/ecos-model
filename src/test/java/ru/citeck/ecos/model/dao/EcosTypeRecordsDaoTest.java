@@ -10,11 +10,11 @@ import org.mockito.Mockito;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.model.dto.EcosAssociationDto;
 import ru.citeck.ecos.model.dto.EcosTypeDto;
-import ru.citeck.ecos.model.record.EcosTypeRecord;
 import ru.citeck.ecos.model.service.impl.EcosTypeServiceImpl;
 import ru.citeck.ecos.predicate.PredicateService;
 import ru.citeck.ecos.predicate.PredicateServiceImpl;
 import ru.citeck.ecos.records2.RecordRef;
+import ru.citeck.ecos.records2.RecordsService;
 import ru.citeck.ecos.records2.RecordsServiceFactory;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaFieldImpl;
@@ -38,11 +38,14 @@ public class EcosTypeRecordsDaoTest {
     @Mock
     private PredicateServiceImpl predicateService;
 
+    @Mock
+    private RecordsService recordsService;
+
     private EcosTypeRecordsDao recordsDao;
 
     @BeforeEach
     public void setUp() throws Exception {
-        recordsDao = new EcosTypeRecordsDao(typeService, predicateService);
+        recordsDao = new EcosTypeRecordsDao(typeService, predicateService, recordsService);
         RecordsServiceFactory factory = new RecordsServiceFactory();
         recordsDao.setRecordsServiceFactory(factory);
     }
@@ -60,7 +63,7 @@ public class EcosTypeRecordsDaoTest {
         given(typeService.getAll()).willReturn(dtos);
 
 
-        RecordsQueryResult<EcosTypeRecord> result = recordsDao.getMetaValues(query);
+        RecordsQueryResult<EcosTypeRecordsDao.EcosTypeRecord> result = recordsDao.getMetaValues(query);
 
 
         MetaField foo = new MetaFieldImpl(new Field(""));
@@ -91,7 +94,7 @@ public class EcosTypeRecordsDaoTest {
         given(typeService.getAll(Collections.singleton("extId"))).willReturn(Collections.singleton(dto));
 
 
-        RecordsQueryResult<EcosTypeRecord> result = recordsDao.getMetaValues(query);
+        RecordsQueryResult<EcosTypeRecordsDao.EcosTypeRecord> result = recordsDao.getMetaValues(query);
 
 
         MetaField foo = new MetaFieldImpl(new Field(""));

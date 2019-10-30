@@ -61,7 +61,7 @@ public class TypeConverter extends AbstractDtoConverter<EcosTypeDto, EcosTypeEnt
             dto.getActions()
                 .stream()
                 .map(ActionConverter::fromDto)
-                .collect(Collectors.toSet())
+                .collect(Collectors.toList())
         );
 
         return ecosTypeEntity;
@@ -114,10 +114,13 @@ public class TypeConverter extends AbstractDtoConverter<EcosTypeDto, EcosTypeEnt
         dto.setName(entity.getName());
         dto.setDescription(entity.getDescription());
         dto.setInheritActions(entity.isInheritActions());
+        dto.setTenant(entity.getTenant());
+
         EcosTypeEntity parent = entity.getParent();
         if (parent != null) {
             dto.setParent(RecordRef.create(EcosTypeRecordsDao.ID, parent.getExtId()));
         }
+
         Set<EcosAssociationEntity> associations = entity.getAssocsToOther();
         if (associations != null && !associations.isEmpty()) {
             dto.setAssociations(associations.stream()
@@ -132,6 +135,7 @@ public class TypeConverter extends AbstractDtoConverter<EcosTypeDto, EcosTypeEnt
                 })
                 .collect(Collectors.toSet()));
         }
+
         Set<ActionDto> actions = entity.getActions()
             .stream()
             .map(ActionConverter::toDto)
