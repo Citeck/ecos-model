@@ -97,8 +97,8 @@
         <sonar.junit.reportsPath>${project.testresult.directory}</sonar.junit.reportsPath>
         <sonar.tests>${project.basedir}/src/test/</sonar.tests>
 
-        <ecos-records.version>1.9.1-SNAPSHOT</ecos-records.version>
-        <ecos-apps-lib-spring>1.1.0-SNAPSHOT</ecos-apps-lib-spring>
+        <ecos-records.version>1.10.0-SNAPSHOT</ecos-records.version>
+        <ecos-apps-lib-spring>1.2.0-SNAPSHOT</ecos-apps-lib-spring>
         <lombok.version>1.18.8</lombok.version>
         <!-- jhipster-needle-maven-property -->
     </properties>
