@@ -37,6 +37,7 @@ public class EcosTypeRecordsDao extends LocalRecordsDAO
     public static final String ID = "type";
 
     private static final String LANGUAGE_EMPTY = "";
+    private static final String TYPE_ACTIONS_WITH_INHERIT_ATT_JSON = "_actions[]?json";
     private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final EcosTypeRecord EMPTY_RECORD = new EcosTypeRecord(new EcosTypeDto());
@@ -150,22 +151,21 @@ public class EcosTypeRecordsDao extends LocalRecordsDAO
 
     }
 
-    //TODO: process override actions?
     private Set<ActionDto> getInheritTypeActions(EcosTypeDto dto) {
         if (!dto.isInheritActions() || dto.getParent() == null) {
+            return dto.getActions();
+        }
+
+        RecordRef parent = dto.getParent();
+        JsonNode actionsNode = recordsService.getAttribute(parent, TYPE_ACTIONS_WITH_INHERIT_ATT_JSON);
+
+        if (actionsNode == null || actionsNode.isNull() || actionsNode.isMissingNode()) {
             return dto.getActions();
         }
 
         Map<String, ActionDto> actionDtoMap = dto.getActions()
             .stream()
             .collect(Collectors.toMap(ActionDto::getId, Function.identity()));
-
-        RecordRef parent = dto.getParent();
-        JsonNode actionsNode = recordsService.getAttribute(parent, "_actions[]?json");
-
-        if (actionsNode == null || actionsNode.isNull() || actionsNode.isMissingNode()) {
-            return dto.getActions();
-        }
 
         if (actionsNode.isArray()) {
             ActionDto[] actionsFromParent;
