@@ -193,5 +193,92 @@
                 }
             }
         ]
+    },
+    {
+        "id": "type-third-with-overridden",
+        "name": "third-with-overridden",
+        "description": "third-with-overridden",
+        "tenant": "third-tenant",
+        "inheritActions": true,
+        "parent": "type@type-second",
+        "actions": [
+            {
+                "id": "fire3",
+                "name": "fire3",
+                "key": "fire-action3",
+                "type": "client-action",
+                "icon": "fire.png",
+                "config": {
+                    "color": "red"
+                },
+                "evaluator": {
+                    "id": "evaluator-view"
+                }
+            },
+            {
+                "id": "reset3",
+                "name": "reset3",
+                "key": "reset-action3",
+                "type": "reset-action",
+                "icon": "reset.png",
+                "config": {
+                    "case": "contract"
+                },
+                "evaluator": {
+                    "id": "reset-eva"
+                }
+            },
+            {
+                "id": "edit",
+                "name": "edit-overridden",
+                "key": "edit-action",
+                "type": "server-action",
+                "icon": "edit-2.png",
+                "order": 60.9,
+                "config": {
+                    "size": 600
+                },
+                "evaluator": {
+                    "id": "evaluator-edit"
+                }
+            }
+        ]
+    },
+    {
+        "id": "type-second-with-overridden",
+        "name": "second-with-overridden",
+        "description": "second-with-overridden",
+        "tenant": "second-tenant",
+        "inheritActions": true,
+        "parent": "type@type-first",
+        "actions": [
+            {
+                "id": "print",
+                "name": "print",
+                "key": "print-action",
+                "type": "client-action",
+                "icon": "print.png",
+                "config": {
+                    "color": "green"
+                },
+                "evaluator": {
+                    "id": "evaluator-view",
+                    "config": {
+                        "permission": "Read"
+                    }
+                }
+            },
+            {
+                "id": "edit",
+                "name": "edit-overridden",
+                "key": "edit-action-overridden",
+                "type": "server-action",
+                "icon": "edit.png",
+                "order": 2045.32,
+                "config": {
+                    "size": 120
+                }
+            }
+        ]
     }
 ]

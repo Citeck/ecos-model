@@ -1,0 +1,41 @@
+{
+    "id": "type@type-second-with-overridden",
+    "attributes": {
+        "name": "second-with-overridden",
+        "description": "second-with-overridden",
+        "tenant": "second-tenant",
+        "inheritActions": true,
+        "parent": "type@type-first",
+        "actions": [
+            {
+                "id": "print",
+                "name": "print",
+                "key": "print-action",
+                "type": "client-action",
+                "icon": "print.png",
+                "order": 0.0,
+                "config": {
+                    "color": "green"
+                },
+                "evaluator": {
+                    "id": "evaluator-view",
+                    "config": {
+                        "permission": "Read"
+                    }
+                }
+            },
+            {
+                "id": "edit",
+                "name": "edit-overridden",
+                "key": "edit-action-overridden",
+                "type": "server-action",
+                "icon": "edit.png",
+                "order": 2045.32,
+                "config": {
+                    "size": 120
+                },
+                "evaluator": null
+            }
+        ]
+    }
+}
