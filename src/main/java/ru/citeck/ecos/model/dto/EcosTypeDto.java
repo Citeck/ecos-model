@@ -1,13 +1,16 @@
 package ru.citeck.ecos.model.dto;
 
 import lombok.*;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.logging.log4j.util.Strings;
 import ru.citeck.ecos.apps.app.module.type.type.TypeModule;
 import ru.citeck.ecos.apps.app.module.type.type.action.ActionDto;
+import ru.citeck.ecos.apps.app.module.type.type.association.AssociationDto;
 import ru.citeck.ecos.model.dao.EcosTypeRecordsDao;
 import ru.citeck.ecos.records2.RecordRef;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -48,15 +51,24 @@ public class EcosTypeDto {
         this.name = module.getName();
         this.description = module.getDescription();
         this.tenant = Strings.EMPTY;
-        if (!Strings.isEmpty(module.getParent())) {
-            this.parent = RecordRef.create(EcosTypeRecordsDao.ID, module.getParent());
+
+        String parent = module.getParent();
+        if (Strings.isNotBlank(parent)) {
+            this.parent = RecordRef.create(EcosTypeRecordsDao.ID, parent);
         }
 
-        this.associations = module.getAssociations().stream()
-            .map(a -> new EcosAssociationDto(a, module.getId()))
-            .collect(Collectors.toSet());
+        List<AssociationDto> associations = module.getAssociations();
+        if (CollectionUtils.isNotEmpty(associations)) {
+            this.associations = associations
+                .stream()
+                .map(a -> new EcosAssociationDto(a, module.getId()))
+                .collect(Collectors.toSet());
+        }
 
-        this.actions = new HashSet<>(module.getActions());
+        List<ActionDto> actions = module.getActions();
+        if (CollectionUtils.isNotEmpty(associations)) {
+            this.actions = new HashSet<>(actions);
+        }
     }
 
     public EcosTypeDto(String id) {
