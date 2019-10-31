@@ -26,6 +26,7 @@ import ru.citeck.ecos.records2.source.dao.local.RecordsMetaLocalDAO;
 import ru.citeck.ecos.records2.source.dao.local.RecordsQueryWithMetaLocalDAO;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
@@ -155,34 +156,37 @@ public class EcosTypeRecordsDao extends LocalRecordsDAO
             return dto.getActions();
         }
 
-        Set<ActionDto> result = new HashSet<>(dto.getActions());
+        Map<String, ActionDto> actionDtoMap = dto.getActions()
+            .stream()
+            .collect(Collectors.toMap(ActionDto::getId, Function.identity()));
 
         RecordRef parent = dto.getParent();
         JsonNode actionsNode = recordsService.getAttribute(parent, "_actions[]?json");
 
         if (actionsNode == null || actionsNode.isNull() || actionsNode.isMissingNode()) {
-            return result;
+            return dto.getActions();
         }
 
         if (actionsNode.isArray()) {
             ActionDto[] actionsFromParent;
             try {
                 actionsFromParent = OBJECT_MAPPER.treeToValue(actionsNode, ActionDto[].class);
-                result.addAll(Arrays.asList(actionsFromParent));
+                for (ActionDto actionDto : actionsFromParent) {
+                    actionDtoMap.putIfAbsent(actionDto.getId(), actionDto);
+                }
             } catch (JsonProcessingException e) {
                 throw new RuntimeException("Can not parse actions from parent", e);
             }
         } else {
             try {
                 ActionDto actionFromParent = OBJECT_MAPPER.treeToValue(actionsNode, ActionDto.class);
-                result.add(actionFromParent);
+                actionDtoMap.putIfAbsent(actionFromParent.getId(), actionFromParent);
             } catch (JsonProcessingException e) {
                 throw new RuntimeException("Can not parse action from parent", e);
             }
         }
 
-
-        return result;
+        return new HashSet<>(actionDtoMap.values());
     }
 
 }
