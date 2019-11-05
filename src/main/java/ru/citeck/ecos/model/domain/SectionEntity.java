@@ -7,7 +7,8 @@ import java.util.Set;
 
 @Entity
 @Table(name = "ecos_section")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class SectionEntity {

@@ -17,7 +17,7 @@ import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.RecordsService;
 import ru.citeck.ecos.records2.RecordsServiceFactory;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
-import ru.citeck.ecos.records2.graphql.meta.value.MetaFieldImpl;
+import ru.citeck.ecos.records2.graphql.meta.value.field.MetaFieldImpl;
 import ru.citeck.ecos.records2.predicate.RecordElement;
 import ru.citeck.ecos.records2.request.query.RecordsQuery;
 import ru.citeck.ecos.records2.request.query.RecordsQueryResult;
@@ -63,7 +63,7 @@ public class TypeRecordsDaoTest {
         given(typeService.getAll()).willReturn(dtos);
 
 
-        RecordsQueryResult<TypeRecordsDao.EcosTypeRecord> result = recordsDao.getMetaValues(query);
+        RecordsQueryResult<TypeRecordsDao.TypeRecord> result = recordsDao.getMetaValues(query);
 
 
         MetaField foo = new MetaFieldImpl(new Field(""));
@@ -94,7 +94,7 @@ public class TypeRecordsDaoTest {
         given(typeService.getAll(Collections.singleton("extId"))).willReturn(Collections.singleton(dto));
 
 
-        RecordsQueryResult<TypeRecordsDao.EcosTypeRecord> result = recordsDao.getMetaValues(query);
+        RecordsQueryResult<TypeRecordsDao.TypeRecord> result = recordsDao.getMetaValues(query);
 
 
         MetaField foo = new MetaFieldImpl(new Field(""));

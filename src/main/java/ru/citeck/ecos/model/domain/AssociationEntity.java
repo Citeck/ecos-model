@@ -6,7 +6,8 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "ecos_association")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class AssociationEntity {

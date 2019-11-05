@@ -10,7 +10,8 @@ import java.util.Set;
 
 @Entity
 @Table(name = "ecos_type")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class TypeEntity {

@@ -9,14 +9,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.model.dto.SectionDto;
-import ru.citeck.ecos.model.record.SectionRecord;
 import ru.citeck.ecos.model.service.impl.SectionServiceImpl;
 import ru.citeck.ecos.predicate.PredicateService;
 import ru.citeck.ecos.predicate.PredicateServiceImpl;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.RecordsServiceFactory;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
-import ru.citeck.ecos.records2.graphql.meta.value.MetaFieldImpl;
+import ru.citeck.ecos.records2.graphql.meta.value.field.MetaFieldImpl;
 import ru.citeck.ecos.records2.predicate.RecordElement;
 import ru.citeck.ecos.records2.request.query.RecordsQuery;
 import ru.citeck.ecos.records2.request.query.RecordsQueryResult;
@@ -55,7 +54,7 @@ public class SectionRecordsDaoTest {
         given(sectionService.getAll()).willReturn(dtos);
 
 
-        RecordsQueryResult<SectionRecord> result = recordsDao.getMetaValues(query);
+        RecordsQueryResult<SectionRecordsDao.SectionRecord> result = recordsDao.getMetaValues(query);
 
 
         MetaField foo = new MetaFieldImpl(new Field(""));
@@ -82,7 +81,7 @@ public class SectionRecordsDaoTest {
         given(sectionService.getAll(Collections.singleton("extId"))).willReturn(Collections.singleton(dto));
 
 
-        RecordsQueryResult<SectionRecord> result = recordsDao.getMetaValues(query);
+        RecordsQueryResult<SectionRecordsDao.SectionRecord> result = recordsDao.getMetaValues(query);
 
 
         MetaField foo = new MetaFieldImpl(new Field(""));

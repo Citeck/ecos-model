@@ -55,7 +55,7 @@ public class TypeDto {
             this.parent = RecordRef.create(TypeRecordsDao.ID, parent);
         }
 
-        List<AssociationDto> associations = module.getAssociations();
+        List<ru.citeck.ecos.apps.app.module.type.type.association.AssociationDto> associations = module.getAssociations();
         if (CollectionUtils.isNotEmpty(associations)) {
             this.associations = associations
                 .stream()
@@ -64,7 +64,7 @@ public class TypeDto {
         }
 
         List<ActionDto> actions = module.getActions();
-        if (CollectionUtils.isNotEmpty(associations)) {
+        if (CollectionUtils.isNotEmpty(actions)) {
             this.actions = new HashSet<>(actions);
         }
     }

@@ -31,8 +31,8 @@ import java.util.stream.Collectors;
 
 @Component
 public class TypeRecordsDao extends LocalRecordsDAO
-    implements RecordsQueryWithMetaLocalDAO<TypeRecordsDao.EcosTypeRecord>,
-    RecordsMetaLocalDAO<TypeRecordsDao.EcosTypeRecord> {
+                            implements RecordsQueryWithMetaLocalDAO<TypeRecordsDao.TypeRecord>,
+                                       RecordsMetaLocalDAO<TypeRecordsDao.TypeRecord> {
 
     public static final String ID = "type";
 
@@ -40,7 +40,7 @@ public class TypeRecordsDao extends LocalRecordsDAO
     private static final String TYPE_ACTIONS_WITH_INHERIT_ATT_JSON = "_actions[]?json";
     private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    private final EcosTypeRecord EMPTY_RECORD = new EcosTypeRecord(new TypeDto());
+    private final TypeRecord EMPTY_RECORD = new TypeRecord(new TypeDto());
 
     private final TypeService typeService;
     private final PredicateService predicateService;
@@ -57,20 +57,20 @@ public class TypeRecordsDao extends LocalRecordsDAO
     }
 
     @Override
-    public List<EcosTypeRecord> getMetaValues(List<RecordRef> list) {
+    public List<TypeRecord> getMetaValues(List<RecordRef> list) {
         if (list.size() == 1 && list.get(0).getId().isEmpty()) {
             return Collections.singletonList(EMPTY_RECORD);
         }
 
         return list.stream()
-            .map(ref -> new EcosTypeRecord(typeService.getByExtId(ref.toString())))
+            .map(ref -> new TypeRecord(typeService.getByExtId(ref.toString())))
             .collect(Collectors.toList());
     }
 
     @Override
-    public RecordsQueryResult<EcosTypeRecord> getMetaValues(RecordsQuery query) {
+    public RecordsQueryResult<TypeRecord> getMetaValues(RecordsQuery query) {
 
-        RecordsQueryResult<EcosTypeRecord> result = new RecordsQueryResult<>();
+        RecordsQueryResult<TypeRecord> result = new RecordsQueryResult<>();
 
         if (query.getLanguage().equals(PredicateService.LANGUAGE_PREDICATE)) {
             Predicate predicate = predicateService.readJson(query.getQuery());
@@ -85,22 +85,22 @@ public class TypeRecordsDao extends LocalRecordsDAO
                 .collect(Collectors.toSet());
 
             result.addRecords(typeService.getAll(filteredResultIds).stream()
-                .map(EcosTypeRecord::new)
+                .map(TypeRecord::new)
                 .collect(Collectors.toList()));
 
         } else {
             result.setRecords(typeService.getAll().stream()
-                .map(EcosTypeRecord::new)
+                .map(TypeRecord::new)
                 .collect(Collectors.toList()));
         }
         return result;
     }
 
-    public class EcosTypeRecord implements MetaValue {
+    public class TypeRecord implements MetaValue {
 
         private final TypeDto dto;
 
-        public EcosTypeRecord(TypeDto dto) {
+        public TypeRecord(TypeDto dto) {
             this.dto = dto;
         }
 
