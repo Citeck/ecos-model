@@ -28,7 +28,7 @@ public class ActionEntity extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "ecos_type_id")
-    private EcosTypeEntity ecosType;
+    private TypeEntity ecosType;
 
     @OneToOne(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "ecos_evaluator_id")

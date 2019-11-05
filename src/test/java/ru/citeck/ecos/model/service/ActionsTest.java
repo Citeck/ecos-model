@@ -11,9 +11,9 @@ import ru.citeck.ecos.apps.app.module.type.type.action.ActionDto;
 import ru.citeck.ecos.apps.app.module.type.type.action.EvaluatorDto;
 import ru.citeck.ecos.model.EcosModelApp;
 import ru.citeck.ecos.model.domain.ActionEntity;
-import ru.citeck.ecos.model.dto.EcosTypeDto;
+import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.repository.ActionRepository;
-import ru.citeck.ecos.model.service.converter.ActionConverter;
+import ru.citeck.ecos.model.converter.impl.ActionConverter;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -32,11 +32,13 @@ public class ActionsTest {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Autowired
-    private EcosTypeService ecosTypeService;
+    private TypeService typeService;
 
     @Autowired
     private ActionRepository actionRepository;
 
+    @Autowired
+    private ActionConverter actionConverter;
 
     @Test
     public void createAction() throws IOException {
@@ -57,7 +59,7 @@ public class ActionsTest {
 
         deleteAction.setEvaluator(deleteEvaluator);
 
-        ActionEntity actionEntity = ActionConverter.fromDto(deleteAction);
+        ActionEntity actionEntity = actionConverter.dtoToEntity(deleteAction);
 
         ActionEntity save = actionRepository.save(actionEntity);
 
@@ -109,7 +111,7 @@ public class ActionsTest {
         viewAction.setEvaluator(viewEvaluator);
 
 
-        EcosTypeDto typeDto = new EcosTypeDto();
+        TypeDto typeDto = new TypeDto();
         typeDto.setId(typeId);
         typeDto.setName(typeName);
         typeDto.setDescription(typeDescription);
@@ -119,9 +121,9 @@ public class ActionsTest {
         actionDtos.add(viewAction);
         typeDto.setActions(actionDtos);
 
-        ecosTypeService.update(typeDto);
+        typeService.update(typeDto);
 
-        EcosTypeDto found = ecosTypeService.getByExtId(typeId);
+        TypeDto found = typeService.getByExtId(typeId);
 
         assertThat(found, is(typeDto));
     }

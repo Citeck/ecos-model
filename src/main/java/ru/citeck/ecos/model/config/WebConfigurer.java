@@ -60,9 +60,9 @@ public class WebConfigurer implements ServletContextInitializer, WebServerFactor
         setMimeMappings(server);
 
         /*
-         * Enable HTTP/2 for Undertow - https://twitter.com/ankinson/status/829256167700492288
+         * Enable HTTP/2 for Undertow
          * HTTP/2 requires HTTPS, so HTTP requests will fallback to HTTP/1.1.
-         * See the JHipsterProperties class and your application-*.yml configuration files
+         * See the ECOS-REGISTRY Properties class and your application-*.yml configuration files
          * for more information.
          */
         if (jHipsterProperties.getHttp().getVersion().equals(JHipsterProperties.Http.Version.V_2_0) &&
@@ -77,9 +77,7 @@ public class WebConfigurer implements ServletContextInitializer, WebServerFactor
     private void setMimeMappings(WebServerFactory server) {
         if (server instanceof ConfigurableServletWebServerFactory) {
             MimeMappings mappings = new MimeMappings(MimeMappings.DEFAULT);
-            // IE issue, see https://github.com/jhipster/generator-jhipster/pull/711
             mappings.add("html", MediaType.TEXT_HTML_VALUE + ";charset=" + StandardCharsets.UTF_8.name().toLowerCase());
-            // CloudFoundry issue, see https://github.com/cloudfoundry/gorouter/issues/64
             mappings.add("json", MediaType.TEXT_HTML_VALUE + ";charset=" + StandardCharsets.UTF_8.name().toLowerCase());
             ConfigurableServletWebServerFactory servletWebServer = (ConfigurableServletWebServerFactory) server;
             servletWebServer.setMimeMappings(mappings);
