@@ -50,6 +50,7 @@ public class TypeDto {
         this.name = module.getName();
         this.description = module.getDescription();
         this.tenant = Strings.EMPTY;
+
         String parent = module.getParent();
         if (Strings.isNotBlank(parent)) {
             this.parent = RecordRef.create(TypeRecordsDao.ID, parent);
