@@ -10,10 +10,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 import ru.citeck.ecos.apps.app.module.type.type.action.ActionDto;
 import ru.citeck.ecos.apps.app.module.type.type.action.EvaluatorDto;
 import ru.citeck.ecos.model.EcosModelApp;
+import ru.citeck.ecos.model.converter.impl.ActionConverter;
 import ru.citeck.ecos.model.domain.ActionEntity;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.repository.ActionRepository;
-import ru.citeck.ecos.model.converter.impl.ActionConverter;
 
 import java.io.IOException;
 import java.util.HashSet;

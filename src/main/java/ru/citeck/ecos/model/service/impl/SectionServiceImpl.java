@@ -19,20 +19,20 @@ import java.util.stream.Collectors;
 public class SectionServiceImpl implements SectionService {
 
     private final SectionRepository sectionRepository;
-    private final Converter<SectionDto, SectionEntity> converter;
+    private final Converter<SectionDto, SectionEntity> sectionConverter;
 
     @Autowired
     public SectionServiceImpl(SectionRepository sectionRepository,
-                              Converter<SectionDto, SectionEntity> converter) {
+                              Converter<SectionDto, SectionEntity> sectionConverter) {
         this.sectionRepository = sectionRepository;
-        this.converter = converter;
+        this.sectionConverter = sectionConverter;
     }
 
     @Cacheable("sections")
     public Set<SectionDto> getAll() {
         return sectionRepository.findAll()
             .stream()
-            .map(converter::targetToSource)
+            .map(sectionConverter::targetToSource)
             .collect(Collectors.toSet());
     }
 
@@ -40,13 +40,13 @@ public class SectionServiceImpl implements SectionService {
     public Set<SectionDto> getAll(Set<String> extIds) {
         return sectionRepository.findAllByExtIds(extIds)
             .stream()
-            .map(converter::targetToSource)
+            .map(sectionConverter::targetToSource)
             .collect(Collectors.toSet());
     }
 
     @Override
     public SectionDto getByExtId(String extId) {
-        return sectionRepository.findByExtId(extId).map(converter::targetToSource)
+        return sectionRepository.findByExtId(extId).map(sectionConverter::targetToSource)
             .orElseThrow(() -> new IllegalArgumentException("Section doesnt exists: " + extId));
     }
 
@@ -60,9 +60,9 @@ public class SectionServiceImpl implements SectionService {
     @Override
     @Transactional
     public SectionDto update(SectionDto dto) {
-        SectionEntity entity = converter.sourceToTarget(dto);
+        SectionEntity entity = sectionConverter.sourceToTarget(dto);
         sectionRepository.save(entity);
-        return converter.targetToSource(entity);
+        return sectionConverter.targetToSource(entity);
     }
 
 }

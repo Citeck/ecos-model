@@ -15,6 +15,7 @@ public class NodeConverter implements Converter<String, JsonNode> {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+    @Override
     public String targetToSource(JsonNode node) {
         try {
             return OBJECT_MAPPER.writeValueAsString(node);
@@ -23,6 +24,7 @@ public class NodeConverter implements Converter<String, JsonNode> {
         }
     }
 
+    @Override
     public JsonNode sourceToTarget(String nodeData) {
         if (StringUtils.isBlank(nodeData)) {
             return NullNode.getInstance();

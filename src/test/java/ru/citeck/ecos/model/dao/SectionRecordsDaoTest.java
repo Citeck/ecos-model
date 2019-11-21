@@ -5,94 +5,160 @@ import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import ru.citeck.ecos.model.dao.record.SectionRecord;
 import ru.citeck.ecos.model.dto.SectionDto;
 import ru.citeck.ecos.model.service.impl.SectionServiceImpl;
 import ru.citeck.ecos.predicate.PredicateService;
 import ru.citeck.ecos.predicate.PredicateServiceImpl;
+import ru.citeck.ecos.predicate.model.Predicate;
+import ru.citeck.ecos.predicate.model.ValuePredicate;
 import ru.citeck.ecos.records2.RecordRef;
+import ru.citeck.ecos.records2.RecordsService;
 import ru.citeck.ecos.records2.RecordsServiceFactory;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
 import ru.citeck.ecos.records2.graphql.meta.value.field.MetaFieldImpl;
 import ru.citeck.ecos.records2.predicate.RecordElement;
+import ru.citeck.ecos.records2.predicate.RecordElements;
 import ru.citeck.ecos.records2.request.query.RecordsQuery;
 import ru.citeck.ecos.records2.request.query.RecordsQueryResult;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
-import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 public class SectionRecordsDaoTest {
 
-    @Mock
+    @MockBean
     private SectionServiceImpl sectionService;
 
-    @Mock
+    @MockBean
     private PredicateServiceImpl predicateService;
 
-    private SectionRecordsDao recordsDao;
+    @MockBean
+    private RecordsService recordsService;
+
+    private SectionRecordsDao sectionRecordsDao;
+
+    private List<RecordRef> recordRefs;
+    private RecordsQuery recordsQuery;
+    private Set<RecordRef> types;
+    private SectionDto sectionDto;
+    private MetaField metaField;
+    private Predicate predicate;
 
     @BeforeEach
-    public void setUp() throws Exception {
-        recordsDao = new SectionRecordsDao(sectionService, predicateService);
-        RecordsServiceFactory factory = new RecordsServiceFactory();
-        recordsDao.setRecordsServiceFactory(factory);
+    void setUp() {
+        sectionRecordsDao = new SectionRecordsDao(sectionService, predicateService);
+        sectionRecordsDao.setRecordsServiceFactory(new RecordsServiceFactory());
+
+        recordRefs = Arrays.asList(
+            RecordRef.create("section", "section")
+        );
+
+        recordsQuery = new RecordsQuery();
+        recordsQuery.setQuery("query");
+        recordsQuery.setLanguage(PredicateService.LANGUAGE_PREDICATE);
+
+        types = Collections.singleton(
+            RecordRef.create("type", "type")
+        );
+
+        sectionDto = new SectionDto();
+        sectionDto.setId("section");
+        sectionDto.setName("name");
+        sectionDto.setTenant("tenant");
+        sectionDto.setDescription("desc");
+        sectionDto.setTypes(types);
+
+        metaField = new MetaFieldImpl(new Field(""));
+
+        predicate = new ValuePredicate();
     }
 
     @Test
-    public void getMetaValuesReturnRecords() {
-        Set<RecordRef> types = Collections.singleton(RecordRef.create(TypeRecordsDao.ID,"typeId"));
-        SectionDto dto = new SectionDto("extId", "a", "adesc","atenant", types);
-        Set<SectionDto> dtos = Collections.singleton(dto);
-        RecordsQuery query = new RecordsQuery();
+    void testGetLocalRecordsMetaFromRecordRefs() {
 
-        given(sectionService.getAll()).willReturn(dtos);
+        //  arrange
+        when(sectionService.getByExtId(sectionDto.getId())).thenReturn(sectionDto);
 
+        //  act
+        List<SectionRecord> resultSectionRecords = sectionRecordsDao.getLocalRecordsMeta(recordRefs, Mockito.any());
 
-        RecordsQueryResult<SectionRecordsDao.SectionRecord> result = recordsDao.getMetaValues(query);
-
-
-        MetaField foo = new MetaFieldImpl(new Field(""));
-        Assert.assertEquals(1L, result.getTotalCount());
-        Assert.assertFalse(result.getHasMore());
-        Assert.assertEquals("extId", result.getRecords().get(0).getId());
-        Assert.assertEquals("a", result.getRecords().get(0).getAttribute("name", foo));
-        Assert.assertEquals("adesc", result.getRecords().get(0).getAttribute("description", foo));
-        Assert.assertEquals("atenant", result.getRecords().get(0).getAttribute("tenant", foo));
-        Assert.assertEquals(types, result.getRecords().get(0).getAttribute("types", foo));
-        Assert.assertNull(result.getRecords().get(0).getAttribute("parent", foo));
+        //  assert
+        Assert.assertEquals(resultSectionRecords.size(), 1);
+        SectionRecord resultSectionRecord = resultSectionRecords.get(0);
+        Assert.assertEquals(resultSectionRecord.getId(), sectionDto.getId());
+        Assert.assertEquals(resultSectionRecord.getAttribute("name", metaField), sectionDto.getName());
+        Assert.assertEquals(resultSectionRecord.getAttribute("description", metaField), sectionDto.getDescription());
+        Assert.assertEquals(resultSectionRecord.getAttribute("tenant", metaField), sectionDto.getTenant());
+        Assert.assertEquals(resultSectionRecord.getAttribute("types", metaField), sectionDto.getTypes());
     }
 
     @Test
-    public void getMetaValuesReturnRecordsWithPredicate() {
-        Set<RecordRef> types = Collections.singleton(RecordRef.create(TypeRecordsDao.ID,"typeId"));
-        SectionDto dto = new SectionDto("extId", "a", "adesc","atenant", types);
-        RecordsQuery query = new RecordsQuery();
-        query.setLanguage(PredicateService.LANGUAGE_PREDICATE);
+    void testGetLocalRecordsMetaFromRecordRefsWithEmptyID() {
 
-        RecordElement element = new RecordElement(null, RecordRef.create("", TypeRecordsDao.ID, "extId"));
+        //  act
+        List<SectionRecord> resultSectionRecords = sectionRecordsDao.getLocalRecordsMeta(
+            Collections.singletonList(RecordRef.create("section", "")), metaField);
 
-        given(predicateService.filter(Mockito.any(), Mockito.any())).willReturn(Arrays.asList(element));
-        given(sectionService.getAll(Collections.singleton("extId"))).willReturn(Collections.singleton(dto));
-
-
-        RecordsQueryResult<SectionRecordsDao.SectionRecord> result = recordsDao.getMetaValues(query);
-
-
-        MetaField foo = new MetaFieldImpl(new Field(""));
-        Assert.assertEquals(1L, result.getTotalCount());
-        Assert.assertFalse(result.getHasMore());
-        Assert.assertEquals("extId", result.getRecords().get(0).getId());
-        Assert.assertEquals("a", result.getRecords().get(0).getAttribute("name", foo));
-        Assert.assertEquals("adesc", result.getRecords().get(0).getAttribute("description", foo));
-        Assert.assertEquals("atenant", result.getRecords().get(0).getAttribute("tenant", foo));
-        Assert.assertEquals(types, result.getRecords().get(0).getAttribute("types", foo));
-        Assert.assertNull(result.getRecords().get(0).getAttribute("parent", foo));
+        //  assert
+        Mockito.verify(sectionService, Mockito.times(0)).getByExtId(Mockito.anyString());
+        Assert.assertEquals(resultSectionRecords.size(), 1);
+        SectionRecord resultSectionRecord = resultSectionRecords.get(0);
+        Assert.assertNull(resultSectionRecord.getId());
+        Assert.assertNull(resultSectionRecord.getAttribute("name", metaField));
+        Assert.assertNull(resultSectionRecord.getAttribute("description", metaField));
+        Assert.assertNull(resultSectionRecord.getAttribute("tenant", metaField));
+        Assert.assertNull(resultSectionRecord.getAttribute("types", metaField));
     }
 
+    @Test
+    void testQueryLocalRecords() {
+
+        //  arrange
+        when(predicateService.readJson(recordsQuery.getQuery())).thenReturn(predicate);
+        when(predicateService.filter(Mockito.any(RecordElements.class), Mockito.eq(predicate)))
+            .thenReturn(Collections.singletonList(new RecordElement(recordsService, RecordRef.create("", "section"))));
+        when(sectionService.getAll(Collections.singleton(sectionDto.getId()))).thenReturn(Collections.singleton(sectionDto));
+
+        //  act
+        RecordsQueryResult<SectionRecord> resultRecordsQueryResult = sectionRecordsDao.queryLocalRecords(recordsQuery, metaField);
+
+        //  assert
+        Assert.assertEquals(resultRecordsQueryResult.getTotalCount(), 1);
+        SectionRecord resultSectionRecord = resultRecordsQueryResult.getRecords().get(0);
+        Assert.assertEquals(resultSectionRecord.getAttribute("name", metaField), "name");
+        Assert.assertEquals(resultSectionRecord.getAttribute("description", metaField), "desc");
+        Assert.assertEquals(resultSectionRecord.getAttribute("tenant", metaField), "tenant");
+        Assert.assertEquals(resultSectionRecord.getAttribute("types", metaField), types);
+    }
+
+    @Test
+    void testQueryLocalRecordsLanguageIsNotPredicate() {
+
+        //  arrange
+        recordsQuery.setLanguage("");
+        when(sectionService.getAll()).thenReturn(Collections.singleton(sectionDto));
+
+        //  act
+        RecordsQueryResult<SectionRecord> resultRecordsQueryResult = sectionRecordsDao.queryLocalRecords(recordsQuery, metaField);
+
+        //  assert
+        Mockito.verify(predicateService, Mockito.times(0)).readJson(Mockito.anyString());
+        Mockito.verify(predicateService, Mockito.times(0)).filter(Mockito.any(), Mockito.any());
+        Mockito.verify(sectionService, Mockito.times(0)).getAll(Mockito.anySet());
+        Assert.assertEquals(resultRecordsQueryResult.getTotalCount(), 1);
+        SectionRecord resultSectionRecord = resultRecordsQueryResult.getRecords().get(0);
+        Assert.assertEquals(resultSectionRecord.getAttribute("name", metaField), "name");
+        Assert.assertEquals(resultSectionRecord.getAttribute("description", metaField), "desc");
+        Assert.assertEquals(resultSectionRecord.getAttribute("tenant", metaField), "tenant");
+        Assert.assertEquals(resultSectionRecord.getAttribute("types", metaField), types);
+    }
 }
