@@ -6,22 +6,25 @@ import org.springframework.stereotype.Component;
 import ru.citeck.ecos.apps.app.module.type.type.action.ActionDto;
 import ru.citeck.ecos.apps.app.module.type.type.action.EvaluatorDto;
 import ru.citeck.ecos.model.converter.AbstractDtoConverter;
+import ru.citeck.ecos.model.converter.Converter;
+import ru.citeck.ecos.model.converter.DtoConverter;
 import ru.citeck.ecos.model.domain.ActionEntity;
 import ru.citeck.ecos.model.domain.EvaluatorEntity;
 
 @Component
 public class ActionConverter extends AbstractDtoConverter<ActionDto, ActionEntity> {
 
-    private final NodeConverter nodeConverter;
-    private final EvaluatorConverter evaluatorConverter;
+    private final Converter<String, JsonNode> nodeConverter;
+    private final DtoConverter<EvaluatorDto, EvaluatorEntity> evaluatorConverter;
 
     @Autowired
-    public ActionConverter(NodeConverter nodeConverter,
-                           EvaluatorConverter evaluatorConverter) {
+    public ActionConverter(Converter<String, JsonNode> nodeConverter,
+                           DtoConverter<EvaluatorDto, EvaluatorEntity> evaluatorConverter) {
         this.nodeConverter = nodeConverter;
         this.evaluatorConverter = evaluatorConverter;
     }
 
+    @Override
     public ActionDto entityToDto(ActionEntity action) {
         ActionDto dto = new ActionDto();
 
@@ -43,6 +46,7 @@ public class ActionConverter extends AbstractDtoConverter<ActionDto, ActionEntit
         return dto;
     }
 
+    @Override
     public ActionEntity dtoToEntity(ActionDto actionDto) {
         ActionEntity action = new ActionEntity();
 

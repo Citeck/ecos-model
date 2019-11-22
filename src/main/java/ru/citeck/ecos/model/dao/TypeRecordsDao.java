@@ -22,8 +22,8 @@ import ru.citeck.ecos.records2.predicate.RecordElements;
 import ru.citeck.ecos.records2.request.query.RecordsQuery;
 import ru.citeck.ecos.records2.request.query.RecordsQueryResult;
 import ru.citeck.ecos.records2.source.dao.local.LocalRecordsDAO;
-import ru.citeck.ecos.records2.source.dao.local.RecordsMetaLocalDAO;
-import ru.citeck.ecos.records2.source.dao.local.RecordsQueryWithMetaLocalDAO;
+import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsMetaDAO;
+import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsQueryWithMetaDAO;
 
 import java.util.*;
 import java.util.function.Function;
@@ -31,8 +31,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class TypeRecordsDao extends LocalRecordsDAO
-                            implements RecordsQueryWithMetaLocalDAO<TypeRecordsDao.TypeRecord>,
-                                       RecordsMetaLocalDAO<TypeRecordsDao.TypeRecord> {
+    implements LocalRecordsQueryWithMetaDAO<TypeRecordsDao.TypeRecord>, LocalRecordsMetaDAO<TypeRecordsDao.TypeRecord> {
 
     public static final String ID = "type";
 
@@ -57,28 +56,28 @@ public class TypeRecordsDao extends LocalRecordsDAO
     }
 
     @Override
-    public List<TypeRecord> getMetaValues(List<RecordRef> list) {
+    public List<TypeRecord> getLocalRecordsMeta(List<RecordRef> list, MetaField metaField) {
         if (list.size() == 1 && list.get(0).getId().isEmpty()) {
             return Collections.singletonList(EMPTY_RECORD);
         }
 
         return list.stream()
-            .map(ref -> new TypeRecord(typeService.getByExtId(ref.toString())))
+            .map(ref -> new TypeRecord(typeService.getByExtId(ref.getId())))
             .collect(Collectors.toList());
     }
 
     @Override
-    public RecordsQueryResult<TypeRecord> getMetaValues(RecordsQuery query) {
+    public RecordsQueryResult<TypeRecord> queryLocalRecords(RecordsQuery recordsQuery, MetaField metaField) {
 
         RecordsQueryResult<TypeRecord> result = new RecordsQueryResult<>();
 
-        if (query.getLanguage().equals(PredicateService.LANGUAGE_PREDICATE)) {
-            Predicate predicate = predicateService.readJson(query.getQuery());
+        if (recordsQuery.getLanguage().equals(PredicateService.LANGUAGE_PREDICATE)) {
+            Predicate predicate = predicateService.readJson(recordsQuery.getQuery());
 
-            query.setSourceId(ID);
-            query.setLanguage(LANGUAGE_EMPTY);
+            recordsQuery.setSourceId(ID);
+            recordsQuery.setLanguage(LANGUAGE_EMPTY);
 
-            Elements<RecordElement> elements = new RecordElements(recordsService, query);
+            Elements<RecordElement> elements = new RecordElements(recordsService, recordsQuery);
 
             Set<String> filteredResultIds = predicateService.filter(elements, predicate).stream()
                 .map(e -> e.getRecordRef().getId())
@@ -96,6 +95,10 @@ public class TypeRecordsDao extends LocalRecordsDAO
         return result;
     }
 
+    /**
+     * This class must be like {@link ru.citeck.ecos.model.dao.record.SectionRecord} in dedicated '.class' file,
+     * but we don't need to set inherited type actions in dto or record.
+     */
     public class TypeRecord implements MetaValue {
 
         private final TypeDto dto;

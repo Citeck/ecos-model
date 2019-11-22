@@ -1,201 +1,181 @@
 package ru.citeck.ecos.model.service;
 
-
 import org.junit.Assert;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.model.converter.impl.SectionConverter;
-import ru.citeck.ecos.model.dao.TypeRecordsDao;
 import ru.citeck.ecos.model.domain.SectionEntity;
+import ru.citeck.ecos.model.domain.TypeEntity;
 import ru.citeck.ecos.model.dto.SectionDto;
 import ru.citeck.ecos.model.repository.SectionRepository;
 import ru.citeck.ecos.model.service.impl.SectionServiceImpl;
 import ru.citeck.ecos.records2.RecordRef;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.Set;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 public class SectionServiceImplTest {
 
-    @Mock
+    @MockBean
     private SectionRepository sectionRepository;
 
-    @Mock
-    private SectionConverter converter;
+    @MockBean
+    private SectionConverter sectionConverter;
 
-    private SectionService sectionService;
+    private SectionServiceImpl sectionService;
+
+    private SectionDto sectionDto;
+    private SectionEntity sectionEntity;
+    private Set<RecordRef> typesRefs;
+    private Set<TypeEntity> types;
+    private String sectionExtId;
 
     @BeforeEach
     public void init() {
-        sectionService = new SectionServiceImpl(sectionRepository, converter);
-    }
+        sectionService = new SectionServiceImpl(sectionRepository, sectionConverter);
 
+        sectionExtId = "section";
 
-    @Test
-    public void getAllReturnTypes() {
+        typesRefs = Collections.singleton(RecordRef.create("type", "type"));
 
-        SectionEntity sectionEntity = new SectionEntity("a", 1L, null, "a",
-            "a_desc", "a_tenant");
-        SectionEntity sectionEntity2 = new SectionEntity("b", 2L, null, "b",
-            "b_desc", "b_tenant");
+        sectionDto = new SectionDto();
+        sectionDto.setId(sectionExtId);
+        sectionDto.setName("name");
+        sectionDto.setDescription("desc");
+        sectionDto.setTenant("tenant");
+        sectionDto.setTypes(typesRefs);
 
-        List<SectionEntity> entities = Arrays.asList(
-            sectionEntity,
-            sectionEntity2
-        );
+        TypeEntity typeEntity = new TypeEntity();
+        typeEntity.setExtId("type");
 
-        given(sectionRepository.findAll()).willReturn(entities);
+        types = Collections.singleton(typeEntity);
 
-
-        Set<SectionDto> dtos = sectionService.getAll();
-
-
-        Assert.assertEquals(2, dtos.size());
-    }
-
-    @Test
-    public void getAllWhenReturnNothing() {
-        Assertions.assertThrows(NullPointerException.class, () -> {
-            given(sectionRepository.findAll()).willReturn(null);
-
-
-            sectionService.getAll();
-        });
+        sectionEntity = new SectionEntity();
+        sectionEntity.setId(1L);
+        sectionEntity.setExtId(sectionExtId);
+        sectionEntity.setName("name");
+        sectionEntity.setDescription("desc");
+        sectionEntity.setTenant("tenant");
+        sectionEntity.setTypes(types);
     }
 
     @Test
-    public void getAllSelectedReturnTypes() {
+    void testGetAll() {
 
-        SectionEntity sectionEntity = new SectionEntity("b", 2L, null, "b",
-            "b_desc", "b_tenant");
+        //  arrange
+        when(sectionRepository.findAll()).thenReturn(Collections.singletonList(sectionEntity));
+        when(sectionConverter.targetToSource(sectionEntity)).thenReturn(sectionDto);
 
-        Set<SectionEntity> entities = Collections.singleton(sectionEntity);
+        //  act
+        Set<SectionDto> resultSectionDtos = sectionService.getAll();
 
-        given(sectionRepository.findAllByExtIds(Collections.singleton("b"))).willReturn(entities);
-
-
-        Set<SectionDto> dtos = sectionService.getAll(Collections.singleton("b"));
-
-
-        Assert.assertEquals(1, dtos.size());
+        //  assert
+        Assert.assertEquals(resultSectionDtos.size(), 1);
+        SectionDto resultSectionDto = resultSectionDtos.iterator().next();
+        Assert.assertEquals(resultSectionDto.getName(), sectionEntity.getName());
+        Assert.assertEquals(resultSectionDto.getTenant(), sectionEntity.getTenant());
+        Assert.assertEquals(resultSectionDto.getDescription(), sectionEntity.getDescription());
+        Assert.assertEquals(resultSectionDto.getId(), sectionEntity.getExtId());
+        Assert.assertEquals(resultSectionDto.getTypes().size(), sectionEntity.getTypes().size());
+        RecordRef resultTypeRef = resultSectionDto.getTypes().iterator().next();
+        TypeEntity type = sectionEntity.getTypes().iterator().next();
+        Assert.assertEquals(resultTypeRef.getId(), type.getExtId());
     }
 
     @Test
-    public void getAllSelectedNothing() {
-        Assertions.assertThrows(NullPointerException.class, () -> {
-            given(sectionRepository.findAllByExtIds(Collections.singleton("b"))).willReturn(null);
+    void testGetAllWithExtIdsArgs() {
 
+        //  arrange
+        when(sectionRepository.findAllByExtIds(Collections.singleton(sectionExtId)))
+            .thenReturn(Collections.singleton(sectionEntity));
+        when(sectionConverter.targetToSource(sectionEntity)).thenReturn(sectionDto);
 
-            sectionService.getAll(Collections.singleton("b"));
-        });
+        //  act
+        Set<SectionDto> resultSectionDtos = sectionService.getAll(Collections.singleton(sectionExtId));
+
+        //  assert
+        Assert.assertEquals(resultSectionDtos.size(), 1);
+        SectionDto resultSectionDto = resultSectionDtos.iterator().next();
+        Assert.assertEquals(resultSectionDto.getName(), sectionEntity.getName());
+        Assert.assertEquals(resultSectionDto.getTenant(), sectionEntity.getTenant());
+        Assert.assertEquals(resultSectionDto.getDescription(), sectionEntity.getDescription());
+        Assert.assertEquals(resultSectionDto.getId(), sectionEntity.getExtId());
+        Assert.assertEquals(resultSectionDto.getTypes().size(), sectionEntity.getTypes().size());
+        RecordRef resultTypeRef = resultSectionDto.getTypes().iterator().next();
+        TypeEntity type = sectionEntity.getTypes().iterator().next();
+        Assert.assertEquals(resultTypeRef.getId(), type.getExtId());
     }
 
     @Test
-    public void getByIdReturnTypeDto() {
-        SectionEntity sectionEntity = new SectionEntity("a", 1L, null, "a",
-            "a_desc", "a_tenant");
-        SectionEntity sectionEntity2 = new SectionEntity("b", 2L, null, "b",
-            "b_desc", "b_tenant");
+    void testGetByExtId() {
 
-        given(sectionRepository.findByExtId("b")).willReturn(Optional.of(sectionEntity2));
+        //  arrange
+        when(sectionRepository.findByExtId(sectionExtId)).thenReturn(Optional.of(sectionEntity));
+        when(sectionConverter.targetToSource(sectionEntity)).thenReturn(sectionDto);
 
+        //  act
+        SectionDto resultSectionDto = sectionService.getByExtId(sectionExtId);
 
-        SectionDto dto = sectionService.getByExtId("b");
-
-
-        Assert.assertEquals("b", dto.getId());
-        Assert.assertEquals("b", dto.getName());
-        Assert.assertEquals("b_desc", dto.getDescription());
-        Assert.assertEquals("b_tenant", dto.getTenant());
+        //  assert
+        Assert.assertEquals(resultSectionDto.getName(), sectionEntity.getName());
+        Assert.assertEquals(resultSectionDto.getTenant(), sectionEntity.getTenant());
+        Assert.assertEquals(resultSectionDto.getDescription(), sectionEntity.getDescription());
+        Assert.assertEquals(resultSectionDto.getId(), sectionEntity.getExtId());
+        Assert.assertEquals(resultSectionDto.getTypes().size(), sectionEntity.getTypes().size());
+        RecordRef resultTypeRef = resultSectionDto.getTypes().iterator().next();
+        TypeEntity type = sectionEntity.getTypes().iterator().next();
+        Assert.assertEquals(resultTypeRef.getId(), type.getExtId());
     }
 
     @Test
-    public void getByIdReturnNothing() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            sectionService.getByExtId("b");
-        });
-    }
+    void testGetByExtIdThrowsException() {
 
-    @Test
-    public void deleteSuccess() {
-        SectionEntity sectionEntity = new SectionEntity("a",1L, null, "a",
-            "a_desc", "a_tenant");
+        //  arrange
+        when(sectionRepository.findByExtId(sectionExtId)).thenReturn(Optional.empty());
 
-        given(sectionRepository.findByExtId("a")).willReturn(Optional.of(sectionEntity));
+        //  act
+        try {
+            sectionService.getByExtId(sectionExtId);
+        } catch (IllegalArgumentException iae) {
 
-
-        sectionService.delete("a");
-
-
-        Mockito.verify(sectionRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
-
-    }
-
-    @Test
-    public void deleteNoDeletion() {
-        given(sectionRepository.findByExtId("a")).willReturn(Optional.empty());
-
-
-        sectionService.delete("a");
-
-
-        Mockito.verify(sectionRepository, Mockito.times(0)).deleteById(Mockito.anyLong());
-    }
-
-    @Test
-    public void updateSuccessNewEntity() {
-        SectionEntity sectionEntity = new SectionEntity("a", 1L, null, "aname",
-            "a_desc", "a_tenant");
-
-        given(sectionRepository.findByExtId("a")).willReturn(Optional.empty());
-
-
-        SectionDto dto = sectionService.update(entityToDto(sectionEntity));
-
-
-        Mockito.verify(sectionRepository, times(1)).save(Mockito.any());
-        Assert.assertEquals("a", dto.getId());
-        Assert.assertEquals("aname", dto.getName());
-        Assert.assertEquals("a_desc", dto.getDescription());
-        Assert.assertEquals("a_tenant", dto.getTenant());
-    }
-
-    @Test
-    public void updateSuccessWithNoUUIDNewEntity() {
-        SectionEntity sectionEntity = new SectionEntity(null, 1L, null, "aname", "a_desc", "a_tenant");
-
-
-        SectionDto dto = sectionService.update(entityToDto(sectionEntity));
-
-
-        Mockito.verify(sectionRepository, times(1)).save(Mockito.any());
-        Assert.assertNotNull(dto.getId());
-        Assert.assertEquals("aname", dto.getName());
-        Assert.assertEquals("a_desc", dto.getDescription());
-        Assert.assertEquals("a_tenant", dto.getTenant());
-    }
-
-    private SectionDto entityToDto(SectionEntity entity) {
-        Set<RecordRef> typesRefs = null;
-        if (entity.getTypes() != null) {
-            typesRefs = entity.getTypes().stream()
-                .map(e -> RecordRef.create(TypeRecordsDao.ID, e.getExtId()))
-                .collect(Collectors.toSet());
+            //  assert
+            Mockito.verify(sectionConverter, Mockito.times(0)).targetToSource(Mockito.any());
+            Assert.assertEquals(iae.getMessage(), "Section doesnt exists: " + sectionExtId);
         }
-        return new SectionDto(
-            entity.getExtId(),
-            entity.getName(),
-            entity.getDescription(),
-            entity.getTenant(),
-            typesRefs);
+    }
+
+    @Test
+    void testDelete() {
+
+        //  arrange
+        when(sectionRepository.findByExtId(sectionExtId)).thenReturn(Optional.of(sectionEntity));
+
+        //  act
+        sectionService.delete(sectionExtId);
+
+        //  assert
+        Mockito.verify(sectionRepository, Mockito.times(1)).deleteById(1L);
+    }
+
+    @Test
+    void testUpdate() {
+
+        //  arrange
+        when(sectionConverter.sourceToTarget(sectionDto)).thenReturn(sectionEntity);
+
+        //  act
+        sectionService.update(sectionDto);
+
+        //  assert
+        Mockito.verify(sectionRepository, Mockito.times(1)).save(sectionEntity);
+        Mockito.verify(sectionConverter, Mockito.times(1)).targetToSource(sectionEntity);
     }
 }

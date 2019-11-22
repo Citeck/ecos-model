@@ -31,30 +31,35 @@ public class SectionConverter extends AbstractDtoConverter<SectionDto, SectionEn
     }
 
     @Override
-    protected SectionEntity dtoToEntity(SectionDto dto) {
+    public SectionEntity dtoToEntity(SectionDto dto) {
+
+        String extId = extractId(dto.getId());
+
         SectionEntity sectionEntity = new SectionEntity();
         sectionEntity.setName(dto.getName());
-        String extId = extractId(dto.getId());
         sectionEntity.setExtId(extId);
         sectionEntity.setDescription(dto.getDescription());
         sectionEntity.setTenant(dto.getTenant());
+
         if (dto.getTypes() != null) {
             Set<String> dtoTypesExtIds = dto.getTypes().stream()
                 .map(r -> extractId(r.getId())).collect(Collectors.toSet());
             Set<TypeEntity> storedTypes = typeRepository.findAllByExtIds(dtoTypesExtIds);
             sectionEntity.setTypes(storedTypes);
         }
+
         if (Strings.isBlank(sectionEntity.getExtId())) {
             sectionEntity.setExtId(UUID.randomUUID().toString());
         } else {
             Optional<SectionEntity> stored = sectionRepository.findByExtId(sectionEntity.getExtId());
             sectionEntity.setId(stored.map(SectionEntity::getId).orElse(null));
         }
+
         return sectionEntity;
     }
 
     @Override
-    protected SectionDto entityToDto(SectionEntity entity) {
+    public SectionDto entityToDto(SectionEntity entity) {
         Set<RecordRef> typesRefs = null;
         if (entity.getTypes() != null) {
             typesRefs = entity.getTypes().stream()

@@ -1,30 +1,30 @@
 package ru.citeck.ecos.model.service;
 
 import org.junit.Assert;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.citeck.ecos.model.converter.impl.ActionConverter;
+import ru.citeck.ecos.apps.app.module.type.type.action.ActionDto;
 import ru.citeck.ecos.model.converter.impl.TypeConverter;
+import ru.citeck.ecos.model.domain.ActionEntity;
 import ru.citeck.ecos.model.domain.AssociationEntity;
 import ru.citeck.ecos.model.domain.SectionEntity;
 import ru.citeck.ecos.model.domain.TypeEntity;
 import ru.citeck.ecos.model.dto.AssociationDto;
 import ru.citeck.ecos.model.dto.TypeDto;
-import ru.citeck.ecos.model.repository.AssociationRepository;
 import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.model.service.exception.ForgottenChildsException;
-import ru.citeck.ecos.model.service.exception.ParentNotFoundException;
 import ru.citeck.ecos.model.service.impl.TypeServiceImpl;
+import ru.citeck.ecos.records2.RecordRef;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.Set;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 public class TypeServiceImplTest {
@@ -33,250 +33,224 @@ public class TypeServiceImplTest {
     private TypeRepository typeRepository;
 
     @Mock
-    private AssociationRepository associationRepository;
+    private AssociationService associationService;
 
     @Mock
-    private ActionConverter actionConverter;
+    private TypeConverter typeConverter;
 
-    private TypeConverter converter;
-
-    private TypeService typeService;
+    private TypeServiceImpl typeService;
 
     private TypeEntity typeEntity;
-    private TypeEntity typeEntity2;
-    private TypeEntity parent;
-    private AssociationEntity target;
+
+    private TypeDto typeDto;
+
+    private String typeExtId;
+    private ActionDto actionDto;
+    private AssociationDto associationDto;
 
     @BeforeEach
-    public void init() {
-        converter = new TypeConverter(typeRepository, actionConverter);
-        typeService = new TypeServiceImpl(typeRepository, associationRepository, converter);
+    void init() {
 
-        parent = new TypeEntity();
-        parent.setExtId("parentId");
+        typeService = new TypeServiceImpl(typeRepository, associationService, typeConverter);
+
+        typeExtId = "type";
+
+        ActionEntity actionEntity = new ActionEntity();
+        actionEntity.setExtId("action");
+
+        AssociationEntity associationEntity = new AssociationEntity();
+        associationEntity.setExtId("association");
+
+        TypeEntity parent = new TypeEntity();
+        parent.setExtId("parent");
 
         TypeEntity child = new TypeEntity();
-        child.setExtId("childId");
+        child.setExtId("child");
 
-        SectionEntity section = new SectionEntity();
-        section.setExtId("sectionId");
+        SectionEntity sectionEntity = new SectionEntity();
+        sectionEntity.setExtId("section");
 
-        AssociationEntity source = new AssociationEntity();
-        source.setExtId("sourceId");
+        typeEntity = new TypeEntity();
+        typeEntity.setExtId(typeExtId);
+        typeEntity.setId(1L);
+        typeEntity.setName("name");
+        typeEntity.setTenant("tenant");
+        typeEntity.setDescription("desc");
+        typeEntity.setInheritActions(false);
+        typeEntity.setActions(Collections.singletonList(actionEntity));
+        typeEntity.setAssocsToOther(Collections.singleton(associationEntity));
+        typeEntity.setParent(parent);
+        typeEntity.setChilds(Collections.singleton(child));
+        typeEntity.setSections(Collections.singleton(sectionEntity));
 
-        target = new AssociationEntity();
-        target.setExtId("targetId");
+        actionDto = new ActionDto();
+        actionDto.setId("action");
 
-        TypeEntity targetType = new TypeEntity();
-        targetType.setExtId("targetTypeId");
-        target.setTarget(targetType);
+        associationDto = new AssociationDto();
+        associationDto.setId("association");
 
-        typeEntity = new TypeEntity(
-            "a", 1L, "a_name", "a_desc", "a_tenant", false, parent, Collections.singleton(child),
-            Collections.singleton(section), Collections.singleton(source), Collections.singleton(target), null);
-        typeEntity2 = new TypeEntity("b", 2L, "b",
-            "b_desc", "b_tenant", false, typeEntity, null, null, null, null, null);
-
-    }
-
-
-    @Test
-    public void getAllReturnTypes() {
-
-        List<TypeEntity> entities = Collections.singletonList(typeEntity);
-
-        given(typeRepository.findAll()).willReturn(entities);
-
-
-        Set<TypeDto> dtos = typeService.getAll();
-
-
-        Assert.assertEquals(1, dtos.size());
-        Assert.assertEquals(dtos.iterator().next().getId(), typeEntity.getExtId());
+        typeDto = new TypeDto();
+        typeDto.setId(typeExtId);
+        typeDto.setName("name");
+        typeDto.setTenant("tenant");
+        typeDto.setDescription("desc");
+        typeDto.setInheritActions(false);
+        typeDto.setActions(Collections.singleton(actionDto));
+        typeDto.setAssociations(Collections.singleton(associationDto));
+        typeDto.setParent(RecordRef.create("type", "parent"));
     }
 
     @Test
-    public void getAllWhenReturnNothing() {
-        Assertions.assertThrows(NullPointerException.class, () -> {
-            given(typeRepository.findAll()).willReturn(null);
+    void testGetAll() {
 
+        //  arrange
+        when(typeRepository.findAll()).thenReturn(Collections.singletonList(typeEntity));
+        when(typeConverter.targetToSource(typeEntity)).thenReturn(typeDto);
 
-            typeService.getAll();
-        });
+        //  act
+        Set<TypeDto> resultTypeDtos = typeService.getAll();
+
+        //  assert
+        Assert.assertEquals(resultTypeDtos.size(), 1);
+        TypeDto resultTypeDto = resultTypeDtos.iterator().next();
+        Assert.assertEquals(resultTypeDto.getId(), typeEntity.getExtId());
+        Assert.assertEquals(resultTypeDto.getName(), typeEntity.getName());
+        Assert.assertEquals(resultTypeDto.getDescription(), typeEntity.getDescription());
+        Assert.assertEquals(resultTypeDto.getTenant(), typeEntity.getTenant());
+        Assert.assertEquals(resultTypeDto.getAssociations(), Collections.singleton(associationDto));
+        Assert.assertEquals(resultTypeDto.getActions(), Collections.singleton(actionDto));
+        Assert.assertEquals(resultTypeDto.getParent(), RecordRef.create("type", "parent"));
     }
 
     @Test
-    public void getAllSelectedReturnTypes() {
+    void testGetAllWithArgs() {
 
-        typeEntity.setChilds(new HashSet<>(Collections.singleton(typeEntity2)));
+        //  arrange
+        when(typeRepository.findAllByExtIds(Collections.singleton(typeExtId)))
+            .thenReturn(Collections.singleton(typeEntity));
+        when(typeConverter.targetToSource(typeEntity)).thenReturn(typeDto);
 
-        Set<TypeEntity> entities = new HashSet<>();
-        entities.add(typeEntity);
-        given(typeRepository.findAllByExtIds(Collections.singleton("a"))).willReturn(entities);
+        //  act
+        Set<TypeDto> resultTypeDtos = typeService.getAll(Collections.singleton(typeExtId));
 
-
-        Set<TypeDto> dtos = typeService.getAll(Collections.singleton("a"));
-
-
-        Assert.assertEquals(1, dtos.size());
-        TypeDto resultDto = dtos.iterator().next();
-        Assert.assertEquals("a", resultDto.getId());
-        Assert.assertEquals("a_name", resultDto.getName());
-        Assert.assertEquals("a_desc", resultDto.getDescription());
-        Assert.assertEquals("a_tenant", resultDto.getTenant());
-        Assert.assertEquals("parentId", resultDto.getParent().getId());
-        Assert.assertEquals("targetId", resultDto.getAssociations().iterator().next().getId());
+        //  assert
+        Assert.assertEquals(resultTypeDtos.size(), 1);
+        TypeDto resultTypeDto = resultTypeDtos.iterator().next();
+        Assert.assertEquals(resultTypeDto.getId(), typeEntity.getExtId());
+        Assert.assertEquals(resultTypeDto.getName(), typeEntity.getName());
+        Assert.assertEquals(resultTypeDto.getDescription(), typeEntity.getDescription());
+        Assert.assertEquals(resultTypeDto.getTenant(), typeEntity.getTenant());
+        Assert.assertEquals(resultTypeDto.getAssociations(), Collections.singleton(associationDto));
+        Assert.assertEquals(resultTypeDto.getActions(), Collections.singleton(actionDto));
+        Assert.assertEquals(resultTypeDto.getParent(), RecordRef.create("type", "parent"));
     }
 
     @Test
-    public void getAllSelectedNothing() {
-        Assertions.assertThrows(NullPointerException.class, () -> {
-            given(typeRepository.findAllByExtIds(Collections.singleton("b"))).willReturn(null);
+    void testGetByExtId() {
 
+        //  arrange
+        when(typeRepository.findByExtId(typeExtId)).thenReturn(Optional.of(typeEntity));
+        when(typeConverter.targetToSource(typeEntity)).thenReturn(typeDto);
 
-            typeService.getAll(Collections.singleton("b"));
-        });
+        //  act
+        TypeDto resultTypeDto = typeService.getByExtId(typeExtId);
+
+        //  assert
+        Assert.assertEquals(resultTypeDto.getId(), typeEntity.getExtId());
+        Assert.assertEquals(resultTypeDto.getName(), typeEntity.getName());
+        Assert.assertEquals(resultTypeDto.getDescription(), typeEntity.getDescription());
+        Assert.assertEquals(resultTypeDto.getTenant(), typeEntity.getTenant());
+        Assert.assertEquals(resultTypeDto.getAssociations(), Collections.singleton(associationDto));
+        Assert.assertEquals(resultTypeDto.getActions(), Collections.singleton(actionDto));
+        Assert.assertEquals(resultTypeDto.getParent(), RecordRef.create("type", "parent"));
     }
 
     @Test
-    public void getByIdReturnTypeDto() {
+    void testGetByExtIdThrowsException() {
 
-        typeEntity.setChilds(Collections.singleton(typeEntity));
+        //  arrange
+        when(typeRepository.findByExtId(typeExtId)).thenReturn(Optional.empty());
 
-        given(typeRepository.findByExtId("a")).willReturn(Optional.of(typeEntity));
-
-
-        TypeDto dto = typeService.getByExtId("a");
-
-
-        Assert.assertEquals("a", dto.getId());
-        Assert.assertEquals("a_name", dto.getName());
-        Assert.assertEquals("a_desc", dto.getDescription());
-        Assert.assertEquals("a_tenant", dto.getTenant());
-        Assert.assertEquals("parentId", dto.getParent().getId());
-        Assert.assertEquals("targetId", dto.getAssociations().iterator().next().getId());
+        //  act
+        try {
+            typeService.getByExtId(typeExtId);
+        } catch (IllegalArgumentException iae) {
+            //  assert
+            Mockito.verify(typeConverter, Mockito.times(0)).targetToSource(Mockito.any());
+            Assert.assertEquals(iae.getMessage(), "Type doesnt exists: " + typeExtId);
+        }
     }
 
     @Test
-    public void getByIdReturnNothing() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            given(typeRepository.findByExtId("b")).willReturn(Optional.empty());
+    void testDelete() {
 
+        //  arrange
+        typeEntity.setChilds(Collections.emptySet());
+        when(typeRepository.findByExtId(typeExtId)).thenReturn(Optional.of(typeEntity));
 
-            typeService.getByExtId("b");
-        });
+        //  act
+        typeService.delete(typeExtId);
+
+        //  assert
+        Mockito.verify(typeRepository, Mockito.times(1)).deleteById(1L);
     }
 
     @Test
-    public void deleteSuccess() {
+    void testDeleteThrowsException() {
 
-        typeEntity.setChilds(null);
+        //  arrange
+        when(typeRepository.findByExtId(typeExtId)).thenReturn(Optional.of(typeEntity));
 
-        given(typeRepository.findByExtId("a")).willReturn(Optional.of(typeEntity));
-
-
-        typeService.delete("a");
-
-
-        Mockito.verify(typeRepository, times(1)).deleteById(Mockito.anyLong());
-
+        //  act
+        try {
+            typeService.delete(typeExtId);
+        } catch (ForgottenChildsException fce) {
+            //  assert
+            Mockito.verify(typeRepository, Mockito.times(0)).deleteById(1L);
+            Assert.assertEquals(fce.getMessage(), "Children types could be forgotten");
+        }
     }
 
     @Test
-    public void deleteException() {
-        Assertions.assertThrows(ForgottenChildsException.class, () -> {
-            given(typeRepository.findByExtId("a")).willReturn(Optional.of(typeEntity));
+    void testDeleteTypeNotFound() {
 
+        //  arrange
+        when(typeRepository.findByExtId(typeExtId)).thenReturn(Optional.empty());
 
-            typeService.delete("a");
+        //  act
+        typeService.delete(typeExtId);
 
-
-            Mockito.verify(typeRepository, times(0)).deleteById(Mockito.anyLong());
-        });
+        //  assert
+        Mockito.verify(typeRepository, Mockito.times(0)).deleteById(1L);
     }
 
     @Test
-    public void deleteNoDeletion() {
+    void testUpdate() {
 
-        given(typeRepository.findByExtId("a")).willReturn(Optional.empty());
+        //  arrange
+        when(typeConverter.sourceToTarget(typeDto)).thenReturn(typeEntity);
 
+        //  act
+        typeService.update(typeDto);
 
-        typeService.delete("a");
-
-
-        Mockito.verify(typeRepository, times(0)).deleteById(Mockito.anyLong());
+        //  assert
+        Mockito.verify(typeRepository, Mockito.times(1)).save(typeEntity);
+        Mockito.verify(typeConverter, Mockito.times(1)).targetToSource(typeEntity);
     }
 
     @Test
-    public void updateSuccessNoParentNewEntity() {
+    void testUpdateWithoutAssocsToOther() {
 
-        typeEntity.setParent(null);
+        //  arrange
+        typeEntity.setAssocsToOther(null);
+        when(typeConverter.sourceToTarget(typeDto)).thenReturn(typeEntity);
 
-        given(typeRepository.findByExtId("a")).willReturn(Optional.empty());
+        //  act
+        typeService.update(typeDto);
 
-
-        TypeDto dto = typeService.update(converter.targetToSource(typeEntity));
-
-
-        Mockito.verify(typeRepository, times(1)).save(Mockito.any());
-        Assert.assertEquals("a", dto.getId());
-        Assert.assertEquals("a_name", dto.getName());
-        Assert.assertEquals("a_desc", dto.getDescription());
-        Assert.assertEquals("a_tenant", dto.getTenant());
-        Assert.assertNull(dto.getParent());
+        //  assert
+        Mockito.verify(typeRepository, Mockito.times(1)).save(typeEntity);
+        Mockito.verify(typeConverter, Mockito.times(1)).targetToSource(typeEntity);
+        Mockito.verify(associationService, Mockito.times(0)).saveAll(Mockito.anySet());
     }
-
-    @Test
-    public void updateSuccessWithParentNewEntity() {
-
-        given(typeRepository.findByExtId("a")).willReturn(Optional.empty());
-        given(typeRepository.findByExtId("parentId")).willReturn(Optional.of(parent));
-        given(associationRepository.findByExtId("targetId")).willReturn(Optional.of(target));
-
-
-        TypeDto dto = typeService.update(converter.targetToSource(typeEntity));
-
-
-        Mockito.verify(typeRepository, times(1)).save(Mockito.any());
-        Assert.assertEquals("a", dto.getId());
-        Assert.assertEquals("a_name", dto.getName());
-        Assert.assertEquals("a_desc", dto.getDescription());
-        Assert.assertEquals("a_tenant", dto.getTenant());
-        Assert.assertEquals("parentId", dto.getParent().getId());
-        AssociationDto assocDto = dto.getAssociations().iterator().next();
-        Assert.assertEquals("targetId", assocDto.getTargetType().getId());
-    }
-
-    @Test
-    public void updateSuccessWithNoExtIdNewEntity() {
-
-        given(typeRepository.findByExtId("parentId")).willReturn(Optional.of(parent));
-        given(associationRepository.findByExtId("targetId")).willReturn(Optional.of(target));
-
-        TypeDto dto = typeService.update(converter.targetToSource(typeEntity));
-
-
-        Mockito.verify(typeRepository, times(1)).save(Mockito.any());
-        Assert.assertNotNull(dto.getId());
-        Assert.assertEquals("a", dto.getId());
-        Assert.assertEquals("a_name", dto.getName());
-        Assert.assertEquals("a_desc", dto.getDescription());
-        Assert.assertEquals("a_tenant", dto.getTenant());
-        Assert.assertEquals("parentId", dto.getParent().getId());
-        Assert.assertEquals("targetId", dto.getAssociations().iterator().next().getId());
-    }
-
-    @Test
-    public void updateException() {
-        Assertions.assertThrows(ParentNotFoundException.class, () -> {
-            given(typeRepository.findByExtId("b")).willReturn(Optional.empty());
-
-
-            typeService.update(converter.targetToSource(typeEntity));
-
-
-            Mockito.verify(typeRepository, times(0)).save(Mockito.any());
-        });
-    }
-
 }

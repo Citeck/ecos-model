@@ -37,16 +37,16 @@ public class ActionEntity extends BaseEntity {
     @Override
     public String toString() {
         return "ActionEntity{" +
-            "extId='" + extId + '\'' +
-            ", name='" + name + '\'' +
-            ", type='" + type + '\'' +
-            ", key='" + key + '\'' +
-            ", icon='" + icon + '\'' +
+            "extId='" + (extId != null ? extId : "null") + '\'' +
+            ", name='" + (name != null ? name : "null") + '\'' +
+            ", type='" + (type != null ? type : "null") + '\'' +
+            ", key='" + (key != null ? key : "null") + '\'' +
+            ", icon='" + (icon != null ? icon : "null") + '\'' +
             ", order=" + order +
-            ", configJson='" + configJson + '\'' +
-            ", ecosType=" + ecosType.getId() +
-            ", evaluator=" + evaluator.getId() +
-            ", id=" + id +
+            ", configJson='" + (configJson != null ? configJson : "null") + '\'' +
+            ", ecosType=" + (ecosType != null && ecosType.getId() != null ? ecosType.getId() : "null") + '\'' +
+            ", evaluator=" + (evaluator != null && evaluator.getExtId() != null ? evaluator.getId() : "null") + '\'' +
+            ", id=" + (id != null ? id : "null") +
             '}';
     }
 }
