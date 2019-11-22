@@ -73,4 +73,8 @@ public class TypeEntity {
         actionEntity.setEcosType(null);
     }
 
+    public void setActions(List<ActionEntity> actionEntities) {
+        throw new UnsupportedOperationException("You must use utility methods addAction/removeAction");
+    }
+    
 }
