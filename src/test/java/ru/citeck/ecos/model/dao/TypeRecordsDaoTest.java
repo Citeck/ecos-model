@@ -26,7 +26,6 @@ import ru.citeck.ecos.records2.predicate.RecordElements;
 import ru.citeck.ecos.records2.request.query.RecordsQuery;
 import ru.citeck.ecos.records2.request.query.RecordsQueryResult;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -49,8 +48,6 @@ public class TypeRecordsDaoTest {
     private List<RecordRef> recordRefs;
     private RecordsQuery recordsQuery;
     private TypeDto typeDto;
-    private AssociationDto associationDto;
-    private ActionDto actionDto;
     private MetaField metaField;
     private Predicate predicate;
 
@@ -59,7 +56,7 @@ public class TypeRecordsDaoTest {
         typeRecordsDao = new TypeRecordsDao(typeService, predicateService, recordsService);
         typeRecordsDao.setRecordsServiceFactory(new RecordsServiceFactory());
 
-        recordRefs = Arrays.asList(
+        recordRefs = Collections.singletonList(
             RecordRef.create("type", "type")
         );
 
@@ -67,10 +64,10 @@ public class TypeRecordsDaoTest {
         recordsQuery.setQuery("query");
         recordsQuery.setLanguage(PredicateService.LANGUAGE_PREDICATE);
 
-        associationDto = new AssociationDto();
+        AssociationDto associationDto = new AssociationDto();
         associationDto.setId("association");
 
-        actionDto = new ActionDto();
+        ActionDto actionDto = new ActionDto();
         actionDto.setId("action");
 
         typeDto = new TypeDto();

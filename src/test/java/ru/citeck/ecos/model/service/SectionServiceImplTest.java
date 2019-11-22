@@ -34,8 +34,6 @@ public class SectionServiceImplTest {
 
     private SectionDto sectionDto;
     private SectionEntity sectionEntity;
-    private Set<RecordRef> typesRefs;
-    private Set<TypeEntity> types;
     private String sectionExtId;
 
     @BeforeEach
@@ -44,7 +42,7 @@ public class SectionServiceImplTest {
 
         sectionExtId = "section";
 
-        typesRefs = Collections.singleton(RecordRef.create("type", "type"));
+        Set<RecordRef> typesRefs = Collections.singleton(RecordRef.create("type", "type"));
 
         sectionDto = new SectionDto();
         sectionDto.setId(sectionExtId);
@@ -56,7 +54,7 @@ public class SectionServiceImplTest {
         TypeEntity typeEntity = new TypeEntity();
         typeEntity.setExtId("type");
 
-        types = Collections.singleton(typeEntity);
+        Set<TypeEntity> types = Collections.singleton(typeEntity);
 
         sectionEntity = new SectionEntity();
         sectionEntity.setId(1L);

@@ -92,6 +92,8 @@
         <ecos-records.version>1.10.0-SNAPSHOT</ecos-records.version>
         <ecos-apps-lib-spring>1.2.0-SNAPSHOT</ecos-apps-lib-spring>
         <lombok.version>1.18.8</lombok.version>
+        <junit-jupiter.version>5.1.0</junit-jupiter.version>
+        <junit.version>4.12</junit.version>
         <!-- jhipster-needle-maven-property -->
     </properties>
 
@@ -202,6 +204,19 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!--JUnit Jupiter Engine to depend on the JUnit4 engine and JUnit 4 API  -->
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <version>${junit-jupiter.version}</version>
+        </dependency>
+        <!-- Optional : override the JUnit 4 API version provided by junit-vintage-engine -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

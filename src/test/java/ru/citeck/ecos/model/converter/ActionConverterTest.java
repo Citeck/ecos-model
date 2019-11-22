@@ -32,7 +32,6 @@ public class ActionConverterTest {
     private ActionEntity actionEntity;
     private ActionDto actionDto;
 
-    private TypeEntity typeEntity;
     private EvaluatorEntity evaluatorEntity;
     private EvaluatorDto evaluatorDto;
     private JsonNode config;
@@ -42,7 +41,7 @@ public class ActionConverterTest {
 
         actionConverter = new ActionConverter(nodeConverter, evaluatorConverter);
 
-        typeEntity = new TypeEntity();
+        TypeEntity typeEntity = new TypeEntity();
         typeEntity.setExtId("type");
 
         evaluatorEntity = new EvaluatorEntity();

@@ -3,37 +3,30 @@ package ru.citeck.ecos.model.converter.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.model.converter.AbstractDtoConverter;
-import ru.citeck.ecos.model.converter.DtoConverter;
 import ru.citeck.ecos.model.domain.AssociationEntity;
 import ru.citeck.ecos.model.domain.TypeEntity;
 import ru.citeck.ecos.model.dto.AssociationDto;
-import ru.citeck.ecos.model.dto.TypeDto;
-import ru.citeck.ecos.model.service.TypeService;
+import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
 
 @Component
 public class AssociationConverter extends AbstractDtoConverter<AssociationDto, AssociationEntity> {
 
-    private final TypeService typeService;
-    private final DtoConverter<TypeDto, TypeEntity> typeConverter;
+    private final TypeRepository typeRepository;
 
     @Autowired
-    public AssociationConverter(TypeService typeService,
-                                DtoConverter<TypeDto, TypeEntity> typeConverter) {
-        this.typeService = typeService;
-        this.typeConverter = typeConverter;
+    public AssociationConverter(TypeRepository typeRepository) {
+        this.typeRepository = typeRepository;
     }
 
     @Override
     public AssociationEntity dtoToEntity(AssociationDto associationDto) {
         AssociationEntity associationEntity = new AssociationEntity();
 
-        TypeDto sourceTypeDto = typeService.getByExtId(associationDto.getSourceType().getId());
-        TypeEntity sourceTypeEntity = typeConverter.dtoToEntity(sourceTypeDto);
+        TypeEntity sourceTypeEntity = findType(associationDto.getSourceType().getId());
         associationEntity.setSource(sourceTypeEntity);
 
-        TypeDto targetTypeDto = typeService.getByExtId(associationDto.getTargetType().getId());
-        TypeEntity targetTypeEntity = typeConverter.dtoToEntity(targetTypeDto);
+        TypeEntity targetTypeEntity = findType(associationDto.getTargetType().getId());
         associationEntity.setTarget(targetTypeEntity);
 
         associationEntity.setName(associationDto.getName());
@@ -53,4 +46,10 @@ public class AssociationConverter extends AbstractDtoConverter<AssociationDto, A
         assocDto.setSourceType(RecordRef.create("type", associationEntity.getSource().getExtId()));
         return assocDto;
     }
+
+    private TypeEntity findType(String extId) {
+        return typeRepository.findByExtId(extId)
+            .orElseThrow(() -> new IllegalArgumentException("Type doesnt exists: " + extId));
+    }
+
 }
