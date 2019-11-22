@@ -77,7 +77,7 @@ public class TypeServiceImplTest {
         typeEntity.setTenant("tenant");
         typeEntity.setDescription("desc");
         typeEntity.setInheritActions(false);
-        typeEntity.setActions(Collections.singletonList(actionEntity));
+        typeEntity.addAction(actionEntity);
         typeEntity.setAssocsToOther(Collections.singleton(associationEntity));
         typeEntity.setParent(parent);
         typeEntity.setChilds(Collections.singleton(child));

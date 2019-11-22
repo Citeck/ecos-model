@@ -133,7 +133,7 @@ public class TypeConverterTest {
         //  arrange
         typeEntity.setParent(null);
         typeEntity.setAssocsToOther(null);
-        typeEntity.setActions(null);
+        typeEntity.removeAction(actionEntity);
 
         //  act
         TypeDto resultDto = typeConverter.targetToSource(typeEntity);
