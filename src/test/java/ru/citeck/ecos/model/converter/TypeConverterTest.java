@@ -41,13 +41,10 @@ public class TypeConverterTest {
     private TypeEntity typeEntity;
     private TypeDto typeDto;
 
-    private TypeEntity child;
     private TypeEntity parent;
 
     private ActionEntity actionEntity;
     private ActionDto actionDto;
-
-    private SectionEntity sectionEntity;
 
     private AssociationEntity associationEntity;
     private AssociationDto associationDto;
@@ -56,7 +53,7 @@ public class TypeConverterTest {
     void setUp() {
         typeConverter = new TypeConverter(typeRepository, actionConverter, associationConverter);
 
-        child = new TypeEntity();
+        TypeEntity child = new TypeEntity();
         child.setExtId("child");
 
         parent = new TypeEntity();
@@ -68,7 +65,7 @@ public class TypeConverterTest {
         actionDto = new ActionDto();
         actionDto.setId("action");
 
-        sectionEntity = new SectionEntity();
+        SectionEntity sectionEntity = new SectionEntity();
         sectionEntity.setExtId("section");
 
         typeEntity = new TypeEntity();
@@ -133,7 +130,7 @@ public class TypeConverterTest {
         //  arrange
         typeEntity.setParent(null);
         typeEntity.setAssocsToOther(null);
-        typeEntity.setActions(null);
+        typeEntity.removeAction(actionEntity);
 
         //  act
         TypeDto resultDto = typeConverter.targetToSource(typeEntity);

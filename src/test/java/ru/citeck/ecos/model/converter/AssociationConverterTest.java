@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.model.converter.impl.AssociationConverter;
@@ -11,8 +12,10 @@ import ru.citeck.ecos.model.domain.AssociationEntity;
 import ru.citeck.ecos.model.domain.TypeEntity;
 import ru.citeck.ecos.model.dto.AssociationDto;
 import ru.citeck.ecos.model.dto.TypeDto;
-import ru.citeck.ecos.model.service.TypeService;
+import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
+
+import java.util.Optional;
 
 import static org.mockito.Mockito.when;
 
@@ -20,23 +23,18 @@ import static org.mockito.Mockito.when;
 public class AssociationConverterTest {
 
     @MockBean
-    private TypeService typeService;
-
-    @MockBean
-    private DtoConverter<TypeDto, TypeEntity> typeConverter;
+    private TypeRepository typeRepository;
 
     private AssociationConverter associationConverter;
 
     private AssociationDto associationDto;
     private AssociationEntity associationEntity;
     private TypeEntity sourceTypeEntity;
-    private TypeDto sourceTypeDto;
     private TypeEntity targetTypeEntity;
-    private TypeDto targetTypeDto;
 
     @BeforeEach
     void setUp() {
-        associationConverter = new AssociationConverter(typeService, typeConverter);
+        associationConverter = new AssociationConverter(typeRepository);
 
         associationDto = new AssociationDto();
         associationDto.setId("association");
@@ -48,13 +46,13 @@ public class AssociationConverterTest {
         sourceTypeEntity = new TypeEntity();
         sourceTypeEntity.setExtId("source");
 
-        sourceTypeDto = new TypeDto();
+        TypeDto sourceTypeDto = new TypeDto();
         sourceTypeDto.setId("source");
 
         targetTypeEntity = new TypeEntity();
         targetTypeEntity.setExtId("target");
 
-        targetTypeDto = new TypeDto();
+        TypeDto targetTypeDto = new TypeDto();
         targetTypeDto.setId("target");
 
         associationEntity = new AssociationEntity();
@@ -70,10 +68,8 @@ public class AssociationConverterTest {
     void testDtoToEntity() {
 
         //  arrange
-        when(typeService.getByExtId("source")).thenReturn(sourceTypeDto);
-        when(typeService.getByExtId("target")).thenReturn(targetTypeDto);
-        when(typeConverter.dtoToEntity(sourceTypeDto)).thenReturn(sourceTypeEntity);
-        when(typeConverter.dtoToEntity(targetTypeDto)).thenReturn(targetTypeEntity);
+        when(typeRepository.findByExtId("source")).thenReturn(Optional.of(sourceTypeEntity));
+        when(typeRepository.findByExtId("target")).thenReturn(Optional.of(targetTypeEntity));
 
         //  act
         AssociationEntity resultAssociationEntity = associationConverter.dtoToEntity(associationDto);
@@ -84,6 +80,39 @@ public class AssociationConverterTest {
         Assert.assertEquals(resultAssociationEntity.getTitle(), associationDto.getTitle());
         Assert.assertEquals(resultAssociationEntity.getSource(), sourceTypeEntity);
         Assert.assertEquals(resultAssociationEntity.getTarget(), targetTypeEntity);
+    }
+
+    @Test
+    void testDtoToEntityThrowsExceptionSourceNotFound() {
+
+        //  arrange
+        when(typeRepository.findByExtId("source")).thenReturn(Optional.empty());
+
+        //  act
+        try {
+            associationConverter.dtoToEntity(associationDto);
+        } catch (IllegalArgumentException iae) {
+            //  assert
+            Mockito.verify(typeRepository, Mockito.times(1)).findByExtId("source");
+            Mockito.verify(typeRepository, Mockito.times(0)).findByExtId("target");
+        }
+    }
+
+    @Test
+    void testDtoToEntityThrowsExceptionTargetNotFound() {
+
+        //  arrange
+        when(typeRepository.findByExtId("source")).thenReturn(Optional.of(sourceTypeEntity));
+        when(typeRepository.findByExtId("target")).thenReturn(Optional.empty());
+
+        //  act
+        try {
+            associationConverter.dtoToEntity(associationDto);
+        } catch (IllegalArgumentException iae) {
+            //  assert
+            Mockito.verify(typeRepository, Mockito.times(1)).findByExtId("source");
+            Mockito.verify(typeRepository, Mockito.times(1)).findByExtId("target");
+        }
     }
 
     @Test
