@@ -4,12 +4,12 @@ import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.model.converter.AbstractDtoConverter;
-import ru.citeck.ecos.model.dao.EcosTypeRecordsDao;
-import ru.citeck.ecos.model.domain.EcosSectionEntity;
-import ru.citeck.ecos.model.domain.EcosTypeEntity;
-import ru.citeck.ecos.model.dto.EcosSectionDto;
-import ru.citeck.ecos.model.repository.EcosSectionRepository;
-import ru.citeck.ecos.model.repository.EcosTypeRepository;
+import ru.citeck.ecos.model.dao.TypeRecordsDao;
+import ru.citeck.ecos.model.domain.SectionEntity;
+import ru.citeck.ecos.model.domain.TypeEntity;
+import ru.citeck.ecos.model.dto.SectionDto;
+import ru.citeck.ecos.model.repository.SectionRepository;
+import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
 
 import java.util.Optional;
@@ -18,50 +18,55 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
-public class SectionConverter extends AbstractDtoConverter<EcosSectionDto, EcosSectionEntity> {
+public class SectionConverter extends AbstractDtoConverter<SectionDto, SectionEntity> {
 
-    private final EcosTypeRepository typeRepository;
-    private EcosSectionRepository sectionRepository;
+    private final TypeRepository typeRepository;
+    private final SectionRepository sectionRepository;
 
     @Autowired
-    public SectionConverter(EcosTypeRepository typeRepository,
-                            EcosSectionRepository sectionRepository) {
+    public SectionConverter(TypeRepository typeRepository,
+                            SectionRepository sectionRepository) {
         this.typeRepository = typeRepository;
         this.sectionRepository = sectionRepository;
     }
 
     @Override
-    protected EcosSectionEntity dtoToEntity(EcosSectionDto dto) {
-        EcosSectionEntity ecosSectionEntity = new EcosSectionEntity();
-        ecosSectionEntity.setName(dto.getName());
+    public SectionEntity dtoToEntity(SectionDto dto) {
+
         String extId = extractId(dto.getId());
-        ecosSectionEntity.setExtId(extId);
-        ecosSectionEntity.setDescription(dto.getDescription());
-        ecosSectionEntity.setTenant(dto.getTenant());
+
+        SectionEntity sectionEntity = new SectionEntity();
+        sectionEntity.setName(dto.getName());
+        sectionEntity.setExtId(extId);
+        sectionEntity.setDescription(dto.getDescription());
+        sectionEntity.setTenant(dto.getTenant());
+
         if (dto.getTypes() != null) {
             Set<String> dtoTypesExtIds = dto.getTypes().stream()
                 .map(r -> extractId(r.getId())).collect(Collectors.toSet());
-            Set<EcosTypeEntity> storedTypes = typeRepository.findAllByExtIds(dtoTypesExtIds);
-            ecosSectionEntity.setTypes(storedTypes);
+            Set<TypeEntity> storedTypes = typeRepository.findAllByExtIds(dtoTypesExtIds);
+            sectionEntity.setTypes(storedTypes);
         }
-        if (Strings.isBlank(ecosSectionEntity.getExtId())) {
-            ecosSectionEntity.setExtId(UUID.randomUUID().toString());
+
+        if (Strings.isBlank(sectionEntity.getExtId())) {
+            sectionEntity.setExtId(UUID.randomUUID().toString());
         } else {
-            Optional<EcosSectionEntity> stored = sectionRepository.findByExtId(ecosSectionEntity.getExtId());
-            ecosSectionEntity.setId(stored.map(EcosSectionEntity::getId).orElse(null));
+            Optional<SectionEntity> stored = sectionRepository.findByExtId(sectionEntity.getExtId());
+            sectionEntity.setId(stored.map(SectionEntity::getId).orElse(null));
         }
-        return ecosSectionEntity;
+
+        return sectionEntity;
     }
 
     @Override
-    protected EcosSectionDto entityToDto(EcosSectionEntity entity) {
+    public SectionDto entityToDto(SectionEntity entity) {
         Set<RecordRef> typesRefs = null;
         if (entity.getTypes() != null) {
             typesRefs = entity.getTypes().stream()
-                .map(e -> RecordRef.create(EcosTypeRecordsDao.ID, e.getExtId()))
+                .map(e -> RecordRef.create(TypeRecordsDao.ID, e.getExtId()))
                 .collect(Collectors.toSet());
         }
-        return new EcosSectionDto(
+        return new SectionDto(
             entity.getExtId(),
             entity.getName(),
             entity.getDescription(),

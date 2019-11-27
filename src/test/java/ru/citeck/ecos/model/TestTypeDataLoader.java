@@ -6,8 +6,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import ru.citeck.ecos.model.dto.EcosTypeDto;
-import ru.citeck.ecos.model.service.EcosTypeService;
+import ru.citeck.ecos.model.dto.TypeDto;
+import ru.citeck.ecos.model.service.TypeService;
 import ru.citeck.ecos.model.web.rest.TestUtil;
 
 /**
@@ -19,17 +19,17 @@ import ru.citeck.ecos.model.web.rest.TestUtil;
 public class TestTypeDataLoader {
 
     @Bean
-    public CommandLineRunner dataLoader(EcosTypeService ecosTypeService, ObjectMapper objectMapper) {
+    public CommandLineRunner dataLoader(TypeService typeService, ObjectMapper objectMapper) {
         return args -> {
             String dataToLoad = TestUtil.getJsonFromResource("/controller/type/ecos-type-controller-test-data.json");
 
-            EcosTypeDto[] types = objectMapper.readValue(dataToLoad, EcosTypeDto[].class);
+            TypeDto[] types = objectMapper.readValue(dataToLoad, TypeDto[].class);
 
             log.info("================ CREATE TEST TYPE DATA ================");
 
-            for (EcosTypeDto type : types) {
+            for (TypeDto type : types) {
                 log.info(type.toString());
-                ecosTypeService.update(type);
+                typeService.update(type);
             }
 
             log.info("======================== END ==========================");

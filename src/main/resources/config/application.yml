@@ -6,9 +6,7 @@
 # ===================================================================
 
 # ===================================================================
-# Standard Spring Boot properties.
-# Full reference is available at:
-# http://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+# Standard Spring Boot properties
 # ===================================================================
 
 eureka:
@@ -155,8 +153,8 @@ jhipster:
         from: emodel@localhost
     swagger:
         default-include-pattern: /api/.*
-        title: emodel API
-        description: emodel API documentation
+        title: ECOS-MODEL API
+        description: Ecos-model API documentation
         version: 0.0.1
         terms-of-service-url:
         contact-name:

@@ -4,7 +4,7 @@
 
     <groupId>ru.citeck.ecos.model</groupId>
     <artifactId>ecos-model</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <packaging>war</packaging>
     <name>Ecos Model</name>
 
@@ -40,17 +40,9 @@
 
         <!-- Dependency versions -->
         <ecos-registry-dependencies.version>2.1.1</ecos-registry-dependencies.version>
-        <!-- The spring-boot version should match the one managed by
-        https://mvnrepository.com/artifact/io.github.jhipster/jhipster-dependencies/${jhipster-dependencies.version} -->
         <spring-boot.version>2.0.8.RELEASE</spring-boot.version>
-        <!-- The hibernate version should match the one managed by
-        https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-dependencies/${spring-boot.version} -->
         <hibernate.version>5.2.17.Final</hibernate.version>
-        <!-- The javassist version should match the one managed by
-        https://mvnrepository.com/artifact/org.hibernate/hibernate-core/${hibernate.version} -->
         <javassist.version>3.22.0-GA</javassist.version>
-        <!-- The liquibase version should match the one managed by
-        https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-dependencies/${spring-boot.version} -->
         <liquibase.version>3.5.5</liquibase.version>
         <liquibase-hibernate5.version>3.6</liquibase-hibernate5.version>
         <validation-api.version>2.0.1.Final</validation-api.version>
@@ -97,9 +89,11 @@
         <sonar.junit.reportsPath>${project.testresult.directory}</sonar.junit.reportsPath>
         <sonar.tests>${project.basedir}/src/test/</sonar.tests>
 
-        <ecos-records.version>1.9.1</ecos-records.version>
-        <ecos-apps-lib-spring>1.1.0</ecos-apps-lib-spring>
+        <ecos-records.version>1.10.0</ecos-records.version>
+        <ecos-apps-lib-spring>1.2.0</ecos-apps-lib-spring>
         <lombok.version>1.18.8</lombok.version>
+        <junit-jupiter.version>5.1.0</junit-jupiter.version>
+        <junit.version>4.12</junit.version>
         <!-- jhipster-needle-maven-property -->
     </properties>
 
@@ -210,6 +204,19 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!--JUnit Jupiter Engine to depend on the JUnit4 engine and JUnit 4 API  -->
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <version>${junit-jupiter.version}</version>
+        </dependency>
+        <!-- Optional : override the JUnit 4 API version provided by junit-vintage-engine -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -571,6 +578,7 @@
                           <environment>
                               <SPRING_OUTPUT_ANSI_ENABLED>ALWAYS</SPRING_OUTPUT_ANSI_ENABLED>
                               <JHIPSTER_SLEEP>0</JHIPSTER_SLEEP>
+                              <ECOS_INIT_DELAY>0</ECOS_INIT_DELAY>
                           </environment>
                           <useCurrentTimestamp>true</useCurrentTimestamp>
                       </container>

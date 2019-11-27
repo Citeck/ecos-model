@@ -6,100 +6,87 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.apps.app.module.type.type.action.ActionDto;
 import ru.citeck.ecos.model.converter.AbstractDtoConverter;
-import ru.citeck.ecos.model.dao.EcosTypeRecordsDao;
-import ru.citeck.ecos.model.domain.EcosAssociationEntity;
-import ru.citeck.ecos.model.domain.EcosTypeEntity;
-import ru.citeck.ecos.model.dto.EcosAssociationDto;
-import ru.citeck.ecos.model.dto.EcosTypeDto;
-import ru.citeck.ecos.model.repository.EcosTypeRepository;
-import ru.citeck.ecos.model.service.converter.ActionConverter;
+import ru.citeck.ecos.model.converter.DtoConverter;
+import ru.citeck.ecos.model.dao.TypeRecordsDao;
+import ru.citeck.ecos.model.domain.ActionEntity;
+import ru.citeck.ecos.model.domain.AssociationEntity;
+import ru.citeck.ecos.model.domain.TypeEntity;
+import ru.citeck.ecos.model.dto.AssociationDto;
+import ru.citeck.ecos.model.dto.TypeDto;
+import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.model.service.exception.ParentNotFoundException;
-import ru.citeck.ecos.model.service.exception.TypeNotFoundException;
 import ru.citeck.ecos.records2.RecordRef;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
-public class TypeConverter extends AbstractDtoConverter<EcosTypeDto, EcosTypeEntity> {
+public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
 
-    private EcosTypeRepository typeRepository;
+    private final TypeRepository typeRepository;
+    private final DtoConverter<ActionDto, ActionEntity> actionConverter;
+    private final DtoConverter<AssociationDto, AssociationEntity> associationConverter;
 
     @Autowired
-    public TypeConverter(EcosTypeRepository typeRepository) {
+    public TypeConverter(TypeRepository typeRepository,
+                         DtoConverter<ActionDto, ActionEntity> actionConverter,
+                         DtoConverter<AssociationDto, AssociationEntity> associationConverter) {
         this.typeRepository = typeRepository;
+        this.actionConverter = actionConverter;
+        this.associationConverter = associationConverter;
     }
 
     @Override
-    protected EcosTypeEntity dtoToEntity(EcosTypeDto dto) {
-        EcosTypeEntity ecosTypeEntity = new EcosTypeEntity();
-        ecosTypeEntity.setName(dto.getName());
-        String extId = extractId(dto.getId());
-        ecosTypeEntity.setExtId(extId);
-        ecosTypeEntity.setDescription(dto.getDescription());
-        ecosTypeEntity.setTenant(dto.getTenant());
-        ecosTypeEntity.setInheritActions(dto.isInheritActions());
+    public TypeEntity dtoToEntity(TypeDto dto) {
 
-        EcosTypeEntity parent = null;
+        String extId = extractId(dto.getId());
+
+        TypeEntity typeEntity = new TypeEntity();
+        typeEntity.setExtId(extId);
+        typeEntity.setName(dto.getName());
+        typeEntity.setDescription(dto.getDescription());
+        typeEntity.setTenant(dto.getTenant());
+        typeEntity.setInheritActions(dto.isInheritActions());
+
         if (dto.getParent() != null && Strings.isNotBlank(dto.getParent().getId())) {
             String parentId = extractId(dto.getParent().getId());
-            parent = typeRepository.findByExtId(parentId).orElseThrow(() -> new ParentNotFoundException(parentId));
+            TypeEntity parent = typeRepository.findByExtId(parentId)
+                .orElseThrow(() -> new ParentNotFoundException(parentId));
+            typeEntity.setParent(parent);
         }
-        ecosTypeEntity.setParent(parent);
 
-        Set<EcosAssociationDto> associationDtos = dto.getAssociations();
-        Set<EcosAssociationEntity> associationEntities = null;
-        if (associationDtos != null && associationDtos.size() != 0) {
-            associationEntities = convertAssociations(associationDtos, ecosTypeEntity);
+        if (dto.getAssociations() != null) {
+            typeEntity.setAssocsToOther(dto.getAssociations().stream()
+                .peek(associationDto -> associationDto.setSourceType(RecordRef.create("type", typeEntity.getExtId())))
+                .map(associationConverter::dtoToEntity)
+                .collect(Collectors.toSet()));
         }
-        ecosTypeEntity.setAssocsToOther(associationEntities);
-        handlingExtId(ecosTypeEntity);
 
-        ecosTypeEntity.addActions(
-            dto.getActions()
-                .stream()
-                .map(ActionConverter::fromDto)
-                .collect(Collectors.toList())
-        );
+        if (dto.getActions() != null) {
+            typeEntity.addActions(
+                dto.getActions()
+                    .stream()
+                    .map(actionConverter::dtoToEntity)
+                    .collect(Collectors.toList())
+            );
+        }
 
-        return ecosTypeEntity;
+        handlingExtId(typeEntity);
+
+        return typeEntity;
     }
 
-    private Set<EcosAssociationEntity> convertAssociations(Set<EcosAssociationDto> associationDtos,
-                                                           EcosTypeEntity sourceType) {
-        return associationDtos.stream()
-            .map(assocDto -> {
-                EcosAssociationEntity entity = new EcosAssociationEntity();
-                entity.setSource(sourceType);
-                entity.setName(assocDto.getName());
-                entity.setExtId(assocDto.getId());
-                entity.setTitle(assocDto.getTitle());
-
-                RecordRef targetRef = assocDto.getTargetType();
-                EcosTypeEntity targetType = null;
-                if (targetRef != null && !StringUtils.isEmpty(targetRef.getId())) {
-                    String targetId = extractId(targetRef.getId());
-                    targetType = typeRepository.findByExtId(targetId)
-                        .orElseThrow(() -> new TypeNotFoundException(targetId));
-                }
-                entity.setTarget(targetType);
-
-                return entity;
-            })
-            .collect(Collectors.toSet());
-    }
-
-    private void handlingExtId(EcosTypeEntity ecosTypeEntity) {
-        if (Strings.isBlank(ecosTypeEntity.getExtId())) {
-            ecosTypeEntity.setExtId(UUID.randomUUID().toString());
+    private void handlingExtId(TypeEntity typeEntity) {
+        if (Strings.isBlank(typeEntity.getExtId())) {
+            typeEntity.setExtId(UUID.randomUUID().toString());
         } else {
-            Optional<EcosTypeEntity> stored = typeRepository.findByExtId(ecosTypeEntity.getExtId());
-            ecosTypeEntity.setId(stored.map(EcosTypeEntity::getId).orElse(null));
+            Optional<TypeEntity> stored = typeRepository.findByExtId(typeEntity.getExtId());
+            typeEntity.setId(stored.map(TypeEntity::getId).orElse(null));
         }
-        if (ecosTypeEntity.getAssocsToOther() != null) {
-            ecosTypeEntity.setAssocsToOther(ecosTypeEntity.getAssocsToOther().stream().peek(e -> {
+
+        if (typeEntity.getAssocsToOther() != null) {
+            typeEntity.setAssocsToOther(typeEntity.getAssocsToOther().stream().peek(e -> {
                 if (e.getExtId() == null || StringUtils.isEmpty(e.getExtId())) {
                     e.setExtId(UUID.randomUUID().toString());
                 }
@@ -108,40 +95,31 @@ public class TypeConverter extends AbstractDtoConverter<EcosTypeDto, EcosTypeEnt
     }
 
     @Override
-    protected EcosTypeDto entityToDto(EcosTypeEntity entity) {
-        EcosTypeDto dto = new EcosTypeDto();
+    public TypeDto entityToDto(TypeEntity entity) {
+        TypeDto dto = new TypeDto();
         dto.setId(entity.getExtId());
         dto.setName(entity.getName());
         dto.setDescription(entity.getDescription());
         dto.setInheritActions(entity.isInheritActions());
         dto.setTenant(entity.getTenant());
 
-        EcosTypeEntity parent = entity.getParent();
-        if (parent != null) {
-            dto.setParent(RecordRef.create(EcosTypeRecordsDao.ID, parent.getExtId()));
+        if (entity.getParent() != null) {
+            dto.setParent(RecordRef.create(TypeRecordsDao.ID, entity.getParent().getExtId()));
         }
 
-        Set<EcosAssociationEntity> associations = entity.getAssocsToOther();
-        if (associations != null && !associations.isEmpty()) {
-            dto.setAssociations(associations.stream()
-                .map(assocEntity -> {
-                    EcosAssociationDto assocDto = new EcosAssociationDto();
-                    assocDto.setId(assocEntity.getExtId());
-                    assocDto.setName(assocEntity.getName());
-                    assocDto.setTitle(assocEntity.getTitle());
-                    assocDto.setTargetType(RecordRef.create(EcosTypeRecordsDao.ID, assocEntity.getTarget().getExtId()));
-                    assocDto.setSourceType(RecordRef.create(EcosTypeRecordsDao.ID, assocEntity.getSource().getExtId()));
-                    return assocDto;
-                })
+        if (entity.getAssocsToOther() != null) {
+            dto.setAssociations(entity.getAssocsToOther().stream()
+                .map(associationConverter::entityToDto)
                 .collect(Collectors.toSet()));
         }
 
-        Set<ActionDto> actions = entity.getActions()
-            .stream()
-            .map(ActionConverter::toDto)
-            .collect(Collectors.toSet());
+        if (entity.getActions() != null) {
+            dto.setActions(entity.getActions()
+                .stream()
+                .map(actionConverter::entityToDto)
+                .collect(Collectors.toSet()));
+        }
 
-        dto.setActions(actions);
         return dto;
     }
 }

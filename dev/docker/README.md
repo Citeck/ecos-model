@@ -9,7 +9,7 @@
     ```
 
     **Note:** we run microservices from  different sides - from the docker container and just start the spring boot app 
-    (current microservices for development). All microservices must be registered in ecos-registry. The path for 
+    (current microservices for development). All microservices must be registered in jhipster registry. The path for 
     registration is determined by _central-server-config_ _eureka.client.service-url.defaultZone_ props, _docker-config_ for 
     docker microservices, _localhost-config_ for localhost microservices, but not both. Easy way to solve this problem - _docker-config_ and 
     add mapping to hosts file.

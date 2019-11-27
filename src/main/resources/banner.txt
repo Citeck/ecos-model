@@ -1,2 +1,2 @@
 
-:: Running ECOS MODEL ::
+:: STARTING ${AnsiColor.BRIGHT_BLUE}ECOS-MODEL${AnsiColor.DEFAULT} ::
