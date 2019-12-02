@@ -23,11 +23,11 @@ public class AssociationConverter extends AbstractDtoConverter<AssociationDto, A
     public AssociationEntity dtoToEntity(AssociationDto associationDto) {
         AssociationEntity associationEntity = new AssociationEntity();
 
-        TypeEntity sourceTypeEntity = findType(associationDto.getSourceType().getId());
+       /* TypeEntity sourceTypeEntity = findType(associationDto.getSourceType().getId());
         associationEntity.setSource(sourceTypeEntity);
 
         TypeEntity targetTypeEntity = findType(associationDto.getTargetType().getId());
-        associationEntity.setTarget(targetTypeEntity);
+        associationEntity.setTarget(targetTypeEntity);*/
 
         associationEntity.setName(associationDto.getName());
         associationEntity.setExtId(associationDto.getId());
@@ -42,8 +42,8 @@ public class AssociationConverter extends AbstractDtoConverter<AssociationDto, A
         assocDto.setId(associationEntity.getExtId());
         assocDto.setName(associationEntity.getName());
         assocDto.setTitle(associationEntity.getTitle());
-        assocDto.setTargetType(RecordRef.create("type", associationEntity.getTarget().getExtId()));
-        assocDto.setSourceType(RecordRef.create("type", associationEntity.getSource().getExtId()));
+        //assocDto.setTargetType(RecordRef.create("type", associationEntity.getTarget().getExtId()));
+        //assocDto.setSourceType(RecordRef.create("type", associationEntity.getSource().getExtId()));
         return assocDto;
     }
 
@@ -51,5 +51,4 @@ public class AssociationConverter extends AbstractDtoConverter<AssociationDto, A
         return typeRepository.findByExtId(extId)
             .orElseThrow(() -> new IllegalArgumentException("Type doesnt exists: " + extId));
     }
-
 }

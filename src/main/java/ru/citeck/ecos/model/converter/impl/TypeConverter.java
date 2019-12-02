@@ -57,7 +57,9 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
         }
 
         if (dto.getAssociations() != null) {
-            typeEntity.setAssocsToOther(dto.getAssociations().stream()
+            typeEntity.setAssocsToOther(dto.getAssociations()
+                .stream()
+                .filter(a -> a != null && StringUtils.isNotBlank(a.getId()))
                 .peek(associationDto -> associationDto.setSourceType(RecordRef.create("type", typeEntity.getExtId())))
                 .map(associationConverter::dtoToEntity)
                 .collect(Collectors.toSet()));
@@ -67,6 +69,7 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
             typeEntity.addActions(
                 dto.getActions()
                     .stream()
+                    .filter(a -> a != null && StringUtils.isNotBlank(a.getId()))
                     .map(actionConverter::dtoToEntity)
                     .collect(Collectors.toList())
             );
