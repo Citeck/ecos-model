@@ -347,6 +347,10 @@
             <artifactId>spring-rabbit</artifactId>
         </dependency>
         <dependency>
+            <groupId>ru.citeck.ecos.community</groupId>
+            <artifactId>ecos-apps-lib-spring</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>20080701</version>
