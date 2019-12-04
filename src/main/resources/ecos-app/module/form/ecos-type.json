@@ -573,7 +573,7 @@
                                 "attribute": null
                             }
                         },
-                        "customCreateVariantsJs": "var registry = _.get(window, 'Citeck.RecordActionExecutorsRegistry'); \nif (registry) {\n  value = registry.getActionCreateVariants();\n} else {\n  console.warn(\"Action registry is not available!\");\n  value = [];\n}",
+                        "customCreateVariantsJs": "var registry = _.get(window, 'Citeck.RecordActions'); \nif (registry) {\n  value = registry.getActionCreateVariants();\n} else {\n  console.warn(\"Action registry is not available!\");\n  value = [];\n}",
                         "computed": {
                             "valueFormKey": "value = 'action_' + record.att('type');"
                         },
