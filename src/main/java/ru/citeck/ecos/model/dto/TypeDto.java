@@ -51,9 +51,8 @@ public class TypeDto {
         this.description = module.getDescription();
         this.tenant = Strings.EMPTY;
 
-        String parent = module.getParent();
-        if (Strings.isNotBlank(parent)) {
-            this.parent = RecordRef.create(TypeRecordsDao.ID, parent);
+        if (module.getParent() != null) {
+            this.parent = RecordRef.create(TypeRecordsDao.ID, module.getParent().getId());
         }
 
         List<ru.citeck.ecos.apps.app.module.type.type.association.AssociationDto> associations = module.getAssociations();
