@@ -46,10 +46,12 @@ public class TypeDto {
     }
 
     public TypeDto(TypeModule module) {
+
         this.id = module.getId();
         this.name = module.getName();
         this.description = module.getDescription();
         this.tenant = Strings.EMPTY;
+        this.inheritActions = module.isInheritActions();
 
         if (module.getParent() != null) {
             this.parent = RecordRef.create(TypeRecordsDao.ID, module.getParent().getId());
