@@ -7,70 +7,10 @@
         "inheritActions": true,
         "parent": "type@type-second",
         "actions": [
-            {
-                "id": "print",
-                "name": "print",
-                "key": "print-action",
-                "type": "client-action",
-                "icon": "print.png",
-                "order": 0.0,
-                "config": {
-                    "color": "green"
-                },
-                "evaluator": {
-                    "id": "evaluator-view",
-                    "config": {
-                        "permission": "Read"
-                    }
-                }
-            },
-            {
-                "id": "edit",
-                "name": "edit",
-                "key": "edit-action",
-                "type": "server-action",
-                "icon": "edit.png",
-                "order": 45.1,
-                "config": {
-                    "size": 34
-                },
-                "evaluator": {
-                    "id": "evaluator-edit",
-                    "config": {
-                        "permission": "Write"
-                    }
-                }
-            },
-            {
-                "id": "fire",
-                "name": "fire",
-                "key": "fire-action",
-                "type": "client-action",
-                "icon": "fire.png",
-                "order": 0.0,
-                "config": {
-                    "color": "red"
-                },
-                "evaluator": {
-                    "id": "evaluator-view",
-                    "config": null
-                }
-            },
-            {
-                "id": "reset",
-                "name": "reset",
-                "key": "reset-action",
-                "type": "reset-action",
-                "icon": "reset.png",
-                "order": 0.0,
-                "config": {
-                    "case": "contract"
-                },
-                "evaluator": {
-                    "id": "reset-eva",
-                    "config": null
-                }
-            }
+            "ui/action$print",
+            "ui/action$edit",
+            "ui/action$fire",
+            "ui/action$reset"
         ]
     }
 }

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.citeck.ecos.apps.app.module.type.type.action.ActionDto;
+import ru.citeck.ecos.apps.app.module.ModuleRef;
 import ru.citeck.ecos.model.dto.AssociationDto;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.service.impl.TypeServiceImpl;
@@ -67,9 +67,6 @@ public class TypeRecordsDaoTest {
         AssociationDto associationDto = new AssociationDto();
         associationDto.setId("association");
 
-        ActionDto actionDto = new ActionDto();
-        actionDto.setId("action");
-
         typeDto = new TypeDto();
         typeDto.setId("type");
         typeDto.setName("name");
@@ -78,7 +75,7 @@ public class TypeRecordsDaoTest {
         typeDto.setParent(RecordRef.create("type","parent"));
         typeDto.setInheritActions(false);
         typeDto.setAssociations(Collections.singleton(associationDto));
-        typeDto.setActions(Collections.singleton(actionDto));
+        typeDto.setActions(Collections.singleton(ModuleRef.create("ui/action", "action")));
 
         metaField = new MetaFieldImpl(new Field(""));
 
@@ -181,5 +178,4 @@ public class TypeRecordsDaoTest {
         Assert.assertEquals(resultTypeRecord.getAttribute("actions", metaField), typeDto.getActions());
         Assert.assertEquals(resultTypeRecord.getAttribute("associations", metaField), typeDto.getAssociations());
     }
-
 }

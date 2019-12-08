@@ -7,48 +7,9 @@
         "inheritActions": true,
         "parent": "type@type-second-non-inherit",
         "actions": [
-            {
-                "id": "fire-2",
-                "name": "fire-2",
-                "key": "fire-action",
-                "type": "client-action",
-                "icon": "fire.png",
-                "config": {
-                    "color": "red"
-                },
-                "evaluator": {
-                    "id": "evaluator-view"
-                }
-            },
-            {
-                "id": "reset-2",
-                "name": "reset-2",
-                "key": "reset-action",
-                "type": "reset-action",
-                "icon": "reset.png",
-                "config": {
-                    "case": "contract"
-                },
-                "evaluator": {
-                    "id": "reset-eva"
-                }
-            },
-            {
-                "id": "print-non-inherit",
-                "name": "print-non-inherit",
-                "key": "print-action",
-                "type": "client-action",
-                "icon": "print-non-inherit.png",
-                "config": {
-                    "color": "green"
-                },
-                "evaluator": {
-                    "id": "evaluator-view",
-                    "config": {
-                        "non": true
-                    }
-                }
-            }
+            "ui/action$fire-2",
+            "ui/action$reset-2",
+            "ui/action$print-non-inherit"
         ]
     }
 }

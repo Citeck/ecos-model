@@ -8,9 +8,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.citeck.ecos.apps.app.module.type.type.action.ActionDto;
+import ru.citeck.ecos.apps.app.module.ModuleRef;
 import ru.citeck.ecos.model.converter.impl.TypeConverter;
-import ru.citeck.ecos.model.domain.ActionEntity;
+import ru.citeck.ecos.model.domain.TypeActionEntity;
 import ru.citeck.ecos.model.domain.AssociationEntity;
 import ru.citeck.ecos.model.domain.SectionEntity;
 import ru.citeck.ecos.model.domain.TypeEntity;
@@ -31,9 +31,6 @@ public class TypeConverterTest {
     private TypeRepository typeRepository;
 
     @MockBean
-    private DtoConverter<ActionDto, ActionEntity> actionConverter;
-
-    @MockBean
     private DtoConverter<AssociationDto, AssociationEntity> associationConverter;
 
     private TypeConverter typeConverter;
@@ -43,15 +40,15 @@ public class TypeConverterTest {
 
     private TypeEntity parent;
 
-    private ActionEntity actionEntity;
-    private ActionDto actionDto;
+    private TypeActionEntity actionEntity;
+    private ModuleRef actionRef;
 
     private AssociationEntity associationEntity;
     private AssociationDto associationDto;
 
     @BeforeEach
     void setUp() {
-        typeConverter = new TypeConverter(typeRepository, actionConverter, associationConverter);
+        typeConverter = new TypeConverter(typeRepository, associationConverter);
 
         TypeEntity child = new TypeEntity();
         child.setExtId("child");
@@ -59,11 +56,10 @@ public class TypeConverterTest {
         parent = new TypeEntity();
         parent.setExtId("parent");
 
-        actionEntity = new ActionEntity();
-        actionEntity.setExtId("action");
+        actionRef = ModuleRef.create("ui/action", "action");
 
-        actionDto = new ActionDto();
-        actionDto.setId("action");
+        actionEntity = new TypeActionEntity();
+        actionEntity.setActionId(actionRef.toString());
 
         SectionEntity sectionEntity = new SectionEntity();
         sectionEntity.setExtId("section");
@@ -81,16 +77,13 @@ public class TypeConverterTest {
 
         associationEntity = new AssociationEntity();
         associationEntity.setExtId("association");
-        associationEntity.setSource(typeEntity);
         associationEntity.setTarget(parent);
-        associationEntity.setSource(typeEntity);
 
         typeEntity.setAssocsToOther(Collections.singleton(associationEntity));
 
 
         associationDto = new AssociationDto();
         associationDto.setId("association");
-        associationDto.setSourceType(RecordRef.create("type", "type"));
         associationDto.setTargetType(RecordRef.create("type", "parent"));
 
         typeDto = new TypeDto();
@@ -98,7 +91,7 @@ public class TypeConverterTest {
         typeDto.setName("name");
         typeDto.setTenant("tenant");
         typeDto.setDescription("desc");
-        typeDto.setActions(Collections.singleton(actionDto));
+        typeDto.setActions(Collections.singleton(actionRef));
         typeDto.setAssociations(Collections.singleton(associationDto));
         typeDto.setInheritActions(true);
         typeDto.setParent(RecordRef.create("type", parent.getExtId()));
@@ -108,7 +101,6 @@ public class TypeConverterTest {
     void testEntityToDto() {
 
         //  arrange
-        when(actionConverter.entityToDto(actionEntity)).thenReturn(actionDto);
         when(associationConverter.entityToDto(associationEntity)).thenReturn(associationDto);
 
         //  act
@@ -120,7 +112,7 @@ public class TypeConverterTest {
         Assert.assertEquals(resultDto.getDescription(), typeEntity.getDescription());
         Assert.assertEquals(resultDto.getTenant(), typeEntity.getTenant());
         Assert.assertEquals(resultDto.getParent(), RecordRef.create("type", parent.getExtId()));
-        Assert.assertEquals(resultDto.getActions(), Collections.singleton(actionDto));
+        Assert.assertEquals(resultDto.getActions(), Collections.singleton(actionRef));
         Assert.assertEquals(resultDto.getAssociations(), Collections.singleton(associationDto));
     }
 
@@ -140,14 +132,12 @@ public class TypeConverterTest {
         Assert.assertEquals(resultDto.getName(), typeEntity.getName());
         Assert.assertEquals(resultDto.getDescription(), typeEntity.getDescription());
         Assert.assertEquals(resultDto.getTenant(), typeEntity.getTenant());
-        Mockito.verify(actionConverter, Mockito.times(0)).entityToDto(Mockito.any());
     }
 
     @Test
     void testDtoToEntity() {
 
         //  arrange
-        when(actionConverter.dtoToEntity(actionDto)).thenReturn(actionEntity);
         when(associationConverter.dtoToEntity(associationDto)).thenReturn(associationEntity);
         when(typeRepository.findByExtId(parent.getExtId())).thenReturn(Optional.of(parent));
         when(typeRepository.findByExtId(typeEntity.getExtId())).thenReturn(Optional.of(typeEntity));
@@ -163,12 +153,10 @@ public class TypeConverterTest {
         Assert.assertEquals(resultEntity.getTenant(), typeDto.getTenant());
         AssociationEntity associationEntityLocal = resultEntity.getAssocsToOther().iterator().next();
         Assert.assertEquals(associationEntityLocal.getExtId(), associationEntity.getExtId());
-        Assert.assertEquals(associationEntityLocal.getSource().getExtId(), associationEntity.getSource().getExtId());
         Assert.assertEquals(associationEntityLocal.getTarget().getExtId(), associationEntity.getTarget().getExtId());
         Assert.assertEquals(resultEntity.getActions(), Collections.singletonList(actionEntity));
         Assert.assertEquals(resultEntity.getChilds(), Collections.emptySet());
         Assert.assertEquals(resultEntity.getParent(), parent);
-        Assert.assertEquals(resultEntity.getAssocsToThis(), Collections.emptySet());
         Assert.assertEquals(resultEntity.getSections(), Collections.emptySet());
     }
 
@@ -189,9 +177,7 @@ public class TypeConverterTest {
         Assert.assertEquals(resultEntity.getDescription(), typeDto.getDescription());
         Assert.assertEquals(resultEntity.getTenant(), typeDto.getTenant());
         Assert.assertEquals(resultEntity.getChilds(), Collections.emptySet());
-        Assert.assertEquals(resultEntity.getAssocsToThis(), Collections.emptySet());
         Assert.assertEquals(resultEntity.getSections(), Collections.emptySet());
         Mockito.verify(typeRepository, Mockito.times(0)).findByExtId(Mockito.any());
-        Mockito.verify(actionConverter, Mockito.times(0)).dtoToEntity(Mockito.any());
     }
 }

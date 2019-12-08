@@ -1,0 +1,27 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <changeSet id="20191209000000" author="citeck">
+
+        <createTable tableName="ecos_type_actions">
+
+            <column name="id" type="BIGINT" autoIncrement="${autoIncrement}">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+
+            <column name="type_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_ecos_type_actions_type_id" references="ecos_type(id)"/>
+            </column>
+
+            <column name="action_ext_id" type="VARCHAR(64)">
+                <constraints nullable="false" />
+            </column>
+
+        </createTable>
+
+    </changeSet>
+
+
+</databaseChangeLog>

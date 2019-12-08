@@ -7,68 +7,10 @@
         "inheritActions": true,
         "parent": "type@type-second",
         "actions": [
-            {
-                "id": "print",
-                "name": "print",
-                "key": "print-action",
-                "type": "client-action",
-                "icon": "print.png",
-                "order": 0.0,
-                "config": {
-                    "color": "green"
-                },
-                "evaluator": {
-                    "id": "evaluator-view",
-                    "config": {
-                        "permission": "Read"
-                    }
-                }
-            },
-            {
-                "id": "fire3",
-                "name": "fire3",
-                "key": "fire-action3",
-                "type": "client-action",
-                "icon": "fire.png",
-                "order": 0.0,
-                "config": {
-                    "color": "red"
-                },
-                "evaluator": {
-                    "id": "evaluator-view",
-                    "config": null
-                }
-            },
-            {
-                "id": "reset3",
-                "name": "reset3",
-                "key": "reset-action3",
-                "type": "reset-action",
-                "icon": "reset.png",
-                "order": 0.0,
-                "config": {
-                    "case": "contract"
-                },
-                "evaluator": {
-                    "id": "reset-eva",
-                    "config": null
-                }
-            },
-            {
-                "id": "edit",
-                "name": "edit-overridden",
-                "key": "edit-action",
-                "type": "server-action",
-                "icon": "edit-2.png",
-                "order": 60.9,
-                "config": {
-                    "size": 600
-                },
-                "evaluator": {
-                    "id": "evaluator-edit",
-                    "config": null
-                }
-            }
+            "ui/action$print",
+            "ui/action$fire3",
+            "ui/action$reset3",
+            "ui/action$edit"
         ]
     }
 }

@@ -7,9 +7,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.citeck.ecos.apps.app.module.type.type.action.ActionDto;
+import ru.citeck.ecos.apps.app.module.ModuleRef;
 import ru.citeck.ecos.model.converter.impl.TypeConverter;
-import ru.citeck.ecos.model.domain.ActionEntity;
+import ru.citeck.ecos.model.domain.TypeActionEntity;
 import ru.citeck.ecos.model.domain.AssociationEntity;
 import ru.citeck.ecos.model.domain.SectionEntity;
 import ru.citeck.ecos.model.domain.TypeEntity;
@@ -45,7 +45,7 @@ public class TypeServiceImplTest {
     private TypeDto typeDto;
 
     private String typeExtId;
-    private ActionDto actionDto;
+    private ModuleRef actionRef;
     private AssociationDto associationDto;
 
     @BeforeEach
@@ -55,8 +55,8 @@ public class TypeServiceImplTest {
 
         typeExtId = "type";
 
-        ActionEntity actionEntity = new ActionEntity();
-        actionEntity.setExtId("action");
+        TypeActionEntity actionEntity = new TypeActionEntity();
+        actionEntity.setActionId("action");
 
         AssociationEntity associationEntity = new AssociationEntity();
         associationEntity.setExtId("association");
@@ -83,8 +83,7 @@ public class TypeServiceImplTest {
         typeEntity.setChilds(Collections.singleton(child));
         typeEntity.setSections(Collections.singleton(sectionEntity));
 
-        actionDto = new ActionDto();
-        actionDto.setId("action");
+        actionRef = ModuleRef.create("ui/action", "action");
 
         associationDto = new AssociationDto();
         associationDto.setId("association");
@@ -95,7 +94,7 @@ public class TypeServiceImplTest {
         typeDto.setTenant("tenant");
         typeDto.setDescription("desc");
         typeDto.setInheritActions(false);
-        typeDto.setActions(Collections.singleton(actionDto));
+        typeDto.setActions(Collections.singleton(actionRef));
         typeDto.setAssociations(Collections.singleton(associationDto));
         typeDto.setParent(RecordRef.create("type", "parent"));
     }
@@ -118,7 +117,7 @@ public class TypeServiceImplTest {
         Assert.assertEquals(resultTypeDto.getDescription(), typeEntity.getDescription());
         Assert.assertEquals(resultTypeDto.getTenant(), typeEntity.getTenant());
         Assert.assertEquals(resultTypeDto.getAssociations(), Collections.singleton(associationDto));
-        Assert.assertEquals(resultTypeDto.getActions(), Collections.singleton(actionDto));
+        Assert.assertEquals(resultTypeDto.getActions(), Collections.singleton(actionRef));
         Assert.assertEquals(resultTypeDto.getParent(), RecordRef.create("type", "parent"));
     }
 
@@ -141,7 +140,7 @@ public class TypeServiceImplTest {
         Assert.assertEquals(resultTypeDto.getDescription(), typeEntity.getDescription());
         Assert.assertEquals(resultTypeDto.getTenant(), typeEntity.getTenant());
         Assert.assertEquals(resultTypeDto.getAssociations(), Collections.singleton(associationDto));
-        Assert.assertEquals(resultTypeDto.getActions(), Collections.singleton(actionDto));
+        Assert.assertEquals(resultTypeDto.getActions(), Collections.singleton(actionRef));
         Assert.assertEquals(resultTypeDto.getParent(), RecordRef.create("type", "parent"));
     }
 
@@ -161,7 +160,7 @@ public class TypeServiceImplTest {
         Assert.assertEquals(resultTypeDto.getDescription(), typeEntity.getDescription());
         Assert.assertEquals(resultTypeDto.getTenant(), typeEntity.getTenant());
         Assert.assertEquals(resultTypeDto.getAssociations(), Collections.singleton(associationDto));
-        Assert.assertEquals(resultTypeDto.getActions(), Collections.singleton(actionDto));
+        Assert.assertEquals(resultTypeDto.getActions(), Collections.singleton(actionRef));
         Assert.assertEquals(resultTypeDto.getParent(), RecordRef.create("type", "parent"));
     }
 

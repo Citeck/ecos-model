@@ -7,23 +7,7 @@
         "inheritActions": true,
         "parent": "type@type-first",
         "actions": [
-            {
-                "id": "print",
-                "name": "print",
-                "key": "print-action",
-                "type": "client-action",
-                "icon": "print.png",
-                "order": 0.0,
-                "config": {
-                    "color": "green"
-                },
-                "evaluator": {
-                    "id": "evaluator-view",
-                    "config": {
-                        "permission": "Read"
-                    }
-                }
-            }
+            "ui/action$print"
         ]
     }
 }

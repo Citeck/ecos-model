@@ -4,15 +4,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.citeck.ecos.apps.app.module.type.type.action.ActionDto;
+import ru.citeck.ecos.apps.app.module.ModuleRef;
 import ru.citeck.ecos.model.converter.AbstractDtoConverter;
 import ru.citeck.ecos.model.converter.DtoConverter;
 import ru.citeck.ecos.model.dao.TypeRecordsDao;
-import ru.citeck.ecos.model.domain.ActionEntity;
 import ru.citeck.ecos.model.domain.AssociationEntity;
+import ru.citeck.ecos.model.domain.TypeActionEntity;
 import ru.citeck.ecos.model.domain.TypeEntity;
 import ru.citeck.ecos.model.dto.AssociationDto;
 import ru.citeck.ecos.model.dto.TypeDto;
+import ru.citeck.ecos.model.repository.TypeActionRepository;
 import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.model.service.exception.ParentNotFoundException;
 import ru.citeck.ecos.records2.RecordRef;
@@ -25,15 +26,12 @@ import java.util.stream.Collectors;
 public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
 
     private final TypeRepository typeRepository;
-    private final DtoConverter<ActionDto, ActionEntity> actionConverter;
     private final DtoConverter<AssociationDto, AssociationEntity> associationConverter;
 
     @Autowired
     public TypeConverter(TypeRepository typeRepository,
-                         DtoConverter<ActionDto, ActionEntity> actionConverter,
                          DtoConverter<AssociationDto, AssociationEntity> associationConverter) {
         this.typeRepository = typeRepository;
-        this.actionConverter = actionConverter;
         this.associationConverter = associationConverter;
     }
 
@@ -60,7 +58,6 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
             typeEntity.setAssocsToOther(dto.getAssociations()
                 .stream()
                 .filter(a -> a != null && StringUtils.isNotBlank(a.getId()))
-                .peek(associationDto -> associationDto.setSourceType(RecordRef.create("type", typeEntity.getExtId())))
                 .map(associationConverter::dtoToEntity)
                 .collect(Collectors.toSet()));
         }
@@ -70,7 +67,12 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
                 dto.getActions()
                     .stream()
                     .filter(a -> a != null && StringUtils.isNotBlank(a.getId()))
-                    .map(actionConverter::dtoToEntity)
+                    .map(a -> {
+                        TypeActionEntity actionEntity = new TypeActionEntity();
+                        actionEntity.setType(typeEntity);
+                        actionEntity.setActionId(a.toString());
+                        return actionEntity;
+                    })
                     .collect(Collectors.toList())
             );
         }
@@ -99,6 +101,7 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
 
     @Override
     public TypeDto entityToDto(TypeEntity entity) {
+
         TypeDto dto = new TypeDto();
         dto.setId(entity.getExtId());
         dto.setName(entity.getName());
@@ -119,7 +122,7 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
         if (entity.getActions() != null) {
             dto.setActions(entity.getActions()
                 .stream()
-                .map(actionConverter::entityToDto)
+                .map(a -> ModuleRef.valueOf(a.getActionId()))
                 .collect(Collectors.toSet()));
         }
 

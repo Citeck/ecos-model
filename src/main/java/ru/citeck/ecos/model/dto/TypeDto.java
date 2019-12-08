@@ -3,8 +3,8 @@ package ru.citeck.ecos.model.dto;
 import lombok.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.logging.log4j.util.Strings;
-import ru.citeck.ecos.apps.app.module.type.type.TypeModule;
-import ru.citeck.ecos.apps.app.module.type.type.action.ActionDto;
+import ru.citeck.ecos.apps.app.module.ModuleRef;
+import ru.citeck.ecos.apps.app.module.type.model.type.TypeModule;
 import ru.citeck.ecos.model.dao.TypeRecordsDao;
 import ru.citeck.ecos.records2.RecordRef;
 
@@ -27,7 +27,7 @@ public class TypeDto {
     private String tenant;
     private RecordRef parent;
     private Set<AssociationDto> associations = new HashSet<>();
-    private Set<ActionDto> actions = new HashSet<>();
+    private Set<ModuleRef> actions = new HashSet<>();
     private boolean inheritActions;
 
     public TypeDto(TypeDto dto) {
@@ -57,15 +57,15 @@ public class TypeDto {
             this.parent = RecordRef.create(TypeRecordsDao.ID, module.getParent().getId());
         }
 
-        List<ru.citeck.ecos.apps.app.module.type.type.association.AssociationDto> associations = module.getAssociations();
+        List<ru.citeck.ecos.apps.app.module.type.model.type.AssociationDto> associations = module.getAssociations();
         if (CollectionUtils.isNotEmpty(associations)) {
             this.associations = associations
                 .stream()
-                .map(a -> new AssociationDto(a, module.getId()))
+                .map(AssociationDto::new)
                 .collect(Collectors.toSet());
         }
 
-        List<ActionDto> actions = module.getActions();
+        List<ModuleRef> actions = module.getActions();
         if (CollectionUtils.isNotEmpty(actions)) {
             this.actions = new HashSet<>(actions);
         }
@@ -74,5 +74,4 @@ public class TypeDto {
     public TypeDto(String id) {
         this.id = id;
     }
-
 }

@@ -39,8 +39,6 @@ public class AssociationConverterTest {
         associationDto = new AssociationDto();
         associationDto.setId("association");
         associationDto.setName("name");
-        associationDto.setTitle("title");
-        associationDto.setSourceType(RecordRef.create("type", "source"));
         associationDto.setTargetType(RecordRef.create("type", "target"));
 
         sourceTypeEntity = new TypeEntity();
@@ -58,9 +56,7 @@ public class AssociationConverterTest {
         associationEntity = new AssociationEntity();
         associationEntity.setId(1L);
         associationEntity.setExtId("association");
-        associationEntity.setTitle("title");
         associationEntity.setName("name");
-        associationEntity.setSource(sourceTypeEntity);
         associationEntity.setTarget(targetTypeEntity);
     }
 
@@ -77,7 +73,6 @@ public class AssociationConverterTest {
         //  assert
         Assert.assertEquals(resultAssociationEntity.getExtId(), associationDto.getId());
         Assert.assertEquals(resultAssociationEntity.getName(), associationDto.getName());
-        Assert.assertEquals(resultAssociationEntity.getTitle(), associationDto.getTitle());
         //Assert.assertEquals(resultAssociationEntity.getSource(), sourceTypeEntity);
         //Assert.assertEquals(resultAssociationEntity.getTarget(), targetTypeEntity);
     }
@@ -124,7 +119,6 @@ public class AssociationConverterTest {
         //  assert
         Assert.assertEquals(resultAssociationDto.getId(), associationEntity.getExtId());
         Assert.assertEquals(resultAssociationDto.getName(), associationEntity.getName());
-        Assert.assertEquals(resultAssociationDto.getTitle(), associationEntity.getTitle());
         //Assert.assertEquals(resultAssociationDto.getSourceType().getId(), sourceTypeEntity.getExtId());
         //Assert.assertEquals(resultAssociationDto.getTargetType().getId(), targetTypeEntity.getExtId());
     }

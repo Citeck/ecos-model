@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
-import ru.citeck.ecos.apps.app.module.type.type.action.ActionDto;
+import ru.citeck.ecos.apps.app.module.ModuleRef;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.service.TypeService;
 import ru.citeck.ecos.predicate.Elements;
@@ -154,7 +154,8 @@ public class TypeRecordsDao extends LocalRecordsDAO
 
     }
 
-    private Set<ActionDto> getInheritTypeActions(TypeDto dto) {
+    private Set<ModuleRef> getInheritTypeActions(TypeDto dto) {
+
         if (!dto.isInheritActions() || dto.getParent() == null) {
             return dto.getActions();
         }
@@ -166,15 +167,15 @@ public class TypeRecordsDao extends LocalRecordsDAO
             return dto.getActions();
         }
 
-        Map<String, ActionDto> actionDtoMap = dto.getActions()
+        Map<String, ModuleRef> actionDtoMap = dto.getActions()
             .stream()
-            .collect(Collectors.toMap(ActionDto::getId, Function.identity()));
+            .collect(Collectors.toMap(ModuleRef::getId, Function.identity()));
 
         if (actionsNode.isArray()) {
-            ActionDto[] actionsFromParent;
+            ModuleRef[] actionsFromParent;
             try {
-                actionsFromParent = OBJECT_MAPPER.treeToValue(actionsNode, ActionDto[].class);
-                for (ActionDto actionDto : actionsFromParent) {
+                actionsFromParent = OBJECT_MAPPER.treeToValue(actionsNode, ModuleRef[].class);
+                for (ModuleRef actionDto : actionsFromParent) {
                     actionDtoMap.putIfAbsent(actionDto.getId(), actionDto);
                 }
             } catch (JsonProcessingException e) {
@@ -182,7 +183,7 @@ public class TypeRecordsDao extends LocalRecordsDAO
             }
         } else {
             try {
-                ActionDto actionFromParent = OBJECT_MAPPER.treeToValue(actionsNode, ActionDto.class);
+                ModuleRef actionFromParent = OBJECT_MAPPER.treeToValue(actionsNode, ModuleRef.class);
                 actionDtoMap.putIfAbsent(actionFromParent.getId(), actionFromParent);
             } catch (JsonProcessingException e) {
                 throw new RuntimeException("Can not parse action from parent", e);

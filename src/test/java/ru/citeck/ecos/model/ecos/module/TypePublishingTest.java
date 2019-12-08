@@ -7,8 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import ru.citeck.ecos.apps.EcosAppsApiFactory;
-import ru.citeck.ecos.apps.app.module.type.type.TypeModule;
-import ru.citeck.ecos.apps.app.module.type.type.association.AssociationDto;
+import ru.citeck.ecos.apps.app.module.ModuleRef;
+import ru.citeck.ecos.apps.app.module.type.model.type.TypeModule;
+import ru.citeck.ecos.apps.app.module.type.model.type.AssociationDto;
 import ru.citeck.ecos.model.EcosModelApp;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.service.TypeService;
@@ -30,6 +31,12 @@ public class TypePublishingTest {
     @Test
     public void test() throws InterruptedException {
 
+        TypeModule baseType = new TypeModule();
+        baseType.setId("baseTypeId");
+        baseType.setName("base name");
+
+        apiFactory.getModuleApi().publishModule("123", baseType);
+
         TypeModule type = new TypeModule();
         type.setId("testId");
         type.setName("name");
@@ -37,6 +44,7 @@ public class TypePublishingTest {
         AssociationDto associationDto = new AssociationDto();
         associationDto.setId("test-assoc");
         associationDto.setName("assoc-name");
+        associationDto.setTarget(ModuleRef.create("model/type", baseType.getId()));
         type.setAssociations(Collections.singletonList(associationDto));
 
         apiFactory.getModuleApi().publishModule("123", type);

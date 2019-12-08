@@ -7,42 +7,8 @@
         "inheritActions": true,
         "parent": null,
         "actions": [
-            {
-                "id": "delete",
-                "name": "Delete",
-                "key": "delete-action",
-                "type": "server-action",
-                "icon": "delete.png",
-                "order": 45.1,
-                "config": {
-                    "color": "red",
-                    "size": 1290
-                },
-                "evaluator": {
-                    "id": "evaluator-delete",
-                    "config": {
-                        "permission": "Delete"
-                    }
-                }
-            },
-            {
-                "id": "view",
-                "name": "View",
-                "key": "view-action",
-                "type": "server-action",
-                "icon": "view.png",
-                "order": 2,
-                "config": {
-                    "color": "blue",
-                    "size": 10
-                },
-                "evaluator": {
-                    "id": "evaluator-view",
-                    "config": {
-                        "permission": "Read"
-                    }
-                }
-            }
+            "ui/action$delete",
+            "ui/action$view"
         ]
     }
 }

@@ -45,36 +45,28 @@ public class TypeEntity {
     private Set<SectionEntity> sections = new HashSet<>();
 
     /*
-     * Set of associations to this type
-     */
-    @OneToMany(mappedBy = "source", fetch = FetchType.EAGER)
-    private Set<AssociationEntity> assocsToThis = new HashSet<>();
-
-    /*
      * Set of associations to other types
      */
     @OneToMany(mappedBy = "target", fetch = FetchType.EAGER)
     private Set<AssociationEntity> assocsToOther = new HashSet<>();
 
-    @OneToMany(mappedBy = "ecosType", cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, orphanRemoval = true)
-    private List<ActionEntity> actions = new ArrayList<>();
+    @OneToMany(mappedBy = "type", cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, orphanRemoval = true)
+    private List<TypeActionEntity> actions = new ArrayList<>();
 
-    public void addAction(ActionEntity actionEntity) {
+    public void addAction(TypeActionEntity actionEntity) {
         actions.add(actionEntity);
-        actionEntity.setEcosType(this);
     }
 
-    public void addActions(List<ActionEntity> actions) {
+    public void addActions(List<TypeActionEntity> actions) {
         actions.forEach(this::addAction);
     }
 
-    public void removeAction(ActionEntity actionEntity) {
+    public void removeAction(TypeActionEntity actionEntity) {
         actions.remove(actionEntity);
-        actionEntity.setEcosType(null);
+        actionEntity.setType(null);
     }
 
-    public void setActions(List<ActionEntity> actionEntities) {
+    public void setActions(List<TypeActionEntity> actionEntities) {
         throw new UnsupportedOperationException("You must use utility methods addAction/removeAction");
     }
-    
 }

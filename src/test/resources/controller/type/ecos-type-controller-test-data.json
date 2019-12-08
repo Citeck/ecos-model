@@ -6,42 +6,8 @@
         "tenant": "some-tenant",
         "inheritActions": true,
         "actions": [
-            {
-                "id": "delete",
-                "name": "Delete",
-                "key": "delete-action",
-                "type": "server-action",
-                "icon": "delete.png",
-                "order": 45.1,
-                "config": {
-                    "color": "red",
-                    "size": 1290
-                },
-                "evaluator": {
-                    "id": "evaluator-delete",
-                    "config": {
-                        "permission": "Delete"
-                    }
-                }
-            },
-            {
-                "id": "view",
-                "name": "View",
-                "key": "view-action",
-                "type": "server-action",
-                "icon": "view.png",
-                "order": 2,
-                "config": {
-                    "color": "blue",
-                    "size": 10
-                },
-                "evaluator": {
-                    "id": "evaluator-view",
-                    "config": {
-                        "permission": "Read"
-                    }
-                }
-            }
+            "ui/action$delete",
+            "ui/action$view"
         ]
     },
     {
@@ -51,23 +17,7 @@
         "tenant": "first-tenant",
         "inheritActions": true,
         "actions": [
-            {
-                "id": "edit",
-                "name": "edit",
-                "key": "edit-action",
-                "type": "server-action",
-                "icon": "edit.png",
-                "order": 45.1,
-                "config": {
-                    "size": 34
-                },
-                "evaluator": {
-                    "id": "evaluator-edit",
-                    "config": {
-                        "permission": "Write"
-                    }
-                }
-            }
+            "ui/action$edit"
         ]
     },
     {
@@ -78,22 +28,7 @@
         "inheritActions": true,
         "parent": "type@type-first",
         "actions": [
-            {
-                "id": "print",
-                "name": "print",
-                "key": "print-action",
-                "type": "client-action",
-                "icon": "print.png",
-                "config": {
-                    "color": "green"
-                },
-                "evaluator": {
-                    "id": "evaluator-view",
-                    "config": {
-                        "permission": "Read"
-                    }
-                }
-            }
+            "ui/action$print"
         ]
     },
     {
@@ -104,32 +39,8 @@
         "inheritActions": true,
         "parent": "type@type-second",
         "actions": [
-            {
-                "id": "fire",
-                "name": "fire",
-                "key": "fire-action",
-                "type": "client-action",
-                "icon": "fire.png",
-                "config": {
-                    "color": "red"
-                },
-                "evaluator": {
-                    "id": "evaluator-view"
-                }
-            },
-            {
-                "id": "reset",
-                "name": "reset",
-                "key": "reset-action",
-                "type": "reset-action",
-                "icon": "reset.png",
-                "config": {
-                    "case": "contract"
-                },
-                "evaluator": {
-                    "id": "reset-eva"
-                }
-            }
+            "ui/action$fire",
+            "ui/action$reset"
         ]
     },
     {
@@ -140,22 +51,7 @@
         "inheritActions": false,
         "parent": "type@type-first",
         "actions": [
-            {
-                "id": "print-non-inherit",
-                "name": "print-non-inherit",
-                "key": "print-action",
-                "type": "client-action",
-                "icon": "print-non-inherit.png",
-                "config": {
-                    "color": "green"
-                },
-                "evaluator": {
-                    "id": "evaluator-view",
-                    "config": {
-                        "non": true
-                    }
-                }
-            }
+            "ui/action$print-non-inherit"
         ]
     },
     {
@@ -166,32 +62,8 @@
         "inheritActions": true,
         "parent": "type@type-second-non-inherit",
         "actions": [
-            {
-                "id": "fire-2",
-                "name": "fire-2",
-                "key": "fire-action",
-                "type": "client-action",
-                "icon": "fire.png",
-                "config": {
-                    "color": "red"
-                },
-                "evaluator": {
-                    "id": "evaluator-view"
-                }
-            },
-            {
-                "id": "reset-2",
-                "name": "reset-2",
-                "key": "reset-action",
-                "type": "reset-action",
-                "icon": "reset.png",
-                "config": {
-                    "case": "contract"
-                },
-                "evaluator": {
-                    "id": "reset-eva"
-                }
-            }
+            "ui/action$fire-2",
+            "ui/action$reset-2"
         ]
     },
     {
@@ -202,46 +74,9 @@
         "inheritActions": true,
         "parent": "type@type-second",
         "actions": [
-            {
-                "id": "fire3",
-                "name": "fire3",
-                "key": "fire-action3",
-                "type": "client-action",
-                "icon": "fire.png",
-                "config": {
-                    "color": "red"
-                },
-                "evaluator": {
-                    "id": "evaluator-view"
-                }
-            },
-            {
-                "id": "reset3",
-                "name": "reset3",
-                "key": "reset-action3",
-                "type": "reset-action",
-                "icon": "reset.png",
-                "config": {
-                    "case": "contract"
-                },
-                "evaluator": {
-                    "id": "reset-eva"
-                }
-            },
-            {
-                "id": "edit",
-                "name": "edit-overridden",
-                "key": "edit-action",
-                "type": "server-action",
-                "icon": "edit-2.png",
-                "order": 60.9,
-                "config": {
-                    "size": 600
-                },
-                "evaluator": {
-                    "id": "evaluator-edit"
-                }
-            }
+            "ui/action$fire3",
+            "ui/action$reset3",
+            "ui/action$edit"
         ]
     },
     {
@@ -252,33 +87,8 @@
         "inheritActions": true,
         "parent": "type@type-first",
         "actions": [
-            {
-                "id": "print",
-                "name": "print",
-                "key": "print-action",
-                "type": "client-action",
-                "icon": "print.png",
-                "config": {
-                    "color": "green"
-                },
-                "evaluator": {
-                    "id": "evaluator-view",
-                    "config": {
-                        "permission": "Read"
-                    }
-                }
-            },
-            {
-                "id": "edit",
-                "name": "edit-overridden",
-                "key": "edit-action-overridden",
-                "type": "server-action",
-                "icon": "edit.png",
-                "order": 2045.32,
-                "config": {
-                    "size": 120
-                }
-            }
+            "ui/action$print",
+            "ui/action$edit"
         ]
     }
 ]

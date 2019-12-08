@@ -35,5 +35,4 @@ public class TestTypeDataLoader {
             log.info("======================== END ==========================");
         };
     }
-
 }

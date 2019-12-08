@@ -12,7 +12,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 public class AssociationEntity {
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String extId;
 
     @Id
@@ -22,14 +22,7 @@ public class AssociationEntity {
 
     private String name;
 
-    private String title;
-
-    @ManyToOne(cascade = CascadeType.DETACH)
-    @JoinColumn(name = "source_id")
-    private TypeEntity source;
-
     @ManyToOne(cascade = CascadeType.DETACH)
     @JoinColumn(name = "target_id")
     private TypeEntity target;
-
 }

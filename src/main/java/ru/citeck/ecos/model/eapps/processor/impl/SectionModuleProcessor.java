@@ -3,7 +3,7 @@ package ru.citeck.ecos.model.eapps.processor.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.citeck.ecos.apps.app.module.type.section.SectionModule;
+import ru.citeck.ecos.apps.app.module.type.model.section.SectionModule;
 import ru.citeck.ecos.model.dto.SectionDto;
 import ru.citeck.ecos.model.eapps.processor.ModuleProcessor;
 import ru.citeck.ecos.model.service.SectionService;
