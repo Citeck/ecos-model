@@ -1,0 +1,6 @@
+{
+    "id": "contracts-cat-doctype-contract",
+    "name": "Договор",
+    "parent": "model/type$base",
+    "inheritActions": true
+}
