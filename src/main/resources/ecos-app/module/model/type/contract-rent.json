@@ -1,6 +1,0 @@
-{
-    "id": "contracts-cat-doctype-contract/contracts-cat-contract-rent",
-    "name": "Договор аренды",
-    "parent": "model/type$contracts-cat-doctype-contract",
-    "inheritActions": true
-}
