@@ -1,7 +1,7 @@
 {
     "id": "ecos-type",
     "title": "Type form",
-    "formKey": "module_type",
+    "formKey": "module_model/type",
     "formMode": null,
     "description": "",
     "customModule": null,
@@ -115,7 +115,7 @@
                                         "mask": false,
                                         "inputType": "text",
                                         "inputMask": "",
-                                        "id": "epf97ce"
+                                        "id": "evsmbi"
                                     },
                                     {
                                         "label": "Parent",
@@ -211,7 +211,7 @@
                                         "hideEditRowButton": false,
                                         "hideDeleteRowButton": false,
                                         "isFullScreenWidthModal": false,
-                                        "id": "e4tps3l"
+                                        "id": "elud2x"
                                     }
                                 ],
                                 "xs": 0,
@@ -267,7 +267,7 @@
                                     "when": null,
                                     "eq": ""
                                 },
-                                "id": "eunb9fc"
+                                "id": "e9xttwo"
                             },
                             {
                                 "xs": 0,
@@ -359,7 +359,7 @@
                                         "mask": false,
                                         "inputType": "text",
                                         "inputMask": "",
-                                        "id": "e8v1frp"
+                                        "id": "ebt4q4t"
                                     },
                                     {
                                         "label": "Description",
@@ -439,7 +439,7 @@
                                         "rows": 3,
                                         "wysiwyg": false,
                                         "editor": "",
-                                        "id": "ei84ai7"
+                                        "id": "eryfvkz"
                                     }
                                 ],
                                 "placeholder": "",
@@ -482,7 +482,7 @@
                                     "when": null,
                                     "eq": ""
                                 },
-                                "id": "ewxv1vd"
+                                "id": "e60e2q"
                             }
                         ],
                         "mask": false,
@@ -540,10 +540,86 @@
                         "inlineColumns": false,
                         "autoAdjust": false,
                         "hideOnChildrenHidden": false,
-                        "id": "e8edyit"
+                        "id": "e7lxe4o"
                     },
                     {
                         "label": "Actions",
+                        "multiple": true,
+                        "mask": false,
+                        "tableView": true,
+                        "alwaysEnabled": false,
+                        "journalId": "ui-actions",
+                        "displayColumns": [],
+                        "customPredicateJs": "",
+                        "computed": {
+                            "valueDisplayName": ""
+                        },
+                        "searchField": "",
+                        "presetFilterPredicatesJs": "",
+                        "ecos": {
+                            "dataType": "assoc"
+                        },
+                        "defaultValue": "",
+                        "encrypted": false,
+                        "displayColumnsAsyncData": [],
+                        "validate": {
+                            "customMessage": "",
+                            "json": "",
+                            "required": false,
+                            "custom": "",
+                            "customPrivate": false
+                        },
+                        "key": "actions",
+                        "properties": {},
+                        "conditional": {
+                            "show": "",
+                            "when": "",
+                            "json": "",
+                            "eq": ""
+                        },
+                        "customConditional": "",
+                        "logic": [],
+                        "attributes": {},
+                        "type": "selectJournal",
+                        "input": true,
+                        "tags": [],
+                        "reorder": false,
+                        "placeholder": "",
+                        "prefix": "",
+                        "customClass": "",
+                        "suffix": "",
+                        "protected": false,
+                        "unique": false,
+                        "persistent": true,
+                        "hidden": false,
+                        "clearOnHide": true,
+                        "dataGridLabel": false,
+                        "labelPosition": "top",
+                        "labelWidth": 30,
+                        "labelMargin": 3,
+                        "description": "",
+                        "errorLabel": "",
+                        "tooltip": "",
+                        "hideLabel": false,
+                        "tabindex": "",
+                        "disabled": false,
+                        "autofocus": false,
+                        "dbIndex": false,
+                        "customDefaultValue": "",
+                        "calculateValue": "",
+                        "allowCalculateOverride": false,
+                        "widget": null,
+                        "refreshOn": "",
+                        "clearOnRefresh": false,
+                        "validateOn": "change",
+                        "hideCreateButton": false,
+                        "hideEditRowButton": false,
+                        "hideDeleteRowButton": false,
+                        "isFullScreenWidthModal": false,
+                        "id": "ehuef1"
+                    },
+                    {
+                        "label": "Associations",
                         "multiple": true,
                         "reorder": false,
                         "mask": false,
@@ -562,10 +638,10 @@
                                         "name": "att_id"
                                     },
                                     {
-                                        "name": "type"
+                                        "name": "name"
                                     },
                                     {
-                                        "name": "name"
+                                        "name": "target"
                                     }
                                 ],
                                 "createVariants": [],
@@ -573,9 +649,9 @@
                                 "attribute": null
                             }
                         },
-                        "customCreateVariantsJs": "var registry = _.get(window, 'Citeck.RecordActions'); \nif (registry) {\n  value = registry.getActionCreateVariants();\n} else {\n  console.warn(\"Action registry is not available!\");\n  value = [];\n}",
+                        "customCreateVariantsJs": "value = [\n  {\n    \"recordRef\": \"association\",\n    \"formKey\": \"type-assoc-form\"\n  }\n];",
                         "computed": {
-                            "valueFormKey": "value = 'action_' + record.att('type');"
+                            "valueFormKey": "value = \"type-assoc-form\";"
                         },
                         "defaultValue": [],
                         "encrypted": false,
@@ -587,7 +663,7 @@
                             "custom": "",
                             "customPrivate": false
                         },
-                        "key": "actions",
+                        "key": "associations",
                         "properties": {},
                         "conditional": {
                             "show": "",
@@ -635,234 +711,7 @@
                         "validateOn": "change",
                         "eventName": "",
                         "isStaticModalTitle": false,
-                        "id": "ed9k05"
-                    },
-                    {
-                        "label": "Associations",
-                        "disableAddingRemovingRows": false,
-                        "addAnother": "",
-                        "addAnotherPosition": "bottom",
-                        "removePlacement": "col",
-                        "defaultOpen": false,
-                        "layoutFixed": false,
-                        "enableRowGroups": false,
-                        "reorder": true,
-                        "hidden": true,
-                        "mask": false,
-                        "disabled": true,
-                        "tableView": true,
-                        "alwaysEnabled": false,
-                        "defaultValue": [
-                            {
-                                "textField": "",
-                                "name2": "",
-                                "id": "",
-                                "title": "",
-                                "target": "",
-                                "name": ""
-                            }
-                        ],
-                        "encrypted": false,
-                        "validate": {
-                            "customMessage": "",
-                            "json": "",
-                            "required": false,
-                            "custom": "",
-                            "customPrivate": false
-                        },
-                        "key": "associations",
-                        "properties": {},
-                        "conditional": {
-                            "show": "",
-                            "when": "",
-                            "json": "",
-                            "eq": ""
-                        },
-                        "customConditional": "",
-                        "logic": [],
-                        "attributes": {},
-                        "type": "datagrid",
-                        "input": true,
-                        "components": [
-                            {
-                                "label": "id",
-                                "showWordCount": false,
-                                "showCharCount": false,
-                                "tableView": true,
-                                "alwaysEnabled": false,
-                                "defaultValue": "",
-                                "inputFormat": "plain",
-                                "encrypted": false,
-                                "validate": {
-                                    "customMessage": "",
-                                    "json": "",
-                                    "required": false,
-                                    "custom": "",
-                                    "customPrivate": false,
-                                    "minLength": "",
-                                    "maxLength": "",
-                                    "minWords": "",
-                                    "maxWords": "",
-                                    "pattern": ""
-                                },
-                                "key": "id",
-                                "properties": {},
-                                "conditional": {
-                                    "show": "",
-                                    "when": "",
-                                    "json": "",
-                                    "eq": ""
-                                },
-                                "customConditional": "",
-                                "logic": [],
-                                "attributes": {},
-                                "type": "textfield",
-                                "input": true,
-                                "tags": [],
-                                "row": "0-0",
-                                "widget": {
-                                    "type": "",
-                                    "format": "yyyy-MM-dd hh:mm a",
-                                    "dateFormat": "yyyy-MM-dd hh:mm a",
-                                    "saveAs": "text"
-                                }
-                            },
-                            {
-                                "label": "name",
-                                "showWordCount": false,
-                                "showCharCount": false,
-                                "tableView": true,
-                                "alwaysEnabled": false,
-                                "defaultValue": "",
-                                "inputFormat": "plain",
-                                "encrypted": false,
-                                "validate": {
-                                    "customMessage": "",
-                                    "json": "",
-                                    "required": false,
-                                    "custom": "",
-                                    "customPrivate": false,
-                                    "minLength": "",
-                                    "maxLength": "",
-                                    "minWords": "",
-                                    "maxWords": "",
-                                    "pattern": ""
-                                },
-                                "key": "name",
-                                "properties": {},
-                                "conditional": {
-                                    "show": "",
-                                    "when": "",
-                                    "json": "",
-                                    "eq": ""
-                                },
-                                "customConditional": "",
-                                "logic": [],
-                                "attributes": {},
-                                "type": "textfield",
-                                "input": true,
-                                "tags": [],
-                                "row": "0-1",
-                                "widget": {
-                                    "type": "",
-                                    "format": "yyyy-MM-dd hh:mm a",
-                                    "dateFormat": "yyyy-MM-dd hh:mm a",
-                                    "saveAs": "text"
-                                }
-                            },
-                            {
-                                "label": "Target type",
-                                "mask": false,
-                                "tableView": true,
-                                "alwaysEnabled": false,
-                                "journalId": "ecos-types",
-                                "displayColumns": [],
-                                "customPredicateJs": "",
-                                "computed": {
-                                    "valueDisplayName": ""
-                                },
-                                "searchField": "",
-                                "ecos": {
-                                    "dataType": "assoc"
-                                },
-                                "defaultValue": "",
-                                "encrypted": false,
-                                "displayColumnsAsyncData": [
-                                    {
-                                        "label": "module_id",
-                                        "value": "module_id"
-                                    },
-                                    {
-                                        "label": "name",
-                                        "value": "name"
-                                    },
-                                    {
-                                        "label": "description",
-                                        "value": "description"
-                                    },
-                                    {
-                                        "label": "parent",
-                                        "value": "parent"
-                                    },
-                                    {
-                                        "label": "associations",
-                                        "value": "associations"
-                                    }
-                                ],
-                                "validate": {
-                                    "customMessage": "",
-                                    "json": "",
-                                    "required": false,
-                                    "custom": "",
-                                    "customPrivate": false
-                                },
-                                "key": "target",
-                                "properties": {},
-                                "conditional": {
-                                    "show": "",
-                                    "when": "",
-                                    "json": "",
-                                    "eq": ""
-                                },
-                                "customConditional": "",
-                                "logic": [],
-                                "attributes": {},
-                                "type": "selectJournal",
-                                "input": true,
-                                "tags": [],
-                                "row": "0-2"
-                            }
-                        ],
-                        "tags": [],
-                        "placeholder": "",
-                        "prefix": "",
-                        "customClass": "",
-                        "suffix": "",
-                        "multiple": false,
-                        "protected": false,
-                        "unique": false,
-                        "persistent": true,
-                        "clearOnHide": true,
-                        "dataGridLabel": false,
-                        "labelPosition": "top",
-                        "labelWidth": 30,
-                        "labelMargin": 3,
-                        "description": "",
-                        "errorLabel": "",
-                        "tooltip": "",
-                        "hideLabel": false,
-                        "tabindex": "",
-                        "autofocus": false,
-                        "dbIndex": false,
-                        "customDefaultValue": "",
-                        "calculateValue": "",
-                        "allowCalculateOverride": false,
-                        "widget": null,
-                        "refreshOn": "",
-                        "clearOnRefresh": false,
-                        "validateOn": "change",
-                        "tree": true,
-                        "id": "ej0pjxp"
+                        "id": "ex2gkc"
                     }
                 ],
                 "tags": [],
@@ -900,7 +749,7 @@
                 "theme": "default",
                 "breadcrumb": "default",
                 "lazyLoad": false,
-                "id": "efe6eka"
+                "id": "euaxg7k"
             },
             {
                 "label": "Columns",
@@ -967,7 +816,7 @@
                                 "disableOnInvalid": false,
                                 "theme": "default",
                                 "removeIndents": false,
-                                "id": "e5s8s5"
+                                "id": "elw1cdp"
                             }
                         ],
                         "width": 6,
@@ -1027,7 +876,7 @@
                             "when": null,
                             "eq": ""
                         },
-                        "id": "eqle95q"
+                        "id": "eetsiwz"
                     },
                     {
                         "components": [],
@@ -1088,7 +937,7 @@
                             "when": null,
                             "eq": ""
                         },
-                        "id": "emkx69g"
+                        "id": "e96gdpu"
                     },
                     {
                         "xs": 0,
@@ -1170,7 +1019,7 @@
                                 "rightIcon": "",
                                 "action": "submit",
                                 "removeIndents": false,
-                                "id": "e1sxgf6"
+                                "id": "euxb0j"
                             }
                         ],
                         "index": 2,
@@ -1214,7 +1063,7 @@
                             "when": null,
                             "eq": ""
                         },
-                        "id": "edkeowl"
+                        "id": "e8qpxjg"
                     }
                 ],
                 "mask": false,
@@ -1272,7 +1121,7 @@
                 "inlineColumns": false,
                 "autoAdjust": false,
                 "hideOnChildrenHidden": false,
-                "id": "eaoh48b"
+                "id": "ec8uuqs"
             }
         ]
     }
