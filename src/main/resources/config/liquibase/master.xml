@@ -12,6 +12,7 @@
     <include file="config/liquibase/changelog/20191027111943_add_actions_changelog.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20191029100931_add_inherit_actions_changelog.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20191209000000_ext_modules_changelog.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20191210000000_type_ext_id_size_update_changelog.xml" relativeToChangelogFile="false"/>
 
     <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
     <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->
