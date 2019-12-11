@@ -3,7 +3,6 @@
     "name": "Базовый тип",
     "actions": [
         "ui/action$edit",
-        "ui/action$delete",
         "ui/action$content-download",
         "ui/action$record-actions"
     ]
