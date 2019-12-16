@@ -13,12 +13,12 @@ import ru.citeck.ecos.model.domain.TypeActionEntity;
 import ru.citeck.ecos.model.domain.TypeEntity;
 import ru.citeck.ecos.model.dto.AssociationDto;
 import ru.citeck.ecos.model.dto.TypeDto;
-import ru.citeck.ecos.model.repository.TypeActionRepository;
 import ru.citeck.ecos.model.repository.TypeRepository;
-import ru.citeck.ecos.model.service.exception.ParentNotFoundException;
 import ru.citeck.ecos.records2.RecordRef;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -38,44 +38,30 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
     @Override
     public TypeEntity dtoToEntity(TypeDto dto) {
 
-        String extId = extractId(dto.getId());
-
         TypeEntity typeEntity = new TypeEntity();
-        typeEntity.setExtId(extId);
+        typeEntity.setExtId(dto.getId());
         typeEntity.setName(dto.getName());
         typeEntity.setDescription(dto.getDescription());
         typeEntity.setTenant(dto.getTenant());
         typeEntity.setInheritActions(dto.isInheritActions());
 
-        if (dto.getParent() != null && Strings.isNotBlank(dto.getParent().getId())) {
-            String parentId = extractId(dto.getParent().getId());
-            TypeEntity parent = typeRepository.findByExtId(parentId)
-                .orElseThrow(() -> new ParentNotFoundException(parentId));
-            typeEntity.setParent(parent);
+        RecordRef parentRef = dto.getParent();
+        if (parentRef != null && Strings.isNotBlank(parentRef.getId())) {
+            Optional<TypeEntity> optionalParent = typeRepository.findByExtId(parentRef.getId());
+            optionalParent.ifPresent(typeEntity::setParent);
         }
 
-        if (dto.getAssociations() != null) {
-            typeEntity.setAssocsToOther(dto.getAssociations()
-                .stream()
-                .filter(a -> a != null && StringUtils.isNotBlank(a.getId()))
+        Set<AssociationEntity> associationEntities = dto.getAssociations().stream()
+                .filter(a -> StringUtils.isNotBlank(a.getId()))
                 .map(associationConverter::dtoToEntity)
-                .collect(Collectors.toSet()));
-        }
+                .collect(Collectors.toSet());
+        typeEntity.setAssocsToOther(associationEntities);
 
-        if (dto.getActions() != null) {
-            typeEntity.addActions(
-                dto.getActions()
-                    .stream()
-                    .filter(a -> a != null && StringUtils.isNotBlank(a.getId()))
-                    .map(a -> {
-                        TypeActionEntity actionEntity = new TypeActionEntity();
-                        actionEntity.setType(typeEntity);
-                        actionEntity.setActionId(a.toString());
-                        return actionEntity;
-                    })
-                    .collect(Collectors.toList())
-            );
-        }
+        List<TypeActionEntity> actionEntities = dto.getActions().stream()
+                .filter(a -> StringUtils.isNotBlank(a.getId()))
+                .map(a -> new TypeActionEntity(typeEntity, a.toString()))
+                .collect(Collectors.toList());
+        typeEntity.addActions(actionEntities);
 
         handlingExtId(typeEntity);
 
@@ -83,6 +69,7 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
     }
 
     private void handlingExtId(TypeEntity typeEntity) {
+
         if (Strings.isBlank(typeEntity.getExtId())) {
             typeEntity.setExtId(UUID.randomUUID().toString());
         } else {
@@ -90,41 +77,41 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
             typeEntity.setId(stored.map(TypeEntity::getId).orElse(null));
         }
 
-        if (typeEntity.getAssocsToOther() != null) {
-            typeEntity.setAssocsToOther(typeEntity.getAssocsToOther().stream().peek(e -> {
+        Set<AssociationEntity> associationEntities = typeEntity.getAssocsToOther().stream()
+            .peek(e -> {
                 if (e.getExtId() == null || StringUtils.isEmpty(e.getExtId())) {
                     e.setExtId(UUID.randomUUID().toString());
                 }
-            }).collect(Collectors.toSet()));
-        }
+            }).collect(Collectors.toSet());
+        typeEntity.setAssocsToOther(associationEntities);
     }
 
     @Override
     public TypeDto entityToDto(TypeEntity entity) {
 
         TypeDto dto = new TypeDto();
+
         dto.setId(entity.getExtId());
         dto.setName(entity.getName());
         dto.setDescription(entity.getDescription());
         dto.setInheritActions(entity.isInheritActions());
         dto.setTenant(entity.getTenant());
 
-        if (entity.getParent() != null) {
-            dto.setParent(RecordRef.create(TypeRecordsDao.ID, entity.getParent().getExtId()));
+        TypeEntity parent = entity.getParent();
+        if (parent != null) {
+            RecordRef parentRecordRef = RecordRef.create(TypeRecordsDao.ID, parent.getExtId());
+            dto.setParent(parentRecordRef);
         }
 
-        if (entity.getAssocsToOther() != null) {
-            dto.setAssociations(entity.getAssocsToOther().stream()
-                .map(associationConverter::entityToDto)
-                .collect(Collectors.toSet()));
-        }
+        Set<AssociationDto> associationDtoSet = entity.getAssocsToOther().stream()
+            .map(associationConverter::entityToDto)
+            .collect(Collectors.toSet());
+        dto.setAssociations(associationDtoSet);
 
-        if (entity.getActions() != null) {
-            dto.setActions(entity.getActions()
-                .stream()
-                .map(a -> ModuleRef.valueOf(a.getActionId()))
-                .collect(Collectors.toSet()));
-        }
+        Set<ModuleRef> actionsModuleRefs = entity.getActions().stream()
+            .map(a -> ModuleRef.valueOf(a.getActionId()))
+            .collect(Collectors.toSet());
+        dto.setActions(actionsModuleRefs);
 
         return dto;
     }

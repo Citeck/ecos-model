@@ -36,16 +36,14 @@ public class TypeServiceImpl implements TypeService {
 
     @Cacheable("types")
     public Set<TypeDto> getAll() {
-        return typeRepository.findAll()
-            .stream()
+        return typeRepository.findAll().stream()
             .map(typeConverter::targetToSource)
             .collect(Collectors.toSet());
     }
 
     @Override
     public Set<TypeDto> getAll(Set<String> extIds) {
-        return typeRepository.findAllByExtIds(extIds)
-            .stream()
+        return typeRepository.findAllByExtIds(extIds).stream()
             .map(typeConverter::targetToSource)
             .collect(Collectors.toSet());
     }
@@ -61,7 +59,7 @@ public class TypeServiceImpl implements TypeService {
     public void delete(String extId) {
         Optional<TypeEntity> optional = typeRepository.findByExtId(extId);
         optional.ifPresent(e -> {
-            if (e.getChilds().size() > 0) {
+            if (e.getChildren().size() > 0) {
                 throw new ForgottenChildsException();
             }
             typeRepository.deleteById(e.getId());

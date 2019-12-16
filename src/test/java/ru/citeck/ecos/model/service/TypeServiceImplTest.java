@@ -80,7 +80,7 @@ public class TypeServiceImplTest {
         typeEntity.addAction(actionEntity);
         typeEntity.setAssocsToOther(Collections.singleton(associationEntity));
         typeEntity.setParent(parent);
-        typeEntity.setChilds(Collections.singleton(child));
+        typeEntity.setChildren(Collections.singleton(child));
         typeEntity.setSections(Collections.singleton(sectionEntity));
 
         actionRef = ModuleRef.create("ui/action", "action");
@@ -184,7 +184,7 @@ public class TypeServiceImplTest {
     void testDelete() {
 
         //  arrange
-        typeEntity.setChilds(Collections.emptySet());
+        typeEntity.setChildren(Collections.emptySet());
         when(typeRepository.findByExtId(typeExtId)).thenReturn(Optional.of(typeEntity));
 
         //  act

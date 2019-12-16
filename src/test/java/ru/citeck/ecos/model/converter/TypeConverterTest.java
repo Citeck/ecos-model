@@ -70,7 +70,7 @@ public class TypeConverterTest {
         typeEntity.setName("name");
         typeEntity.setTenant("tenant");
         typeEntity.setDescription("desc");
-        typeEntity.setChilds(Collections.singleton(child));
+        typeEntity.setChildren(Collections.singleton(child));
         typeEntity.setParent(parent);
         typeEntity.addAction(actionEntity);
         typeEntity.setSections(Collections.singleton(sectionEntity));
@@ -155,7 +155,7 @@ public class TypeConverterTest {
         Assert.assertEquals(associationEntityLocal.getExtId(), associationEntity.getExtId());
         Assert.assertEquals(associationEntityLocal.getTarget().getExtId(), associationEntity.getTarget().getExtId());
         Assert.assertEquals(resultEntity.getActions(), Collections.singletonList(actionEntity));
-        Assert.assertEquals(resultEntity.getChilds(), Collections.emptySet());
+        Assert.assertEquals(resultEntity.getChildren(), Collections.emptySet());
         Assert.assertEquals(resultEntity.getParent(), parent);
         Assert.assertEquals(resultEntity.getSections(), Collections.emptySet());
     }
@@ -176,7 +176,7 @@ public class TypeConverterTest {
         Assert.assertEquals(resultEntity.getName(), typeDto.getName());
         Assert.assertEquals(resultEntity.getDescription(), typeDto.getDescription());
         Assert.assertEquals(resultEntity.getTenant(), typeDto.getTenant());
-        Assert.assertEquals(resultEntity.getChilds(), Collections.emptySet());
+        Assert.assertEquals(resultEntity.getChildren(), Collections.emptySet());
         Assert.assertEquals(resultEntity.getSections(), Collections.emptySet());
         Mockito.verify(typeRepository, Mockito.times(0)).findByExtId(Mockito.any());
     }

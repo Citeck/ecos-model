@@ -33,20 +33,17 @@ public class SectionConverter extends AbstractDtoConverter<SectionDto, SectionEn
     @Override
     public SectionEntity dtoToEntity(SectionDto dto) {
 
-        String extId = extractId(dto.getId());
-
         SectionEntity sectionEntity = new SectionEntity();
         sectionEntity.setName(dto.getName());
-        sectionEntity.setExtId(extId);
+        sectionEntity.setExtId(dto.getId());
         sectionEntity.setDescription(dto.getDescription());
         sectionEntity.setTenant(dto.getTenant());
 
-        if (dto.getTypes() != null) {
-            Set<String> dtoTypesExtIds = dto.getTypes().stream()
-                .map(r -> extractId(r.getId())).collect(Collectors.toSet());
-            Set<TypeEntity> storedTypes = typeRepository.findAllByExtIds(dtoTypesExtIds);
-            sectionEntity.setTypes(storedTypes);
-        }
+        Set<String> dtoTypesExtIds = dto.getTypes().stream()
+            .map(RecordRef::getId)
+            .collect(Collectors.toSet());
+        Set<TypeEntity> storedTypes = typeRepository.findAllByExtIds(dtoTypesExtIds);
+        sectionEntity.setTypes(storedTypes);
 
         if (Strings.isBlank(sectionEntity.getExtId())) {
             sectionEntity.setExtId(UUID.randomUUID().toString());
