@@ -18,6 +18,7 @@ public class TypeDto {
     private String description;
     private String tenant;
     private RecordRef parent;
+    private String form;
     private Set<TypeAssociationDto> associations = new HashSet<>();
     private Set<ModuleRef> actions = new HashSet<>();
     private boolean inheritActions;
@@ -27,6 +28,7 @@ public class TypeDto {
         this.description = dto.description;
         this.tenant = dto.tenant;
         this.parent = dto.parent;
+        this.form = dto.form;
         this.id = dto.id;
 
         if (dto.associations != null) {
