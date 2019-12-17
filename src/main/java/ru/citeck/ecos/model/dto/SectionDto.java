@@ -7,30 +7,15 @@ import ru.citeck.ecos.records2.graphql.meta.annotation.DisplayName;
 import java.util.HashSet;
 import java.util.Set;
 
-@EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
+@Data
 public class SectionDto {
 
-    @Getter
-    @Setter
     private String id;
-
-    @Getter
-    @Setter
     private String name;
-
-    @Getter
-    @Setter
     private String description;
-
-    @Getter
-    @Setter
     private String tenant;
-
-    @Getter
-    @Setter
     private Set<RecordRef> types;
 
     public SectionDto(SectionDto dto) {

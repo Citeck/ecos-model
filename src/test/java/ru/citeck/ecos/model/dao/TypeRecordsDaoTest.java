@@ -9,7 +9,7 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.apps.app.module.ModuleRef;
-import ru.citeck.ecos.model.dto.AssociationDto;
+import ru.citeck.ecos.model.dto.TypeAssociationDto;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.service.impl.TypeServiceImpl;
 import ru.citeck.ecos.predicate.PredicateService;
@@ -64,7 +64,7 @@ public class TypeRecordsDaoTest {
         recordsQuery.setQuery("query");
         recordsQuery.setLanguage(PredicateService.LANGUAGE_PREDICATE);
 
-        AssociationDto associationDto = new AssociationDto();
+        TypeAssociationDto associationDto = new TypeAssociationDto();
         associationDto.setId("association");
 
         typeDto = new TypeDto();

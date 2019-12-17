@@ -1,14 +1,16 @@
-package ru.citeck.ecos.model.converter.impl.module;
+package ru.citeck.ecos.model.converter.module.impl;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.apps.app.module.ModuleRef;
+import ru.citeck.ecos.apps.app.module.type.model.type.AssociationDto;
 import ru.citeck.ecos.apps.app.module.type.model.type.TypeModule;
-import ru.citeck.ecos.model.converter.AbstractModuleConverter;
-import ru.citeck.ecos.model.converter.ModuleConverter;
+import ru.citeck.ecos.model.converter.Converter;
+import ru.citeck.ecos.model.converter.module.AbstractModuleConverter;
 import ru.citeck.ecos.model.dao.TypeRecordsDao;
-import ru.citeck.ecos.model.dto.AssociationDto;
+import ru.citeck.ecos.model.dto.TypeAssociationDto;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.records2.RecordRef;
 
@@ -24,23 +26,18 @@ import java.util.stream.Collectors;
  * @see ru.citeck.ecos.apps.app.module.type.model.type.TypeModule
  * @see ru.citeck.ecos.model.dto.TypeDto
  */
+@RequiredArgsConstructor
 @Component
 public class TypeModuleConverter extends AbstractModuleConverter<TypeModule, TypeDto> {
 
-    private final ModuleConverter<ru.citeck.ecos.apps.app.module.type.model.type.AssociationDto, AssociationDto> associationDtoModuleConverter;
-
-    public TypeModuleConverter(AssociationModuleDtoConverter associationDtoModuleConverter) {
-        this.associationDtoModuleConverter = associationDtoModuleConverter;
-    }
+    private final Converter<AssociationDto, TypeAssociationDto> associationDtoModuleConverter;
 
     @Override
     public TypeDto moduleToDto(TypeModule typeModule) {
 
         TypeDto typeDto = new TypeDto();
 
-        String typeId = extractIdFromModuleId(typeModule.getId());
-        typeDto.setId(typeId);
-
+        typeDto.setId(typeModule.getName());
         typeDto.setName(typeModule.getName());
         typeDto.setDescription(typeModule.getDescription());
         typeDto.setTenant(Strings.EMPTY);
@@ -48,17 +45,15 @@ public class TypeModuleConverter extends AbstractModuleConverter<TypeModule, Typ
 
         ModuleRef parentModuleRef = typeModule.getParent();
         if (parentModuleRef != null) {
-            String parentModuleId = parentModuleRef.getId();
-            String parentId = extractIdFromModuleId(parentModuleId);
-            RecordRef parentRecordRef = RecordRef.create(TypeRecordsDao.ID, parentId);
+            RecordRef parentRecordRef = RecordRef.create(TypeRecordsDao.ID, parentModuleRef.getId());
             typeDto.setParent(parentRecordRef);
         }
 
-        List<ru.citeck.ecos.apps.app.module.type.model.type.AssociationDto> associationsModuleDTOs =
+        List<AssociationDto> associationsModuleDTOs =
             typeModule.getAssociations();
         if (CollectionUtils.isNotEmpty(associationsModuleDTOs)) {
-            Set<AssociationDto> associationsDTOs = associationsModuleDTOs.stream()
-                .map(associationDtoModuleConverter::moduleToDto)
+            Set<TypeAssociationDto> associationsDTOs = associationsModuleDTOs.stream()
+                .map(associationDtoModuleConverter::sourceToTarget)
                 .collect(Collectors.toSet());
             typeDto.setAssociations(associationsDTOs);
         } else {

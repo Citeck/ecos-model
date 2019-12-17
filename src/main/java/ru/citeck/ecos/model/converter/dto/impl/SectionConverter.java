@@ -1,9 +1,9 @@
-package ru.citeck.ecos.model.converter.impl;
+package ru.citeck.ecos.model.converter.dto.impl;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.util.Strings;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.citeck.ecos.model.converter.AbstractDtoConverter;
+import ru.citeck.ecos.model.converter.dto.AbstractDtoConverter;
 import ru.citeck.ecos.model.dao.TypeRecordsDao;
 import ru.citeck.ecos.model.domain.SectionEntity;
 import ru.citeck.ecos.model.domain.TypeEntity;
@@ -17,18 +17,12 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Component
 public class SectionConverter extends AbstractDtoConverter<SectionDto, SectionEntity> {
 
     private final TypeRepository typeRepository;
     private final SectionRepository sectionRepository;
-
-    @Autowired
-    public SectionConverter(TypeRepository typeRepository,
-                            SectionRepository sectionRepository) {
-        this.typeRepository = typeRepository;
-        this.sectionRepository = sectionRepository;
-    }
 
     @Override
     public SectionEntity dtoToEntity(SectionDto dto) {

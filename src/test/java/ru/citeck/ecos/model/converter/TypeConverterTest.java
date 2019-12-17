@@ -9,12 +9,13 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.apps.app.module.ModuleRef;
-import ru.citeck.ecos.model.converter.impl.TypeConverter;
+import ru.citeck.ecos.model.converter.dto.DtoConverter;
+import ru.citeck.ecos.model.converter.dto.impl.TypeConverter;
 import ru.citeck.ecos.model.domain.TypeActionEntity;
 import ru.citeck.ecos.model.domain.AssociationEntity;
 import ru.citeck.ecos.model.domain.SectionEntity;
 import ru.citeck.ecos.model.domain.TypeEntity;
-import ru.citeck.ecos.model.dto.AssociationDto;
+import ru.citeck.ecos.model.dto.TypeAssociationDto;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
@@ -31,7 +32,7 @@ public class TypeConverterTest {
     private TypeRepository typeRepository;
 
     @MockBean
-    private DtoConverter<AssociationDto, AssociationEntity> associationConverter;
+    private DtoConverter<TypeAssociationDto, AssociationEntity> associationConverter;
 
     private TypeConverter typeConverter;
 
@@ -44,7 +45,7 @@ public class TypeConverterTest {
     private ModuleRef actionRef;
 
     private AssociationEntity associationEntity;
-    private AssociationDto associationDto;
+    private TypeAssociationDto associationDto;
 
     @BeforeEach
     void setUp() {
@@ -82,7 +83,7 @@ public class TypeConverterTest {
         typeEntity.setAssocsToOther(Collections.singleton(associationEntity));
 
 
-        associationDto = new AssociationDto();
+        associationDto = new TypeAssociationDto();
         associationDto.setId("association");
         associationDto.setTargetType(RecordRef.create("type", "parent"));
 

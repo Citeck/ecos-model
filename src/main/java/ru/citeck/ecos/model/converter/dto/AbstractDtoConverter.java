@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.converter;
+package ru.citeck.ecos.model.converter.dto;
 
 /*
  * Extension of default interface Converter, whose purpose to converting local dto to entity and conversely.

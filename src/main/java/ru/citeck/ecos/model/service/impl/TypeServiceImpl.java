@@ -1,7 +1,7 @@
 package ru.citeck.ecos.model.service.impl;
 
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.citeck.ecos.model.converter.Converter;
@@ -17,22 +17,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Service
 public class TypeServiceImpl implements TypeService {
 
     private final TypeRepository typeRepository;
     private final AssociationService associationService;
     private final Converter<TypeDto, TypeEntity> typeConverter;
-
-
-    @Autowired
-    public TypeServiceImpl(TypeRepository typeRepository,
-                           AssociationService associationService,
-                           Converter<TypeDto, TypeEntity> typeConverter) {
-        this.typeRepository = typeRepository;
-        this.associationService = associationService;
-        this.typeConverter = typeConverter;
-    }
 
     @Cacheable("types")
     public Set<TypeDto> getAll() {

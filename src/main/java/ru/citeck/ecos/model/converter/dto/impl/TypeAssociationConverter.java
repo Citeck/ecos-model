@@ -1,25 +1,21 @@
-package ru.citeck.ecos.model.converter.impl;
+package ru.citeck.ecos.model.converter.dto.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.citeck.ecos.model.converter.AbstractDtoConverter;
+import ru.citeck.ecos.model.converter.dto.AbstractDtoConverter;
 import ru.citeck.ecos.model.domain.AssociationEntity;
 import ru.citeck.ecos.model.domain.TypeEntity;
-import ru.citeck.ecos.model.dto.AssociationDto;
+import ru.citeck.ecos.model.dto.TypeAssociationDto;
 import ru.citeck.ecos.model.repository.TypeRepository;
 
+@RequiredArgsConstructor
 @Component
-public class AssociationConverter extends AbstractDtoConverter<AssociationDto, AssociationEntity> {
+public class TypeAssociationConverter extends AbstractDtoConverter<TypeAssociationDto, AssociationEntity> {
 
     private final TypeRepository typeRepository;
 
-    @Autowired
-    public AssociationConverter(TypeRepository typeRepository) {
-        this.typeRepository = typeRepository;
-    }
-
     @Override
-    public AssociationEntity dtoToEntity(AssociationDto associationDto) {
+    public AssociationEntity dtoToEntity(TypeAssociationDto associationDto) {
         AssociationEntity associationEntity = new AssociationEntity();
 
        /*
@@ -34,8 +30,8 @@ public class AssociationConverter extends AbstractDtoConverter<AssociationDto, A
     }
 
     @Override
-    public AssociationDto entityToDto(AssociationEntity associationEntity) {
-        AssociationDto assocDto = new AssociationDto();
+    public TypeAssociationDto entityToDto(AssociationEntity associationEntity) {
+        TypeAssociationDto assocDto = new TypeAssociationDto();
         assocDto.setId(associationEntity.getExtId());
         assocDto.setName(associationEntity.getName());
         //assocDto.setTargetType(RecordRef.create("type", associationEntity.getTarget().getExtId()));

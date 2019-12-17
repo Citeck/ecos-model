@@ -8,12 +8,12 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.apps.app.module.ModuleRef;
-import ru.citeck.ecos.model.converter.impl.TypeConverter;
+import ru.citeck.ecos.model.converter.dto.impl.TypeConverter;
 import ru.citeck.ecos.model.domain.TypeActionEntity;
 import ru.citeck.ecos.model.domain.AssociationEntity;
 import ru.citeck.ecos.model.domain.SectionEntity;
 import ru.citeck.ecos.model.domain.TypeEntity;
-import ru.citeck.ecos.model.dto.AssociationDto;
+import ru.citeck.ecos.model.dto.TypeAssociationDto;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.model.service.exception.ForgottenChildsException;
@@ -46,7 +46,7 @@ public class TypeServiceImplTest {
 
     private String typeExtId;
     private ModuleRef actionRef;
-    private AssociationDto associationDto;
+    private TypeAssociationDto associationDto;
 
     @BeforeEach
     void init() {
@@ -85,7 +85,7 @@ public class TypeServiceImplTest {
 
         actionRef = ModuleRef.create("ui/action", "action");
 
-        associationDto = new AssociationDto();
+        associationDto = new TypeAssociationDto();
         associationDto.setId("association");
 
         typeDto = new TypeDto();

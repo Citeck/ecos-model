@@ -8,12 +8,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-@EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
-@Getter
-@Setter
+@Data
 public class TypeDto {
 
     private String id;
@@ -21,7 +18,7 @@ public class TypeDto {
     private String description;
     private String tenant;
     private RecordRef parent;
-    private Set<AssociationDto> associations = new HashSet<>();
+    private Set<TypeAssociationDto> associations = new HashSet<>();
     private Set<ModuleRef> actions = new HashSet<>();
     private boolean inheritActions;
 
