@@ -39,7 +39,7 @@ public class TypeEntity {
     private TypeEntity parent;
 
     @OneToMany(mappedBy="parent", cascade = CascadeType.DETACH)
-    private Set<TypeEntity> childs = new HashSet<>();
+    private Set<TypeEntity> children = new HashSet<>();
 
     @ManyToMany(mappedBy = "types", fetch = FetchType.EAGER)
     private Set<SectionEntity> sections = new HashSet<>();

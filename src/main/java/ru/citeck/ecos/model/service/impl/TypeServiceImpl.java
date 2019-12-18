@@ -1,7 +1,7 @@
 package ru.citeck.ecos.model.service.impl;
 
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.citeck.ecos.model.converter.Converter;
@@ -17,6 +17,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Service
 public class TypeServiceImpl implements TypeService {
 
@@ -24,28 +25,16 @@ public class TypeServiceImpl implements TypeService {
     private final AssociationService associationService;
     private final Converter<TypeDto, TypeEntity> typeConverter;
 
-
-    @Autowired
-    public TypeServiceImpl(TypeRepository typeRepository,
-                           AssociationService associationService,
-                           Converter<TypeDto, TypeEntity> typeConverter) {
-        this.typeRepository = typeRepository;
-        this.associationService = associationService;
-        this.typeConverter = typeConverter;
-    }
-
     @Cacheable("types")
     public Set<TypeDto> getAll() {
-        return typeRepository.findAll()
-            .stream()
+        return typeRepository.findAll().stream()
             .map(typeConverter::targetToSource)
             .collect(Collectors.toSet());
     }
 
     @Override
     public Set<TypeDto> getAll(Set<String> extIds) {
-        return typeRepository.findAllByExtIds(extIds)
-            .stream()
+        return typeRepository.findAllByExtIds(extIds).stream()
             .map(typeConverter::targetToSource)
             .collect(Collectors.toSet());
     }
@@ -61,7 +50,7 @@ public class TypeServiceImpl implements TypeService {
     public void delete(String extId) {
         Optional<TypeEntity> optional = typeRepository.findByExtId(extId);
         optional.ifPresent(e -> {
-            if (e.getChilds().size() > 0) {
+            if (e.getChildren().size() > 0) {
                 throw new ForgottenChildsException();
             }
             typeRepository.deleteById(e.getId());

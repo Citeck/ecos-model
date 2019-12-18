@@ -1,4 +1,6 @@
-package ru.citeck.ecos.model.converter;
+package ru.citeck.ecos.model.converter.dto;
+
+import ru.citeck.ecos.model.converter.Converter;
 
 public interface DtoConverter<S, T> extends Converter<S, T> {
 

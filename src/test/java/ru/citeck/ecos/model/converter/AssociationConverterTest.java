@@ -7,10 +7,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.citeck.ecos.model.converter.impl.AssociationConverter;
+import ru.citeck.ecos.model.converter.dto.impl.TypeAssociationConverter;
 import ru.citeck.ecos.model.domain.AssociationEntity;
 import ru.citeck.ecos.model.domain.TypeEntity;
-import ru.citeck.ecos.model.dto.AssociationDto;
+import ru.citeck.ecos.model.dto.TypeAssociationDto;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
@@ -25,18 +25,18 @@ public class AssociationConverterTest {
     @MockBean
     private TypeRepository typeRepository;
 
-    private AssociationConverter associationConverter;
+    private TypeAssociationConverter associationConverter;
 
-    private AssociationDto associationDto;
+    private TypeAssociationDto associationDto;
     private AssociationEntity associationEntity;
     private TypeEntity sourceTypeEntity;
     private TypeEntity targetTypeEntity;
 
     @BeforeEach
     void setUp() {
-        associationConverter = new AssociationConverter(typeRepository);
+        associationConverter = new TypeAssociationConverter(typeRepository);
 
-        associationDto = new AssociationDto();
+        associationDto = new TypeAssociationDto();
         associationDto.setId("association");
         associationDto.setName("name");
         associationDto.setTargetType(RecordRef.create("type", "target"));
@@ -114,7 +114,7 @@ public class AssociationConverterTest {
     void testEntityToDto() {
 
         //  act
-        AssociationDto resultAssociationDto = associationConverter.entityToDto(associationEntity);
+        TypeAssociationDto resultAssociationDto = associationConverter.entityToDto(associationEntity);
 
         //  assert
         Assert.assertEquals(resultAssociationDto.getId(), associationEntity.getExtId());

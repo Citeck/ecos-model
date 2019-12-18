@@ -1,7 +1,7 @@
-package ru.citeck.ecos.model.converter;
+package ru.citeck.ecos.model.converter.dto;
 
 /*
- * Extension of default interface Converter, whose purpose to converting dto to entity and conversely.
+ * Extension of default interface Converter, whose purpose to converting local dto to entity and conversely.
  */
 public abstract class AbstractDtoConverter<S, T> implements DtoConverter<S, T> {
 
@@ -27,10 +27,4 @@ public abstract class AbstractDtoConverter<S, T> implements DtoConverter<S, T> {
     @Override
     public abstract S entityToDto(T t);
 
-    protected String extractId(String refId) {
-        if (refId != null && refId.contains("$")) {
-            return refId.substring(refId.indexOf("$") + 1);
-        }
-        return refId;
-    }
 }
