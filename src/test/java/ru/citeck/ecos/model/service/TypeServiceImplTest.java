@@ -104,7 +104,7 @@ public class TypeServiceImplTest {
 
         //  arrange
         when(typeRepository.findAll()).thenReturn(Collections.singletonList(typeEntity));
-        when(typeConverter.targetToSource(typeEntity)).thenReturn(typeDto);
+        when(typeConverter.entityToDto(typeEntity)).thenReturn(typeDto);
 
         //  act
         Set<TypeDto> resultTypeDtos = typeService.getAll();
@@ -127,7 +127,7 @@ public class TypeServiceImplTest {
         //  arrange
         when(typeRepository.findAllByExtIds(Collections.singleton(typeExtId)))
             .thenReturn(Collections.singleton(typeEntity));
-        when(typeConverter.targetToSource(typeEntity)).thenReturn(typeDto);
+        when(typeConverter.entityToDto(typeEntity)).thenReturn(typeDto);
 
         //  act
         Set<TypeDto> resultTypeDtos = typeService.getAll(Collections.singleton(typeExtId));
@@ -149,7 +149,7 @@ public class TypeServiceImplTest {
 
         //  arrange
         when(typeRepository.findByExtId(typeExtId)).thenReturn(Optional.of(typeEntity));
-        when(typeConverter.targetToSource(typeEntity)).thenReturn(typeDto);
+        when(typeConverter.entityToDto(typeEntity)).thenReturn(typeDto);
 
         //  act
         TypeDto resultTypeDto = typeService.getByExtId(typeExtId);
@@ -175,7 +175,7 @@ public class TypeServiceImplTest {
             typeService.getByExtId(typeExtId);
         } catch (IllegalArgumentException iae) {
             //  assert
-            Mockito.verify(typeConverter, Mockito.times(0)).targetToSource(Mockito.any());
+            Mockito.verify(typeConverter, Mockito.times(0)).entityToDto(Mockito.any());
             Assert.assertEquals(iae.getMessage(), "Type doesnt exists: " + typeExtId);
         }
     }
@@ -227,14 +227,14 @@ public class TypeServiceImplTest {
     void testUpdate() {
 
         //  arrange
-        when(typeConverter.sourceToTarget(typeDto)).thenReturn(typeEntity);
+        when(typeConverter.dtoToEntity(typeDto)).thenReturn(typeEntity);
 
         //  act
         typeService.update(typeDto);
 
         //  assert
         Mockito.verify(typeRepository, Mockito.times(1)).save(typeEntity);
-        Mockito.verify(typeConverter, Mockito.times(1)).targetToSource(typeEntity);
+        Mockito.verify(typeConverter, Mockito.times(1)).entityToDto(typeEntity);
     }
 
     @Test
@@ -242,14 +242,14 @@ public class TypeServiceImplTest {
 
         //  arrange
         typeEntity.setAssocsToOther(null);
-        when(typeConverter.sourceToTarget(typeDto)).thenReturn(typeEntity);
+        when(typeConverter.dtoToEntity(typeDto)).thenReturn(typeEntity);
 
         //  act
         typeService.update(typeDto);
 
         //  assert
         Mockito.verify(typeRepository, Mockito.times(1)).save(typeEntity);
-        Mockito.verify(typeConverter, Mockito.times(1)).targetToSource(typeEntity);
+        Mockito.verify(typeConverter, Mockito.times(1)).entityToDto(typeEntity);
         Mockito.verify(associationService, Mockito.times(0)).saveAll(Mockito.anySet());
     }
 }

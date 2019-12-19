@@ -4,7 +4,7 @@ package ru.citeck.ecos.model.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.citeck.ecos.model.converter.Converter;
+import ru.citeck.ecos.model.converter.dto.DtoConverter;
 import ru.citeck.ecos.model.domain.TypeEntity;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.repository.TypeRepository;
@@ -23,25 +23,25 @@ public class TypeServiceImpl implements TypeService {
 
     private final TypeRepository typeRepository;
     private final AssociationService associationService;
-    private final Converter<TypeDto, TypeEntity> typeConverter;
+    private final DtoConverter<TypeDto, TypeEntity> typeConverter;
 
     @Cacheable("types")
     public Set<TypeDto> getAll() {
         return typeRepository.findAll().stream()
-            .map(typeConverter::targetToSource)
+            .map(typeConverter::entityToDto)
             .collect(Collectors.toSet());
     }
 
     @Override
     public Set<TypeDto> getAll(Set<String> extIds) {
         return typeRepository.findAllByExtIds(extIds).stream()
-            .map(typeConverter::targetToSource)
+            .map(typeConverter::entityToDto)
             .collect(Collectors.toSet());
     }
 
     @Override
     public TypeDto getByExtId(String extId) {
-        return typeRepository.findByExtId(extId).map(typeConverter::targetToSource)
+        return typeRepository.findByExtId(extId).map(typeConverter::entityToDto)
             .orElseThrow(() -> new IllegalArgumentException("Type doesnt exists: " + extId));
     }
 
@@ -60,11 +60,11 @@ public class TypeServiceImpl implements TypeService {
     @Override
     @Transactional
     public TypeDto update(TypeDto dto) {
-        TypeEntity entity = typeConverter.sourceToTarget(dto);
+        TypeEntity entity = typeConverter.dtoToEntity(dto);
         typeRepository.save(entity);
         if (entity.getAssocsToOther() != null) {
             associationService.saveAll(entity.getAssocsToOther());
         }
-        return typeConverter.targetToSource(entity);
+        return typeConverter.entityToDto(entity);
     }
 }

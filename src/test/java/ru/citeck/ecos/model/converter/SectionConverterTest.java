@@ -83,7 +83,7 @@ public class SectionConverterTest {
     void testDtoToEntityWithoutTypesAndBlackExtId() {
 
         //  arrange
-        sectionDto.setTypes(null);
+        sectionDto.setTypes(Collections.emptySet());
         sectionDto.setId(Strings.EMPTY);
 
         //  act
@@ -93,7 +93,6 @@ public class SectionConverterTest {
         Assert.assertEquals(resultSectionEntity.getName(), sectionDto.getName());
         Assert.assertEquals(resultSectionEntity.getTenant(), sectionDto.getTenant());
         Assert.assertEquals(resultSectionEntity.getDescription(), sectionDto.getDescription());
-        Mockito.verify(typeRepository, Mockito.times(0)).findAllByExtIds(Mockito.any());
         Mockito.verify(sectionRepository, Mockito.times(0)).findByExtId(Mockito.any());
     }
 
