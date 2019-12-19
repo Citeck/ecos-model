@@ -31,6 +31,8 @@ public class TypeEntity {
 
     private String tenant;
 
+    private String form;
+
     @Column(name = "inherit_actions")
     private boolean inheritActions;
 
