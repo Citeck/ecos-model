@@ -122,7 +122,7 @@ public class TypeConverterTest {
 
         //  arrange
         typeEntity.setParent(null);
-        typeEntity.setAssocsToOther(null);
+        typeEntity.setAssocsToOther(Collections.emptySet());
         typeEntity.removeAction(actionEntity);
 
         //  act
@@ -165,10 +165,10 @@ public class TypeConverterTest {
     void testDtoToEntityWithoutParentAndAssociationsAndExtIdAndActions() {
 
         //  arrange
-        typeDto.setActions(null);
+        typeDto.setActions(Collections.emptySet());
         typeDto.setParent(null);
         typeDto.setId(Strings.EMPTY);
-        typeDto.setAssociations(null);
+        typeDto.setAssociations(Collections.emptySet());
 
         //  act
         TypeEntity resultEntity = typeConverter.sourceToTarget(typeDto);
