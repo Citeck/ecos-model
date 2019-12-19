@@ -1,6 +1,10 @@
 package ru.citeck.ecos.model.domain;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import ru.citeck.ecos.apps.app.module.type.model.type.AssocDirection;
 
 import javax.persistence.*;
 
@@ -25,4 +29,7 @@ public class AssociationEntity {
     @ManyToOne(cascade = CascadeType.DETACH)
     @JoinColumn(name = "target_id")
     private TypeEntity target;
+
+    @Enumerated(EnumType.ORDINAL)
+    private AssocDirection direction;
 }
