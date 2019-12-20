@@ -59,12 +59,9 @@ public class TypeServiceImpl implements TypeService {
 
     @Override
     @Transactional
-    public TypeDto update(TypeDto dto) {
+    public TypeDto save(TypeDto dto) {
         TypeEntity entity = typeConverter.dtoToEntity(dto);
         typeRepository.save(entity);
-        if (entity.getAssocsToOther() != null) {
-            associationService.saveAll(entity.getAssocsToOther());
-        }
         return typeConverter.entityToDto(entity);
     }
 }

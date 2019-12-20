@@ -19,6 +19,7 @@ public class EappsAssociationConverter implements Converter<AssociationDto, Type
         localDto.setId(associationId);
 
         localDto.setName(eappsDto.getName());
+        localDto.setDirection(eappsDto.getDirection());
 
         ModuleRef targetTypeModuleRef = eappsDto.getTarget();
         if (targetTypeModuleRef != null) {

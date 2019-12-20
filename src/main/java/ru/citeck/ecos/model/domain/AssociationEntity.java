@@ -1,30 +1,30 @@
 package ru.citeck.ecos.model.domain;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import ru.citeck.ecos.apps.app.module.type.model.type.AssocDirection;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "ecos_association")
-@Getter
-@Setter
+@IdClass(AssociationId.class)
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class AssociationEntity {
 
+    @Id
     @Column(nullable = false)
     private String extId;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
-    @SequenceGenerator(name = "sequenceGenerator")
-    private Long id;
-
     private String name;
+
+    @Id
+    @ManyToOne(cascade = CascadeType.DETACH)
+    @JoinColumn(name = "source_id")
+    private TypeEntity source;
 
     @ManyToOne(cascade = CascadeType.DETACH)
     @JoinColumn(name = "target_id")

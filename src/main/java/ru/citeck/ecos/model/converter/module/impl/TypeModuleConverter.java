@@ -30,18 +30,23 @@ import java.util.stream.Collectors;
 @Component
 public class TypeModuleConverter extends AbstractModuleConverter<TypeModule, TypeDto> {
 
-    private final Converter<AssociationDto, TypeAssociationDto> associationDtoModuleConverter;
+    private final Converter<AssociationDto, TypeAssociationDto> eappsAssociationDtoConverter;
 
     @Override
     public TypeDto moduleToDto(TypeModule typeModule) {
 
         TypeDto typeDto = new TypeDto();
 
-        typeDto.setId(typeModule.getName());
+        typeDto.setId(typeModule.getId());
         typeDto.setName(typeModule.getName());
         typeDto.setDescription(typeModule.getDescription());
         typeDto.setTenant(Strings.EMPTY);
         typeDto.setInheritActions(typeModule.isInheritActions());
+
+        ModuleRef formModuleRef = typeModule.getForm();
+        if (formModuleRef != null) {
+            typeDto.setForm(formModuleRef.toString());
+        }
 
         ModuleRef parentModuleRef = typeModule.getParent();
         if (parentModuleRef != null) {
@@ -49,11 +54,10 @@ public class TypeModuleConverter extends AbstractModuleConverter<TypeModule, Typ
             typeDto.setParent(parentRecordRef);
         }
 
-        List<AssociationDto> associationsModuleDTOs =
-            typeModule.getAssociations();
+        List<AssociationDto> associationsModuleDTOs = typeModule.getAssociations();
         if (CollectionUtils.isNotEmpty(associationsModuleDTOs)) {
             Set<TypeAssociationDto> associationsDTOs = associationsModuleDTOs.stream()
-                .map(associationDtoModuleConverter::sourceToTarget)
+                .map(eappsAssociationDtoConverter::sourceToTarget)
                 .collect(Collectors.toSet());
             typeDto.setAssociations(associationsDTOs);
         } else {
