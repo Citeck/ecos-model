@@ -10,10 +10,12 @@
     <include file="config/liquibase/changelog/00000000000005_section_type_schema.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/00000000000006_ecos_association_schema.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/00000000000007_ecos_type_add_form.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/00000000000008_ecos_association_add_direction_field.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20191027111943_add_actions_changelog.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20191029100931_add_inherit_actions_changelog.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20191209000000_ext_modules_changelog.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20191210000000_type_ext_id_size_update_changelog.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20191220000009_ecos_association_add_source_target_unique_constraint.xml" relativeToChangelogFile="false"/>
 
     <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
     <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->

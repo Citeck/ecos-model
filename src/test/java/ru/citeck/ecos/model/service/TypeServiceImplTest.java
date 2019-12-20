@@ -230,7 +230,7 @@ public class TypeServiceImplTest {
         when(typeConverter.dtoToEntity(typeDto)).thenReturn(typeEntity);
 
         //  act
-        typeService.update(typeDto);
+        typeService.save(typeDto);
 
         //  assert
         Mockito.verify(typeRepository, Mockito.times(1)).save(typeEntity);
@@ -245,7 +245,7 @@ public class TypeServiceImplTest {
         when(typeConverter.dtoToEntity(typeDto)).thenReturn(typeEntity);
 
         //  act
-        typeService.update(typeDto);
+        typeService.save(typeDto);
 
         //  assert
         Mockito.verify(typeRepository, Mockito.times(1)).save(typeEntity);

@@ -13,6 +13,7 @@ import ru.citeck.ecos.model.domain.TypeActionEntity;
 import ru.citeck.ecos.model.domain.TypeEntity;
 import ru.citeck.ecos.model.dto.TypeAssociationDto;
 import ru.citeck.ecos.model.dto.TypeDto;
+import ru.citeck.ecos.model.repository.AssociationRepository;
 import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
 
@@ -27,17 +28,26 @@ import java.util.stream.Collectors;
 public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
 
     private final TypeRepository typeRepository;
+    private final AssociationRepository associationRepository;
     private final DtoConverter<TypeAssociationDto, AssociationEntity> associationConverter;
 
     @Override
     public TypeEntity dtoToEntity(TypeDto dto) {
 
         TypeEntity typeEntity = new TypeEntity();
-        typeEntity.setExtId(dto.getId());
+
+        String typeDtoId = dto.getId();
+        if (Strings.isBlank(typeDtoId)) {
+            typeEntity.setExtId(UUID.randomUUID().toString());
+        } else {
+            typeEntity.setExtId(typeDtoId);
+        }
+
         typeEntity.setName(dto.getName());
         typeEntity.setDescription(dto.getDescription());
         typeEntity.setTenant(dto.getTenant());
         typeEntity.setInheritActions(dto.isInheritActions());
+        typeEntity.setForm(dto.getForm());
 
         RecordRef parentRef = dto.getParent();
         if (parentRef != null && Strings.isNotBlank(parentRef.getId())) {
@@ -47,9 +57,25 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
 
         Set<AssociationEntity> associationEntities = dto.getAssociations().stream()
             .filter(a -> StringUtils.isNotBlank(a.getId()))
-            .map(associationConverter::dtoToEntity)
+            .map(a -> {
+                AssociationEntity assocEntity = associationConverter.dtoToEntity(a);
+
+                assocEntity.setSource(typeEntity);
+
+                String targetTypeId = a.getTargetType().getId();
+                TypeEntity targetTypeEntity = typeRepository.findByExtId(targetTypeId)
+                    .orElseThrow(() -> new IllegalArgumentException("Type doesnt exists: " + targetTypeId));
+                assocEntity.setTarget(targetTypeEntity);
+
+                return assocEntity;
+            })
             .collect(Collectors.toSet());
         typeEntity.setAssocsToOther(associationEntities);
+
+        Optional<TypeEntity> storedType = typeRepository.findByExtId(typeEntity.getExtId());
+        storedType.ifPresent(t -> {
+            typeEntity.setId(t.getId());
+        });
 
         List<TypeActionEntity> actionEntities = dto.getActions().stream()
             .filter(a -> StringUtils.isNotBlank(a.getId()))
@@ -57,27 +83,7 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
             .collect(Collectors.toList());
         typeEntity.addActions(actionEntities);
 
-        handlingExtId(typeEntity);
-
         return typeEntity;
-    }
-
-    private void handlingExtId(TypeEntity typeEntity) {
-
-        if (Strings.isBlank(typeEntity.getExtId())) {
-            typeEntity.setExtId(UUID.randomUUID().toString());
-        } else {
-            Optional<TypeEntity> stored = typeRepository.findByExtId(typeEntity.getExtId());
-            typeEntity.setId(stored.map(TypeEntity::getId).orElse(null));
-        }
-
-        Set<AssociationEntity> associationEntities = typeEntity.getAssocsToOther().stream()
-            .peek(e -> {
-                if (e.getExtId() == null || StringUtils.isEmpty(e.getExtId())) {
-                    e.setExtId(UUID.randomUUID().toString());
-                }
-            }).collect(Collectors.toSet());
-        typeEntity.setAssocsToOther(associationEntities);
     }
 
     @Override
@@ -90,6 +96,7 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
         dto.setDescription(entity.getDescription());
         dto.setInheritActions(entity.isInheritActions());
         dto.setTenant(entity.getTenant());
+        dto.setForm(entity.getForm());
 
         TypeEntity parent = entity.getParent();
         if (parent != null) {

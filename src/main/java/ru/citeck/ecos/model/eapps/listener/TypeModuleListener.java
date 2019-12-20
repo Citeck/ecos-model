@@ -18,7 +18,7 @@ public class TypeModuleListener implements EcosModuleListener<TypeModule> {
     @Override
     public void onModulePublished(TypeModule module) {
         TypeDto dto = typeModuleConverter.moduleToDto(module);
-        typeService.update(dto);
+        typeService.save(dto);
     }
 
     @Override

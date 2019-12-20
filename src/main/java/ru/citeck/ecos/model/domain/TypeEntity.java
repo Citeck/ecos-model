@@ -47,9 +47,15 @@ public class TypeEntity {
     private Set<SectionEntity> sections = new HashSet<>();
 
     /*
+     * Set of associations to this type
+     */
+    @OneToMany(mappedBy = "target", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private Set<AssociationEntity> assocsToThis = new HashSet<>();;
+
+    /*
      * Set of associations to other types
      */
-    @OneToMany(mappedBy = "target", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "source", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval=true)
     private Set<AssociationEntity> assocsToOther = new HashSet<>();
 
     @OneToMany(mappedBy = "type", cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, orphanRemoval = true)

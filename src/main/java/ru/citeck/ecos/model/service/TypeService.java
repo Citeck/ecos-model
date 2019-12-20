@@ -14,5 +14,5 @@ public interface TypeService {
 
     void delete(String extId);
 
-    TypeDto update(TypeDto dto);
+    TypeDto save(TypeDto dto);
 }

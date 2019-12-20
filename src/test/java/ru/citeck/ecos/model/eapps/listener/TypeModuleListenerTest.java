@@ -52,14 +52,14 @@ public class TypeModuleListenerTest {
         typeDto.setId("testId");
 
         when(typeModuleConverter.moduleToDto(typeModule)).thenReturn(typeDto);
-        when(typeService.update(typeDto)).thenReturn(typeDto);
+        when(typeService.save(typeDto)).thenReturn(typeDto);
 
         //  act
         typeModuleListener.onModulePublished(typeModule);
 
         //  assert
         Mockito.verify(typeModuleConverter, times(1)).moduleToDto(typeModule);
-        Mockito.verify(typeService, times(1)).update(typeDto);
+        Mockito.verify(typeService, times(1)).save(typeDto);
     }
 
     @Test

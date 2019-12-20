@@ -39,12 +39,15 @@ public class SectionConverter extends AbstractDtoConverter<SectionDto, SectionEn
         Set<TypeEntity> storedTypes = typeRepository.findAllByExtIds(dtoTypesExtIds);
         sectionEntity.setTypes(storedTypes);
 
-        if (Strings.isBlank(sectionEntity.getExtId())) {
+        String sectionDtoId = dto.getId();
+        if (Strings.isBlank(sectionDtoId)) {
             sectionEntity.setExtId(UUID.randomUUID().toString());
         } else {
-            Optional<SectionEntity> stored = sectionRepository.findByExtId(sectionEntity.getExtId());
-            sectionEntity.setId(stored.map(SectionEntity::getId).orElse(null));
+            sectionEntity.setExtId(sectionDtoId);
         }
+
+        Optional<SectionEntity> storedSection = sectionRepository.findByExtId(sectionEntity.getExtId());
+        storedSection.ifPresent(s -> sectionEntity.setId(s.getId()));
 
         return sectionEntity;
     }
