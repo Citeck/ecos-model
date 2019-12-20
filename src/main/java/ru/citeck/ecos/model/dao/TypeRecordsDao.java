@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.apps.app.module.ModuleRef;
+import ru.citeck.ecos.model.dto.TypeAssociationDto;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.service.TypeService;
 import ru.citeck.ecos.predicate.Elements;
@@ -142,7 +143,7 @@ public class TypeRecordsDao extends LocalRecordsDAO
                 case RecordConstants.ATT_ACTIONS:
                     return getInheritTypeActions(dto);
                 case "associations":
-                    return dto.getAssociations();
+                    return getTypeAndParentsAssociations(dto);
                 case "form":
                     return dto.getForm();
             }
@@ -154,6 +155,26 @@ public class TypeRecordsDao extends LocalRecordsDAO
             return dto;
         }
 
+    }
+
+    private Set<TypeAssociationDto> getTypeAndParentsAssociations(TypeDto typeDto) {
+
+        Set<TypeAssociationDto> resultAssociations = new HashSet<>();
+
+        TypeDto currentType = typeDto;
+        while (currentType != null) {
+
+            resultAssociations.addAll(currentType.getAssociations());
+
+            RecordRef parentRecordRef = currentType.getParent();
+            if (parentRecordRef != null) {
+                currentType = typeService.getByExtId(currentType.getParent().getId());
+            } else {
+                currentType = null;
+            }
+        }
+
+        return resultAssociations;
     }
 
     private Set<ModuleRef> getInheritTypeActions(TypeDto dto) {
