@@ -12,6 +12,11 @@
             <column name="id" type="BIGINT"/>
         </dropColumn>
 
+        <comment>Clear stored data in the table ECOS_ASSOCIATION for create PK on source_id and ext_id columns</comment>
+        <sql splitStatements="true">
+            truncate table ecos_association;
+        </sql>
+
         <addPrimaryKey columnNames="source_id, ext_id"
                        constraintName="pk_ecos_association"
                        schemaName="public"
