@@ -1,6 +1,9 @@
 package ru.citeck.ecos.model.domain;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -49,17 +52,32 @@ public class TypeEntity {
     /*
      * Set of associations to this type
      */
-    @OneToMany(mappedBy = "target", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(
+        mappedBy = "target",
+        fetch = FetchType.EAGER,
+        cascade = CascadeType.ALL)
     private Set<AssociationEntity> assocsToThis = new HashSet<>();;
 
     /*
      * Set of associations to other types
      */
-    @OneToMany(mappedBy = "source", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval=true)
-    private Set<AssociationEntity> assocsToOther = new HashSet<>();
+    @OneToMany(
+        mappedBy = "source",
+        fetch = FetchType.EAGER,
+        cascade = CascadeType.ALL,
+        orphanRemoval=true)
+    private Set<AssociationEntity> assocsToOthers = new HashSet<>();
 
-    @OneToMany(mappedBy = "type", cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(
+        mappedBy = "type",
+        cascade = {CascadeType.ALL},
+        fetch = FetchType.EAGER,
+        orphanRemoval = true)
     private List<TypeActionEntity> actions = new ArrayList<>();
+
+    public void setAssocsToOthers(Set<AssociationEntity> assocsToOthers) {
+        EntityCollectionUtils.changeHibernateSet(this.assocsToOthers, assocsToOthers, AssociationEntity::getId);
+    }
 
     public void addAction(TypeActionEntity actionEntity) {
         actions.add(actionEntity);

@@ -32,4 +32,8 @@ public class AssociationEntity {
 
     @Enumerated(EnumType.ORDINAL)
     private AssocDirection direction;
+
+    public AssociationId getId() {
+        return new AssociationId(extId, source);
+    }
 }

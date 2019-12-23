@@ -82,7 +82,7 @@ public class TypeConverterTest {
         associationEntity.setExtId("association");
         associationEntity.setTarget(parent);
 
-        typeEntity.setAssocsToOther(Collections.singleton(associationEntity));
+        typeEntity.setAssocsToOthers(Collections.singleton(associationEntity));
 
 
         associationDto = new TypeAssociationDto();
@@ -124,7 +124,7 @@ public class TypeConverterTest {
 
         //  arrange
         typeEntity.setParent(null);
-        typeEntity.setAssocsToOther(Collections.emptySet());
+        typeEntity.setAssocsToOthers(Collections.emptySet());
         typeEntity.removeAction(actionEntity);
 
         //  act
@@ -154,7 +154,7 @@ public class TypeConverterTest {
         Assert.assertEquals(resultEntity.getName(), typeDto.getName());
         Assert.assertEquals(resultEntity.getDescription(), typeDto.getDescription());
         Assert.assertEquals(resultEntity.getTenant(), typeDto.getTenant());
-        AssociationEntity associationEntityLocal = resultEntity.getAssocsToOther().iterator().next();
+        AssociationEntity associationEntityLocal = resultEntity.getAssocsToOthers().iterator().next();
         Assert.assertEquals(associationEntityLocal.getExtId(), associationEntity.getExtId());
         Assert.assertEquals(
             associationEntityLocal.getTarget().getExtId(),
