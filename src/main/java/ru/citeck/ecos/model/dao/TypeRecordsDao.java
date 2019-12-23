@@ -144,7 +144,7 @@ public class TypeRecordsDao extends LocalRecordsDAO
                     return getInheritTypeActions(dto);
                 case "associations":
                     return dto.getAssociations();
-                case "assocs-full":
+                case "assocsFull":
                     return getTypeAndParentsAssociations(dto);
                 case "form":
                     return dto.getForm();

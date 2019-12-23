@@ -18,7 +18,7 @@ public class SectionModuleListener implements EcosModuleListener<SectionModule> 
     @Override
     public void onModulePublished(SectionModule module) {
         SectionDto dto = sectionModuleConverter.moduleToDto(module);
-        sectionService.update(dto);
+        sectionService.save(dto);
     }
 
     @Override
