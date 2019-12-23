@@ -14,5 +14,5 @@ public interface SectionService {
 
     void delete(String extId);
 
-    SectionDto update(SectionDto dto);
+    SectionDto save(SectionDto dto);
 }

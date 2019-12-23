@@ -170,7 +170,7 @@ public class SectionServiceImplTest {
         when(sectionConverter.sourceToTarget(sectionDto)).thenReturn(sectionEntity);
 
         //  act
-        sectionService.update(sectionDto);
+        sectionService.save(sectionDto);
 
         //  assert
         Mockito.verify(sectionRepository, Mockito.times(1)).save(sectionEntity);

@@ -42,6 +42,7 @@ public class TypeAssociationConverter extends AbstractDtoConverter<TypeAssociati
 
         assocDto.setId(associationEntity.getExtId());
         assocDto.setName(associationEntity.getName());
+        assocDto.setDirection(associationEntity.getDirection());
 
         String targetTypeId = associationEntity.getTarget().getExtId();
         RecordRef targetTypeRecordRef = RecordRef.create(TypeRecordsDao.ID, targetTypeId);

@@ -41,14 +41,14 @@ public class SectionModuleListenerTest {
         sectionDto.setId("sectionDtoId");
 
         when(sectionModuleConverter.moduleToDto(sectionModule)).thenReturn(sectionDto);
-        when(sectionService.update(sectionDto)).thenReturn(sectionDto);
+        when(sectionService.save(sectionDto)).thenReturn(sectionDto);
 
         //  act
         sectionModuleListener.onModulePublished(sectionModule);
 
         //  assert
         Mockito.verify(sectionModuleConverter, times(1)).moduleToDto(sectionModule);
-        Mockito.verify(sectionService, times(1)).update(sectionDto);
+        Mockito.verify(sectionService, times(1)).save(sectionDto);
     }
 
     @Test

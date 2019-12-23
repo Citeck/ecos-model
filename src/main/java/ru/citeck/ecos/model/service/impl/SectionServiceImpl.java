@@ -53,7 +53,7 @@ public class SectionServiceImpl implements SectionService {
 
     @Override
     @Transactional
-    public SectionDto update(SectionDto dto) {
+    public SectionDto save(SectionDto dto) {
         SectionEntity entity = sectionConverter.sourceToTarget(dto);
         sectionRepository.save(entity);
         return sectionConverter.targetToSource(entity);
