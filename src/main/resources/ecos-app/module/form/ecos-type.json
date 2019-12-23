@@ -934,7 +934,7 @@
                             "customPrivate": false,
                             "customMessage": "",
                             "json": "",
-                            "required": true
+                            "required": false
                         },
                         "dataGridLabel": false,
                         "allowCalculateOverride": false,
