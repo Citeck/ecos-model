@@ -17,6 +17,7 @@
     <include file="config/liquibase/changelog/20191210000000_type_ext_id_size_update_changelog.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20191220000009_ecos_association_add_source_target_unique_constraint.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20191221000000_ecos_association_remove_ext_id_unique_const.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20191223000000_ecos_association_remove_id_field.xml" relativeToChangelogFile="false"/>
 
     <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
     <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->
