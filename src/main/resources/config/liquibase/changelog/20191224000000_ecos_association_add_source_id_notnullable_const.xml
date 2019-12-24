@@ -3,12 +3,13 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
 
-    <changeSet author="citeck" id="20191221000000">
+    <changeSet author="citeck" id="20191224000000">
 
-        <dropUniqueConstraint constraintName="ecos_association_ext_id_key"
+        <addNotNullConstraint columnDataType="BIGINT"
+                              columnName="source_id"
+                              constraintName="source_id_not_nullable"
                               schemaName="public"
-                              tableName="ecos_association"
-                              uniqueColumns="ext_id"/>
+                              tableName="ecos_association"/>
 
     </changeSet>
 

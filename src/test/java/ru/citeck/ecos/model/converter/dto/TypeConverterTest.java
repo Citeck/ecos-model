@@ -181,8 +181,7 @@ public class TypeConverterTest {
         Assert.assertEquals(resultEntity.getName(), typeDto.getName());
         Assert.assertEquals(resultEntity.getDescription(), typeDto.getDescription());
         Assert.assertEquals(resultEntity.getTenant(), typeDto.getTenant());
-//        Assert.assertEquals(resultEntity.getChildren(), Collections.emptySet());
-//        Assert.assertEquals(resultEntity.getSections(), Collections.emptySet());
-//        Mockito.verify(typeRepository, Mockito.times(0)).findByExtId(Mockito.any());
+        Assert.assertEquals(resultEntity.getChildren(), Collections.emptySet());
+        Assert.assertEquals(resultEntity.getSections(), Collections.emptySet());
     }
 }

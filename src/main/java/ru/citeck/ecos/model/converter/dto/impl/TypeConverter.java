@@ -55,11 +55,11 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
             optionalParent.ifPresent(typeEntity::setParent);
         }
 
+        //  associations to other types
         Set<AssociationEntity> associationEntities = dto.getAssociations().stream()
             .filter(a -> StringUtils.isNotBlank(a.getId()))
             .map(a -> {
                 AssociationEntity assocEntity = associationConverter.dtoToEntity(a);
-
                 assocEntity.setSource(typeEntity);
 
                 String targetTypeId = a.getTargetType().getId();
@@ -72,11 +72,13 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
             .collect(Collectors.toSet());
         typeEntity.setAssocsToOthers(associationEntities);
 
+        //  checking for existing in DB
         Optional<TypeEntity> storedType = typeRepository.findByExtId(typeEntity.getExtId());
         storedType.ifPresent(t -> {
             typeEntity.setId(t.getId());
         });
 
+        //  actions
         List<TypeActionEntity> actionEntities = dto.getActions().stream()
             .filter(a -> StringUtils.isNotBlank(a.getId()))
             .map(a -> new TypeActionEntity(typeEntity, a.toString()))
