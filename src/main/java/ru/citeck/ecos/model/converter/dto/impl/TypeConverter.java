@@ -70,7 +70,7 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
                 return assocEntity;
             })
             .collect(Collectors.toSet());
-        typeEntity.setAssocsToOther(associationEntities);
+        typeEntity.setAssocsToOthers(associationEntities);
 
         Optional<TypeEntity> storedType = typeRepository.findByExtId(typeEntity.getExtId());
         storedType.ifPresent(t -> {
@@ -104,7 +104,7 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
             dto.setParent(parentRecordRef);
         }
 
-        Set<TypeAssociationDto> associationDtoSet = entity.getAssocsToOther().stream()
+        Set<TypeAssociationDto> associationDtoSet = entity.getAssocsToOthers().stream()
             .map(associationConverter::entityToDto)
             .collect(Collectors.toSet());
         dto.setAssociations(associationDtoSet);
