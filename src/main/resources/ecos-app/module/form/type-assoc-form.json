@@ -283,7 +283,7 @@
                     "when": ""
                 },
                 "readOnlyValue": false,
-                "defaultValue": "",
+                "defaultValue": "TARGET",
                 "prefix": "",
                 "tooltip": "",
                 "labelWidth": 30,
