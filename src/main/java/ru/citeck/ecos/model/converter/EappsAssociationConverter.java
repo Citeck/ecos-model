@@ -25,7 +25,7 @@ public class EappsAssociationConverter implements Converter<AssociationDto, Type
         if (targetTypeModuleRef != null) {
             localDto.setTargetType(RecordRef.create(TypeRecordsDao.ID, targetTypeModuleRef.getId()));
         } else {
-            throw new IllegalArgumentException("Association with id: " + associationId
+            throw new IllegalArgumentException("Association with id: '" + associationId
                                 + "' in TypeModule have field 'targetType' with null value!");
         }
 

@@ -17,6 +17,7 @@ import ru.citeck.ecos.records2.RecordRef;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.mockito.Mockito.when;
 
@@ -79,7 +80,7 @@ public class SectionConverterTest {
     }
 
     @Test
-    void testDtoToEntityWithoutTypesAndBlackExtId() {
+    void testDtoToEntityWithoutTypesAndBlankExtId() {
 
         //  arrange
         sectionDto.setTypes(Collections.emptySet());
@@ -92,7 +93,9 @@ public class SectionConverterTest {
         Assert.assertEquals(resultSectionEntity.getName(), sectionDto.getName());
         Assert.assertEquals(resultSectionEntity.getTenant(), sectionDto.getTenant());
         Assert.assertEquals(resultSectionEntity.getDescription(), sectionDto.getDescription());
-//        Mockito.verify(sectionRepository, Mockito.times(0)).findByExtId(Mockito.any());
+
+        // checking that extId it is UUID
+        UUID.fromString(resultSectionEntity.getExtId());
     }
 
     @Test
