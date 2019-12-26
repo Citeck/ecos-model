@@ -102,7 +102,7 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
 
         TypeEntity parent = entity.getParent();
         if (parent != null) {
-            RecordRef parentRecordRef = RecordRef.create(TypeRecordsDao.ID, parent.getExtId());
+            RecordRef parentRecordRef = RecordRef.create("emodel", TypeRecordsDao.ID, parent.getExtId());
             dto.setParent(parentRecordRef);
         }
 

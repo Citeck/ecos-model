@@ -5,7 +5,7 @@
         "description": "third-with-overridden",
         "tenant": "third-tenant",
         "inheritActions": true,
-        "parent": "type@type-second",
+        "parent": "emodel/type@type-second",
         "actions": [
             "ui/action$print",
             "ui/action$fire3",

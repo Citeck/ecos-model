@@ -5,7 +5,7 @@
         "description": "third",
         "tenant": "third-tenant",
         "inheritActions": true,
-        "parent": "type@type-second",
+        "parent": "emodel/type@type-second",
         "actions": [
             "ui/action$print",
             "ui/action$edit",

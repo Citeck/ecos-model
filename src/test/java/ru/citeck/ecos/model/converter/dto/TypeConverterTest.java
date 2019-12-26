@@ -84,7 +84,6 @@ public class TypeConverterTest {
 
         typeEntity.setAssocsToOthers(Collections.singleton(associationEntity));
 
-
         associationDto = new TypeAssociationDto();
         associationDto.setId("association");
         associationDto.setTargetType(RecordRef.create("type", "parent"));
@@ -114,7 +113,7 @@ public class TypeConverterTest {
         Assert.assertEquals(resultDto.getName(), typeEntity.getName());
         Assert.assertEquals(resultDto.getDescription(), typeEntity.getDescription());
         Assert.assertEquals(resultDto.getTenant(), typeEntity.getTenant());
-        Assert.assertEquals(resultDto.getParent(), RecordRef.create("type", parent.getExtId()));
+        Assert.assertEquals(resultDto.getParent(), RecordRef.create("emodel", "type", parent.getExtId()));
         Assert.assertEquals(resultDto.getActions(), Collections.singleton(actionRef));
         Assert.assertEquals(resultDto.getAssociations(), Collections.singleton(associationDto));
     }
