@@ -12,5 +12,5 @@ import java.io.Serializable;
 public class AssociationId implements Serializable {
 
     private String extId;
-    private TypeEntity source;
+    private Long sourceId;
 }

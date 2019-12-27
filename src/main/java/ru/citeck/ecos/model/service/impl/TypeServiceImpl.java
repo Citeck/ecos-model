@@ -62,6 +62,7 @@ public class TypeServiceImpl implements TypeService {
     public TypeDto save(TypeDto dto) {
         TypeEntity entity = typeConverter.dtoToEntity(dto);
         typeRepository.save(entity);
+        associationService.extractAndSaveAssocsFromType(dto);
         return typeConverter.entityToDto(entity);
     }
 }

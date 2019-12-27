@@ -13,7 +13,6 @@ import ru.citeck.ecos.model.domain.TypeActionEntity;
 import ru.citeck.ecos.model.domain.TypeEntity;
 import ru.citeck.ecos.model.dto.TypeAssociationDto;
 import ru.citeck.ecos.model.dto.TypeDto;
-import ru.citeck.ecos.model.repository.AssociationRepository;
 import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
 
@@ -28,9 +27,14 @@ import java.util.stream.Collectors;
 public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
 
     private final TypeRepository typeRepository;
-    private final AssociationRepository associationRepository;
     private final DtoConverter<TypeAssociationDto, AssociationEntity> associationConverter;
 
+    /*
+    *   Note:
+    *
+    *   Associations logic moved to 'extractAndSaveAssocsFromType' method AssociationServiceImpl.class
+    *   We cant and dont need to handle assocs to other types here.
+    */
     @Override
     public TypeEntity dtoToEntity(TypeDto dto) {
 
@@ -54,23 +58,6 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
             Optional<TypeEntity> optionalParent = typeRepository.findByExtId(parentRef.getId());
             optionalParent.ifPresent(typeEntity::setParent);
         }
-
-        //  associations to other types
-        Set<AssociationEntity> associationEntities = dto.getAssociations().stream()
-            .filter(a -> StringUtils.isNotBlank(a.getId()))
-            .map(a -> {
-                AssociationEntity assocEntity = associationConverter.dtoToEntity(a);
-                assocEntity.setSource(typeEntity);
-
-                String targetTypeId = a.getTargetType().getId();
-                TypeEntity targetTypeEntity = typeRepository.findByExtId(targetTypeId)
-                    .orElseThrow(() -> new IllegalArgumentException("Type doesnt exists: " + targetTypeId));
-                assocEntity.setTarget(targetTypeEntity);
-
-                return assocEntity;
-            })
-            .collect(Collectors.toSet());
-        typeEntity.setAssocsToOthers(associationEntities);
 
         //  checking for existing in DB
         Optional<TypeEntity> storedType = typeRepository.findByExtId(typeEntity.getExtId());

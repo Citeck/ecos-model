@@ -5,5 +5,14 @@
         "ui/action$edit",
         "ui/action$content-download",
         "ui/action$record-actions"
+    ],
+    "associations": [
+        {
+            "id": "assoc:associatedWith",
+            "name": "Связан с",
+            "direction": "BOTH",
+            "target": "model/type$base"
+        }
     ]
+
 }

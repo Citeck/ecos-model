@@ -19,11 +19,14 @@ public class AssociationEntity {
     @Column(nullable = false)
     private String extId;
 
+    @Id
+    @Column(name = "source_id")
+    private Long sourceId;
+
     private String name;
 
-    @Id
     @ManyToOne(cascade = CascadeType.DETACH)
-    @JoinColumn(name = "source_id")
+    @JoinColumn(name = "source_id", insertable = false, updatable = false)
     private TypeEntity source;
 
     @ManyToOne(cascade = CascadeType.DETACH)
@@ -34,6 +37,6 @@ public class AssociationEntity {
     private AssocDirection direction;
 
     public AssociationId getId() {
-        return new AssociationId(extId, source);
+        return new AssociationId(extId, sourceId);
     }
 }
