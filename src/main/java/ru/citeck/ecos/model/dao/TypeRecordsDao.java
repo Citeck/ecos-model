@@ -39,6 +39,7 @@ public class TypeRecordsDao extends LocalRecordsDAO
     private static final String LANGUAGE_EMPTY = "";
     private static final String TYPE_ACTIONS_WITH_INHERIT_ATT_JSON = "_actions[]?json";
     private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final String UISERV_EFORM_PREFIX = "uiserv/eform@";
 
     private final TypeRecord EMPTY_RECORD = new TypeRecord(new TypeDto());
 
@@ -147,7 +148,9 @@ public class TypeRecordsDao extends LocalRecordsDAO
                 case "assocsFull":
                     return getTypeAndParentsAssociations(dto);
                 case "form":
-                    return dto.getForm();
+                    return RecordRef.valueOf(UISERV_EFORM_PREFIX + dto.getForm());
+                case "inheritedForm":
+                    return findAndGetInheritedForm(dto);
             }
             return null;
         }
@@ -156,7 +159,28 @@ public class TypeRecordsDao extends LocalRecordsDAO
         public Object getJson() {
             return dto;
         }
+    }
 
+    private RecordRef findAndGetInheritedForm(TypeDto typeDto) {
+
+        TypeDto currentType = typeDto;
+
+        while (currentType != null) {
+
+            String formId = currentType.getForm();
+
+            if (formId != null) {
+                return RecordRef.valueOf(UISERV_EFORM_PREFIX + formId);
+            } else {
+                if (currentType.getParent() != null) {
+                    currentType = typeService.getByExtId(currentType.getParent().getId());
+                } else {
+                    return null;
+                }
+            }
+        }
+
+        return null;
     }
 
     private Set<TypeAssociationDto> getTypeAndParentsAssociations(TypeDto typeDto) {
