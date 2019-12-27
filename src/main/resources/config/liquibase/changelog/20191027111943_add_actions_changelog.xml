@@ -29,16 +29,16 @@
         <addPrimaryKey columnNames="section_id, type_id" tableName="section_type"/>
     </changeSet>
     <changeSet author="Romancha (generated)" id="1572175193105-12">
-        <addForeignKeyConstraint baseColumnNames="ecos_evaluator_id" baseTableName="ecos_actions" constraintName="FK74d4frst1ngtgst2qi6u8bwsj" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="ecos_evaluators" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="ecos_evaluator_id" baseTableName="ecos_actions" constraintName="FK74d4frst1ngtgst2qi6u8bwsj" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="ecos_evaluators"/>
     </changeSet>
     <changeSet author="Romancha (generated)" id="1572175193105-13">
-        <addForeignKeyConstraint baseColumnNames="type_id" baseTableName="section_type" constraintName="FKg6xvhwgq09vf1t52dwhtsem4y" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="ecos_type" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="type_id" baseTableName="section_type" constraintName="FKg6xvhwgq09vf1t52dwhtsem4y" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="ecos_type"/>
     </changeSet>
     <changeSet author="Romancha (generated)" id="1572175193105-14">
-        <addForeignKeyConstraint baseColumnNames="section_id" baseTableName="section_type" constraintName="FKqx49n67rhtbrhnx7p38ygq857" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="ecos_section" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="section_id" baseTableName="section_type" constraintName="FKqx49n67rhtbrhnx7p38ygq857" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="ecos_section"/>
     </changeSet>
     <changeSet author="Romancha (generated)" id="1572175193105-15">
-        <addForeignKeyConstraint baseColumnNames="ecos_type_id" baseTableName="ecos_actions" constraintName="FKt11b3qrd668pw1mt5kt7oul4l" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="ecos_type" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="ecos_type_id" baseTableName="ecos_actions" constraintName="FKt11b3qrd668pw1mt5kt7oul4l" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="ecos_type"/>
     </changeSet>
     <changeSet author="Romancha (generated)" id="1572175193105-16">
         <dropUniqueConstraint constraintName="unique_constraint" tableName="section_type"/>
