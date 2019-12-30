@@ -51,7 +51,9 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
         typeEntity.setDescription(dto.getDescription());
         typeEntity.setTenant(dto.getTenant());
         typeEntity.setInheritActions(dto.isInheritActions());
-        typeEntity.setForm(dto.getForm());
+        if (StringUtils.isNotBlank(dto.getForm())) {
+            typeEntity.setForm(dto.getForm());
+        }
 
         RecordRef parentRef = dto.getParent();
         if (parentRef != null && Strings.isNotBlank(parentRef.getId())) {
