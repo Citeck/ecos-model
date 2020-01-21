@@ -21,18 +21,14 @@ public class TypeAssociationConverter extends AbstractDtoConverter<TypeAssociati
         AssociationEntity associationEntity = new AssociationEntity();
 
         associationEntity.setExtId(associationDto.getId());
-        handleExtId(associationEntity);
-
         associationEntity.setName(associationDto.getName());
         associationEntity.setDirection(associationDto.getDirection());
 
-        return associationEntity;
-    }
-
-    private void handleExtId(AssociationEntity associationEntity) {
         if (Strings.isBlank(associationEntity.getExtId())) {
             associationEntity.setExtId(UUID.randomUUID().toString());
         }
+
+        return associationEntity;
     }
 
     @Override

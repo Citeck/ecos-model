@@ -1,5 +1,7 @@
 package ru.citeck.ecos.model.converter.module;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,8 +11,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.apps.app.module.ModuleRef;
 import ru.citeck.ecos.apps.app.module.type.model.type.AssociationDto;
+import ru.citeck.ecos.apps.app.module.type.model.type.CreateVariantDto;
 import ru.citeck.ecos.apps.app.module.type.model.type.TypeModule;
 import ru.citeck.ecos.model.converter.EappsAssociationConverter;
+import ru.citeck.ecos.model.converter.CreateVariantConverter;
 import ru.citeck.ecos.model.converter.module.impl.TypeModuleConverter;
 import ru.citeck.ecos.model.dto.TypeAssociationDto;
 import ru.citeck.ecos.model.dto.TypeDto;
@@ -27,13 +31,16 @@ public class TypeModuleConverterTest {
     @MockBean
     private EappsAssociationConverter eappsAssociationConverter;
 
+    @MockBean
+    private CreateVariantConverter createVariantConverter;
+
     private TypeModule typeModule;
 
     private AssociationDto associationDto;
 
     @BeforeEach
     void setUp() {
-        typeModuleConverter = new TypeModuleConverter(eappsAssociationConverter);
+        typeModuleConverter = new TypeModuleConverter(eappsAssociationConverter, createVariantConverter);
 
         associationDto = new AssociationDto();
         associationDto.setId("assocId");
@@ -47,6 +54,19 @@ public class TypeModuleConverterTest {
         typeModule.setInheritActions(true);
         typeModule.setAssociations(Collections.singletonList(associationDto));
         typeModule.setActions(Collections.singletonList(ModuleRef.create("ActionModule", "action")));
+
+        ObjectNode objectNode = null;
+        try {
+            objectNode = new ObjectMapper().createObjectNode();
+            objectNode.put("field", "value");
+        } catch (Exception ignored) { }
+
+        typeModule.setAttributes(objectNode);
+
+        CreateVariantDto createVariantDto = new CreateVariantDto();
+        createVariantDto.setId("variantId");
+
+        typeModule.setCreateVariants(Collections.singletonList(createVariantDto));
     }
 
     @Test
@@ -67,6 +87,9 @@ public class TypeModuleConverterTest {
         Assert.assertEquals(typeModule.getForm().toString(), resultDto.getForm());
         Assert.assertEquals(typeModule.getParent().getId(), resultDto.getParent().getId());
         Assert.assertEquals(typeModule.getActions().size(), resultDto.getActions().size());
+        Assert.assertEquals(typeModule.getActions().size(), resultDto.getActions().size());
+        Assert.assertEquals(typeModule.getAttributes().get("field").asText(), "value");
+        Assert.assertEquals(typeModule.getCreateVariants().get(0).getId(), "variantId");
         Assert.assertEquals(
             typeModule.getActions().iterator().next().getId(),
             resultDto.getActions().iterator().next().getId());
@@ -77,13 +100,15 @@ public class TypeModuleConverterTest {
     }
 
     @Test
-    void testModuleToDtoWithoutFormAndParentAndAssocsAndActions() {
+    void testModuleToDtoWithoutFormAndParentAndAssocsAndActionsAndCreateVariantsAndAttributes() {
 
         //  arrange
         typeModule.setForm(null);
         typeModule.setParent(null);
         typeModule.setActions(null);
         typeModule.setAssociations(null);
+        typeModule.setCreateVariants(null);
+        typeModule.setAttributes(null);
 
         //  act
         TypeDto resultDto = typeModuleConverter.moduleToDto(typeModule);
@@ -96,6 +121,8 @@ public class TypeModuleConverterTest {
         Assert.assertNull(resultDto.getParent());
         Assert.assertEquals(Collections.emptySet(), resultDto.getActions());
         Assert.assertEquals(Collections.emptySet(), resultDto.getAssociations());
+        Assert.assertNull(resultDto.getAttributes());
+        Assert.assertEquals(Collections.emptySet(), resultDto.getCreateVariants());
 
     }
 }

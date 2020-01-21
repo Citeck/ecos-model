@@ -6,11 +6,13 @@ import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.apps.app.module.ModuleRef;
 import ru.citeck.ecos.apps.app.module.type.model.type.AssociationDto;
+import ru.citeck.ecos.apps.app.module.type.model.type.CreateVariantDto;
 import ru.citeck.ecos.apps.app.module.type.model.type.TypeModule;
 import ru.citeck.ecos.model.converter.Converter;
 import ru.citeck.ecos.model.converter.module.AbstractModuleConverter;
 import ru.citeck.ecos.model.dao.TypeRecordsDao;
 import ru.citeck.ecos.model.dto.TypeAssociationDto;
+import ru.citeck.ecos.model.dto.TypeCreateVariantDto;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.records2.RecordRef;
 
@@ -31,6 +33,7 @@ import java.util.stream.Collectors;
 public class TypeModuleConverter extends AbstractModuleConverter<TypeModule, TypeDto> {
 
     private final Converter<AssociationDto, TypeAssociationDto> eappsAssociationDtoConverter;
+    private final Converter<CreateVariantDto, TypeCreateVariantDto> createVariantConverter;
 
     @Override
     public TypeDto moduleToDto(TypeModule typeModule) {
@@ -42,6 +45,7 @@ public class TypeModuleConverter extends AbstractModuleConverter<TypeModule, Typ
         typeDto.setDescription(typeModule.getDescription());
         typeDto.setTenant(Strings.EMPTY);
         typeDto.setInheritActions(typeModule.isInheritActions());
+        typeDto.setAttributes(typeModule.getAttributes());
 
         ModuleRef formModuleRef = typeModule.getForm();
         if (formModuleRef != null) {
@@ -64,11 +68,21 @@ public class TypeModuleConverter extends AbstractModuleConverter<TypeModule, Typ
             typeDto.setAssociations(Collections.emptySet());
         }
 
-        List<ModuleRef> actionsModuleRefs = typeModule.getActions();
-        if (CollectionUtils.isNotEmpty(actionsModuleRefs)) {
-            typeDto.setActions(new HashSet<>(actionsModuleRefs));
+        List<ModuleRef> actionsList = typeModule.getActions();
+        if (CollectionUtils.isNotEmpty(actionsList)) {
+            Set<ModuleRef> actionsModuleRefs = new HashSet<>(actionsList);
+            typeDto.setActions(actionsModuleRefs);
         } else {
             typeDto.setActions(Collections.emptySet());
+        }
+
+        List<CreateVariantDto> createVariantDtoList = typeModule.getCreateVariants();
+        if (CollectionUtils.isNotEmpty(createVariantDtoList)) {
+            Set<CreateVariantDto> createVariantDTOs = new HashSet<>(typeModule.getCreateVariants());
+            Set<TypeCreateVariantDto> typeCreateVariantDTOs = createVariantDTOs.stream()
+                .map(createVariantConverter::sourceToTarget)
+                .collect(Collectors.toSet());
+            typeDto.setCreateVariants(typeCreateVariantDTOs);
         }
 
         return typeDto;
