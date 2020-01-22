@@ -1,6 +1,9 @@
 package ru.citeck.ecos.model.dto;
 
-import lombok.*;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.citeck.ecos.apps.app.module.ModuleRef;
 import ru.citeck.ecos.records2.RecordRef;
 
@@ -22,6 +25,8 @@ public class TypeDto {
     private Set<TypeAssociationDto> associations = new HashSet<>();
     private Set<ModuleRef> actions = new HashSet<>();
     private boolean inheritActions;
+    private ObjectNode attributes;
+    private Set<TypeCreateVariantDto> createVariants = new HashSet<>();
 
     public TypeDto(TypeDto dto) {
         this.name = dto.name;
@@ -30,6 +35,8 @@ public class TypeDto {
         this.parent = dto.parent;
         this.form = dto.form;
         this.id = dto.id;
+        this.inheritActions = dto.inheritActions;
+        this.attributes = dto.attributes;
 
         if (dto.associations != null) {
             this.associations = dto.associations;
@@ -43,6 +50,10 @@ public class TypeDto {
             this.actions = Collections.emptySet();
         }
 
-        this.inheritActions = dto.isInheritActions();
+        if (dto.createVariants != null) {
+            this.createVariants = dto.createVariants;
+        } else {
+            this.createVariants = Collections.emptySet();
+        }
     }
 }

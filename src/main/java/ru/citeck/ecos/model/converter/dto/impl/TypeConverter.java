@@ -1,6 +1,10 @@
 package ru.citeck.ecos.model.converter.dto.impl;
 
-import lombok.RequiredArgsConstructor;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
@@ -12,22 +16,32 @@ import ru.citeck.ecos.model.domain.AssociationEntity;
 import ru.citeck.ecos.model.domain.TypeActionEntity;
 import ru.citeck.ecos.model.domain.TypeEntity;
 import ru.citeck.ecos.model.dto.TypeAssociationDto;
+import ru.citeck.ecos.model.dto.TypeCreateVariantDto;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.io.IOException;
+import java.util.*;
 import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
 @Component
+@Slf4j
 public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
 
     private final TypeRepository typeRepository;
     private final DtoConverter<TypeAssociationDto, AssociationEntity> associationConverter;
+    private final DtoConverter<TypeCreateVariantDto, String> typeCreateVariantConverter;
+    private final ObjectMapper objectMapper;
+
+    public TypeConverter(TypeRepository typeRepository,
+                         DtoConverter<TypeAssociationDto, AssociationEntity> associationConverter,
+                         DtoConverter<TypeCreateVariantDto, String> typeCreateVariantConverter) {
+        this.typeRepository = typeRepository;
+        this.associationConverter = associationConverter;
+        this.typeCreateVariantConverter = typeCreateVariantConverter;
+        this.objectMapper = new ObjectMapper();
+    }
 
     /*
     *   Note:
@@ -51,6 +65,12 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
         typeEntity.setDescription(dto.getDescription());
         typeEntity.setTenant(dto.getTenant());
         typeEntity.setInheritActions(dto.isInheritActions());
+
+        ObjectNode attributes = dto.getAttributes();
+        if (attributes != null) {
+            typeEntity.setAttributes(attributes.toString());
+        }
+
         if (StringUtils.isNotBlank(dto.getForm())) {
             typeEntity.setForm(dto.getForm());
         }
@@ -74,7 +94,26 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
             .collect(Collectors.toList());
         typeEntity.addActions(actionEntities);
 
+        // create variants
+        Set<TypeCreateVariantDto> createVariantDTOs = dto.getCreateVariants();
+        Set<String> createVariantsStrings = createVariantDTOs.stream()
+            .map(typeCreateVariantConverter::dtoToEntity)
+            .collect(Collectors.toSet());
+        String createVariantsStr = convertListOfStringsToContent(createVariantsStrings);
+        typeEntity.setCreateVariants(createVariantsStr);
+
         return typeEntity;
+    }
+
+    private String convertListOfStringsToContent(Set<String> strings) {
+        if (CollectionUtils.isNotEmpty(strings)) {
+            try {
+                return objectMapper.writeValueAsString(strings);
+            } catch (JsonProcessingException jpe) {
+                log.error("Cannot create solid string from multiple", jpe);
+            }
+        }
+        return null;
     }
 
     @Override
@@ -88,6 +127,16 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
         dto.setInheritActions(entity.isInheritActions());
         dto.setTenant(entity.getTenant());
         dto.setForm(entity.getForm());
+
+        String attributesStr = entity.getAttributes();
+        if (StringUtils.isNotBlank(attributesStr)) {
+            try {
+                ObjectNode attributes = objectMapper.readValue(attributesStr, ObjectNode.class);
+                dto.setAttributes(attributes);
+            } catch (IOException ioe) {
+                log.error("Cannot deserialize attributes for type entity with id:" + entity.getId());
+            }
+        }
 
         TypeEntity parent = entity.getParent();
         if (parent != null) {
@@ -105,6 +154,24 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
             .collect(Collectors.toSet());
         dto.setActions(actionsModuleRefs);
 
+        Set<String> createVariantsStrings = convertContentToListOfString(entity.getCreateVariants());
+        Set<TypeCreateVariantDto> createVariants = createVariantsStrings.stream()
+            .map(typeCreateVariantConverter::entityToDto)
+            .collect(Collectors.toSet());
+        dto.setCreateVariants(createVariants);
+
         return dto;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Set<String> convertContentToListOfString(String content) {
+        if (content != null) {
+            try {
+                return objectMapper.readValue(content, Set.class);
+            } catch (IOException ioe) {
+                log.error("Cannot convert content to list of strings");
+            }
+        }
+        return Collections.emptySet();
     }
 }

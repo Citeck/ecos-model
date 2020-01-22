@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ru.citeck.ecos.model.utils.EntityCollectionUtils;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -35,6 +36,11 @@ public class TypeEntity {
     private String tenant;
 
     private String form;
+
+    private String attributes;
+
+    @Column(name = "create_variants")
+    private String createVariants;
 
     @Column(name = "inherit_actions")
     private boolean inheritActions;

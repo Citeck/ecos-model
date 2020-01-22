@@ -1,19 +1,25 @@
 package ru.citeck.ecos.model.converter.dto;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.logging.log4j.util.Strings;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.platform.commons.util.CollectionUtils;
+import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.apps.app.module.ModuleRef;
+import ru.citeck.ecos.apps.app.module.type.model.type.CreateVariantDto;
 import ru.citeck.ecos.model.converter.dto.impl.TypeConverter;
 import ru.citeck.ecos.model.domain.AssociationEntity;
 import ru.citeck.ecos.model.domain.SectionEntity;
 import ru.citeck.ecos.model.domain.TypeActionEntity;
 import ru.citeck.ecos.model.domain.TypeEntity;
 import ru.citeck.ecos.model.dto.TypeAssociationDto;
+import ru.citeck.ecos.model.dto.TypeCreateVariantDto;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.repository.AssociationRepository;
 import ru.citeck.ecos.model.repository.TypeRepository;
@@ -31,10 +37,10 @@ public class TypeConverterTest {
     private TypeRepository typeRepository;
 
     @MockBean
-    private AssociationRepository associationRepository;
+    private DtoConverter<TypeAssociationDto, AssociationEntity> associationConverter;
 
     @MockBean
-    private DtoConverter<TypeAssociationDto, AssociationEntity> associationConverter;
+    private DtoConverter<TypeCreateVariantDto, String> typeCreateVariantConverter;
 
     private TypeConverter typeConverter;
 
@@ -48,10 +54,11 @@ public class TypeConverterTest {
 
     private AssociationEntity associationEntity;
     private TypeAssociationDto associationDto;
+    private TypeCreateVariantDto createVariantDto;
 
     @BeforeEach
     void setUp() {
-        typeConverter = new TypeConverter(typeRepository, associationConverter);
+        typeConverter = new TypeConverter(typeRepository, associationConverter, typeCreateVariantConverter);
 
         TypeEntity child = new TypeEntity();
         child.setExtId("child");
@@ -67,6 +74,15 @@ public class TypeConverterTest {
         SectionEntity sectionEntity = new SectionEntity();
         sectionEntity.setExtId("section");
 
+        createVariantDto = new TypeCreateVariantDto();
+        createVariantDto.setId("createVariant");
+
+        ObjectNode objectNode = null;
+        try {
+            objectNode = new ObjectMapper().createObjectNode();
+            objectNode.put("field", "value");
+        } catch (Exception ignored) { }
+
         typeEntity = new TypeEntity();
         typeEntity.setExtId("type");
         typeEntity.setId(123L);
@@ -77,6 +93,13 @@ public class TypeConverterTest {
         typeEntity.setParent(parent);
         typeEntity.addAction(actionEntity);
         typeEntity.setSections(Collections.singleton(sectionEntity));
+        typeEntity.setAttributes(objectNode != null ? objectNode.toString() : "");
+        typeEntity.setCreateVariants("[\"{\\\"id\\\":\\\"id2\\\",\\\"name\\\":\\\"name2\\\",\\\"formRef\\\":\\\"" +
+            "type$formRef1\\\",\\\"recordRef\\\":\\\"type@recordRef1\\\",\\\"attributes\\\":\\\"{\\\\\\\"key" +
+            "\\\\\\\":\\\\\\\"value3\\\\\\\",\\\\\\\"key2\\\\\\\":\\\\\\\"value4\\\\\\\"}\\\"}\",\"{\\\"id\\\":" +
+            "\\\"id1\\\",\\\"name\\\":\\\"name1\\\",\\\"formRef\\\":\\\"type$formRef1\\\",\\\"recordRef\\\":\\\"" +
+            "type@recordRef1\\\",\\\"attributes\\\":\\\"{\\\\\\\"key\\\\\\\":\\\\\\\"value\\\\\\\",\\\\\\\"key2" +
+            "\\\\\\\":\\\\\\\"value2\\\\\\\"}\\\"}\"]");
 
         associationEntity = new AssociationEntity();
         associationEntity.setExtId("association");
@@ -103,7 +126,9 @@ public class TypeConverterTest {
     void testEntityToDto() {
 
         //  arrange
+
         when(associationConverter.entityToDto(associationEntity)).thenReturn(associationDto);
+        when(typeCreateVariantConverter.entityToDto(Mockito.anyString())).thenReturn(createVariantDto);
 
         //  act
         TypeDto resultDto = typeConverter.targetToSource(typeEntity);
@@ -116,15 +141,19 @@ public class TypeConverterTest {
         Assert.assertEquals(resultDto.getParent(), RecordRef.create("emodel", "type", parent.getExtId()));
         Assert.assertEquals(resultDto.getActions(), Collections.singleton(actionRef));
         Assert.assertEquals(resultDto.getAssociations(), Collections.singleton(associationDto));
+        Assert.assertEquals(resultDto.getAttributes().toString(), typeEntity.getAttributes());
+        Assert.assertEquals(resultDto.getCreateVariants().iterator().next().getId(), "createVariant");
     }
 
     @Test
-    void testEntityToDtoWithoutParentAndAssociationsAndActions() {
+    void testEntityToDtoWithoutParentAndAssociationsAndActionsAndAttributesAndCreateVariants() {
 
         //  arrange
         typeEntity.setParent(null);
         typeEntity.setAssocsToOthers(Collections.emptySet());
         typeEntity.removeAction(actionEntity);
+        typeEntity.setCreateVariants(null);
+        typeEntity.setAttributes(null);
 
         //  act
         TypeDto resultDto = typeConverter.targetToSource(typeEntity);
@@ -134,6 +163,11 @@ public class TypeConverterTest {
         Assert.assertEquals(resultDto.getName(), typeEntity.getName());
         Assert.assertEquals(resultDto.getDescription(), typeEntity.getDescription());
         Assert.assertEquals(resultDto.getTenant(), typeEntity.getTenant());
+        Assert.assertNull(resultDto.getAttributes());
+        Assert.assertEquals(resultDto.getCreateVariants(), Collections.emptySet());
+        Assert.assertNull(resultDto.getParent());
+        Assert.assertEquals(resultDto.getAssociations(), Collections.emptySet());
+        Assert.assertEquals(resultDto.getActions(), Collections.emptySet());
     }
 
     @Test
@@ -141,6 +175,7 @@ public class TypeConverterTest {
 
         //  arrange
         when(associationConverter.dtoToEntity(associationDto)).thenReturn(associationEntity);
+        when(typeCreateVariantConverter.dtoToEntity(createVariantDto)).thenReturn("createVariantSampleString");
         when(typeRepository.findByExtId(parent.getExtId())).thenReturn(Optional.of(parent));
         when(typeRepository.findByExtId(typeEntity.getExtId())).thenReturn(Optional.of(typeEntity));
 

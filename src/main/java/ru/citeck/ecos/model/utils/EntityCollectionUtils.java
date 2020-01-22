@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.domain;
+package ru.citeck.ecos.model.utils;
 
 import java.util.HashMap;
 import java.util.Map;
