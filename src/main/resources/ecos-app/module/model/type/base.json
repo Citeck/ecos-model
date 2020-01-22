@@ -4,7 +4,8 @@
     "actions": [
         "ui/action$edit",
         "ui/action$content-download",
-        "ui/action$record-actions"
+        "ui/action$record-actions",
+        "ui/action$edit-in-onlyoffice"
     ],
     "associations": [
         {
