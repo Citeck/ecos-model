@@ -6,8 +6,8 @@
     <changeSet author="citeck" id="20200120000000">
 
         <addColumn tableName="ecos_type">
-            <column name="attributes" type="VARCHAR(1023)"/>
-            <column name="create_variants" type="VARCHAR(1023)"/>
+            <column name="attributes" type="VARCHAR"/>
+            <column name="create_variants" type="VARCHAR"/>
         </addColumn>
 
     </changeSet>
