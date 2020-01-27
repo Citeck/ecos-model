@@ -113,7 +113,26 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
         String createVariantsStr = convertListOfStringsToContent(createVariantsStrings);
         typeEntity.setCreateVariants(createVariantsStr);
 
+        checkCyclicDependencies(typeEntity);
+
         return typeEntity;
+    }
+
+    private void checkCyclicDependencies(TypeEntity entity) {
+
+        String currentId = entity.getExtId();
+        TypeEntity parent = entity.getParent();
+
+        List<String> depsList = new ArrayList<>();
+        depsList.add(currentId);
+
+        while (parent != null) {
+            depsList.add(parent.getExtId());
+            if (Objects.equals(currentId, parent.getExtId())) {
+                throw new IllegalStateException("Cyclic dependencies! " + depsList);
+            }
+            parent = parent.getParent();
+        }
     }
 
     private String convertListOfStringsToContent(Set<String> strings) {
