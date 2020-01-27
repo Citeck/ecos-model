@@ -158,7 +158,9 @@ public class TypeRecordsDao extends LocalRecordsDAO
                 case "form":
                     String formId = dto.getForm();
                     if (StringUtils.isNotBlank(formId)) {
-                        formId = formId.replaceFirst(formTypeIdPrefix, "");
+                        if (formId.startsWith(formTypeIdPrefix)) {
+                            formId = formId.substring(formTypeIdPrefix.length());
+                        }
                         return RecordRef.valueOf(UISERV_EFORM_PREFIX + formId);
                     }
                     return null;

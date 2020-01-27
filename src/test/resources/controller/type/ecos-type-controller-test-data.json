@@ -5,6 +5,7 @@
         "description": "some description",
         "tenant": "some-tenant",
         "inheritActions": true,
+        "form": "form$test-form",
         "actions": [
             "ui/action$delete",
             "ui/action$view"

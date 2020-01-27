@@ -6,6 +6,7 @@
         "tenant": "third-tenant",
         "inheritActions": true,
         "parent": "emodel/type@type-second",
+        "form": null,
         "actions": [
             "ui/action$print",
             "ui/action$edit",

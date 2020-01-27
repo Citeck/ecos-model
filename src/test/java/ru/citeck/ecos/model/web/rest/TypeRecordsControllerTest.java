@@ -91,6 +91,7 @@ public class TypeRecordsControllerTest {
             "        \"parent\": \"parent?id\",\n" +
             "        \"tenant\": \"tenant\",\n" +
             "        \"description\": \"description\",\n" +
+            "        \"form\": \"form?id\",\n" +
             "        \"inheritActions\": \"inheritActions?bool\",\n" +
             "        \"actions\": \"" + actionAtt + "\"\n" +
             "    }\n" +
