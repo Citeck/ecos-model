@@ -5,7 +5,7 @@
         "description": "some description",
         "tenant": "some-tenant",
         "inheritActions": true,
-        "parent": null,
+        "parent": "emodel/type@base",
         "actions": [
             "ui/action$delete",
             "ui/action$view"
