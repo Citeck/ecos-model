@@ -165,7 +165,7 @@ public class TypeConverterTest {
         Assert.assertEquals(resultDto.getTenant(), typeEntity.getTenant());
         Assert.assertNull(resultDto.getAttributes());
         Assert.assertEquals(resultDto.getCreateVariants(), Collections.emptySet());
-        Assert.assertNull(resultDto.getParent());
+        Assert.assertEquals(resultDto.getParent(), RecordRef.valueOf("emodel/type@base"));
         Assert.assertEquals(resultDto.getAssociations(), Collections.emptySet());
         Assert.assertEquals(resultDto.getActions(), Collections.emptySet());
     }
