@@ -3,10 +3,13 @@ package ru.citeck.ecos.model.dao;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import ru.citeck.ecos.apps.app.module.EappsModuleService;
 import ru.citeck.ecos.apps.app.module.ModuleRef;
+import ru.citeck.ecos.apps.app.module.type.form.FormModule;
 import ru.citeck.ecos.model.dto.TypeAssociationDto;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.service.TypeService;
@@ -47,14 +50,19 @@ public class TypeRecordsDao extends LocalRecordsDAO
     private final PredicateService predicateService;
     private RecordsService recordsService;
 
+    private final String formTypeId;
+
     @Autowired
     public TypeRecordsDao(TypeService typeService,
                           PredicateService predicateService,
-                          @Lazy RecordsService recordsService) {
+                          @Lazy RecordsService recordsService,
+                          EappsModuleService moduleService) {
         setId(ID);
         this.typeService = typeService;
         this.predicateService = predicateService;
         this.recordsService = recordsService;
+
+        formTypeId = moduleService.getTypeId(FormModule.class);
     }
 
     @Override
@@ -148,7 +156,12 @@ public class TypeRecordsDao extends LocalRecordsDAO
                 case "assocsFull":
                     return getTypeAndParentsAssociations(dto);
                 case "form":
-                    return RecordRef.valueOf(UISERV_EFORM_PREFIX + dto.getForm());
+                    String formId = dto.getForm();
+                    if (StringUtils.isNotBlank(formId)) {
+                        formId = formId.replace(formTypeId, "");
+                        return RecordRef.valueOf(UISERV_EFORM_PREFIX + formId);
+                    }
+                    return null;
                 case "inheritedForm":
                     return findAndGetInheritedForm(dto);
                 case "attributes":
