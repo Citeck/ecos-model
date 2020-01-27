@@ -50,7 +50,7 @@ public class TypeRecordsDao extends LocalRecordsDAO
     private final PredicateService predicateService;
     private RecordsService recordsService;
 
-    private final String formTypeId;
+    private final String formTypeIdPrefix;
 
     @Autowired
     public TypeRecordsDao(TypeService typeService,
@@ -62,7 +62,7 @@ public class TypeRecordsDao extends LocalRecordsDAO
         this.predicateService = predicateService;
         this.recordsService = recordsService;
 
-        formTypeId = moduleService.getTypeId(FormModule.class);
+        formTypeIdPrefix = moduleService.getTypeId(FormModule.class) + "$";
     }
 
     @Override
@@ -158,7 +158,7 @@ public class TypeRecordsDao extends LocalRecordsDAO
                 case "form":
                     String formId = dto.getForm();
                     if (StringUtils.isNotBlank(formId)) {
-                        formId = formId.replace(formTypeId, "");
+                        formId = formId.replaceFirst(formTypeIdPrefix, "");
                         return RecordRef.valueOf(UISERV_EFORM_PREFIX + formId);
                     }
                     return null;

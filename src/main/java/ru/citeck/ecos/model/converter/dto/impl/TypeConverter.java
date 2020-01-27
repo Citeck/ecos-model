@@ -29,6 +29,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
 
+    private static final String BASE_TYPE_ID = "base";
+
     private final TypeRepository typeRepository;
     private final DtoConverter<TypeAssociationDto, AssociationEntity> associationConverter;
     private final DtoConverter<TypeCreateVariantDto, String> typeCreateVariantConverter;
@@ -76,8 +78,17 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
         }
 
         RecordRef parentRef = dto.getParent();
-        if (parentRef != null && Strings.isNotBlank(parentRef.getId())) {
-            Optional<TypeEntity> optionalParent = typeRepository.findByExtId(parentRef.getId());
+        String parentExtId = null;
+        if (parentRef == null || Strings.isBlank(parentRef.getId())) {
+            if (!Objects.equals(dto.getId(), BASE_TYPE_ID)) {
+                parentExtId = BASE_TYPE_ID;
+            }
+        } else {
+            parentExtId = parentRef.getId();
+        }
+
+        if (parentExtId != null) {
+            Optional<TypeEntity> optionalParent = typeRepository.findByExtId(parentExtId);
             optionalParent.ifPresent(typeEntity::setParent);
         }
 
@@ -139,8 +150,16 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
         }
 
         TypeEntity parent = entity.getParent();
-        if (parent != null) {
-            RecordRef parentRecordRef = RecordRef.create("emodel", TypeRecordsDao.ID, parent.getExtId());
+        String parentExtId = null;
+        if (parent == null) {
+            if (!Objects.equals(entity.getExtId(), BASE_TYPE_ID)) {
+                parentExtId = BASE_TYPE_ID;
+            }
+        } else {
+            parentExtId = parent.getExtId();
+        }
+        if (parentExtId != null) {
+            RecordRef parentRecordRef = RecordRef.create("emodel", TypeRecordsDao.ID, parentExtId);
             dto.setParent(parentRecordRef);
         }
 
