@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import ru.citeck.ecos.apps.EappsFactory;
 import ru.citeck.ecos.apps.app.module.ModuleRef;
 import ru.citeck.ecos.model.dto.TypeAssociationDto;
 import ru.citeck.ecos.model.dto.TypeDto;
@@ -53,7 +54,10 @@ public class TypeRecordsDaoTest {
 
     @BeforeEach
     void setUp() {
-        typeRecordsDao = new TypeRecordsDao(typeService, predicateService, recordsService);
+
+        EappsFactory factory = new EappsFactory();
+
+        typeRecordsDao = new TypeRecordsDao(typeService, predicateService, recordsService, factory.getModuleService());
         typeRecordsDao.setRecordsServiceFactory(new RecordsServiceFactory());
 
         recordRefs = Collections.singletonList(
