@@ -1,11 +1,9 @@
 package ru.citeck.ecos.model.converter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.apps.app.module.ModuleRef;
 import ru.citeck.ecos.apps.app.module.type.model.type.CreateVariantDto;
@@ -35,7 +33,7 @@ public class CreateVariantConverterTest {
         createVariantDto.setRecordRef(RecordRef.create("source", "id"));
 
         Map<String, Object> attributes = new HashMap<>();
-        attributes.put("field","value");
+        attributes.put("field", "value");
         createVariantDto.setAttributes(attributes);
 
         TypeCreateVariantDto typeCreateVariantDto = createVariantConverter.sourceToTarget(createVariantDto);
@@ -44,10 +42,8 @@ public class CreateVariantConverterTest {
         Assert.assertEquals(typeCreateVariantDto.getRecordRef(), createVariantDto.getRecordRef().toString());
         Assert.assertEquals(typeCreateVariantDto.getFormRef(), createVariantDto.getFormRef().toString());
 
-        try {
-            String attrStr = new ObjectMapper().writeValueAsString(attributes);
-            Assert.assertEquals(typeCreateVariantDto.getAttributes(), attrStr);
-        } catch (Exception ignored) { }
+        Assert.assertEquals(typeCreateVariantDto.getAttributes(), attributes);
+        Assert.assertNotSame(typeCreateVariantDto.getAttributes(), attributes);
     }
 
     @Test

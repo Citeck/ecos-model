@@ -7,6 +7,8 @@ import ru.citeck.ecos.apps.app.module.type.model.type.CreateVariantDto;
 import ru.citeck.ecos.model.dto.TypeCreateVariantDto;
 import ru.citeck.ecos.records2.RecordRef;
 
+import java.util.HashMap;
+
 @Slf4j
 @Component
 public class CreateVariantConverter implements Converter<CreateVariantDto, TypeCreateVariantDto> {
@@ -29,7 +31,9 @@ public class CreateVariantConverter implements Converter<CreateVariantDto, TypeC
             localDto.setRecordRef(variantDto.getRecordRef().toString());
         }
 
-        localDto.setAttributes(variantDto.getAttributes());
+        if (variantDto.getAttributes() != null) {
+            localDto.setAttributes(new HashMap<>(variantDto.getAttributes()));
+        }
 
         return localDto;
     }
