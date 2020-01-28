@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.converter.dto;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,6 +9,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.model.converter.dto.impl.TypeCreateVariantConverter;
 import ru.citeck.ecos.model.dto.TypeCreateVariantDto;
+
+import java.io.IOException;
+import java.util.Map;
 
 @ExtendWith(SpringExtension.class)
 public class TypeCreateVariantConverterTest {
@@ -19,15 +23,20 @@ public class TypeCreateVariantConverterTest {
     private TypeCreateVariantDto createVariantDto;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws IOException {
+
+        objectMapper = new ObjectMapper();
+
         createVariantDto = new TypeCreateVariantDto();
         createVariantDto.setId("createVariant");
         createVariantDto.setName("name");
         createVariantDto.setFormRef("formRef");
         createVariantDto.setRecordRef("recordRef");
-        createVariantDto.setAttributes("{\"key\":\"value\"");
+
+        Map<String, Object> atts = objectMapper.readValue("{\"key\":\"value\"}",
+                                                          new TypeReference<Map<String, Object>>(){});
+        createVariantDto.setAttributes(atts);
         converter = new TypeCreateVariantConverter();
-        objectMapper = new ObjectMapper();
     }
 
     @Test
@@ -35,14 +44,14 @@ public class TypeCreateVariantConverterTest {
         String string = converter.dtoToEntity(createVariantDto);
 
         Assert.assertEquals(string, "{\"id\":\"createVariant\",\"name\":\"name\",\"formRef\":\"formRef\"" +
-            ",\"recordRef\":\"recordRef\",\"attributes\":\"{\\\"key\\\":\\\"value\\\"\"}");
+            ",\"recordRef\":\"recordRef\",\"attributes\":{\"key\":\"value\"}}");
         System.out.println(string);
     }
 
     @Test
     void entityToDto() {
         TypeCreateVariantDto dto = converter.entityToDto("{\"id\":\"createVariant\",\"name\":\"name\",\"" +
-            "formRef\":\"formRef\",\"recordRef\":\"recordRef\",\"attributes\":\"{\\\"key\\\":\\\"value\\\"\"}");
+            "formRef\":\"formRef\",\"recordRef\":\"recordRef\",\"attributes\":{\"key\":\"value\"}}");
 
         Assert.assertEquals(dto.getId(), createVariantDto.getId());
         Assert.assertEquals(dto.getName(), createVariantDto.getName());
