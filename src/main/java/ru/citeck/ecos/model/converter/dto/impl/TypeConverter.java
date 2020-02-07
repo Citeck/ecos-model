@@ -161,7 +161,7 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
         String attributesStr = entity.getAttributes();
         if (StringUtils.isNotBlank(attributesStr)) {
             try {
-                ObjectNode attributes = objectMapper.readValue(attributesStr, ObjectNode.class);
+                ObjectNode attributes = (ObjectNode) objectMapper.readTree(attributesStr);
                 dto.setAttributes(attributes);
             } catch (IOException ioe) {
                 log.error("Cannot deserialize attributes for type entity with id:" + entity.getId());

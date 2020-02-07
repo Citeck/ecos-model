@@ -1,6 +1,10 @@
 package ru.citeck.ecos.model.converter.dto.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.model.converter.dto.AbstractDtoConverter;
@@ -12,17 +16,20 @@ import ru.citeck.ecos.model.repository.SectionRepository;
 import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
 
+import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class SectionConverter extends AbstractDtoConverter<SectionDto, SectionEntity> {
 
     private final TypeRepository typeRepository;
     private final SectionRepository sectionRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public SectionEntity dtoToEntity(SectionDto dto) {
@@ -38,6 +45,11 @@ public class SectionConverter extends AbstractDtoConverter<SectionDto, SectionEn
             .collect(Collectors.toSet());
         Set<TypeEntity> storedTypes = typeRepository.findAllByExtIds(dtoTypesExtIds);
         sectionEntity.setTypes(storedTypes);
+
+        ObjectNode attributes = dto.getAttributes();
+        if (attributes != null) {
+            sectionEntity.setAttributes(attributes.toString());
+        }
 
         String sectionDtoId = dto.getId();
         if (Strings.isBlank(sectionDtoId)) {
@@ -60,11 +72,24 @@ public class SectionConverter extends AbstractDtoConverter<SectionDto, SectionEn
                 .map(e -> RecordRef.create(TypeRecordsDao.ID, e.getExtId()))
                 .collect(Collectors.toSet());
         }
+
+        ObjectNode attributes = null;
+
+        String attributesStr = entity.getAttributes();
+        if (StringUtils.isNotBlank(attributesStr)) {
+            try {
+                attributes = (ObjectNode) objectMapper.readTree(attributesStr);
+            } catch (IOException ioe) {
+                log.error("Cannot deserialize attributes for section entity with id:" + entity.getId());
+            }
+        }
+
         return new SectionDto(
             entity.getExtId(),
             entity.getName(),
             entity.getDescription(),
             entity.getTenant(),
-            typesRefs);
+            typesRefs,
+            attributes);
     }
 }

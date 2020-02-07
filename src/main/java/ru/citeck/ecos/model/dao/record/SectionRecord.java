@@ -42,6 +42,8 @@ public class SectionRecord implements MetaValue {
                 return dto.getTenant();
             case "types":
                 return dto.getTypes();
+            case "attributes":
+                return dto.getAttributes();
         }
         return null;
     }
