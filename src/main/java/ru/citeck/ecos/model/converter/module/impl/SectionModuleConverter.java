@@ -33,6 +33,7 @@ public class SectionModuleConverter extends AbstractModuleConverter<SectionModul
         dto.setName(module.getName());
         dto.setDescription(module.getDescription());
         dto.setTenant(Strings.EMPTY);
+        dto.setAttributes(module.getAttributes());
 
         List<ModuleRef> typesModuleRefs = module.getTypes();
         if (typesModuleRefs != null && !typesModuleRefs.isEmpty()) {

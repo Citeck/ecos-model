@@ -17,6 +17,7 @@ import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -43,7 +44,8 @@ public class SectionConverter extends AbstractDtoConverter<SectionDto, SectionEn
         Set<String> dtoTypesExtIds = dto.getTypes().stream()
             .map(RecordRef::getId)
             .collect(Collectors.toSet());
-        Set<TypeEntity> storedTypes = typeRepository.findAllByExtIds(dtoTypesExtIds);
+        Set<TypeEntity> storedTypes = dtoTypesExtIds.isEmpty() ?
+            Collections.emptySet() : typeRepository.findAllByExtIds(dtoTypesExtIds);
         sectionEntity.setTypes(storedTypes);
 
         ObjectNode attributes = dto.getAttributes();
