@@ -4,6 +4,41 @@
     "actions": [
         "ui/action$edit",
         "ui/action$content-download",
-        "ui/action$record-actions"
+        "ui/action$record-actions",
+        "ui/action$edit-in-onlyoffice"
+    ],
+    "associations": [
+        {
+            "id": "assoc:associatedWith",
+            "name": "Связан с",
+            "direction": "BOTH",
+            "target": "model/type$base"
+        }
+    ],
+    "attributes": {
+        "key":"value",
+        "key2":"value2"
+    },
+    "createVariants": [
+        {
+            "id": "id1",
+            "name": "name1",
+            "formRef": "type$formRef1",
+            "recordRef": "type@recordRef1",
+            "attributes": {
+                "key":"value",
+                "key2":"value2"
+            }
+        },
+        {
+            "id": "id2",
+            "name": "name2",
+            "formRef": "type$formRef1",
+            "recordRef": "type@recordRef1",
+            "attributes": {
+                "key":"value3",
+                "key2":"value4"
+            }
+        }
     ]
 }

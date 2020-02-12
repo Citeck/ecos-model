@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.converter.impl;
+package ru.citeck.ecos.model.converter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
 import io.micrometer.core.instrument.util.StringUtils;
 import org.springframework.stereotype.Component;
-import ru.citeck.ecos.model.converter.Converter;
 
 import java.io.IOException;
 

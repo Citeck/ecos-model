@@ -3,10 +3,14 @@ package ru.citeck.ecos.model.dao;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import ru.citeck.ecos.apps.app.module.EappsModuleService;
 import ru.citeck.ecos.apps.app.module.ModuleRef;
+import ru.citeck.ecos.apps.app.module.type.form.FormModule;
+import ru.citeck.ecos.model.dto.TypeAssociationDto;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.service.TypeService;
 import ru.citeck.ecos.predicate.Elements;
@@ -37,7 +41,8 @@ public class TypeRecordsDao extends LocalRecordsDAO
 
     private static final String LANGUAGE_EMPTY = "";
     private static final String TYPE_ACTIONS_WITH_INHERIT_ATT_JSON = "_actions[]?json";
-    private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final String UISERV_EFORM_PREFIX = "uiserv/eform@";
 
     private final TypeRecord EMPTY_RECORD = new TypeRecord(new TypeDto());
 
@@ -45,14 +50,19 @@ public class TypeRecordsDao extends LocalRecordsDAO
     private final PredicateService predicateService;
     private RecordsService recordsService;
 
+    private final String formTypeIdPrefix;
+
     @Autowired
     public TypeRecordsDao(TypeService typeService,
                           PredicateService predicateService,
-                          @Lazy RecordsService recordsService) {
+                          @Lazy RecordsService recordsService,
+                          EappsModuleService moduleService) {
         setId(ID);
         this.typeService = typeService;
         this.predicateService = predicateService;
         this.recordsService = recordsService;
+
+        formTypeIdPrefix = moduleService.getTypeId(FormModule.class) + "$";
     }
 
     @Override
@@ -143,6 +153,23 @@ public class TypeRecordsDao extends LocalRecordsDAO
                     return getInheritTypeActions(dto);
                 case "associations":
                     return dto.getAssociations();
+                case "assocsFull":
+                    return getTypeAndParentsAssociations(dto);
+                case "form":
+                    String formId = dto.getForm();
+                    if (StringUtils.isNotBlank(formId)) {
+                        if (formId.startsWith(formTypeIdPrefix)) {
+                            formId = formId.substring(formTypeIdPrefix.length());
+                        }
+                        return RecordRef.valueOf(UISERV_EFORM_PREFIX + formId);
+                    }
+                    return null;
+                case "inheritedForm":
+                    return findAndGetInheritedForm(dto);
+                case "attributes":
+                    return dto.getAttributes();
+                case "createVariants":
+                    return dto.getCreateVariants();
             }
             return null;
         }
@@ -151,7 +178,48 @@ public class TypeRecordsDao extends LocalRecordsDAO
         public Object getJson() {
             return dto;
         }
+    }
 
+    private RecordRef findAndGetInheritedForm(TypeDto typeDto) {
+
+        TypeDto currentType = typeDto;
+
+        while (currentType != null) {
+
+            String formId = currentType.getForm();
+
+            if (formId != null) {
+                return RecordRef.valueOf(UISERV_EFORM_PREFIX + formId);
+            } else {
+                if (currentType.getParent() != null) {
+                    currentType = typeService.getByExtId(currentType.getParent().getId());
+                } else {
+                    return null;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private Set<TypeAssociationDto> getTypeAndParentsAssociations(TypeDto typeDto) {
+
+        Set<TypeAssociationDto> resultAssociations = new HashSet<>();
+
+        TypeDto currentType = typeDto;
+        while (currentType != null) {
+
+            resultAssociations.addAll(currentType.getAssociations());
+
+            RecordRef parentRecordRef = currentType.getParent();
+            if (parentRecordRef != null) {
+                currentType = typeService.getByExtId(currentType.getParent().getId());
+            } else {
+                currentType = null;
+            }
+        }
+
+        return resultAssociations;
     }
 
     private Set<ModuleRef> getInheritTypeActions(TypeDto dto) {

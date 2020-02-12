@@ -1,8 +1,5 @@
 package ru.citeck.ecos.model.config.timezone;
 
-import ru.citeck.ecos.model.EcosModelApp;
-import ru.citeck.ecos.model.repository.timezone.DateTimeWrapper;
-import ru.citeck.ecos.model.repository.timezone.DateTimeWrapperRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,13 +8,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Transactional;
+import ru.citeck.ecos.model.EcosModelApp;
+import ru.citeck.ecos.model.repository.timezone.DateTimeWrapper;
+import ru.citeck.ecos.model.repository.timezone.DateTimeWrapperRepository;
 
+import javax.transaction.Transactional;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 
-import static java.lang.String.format;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 /**
  * Unit tests for the UTC Hibernate configuration.
@@ -162,7 +161,7 @@ public class HibernateTimeZoneTest {
     }
 
     private String generateSqlRequest(String fieldName, long id) {
-        return format("SELECT %s FROM jhi_date_time_wrapper where id=%d", fieldName, id);
+        return String.format("SELECT %s FROM jhi_date_time_wrapper where id=%d", fieldName, id);
     }
 
     private void assertThatDateStoredValueIsEqualToInsertDateValueOnGMTTimeZone(SqlRowSet sqlRowSet, String expectedValue) {

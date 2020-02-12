@@ -1,7 +1,7 @@
 package ru.citeck.ecos.model.service.impl;
 
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.citeck.ecos.model.converter.Converter;
@@ -15,18 +15,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Service
 public class SectionServiceImpl implements SectionService {
 
     private final SectionRepository sectionRepository;
     private final Converter<SectionDto, SectionEntity> sectionConverter;
-
-    @Autowired
-    public SectionServiceImpl(SectionRepository sectionRepository,
-                              Converter<SectionDto, SectionEntity> sectionConverter) {
-        this.sectionRepository = sectionRepository;
-        this.sectionConverter = sectionConverter;
-    }
 
     @Cacheable("sections")
     public Set<SectionDto> getAll() {
@@ -59,7 +53,7 @@ public class SectionServiceImpl implements SectionService {
 
     @Override
     @Transactional
-    public SectionDto update(SectionDto dto) {
+    public SectionDto save(SectionDto dto) {
         SectionEntity entity = sectionConverter.sourceToTarget(dto);
         sectionRepository.save(entity);
         return sectionConverter.targetToSource(entity);

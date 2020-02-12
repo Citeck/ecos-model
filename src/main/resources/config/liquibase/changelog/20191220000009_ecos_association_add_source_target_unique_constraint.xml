@@ -1,0 +1,27 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+    <changeSet author="citeck" id="00000000000009">
+
+        <dropPrimaryKey constraintName="pk_ecos_association"
+                        schemaName="public"
+                        tableName="ecos_association"/>
+
+        <dropColumn schemaName="public"
+                    tableName="ecos_association">
+            <column name="id" type="BIGINT"/>
+        </dropColumn>
+
+        <comment>Clear stored data in the table ECOS_ASSOCIATION for create PK on source_id and ext_id columns</comment>
+        <sql splitStatements="true">
+            truncate table ecos_association;
+        </sql>
+
+        <addPrimaryKey columnNames="source_id, ext_id"
+                       constraintName="pk_ecos_association"
+                       schemaName="public"
+                       tableName="ecos_association"/>
+
+    </changeSet>
+</databaseChangeLog>

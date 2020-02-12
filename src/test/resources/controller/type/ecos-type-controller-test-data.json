@@ -5,6 +5,7 @@
         "description": "some description",
         "tenant": "some-tenant",
         "inheritActions": true,
+        "form": "form$test-form",
         "actions": [
             "ui/action$delete",
             "ui/action$view"
@@ -26,7 +27,7 @@
         "description": "second",
         "tenant": "second-tenant",
         "inheritActions": true,
-        "parent": "type@type-first",
+        "parent": "emodel/type@type-first",
         "actions": [
             "ui/action$print"
         ]
@@ -37,7 +38,7 @@
         "description": "third",
         "tenant": "third-tenant",
         "inheritActions": true,
-        "parent": "type@type-second",
+        "parent": "emodel/type@type-second",
         "actions": [
             "ui/action$fire",
             "ui/action$reset"
@@ -49,7 +50,7 @@
         "description": "second-non-inherit",
         "tenant": "second-tenant-non-inherit",
         "inheritActions": false,
-        "parent": "type@type-first",
+        "parent": "emodel/type@type-first",
         "actions": [
             "ui/action$print-non-inherit"
         ]
@@ -60,7 +61,7 @@
         "description": "third",
         "tenant": "third-tenant",
         "inheritActions": true,
-        "parent": "type@type-second-non-inherit",
+        "parent": "emodel/type@type-second-non-inherit",
         "actions": [
             "ui/action$fire-2",
             "ui/action$reset-2"
@@ -72,7 +73,7 @@
         "description": "third-with-overridden",
         "tenant": "third-tenant",
         "inheritActions": true,
-        "parent": "type@type-second",
+        "parent": "emodel/type@type-second",
         "actions": [
             "ui/action$fire3",
             "ui/action$reset3",
@@ -85,7 +86,7 @@
         "description": "second-with-overridden",
         "tenant": "second-tenant",
         "inheritActions": true,
-        "parent": "type@type-first",
+        "parent": "emodel/type@type-first",
         "actions": [
             "ui/action$print",
             "ui/action$edit"

@@ -5,7 +5,8 @@
         "description": "third",
         "tenant": "third-tenant",
         "inheritActions": true,
-        "parent": "type@type-second-non-inherit",
+        "parent": "emodel/type@type-second-non-inherit",
+        "form": null,
         "actions": [
             "ui/action$fire-2",
             "ui/action$reset-2",

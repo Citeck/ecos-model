@@ -1,6 +1,10 @@
 package ru.citeck.ecos.model.domain;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import ru.citeck.ecos.model.utils.EntityCollectionUtils;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -31,6 +35,13 @@ public class TypeEntity {
 
     private String tenant;
 
+    private String form;
+
+    private String attributes;
+
+    @Column(name = "create_variants")
+    private String createVariants;
+
     @Column(name = "inherit_actions")
     private boolean inheritActions;
 
@@ -39,19 +50,40 @@ public class TypeEntity {
     private TypeEntity parent;
 
     @OneToMany(mappedBy="parent", cascade = CascadeType.DETACH)
-    private Set<TypeEntity> childs = new HashSet<>();
+    private Set<TypeEntity> children = new HashSet<>();
 
     @ManyToMany(mappedBy = "types", fetch = FetchType.EAGER)
     private Set<SectionEntity> sections = new HashSet<>();
 
     /*
+     * Set of associations to this type
+     */
+    @OneToMany(
+        mappedBy = "target",
+        fetch = FetchType.EAGER,
+        cascade = CascadeType.ALL)
+    private Set<AssociationEntity> assocsToThis = new HashSet<>();;
+
+    /*
      * Set of associations to other types
      */
-    @OneToMany(mappedBy = "target", fetch = FetchType.EAGER)
-    private Set<AssociationEntity> assocsToOther = new HashSet<>();
+    @OneToMany(
+        mappedBy = "source",
+        fetch = FetchType.EAGER,
+        cascade = CascadeType.ALL,
+        orphanRemoval=true)
+    private Set<AssociationEntity> assocsToOthers = new HashSet<>();
 
-    @OneToMany(mappedBy = "type", cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(
+        mappedBy = "type",
+        cascade = {CascadeType.ALL},
+        fetch = FetchType.EAGER,
+        orphanRemoval = true)
     private List<TypeActionEntity> actions = new ArrayList<>();
+
+    public void setAssocsToOthers(Set<AssociationEntity> assocsToOthers) {
+        EntityCollectionUtils.changeHibernateSet(this.assocsToOthers, assocsToOthers, AssociationEntity::getId);
+    }
 
     public void addAction(TypeActionEntity actionEntity) {
         actions.add(actionEntity);

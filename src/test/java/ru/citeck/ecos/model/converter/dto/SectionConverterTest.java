@@ -1,14 +1,13 @@
-package ru.citeck.ecos.model.converter;
+package ru.citeck.ecos.model.converter.dto;
 
 import org.apache.logging.log4j.util.Strings;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.citeck.ecos.model.converter.impl.SectionConverter;
+import ru.citeck.ecos.model.converter.dto.impl.SectionConverter;
 import ru.citeck.ecos.model.domain.SectionEntity;
 import ru.citeck.ecos.model.domain.TypeEntity;
 import ru.citeck.ecos.model.dto.SectionDto;
@@ -18,6 +17,7 @@ import ru.citeck.ecos.records2.RecordRef;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.mockito.Mockito.when;
 
@@ -80,10 +80,10 @@ public class SectionConverterTest {
     }
 
     @Test
-    void testDtoToEntityWithoutTypesAndBlackExtId() {
+    void testDtoToEntityWithoutTypesAndBlankExtId() {
 
         //  arrange
-        sectionDto.setTypes(null);
+        sectionDto.setTypes(Collections.emptySet());
         sectionDto.setId(Strings.EMPTY);
 
         //  act
@@ -93,8 +93,9 @@ public class SectionConverterTest {
         Assert.assertEquals(resultSectionEntity.getName(), sectionDto.getName());
         Assert.assertEquals(resultSectionEntity.getTenant(), sectionDto.getTenant());
         Assert.assertEquals(resultSectionEntity.getDescription(), sectionDto.getDescription());
-        Mockito.verify(typeRepository, Mockito.times(0)).findAllByExtIds(Mockito.any());
-        Mockito.verify(sectionRepository, Mockito.times(0)).findByExtId(Mockito.any());
+
+        // checking that extId it is UUID
+        UUID.fromString(resultSectionEntity.getExtId());
     }
 
     @Test

@@ -36,5 +36,5 @@ public class SectionEntity {
 
     private String tenant;
 
-
+    private String attributes;
 }

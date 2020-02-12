@@ -1,24 +1,19 @@
 package ru.citeck.ecos.model.dto;
 
-import lombok.*;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.logging.log4j.util.Strings;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.citeck.ecos.apps.app.module.ModuleRef;
-import ru.citeck.ecos.apps.app.module.type.model.type.TypeModule;
-import ru.citeck.ecos.model.dao.TypeRecordsDao;
 import ru.citeck.ecos.records2.RecordRef;
 
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-@EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
-@Getter
-@Setter
+@Data
 public class TypeDto {
 
     private String id;
@@ -26,52 +21,39 @@ public class TypeDto {
     private String description;
     private String tenant;
     private RecordRef parent;
-    private Set<AssociationDto> associations = new HashSet<>();
+    private String form;
+    private Set<TypeAssociationDto> associations = new HashSet<>();
     private Set<ModuleRef> actions = new HashSet<>();
     private boolean inheritActions;
+    private ObjectNode attributes;
+    private Set<TypeCreateVariantDto> createVariants = new HashSet<>();
 
     public TypeDto(TypeDto dto) {
         this.name = dto.name;
         this.description = dto.description;
         this.tenant = dto.tenant;
         this.parent = dto.parent;
+        this.form = dto.form;
         this.id = dto.id;
+        this.inheritActions = dto.inheritActions;
+        this.attributes = dto.attributes;
+
         if (dto.associations != null) {
-            this.associations = new HashSet<>(dto.associations);
+            this.associations = dto.associations;
+        } else {
+            this.associations = Collections.emptySet();
         }
+
         if (dto.actions != null) {
-            this.actions = new HashSet<>(dto.actions);
-        }
-        this.inheritActions = dto.isInheritActions();
-    }
-
-    public TypeDto(TypeModule module) {
-
-        this.id = module.getId();
-        this.name = module.getName();
-        this.description = module.getDescription();
-        this.tenant = Strings.EMPTY;
-        this.inheritActions = module.isInheritActions();
-
-        if (module.getParent() != null) {
-            this.parent = RecordRef.create(TypeRecordsDao.ID, module.getParent().getId());
+            this.actions = dto.actions;
+        } else {
+            this.actions = Collections.emptySet();
         }
 
-        List<ru.citeck.ecos.apps.app.module.type.model.type.AssociationDto> associations = module.getAssociations();
-        if (CollectionUtils.isNotEmpty(associations)) {
-            this.associations = associations
-                .stream()
-                .map(AssociationDto::new)
-                .collect(Collectors.toSet());
+        if (dto.createVariants != null) {
+            this.createVariants = dto.createVariants;
+        } else {
+            this.createVariants = Collections.emptySet();
         }
-
-        List<ModuleRef> actions = module.getActions();
-        if (CollectionUtils.isNotEmpty(actions)) {
-            this.actions = new HashSet<>(actions);
-        }
-    }
-
-    public TypeDto(String id) {
-        this.id = id;
     }
 }

@@ -29,7 +29,7 @@ public class TestTypeDataLoader {
 
             for (TypeDto type : types) {
                 log.info(type.toString());
-                typeService.update(type);
+                typeService.save(type);
             }
 
             log.info("======================== END ==========================");
