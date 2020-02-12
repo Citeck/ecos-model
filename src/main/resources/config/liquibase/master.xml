@@ -19,6 +19,7 @@
     <include file="config/liquibase/changelog/20191220000009_ecos_association_add_source_target_unique_constraint.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20200120000000_ecos_type_add_attributes_and_create_variants.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20200207000000_ecos_section_add_attributes.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20200212000000_increase_type_ext_id_column_size.xml" relativeToChangelogFile="false"/>
 
     <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
     <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->
