@@ -1,7 +1,7 @@
 package ru.citeck.ecos.model.converter.module;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import ecos.com.fasterxml.jackson210.databind.ObjectMapper;
+import ecos.com.fasterxml.jackson210.databind.node.ObjectNode;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import ru.citeck.ecos.records2.scalar.MLText;
 import ru.citeck.ecos.apps.app.module.ModuleRef;
 import ru.citeck.ecos.apps.app.module.type.model.type.AssociationDto;
 import ru.citeck.ecos.apps.app.module.type.model.type.CreateVariantDto;
@@ -47,8 +48,8 @@ public class TypeModuleConverterTest {
 
         typeModule = new TypeModule();
         typeModule.setId("typeId");
-        typeModule.setName("name");
-        typeModule.setDescription("desc");
+        typeModule.setName(new MLText("name"));
+        typeModule.setDescription(new MLText("desc"));
         typeModule.setParent(ModuleRef.create("TypeModule", "parent"));
         typeModule.setForm(ModuleRef.create("FormModule", "form"));
         typeModule.setInheritActions(true);

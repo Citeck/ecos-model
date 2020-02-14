@@ -1,7 +1,7 @@
 package ru.citeck.ecos.model.converter.dto;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import ecos.com.fasterxml.jackson210.core.type.TypeReference;
+import ecos.com.fasterxml.jackson210.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

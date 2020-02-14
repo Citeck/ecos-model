@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import ru.citeck.ecos.records2.scalar.MLText;
 import ru.citeck.ecos.apps.app.module.ModuleRef;
 import ru.citeck.ecos.apps.app.module.type.model.type.AssociationDto;
 import ru.citeck.ecos.apps.app.module.type.model.type.TypeModule;
@@ -40,11 +41,11 @@ public class TypeModuleListenerTest {
         //  arrange
         TypeModule typeModule = new TypeModule();
         typeModule.setId("testId");
-        typeModule.setName("name");
+        typeModule.setName(new MLText("name"));
 
         AssociationDto associationDto = new AssociationDto();
         associationDto.setId("test-assoc");
-        associationDto.setName("assoc-name");
+        associationDto.setName(new MLText("assoc-name"));
         associationDto.setTarget(ModuleRef.create("model/type", "targetId"));
         typeModule.setAssociations(Collections.singletonList(associationDto));
 

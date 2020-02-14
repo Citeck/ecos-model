@@ -1,6 +1,6 @@
 package ru.citeck.ecos.model;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import ecos.com.fasterxml.jackson210.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;

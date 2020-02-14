@@ -1,9 +1,9 @@
 package ru.citeck.ecos.model.converter;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.POJONode;
-import com.fasterxml.jackson.databind.node.TextNode;
+import ecos.com.fasterxml.jackson210.databind.JsonNode;
+import ecos.com.fasterxml.jackson210.databind.ObjectMapper;
+import ecos.com.fasterxml.jackson210.databind.node.POJONode;
+import ecos.com.fasterxml.jackson210.databind.node.TextNode;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

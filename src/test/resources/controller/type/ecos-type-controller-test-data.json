@@ -1,5 +1,9 @@
 [
     {
+        "id": "base",
+        "name": "base-type"
+    },
+    {
         "id": "type-tree",
         "name": "test-type",
         "description": "some description",

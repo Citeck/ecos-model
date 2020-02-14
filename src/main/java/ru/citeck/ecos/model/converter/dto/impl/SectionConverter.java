@@ -1,7 +1,7 @@
 package ru.citeck.ecos.model.converter.dto.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import ecos.com.fasterxml.jackson210.databind.ObjectMapper;
+import ecos.com.fasterxml.jackson210.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

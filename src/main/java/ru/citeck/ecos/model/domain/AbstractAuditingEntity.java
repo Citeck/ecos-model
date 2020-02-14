@@ -1,6 +1,6 @@
 package ru.citeck.ecos.model.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import ecos.com.fasterxml.jackson210.annotation.JsonIgnore;
 import org.hibernate.envers.Audited;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;

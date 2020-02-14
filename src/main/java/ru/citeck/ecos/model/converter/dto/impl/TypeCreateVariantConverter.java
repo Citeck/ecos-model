@@ -1,7 +1,7 @@
 package ru.citeck.ecos.model.converter.dto.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import ecos.com.fasterxml.jackson210.core.JsonProcessingException;
+import ecos.com.fasterxml.jackson210.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

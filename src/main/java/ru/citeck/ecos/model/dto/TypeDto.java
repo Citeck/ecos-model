@@ -1,11 +1,12 @@
 package ru.citeck.ecos.model.dto;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import ecos.com.fasterxml.jackson210.databind.node.ObjectNode;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.citeck.ecos.apps.app.module.ModuleRef;
 import ru.citeck.ecos.records2.RecordRef;
+import ru.citeck.ecos.records2.scalar.MLText;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -17,8 +18,8 @@ import java.util.Set;
 public class TypeDto {
 
     private String id;
-    private String name;
-    private String description;
+    private MLText name;
+    private MLText description;
     private String tenant;
     private RecordRef parent;
     private String form;

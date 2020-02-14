@@ -1,13 +1,14 @@
 package ru.citeck.ecos.model.converter.dto.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import ecos.com.fasterxml.jackson210.core.JsonProcessingException;
+import ecos.com.fasterxml.jackson210.databind.ObjectMapper;
+import ecos.com.fasterxml.jackson210.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
+import ru.citeck.ecos.records2.scalar.MLText;
 import ru.citeck.ecos.apps.app.module.ModuleRef;
 import ru.citeck.ecos.model.converter.dto.AbstractDtoConverter;
 import ru.citeck.ecos.model.converter.dto.DtoConverter;
@@ -19,6 +20,7 @@ import ru.citeck.ecos.model.dto.TypeAssociationDto;
 import ru.citeck.ecos.model.dto.TypeCreateVariantDto;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.repository.TypeRepository;
+import ru.citeck.ecos.model.utils.JsonUtil;
 import ru.citeck.ecos.records2.RecordRef;
 
 import java.io.IOException;
@@ -62,9 +64,12 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
         } else {
             typeEntity.setExtId(typeDtoId);
         }
-
-        typeEntity.setName(dto.getName());
-        typeEntity.setDescription(dto.getDescription());
+        if (dto.getName() != null) {
+            typeEntity.setName(JsonUtil.safeWriteValueAsJsonString(dto.getName()));
+        }
+        if (dto.getDescription() != null) {
+            typeEntity.setDescription(JsonUtil.safeWriteValueAsJsonString(dto.getDescription()));
+        }
         typeEntity.setTenant(dto.getTenant());
         typeEntity.setInheritActions(dto.isInheritActions());
 
@@ -146,14 +151,15 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
         return null;
     }
 
+
     @Override
     public TypeDto entityToDto(TypeEntity entity) {
 
         TypeDto dto = new TypeDto();
 
         dto.setId(entity.getExtId());
-        dto.setName(entity.getName());
-        dto.setDescription(entity.getDescription());
+        dto.setName(JsonUtil.safeReadJsonValue(entity.getName(), MLText.class));
+        dto.setDescription(JsonUtil.safeReadJsonValue(entity.getDescription(), MLText.class));
         dto.setInheritActions(entity.isInheritActions());
         dto.setTenant(entity.getTenant());
         dto.setForm(entity.getForm());

@@ -9,6 +9,7 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.apps.EappsFactory;
+import ru.citeck.ecos.records2.scalar.MLText;
 import ru.citeck.ecos.apps.app.module.ModuleRef;
 import ru.citeck.ecos.model.dto.TypeAssociationDto;
 import ru.citeck.ecos.model.dto.TypeDto;
@@ -73,9 +74,9 @@ public class TypeRecordsDaoTest {
 
         typeDto = new TypeDto();
         typeDto.setId("type");
-        typeDto.setName("name");
+        typeDto.setName(new MLText("name"));
         typeDto.setTenant("tenant");
-        typeDto.setDescription("desc");
+        typeDto.setDescription(new MLText("desc"));
         typeDto.setParent(RecordRef.create("type","parent"));
         typeDto.setInheritActions(false);
         typeDto.setAssociations(Collections.singleton(associationDto));
@@ -147,7 +148,7 @@ public class TypeRecordsDaoTest {
         //  assert
         Assert.assertEquals(resultRecordsQueryResult.getTotalCount(), 1);
         TypeRecordsDao.TypeRecord resultTypeRecord = resultRecordsQueryResult.getRecords().get(0);
-        Assert.assertEquals(resultTypeRecord.getAttribute("name", metaField), "name");
+        Assert.assertEquals(resultTypeRecord.getAttribute("name", metaField), new MLText("name"));
         Assert.assertEquals(resultTypeRecord.getAttribute("description", metaField), "desc");
         Assert.assertEquals(resultTypeRecord.getAttribute("tenant", metaField), "tenant");
         Assert.assertEquals(resultTypeRecord.getAttribute("extId", metaField), typeDto.getId());
@@ -173,8 +174,9 @@ public class TypeRecordsDaoTest {
         Mockito.verify(typeService, Mockito.times(0)).getAll(Mockito.anySet());
         Assert.assertEquals(resultRecordsQueryResult.getTotalCount(), 1);
         TypeRecordsDao.TypeRecord resultTypeRecord = resultRecordsQueryResult.getRecords().get(0);
-        Assert.assertEquals(resultTypeRecord.getAttribute("name", metaField), "name");
-        Assert.assertEquals(resultTypeRecord.getAttribute("description", metaField), "desc");
+
+        Assert.assertEquals(resultTypeRecord.getAttribute("name", metaField), new MLText("name"));
+        Assert.assertEquals(resultTypeRecord.getAttribute("description", metaField), new MLText("desc"));
         Assert.assertEquals(resultTypeRecord.getAttribute("tenant", metaField), "tenant");
         Assert.assertEquals(resultTypeRecord.getAttribute("extId", metaField), typeDto.getId());
         Assert.assertEquals(resultTypeRecord.getAttribute("inheritActions", metaField), typeDto.isInheritActions());

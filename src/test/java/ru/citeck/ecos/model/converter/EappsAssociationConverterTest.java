@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import ru.citeck.ecos.records2.scalar.MLText;
 import ru.citeck.ecos.apps.app.module.ModuleRef;
 import ru.citeck.ecos.apps.app.module.type.model.type.AssocDirection;
 import ru.citeck.ecos.apps.app.module.type.model.type.AssociationDto;
@@ -26,13 +27,13 @@ public class EappsAssociationConverterTest {
 
         localDto = new TypeAssociationDto();
         localDto.setId("assocId");
-        localDto.setName("name");
+        localDto.setName(new MLText("name"));
         localDto.setTargetType(RecordRef.create("type", "targetTypeId"));
         localDto.setDirection(AssocDirection.TARGET);
 
         eappsDto = new AssociationDto();
         eappsDto.setId("assocId");
-        eappsDto.setName("name");
+        eappsDto.setName(new MLText("name"));
         eappsDto.setDirection(AssocDirection.TARGET);
         eappsDto.setTarget(ModuleRef.create("TypeModule", "targetTypeId"));
     }

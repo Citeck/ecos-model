@@ -1,12 +1,13 @@
 package ru.citeck.ecos.model.dao;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import ecos.com.fasterxml.jackson210.core.JsonProcessingException;
+import ecos.com.fasterxml.jackson210.databind.JsonNode;
+import ecos.com.fasterxml.jackson210.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import ru.citeck.ecos.records2.scalar.MLText;
 import ru.citeck.ecos.apps.app.module.EappsModuleService;
 import ru.citeck.ecos.apps.app.module.ModuleRef;
 import ru.citeck.ecos.apps.app.module.type.form.FormModule;
@@ -124,9 +125,13 @@ public class TypeRecordsDao extends LocalRecordsDAO
 
         @Override
         public String getDisplayName() {
-            String dispName = dto.getName();
-            if (dispName == null) {
+            MLText name = dto.getName();
+            String dispName;
+            if (name == null) {
                 dispName = dto.getId();
+            } else {
+                //todo: should be user locale
+                dispName = name.getClosestValue(Locale.ENGLISH);
             }
             return dispName;
         }

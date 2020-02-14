@@ -1,6 +1,6 @@
 package ru.citeck.ecos.model.dto;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import ecos.com.fasterxml.jackson210.databind.node.ObjectNode;
 import lombok.*;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.graphql.meta.annotation.DisplayName;
