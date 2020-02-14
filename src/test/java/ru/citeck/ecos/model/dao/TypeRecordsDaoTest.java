@@ -149,7 +149,7 @@ public class TypeRecordsDaoTest {
         Assert.assertEquals(resultRecordsQueryResult.getTotalCount(), 1);
         TypeRecordsDao.TypeRecord resultTypeRecord = resultRecordsQueryResult.getRecords().get(0);
         Assert.assertEquals(resultTypeRecord.getAttribute("name", metaField), new MLText("name"));
-        Assert.assertEquals(resultTypeRecord.getAttribute("description", metaField), "desc");
+        Assert.assertEquals(resultTypeRecord.getAttribute("description", metaField), new MLText("desc"));
         Assert.assertEquals(resultTypeRecord.getAttribute("tenant", metaField), "tenant");
         Assert.assertEquals(resultTypeRecord.getAttribute("extId", metaField), typeDto.getId());
         Assert.assertEquals(resultTypeRecord.getAttribute("inheritActions", metaField), typeDto.isInheritActions());
