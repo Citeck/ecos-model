@@ -14,7 +14,6 @@ import ru.citeck.ecos.apps.app.module.ModuleRef;
 import ru.citeck.ecos.model.dto.TypeAssociationDto;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.service.impl.TypeServiceImpl;
-import ru.citeck.ecos.records2.predicate.PredicateService;
 import ru.citeck.ecos.records2.predicate.PredicateServiceImpl;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
 import ru.citeck.ecos.records2.predicate.model.ValuePredicate;
@@ -67,7 +66,7 @@ public class TypeRecordsDaoTest {
 
         recordsQuery = new RecordsQuery();
         recordsQuery.setQuery("query");
-        recordsQuery.setLanguage(PredicateService.LANGUAGE_PREDICATE);
+        recordsQuery.setLanguage("query-lang");
 
         TypeAssociationDto associationDto = new TypeAssociationDto();
         associationDto.setId("association");
@@ -137,10 +136,10 @@ public class TypeRecordsDaoTest {
     void testQueryLocalRecords() {
 
         //  arrange
-        when(recordsQuery.getQuery(Predicate.class)).thenReturn(predicate);
         when(predicateService.filter(Mockito.any(RecordElements.class), Mockito.eq(predicate)))
             .thenReturn(Collections.singletonList(new RecordElement(recordsService, RecordRef.create("type", "type"))));
         when(typeService.getAll(Collections.singleton(typeDto.getId()))).thenReturn(Collections.singleton(typeDto));
+        when(typeService.getAll()).thenReturn(Collections.singleton(typeDto));
 
         //  act
         RecordsQueryResult<TypeRecordsDao.TypeRecord> resultRecordsQueryResult = typeRecordsDao.queryLocalRecords(recordsQuery, metaField);

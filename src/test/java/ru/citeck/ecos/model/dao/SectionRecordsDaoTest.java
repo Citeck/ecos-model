@@ -11,7 +11,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.model.dao.record.SectionRecord;
 import ru.citeck.ecos.model.dto.SectionDto;
 import ru.citeck.ecos.model.service.impl.SectionServiceImpl;
-import ru.citeck.ecos.records2.predicate.PredicateService;
 import ru.citeck.ecos.records2.predicate.PredicateServiceImpl;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
 import ru.citeck.ecos.records2.predicate.model.ValuePredicate;
@@ -64,7 +63,7 @@ public class SectionRecordsDaoTest {
 
         recordsQuery = new RecordsQuery();
         recordsQuery.setQuery("query");
-        recordsQuery.setLanguage(PredicateService.LANGUAGE_PREDICATE);
+        recordsQuery.setLanguage("query");
 
         types = Collections.singleton(
             RecordRef.create("type", "type")
@@ -123,10 +122,10 @@ public class SectionRecordsDaoTest {
     void testQueryLocalRecords() {
 
         //  arrange
-        when(recordsQuery.getQuery(Predicate.class)).thenReturn(predicate);
         when(predicateService.filter(Mockito.any(RecordElements.class), Mockito.eq(predicate)))
             .thenReturn(Collections.singletonList(new RecordElement(recordsService, RecordRef.create("", "section"))));
         when(sectionService.getAll(Collections.singleton(sectionDto.getId()))).thenReturn(Collections.singleton(sectionDto));
+        when(sectionService.getAll()).thenReturn(Collections.singleton(sectionDto));
 
         //  act
         RecordsQueryResult<SectionRecord> resultRecordsQueryResult = sectionRecordsDao.queryLocalRecords(recordsQuery, metaField);
