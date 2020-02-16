@@ -11,10 +11,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.model.dao.record.SectionRecord;
 import ru.citeck.ecos.model.dto.SectionDto;
 import ru.citeck.ecos.model.service.impl.SectionServiceImpl;
-import ru.citeck.ecos.predicate.PredicateService;
-import ru.citeck.ecos.predicate.PredicateServiceImpl;
-import ru.citeck.ecos.predicate.model.Predicate;
-import ru.citeck.ecos.predicate.model.ValuePredicate;
+import ru.citeck.ecos.records2.predicate.PredicateService;
+import ru.citeck.ecos.records2.predicate.PredicateServiceImpl;
+import ru.citeck.ecos.records2.predicate.model.Predicate;
+import ru.citeck.ecos.records2.predicate.model.ValuePredicate;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.RecordsService;
 import ru.citeck.ecos.records2.RecordsServiceFactory;
@@ -123,7 +123,7 @@ public class SectionRecordsDaoTest {
     void testQueryLocalRecords() {
 
         //  arrange
-        when(predicateService.readJson(recordsQuery.getQuery())).thenReturn(predicate);
+        when(recordsQuery.getQuery(Predicate.class)).thenReturn(predicate);
         when(predicateService.filter(Mockito.any(RecordElements.class), Mockito.eq(predicate)))
             .thenReturn(Collections.singletonList(new RecordElement(recordsService, RecordRef.create("", "section"))));
         when(sectionService.getAll(Collections.singleton(sectionDto.getId()))).thenReturn(Collections.singleton(sectionDto));
@@ -151,7 +151,6 @@ public class SectionRecordsDaoTest {
         RecordsQueryResult<SectionRecord> resultRecordsQueryResult = sectionRecordsDao.queryLocalRecords(recordsQuery, metaField);
 
         //  assert
-        Mockito.verify(predicateService, Mockito.times(0)).readJson(Mockito.anyString());
         Mockito.verify(predicateService, Mockito.times(0)).filter(Mockito.any(), Mockito.any());
         Mockito.verify(sectionService, Mockito.times(0)).getAll(Mockito.anySet());
         Assert.assertEquals(resultRecordsQueryResult.getTotalCount(), 1);

@@ -14,10 +14,10 @@ import ru.citeck.ecos.apps.app.module.ModuleRef;
 import ru.citeck.ecos.model.dto.TypeAssociationDto;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.service.impl.TypeServiceImpl;
-import ru.citeck.ecos.predicate.PredicateService;
-import ru.citeck.ecos.predicate.PredicateServiceImpl;
-import ru.citeck.ecos.predicate.model.Predicate;
-import ru.citeck.ecos.predicate.model.ValuePredicate;
+import ru.citeck.ecos.records2.predicate.PredicateService;
+import ru.citeck.ecos.records2.predicate.PredicateServiceImpl;
+import ru.citeck.ecos.records2.predicate.model.Predicate;
+import ru.citeck.ecos.records2.predicate.model.ValuePredicate;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.RecordsService;
 import ru.citeck.ecos.records2.RecordsServiceFactory;
@@ -137,7 +137,7 @@ public class TypeRecordsDaoTest {
     void testQueryLocalRecords() {
 
         //  arrange
-        when(predicateService.readJson(recordsQuery.getQuery())).thenReturn(predicate);
+        when(recordsQuery.getQuery(Predicate.class)).thenReturn(predicate);
         when(predicateService.filter(Mockito.any(RecordElements.class), Mockito.eq(predicate)))
             .thenReturn(Collections.singletonList(new RecordElement(recordsService, RecordRef.create("type", "type"))));
         when(typeService.getAll(Collections.singleton(typeDto.getId()))).thenReturn(Collections.singleton(typeDto));
@@ -169,7 +169,6 @@ public class TypeRecordsDaoTest {
         RecordsQueryResult<TypeRecordsDao.TypeRecord> resultRecordsQueryResult = typeRecordsDao.queryLocalRecords(recordsQuery, metaField);
 
         //  assert
-        Mockito.verify(predicateService, Mockito.times(0)).readJson(Mockito.anyString());
         Mockito.verify(predicateService, Mockito.times(0)).filter(Mockito.any(), Mockito.any());
         Mockito.verify(typeService, Mockito.times(0)).getAll(Mockito.anySet());
         Assert.assertEquals(resultRecordsQueryResult.getTotalCount(), 1);

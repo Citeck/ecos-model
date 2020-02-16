@@ -15,6 +15,8 @@ import ru.citeck.ecos.model.dto.SectionDto;
 import ru.citeck.ecos.model.repository.SectionRepository;
 import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
+import ru.citeck.ecos.records2.objdata.ObjectData;
+import ru.citeck.ecos.records2.utils.json.JsonUtils;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -48,7 +50,7 @@ public class SectionConverter extends AbstractDtoConverter<SectionDto, SectionEn
             Collections.emptySet() : typeRepository.findAllByExtIds(dtoTypesExtIds);
         sectionEntity.setTypes(storedTypes);
 
-        ObjectNode attributes = dto.getAttributes();
+        ObjectData attributes = dto.getAttributes();
         if (attributes != null) {
             sectionEntity.setAttributes(attributes.toString());
         }
@@ -75,14 +77,15 @@ public class SectionConverter extends AbstractDtoConverter<SectionDto, SectionEn
                 .collect(Collectors.toSet());
         }
 
-        ObjectNode attributes = null;
+        ObjectData attributes = null;
 
         String attributesStr = entity.getAttributes();
         if (StringUtils.isNotBlank(attributesStr)) {
             try {
-                attributes = (ObjectNode) objectMapper.readTree(attributesStr);
-            } catch (IOException ioe) {
-                log.error("Cannot deserialize attributes for section entity with id:" + entity.getId());
+                attributes = JsonUtils.read(attributesStr, ObjectData.class);
+            } catch (RuntimeException ioe) {
+                log.error("Cannot deserialize attributes for section entity with id: '"
+                    + entity.getId() + "' Str: " + attributesStr);
             }
         }
 

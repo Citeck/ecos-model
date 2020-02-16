@@ -9,6 +9,7 @@ import ru.citeck.ecos.apps.app.module.ModuleRef;
 import ru.citeck.ecos.apps.app.module.type.model.type.CreateVariantDto;
 import ru.citeck.ecos.model.dto.TypeCreateVariantDto;
 import ru.citeck.ecos.records2.RecordRef;
+import ru.citeck.ecos.records2.objdata.ObjectData;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +35,7 @@ public class CreateVariantConverterTest {
 
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("field", "value");
-        createVariantDto.setAttributes(attributes);
+        createVariantDto.setAttributes(new ObjectData(attributes));
 
         TypeCreateVariantDto typeCreateVariantDto = createVariantConverter.sourceToTarget(createVariantDto);
         Assert.assertEquals(typeCreateVariantDto.getId(), createVariantDto.getId());

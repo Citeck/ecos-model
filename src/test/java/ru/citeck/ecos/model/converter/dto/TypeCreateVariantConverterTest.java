@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.model.converter.dto.impl.TypeCreateVariantConverter;
 import ru.citeck.ecos.model.dto.TypeCreateVariantDto;
+import ru.citeck.ecos.records2.objdata.ObjectData;
 
 import java.io.IOException;
 import java.util.Map;
@@ -35,7 +36,7 @@ public class TypeCreateVariantConverterTest {
 
         Map<String, Object> atts = objectMapper.readValue("{\"key\":\"value\"}",
                                                           new TypeReference<Map<String, Object>>(){});
-        createVariantDto.setAttributes(atts);
+        createVariantDto.setAttributes(new ObjectData(atts));
         converter = new TypeCreateVariantConverter();
     }
 

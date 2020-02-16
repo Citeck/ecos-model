@@ -1,9 +1,9 @@
 package ru.citeck.ecos.model.dto;
 
-import ecos.com.fasterxml.jackson210.databind.node.ObjectNode;
 import lombok.*;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.graphql.meta.annotation.DisplayName;
+import ru.citeck.ecos.records2.objdata.ObjectData;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -19,7 +19,7 @@ public class SectionDto {
     private String tenant;
     private Set<RecordRef> types;
 
-    private ObjectNode attributes;
+    private ObjectData attributes;
 
     public SectionDto(SectionDto dto) {
         this.name = dto.name;

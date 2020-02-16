@@ -5,13 +5,13 @@ import org.springframework.stereotype.Component;
 import ru.citeck.ecos.model.dao.record.SectionRecord;
 import ru.citeck.ecos.model.dto.SectionDto;
 import ru.citeck.ecos.model.service.SectionService;
-import ru.citeck.ecos.predicate.Elements;
-import ru.citeck.ecos.predicate.PredicateService;
-import ru.citeck.ecos.predicate.model.Predicate;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
+import ru.citeck.ecos.records2.predicate.Elements;
+import ru.citeck.ecos.records2.predicate.PredicateService;
 import ru.citeck.ecos.records2.predicate.RecordElement;
 import ru.citeck.ecos.records2.predicate.RecordElements;
+import ru.citeck.ecos.records2.predicate.model.Predicate;
 import ru.citeck.ecos.records2.request.query.RecordsQuery;
 import ru.citeck.ecos.records2.request.query.RecordsQueryResult;
 import ru.citeck.ecos.records2.source.dao.local.LocalRecordsDAO;
@@ -60,7 +60,7 @@ public class SectionRecordsDao extends LocalRecordsDAO
         RecordsQueryResult<SectionRecord> result = new RecordsQueryResult<>();
 
         if (recordsQuery.getLanguage().equals(PredicateService.LANGUAGE_PREDICATE)) {
-            Predicate predicate = predicateService.readJson(recordsQuery.getQuery());
+            Predicate predicate = recordsQuery.getQuery(Predicate.class);
 
             recordsQuery.setSourceId(ID);
             recordsQuery.setLanguage(LANGUAGE_EMPTY);

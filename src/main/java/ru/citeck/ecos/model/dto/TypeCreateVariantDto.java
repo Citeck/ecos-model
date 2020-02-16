@@ -1,8 +1,7 @@
 package ru.citeck.ecos.model.dto;
 
 import lombok.Data;
-
-import java.util.Map;
+import ru.citeck.ecos.records2.objdata.ObjectData;
 
 @Data
 public class TypeCreateVariantDto {
@@ -11,5 +10,5 @@ public class TypeCreateVariantDto {
     private String name;
     private String formRef;
     private String recordRef;
-    private Map<String, Object> attributes;
+    private ObjectData attributes;
 }

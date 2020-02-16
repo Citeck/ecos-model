@@ -11,7 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.citeck.ecos.model.EcosModelApp;
 import ru.citeck.ecos.records2.request.rest.RestHandler;
-import ru.citeck.ecos.records2.spring.RecordsRestApi;
+import ru.citeck.ecos.records2.spring.web.rest.RecordsRestApi;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;

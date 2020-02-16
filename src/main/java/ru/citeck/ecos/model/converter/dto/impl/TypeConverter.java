@@ -8,6 +8,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
+import ru.citeck.ecos.records2.objdata.ObjectData;
 import ru.citeck.ecos.records2.scalar.MLText;
 import ru.citeck.ecos.apps.app.module.ModuleRef;
 import ru.citeck.ecos.model.converter.dto.AbstractDtoConverter;
@@ -22,6 +23,7 @@ import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.model.utils.JsonUtil;
 import ru.citeck.ecos.records2.RecordRef;
+import ru.citeck.ecos.records2.utils.json.JsonUtils;
 
 import java.io.IOException;
 import java.util.*;
@@ -73,7 +75,7 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
         typeEntity.setTenant(dto.getTenant());
         typeEntity.setInheritActions(dto.isInheritActions());
 
-        ObjectNode attributes = dto.getAttributes();
+        ObjectData attributes = dto.getAttributes();
         if (attributes != null) {
             typeEntity.setAttributes(attributes.toString());
         }
@@ -151,7 +153,6 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
         return null;
     }
 
-
     @Override
     public TypeDto entityToDto(TypeEntity entity) {
 
@@ -167,10 +168,10 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
         String attributesStr = entity.getAttributes();
         if (StringUtils.isNotBlank(attributesStr)) {
             try {
-                ObjectNode attributes = (ObjectNode) objectMapper.readTree(attributesStr);
-                dto.setAttributes(attributes);
-            } catch (IOException ioe) {
-                log.error("Cannot deserialize attributes for type entity with id:" + entity.getId());
+                dto.setAttributes(JsonUtils.read(attributesStr, ObjectData.class));
+            } catch (RuntimeException ioe) {
+                log.error("Cannot deserialize attributes for type entity with id: '"
+                    + entity.getId() + "' Str: " + attributesStr);
             }
         }
 

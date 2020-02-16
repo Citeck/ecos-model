@@ -1,7 +1,7 @@
 package ru.citeck.ecos.model.converter.module;
 
-import ecos.com.fasterxml.jackson210.databind.ObjectMapper;
-import ecos.com.fasterxml.jackson210.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import ru.citeck.ecos.records2.objdata.ObjectData;
 import ru.citeck.ecos.records2.scalar.MLText;
 import ru.citeck.ecos.apps.app.module.ModuleRef;
 import ru.citeck.ecos.apps.app.module.type.model.type.AssociationDto;
@@ -62,7 +63,7 @@ public class TypeModuleConverterTest {
             objectNode.put("field", "value");
         } catch (Exception ignored) { }
 
-        typeModule.setAttributes(objectNode);
+        typeModule.setAttributes(new ObjectData(objectNode));
 
         CreateVariantDto createVariantDto = new CreateVariantDto();
         createVariantDto.setId("variantId");

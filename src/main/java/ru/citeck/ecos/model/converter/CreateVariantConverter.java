@@ -32,7 +32,7 @@ public class CreateVariantConverter implements Converter<CreateVariantDto, TypeC
         }
 
         if (variantDto.getAttributes() != null) {
-            localDto.setAttributes(new HashMap<>(variantDto.getAttributes()));
+            localDto.setAttributes(variantDto.getAttributes());
         }
 
         return localDto;

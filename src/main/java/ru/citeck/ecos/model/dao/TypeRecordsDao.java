@@ -1,12 +1,14 @@
 package ru.citeck.ecos.model.dao;
 
 import ecos.com.fasterxml.jackson210.core.JsonProcessingException;
-import ecos.com.fasterxml.jackson210.databind.JsonNode;
-import ecos.com.fasterxml.jackson210.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import ru.citeck.ecos.records2.objdata.DataValue;
+import ru.citeck.ecos.records2.predicate.Elements;
+import ru.citeck.ecos.records2.predicate.PredicateService;
+import ru.citeck.ecos.records2.predicate.model.Predicate;
 import ru.citeck.ecos.records2.scalar.MLText;
 import ru.citeck.ecos.apps.app.module.EappsModuleService;
 import ru.citeck.ecos.apps.app.module.ModuleRef;
@@ -14,9 +16,6 @@ import ru.citeck.ecos.apps.app.module.type.form.FormModule;
 import ru.citeck.ecos.model.dto.TypeAssociationDto;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.service.TypeService;
-import ru.citeck.ecos.predicate.Elements;
-import ru.citeck.ecos.predicate.PredicateService;
-import ru.citeck.ecos.predicate.model.Predicate;
 import ru.citeck.ecos.records2.RecordConstants;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.RecordsService;
@@ -29,6 +28,7 @@ import ru.citeck.ecos.records2.request.query.RecordsQueryResult;
 import ru.citeck.ecos.records2.source.dao.local.LocalRecordsDAO;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsMetaDAO;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsQueryWithMetaDAO;
+import ru.citeck.ecos.records2.utils.json.JsonUtils;
 
 import java.util.*;
 import java.util.function.Function;
@@ -42,7 +42,6 @@ public class TypeRecordsDao extends LocalRecordsDAO
 
     private static final String LANGUAGE_EMPTY = "";
     private static final String TYPE_ACTIONS_WITH_INHERIT_ATT_JSON = "_actions[]?json";
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final String UISERV_EFORM_PREFIX = "uiserv/eform@";
 
     private final TypeRecord EMPTY_RECORD = new TypeRecord(new TypeDto());
@@ -83,7 +82,8 @@ public class TypeRecordsDao extends LocalRecordsDAO
         RecordsQueryResult<TypeRecord> result = new RecordsQueryResult<>();
 
         if (recordsQuery.getLanguage().equals(PredicateService.LANGUAGE_PREDICATE)) {
-            Predicate predicate = predicateService.readJson(recordsQuery.getQuery());
+
+            Predicate predicate = recordsQuery.getQuery(Predicate.class);
 
             recordsQuery.setSourceId(ID);
             recordsQuery.setLanguage(LANGUAGE_EMPTY);
@@ -234,9 +234,9 @@ public class TypeRecordsDao extends LocalRecordsDAO
         }
 
         RecordRef parent = dto.getParent();
-        JsonNode actionsNode = recordsService.getAttribute(parent, TYPE_ACTIONS_WITH_INHERIT_ATT_JSON);
+        DataValue actionsNode = recordsService.getAttribute(parent, TYPE_ACTIONS_WITH_INHERIT_ATT_JSON);
 
-        if (actionsNode == null || actionsNode.isNull() || actionsNode.isMissingNode()) {
+        if (actionsNode == null || actionsNode.isNull()) {
             return dto.getActions();
         }
 
@@ -247,18 +247,18 @@ public class TypeRecordsDao extends LocalRecordsDAO
         if (actionsNode.isArray()) {
             ModuleRef[] actionsFromParent;
             try {
-                actionsFromParent = OBJECT_MAPPER.treeToValue(actionsNode, ModuleRef[].class);
+                actionsFromParent = JsonUtils.convert(actionsNode, ModuleRef[].class);
                 for (ModuleRef actionDto : actionsFromParent) {
                     actionDtoMap.putIfAbsent(actionDto.getId(), actionDto);
                 }
-            } catch (JsonProcessingException e) {
+            } catch (RuntimeException e) {
                 throw new RuntimeException("Can not parse actions from parent", e);
             }
         } else {
             try {
-                ModuleRef actionFromParent = OBJECT_MAPPER.treeToValue(actionsNode, ModuleRef.class);
+                ModuleRef actionFromParent = JsonUtils.convert(actionsNode, ModuleRef.class);
                 actionDtoMap.putIfAbsent(actionFromParent.getId(), actionFromParent);
-            } catch (JsonProcessingException e) {
+            } catch (RuntimeException e) {
                 throw new RuntimeException("Can not parse action from parent", e);
             }
         }

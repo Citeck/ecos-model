@@ -1,11 +1,11 @@
 package ru.citeck.ecos.model.dto;
 
-import ecos.com.fasterxml.jackson210.databind.node.ObjectNode;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.citeck.ecos.apps.app.module.ModuleRef;
 import ru.citeck.ecos.records2.RecordRef;
+import ru.citeck.ecos.records2.objdata.ObjectData;
 import ru.citeck.ecos.records2.scalar.MLText;
 
 import java.util.Collections;
@@ -26,7 +26,7 @@ public class TypeDto {
     private Set<TypeAssociationDto> associations = new HashSet<>();
     private Set<ModuleRef> actions = new HashSet<>();
     private boolean inheritActions;
-    private ObjectNode attributes;
+    private ObjectData attributes;
     private Set<TypeCreateVariantDto> createVariants = new HashSet<>();
 
     public TypeDto(TypeDto dto) {
