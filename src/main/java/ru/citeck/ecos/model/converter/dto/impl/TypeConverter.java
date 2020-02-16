@@ -21,7 +21,6 @@ import ru.citeck.ecos.model.dto.TypeAssociationDto;
 import ru.citeck.ecos.model.dto.TypeCreateVariantDto;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.repository.TypeRepository;
-import ru.citeck.ecos.model.utils.JsonUtil;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.utils.json.JsonUtils;
 
@@ -67,10 +66,10 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
             typeEntity.setExtId(typeDtoId);
         }
         if (dto.getName() != null) {
-            typeEntity.setName(JsonUtil.safeWriteValueAsJsonString(dto.getName()));
+            typeEntity.setName(JsonUtils.toString(dto.getName()));
         }
         if (dto.getDescription() != null) {
-            typeEntity.setDescription(JsonUtil.safeWriteValueAsJsonString(dto.getDescription()));
+            typeEntity.setDescription(JsonUtils.toString(dto.getDescription()));
         }
         typeEntity.setTenant(dto.getTenant());
         typeEntity.setInheritActions(dto.isInheritActions());
@@ -159,8 +158,8 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
         TypeDto dto = new TypeDto();
 
         dto.setId(entity.getExtId());
-        dto.setName(JsonUtil.safeReadJsonValue(entity.getName(), MLText.class));
-        dto.setDescription(JsonUtil.safeReadJsonValue(entity.getDescription(), MLText.class));
+        dto.setName(JsonUtils.read(entity.getName(), MLText.class));
+        dto.setDescription(JsonUtils.read(entity.getDescription(), MLText.class));
         dto.setInheritActions(entity.isInheritActions());
         dto.setTenant(entity.getTenant());
         dto.setForm(entity.getForm());

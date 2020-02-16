@@ -12,8 +12,8 @@ import ru.citeck.ecos.model.dao.TypeRecordsDao;
 import ru.citeck.ecos.model.domain.AssociationEntity;
 import ru.citeck.ecos.model.domain.TypeEntity;
 import ru.citeck.ecos.model.dto.TypeAssociationDto;
-import ru.citeck.ecos.model.utils.JsonUtil;
 import ru.citeck.ecos.records2.RecordRef;
+import ru.citeck.ecos.records2.utils.json.JsonUtils;
 
 import java.util.UUID;
 
@@ -60,7 +60,7 @@ public class TypeAssociationConverterTest {
 
         //  assert
         Assert.assertEquals(dto.getId(), resultEntity.getExtId());
-        Assert.assertEquals(dto.getName(), JsonUtil.safeReadJsonValue(resultEntity.getName(), MLText.class));
+        Assert.assertEquals(dto.getName(), JsonUtils.read(resultEntity.getName(), MLText.class));
         Assert.assertEquals(dto.getDirection(), resultEntity.getDirection());
     }
 
@@ -74,7 +74,7 @@ public class TypeAssociationConverterTest {
         AssociationEntity resultEntity = typeAssociationConverter.dtoToEntity(dto);
 
         //  assert
-        Assert.assertEquals(dto.getName(), JsonUtil.safeReadJsonValue(resultEntity.getName(), MLText.class));
+        Assert.assertEquals(dto.getName(), JsonUtils.read(resultEntity.getName(), MLText.class));
         Assert.assertEquals(dto.getDirection(), resultEntity.getDirection());
 
         // check that id it is generated UUID
@@ -90,7 +90,7 @@ public class TypeAssociationConverterTest {
         //  assert
         Assert.assertEquals(resultDto.getId(), entity.getExtId());
         Assert.assertEquals(resultDto.getDirection(), entity.getDirection());
-        Assert.assertEquals(resultDto.getName(), JsonUtil.safeReadJsonValue(entity.getName(), MLText.class));
+        Assert.assertEquals(resultDto.getName(), JsonUtils.read(entity.getName(), MLText.class));
         Assert.assertEquals(resultDto.getTargetType().getId(), entity.getTarget().getExtId());
     }
 }

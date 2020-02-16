@@ -21,8 +21,8 @@ import ru.citeck.ecos.model.dto.TypeAssociationDto;
 import ru.citeck.ecos.model.dto.TypeCreateVariantDto;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.repository.TypeRepository;
-import ru.citeck.ecos.model.utils.JsonUtil;
 import ru.citeck.ecos.records2.RecordRef;
+import ru.citeck.ecos.records2.utils.json.JsonUtils;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -134,8 +134,8 @@ public class TypeConverterTest {
 
         //  assert
         Assert.assertEquals(resultDto.getId(), typeEntity.getExtId());
-        Assert.assertEquals(resultDto.getName(), JsonUtil.safeReadJsonValue(typeEntity.getName(), MLText.class));
-        Assert.assertEquals(resultDto.getDescription(), JsonUtil.safeReadJsonValue(typeEntity.getDescription(), MLText.class));
+        Assert.assertEquals(resultDto.getName(), JsonUtils.read(typeEntity.getName(), MLText.class));
+        Assert.assertEquals(resultDto.getDescription(), JsonUtils.read(typeEntity.getDescription(), MLText.class));
         Assert.assertEquals(resultDto.getTenant(), typeEntity.getTenant());
         Assert.assertEquals(resultDto.getParent(), RecordRef.create("emodel", "type", parent.getExtId()));
         Assert.assertEquals(resultDto.getActions(), Collections.singleton(actionRef));
@@ -159,8 +159,8 @@ public class TypeConverterTest {
 
         //  assert
         Assert.assertEquals(resultDto.getId(), typeEntity.getExtId());
-        Assert.assertEquals(resultDto.getName(), JsonUtil.safeReadJsonValue(typeEntity.getName(), MLText.class));
-        Assert.assertEquals(resultDto.getDescription(), JsonUtil.safeReadJsonValue(typeEntity.getDescription(), MLText.class));
+        Assert.assertEquals(resultDto.getName(), JsonUtils.read(typeEntity.getName(), MLText.class));
+        Assert.assertEquals(resultDto.getDescription(), JsonUtils.read(typeEntity.getDescription(), MLText.class));
         Assert.assertEquals(resultDto.getTenant(), typeEntity.getTenant());
         Assert.assertNull(resultDto.getAttributes());
         Assert.assertEquals(resultDto.getCreateVariants(), Collections.emptySet());
@@ -184,8 +184,8 @@ public class TypeConverterTest {
         //  assert
         Assert.assertEquals(resultEntity.getExtId(), typeDto.getId());
         Assert.assertEquals(resultEntity.getId().longValue(), 123L);
-        Assert.assertEquals(JsonUtil.safeReadJsonValue(resultEntity.getName(), MLText.class), typeDto.getName());
-        Assert.assertEquals(JsonUtil.safeReadJsonValue(resultEntity.getDescription(), MLText.class), typeDto.getDescription());
+        Assert.assertEquals(JsonUtils.read(resultEntity.getName(), MLText.class), typeDto.getName());
+        Assert.assertEquals(JsonUtils.read(resultEntity.getDescription(), MLText.class), typeDto.getDescription());
         Assert.assertEquals(resultEntity.getTenant(), typeDto.getTenant());
         Assert.assertEquals(resultEntity.getAssocsToOthers(), Collections.emptySet());
         Assert.assertEquals(resultEntity.getActions(), Collections.singletonList(actionEntity));
@@ -207,8 +207,8 @@ public class TypeConverterTest {
         TypeEntity resultEntity = typeConverter.sourceToTarget(typeDto);
 
         //  assert
-        Assert.assertEquals(JsonUtil.safeReadJsonValue(resultEntity.getName(), MLText.class), typeDto.getName());
-        Assert.assertEquals(JsonUtil.safeReadJsonValue(resultEntity.getDescription(), MLText.class), typeDto.getDescription());
+        Assert.assertEquals(JsonUtils.read(resultEntity.getName(), MLText.class), typeDto.getName());
+        Assert.assertEquals(JsonUtils.read(resultEntity.getDescription(), MLText.class), typeDto.getDescription());
         Assert.assertEquals(resultEntity.getTenant(), typeDto.getTenant());
         Assert.assertEquals(resultEntity.getChildren(), Collections.emptySet());
         Assert.assertEquals(resultEntity.getSections(), Collections.emptySet());

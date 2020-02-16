@@ -43,7 +43,7 @@ public class CreateVariantConverterTest {
         Assert.assertEquals(typeCreateVariantDto.getRecordRef(), createVariantDto.getRecordRef().toString());
         Assert.assertEquals(typeCreateVariantDto.getFormRef(), createVariantDto.getFormRef().toString());
 
-        Assert.assertEquals(typeCreateVariantDto.getAttributes(), attributes);
+        Assert.assertEquals(typeCreateVariantDto.getAttributes(), new ObjectData(attributes));
         Assert.assertNotSame(typeCreateVariantDto.getAttributes(), attributes);
     }
 

@@ -19,8 +19,8 @@ import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.model.service.exception.ForgottenChildsException;
 import ru.citeck.ecos.model.service.impl.TypeServiceImpl;
-import ru.citeck.ecos.model.utils.JsonUtil;
 import ru.citeck.ecos.records2.RecordRef;
+import ru.citeck.ecos.records2.utils.json.JsonUtils;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -115,8 +115,8 @@ public class TypeServiceImplTest {
         Assert.assertEquals(resultTypeDtos.size(), 1);
         TypeDto resultTypeDto = resultTypeDtos.iterator().next();
         Assert.assertEquals(resultTypeDto.getId(), typeEntity.getExtId());
-        Assert.assertEquals(resultTypeDto.getName(), JsonUtil.safeReadJsonValue(typeEntity.getName(), MLText.class));
-        Assert.assertEquals(resultTypeDto.getDescription(), JsonUtil.safeReadJsonValue(typeEntity.getDescription(), MLText.class));
+        Assert.assertEquals(resultTypeDto.getName(), JsonUtils.read(typeEntity.getName(), MLText.class));
+        Assert.assertEquals(resultTypeDto.getDescription(), JsonUtils.read(typeEntity.getDescription(), MLText.class));
         Assert.assertEquals(resultTypeDto.getTenant(), typeEntity.getTenant());
         Assert.assertEquals(resultTypeDto.getAssociations(), Collections.singleton(associationDto));
         Assert.assertEquals(resultTypeDto.getActions(), Collections.singleton(actionRef));
@@ -138,8 +138,8 @@ public class TypeServiceImplTest {
         Assert.assertEquals(resultTypeDtos.size(), 1);
         TypeDto resultTypeDto = resultTypeDtos.iterator().next();
         Assert.assertEquals(resultTypeDto.getId(), typeEntity.getExtId());
-        Assert.assertEquals(resultTypeDto.getName(), JsonUtil.safeReadJsonValue(typeEntity.getName(), MLText.class));
-        Assert.assertEquals(resultTypeDto.getDescription(), JsonUtil.safeReadJsonValue(typeEntity.getDescription(), MLText.class));
+        Assert.assertEquals(resultTypeDto.getName(), JsonUtils.read(typeEntity.getName(), MLText.class));
+        Assert.assertEquals(resultTypeDto.getDescription(), JsonUtils.read(typeEntity.getDescription(), MLText.class));
         Assert.assertEquals(resultTypeDto.getTenant(), typeEntity.getTenant());
         Assert.assertEquals(resultTypeDto.getAssociations(), Collections.singleton(associationDto));
         Assert.assertEquals(resultTypeDto.getActions(), Collections.singleton(actionRef));
@@ -158,8 +158,8 @@ public class TypeServiceImplTest {
 
         //  assert
         Assert.assertEquals(resultTypeDto.getId(), typeEntity.getExtId());
-        Assert.assertEquals(resultTypeDto.getName(), JsonUtil.safeReadJsonValue(typeEntity.getName(), MLText.class));
-        Assert.assertEquals(resultTypeDto.getDescription(), JsonUtil.safeReadJsonValue(typeEntity.getDescription(), MLText.class));
+        Assert.assertEquals(resultTypeDto.getName(), JsonUtils.read(typeEntity.getName(), MLText.class));
+        Assert.assertEquals(resultTypeDto.getDescription(), JsonUtils.read(typeEntity.getDescription(), MLText.class));
         Assert.assertEquals(resultTypeDto.getTenant(), typeEntity.getTenant());
         Assert.assertEquals(resultTypeDto.getAssociations(), Collections.singleton(associationDto));
         Assert.assertEquals(resultTypeDto.getActions(), Collections.singleton(actionRef));
