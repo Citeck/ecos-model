@@ -1,6 +1,5 @@
 package ru.citeck.ecos.model.dao;
 
-import ecos.com.fasterxml.jackson210.core.JsonProcessingException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -152,6 +151,11 @@ public class TypeRecordsDao extends LocalRecordsDAO
                 case "parent":
                 case RecordConstants.ATT_PARENT:
                     return dto.getParent();
+                case "parents":
+                    return typeService.getParents(dto.getId())
+                        .stream()
+                        .map(dto -> RecordRef.create("emodel", ID, dto.getId()))
+                        .collect(Collectors.toList());
                 case "actions":
                     return dto.getActions();
                 case RecordConstants.ATT_ACTIONS:
@@ -175,6 +179,10 @@ public class TypeRecordsDao extends LocalRecordsDAO
                     return dto.getAttributes();
                 case "createVariants":
                     return dto.getCreateVariants();
+                case "dashboardType":
+                    return dto.getDashboardType();
+                case "isSystem":
+                    return dto.isSystem();
             }
             return null;
         }
@@ -265,5 +273,4 @@ public class TypeRecordsDao extends LocalRecordsDAO
 
         return new HashSet<>(actionDtoMap.values());
     }
-
 }

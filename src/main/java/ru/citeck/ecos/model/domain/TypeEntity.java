@@ -39,6 +39,10 @@ public class TypeEntity {
 
     private String attributes;
 
+    private Boolean system;
+
+    private String dashboardType;
+
     @Column(name = "create_variants")
     private String createVariants;
 

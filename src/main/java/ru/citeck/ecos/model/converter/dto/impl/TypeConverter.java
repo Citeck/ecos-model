@@ -2,7 +2,6 @@ package ru.citeck.ecos.model.converter.dto.impl;
 
 import ecos.com.fasterxml.jackson210.core.JsonProcessingException;
 import ecos.com.fasterxml.jackson210.databind.ObjectMapper;
-import ecos.com.fasterxml.jackson210.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -58,6 +57,9 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
     public TypeEntity dtoToEntity(TypeDto dto) {
 
         TypeEntity typeEntity = new TypeEntity();
+
+        typeEntity.setSystem(dto.isSystem());
+        typeEntity.setDashboardType(dto.getDashboardType());
 
         String typeDtoId = dto.getId();
         if (Strings.isBlank(typeDtoId)) {
@@ -157,6 +159,8 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
 
         TypeDto dto = new TypeDto();
 
+        dto.setSystem(Boolean.TRUE.equals(entity.getSystem()));
+        dto.setDashboardType(entity.getDashboardType());
         dto.setId(entity.getExtId());
         dto.setName(JsonUtils.read(entity.getName(), MLText.class));
         dto.setDescription(JsonUtils.read(entity.getDescription(), MLText.class));

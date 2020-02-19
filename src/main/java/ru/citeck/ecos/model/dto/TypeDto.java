@@ -23,6 +23,9 @@ public class TypeDto {
     private String tenant;
     private RecordRef parent;
     private String form;
+    private boolean system;
+    private String dashboardType;
+
     private Set<TypeAssociationDto> associations = new HashSet<>();
     private Set<ModuleRef> actions = new HashSet<>();
     private boolean inheritActions;

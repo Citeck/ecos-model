@@ -11,8 +11,11 @@ import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.model.service.AssociationService;
 import ru.citeck.ecos.model.service.TypeService;
 import ru.citeck.ecos.model.service.exception.ForgottenChildsException;
+import ru.citeck.ecos.records2.RecordRef;
 import springfox.documentation.annotations.Cacheable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -30,6 +33,29 @@ public class TypeServiceImpl implements TypeService {
         return typeRepository.findAll().stream()
             .map(typeConverter::entityToDto)
             .collect(Collectors.toSet());
+    }
+
+    @Override
+    public List<TypeDto> getParents(String extId) {
+
+        List<TypeDto> result = new ArrayList<>();
+        TypeDto type = getByExtId(extId);
+
+        while (type != null) {
+
+            RecordRef parentRef = type.getParent();
+
+            if (parentRef != null) {
+                type = getByExtId(parentRef.getId());
+                if (type != null) {
+                    result.add(type);
+                }
+            } else {
+                type = null;
+            }
+        }
+
+        return result;
     }
 
     @Override
