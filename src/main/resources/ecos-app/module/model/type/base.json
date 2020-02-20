@@ -1,6 +1,7 @@
 {
     "id": "base",
     "name": "Базовый тип",
+    "dashboardType": "case-details",
     "actions": [
         "ui/action$edit",
         "ui/action$content-download",
@@ -15,10 +16,6 @@
             "target": "model/type$base"
         }
     ],
-    "attributes": {
-        "key":"value",
-        "key2":"value2"
-    },
     "createVariants": [
         {
             "id": "id1",

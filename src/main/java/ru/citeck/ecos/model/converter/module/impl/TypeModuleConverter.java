@@ -46,6 +46,7 @@ public class TypeModuleConverter extends AbstractModuleConverter<TypeModule, Typ
         typeDto.setTenant(Strings.EMPTY);
         typeDto.setInheritActions(typeModule.isInheritActions());
         typeDto.setAttributes(typeModule.getAttributes());
+        typeDto.setDashboardType(typeModule.getDashboardType());
 
         ModuleRef formModuleRef = typeModule.getForm();
         if (formModuleRef != null) {

@@ -2,6 +2,7 @@ package ru.citeck.ecos.model.service.impl;
 
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.citeck.ecos.model.converter.dto.DtoConverter;
@@ -18,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -36,10 +39,39 @@ public class TypeServiceImpl implements TypeService {
     }
 
     @Override
+    public String getDashboardType(String extId) {
+
+        AtomicReference<String> result = new AtomicReference<>();
+
+        forEachTypeInHierarchy(extId, type -> {
+            if (StringUtils.isNotBlank(type.getDashboardType())) {
+                result.set(type.getDashboardType());
+                return true;
+            }
+            return false;
+        });
+
+        return result.get();
+    }
+
+    @Override
     public List<TypeDto> getParents(String extId) {
 
         List<TypeDto> result = new ArrayList<>();
+        forEachTypeInHierarchy(extId, type -> {
+            result.add(type);
+            return false;
+        });
+
+        return result;
+    }
+
+    private void forEachTypeInHierarchy(String extId, Function<TypeDto, Boolean> action) {
+
         TypeDto type = getByExtId(extId);
+        if (action.apply(type)) {
+            return;
+        }
 
         while (type != null) {
 
@@ -48,14 +80,14 @@ public class TypeServiceImpl implements TypeService {
             if (parentRef != null) {
                 type = getByExtId(parentRef.getId());
                 if (type != null) {
-                    result.add(type);
+                    if (action.apply(type)) {
+                        return;
+                    }
                 }
             } else {
                 type = null;
             }
         }
-
-        return result;
     }
 
     @Override

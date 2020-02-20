@@ -15,6 +15,8 @@ public interface TypeService {
 
     List<TypeDto> getParents(String extId);
 
+    String getDashboardType(String extId);
+
     void delete(String extId);
 
     TypeDto save(TypeDto dto);
