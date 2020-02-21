@@ -92,6 +92,7 @@ public class TypeRecordsDaoTest {
 
         //  arrange
         when(typeService.getByExtId(typeDto.getId())).thenReturn(typeDto);
+        when(typeService.getOrCreateByExtId(typeDto.getId())).thenReturn(typeDto);
 
         //  act
         List<TypeRecordsDao.TypeRecord> resultTypeRecords = typeRecordsDao.getLocalRecordsMeta(recordRefs, Mockito.any());
