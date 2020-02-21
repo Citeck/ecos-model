@@ -130,7 +130,7 @@ public class TypeServiceImpl implements TypeService {
             ObjectData data = JsonUtils.convert(newType, ObjectData.class);
             data.set("module_id", extId);
 
-            RecordMeta meta = new RecordMeta(RecordRef.create("eapps", "module", "type$"));
+            RecordMeta meta = new RecordMeta(RecordRef.create("eapps", "module", "model/type$"));
             meta.setAttributes(data);
 
             recordsService.mutate(meta);
