@@ -13,6 +13,8 @@ public interface TypeService {
 
     TypeDto getByExtId(String extId);
 
+    TypeDto getOrCreateByExtId(String extId);
+
     List<TypeDto> getParents(String extId);
 
     String getDashboardType(String extId);

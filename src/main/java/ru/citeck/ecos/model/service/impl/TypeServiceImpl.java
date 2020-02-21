@@ -13,6 +13,7 @@ import ru.citeck.ecos.model.service.AssociationService;
 import ru.citeck.ecos.model.service.TypeService;
 import ru.citeck.ecos.model.service.exception.ForgottenChildsException;
 import ru.citeck.ecos.records2.RecordRef;
+import ru.citeck.ecos.records2.scalar.MLText;
 import springfox.documentation.annotations.Cacheable;
 
 import java.util.ArrayList;
@@ -101,6 +102,33 @@ public class TypeServiceImpl implements TypeService {
     public TypeDto getByExtId(String extId) {
         return typeRepository.findByExtId(extId).map(typeConverter::entityToDto)
             .orElseThrow(() -> new IllegalArgumentException("Type doesnt exists: " + extId));
+    }
+
+    @Override
+    public TypeDto getOrCreateByExtId(String extId) {
+
+        Optional<TypeEntity> byExtId = typeRepository.findByExtId(extId);
+
+        return byExtId.map(typeConverter::entityToDto)
+            .orElseGet(() -> {
+
+            if ("base".equals(extId)) {
+                throw new IllegalStateException("Base type doesn't exists!");
+            }
+
+            TypeDto newType = new TypeDto();
+            newType.setId(extId);
+            newType.setInheritActions(true);
+            newType.setName(new MLText(extId));
+
+            return save(newType);
+        });
+    }
+
+    public TypeDto getBaseType() {
+        return typeRepository.findByExtId("base")
+            .map(typeConverter::entityToDto)
+            .orElseThrow(() -> new IllegalArgumentException("Base type doesn't exists"));
     }
 
     @Override
