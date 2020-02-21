@@ -66,12 +66,13 @@ public class TypeRecordsDao extends LocalRecordsDAO
 
     @Override
     public List<TypeRecord> getLocalRecordsMeta(List<RecordRef> list, MetaField metaField) {
+
         if (list.size() == 1 && list.get(0).getId().isEmpty()) {
             return Collections.singletonList(EMPTY_RECORD);
         }
 
         return list.stream()
-            .map(ref -> new TypeRecord(typeService.getByExtId(ref.getId())))
+            .map(ref -> new TypeRecord(typeService.getOrCreateByExtId(ref.getId())))
             .collect(Collectors.toList());
     }
 

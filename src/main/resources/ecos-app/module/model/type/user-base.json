@@ -1,5 +1,8 @@
 {
     "id": "user-base",
-    "name": "Базовый тип",
+    "name": {
+        "ru": "Базовый пользовательский тип",
+        "en": "Base user type"
+    },
     "inheritActions": true
 }
