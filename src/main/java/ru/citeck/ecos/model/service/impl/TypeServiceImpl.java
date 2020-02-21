@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.citeck.ecos.model.converter.dto.DtoConverter;
+import ru.citeck.ecos.model.dao.TypeRecordsDao;
 import ru.citeck.ecos.model.domain.TypeEntity;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.repository.TypeRepository;
@@ -112,12 +113,13 @@ public class TypeServiceImpl implements TypeService {
         return byExtId.map(typeConverter::entityToDto)
             .orElseGet(() -> {
 
-            if ("base".equals(extId)) {
+            if ("base".equals(extId) || "user-base".equals(extId)) {
                 throw new IllegalStateException("Base type doesn't exists!");
             }
 
             TypeDto newType = new TypeDto();
             newType.setId(extId);
+            newType.setParent(RecordRef.create("emodel", TypeRecordsDao.ID, "user-base"));
             newType.setInheritActions(true);
             newType.setName(new MLText(extId));
 
