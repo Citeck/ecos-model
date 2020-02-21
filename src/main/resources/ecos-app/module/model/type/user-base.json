@@ -1,0 +1,5 @@
+{
+    "id": "user-base",
+    "name": "Базовый тип",
+    "inheritActions": true
+}
