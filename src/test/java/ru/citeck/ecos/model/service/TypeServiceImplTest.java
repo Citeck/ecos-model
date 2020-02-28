@@ -7,6 +7,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import ru.citeck.ecos.model.converter.module.impl.TypeModuleConverter;
+import ru.citeck.ecos.records2.RecordsService;
 import ru.citeck.ecos.records2.scalar.MLText;
 import ru.citeck.ecos.apps.app.module.ModuleRef;
 import ru.citeck.ecos.model.converter.dto.impl.TypeConverter;
@@ -40,6 +42,12 @@ public class TypeServiceImplTest {
     @Mock
     private TypeConverter typeConverter;
 
+    @Mock
+    private TypeModuleConverter moduleConverter;
+
+    @Mock
+    private RecordsService recordsService;
+
     private TypeServiceImpl typeService;
 
     private TypeEntity typeEntity;
@@ -53,7 +61,13 @@ public class TypeServiceImplTest {
     @BeforeEach
     void init() {
 
-        typeService = new TypeServiceImpl(typeRepository, associationService, typeConverter);
+        typeService = new TypeServiceImpl(
+            typeRepository,
+            associationService,
+            typeConverter,
+            moduleConverter,
+            recordsService
+        );
 
         typeExtId = "type";
 
