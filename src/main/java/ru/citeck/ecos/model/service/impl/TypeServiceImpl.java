@@ -31,7 +31,7 @@ public class TypeServiceImpl implements TypeService {
     private final AssociationService associationService;
     private final DtoConverter<TypeDto, TypeEntity> typeConverter;
 
-    private Consumer<TypeDto> onTypeChangedListener;
+    private Consumer<TypeDto> onTypeChangedListener = dto -> {};
 
     @Override
     public List<TypeDto> getAll(int max, int skip) {

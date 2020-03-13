@@ -242,6 +242,7 @@ public class TypeServiceImplTest {
 
         //  arrange
         when(typeConverter.dtoToEntity(typeDto)).thenReturn(typeEntity);
+        when(typeRepository.save(typeEntity)).thenReturn(typeEntity);
 
         //  act
         typeService.save(typeDto);

@@ -139,6 +139,7 @@ public class TypeRecordsDaoTest {
             .thenReturn(Collections.singletonList(new RecordElement(recordsService, RecordRef.create("type", "type"))));
         when(typeService.getAll(Collections.singleton(typeDto.getId()))).thenReturn(Collections.singleton(typeDto));
         when(typeService.getAll()).thenReturn(Collections.singleton(typeDto));
+        when(typeService.getAll(Mockito.anyInt(), Mockito.anyInt())).thenReturn(Collections.singletonList(typeDto));
 
         //  act
         RecordsQueryResult<TypeRecordsDao.TypeRecord> resultRecordsQueryResult = typeRecordsDao.queryLocalRecords(recordsQuery, metaField);
@@ -162,6 +163,7 @@ public class TypeRecordsDaoTest {
         //  arrange
         recordsQuery.setLanguage("");
         when(typeService.getAll()).thenReturn(Collections.singleton(typeDto));
+        when(typeService.getAll(Mockito.anyInt(), Mockito.anyInt())).thenReturn(Collections.singletonList(typeDto));
 
         //  act
         RecordsQueryResult<TypeRecordsDao.TypeRecord> resultRecordsQueryResult = typeRecordsDao.queryLocalRecords(recordsQuery, metaField);

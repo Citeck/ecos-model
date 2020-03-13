@@ -126,6 +126,7 @@ public class SectionRecordsDaoTest {
             .thenReturn(Collections.singletonList(new RecordElement(recordsService, RecordRef.create("", "section"))));
         when(sectionService.getAll(Collections.singleton(sectionDto.getId()))).thenReturn(Collections.singleton(sectionDto));
         when(sectionService.getAll()).thenReturn(Collections.singleton(sectionDto));
+        when(sectionService.getAll(Mockito.anyInt(), Mockito.anyInt())).thenReturn(Collections.singletonList(sectionDto));
 
         //  act
         RecordsQueryResult<SectionRecord> resultRecordsQueryResult = sectionRecordsDao.queryLocalRecords(recordsQuery, metaField);
@@ -145,6 +146,7 @@ public class SectionRecordsDaoTest {
         //  arrange
         recordsQuery.setLanguage("");
         when(sectionService.getAll()).thenReturn(Collections.singleton(sectionDto));
+        when(sectionService.getAll(Mockito.anyInt(), Mockito.anyInt())).thenReturn(Collections.singletonList(sectionDto));
 
         //  act
         RecordsQueryResult<SectionRecord> resultRecordsQueryResult = sectionRecordsDao.queryLocalRecords(recordsQuery, metaField);
