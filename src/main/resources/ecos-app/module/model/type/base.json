@@ -1,6 +1,9 @@
 {
     "id": "base",
-    "name": "qБазовый тип",
+    "name": {
+        "ru": "Базовый тип",
+        "en": "Base type"
+    },
     "dashboardType": "case-details",
     "actions": [
         "ui/action$edit",
