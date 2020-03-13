@@ -9,17 +9,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.citeck.ecos.records2.objdata.ObjectData;
-import ru.citeck.ecos.records2.scalar.MLText;
-import ru.citeck.ecos.apps.app.module.ModuleRef;
-import ru.citeck.ecos.apps.app.module.type.model.type.AssociationDto;
-import ru.citeck.ecos.apps.app.module.type.model.type.CreateVariantDto;
-import ru.citeck.ecos.apps.app.module.type.model.type.TypeModule;
+import ru.citeck.ecos.apps.module.ModuleRef;
+import ru.citeck.ecos.commons.data.MLText;
+import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.model.converter.EappsAssociationConverter;
 import ru.citeck.ecos.model.converter.CreateVariantConverter;
 import ru.citeck.ecos.model.converter.module.impl.TypeModuleConverter;
 import ru.citeck.ecos.model.dto.TypeAssociationDto;
 import ru.citeck.ecos.model.dto.TypeDto;
+import ru.citeck.ecos.model.eapps.listener.AssociationDto;
+import ru.citeck.ecos.model.eapps.listener.CreateVariantDto;
+import ru.citeck.ecos.model.eapps.listener.TypeModule;
 
 import java.util.Collections;
 

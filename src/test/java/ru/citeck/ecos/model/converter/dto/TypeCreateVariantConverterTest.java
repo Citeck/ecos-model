@@ -7,9 +7,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.model.converter.dto.impl.TypeCreateVariantConverter;
 import ru.citeck.ecos.model.dto.TypeCreateVariantDto;
-import ru.citeck.ecos.records2.objdata.ObjectData;
 
 import java.io.IOException;
 import java.util.Map;

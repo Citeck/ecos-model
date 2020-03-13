@@ -2,12 +2,10 @@ package ru.citeck.ecos.model.converter;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.citeck.ecos.apps.app.module.ModuleRef;
-import ru.citeck.ecos.apps.app.module.type.model.type.CreateVariantDto;
+import ru.citeck.ecos.apps.module.ModuleRef;
 import ru.citeck.ecos.model.dto.TypeCreateVariantDto;
+import ru.citeck.ecos.model.eapps.listener.CreateVariantDto;
 import ru.citeck.ecos.records2.RecordRef;
-
-import java.util.HashMap;
 
 @Slf4j
 @Component

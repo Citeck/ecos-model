@@ -1,12 +1,13 @@
 package ru.citeck.ecos.model.converter.dto.impl;
 
 import ecos.com.fasterxml.jackson210.databind.ObjectMapper;
-import ecos.com.fasterxml.jackson210.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
+import ru.citeck.ecos.commons.data.ObjectData;
+import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.converter.dto.AbstractDtoConverter;
 import ru.citeck.ecos.model.dao.TypeRecordsDao;
 import ru.citeck.ecos.model.domain.SectionEntity;
@@ -15,10 +16,7 @@ import ru.citeck.ecos.model.dto.SectionDto;
 import ru.citeck.ecos.model.repository.SectionRepository;
 import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records2.objdata.ObjectData;
-import ru.citeck.ecos.records2.utils.json.JsonUtils;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
@@ -32,7 +30,6 @@ public class SectionConverter extends AbstractDtoConverter<SectionDto, SectionEn
 
     private final TypeRepository typeRepository;
     private final SectionRepository sectionRepository;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public SectionEntity dtoToEntity(SectionDto dto) {
@@ -43,9 +40,16 @@ public class SectionConverter extends AbstractDtoConverter<SectionDto, SectionEn
         sectionEntity.setDescription(dto.getDescription());
         sectionEntity.setTenant(dto.getTenant());
 
-        Set<String> dtoTypesExtIds = dto.getTypes().stream()
-            .map(RecordRef::getId)
-            .collect(Collectors.toSet());
+        Set<String> dtoTypesExtIds;
+
+        if (dto.getTypes() != null) {
+            dtoTypesExtIds = dto.getTypes().stream()
+                .map(RecordRef::getId)
+                .collect(Collectors.toSet());
+        } else {
+            dtoTypesExtIds = Collections.emptySet();
+        }
+
         Set<TypeEntity> storedTypes = dtoTypesExtIds.isEmpty() ?
             Collections.emptySet() : typeRepository.findAllByExtIds(dtoTypesExtIds);
         sectionEntity.setTypes(storedTypes);
@@ -82,7 +86,7 @@ public class SectionConverter extends AbstractDtoConverter<SectionDto, SectionEn
         String attributesStr = entity.getAttributes();
         if (StringUtils.isNotBlank(attributesStr)) {
             try {
-                attributes = JsonUtils.read(attributesStr, ObjectData.class);
+                attributes = Json.getMapper().read(attributesStr, ObjectData.class);
             } catch (RuntimeException ioe) {
                 log.error("Cannot deserialize attributes for section entity with id: '"
                     + entity.getId() + "' Str: " + attributesStr);

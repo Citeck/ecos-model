@@ -1,9 +1,9 @@
 package ru.citeck.ecos.model.dto;
 
 import lombok.*;
+import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.graphql.meta.annotation.DisplayName;
-import ru.citeck.ecos.records2.objdata.ObjectData;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -3,7 +3,6 @@ package ru.citeck.ecos.model.converter.dto.impl;
 import ecos.com.fasterxml.jackson210.core.JsonProcessingException;
 import ecos.com.fasterxml.jackson210.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.model.converter.dto.AbstractDtoConverter;
 import ru.citeck.ecos.model.dto.TypeCreateVariantDto;

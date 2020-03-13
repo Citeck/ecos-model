@@ -1,7 +1,7 @@
 package ru.citeck.ecos.model.dto;
 
 import lombok.Data;
-import ru.citeck.ecos.records2.objdata.ObjectData;
+import ru.citeck.ecos.commons.data.ObjectData;
 
 @Data
 public class TypeCreateVariantDto {

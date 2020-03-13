@@ -7,10 +7,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import ru.citeck.ecos.apps.module.ModuleRef;
+import ru.citeck.ecos.commons.data.MLText;
+import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.converter.module.impl.TypeModuleConverter;
 import ru.citeck.ecos.records2.RecordsService;
-import ru.citeck.ecos.records2.scalar.MLText;
-import ru.citeck.ecos.apps.app.module.ModuleRef;
 import ru.citeck.ecos.model.converter.dto.impl.TypeConverter;
 import ru.citeck.ecos.model.domain.TypeActionEntity;
 import ru.citeck.ecos.model.domain.AssociationEntity;
@@ -22,7 +23,6 @@ import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.model.service.exception.ForgottenChildsException;
 import ru.citeck.ecos.model.service.impl.TypeServiceImpl;
 import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records2.utils.json.JsonUtils;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -64,9 +64,7 @@ public class TypeServiceImplTest {
         typeService = new TypeServiceImpl(
             typeRepository,
             associationService,
-            typeConverter,
-            moduleConverter,
-            recordsService
+            typeConverter
         );
 
         typeExtId = "type";
@@ -129,8 +127,8 @@ public class TypeServiceImplTest {
         Assert.assertEquals(resultTypeDtos.size(), 1);
         TypeDto resultTypeDto = resultTypeDtos.iterator().next();
         Assert.assertEquals(resultTypeDto.getId(), typeEntity.getExtId());
-        Assert.assertEquals(resultTypeDto.getName(), JsonUtils.read(typeEntity.getName(), MLText.class));
-        Assert.assertEquals(resultTypeDto.getDescription(), JsonUtils.read(typeEntity.getDescription(), MLText.class));
+        Assert.assertEquals(resultTypeDto.getName(), Json.getMapper().read(typeEntity.getName(), MLText.class));
+        Assert.assertEquals(resultTypeDto.getDescription(), Json.getMapper().read(typeEntity.getDescription(), MLText.class));
         Assert.assertEquals(resultTypeDto.getTenant(), typeEntity.getTenant());
         Assert.assertEquals(resultTypeDto.getAssociations(), Collections.singleton(associationDto));
         Assert.assertEquals(resultTypeDto.getActions(), Collections.singleton(actionRef));
@@ -152,8 +150,8 @@ public class TypeServiceImplTest {
         Assert.assertEquals(resultTypeDtos.size(), 1);
         TypeDto resultTypeDto = resultTypeDtos.iterator().next();
         Assert.assertEquals(resultTypeDto.getId(), typeEntity.getExtId());
-        Assert.assertEquals(resultTypeDto.getName(), JsonUtils.read(typeEntity.getName(), MLText.class));
-        Assert.assertEquals(resultTypeDto.getDescription(), JsonUtils.read(typeEntity.getDescription(), MLText.class));
+        Assert.assertEquals(resultTypeDto.getName(), Json.getMapper().read(typeEntity.getName(), MLText.class));
+        Assert.assertEquals(resultTypeDto.getDescription(), Json.getMapper().read(typeEntity.getDescription(), MLText.class));
         Assert.assertEquals(resultTypeDto.getTenant(), typeEntity.getTenant());
         Assert.assertEquals(resultTypeDto.getAssociations(), Collections.singleton(associationDto));
         Assert.assertEquals(resultTypeDto.getActions(), Collections.singleton(actionRef));
@@ -172,8 +170,8 @@ public class TypeServiceImplTest {
 
         //  assert
         Assert.assertEquals(resultTypeDto.getId(), typeEntity.getExtId());
-        Assert.assertEquals(resultTypeDto.getName(), JsonUtils.read(typeEntity.getName(), MLText.class));
-        Assert.assertEquals(resultTypeDto.getDescription(), JsonUtils.read(typeEntity.getDescription(), MLText.class));
+        Assert.assertEquals(resultTypeDto.getName(), Json.getMapper().read(typeEntity.getName(), MLText.class));
+        Assert.assertEquals(resultTypeDto.getDescription(), Json.getMapper().read(typeEntity.getDescription(), MLText.class));
         Assert.assertEquals(resultTypeDto.getTenant(), typeEntity.getTenant());
         Assert.assertEquals(resultTypeDto.getAssociations(), Collections.singleton(associationDto));
         Assert.assertEquals(resultTypeDto.getActions(), Collections.singleton(actionRef));

@@ -5,11 +5,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.citeck.ecos.apps.app.module.ModuleRef;
-import ru.citeck.ecos.apps.app.module.type.model.section.SectionModule;
+import ru.citeck.ecos.apps.module.ModuleRef;
 import ru.citeck.ecos.model.converter.module.impl.SectionModuleConverter;
 import ru.citeck.ecos.model.dao.TypeRecordsDao;
 import ru.citeck.ecos.model.dto.SectionDto;
+import ru.citeck.ecos.model.eapps.listener.SectionModule;
 import ru.citeck.ecos.records2.RecordRef;
 
 import java.util.Collections;

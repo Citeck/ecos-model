@@ -6,7 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.citeck.ecos.apps.app.module.type.model.section.SectionModule;
 import ru.citeck.ecos.model.converter.module.impl.SectionModuleConverter;
 import ru.citeck.ecos.model.dto.SectionDto;
 import ru.citeck.ecos.model.service.impl.SectionServiceImpl;
@@ -23,11 +22,11 @@ public class SectionModuleListenerTest {
     @MockBean
     private SectionModuleConverter sectionModuleConverter;
 
-    private SectionModuleListener sectionModuleListener;
+    private SectionModuleHandler sectionModuleListener;
 
     @BeforeEach
     void init() {
-        sectionModuleListener = new SectionModuleListener(sectionService, sectionModuleConverter);
+        sectionModuleListener = new SectionModuleHandler(sectionService, sectionModuleConverter);
     }
 
     @Test
@@ -44,20 +43,10 @@ public class SectionModuleListenerTest {
         when(sectionService.save(sectionDto)).thenReturn(sectionDto);
 
         //  act
-        sectionModuleListener.onModulePublished(sectionModule);
+        sectionModuleListener.deployModule(sectionModule);
 
         //  assert
         Mockito.verify(sectionModuleConverter, times(1)).moduleToDto(sectionModule);
         Mockito.verify(sectionService, times(1)).save(sectionDto);
-    }
-
-    @Test
-    void onModuleDelete() {
-
-        //  act
-        sectionModuleListener.onModuleDeleted("testId");
-
-        //  assert
-        Mockito.verify(sectionService, times(1)).delete("testId");
     }
 }

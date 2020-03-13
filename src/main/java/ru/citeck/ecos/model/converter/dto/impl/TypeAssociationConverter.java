@@ -3,13 +3,13 @@ package ru.citeck.ecos.model.converter.dto.impl;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
-import ru.citeck.ecos.records2.scalar.MLText;
+import ru.citeck.ecos.commons.data.MLText;
+import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.converter.dto.AbstractDtoConverter;
 import ru.citeck.ecos.model.dao.TypeRecordsDao;
 import ru.citeck.ecos.model.domain.AssociationEntity;
 import ru.citeck.ecos.model.dto.TypeAssociationDto;
 import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records2.utils.json.JsonUtils;
 
 import java.util.UUID;
 
@@ -23,7 +23,7 @@ public class TypeAssociationConverter extends AbstractDtoConverter<TypeAssociati
         AssociationEntity associationEntity = new AssociationEntity();
 
         associationEntity.setExtId(associationDto.getId());
-        associationEntity.setName(JsonUtils.toString(associationDto.getName()));
+        associationEntity.setName(Json.getMapper().toString(associationDto.getName()));
         associationEntity.setDirection(associationDto.getDirection());
 
         if (Strings.isBlank(associationEntity.getExtId())) {
@@ -39,7 +39,7 @@ public class TypeAssociationConverter extends AbstractDtoConverter<TypeAssociati
         TypeAssociationDto assocDto = new TypeAssociationDto();
 
         assocDto.setId(associationEntity.getExtId());
-        assocDto.setName(JsonUtils.read(associationEntity.getName(), MLText.class));
+        assocDto.setName(Json.getMapper().read(associationEntity.getName(), MLText.class));
         assocDto.setDirection(associationEntity.getDirection());
 
         String targetTypeId = associationEntity.getTarget().getExtId();

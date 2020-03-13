@@ -4,16 +4,16 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
-import ru.citeck.ecos.apps.app.module.ModuleRef;
-import ru.citeck.ecos.apps.app.module.type.model.type.AssociationDto;
-import ru.citeck.ecos.apps.app.module.type.model.type.CreateVariantDto;
-import ru.citeck.ecos.apps.app.module.type.model.type.TypeModule;
+import ru.citeck.ecos.apps.module.ModuleRef;
 import ru.citeck.ecos.model.converter.Converter;
 import ru.citeck.ecos.model.converter.module.AbstractModuleConverter;
 import ru.citeck.ecos.model.dao.TypeRecordsDao;
 import ru.citeck.ecos.model.dto.TypeAssociationDto;
 import ru.citeck.ecos.model.dto.TypeCreateVariantDto;
 import ru.citeck.ecos.model.dto.TypeDto;
+import ru.citeck.ecos.model.eapps.listener.AssociationDto;
+import ru.citeck.ecos.model.eapps.listener.CreateVariantDto;
+import ru.citeck.ecos.model.eapps.listener.TypeModule;
 import ru.citeck.ecos.records2.RecordRef;
 
 import java.util.Collections;
@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 /**
  * Converting type module objects to local dto objects.
  *
- * @see ru.citeck.ecos.apps.app.module.type.model.type.TypeModule
  * @see ru.citeck.ecos.model.dto.TypeDto
  */
 @RequiredArgsConstructor

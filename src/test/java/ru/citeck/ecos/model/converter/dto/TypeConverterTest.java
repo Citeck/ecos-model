@@ -10,8 +10,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.citeck.ecos.records2.scalar.MLText;
-import ru.citeck.ecos.apps.app.module.ModuleRef;
+import ru.citeck.ecos.apps.module.ModuleRef;
+import ru.citeck.ecos.commons.data.MLText;
+import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.converter.dto.impl.TypeConverter;
 import ru.citeck.ecos.model.domain.AssociationEntity;
 import ru.citeck.ecos.model.domain.SectionEntity;
@@ -22,7 +23,6 @@ import ru.citeck.ecos.model.dto.TypeCreateVariantDto;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records2.utils.json.JsonUtils;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -134,8 +134,8 @@ public class TypeConverterTest {
 
         //  assert
         Assert.assertEquals(resultDto.getId(), typeEntity.getExtId());
-        Assert.assertEquals(resultDto.getName(), JsonUtils.read(typeEntity.getName(), MLText.class));
-        Assert.assertEquals(resultDto.getDescription(), JsonUtils.read(typeEntity.getDescription(), MLText.class));
+        Assert.assertEquals(resultDto.getName(), Json.getMapper().read(typeEntity.getName(), MLText.class));
+        Assert.assertEquals(resultDto.getDescription(), Json.getMapper().read(typeEntity.getDescription(), MLText.class));
         Assert.assertEquals(resultDto.getTenant(), typeEntity.getTenant());
         Assert.assertEquals(resultDto.getParent(), RecordRef.create("emodel", "type", parent.getExtId()));
         Assert.assertEquals(resultDto.getActions(), Collections.singleton(actionRef));
@@ -159,8 +159,8 @@ public class TypeConverterTest {
 
         //  assert
         Assert.assertEquals(resultDto.getId(), typeEntity.getExtId());
-        Assert.assertEquals(resultDto.getName(), JsonUtils.read(typeEntity.getName(), MLText.class));
-        Assert.assertEquals(resultDto.getDescription(), JsonUtils.read(typeEntity.getDescription(), MLText.class));
+        Assert.assertEquals(resultDto.getName(), Json.getMapper().read(typeEntity.getName(), MLText.class));
+        Assert.assertEquals(resultDto.getDescription(), Json.getMapper().read(typeEntity.getDescription(), MLText.class));
         Assert.assertEquals(resultDto.getTenant(), typeEntity.getTenant());
         Assert.assertNull(resultDto.getAttributes());
         Assert.assertEquals(resultDto.getCreateVariants(), Collections.emptySet());
@@ -184,8 +184,8 @@ public class TypeConverterTest {
         //  assert
         Assert.assertEquals(resultEntity.getExtId(), typeDto.getId());
         Assert.assertEquals(resultEntity.getId().longValue(), 123L);
-        Assert.assertEquals(JsonUtils.read(resultEntity.getName(), MLText.class), typeDto.getName());
-        Assert.assertEquals(JsonUtils.read(resultEntity.getDescription(), MLText.class), typeDto.getDescription());
+        Assert.assertEquals(Json.getMapper().read(resultEntity.getName(), MLText.class), typeDto.getName());
+        Assert.assertEquals(Json.getMapper().read(resultEntity.getDescription(), MLText.class), typeDto.getDescription());
         Assert.assertEquals(resultEntity.getTenant(), typeDto.getTenant());
         Assert.assertEquals(resultEntity.getAssocsToOthers(), Collections.emptySet());
         Assert.assertEquals(resultEntity.getActions(), Collections.singletonList(actionEntity));
@@ -207,8 +207,8 @@ public class TypeConverterTest {
         TypeEntity resultEntity = typeConverter.sourceToTarget(typeDto);
 
         //  assert
-        Assert.assertEquals(JsonUtils.read(resultEntity.getName(), MLText.class), typeDto.getName());
-        Assert.assertEquals(JsonUtils.read(resultEntity.getDescription(), MLText.class), typeDto.getDescription());
+        Assert.assertEquals(Json.getMapper().read(resultEntity.getName(), MLText.class), typeDto.getName());
+        Assert.assertEquals(Json.getMapper().read(resultEntity.getDescription(), MLText.class), typeDto.getDescription());
         Assert.assertEquals(resultEntity.getTenant(), typeDto.getTenant());
         Assert.assertEquals(resultEntity.getChildren(), Collections.emptySet());
         Assert.assertEquals(resultEntity.getSections(), Collections.emptySet());

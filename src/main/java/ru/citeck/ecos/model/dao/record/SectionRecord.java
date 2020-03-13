@@ -1,6 +1,7 @@
 package ru.citeck.ecos.model.dao.record;
 
 import ru.citeck.ecos.model.dto.SectionDto;
+import ru.citeck.ecos.records2.RecordConstants;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaValue;
 
@@ -44,6 +45,10 @@ public class SectionRecord implements MetaValue {
                 return dto.getTypes();
             case "attributes":
                 return dto.getAttributes();
+            case "moduleId":
+                return dto.getId();
+            case RecordConstants.ATT_FORM_KEY:
+                return "module_model/section";
         }
         return null;
     }

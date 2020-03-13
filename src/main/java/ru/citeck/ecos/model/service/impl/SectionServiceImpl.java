@@ -1,7 +1,8 @@
 package ru.citeck.ecos.model.service.impl;
 
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.citeck.ecos.model.converter.Converter;
@@ -11,6 +12,7 @@ import ru.citeck.ecos.model.repository.SectionRepository;
 import ru.citeck.ecos.model.service.SectionService;
 import springfox.documentation.annotations.Cacheable;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,6 +23,21 @@ public class SectionServiceImpl implements SectionService {
 
     private final SectionRepository sectionRepository;
     private final Converter<SectionDto, SectionEntity> sectionConverter;
+
+    public List<SectionDto> getAll(int max, int skip) {
+
+        PageRequest page = PageRequest.of(skip / max, max, Sort.by(Sort.Direction.DESC, "id"));
+
+        return sectionRepository.findAll(page)
+            .stream()
+            .map(sectionConverter::targetToSource)
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public int getCount() {
+        return (int) sectionRepository.count();
+    }
 
     @Cacheable("sections")
     public Set<SectionDto> getAll() {

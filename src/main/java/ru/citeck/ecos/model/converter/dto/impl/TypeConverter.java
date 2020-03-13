@@ -7,9 +7,10 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
-import ru.citeck.ecos.records2.objdata.ObjectData;
-import ru.citeck.ecos.records2.scalar.MLText;
-import ru.citeck.ecos.apps.app.module.ModuleRef;
+import ru.citeck.ecos.apps.module.ModuleRef;
+import ru.citeck.ecos.commons.data.MLText;
+import ru.citeck.ecos.commons.data.ObjectData;
+import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.converter.dto.AbstractDtoConverter;
 import ru.citeck.ecos.model.converter.dto.DtoConverter;
 import ru.citeck.ecos.model.dao.TypeRecordsDao;
@@ -21,7 +22,6 @@ import ru.citeck.ecos.model.dto.TypeCreateVariantDto;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records2.utils.json.JsonUtils;
 
 import java.io.IOException;
 import java.util.*;
@@ -68,10 +68,10 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
             typeEntity.setExtId(typeDtoId);
         }
         if (dto.getName() != null) {
-            typeEntity.setName(JsonUtils.toString(dto.getName()));
+            typeEntity.setName(Json.getMapper().toString(dto.getName()));
         }
         if (dto.getDescription() != null) {
-            typeEntity.setDescription(JsonUtils.toString(dto.getDescription()));
+            typeEntity.setDescription(Json.getMapper().toString(dto.getDescription()));
         }
         typeEntity.setTenant(dto.getTenant());
         typeEntity.setInheritActions(dto.isInheritActions());
@@ -162,8 +162,8 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
         dto.setSystem(Boolean.TRUE.equals(entity.getSystem()));
         dto.setDashboardType(entity.getDashboardType());
         dto.setId(entity.getExtId());
-        dto.setName(JsonUtils.read(entity.getName(), MLText.class));
-        dto.setDescription(JsonUtils.read(entity.getDescription(), MLText.class));
+        dto.setName(Json.getMapper().read(entity.getName(), MLText.class));
+        dto.setDescription(Json.getMapper().read(entity.getDescription(), MLText.class));
         dto.setInheritActions(entity.isInheritActions());
         dto.setTenant(entity.getTenant());
         dto.setForm(entity.getForm());
@@ -171,7 +171,7 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
         String attributesStr = entity.getAttributes();
         if (StringUtils.isNotBlank(attributesStr)) {
             try {
-                dto.setAttributes(JsonUtils.read(attributesStr, ObjectData.class));
+                dto.setAttributes(Json.getMapper().read(attributesStr, ObjectData.class));
             } catch (RuntimeException ioe) {
                 log.error("Cannot deserialize attributes for type entity with id: '"
                     + entity.getId() + "' Str: " + attributesStr);

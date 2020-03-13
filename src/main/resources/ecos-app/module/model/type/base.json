@@ -1,6 +1,6 @@
 {
     "id": "base",
-    "name": "Базовый тип",
+    "name": "qБазовый тип",
     "dashboardType": "case-details",
     "actions": [
         "ui/action$edit",

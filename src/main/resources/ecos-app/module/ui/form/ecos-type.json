@@ -120,7 +120,7 @@
                                         "labelPosition": "top",
                                         "disabled": false,
                                         "placeholder": "",
-                                        "key": "id",
+                                        "key": "moduleId",
                                         "validate": {
                                             "maxWords": "",
                                             "minWords": "",
@@ -182,8 +182,8 @@
                                         "tags": [],
                                         "displayColumnsAsyncData": [
                                             {
-                                                "label": "module_id",
-                                                "value": "module_id"
+                                                "label": "moduleId",
+                                                "value": "moduleId"
                                             },
                                             {
                                                 "label": "name",
@@ -891,8 +891,8 @@
                         "tags": [],
                         "displayColumnsAsyncData": [
                             {
-                                "label": "module_id",
-                                "value": "module_id"
+                                "label": "moduleId",
+                                "value": "moduleId"
                             },
                             {
                                 "label": "formKey",

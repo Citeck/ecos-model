@@ -5,11 +5,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.citeck.ecos.records2.scalar.MLText;
-import ru.citeck.ecos.apps.app.module.ModuleRef;
-import ru.citeck.ecos.apps.app.module.type.model.type.AssocDirection;
-import ru.citeck.ecos.apps.app.module.type.model.type.AssociationDto;
+import ru.citeck.ecos.apps.module.ModuleRef;
+import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.model.dto.TypeAssociationDto;
+import ru.citeck.ecos.model.eapps.listener.AssocDirection;
+import ru.citeck.ecos.model.eapps.listener.AssociationDto;
 import ru.citeck.ecos.records2.RecordRef;
 
 @ExtendWith(SpringExtension.class)

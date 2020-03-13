@@ -1,10 +1,10 @@
 package ru.citeck.ecos.model.converter;
 
 import org.springframework.stereotype.Component;
-import ru.citeck.ecos.apps.app.module.ModuleRef;
-import ru.citeck.ecos.apps.app.module.type.model.type.AssociationDto;
+import ru.citeck.ecos.apps.module.ModuleRef;
 import ru.citeck.ecos.model.dao.TypeRecordsDao;
 import ru.citeck.ecos.model.dto.TypeAssociationDto;
+import ru.citeck.ecos.model.eapps.listener.AssociationDto;
 import ru.citeck.ecos.records2.RecordRef;
 
 @Component

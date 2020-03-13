@@ -5,11 +5,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.citeck.ecos.apps.app.module.ModuleRef;
-import ru.citeck.ecos.apps.app.module.type.model.type.CreateVariantDto;
+import ru.citeck.ecos.apps.module.ModuleRef;
+import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.model.dto.TypeCreateVariantDto;
+import ru.citeck.ecos.model.eapps.listener.CreateVariantDto;
 import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records2.objdata.ObjectData;
 
 import java.util.HashMap;
 import java.util.Map;
