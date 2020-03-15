@@ -8,17 +8,17 @@ import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.converter.dto.AbstractDtoConverter;
 import ru.citeck.ecos.model.dao.TypeRecordsDao;
 import ru.citeck.ecos.model.domain.AssociationEntity;
-import ru.citeck.ecos.model.dto.TypeAssociationDto;
+import ru.citeck.ecos.model.eapps.listener.AssociationDto;
 import ru.citeck.ecos.records2.RecordRef;
 
 import java.util.UUID;
 
 @RequiredArgsConstructor
 @Component
-public class TypeAssociationConverter extends AbstractDtoConverter<TypeAssociationDto, AssociationEntity> {
+public class TypeAssociationConverter extends AbstractDtoConverter<AssociationDto, AssociationEntity> {
 
     @Override
-    public AssociationEntity dtoToEntity(TypeAssociationDto associationDto) {
+    public AssociationEntity dtoToEntity(AssociationDto associationDto) {
 
         AssociationEntity associationEntity = new AssociationEntity();
 
@@ -34,9 +34,9 @@ public class TypeAssociationConverter extends AbstractDtoConverter<TypeAssociati
     }
 
     @Override
-    public TypeAssociationDto entityToDto(AssociationEntity associationEntity) {
+    public AssociationDto entityToDto(AssociationEntity associationEntity) {
 
-        TypeAssociationDto assocDto = new TypeAssociationDto();
+        AssociationDto assocDto = new AssociationDto();
 
         assocDto.setId(associationEntity.getExtId());
         assocDto.setName(Json.getMapper().read(associationEntity.getName(), MLText.class));
@@ -44,7 +44,7 @@ public class TypeAssociationConverter extends AbstractDtoConverter<TypeAssociati
 
         String targetTypeId = associationEntity.getTarget().getExtId();
         RecordRef targetTypeRecordRef = RecordRef.create(TypeRecordsDao.ID, targetTypeId);
-        assocDto.setTargetType(targetTypeRecordRef);
+        assocDto.setTarget(targetTypeRecordRef);
 
         return assocDto;
     }

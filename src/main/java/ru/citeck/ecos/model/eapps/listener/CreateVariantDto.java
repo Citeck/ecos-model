@@ -1,7 +1,7 @@
 package ru.citeck.ecos.model.eapps.listener;
 
 import lombok.Data;
-import ru.citeck.ecos.apps.module.ModuleRef;
+import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.records2.RecordRef;
 
@@ -9,9 +9,9 @@ import ru.citeck.ecos.records2.RecordRef;
 public class CreateVariantDto {
 
     private String id;
-    private String name;
-    private ModuleRef formRef;
+    private MLText name;
     private String formKey;
+    private RecordRef formRef;
     private RecordRef recordRef;
     private ObjectData attributes = new ObjectData();
 }

@@ -6,17 +6,17 @@
     },
     "dashboardType": "case-details",
     "actions": [
-        "ui/action$edit",
-        "ui/action$content-download",
-        "ui/action$record-actions",
-        "ui/action$edit-in-onlyoffice"
+        "uiserv/action@edit",
+        "uiserv/action@content-download",
+        "uiserv/action@record-actions",
+        "uiserv/action@edit-in-onlyoffice"
     ],
     "associations": [
         {
             "id": "assoc:associatedWith",
             "name": "Связан с",
             "direction": "BOTH",
-            "target": "model/type$base"
+            "target": "emodel/type@base"
         }
     ]
 }

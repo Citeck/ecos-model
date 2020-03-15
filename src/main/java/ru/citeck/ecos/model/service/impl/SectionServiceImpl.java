@@ -15,6 +15,7 @@ import springfox.documentation.annotations.Cacheable;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -23,6 +24,13 @@ public class SectionServiceImpl implements SectionService {
 
     private final SectionRepository sectionRepository;
     private final Converter<SectionDto, SectionEntity> sectionConverter;
+
+    private Consumer<SectionDto> listener = dto -> {};
+
+    @Override
+    public void addListener(Consumer<SectionDto> listener) {
+        this.listener = listener;
+    }
 
     public List<SectionDto> getAll(int max, int skip) {
 
@@ -73,7 +81,9 @@ public class SectionServiceImpl implements SectionService {
     public SectionDto save(SectionDto dto) {
         SectionEntity entity = sectionConverter.sourceToTarget(dto);
         sectionRepository.save(entity);
-        return sectionConverter.targetToSource(entity);
+        SectionDto sectionDto = sectionConverter.targetToSource(entity);
+        listener.accept(sectionDto);
+        return sectionDto;
     }
 
 }

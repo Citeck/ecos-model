@@ -7,18 +7,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
-import ru.citeck.ecos.apps.module.ModuleRef;
 import ru.citeck.ecos.commons.data.DataValue;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
-import ru.citeck.ecos.model.dto.SectionDto;
+import ru.citeck.ecos.model.eapps.listener.AssociationDto;
 import ru.citeck.ecos.records2.RecordMeta;
 import ru.citeck.ecos.records2.graphql.meta.annotation.DisplayName;
 import ru.citeck.ecos.records2.predicate.Elements;
 import ru.citeck.ecos.records2.predicate.PredicateService;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
-import ru.citeck.ecos.model.dto.TypeAssociationDto;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.service.TypeService;
 import ru.citeck.ecos.records2.RecordConstants;
@@ -51,8 +49,7 @@ public class TypeRecordsDao extends LocalRecordsDAO
     public static final String ID = "type";
 
     private static final String LANGUAGE_EMPTY = "";
-    private static final String TYPE_ACTIONS_WITH_INHERIT_ATT_JSON = "_actions[]?json";
-    private static final String UISERV_EFORM_PREFIX = "uiserv/eform@";
+    private static final String TYPE_ACTIONS_WITH_INHERIT_ATT_JSON = "_actions[]?id";
 
     private final TypeRecord EMPTY_RECORD = new TypeRecord(new TypeDto());
 
@@ -197,8 +194,6 @@ public class TypeRecordsDao extends LocalRecordsDAO
                     return dto.getId();
                 case "description":
                     return dto.getDescription();
-                case "tenant":
-                    return dto.getTenant();
                 case "inheritActions":
                     return dto.isInheritActions();
                 case "parent":
@@ -218,13 +213,7 @@ public class TypeRecordsDao extends LocalRecordsDAO
                 case "assocsFull":
                     return getTypeAndParentsAssociations(dto);
                 case "form":
-                    String formId = dto.getForm();
-                    if (StringUtils.isNotBlank(formId)) {
-                        formId = formId.replaceAll("^form\\$", "");
-                        formId = formId.replaceAll("^ui/form\\$", "");
-                        return RecordRef.valueOf(UISERV_EFORM_PREFIX + formId);
-                    }
-                    return null;
+                    return dto.getForm();
                 case "inheritedForm":
                     return findAndGetInheritedForm(dto);
                 case "attributes":
@@ -255,10 +244,10 @@ public class TypeRecordsDao extends LocalRecordsDAO
 
         while (currentType != null) {
 
-            String formId = currentType.getForm();
+            RecordRef formId = currentType.getForm();
 
             if (formId != null) {
-                return RecordRef.valueOf(UISERV_EFORM_PREFIX + formId);
+                return formId;
             } else {
                 if (currentType.getParent() != null) {
                     currentType = typeService.getByExtId(currentType.getParent().getId());
@@ -271,9 +260,9 @@ public class TypeRecordsDao extends LocalRecordsDAO
         return null;
     }
 
-    private Set<TypeAssociationDto> getTypeAndParentsAssociations(TypeDto typeDto) {
+    private Set<AssociationDto> getTypeAndParentsAssociations(TypeDto typeDto) {
 
-        Set<TypeAssociationDto> resultAssociations = new HashSet<>();
+        Set<AssociationDto> resultAssociations = new HashSet<>();
 
         TypeDto currentType = typeDto;
         while (currentType != null) {
@@ -291,7 +280,7 @@ public class TypeRecordsDao extends LocalRecordsDAO
         return resultAssociations;
     }
 
-    private Set<ModuleRef> getInheritTypeActions(TypeDto dto) {
+    private List<RecordRef> getInheritTypeActions(TypeDto dto) {
 
         if (!dto.isInheritActions() || dto.getParent() == null) {
             return dto.getActions();
@@ -304,16 +293,16 @@ public class TypeRecordsDao extends LocalRecordsDAO
             return dto.getActions();
         }
 
-        Map<String, ModuleRef> actionDtoMap = dto.getActions()
+        Map<String, RecordRef> actionDtoMap = dto.getActions()
             .stream()
-            .collect(Collectors.toMap(ModuleRef::getId, Function.identity()));
+            .collect(Collectors.toMap(RecordRef::getId, Function.identity()));
 
         if (actionsNode.isArray()) {
-            ModuleRef[] actionsFromParent;
+            RecordRef[] actionsFromParent;
             try {
-                actionsFromParent = Json.getMapper().convert(actionsNode, ModuleRef[].class);
+                actionsFromParent = Json.getMapper().convert(actionsNode, RecordRef[].class);
                 if (actionsFromParent != null) {
-                    for (ModuleRef actionDto : actionsFromParent) {
+                    for (RecordRef actionDto : actionsFromParent) {
                         actionDtoMap.putIfAbsent(actionDto.getId(), actionDto);
                     }
                 }
@@ -322,7 +311,7 @@ public class TypeRecordsDao extends LocalRecordsDAO
             }
         } else {
             try {
-                ModuleRef actionFromParent = Json.getMapper().convert(actionsNode, ModuleRef.class);
+                RecordRef actionFromParent = Json.getMapper().convert(actionsNode, RecordRef.class);
                 if (actionFromParent != null) {
                     actionDtoMap.putIfAbsent(actionFromParent.getId(), actionFromParent);
                 }
@@ -331,7 +320,7 @@ public class TypeRecordsDao extends LocalRecordsDAO
             }
         }
 
-        return new HashSet<>(actionDtoMap.values());
+        return new ArrayList<>(actionDtoMap.values());
     }
 
     public static class TypeMutRecord extends TypeDto {

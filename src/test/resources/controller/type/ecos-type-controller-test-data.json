@@ -7,93 +7,85 @@
         "id": "type-tree",
         "name": "test-type",
         "description": "some description",
-        "tenant": "some-tenant",
         "inheritActions": true,
-        "form": "form$test-form",
+        "form": "uiserv/eform@test-form",
         "actions": [
-            "ui/action$delete",
-            "ui/action$view"
+            "uiserv/action@delete",
+            "uiserv/action@view"
         ]
     },
     {
         "id": "type-first",
         "name": "first",
         "description": "first",
-        "tenant": "first-tenant",
         "inheritActions": true,
         "actions": [
-            "ui/action$edit"
+            "uiserv/action@edit"
         ]
     },
     {
         "id": "type-second",
         "name": "second",
         "description": "second",
-        "tenant": "second-tenant",
         "inheritActions": true,
         "parent": "emodel/type@type-first",
         "actions": [
-            "ui/action$print"
+            "uiserv/action@print"
         ]
     },
     {
         "id": "type-third",
         "name": "third",
         "description": "third",
-        "tenant": "third-tenant",
         "inheritActions": true,
         "parent": "emodel/type@type-second",
         "actions": [
-            "ui/action$fire",
-            "ui/action$reset"
+            "uiserv/action@fire",
+            "uiserv/action@reset"
         ]
     },
     {
         "id": "type-second-non-inherit",
         "name": "second-non-inherit",
         "description": "second-non-inherit",
-        "tenant": "second-tenant-non-inherit",
         "inheritActions": false,
         "parent": "emodel/type@type-first",
         "actions": [
-            "ui/action$print-non-inherit"
+            "uiserv/action@print-non-inherit"
         ]
     },
     {
         "id": "type-third-to-second-non-inherit",
         "name": "third",
         "description": "third",
-        "tenant": "third-tenant",
         "inheritActions": true,
         "parent": "emodel/type@type-second-non-inherit",
         "actions": [
-            "ui/action$fire-2",
-            "ui/action$reset-2"
+            "uiserv/action@fire-2",
+            "uiserv/action@reset-2"
         ]
     },
     {
         "id": "type-third-with-overridden",
         "name": "third-with-overridden",
         "description": "third-with-overridden",
-        "tenant": "third-tenant",
         "inheritActions": true,
         "parent": "emodel/type@type-second",
         "actions": [
-            "ui/action$fire3",
-            "ui/action$reset3",
-            "ui/action$edit"
+            "uiserv/action@fire3",
+            "uiserv/action@reset3",
+            "uiserv/action@edit"
         ]
     },
     {
         "id": "type-second-with-overridden",
         "name": "second-with-overridden",
         "description": "second-with-overridden",
-        "tenant": "second-tenant",
         "inheritActions": true,
         "parent": "emodel/type@type-first",
         "actions": [
-            "ui/action$print",
-            "ui/action$edit"
+            "uiserv/action@print",
+            "uiserv/action@edit"
         ]
     }
 ]

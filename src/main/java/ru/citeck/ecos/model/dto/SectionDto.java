@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.dto;
 
+import ecos.com.fasterxml.jackson210.annotation.JsonIgnore;
 import lombok.*;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.records2.RecordRef;
@@ -33,6 +34,7 @@ public class SectionDto {
     }
 
     @DisplayName
+    @JsonIgnore
     public String getDisplayName() {
         return name;
     }

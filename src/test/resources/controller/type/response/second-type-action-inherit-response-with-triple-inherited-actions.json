@@ -3,15 +3,14 @@
     "attributes": {
         "name": "third",
         "description": "third",
-        "tenant": "third-tenant",
         "inheritActions": true,
         "parent": "emodel/type@type-second",
         "form": null,
         "actions": [
-            "ui/action$print",
-            "ui/action$edit",
-            "ui/action$fire",
-            "ui/action$reset"
+            "uiserv/action@print",
+            "uiserv/action@edit",
+            "uiserv/action@fire",
+            "uiserv/action@reset"
         ]
     }
 }

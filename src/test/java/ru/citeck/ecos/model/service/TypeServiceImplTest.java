@@ -7,17 +7,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.citeck.ecos.apps.module.ModuleRef;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.json.Json;
-import ru.citeck.ecos.model.converter.module.impl.TypeModuleConverter;
-import ru.citeck.ecos.records2.RecordsService;
+import ru.citeck.ecos.model.eapps.listener.AssociationDto;
 import ru.citeck.ecos.model.converter.dto.impl.TypeConverter;
-import ru.citeck.ecos.model.domain.TypeActionEntity;
 import ru.citeck.ecos.model.domain.AssociationEntity;
 import ru.citeck.ecos.model.domain.SectionEntity;
 import ru.citeck.ecos.model.domain.TypeEntity;
-import ru.citeck.ecos.model.dto.TypeAssociationDto;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.model.service.exception.ForgottenChildsException;
@@ -42,12 +38,6 @@ public class TypeServiceImplTest {
     @Mock
     private TypeConverter typeConverter;
 
-    @Mock
-    private TypeModuleConverter moduleConverter;
-
-    @Mock
-    private RecordsService recordsService;
-
     private TypeServiceImpl typeService;
 
     private TypeEntity typeEntity;
@@ -55,8 +45,8 @@ public class TypeServiceImplTest {
     private TypeDto typeDto;
 
     private String typeExtId;
-    private ModuleRef actionRef;
-    private TypeAssociationDto associationDto;
+    private RecordRef actionRef;
+    private AssociationDto associationDto;
 
     @BeforeEach
     void init() {
@@ -68,9 +58,6 @@ public class TypeServiceImplTest {
         );
 
         typeExtId = "type";
-
-        TypeActionEntity actionEntity = new TypeActionEntity();
-        actionEntity.setActionId("action");
 
         AssociationEntity associationEntity = new AssociationEntity();
         associationEntity.setExtId("association");
@@ -91,25 +78,24 @@ public class TypeServiceImplTest {
         typeEntity.setTenant("tenant");
         typeEntity.setDescription("desc");
         typeEntity.setInheritActions(false);
-        typeEntity.addAction(actionEntity);
+        typeEntity.setActions("[\"uiserv/action@action\"]");
         typeEntity.setAssocsToOthers(Collections.singleton(associationEntity));
         typeEntity.setParent(parent);
         typeEntity.setChildren(Collections.singleton(child));
         typeEntity.setSections(Collections.singleton(sectionEntity));
 
-        actionRef = ModuleRef.create("ui/action", "action");
+        actionRef = RecordRef.create("uiserv", "action", "action");
 
-        associationDto = new TypeAssociationDto();
+        associationDto = new AssociationDto();
         associationDto.setId("association");
 
         typeDto = new TypeDto();
         typeDto.setId(typeExtId);
         typeDto.setName(new MLText("name"));
-        typeDto.setTenant("tenant");
         typeDto.setDescription(new MLText("desc"));
         typeDto.setInheritActions(false);
-        typeDto.setActions(Collections.singleton(actionRef));
-        typeDto.setAssociations(Collections.singleton(associationDto));
+        typeDto.setActions(Collections.singletonList(actionRef));
+        typeDto.setAssociations(Collections.singletonList(associationDto));
         typeDto.setParent(RecordRef.create("type", "parent"));
     }
 
@@ -129,9 +115,8 @@ public class TypeServiceImplTest {
         Assert.assertEquals(resultTypeDto.getId(), typeEntity.getExtId());
         Assert.assertEquals(resultTypeDto.getName(), Json.getMapper().read(typeEntity.getName(), MLText.class));
         Assert.assertEquals(resultTypeDto.getDescription(), Json.getMapper().read(typeEntity.getDescription(), MLText.class));
-        Assert.assertEquals(resultTypeDto.getTenant(), typeEntity.getTenant());
-        Assert.assertEquals(resultTypeDto.getAssociations(), Collections.singleton(associationDto));
-        Assert.assertEquals(resultTypeDto.getActions(), Collections.singleton(actionRef));
+        Assert.assertEquals(resultTypeDto.getAssociations(), Collections.singletonList(associationDto));
+        Assert.assertEquals(resultTypeDto.getActions(), Collections.singletonList(actionRef));
         Assert.assertEquals(resultTypeDto.getParent(), RecordRef.create("type", "parent"));
     }
 
@@ -152,9 +137,8 @@ public class TypeServiceImplTest {
         Assert.assertEquals(resultTypeDto.getId(), typeEntity.getExtId());
         Assert.assertEquals(resultTypeDto.getName(), Json.getMapper().read(typeEntity.getName(), MLText.class));
         Assert.assertEquals(resultTypeDto.getDescription(), Json.getMapper().read(typeEntity.getDescription(), MLText.class));
-        Assert.assertEquals(resultTypeDto.getTenant(), typeEntity.getTenant());
-        Assert.assertEquals(resultTypeDto.getAssociations(), Collections.singleton(associationDto));
-        Assert.assertEquals(resultTypeDto.getActions(), Collections.singleton(actionRef));
+        Assert.assertEquals(resultTypeDto.getAssociations(), Collections.singletonList(associationDto));
+        Assert.assertEquals(resultTypeDto.getActions(), Collections.singletonList(actionRef));
         Assert.assertEquals(resultTypeDto.getParent(), RecordRef.create("type", "parent"));
     }
 
@@ -172,9 +156,8 @@ public class TypeServiceImplTest {
         Assert.assertEquals(resultTypeDto.getId(), typeEntity.getExtId());
         Assert.assertEquals(resultTypeDto.getName(), Json.getMapper().read(typeEntity.getName(), MLText.class));
         Assert.assertEquals(resultTypeDto.getDescription(), Json.getMapper().read(typeEntity.getDescription(), MLText.class));
-        Assert.assertEquals(resultTypeDto.getTenant(), typeEntity.getTenant());
-        Assert.assertEquals(resultTypeDto.getAssociations(), Collections.singleton(associationDto));
-        Assert.assertEquals(resultTypeDto.getActions(), Collections.singleton(actionRef));
+        Assert.assertEquals(resultTypeDto.getAssociations(), Collections.singletonList(associationDto));
+        Assert.assertEquals(resultTypeDto.getActions(), Collections.singletonList(actionRef));
         Assert.assertEquals(resultTypeDto.getParent(), RecordRef.create("type", "parent"));
     }
 

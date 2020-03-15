@@ -3,14 +3,14 @@ package ru.citeck.ecos.model.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.citeck.ecos.apps.module.ModuleRef;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
+import ru.citeck.ecos.model.eapps.listener.AssociationDto;
+import ru.citeck.ecos.model.eapps.listener.CreateVariantDto;
 import ru.citeck.ecos.records2.RecordRef;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,44 +20,38 @@ public class TypeDto {
     private String id;
     private MLText name;
     private MLText description;
-    private String tenant;
     private RecordRef parent;
-    private String form;
+    private RecordRef form;
     private boolean system;
     private String dashboardType;
-
-    private Set<TypeAssociationDto> associations = new HashSet<>();
-    private Set<ModuleRef> actions = new HashSet<>();
     private boolean inheritActions;
-    private ObjectData attributes;
-    private Set<TypeCreateVariantDto> createVariants = new HashSet<>();
+
+    private List<RecordRef> actions = new ArrayList<>();
+    private List<AssociationDto> associations = new ArrayList<>();
+    private List<CreateVariantDto> createVariants = new ArrayList<>();
+
+    private ObjectData attributes = new ObjectData();
 
     public TypeDto(TypeDto dto) {
+
         this.name = dto.name;
         this.description = dto.description;
-        this.tenant = dto.tenant;
         this.parent = dto.parent;
         this.form = dto.form;
         this.id = dto.id;
         this.inheritActions = dto.inheritActions;
-        this.attributes = dto.attributes;
+        this.attributes = ObjectData.deepCopy(dto.attributes);
+        this.system = dto.system;
+        this.dashboardType = dto.dashboardType;
 
         if (dto.associations != null) {
-            this.associations = dto.associations;
-        } else {
-            this.associations = Collections.emptySet();
+            this.associations = new ArrayList<>(dto.associations);
         }
-
         if (dto.actions != null) {
-            this.actions = dto.actions;
-        } else {
-            this.actions = Collections.emptySet();
+            this.actions = new ArrayList<>(dto.actions);
         }
-
         if (dto.createVariants != null) {
-            this.createVariants = dto.createVariants;
-        } else {
-            this.createVariants = Collections.emptySet();
+            this.createVariants = new ArrayList<>(dto.createVariants);
         }
     }
 }
