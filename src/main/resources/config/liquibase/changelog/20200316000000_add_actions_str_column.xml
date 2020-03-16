@@ -9,6 +9,8 @@
             <column name="actions_str" type="VARCHAR" />
         </addColumn>
 
+        <dropUniqueConstraint constraintName="ecos_association_ext_id_key" tableName="ecos_association"/>
+
     </changeSet>
 
 </databaseChangeLog>
