@@ -103,7 +103,14 @@ public class TypeRecordsDao extends LocalRecordsDAO
 
         } else {
 
-            result.setRecords(typeService.getAll(recordsQuery.getMaxItems(), recordsQuery.getSkipCount()).stream()
+            int max = recordsQuery.getMaxItems();
+            Collection<TypeDto> types;
+            if (max < 0) {
+                types = typeService.getAll();
+            } else {
+                types = typeService.getAll(max, recordsQuery.getSkipCount());
+            }
+            result.setRecords(types.stream()
                 .map(TypeRecord::new)
                 .collect(Collectors.toList()));
             result.setTotalCount(typeService.getCount());
