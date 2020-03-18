@@ -11,8 +11,8 @@ import ru.citeck.ecos.model.converter.dto.DtoConverter;
 import ru.citeck.ecos.model.dao.TypeRecordsDao;
 import ru.citeck.ecos.model.domain.AssociationEntity;
 import ru.citeck.ecos.model.domain.TypeEntity;
-import ru.citeck.ecos.model.dto.TypeAssociationDto;
 import ru.citeck.ecos.model.dto.TypeDto;
+import ru.citeck.ecos.model.eapps.listener.AssociationDto;
 import ru.citeck.ecos.model.repository.AssociationRepository;
 import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.model.service.impl.AssociationServiceImpl;
@@ -36,7 +36,7 @@ public class AssociationServiceImplTest {
     private TypeRepository typeRepository;
 
     @MockBean
-    private DtoConverter<TypeAssociationDto, AssociationEntity> associationConverter;
+    private DtoConverter<AssociationDto, AssociationEntity> associationConverter;
 
     @MockBean
     private DtoConverter<TypeDto, TypeEntity> typeConverter;
@@ -56,9 +56,9 @@ public class AssociationServiceImplTest {
     void testExtractAndSaveAssocsFromType() {
 
         //  arrange
-        TypeAssociationDto associationDto = new TypeAssociationDto();
+        AssociationDto associationDto = new AssociationDto();
         associationDto.setId("assocId");
-        associationDto.setTargetType(RecordRef.create(TypeRecordsDao.ID, "typeId"));
+        associationDto.setTarget(RecordRef.create(TypeRecordsDao.ID, "typeId"));
 
         AssociationEntity associationEntity = new AssociationEntity();
         associationEntity.setExtId("assocId");
@@ -66,7 +66,7 @@ public class AssociationServiceImplTest {
         when(associationConverter.dtoToEntity(associationDto)).thenReturn(associationEntity);
 
         TypeDto typeDto = new TypeDto();
-        typeDto.setAssociations(Collections.singleton(associationDto));
+        typeDto.setAssociations(Collections.singletonList(associationDto));
 
         TypeEntity typeEntity = new TypeEntity();
         typeEntity.setId(1L);
@@ -89,7 +89,7 @@ public class AssociationServiceImplTest {
     void testExtractAndSaveAssocsFromTypeTargetTypeIsNull() {
 
         //  arrange
-        TypeAssociationDto associationDto = new TypeAssociationDto();
+        AssociationDto associationDto = new AssociationDto();
         associationDto.setId("assocId");
 
         AssociationEntity associationEntity = new AssociationEntity();
@@ -98,7 +98,7 @@ public class AssociationServiceImplTest {
         when(associationConverter.dtoToEntity(associationDto)).thenReturn(associationEntity);
 
         TypeDto typeDto = new TypeDto();
-        typeDto.setAssociations(Collections.singleton(associationDto));
+        typeDto.setAssociations(Collections.singletonList(associationDto));
 
         TypeEntity typeEntity = new TypeEntity();
         typeEntity.setId(1L);
@@ -122,9 +122,9 @@ public class AssociationServiceImplTest {
     void testExtractAndSaveAssocsFromTypeTargetTypeIsNotExists() {
 
         //  arrange
-        TypeAssociationDto associationDto = new TypeAssociationDto();
+        AssociationDto associationDto = new AssociationDto();
         associationDto.setId("assocId");
-        associationDto.setTargetType(RecordRef.create(TypeRecordsDao.ID, "notExistableTypeId"));
+        associationDto.setTarget(RecordRef.create(TypeRecordsDao.ID, "notExistableTypeId"));
 
         AssociationEntity associationEntity = new AssociationEntity();
         associationEntity.setExtId("assocId");
@@ -132,7 +132,7 @@ public class AssociationServiceImplTest {
         when(associationConverter.dtoToEntity(associationDto)).thenReturn(associationEntity);
 
         TypeDto typeDto = new TypeDto();
-        typeDto.setAssociations(Collections.singleton(associationDto));
+        typeDto.setAssociations(Collections.singletonList(associationDto));
 
         TypeEntity typeEntity = new TypeEntity();
         typeEntity.setId(1L);

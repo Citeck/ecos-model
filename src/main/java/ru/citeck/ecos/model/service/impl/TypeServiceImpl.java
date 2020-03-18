@@ -2,28 +2,24 @@ package ru.citeck.ecos.model.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.citeck.ecos.apps.app.module.ModuleRef;
-import ru.citeck.ecos.apps.app.module.type.model.type.TypeModule;
+import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.model.converter.dto.DtoConverter;
-import ru.citeck.ecos.model.converter.module.impl.TypeModuleConverter;
 import ru.citeck.ecos.model.domain.TypeEntity;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.model.service.AssociationService;
 import ru.citeck.ecos.model.service.TypeService;
 import ru.citeck.ecos.model.service.exception.ForgottenChildsException;
-import ru.citeck.ecos.records2.RecordMeta;
 import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records2.RecordsService;
-import ru.citeck.ecos.records2.objdata.ObjectData;
-import ru.citeck.ecos.records2.scalar.MLText;
-import ru.citeck.ecos.records2.utils.json.JsonUtils;
 import springfox.documentation.annotations.Cacheable;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -34,9 +30,29 @@ public class TypeServiceImpl implements TypeService {
     private final TypeRepository typeRepository;
     private final AssociationService associationService;
     private final DtoConverter<TypeDto, TypeEntity> typeConverter;
-    private final TypeModuleConverter moduleConverter;
 
-    private final RecordsService recordsService;
+    private Consumer<TypeDto> onTypeChangedListener = dto -> {};
+
+    @Override
+    public List<TypeDto> getAll(int max, int skip) {
+
+        PageRequest page = PageRequest.of(skip / max, max, Sort.by(Sort.Direction.DESC, "id"));
+
+        return typeRepository.findAll(page)
+            .stream()
+            .map(typeConverter::targetToSource)
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public int getCount() {
+        return (int) typeRepository.count();
+    }
+
+    @Override
+    public void addListener(Consumer<TypeDto> onTypeChangedListener) {
+        this.onTypeChangedListener = onTypeChangedListener;
+    }
 
     @Cacheable("types")
     public Set<TypeDto> getAll() {
@@ -122,20 +138,13 @@ public class TypeServiceImpl implements TypeService {
                 throw new IllegalStateException("Base type doesn't exists!");
             }
 
-            TypeModule newType = new TypeModule();
-            newType.setParent(ModuleRef.create("model/type", "user-base"));
-            newType.setInheritActions(true);
-            newType.setName(new MLText(extId));
+            TypeDto typeDto = new TypeDto();
+            typeDto.setId(extId);
+            typeDto.setInheritActions(true);
+            typeDto.setParent(RecordRef.create("emodel", "type", "user-base"));
+            typeDto.setName(new MLText(extId));
 
-            ObjectData data = JsonUtils.convert(newType, ObjectData.class);
-            data.set("module_id", extId);
-
-            RecordMeta meta = new RecordMeta(RecordRef.create("eapps", "module", "model/type$"));
-            meta.setAttributes(data);
-
-            recordsService.mutate(meta);
-
-            return moduleConverter.moduleToDto(newType);
+            return save(typeDto);
         });
     }
 
@@ -161,8 +170,10 @@ public class TypeServiceImpl implements TypeService {
     @Transactional
     public TypeDto save(TypeDto dto) {
         TypeEntity entity = typeConverter.dtoToEntity(dto);
-        typeRepository.save(entity);
+        entity = typeRepository.save(entity);
         associationService.extractAndSaveAssocsFromType(dto);
-        return typeConverter.entityToDto(entity);
+        TypeDto typeDto = typeConverter.entityToDto(entity);
+        onTypeChangedListener.accept(typeDto);
+        return typeDto;
     }
 }

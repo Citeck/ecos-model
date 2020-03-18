@@ -1,6 +1,5 @@
 package ru.citeck.ecos.model;
 
-import ru.citeck.ecos.apps.spring.EcosAppsFactoryConfig;
 import ru.citeck.ecos.model.config.ApplicationProperties;
 import ru.citeck.ecos.model.config.DefaultProfileUtil;
 
@@ -23,8 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 @SpringBootApplication(scanBasePackageClasses = {
-    EcosModelApp.class,
-    EcosAppsFactoryConfig.class
+    EcosModelApp.class
 })
 @EnableConfigurationProperties({LiquibaseProperties.class, ApplicationProperties.class})
 @EnableDiscoveryClient

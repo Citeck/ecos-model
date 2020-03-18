@@ -3,7 +3,7 @@ package ru.citeck.ecos.model.domain;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.citeck.ecos.apps.app.module.type.model.type.AssocDirection;
+import ru.citeck.ecos.model.eapps.listener.AssocDirection;
 
 import javax.persistence.*;
 

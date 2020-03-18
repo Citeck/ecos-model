@@ -5,15 +5,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.citeck.ecos.records2.scalar.MLText;
-import ru.citeck.ecos.apps.app.module.type.model.type.AssocDirection;
+import ru.citeck.ecos.commons.data.MLText;
+import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.converter.dto.impl.TypeAssociationConverter;
 import ru.citeck.ecos.model.dao.TypeRecordsDao;
 import ru.citeck.ecos.model.domain.AssociationEntity;
 import ru.citeck.ecos.model.domain.TypeEntity;
-import ru.citeck.ecos.model.dto.TypeAssociationDto;
+import ru.citeck.ecos.model.eapps.listener.AssocDirection;
+import ru.citeck.ecos.model.eapps.listener.AssociationDto;
 import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records2.utils.json.JsonUtils;
 
 import java.util.UUID;
 
@@ -23,7 +23,7 @@ public class TypeAssociationConverterTest {
     private TypeAssociationConverter typeAssociationConverter;
 
     private AssociationEntity entity;
-    private TypeAssociationDto dto;
+    private AssociationDto dto;
 
     private TypeEntity targetTypeEntity;
     private TypeEntity sourceTypeEntity;
@@ -45,11 +45,11 @@ public class TypeAssociationConverterTest {
         entity.setTarget(targetTypeEntity);
         entity.setSource(sourceTypeEntity);
 
-        dto = new TypeAssociationDto();
+        dto = new AssociationDto();
         dto.setId("assocId");
         dto.setName(new MLText("assoc-name"));
         dto.setDirection(AssocDirection.TARGET);
-        dto.setTargetType(RecordRef.create(TypeRecordsDao.ID, targetTypeEntity.getExtId()));
+        dto.setTarget(RecordRef.create(TypeRecordsDao.ID, targetTypeEntity.getExtId()));
     }
 
     @Test
@@ -60,7 +60,7 @@ public class TypeAssociationConverterTest {
 
         //  assert
         Assert.assertEquals(dto.getId(), resultEntity.getExtId());
-        Assert.assertEquals(dto.getName(), JsonUtils.read(resultEntity.getName(), MLText.class));
+        Assert.assertEquals(dto.getName(), Json.getMapper().read(resultEntity.getName(), MLText.class));
         Assert.assertEquals(dto.getDirection(), resultEntity.getDirection());
     }
 
@@ -74,7 +74,7 @@ public class TypeAssociationConverterTest {
         AssociationEntity resultEntity = typeAssociationConverter.dtoToEntity(dto);
 
         //  assert
-        Assert.assertEquals(dto.getName(), JsonUtils.read(resultEntity.getName(), MLText.class));
+        Assert.assertEquals(dto.getName(), Json.getMapper().read(resultEntity.getName(), MLText.class));
         Assert.assertEquals(dto.getDirection(), resultEntity.getDirection());
 
         // check that id it is generated UUID
@@ -85,12 +85,12 @@ public class TypeAssociationConverterTest {
     void testEntityToDto() {
 
         //  act
-        TypeAssociationDto resultDto = typeAssociationConverter.entityToDto(entity);
+        AssociationDto resultDto = typeAssociationConverter.entityToDto(entity);
 
         //  assert
         Assert.assertEquals(resultDto.getId(), entity.getExtId());
         Assert.assertEquals(resultDto.getDirection(), entity.getDirection());
-        Assert.assertEquals(resultDto.getName(), JsonUtils.read(entity.getName(), MLText.class));
-        Assert.assertEquals(resultDto.getTargetType().getId(), entity.getTarget().getExtId());
+        Assert.assertEquals(resultDto.getName(), Json.getMapper().read(entity.getName(), MLText.class));
+        Assert.assertEquals(resultDto.getTarget().getId(), entity.getTarget().getExtId());
     }
 }

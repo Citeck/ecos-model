@@ -1,18 +1,22 @@
 package ru.citeck.ecos.model.dao;
 
+import ecos.com.fasterxml.jackson210.annotation.JsonIgnore;
+import ecos.com.fasterxml.jackson210.annotation.JsonProperty;
+import ecos.com.fasterxml.jackson210.annotation.JsonValue;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
-import ru.citeck.ecos.records2.objdata.DataValue;
+import ru.citeck.ecos.commons.data.DataValue;
+import ru.citeck.ecos.commons.data.MLText;
+import ru.citeck.ecos.commons.data.ObjectData;
+import ru.citeck.ecos.commons.json.Json;
+import ru.citeck.ecos.model.eapps.listener.AssociationDto;
+import ru.citeck.ecos.records2.RecordMeta;
+import ru.citeck.ecos.records2.graphql.meta.annotation.DisplayName;
 import ru.citeck.ecos.records2.predicate.Elements;
 import ru.citeck.ecos.records2.predicate.PredicateService;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
-import ru.citeck.ecos.records2.scalar.MLText;
-import ru.citeck.ecos.apps.app.module.EappsModuleService;
-import ru.citeck.ecos.apps.app.module.ModuleRef;
-import ru.citeck.ecos.apps.app.module.type.form.FormModule;
-import ru.citeck.ecos.model.dto.TypeAssociationDto;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.service.TypeService;
 import ru.citeck.ecos.records2.RecordConstants;
@@ -22,12 +26,15 @@ import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaValue;
 import ru.citeck.ecos.records2.predicate.RecordElement;
 import ru.citeck.ecos.records2.predicate.RecordElements;
+import ru.citeck.ecos.records2.request.delete.RecordsDelResult;
+import ru.citeck.ecos.records2.request.delete.RecordsDeletion;
+import ru.citeck.ecos.records2.request.mutation.RecordsMutResult;
 import ru.citeck.ecos.records2.request.query.RecordsQuery;
 import ru.citeck.ecos.records2.request.query.RecordsQueryResult;
 import ru.citeck.ecos.records2.source.dao.local.LocalRecordsDAO;
+import ru.citeck.ecos.records2.source.dao.local.MutableRecordsLocalDAO;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsMetaDAO;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsQueryWithMetaDAO;
-import ru.citeck.ecos.records2.utils.json.JsonUtils;
 
 import java.util.*;
 import java.util.function.Function;
@@ -35,13 +42,14 @@ import java.util.stream.Collectors;
 
 @Component
 public class TypeRecordsDao extends LocalRecordsDAO
-    implements LocalRecordsQueryWithMetaDAO<TypeRecordsDao.TypeRecord>, LocalRecordsMetaDAO<TypeRecordsDao.TypeRecord> {
+    implements LocalRecordsQueryWithMetaDAO<TypeRecordsDao.TypeRecord>,
+            LocalRecordsMetaDAO<TypeRecordsDao.TypeRecord>,
+            MutableRecordsLocalDAO<TypeRecordsDao.TypeMutRecord> {
 
     public static final String ID = "type";
 
     private static final String LANGUAGE_EMPTY = "";
-    private static final String TYPE_ACTIONS_WITH_INHERIT_ATT_JSON = "_actions[]?json";
-    private static final String UISERV_EFORM_PREFIX = "uiserv/eform@";
+    private static final String TYPE_ACTIONS_WITH_INHERIT_ATT_JSON = "_actions[]?id";
 
     private final TypeRecord EMPTY_RECORD = new TypeRecord(new TypeDto());
 
@@ -49,19 +57,14 @@ public class TypeRecordsDao extends LocalRecordsDAO
     private final PredicateService predicateService;
     private RecordsService recordsService;
 
-    private final String formTypeIdPrefix;
-
     @Autowired
     public TypeRecordsDao(TypeService typeService,
                           PredicateService predicateService,
-                          @Lazy RecordsService recordsService,
-                          EappsModuleService moduleService) {
+                          @Lazy RecordsService recordsService) {
         setId(ID);
         this.typeService = typeService;
         this.predicateService = predicateService;
         this.recordsService = recordsService;
-
-        formTypeIdPrefix = moduleService.getTypeId(FormModule.class) + "$";
     }
 
     @Override
@@ -99,10 +102,62 @@ public class TypeRecordsDao extends LocalRecordsDAO
                 .collect(Collectors.toList()));
 
         } else {
-            result.setRecords(typeService.getAll().stream()
+
+            int max = recordsQuery.getMaxItems();
+            Collection<TypeDto> types;
+            if (max < 0) {
+                types = typeService.getAll();
+            } else {
+                types = typeService.getAll(max, recordsQuery.getSkipCount());
+            }
+            result.setRecords(types.stream()
                 .map(TypeRecord::new)
                 .collect(Collectors.toList()));
+            result.setTotalCount(typeService.getCount());
         }
+        return result;
+    }
+
+    @Override
+    public RecordsDelResult delete(RecordsDeletion recordsDeletion) {
+
+        List<RecordMeta> result = new ArrayList<>();
+
+        recordsDeletion.getRecords().forEach(r -> {
+            typeService.delete(r.getId());
+            result.add(new RecordMeta(r));
+        });
+
+        RecordsDelResult delRes = new RecordsDelResult();
+        delRes.setRecords(result);
+
+        return delRes;
+    }
+
+    @Override
+    public List<TypeMutRecord> getValuesToMutate(List<RecordRef> list) {
+        return list.stream()
+            .map(RecordRef::getId)
+            .map(id -> {
+                if (StringUtils.isBlank(id)) {
+                    return new TypeMutRecord();
+                } else {
+                    return new TypeMutRecord(typeService.getByExtId(id));
+                }
+            })
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public RecordsMutResult save(List<TypeMutRecord> list) {
+
+        RecordsMutResult result = new RecordsMutResult();
+
+        list.forEach(sec -> {
+            TypeDto resDto = typeService.save(sec);
+            result.addRecord(new RecordMeta(RecordRef.valueOf(resDto.getId())));
+        });
+
         return result;
     }
 
@@ -142,11 +197,10 @@ public class TypeRecordsDao extends LocalRecordsDAO
                 case "name":
                     return dto.getName();
                 case "extId":
+                case "moduleId":
                     return dto.getId();
                 case "description":
                     return dto.getDescription();
-                case "tenant":
-                    return dto.getTenant();
                 case "inheritActions":
                     return dto.isInheritActions();
                 case "parent":
@@ -166,14 +220,7 @@ public class TypeRecordsDao extends LocalRecordsDAO
                 case "assocsFull":
                     return getTypeAndParentsAssociations(dto);
                 case "form":
-                    String formId = dto.getForm();
-                    if (StringUtils.isNotBlank(formId)) {
-                        if (formId.startsWith(formTypeIdPrefix)) {
-                            formId = formId.substring(formTypeIdPrefix.length());
-                        }
-                        return RecordRef.valueOf(UISERV_EFORM_PREFIX + formId);
-                    }
-                    return null;
+                    return dto.getForm();
                 case "inheritedForm":
                     return findAndGetInheritedForm(dto);
                 case "attributes":
@@ -186,6 +233,8 @@ public class TypeRecordsDao extends LocalRecordsDAO
                     return typeService.getDashboardType(dto.getId());
                 case "isSystem":
                     return dto.isSystem();
+                case RecordConstants.ATT_FORM_KEY:
+                    return "module_model/type";
             }
             return null;
         }
@@ -202,10 +251,10 @@ public class TypeRecordsDao extends LocalRecordsDAO
 
         while (currentType != null) {
 
-            String formId = currentType.getForm();
+            RecordRef formId = currentType.getForm();
 
             if (formId != null) {
-                return RecordRef.valueOf(UISERV_EFORM_PREFIX + formId);
+                return formId;
             } else {
                 if (currentType.getParent() != null) {
                     currentType = typeService.getByExtId(currentType.getParent().getId());
@@ -218,9 +267,9 @@ public class TypeRecordsDao extends LocalRecordsDAO
         return null;
     }
 
-    private Set<TypeAssociationDto> getTypeAndParentsAssociations(TypeDto typeDto) {
+    private Set<AssociationDto> getTypeAndParentsAssociations(TypeDto typeDto) {
 
-        Set<TypeAssociationDto> resultAssociations = new HashSet<>();
+        Set<AssociationDto> resultAssociations = new HashSet<>();
 
         TypeDto currentType = typeDto;
         while (currentType != null) {
@@ -238,7 +287,7 @@ public class TypeRecordsDao extends LocalRecordsDAO
         return resultAssociations;
     }
 
-    private Set<ModuleRef> getInheritTypeActions(TypeDto dto) {
+    private List<RecordRef> getInheritTypeActions(TypeDto dto) {
 
         if (!dto.isInheritActions() || dto.getParent() == null) {
             return dto.getActions();
@@ -251,29 +300,74 @@ public class TypeRecordsDao extends LocalRecordsDAO
             return dto.getActions();
         }
 
-        Map<String, ModuleRef> actionDtoMap = dto.getActions()
+        Map<String, RecordRef> actionDtoMap = dto.getActions()
             .stream()
-            .collect(Collectors.toMap(ModuleRef::getId, Function.identity()));
+            .collect(Collectors.toMap(RecordRef::getId, Function.identity()));
 
         if (actionsNode.isArray()) {
-            ModuleRef[] actionsFromParent;
+            RecordRef[] actionsFromParent;
             try {
-                actionsFromParent = JsonUtils.convert(actionsNode, ModuleRef[].class);
-                for (ModuleRef actionDto : actionsFromParent) {
-                    actionDtoMap.putIfAbsent(actionDto.getId(), actionDto);
+                actionsFromParent = Json.getMapper().convert(actionsNode, RecordRef[].class);
+                if (actionsFromParent != null) {
+                    for (RecordRef actionDto : actionsFromParent) {
+                        actionDtoMap.putIfAbsent(actionDto.getId(), actionDto);
+                    }
                 }
             } catch (RuntimeException e) {
                 throw new RuntimeException("Can not parse actions from parent", e);
             }
         } else {
             try {
-                ModuleRef actionFromParent = JsonUtils.convert(actionsNode, ModuleRef.class);
-                actionDtoMap.putIfAbsent(actionFromParent.getId(), actionFromParent);
+                RecordRef actionFromParent = Json.getMapper().convert(actionsNode, RecordRef.class);
+                if (actionFromParent != null) {
+                    actionDtoMap.putIfAbsent(actionFromParent.getId(), actionFromParent);
+                }
             } catch (RuntimeException e) {
                 throw new RuntimeException("Can not parse action from parent", e);
             }
         }
 
-        return new HashSet<>(actionDtoMap.values());
+        return new ArrayList<>(actionDtoMap.values());
+    }
+
+    public static class TypeMutRecord extends TypeDto {
+
+        TypeMutRecord() {
+        }
+
+        TypeMutRecord(TypeDto dto) {
+            super(dto);
+        }
+
+        @JsonIgnore
+        public String getModuleId() {
+            return getId();
+        }
+
+        public void setModuleId(String value) {
+            setId(value);
+        }
+
+        @JsonIgnore
+        @DisplayName
+        public String getDisplayName() {
+            String result = getId();
+            return result != null ? result : "Section";
+        }
+
+        @JsonProperty("_content")
+        public void setContent(List<ObjectData> content) {
+
+            String base64Content = content.get(0).get("url", "");
+            base64Content = base64Content.replaceAll("^data:application/json;base64,", "");
+            ObjectData data = Json.getMapper().read(Base64.getDecoder().decode(base64Content), ObjectData.class);
+
+            Json.getMapper().applyData(this, data);
+        }
+
+        @JsonValue
+        public TypeDto toJson() {
+            return new TypeDto(this);
+        }
     }
 }

@@ -26,8 +26,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class TypeRecordsControllerTest {
 
     private static final String PATH_TO_RESPONSE_DATA = "/controller/type/response/";
-    private static final String CURRENT_TYPE_ACTION_ATT = "actions[]?str";
-    private static final String TYPE_ACTION_WITH_INHERIT_ATT = "_actions[]?str";
+    private static final String CURRENT_TYPE_ACTION_ATT = "actions[]?id";
+    private static final String TYPE_ACTION_WITH_INHERIT_ATT = "_actions[]?id";
 
     private MockMvc mockRecordsApi;
 
@@ -89,7 +89,6 @@ public class TypeRecordsControllerTest {
             "    \"attributes\": {\n" +
             "        \"name\": \"name\",\n" +
             "        \"parent\": \"parent?id\",\n" +
-            "        \"tenant\": \"tenant\",\n" +
             "        \"description\": \"description\",\n" +
             "        \"form\": \"form?id\",\n" +
             "        \"inheritActions\": \"inheritActions?bool\",\n" +

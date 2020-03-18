@@ -1,5 +1,8 @@
 {
     "id": "case",
-    "name": "Кейс",
+    "name": {
+        "ru": "Кейс",
+        "en": "Case"
+    },
     "inheritActions": true
 }

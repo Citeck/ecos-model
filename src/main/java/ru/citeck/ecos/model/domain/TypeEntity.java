@@ -7,10 +7,7 @@ import lombok.Setter;
 import ru.citeck.ecos.model.utils.EntityCollectionUtils;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "ecos_type")
@@ -66,7 +63,7 @@ public class TypeEntity {
         mappedBy = "target",
         fetch = FetchType.EAGER,
         cascade = CascadeType.ALL)
-    private Set<AssociationEntity> assocsToThis = new HashSet<>();;
+    private Set<AssociationEntity> assocsToThis = new HashSet<>();
 
     /*
      * Set of associations to other types
@@ -78,31 +75,10 @@ public class TypeEntity {
         orphanRemoval=true)
     private Set<AssociationEntity> assocsToOthers = new HashSet<>();
 
-    @OneToMany(
-        mappedBy = "type",
-        cascade = {CascadeType.ALL},
-        fetch = FetchType.EAGER,
-        orphanRemoval = true)
-    private List<TypeActionEntity> actions = new ArrayList<>();
+    @Column(name = "actions_str")
+    private String actions;
 
     public void setAssocsToOthers(Set<AssociationEntity> assocsToOthers) {
         EntityCollectionUtils.changeHibernateSet(this.assocsToOthers, assocsToOthers, AssociationEntity::getId);
-    }
-
-    public void addAction(TypeActionEntity actionEntity) {
-        actions.add(actionEntity);
-    }
-
-    public void addActions(List<TypeActionEntity> actions) {
-        actions.forEach(this::addAction);
-    }
-
-    public void removeAction(TypeActionEntity actionEntity) {
-        actions.remove(actionEntity);
-        actionEntity.setType(null);
-    }
-
-    public void setActions(List<TypeActionEntity> actionEntities) {
-        throw new UnsupportedOperationException("You must use utility methods addAction/removeAction");
     }
 }

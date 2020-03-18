@@ -59,7 +59,7 @@
               "maxWords": "",
               "pattern": ""
             },
-            "key": "id",
+            "key": "moduleId",
             "properties": {},
             "conditional": {
               "show": "",
@@ -286,8 +286,8 @@
             "encrypted": false,
             "displayColumnsAsyncData": [
               {
-                "label": "module_id",
-                "value": "module_id"
+                "label": "moduleId",
+                "value": "moduleId"
               },
               {
                 "label": "name",

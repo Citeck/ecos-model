@@ -3,13 +3,12 @@
     "attributes": {
         "name": "test-type",
         "description": "some description",
-        "tenant": "some-tenant",
         "inheritActions": true,
         "parent": "emodel/type@base",
         "form": "uiserv/eform@test-form",
         "actions": [
-            "ui/action$delete",
-            "ui/action$view"
+            "uiserv/action@delete",
+            "uiserv/action@view"
         ]
     }
 }

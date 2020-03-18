@@ -10,19 +10,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.citeck.ecos.records2.scalar.MLText;
-import ru.citeck.ecos.apps.app.module.ModuleRef;
+import ru.citeck.ecos.commons.data.MLText;
+import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.converter.dto.impl.TypeConverter;
 import ru.citeck.ecos.model.domain.AssociationEntity;
 import ru.citeck.ecos.model.domain.SectionEntity;
 import ru.citeck.ecos.model.domain.TypeActionEntity;
 import ru.citeck.ecos.model.domain.TypeEntity;
-import ru.citeck.ecos.model.dto.TypeAssociationDto;
-import ru.citeck.ecos.model.dto.TypeCreateVariantDto;
 import ru.citeck.ecos.model.dto.TypeDto;
+import ru.citeck.ecos.model.eapps.listener.AssociationDto;
+import ru.citeck.ecos.model.eapps.listener.CreateVariantDto;
 import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records2.utils.json.JsonUtils;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -36,10 +35,10 @@ public class TypeConverterTest {
     private TypeRepository typeRepository;
 
     @MockBean
-    private DtoConverter<TypeAssociationDto, AssociationEntity> associationConverter;
+    private DtoConverter<AssociationDto, AssociationEntity> associationConverter;
 
     @MockBean
-    private DtoConverter<TypeCreateVariantDto, String> typeCreateVariantConverter;
+    private DtoConverter<CreateVariantDto, String> typeCreateVariantConverter;
 
     private TypeConverter typeConverter;
 
@@ -48,16 +47,15 @@ public class TypeConverterTest {
 
     private TypeEntity parent;
 
-    private TypeActionEntity actionEntity;
-    private ModuleRef actionRef;
+    private RecordRef actionRef;
 
     private AssociationEntity associationEntity;
-    private TypeAssociationDto associationDto;
-    private TypeCreateVariantDto createVariantDto;
+    private AssociationDto associationDto;
+    private CreateVariantDto createVariantDto;
 
     @BeforeEach
     void setUp() {
-        typeConverter = new TypeConverter(typeRepository, associationConverter, typeCreateVariantConverter);
+        typeConverter = new TypeConverter(typeRepository, associationConverter);
 
         TypeEntity child = new TypeEntity();
         child.setExtId("child");
@@ -65,15 +63,11 @@ public class TypeConverterTest {
         parent = new TypeEntity();
         parent.setExtId("parent");
 
-        actionRef = ModuleRef.create("ui/action", "action");
-
-        actionEntity = new TypeActionEntity();
-        actionEntity.setActionId(actionRef.toString());
 
         SectionEntity sectionEntity = new SectionEntity();
         sectionEntity.setExtId("section");
 
-        createVariantDto = new TypeCreateVariantDto();
+        createVariantDto = new CreateVariantDto();
         createVariantDto.setId("createVariant");
 
         ObjectNode objectNode = null;
@@ -81,6 +75,12 @@ public class TypeConverterTest {
             objectNode = new ObjectMapper().createObjectNode();
             objectNode.put("field", "value");
         } catch (Exception ignored) { }
+
+        actionRef = RecordRef.create("uiserv", "action", "action");
+
+        TypeEntity baseType = new TypeEntity();
+        baseType.setExtId("base");
+        when(typeRepository.findByExtId("base")).thenReturn(Optional.of(baseType));
 
         typeEntity = new TypeEntity();
         typeEntity.setExtId("type");
@@ -90,15 +90,31 @@ public class TypeConverterTest {
         typeEntity.setDescription("desc");
         typeEntity.setChildren(Collections.singleton(child));
         typeEntity.setParent(parent);
-        typeEntity.addAction(actionEntity);
+        typeEntity.setActions("[\"" + actionRef + "\"]");
         typeEntity.setSections(Collections.singleton(sectionEntity));
         typeEntity.setAttributes(objectNode != null ? objectNode.toString() : "");
-        typeEntity.setCreateVariants("[\"{\\\"id\\\":\\\"id2\\\",\\\"name\\\":\\\"name2\\\",\\\"formRef\\\":\\\"" +
-            "type$formRef1\\\",\\\"recordRef\\\":\\\"type@recordRef1\\\",\\\"attributes\\\":\\\"{\\\\\\\"key" +
-            "\\\\\\\":\\\\\\\"value3\\\\\\\",\\\\\\\"key2\\\\\\\":\\\\\\\"value4\\\\\\\"}\\\"}\",\"{\\\"id\\\":" +
-            "\\\"id1\\\",\\\"name\\\":\\\"name1\\\",\\\"formRef\\\":\\\"type$formRef1\\\",\\\"recordRef\\\":\\\"" +
-            "type@recordRef1\\\",\\\"attributes\\\":\\\"{\\\\\\\"key\\\\\\\":\\\\\\\"value\\\\\\\",\\\\\\\"key2" +
-            "\\\\\\\":\\\\\\\"value2\\\\\\\"}\\\"}\"]");
+        typeEntity.setCreateVariants("[\n" +
+            "    {\n" +
+            "        \"id\": \"id2\",\n" +
+            "        \"name\": \"name2\",\n" +
+            "        \"formRef\": \"type$formRef1\",\n" +
+            "        \"recordRef\": \"type@recordRef1\",\n" +
+            "        \"attributes\": {\n" +
+            "            \"key\": \"value3\",\n" +
+            "            \"key2\": \"value4\"\n" +
+            "        }\n" +
+            "    },\n" +
+            "    {\n" +
+            "        \"id\": \"id1\",\n" +
+            "        \"name\": \"name1\",\n" +
+            "        \"formRef\": \"type$formRef1\",\n" +
+            "        \"recordRef\": \"type@recordRef1\",\n" +
+            "        \"attributes\": {\n" +
+            "            \"key\": \"value\",\n" +
+            "            \"key2\": \"value2\"\n" +
+            "        }\n" +
+            "    }\n" +
+            "]");
 
         associationEntity = new AssociationEntity();
         associationEntity.setExtId("association");
@@ -106,17 +122,16 @@ public class TypeConverterTest {
 
         typeEntity.setAssocsToOthers(Collections.singleton(associationEntity));
 
-        associationDto = new TypeAssociationDto();
+        associationDto = new AssociationDto();
         associationDto.setId("association");
-        associationDto.setTargetType(RecordRef.create("type", "parent"));
+        associationDto.setTarget(RecordRef.create("type", "parent"));
 
         typeDto = new TypeDto();
         typeDto.setId("type");
         typeDto.setName(new MLText("name"));
-        typeDto.setTenant("tenant");
         typeDto.setDescription(new MLText("desc"));
-        typeDto.setActions(Collections.singleton(actionRef));
-        typeDto.setAssociations(Collections.singleton(associationDto));
+        typeDto.setActions(Collections.singletonList(actionRef));
+        typeDto.setAssociations(Collections.singletonList(associationDto));
         typeDto.setInheritActions(true);
         typeDto.setParent(RecordRef.create("type", parent.getExtId()));
     }
@@ -134,14 +149,13 @@ public class TypeConverterTest {
 
         //  assert
         Assert.assertEquals(resultDto.getId(), typeEntity.getExtId());
-        Assert.assertEquals(resultDto.getName(), JsonUtils.read(typeEntity.getName(), MLText.class));
-        Assert.assertEquals(resultDto.getDescription(), JsonUtils.read(typeEntity.getDescription(), MLText.class));
-        Assert.assertEquals(resultDto.getTenant(), typeEntity.getTenant());
+        Assert.assertEquals(resultDto.getName(), Json.getMapper().read(typeEntity.getName(), MLText.class));
+        Assert.assertEquals(resultDto.getDescription(), Json.getMapper().read(typeEntity.getDescription(), MLText.class));
         Assert.assertEquals(resultDto.getParent(), RecordRef.create("emodel", "type", parent.getExtId()));
-        Assert.assertEquals(resultDto.getActions(), Collections.singleton(actionRef));
-        Assert.assertEquals(resultDto.getAssociations(), Collections.singleton(associationDto));
+        Assert.assertEquals(resultDto.getActions(), Collections.singletonList(actionRef));
+        Assert.assertEquals(resultDto.getAssociations(), Collections.singletonList(associationDto));
         Assert.assertEquals(resultDto.getAttributes().toString(), typeEntity.getAttributes());
-        Assert.assertEquals(resultDto.getCreateVariants().iterator().next().getId(), "createVariant");
+        Assert.assertEquals(resultDto.getCreateVariants().iterator().next().getId(), "id2");
     }
 
     @Test
@@ -150,7 +164,7 @@ public class TypeConverterTest {
         //  arrange
         typeEntity.setParent(null);
         typeEntity.setAssocsToOthers(Collections.emptySet());
-        typeEntity.removeAction(actionEntity);
+        typeEntity.setActions(null);
         typeEntity.setCreateVariants(null);
         typeEntity.setAttributes(null);
 
@@ -159,14 +173,13 @@ public class TypeConverterTest {
 
         //  assert
         Assert.assertEquals(resultDto.getId(), typeEntity.getExtId());
-        Assert.assertEquals(resultDto.getName(), JsonUtils.read(typeEntity.getName(), MLText.class));
-        Assert.assertEquals(resultDto.getDescription(), JsonUtils.read(typeEntity.getDescription(), MLText.class));
-        Assert.assertEquals(resultDto.getTenant(), typeEntity.getTenant());
+        Assert.assertEquals(resultDto.getName(), Json.getMapper().read(typeEntity.getName(), MLText.class));
+        Assert.assertEquals(resultDto.getDescription(), Json.getMapper().read(typeEntity.getDescription(), MLText.class));
         Assert.assertNull(resultDto.getAttributes());
-        Assert.assertEquals(resultDto.getCreateVariants(), Collections.emptySet());
+        Assert.assertEquals(resultDto.getCreateVariants(), Collections.emptyList());
         Assert.assertEquals(resultDto.getParent(), RecordRef.valueOf("emodel/type@base"));
-        Assert.assertEquals(resultDto.getAssociations(), Collections.emptySet());
-        Assert.assertEquals(resultDto.getActions(), Collections.emptySet());
+        Assert.assertEquals(resultDto.getAssociations(), Collections.emptyList());
+        Assert.assertEquals(resultDto.getActions(), Collections.emptyList());
     }
 
     @Test
@@ -184,32 +197,30 @@ public class TypeConverterTest {
         //  assert
         Assert.assertEquals(resultEntity.getExtId(), typeDto.getId());
         Assert.assertEquals(resultEntity.getId().longValue(), 123L);
-        Assert.assertEquals(JsonUtils.read(resultEntity.getName(), MLText.class), typeDto.getName());
-        Assert.assertEquals(JsonUtils.read(resultEntity.getDescription(), MLText.class), typeDto.getDescription());
-        Assert.assertEquals(resultEntity.getTenant(), typeDto.getTenant());
-        Assert.assertEquals(resultEntity.getAssocsToOthers(), Collections.emptySet());
-        Assert.assertEquals(resultEntity.getActions(), Collections.singletonList(actionEntity));
-        Assert.assertEquals(resultEntity.getChildren(), Collections.emptySet());
+        Assert.assertEquals(Json.getMapper().read(resultEntity.getName(), MLText.class), typeDto.getName());
+        Assert.assertEquals(Json.getMapper().read(resultEntity.getDescription(), MLText.class), typeDto.getDescription());
+        Assert.assertEquals(1, resultEntity.getAssocsToOthers().size());
+        Assert.assertEquals(resultEntity.getActions(), "[\"" + actionRef.toString() + "\"]");
+        Assert.assertEquals(1, resultEntity.getChildren().size());
         Assert.assertEquals(resultEntity.getParent(), parent);
-        Assert.assertEquals(resultEntity.getSections(), Collections.emptySet());
+        Assert.assertEquals(1, resultEntity.getSections().size());
     }
 
     @Test
     void testDtoToEntityWithoutParentAndAssociationsAndExtIdAndActions() {
 
         //  arrange
-        typeDto.setActions(Collections.emptySet());
+        typeDto.setActions(Collections.emptyList());
         typeDto.setParent(null);
         typeDto.setId(Strings.EMPTY);
-        typeDto.setAssociations(Collections.emptySet());
+        typeDto.setAssociations(Collections.emptyList());
 
         //  act
         TypeEntity resultEntity = typeConverter.sourceToTarget(typeDto);
 
         //  assert
-        Assert.assertEquals(JsonUtils.read(resultEntity.getName(), MLText.class), typeDto.getName());
-        Assert.assertEquals(JsonUtils.read(resultEntity.getDescription(), MLText.class), typeDto.getDescription());
-        Assert.assertEquals(resultEntity.getTenant(), typeDto.getTenant());
+        Assert.assertEquals(Json.getMapper().read(resultEntity.getName(), MLText.class), typeDto.getName());
+        Assert.assertEquals(Json.getMapper().read(resultEntity.getDescription(), MLText.class), typeDto.getDescription());
         Assert.assertEquals(resultEntity.getChildren(), Collections.emptySet());
         Assert.assertEquals(resultEntity.getSections(), Collections.emptySet());
     }

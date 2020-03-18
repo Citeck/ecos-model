@@ -1,29 +1,22 @@
 package ru.citeck.ecos.model.converter.dto.impl;
 
-import ecos.com.fasterxml.jackson210.core.JsonProcessingException;
-import ecos.com.fasterxml.jackson210.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
-import ru.citeck.ecos.records2.objdata.ObjectData;
-import ru.citeck.ecos.records2.scalar.MLText;
-import ru.citeck.ecos.apps.app.module.ModuleRef;
+import ru.citeck.ecos.commons.data.MLText;
+import ru.citeck.ecos.commons.data.ObjectData;
+import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.converter.dto.AbstractDtoConverter;
 import ru.citeck.ecos.model.converter.dto.DtoConverter;
 import ru.citeck.ecos.model.dao.TypeRecordsDao;
 import ru.citeck.ecos.model.domain.AssociationEntity;
-import ru.citeck.ecos.model.domain.TypeActionEntity;
 import ru.citeck.ecos.model.domain.TypeEntity;
-import ru.citeck.ecos.model.dto.TypeAssociationDto;
-import ru.citeck.ecos.model.dto.TypeCreateVariantDto;
 import ru.citeck.ecos.model.dto.TypeDto;
+import ru.citeck.ecos.model.eapps.listener.AssociationDto;
+import ru.citeck.ecos.model.eapps.listener.CreateVariantDto;
 import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records2.utils.json.JsonUtils;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -34,29 +27,20 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
     private static final String BASE_TYPE_ID = "base";
 
     private final TypeRepository typeRepository;
-    private final DtoConverter<TypeAssociationDto, AssociationEntity> associationConverter;
-    private final DtoConverter<TypeCreateVariantDto, String> typeCreateVariantConverter;
-    private final ObjectMapper objectMapper;
+    private final DtoConverter<AssociationDto, AssociationEntity> associationConverter;
 
     public TypeConverter(TypeRepository typeRepository,
-                         DtoConverter<TypeAssociationDto, AssociationEntity> associationConverter,
-                         DtoConverter<TypeCreateVariantDto, String> typeCreateVariantConverter) {
+                         DtoConverter<AssociationDto, AssociationEntity> associationConverter) {
+
         this.typeRepository = typeRepository;
         this.associationConverter = associationConverter;
-        this.typeCreateVariantConverter = typeCreateVariantConverter;
-        this.objectMapper = new ObjectMapper();
     }
 
-    /*
-    *   Note:
-    *
-    *   Associations logic moved to 'extractAndSaveAssocsFromType' method AssociationServiceImpl.class
-    *   We cant and dont need to handle assocs to other types here.
-    */
     @Override
     public TypeEntity dtoToEntity(TypeDto dto) {
 
-        TypeEntity typeEntity = new TypeEntity();
+        Optional<TypeEntity> storedType = typeRepository.findByExtId(dto.getId());
+        TypeEntity typeEntity = storedType.orElseGet(TypeEntity::new);
 
         typeEntity.setSystem(dto.isSystem());
         typeEntity.setDashboardType(dto.getDashboardType());
@@ -67,29 +51,21 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
         } else {
             typeEntity.setExtId(typeDtoId);
         }
-        if (dto.getName() != null) {
-            typeEntity.setName(JsonUtils.toString(dto.getName()));
-        }
-        if (dto.getDescription() != null) {
-            typeEntity.setDescription(JsonUtils.toString(dto.getDescription()));
-        }
-        typeEntity.setTenant(dto.getTenant());
+        typeEntity.setName(Json.getMapper().toString(dto.getName()));
+        typeEntity.setDescription(Json.getMapper().toString(dto.getDescription()));
         typeEntity.setInheritActions(dto.isInheritActions());
 
         ObjectData attributes = dto.getAttributes();
-        if (attributes != null) {
-            typeEntity.setAttributes(attributes.toString());
-        }
-
-        if (StringUtils.isNotBlank(dto.getForm())) {
-            typeEntity.setForm(dto.getForm());
-        }
+        typeEntity.setAttributes(attributes.toString());
+        typeEntity.setForm(RecordRef.toString(dto.getForm()));
 
         RecordRef parentRef = dto.getParent();
-        String parentExtId = null;
-        if (parentRef == null || Strings.isBlank(parentRef.getId())) {
+        String parentExtId;
+        if (RecordRef.isEmpty(parentRef)) {
             if (!Objects.equals(dto.getId(), BASE_TYPE_ID)) {
                 parentExtId = BASE_TYPE_ID;
+            } else {
+                parentExtId = null;
             }
         } else {
             parentExtId = parentRef.getId();
@@ -97,29 +73,12 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
 
         if (parentExtId != null) {
             Optional<TypeEntity> optionalParent = typeRepository.findByExtId(parentExtId);
-            optionalParent.ifPresent(typeEntity::setParent);
+            typeEntity.setParent(optionalParent.orElseThrow(() ->
+                new IllegalStateException("Type is undefined: '" + parentExtId + "'")));
         }
 
-        //  checking for existing in DB
-        Optional<TypeEntity> storedType = typeRepository.findByExtId(typeEntity.getExtId());
-        storedType.ifPresent(t -> {
-            typeEntity.setId(t.getId());
-        });
-
-        //  actions
-        List<TypeActionEntity> actionEntities = dto.getActions().stream()
-            .filter(a -> StringUtils.isNotBlank(a.getId()))
-            .map(a -> new TypeActionEntity(typeEntity, a.toString()))
-            .collect(Collectors.toList());
-        typeEntity.addActions(actionEntities);
-
-        // create variants
-        Set<TypeCreateVariantDto> createVariantDTOs = dto.getCreateVariants();
-        Set<String> createVariantsStrings = createVariantDTOs.stream()
-            .map(typeCreateVariantConverter::dtoToEntity)
-            .collect(Collectors.toSet());
-        String createVariantsStr = convertListOfStringsToContent(createVariantsStrings);
-        typeEntity.setCreateVariants(createVariantsStr);
+        typeEntity.setActions(Json.getMapper().toString(dto.getActions()));
+        typeEntity.setCreateVariants(Json.getMapper().toString(dto.getCreateVariants()));
 
         checkCyclicDependencies(typeEntity);
 
@@ -143,17 +102,6 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
         }
     }
 
-    private String convertListOfStringsToContent(Set<String> strings) {
-        if (CollectionUtils.isNotEmpty(strings)) {
-            try {
-                return objectMapper.writeValueAsString(strings);
-            } catch (JsonProcessingException jpe) {
-                log.error("Cannot create solid string from multiple", jpe);
-            }
-        }
-        return null;
-    }
-
     @Override
     public TypeDto entityToDto(TypeEntity entity) {
 
@@ -162,21 +110,13 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
         dto.setSystem(Boolean.TRUE.equals(entity.getSystem()));
         dto.setDashboardType(entity.getDashboardType());
         dto.setId(entity.getExtId());
-        dto.setName(JsonUtils.read(entity.getName(), MLText.class));
-        dto.setDescription(JsonUtils.read(entity.getDescription(), MLText.class));
+        dto.setName(Json.getMapper().read(entity.getName(), MLText.class));
+        dto.setDescription(Json.getMapper().read(entity.getDescription(), MLText.class));
         dto.setInheritActions(entity.isInheritActions());
-        dto.setTenant(entity.getTenant());
-        dto.setForm(entity.getForm());
+        dto.setForm(RecordRef.valueOf(entity.getForm()));
 
         String attributesStr = entity.getAttributes();
-        if (StringUtils.isNotBlank(attributesStr)) {
-            try {
-                dto.setAttributes(JsonUtils.read(attributesStr, ObjectData.class));
-            } catch (RuntimeException ioe) {
-                log.error("Cannot deserialize attributes for type entity with id: '"
-                    + entity.getId() + "' Str: " + attributesStr);
-            }
-        }
+        dto.setAttributes(Json.getMapper().read(attributesStr, ObjectData.class));
 
         TypeEntity parent = entity.getParent();
         String parentExtId = null;
@@ -192,34 +132,23 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
             dto.setParent(parentRecordRef);
         }
 
-        Set<TypeAssociationDto> associationDtoSet = entity.getAssocsToOthers().stream()
+        Set<AssociationDto> associationDtoSet = entity.getAssocsToOthers().stream()
             .map(associationConverter::entityToDto)
             .collect(Collectors.toSet());
-        dto.setAssociations(associationDtoSet);
+        dto.setAssociations(new ArrayList<>(associationDtoSet));
 
-        Set<ModuleRef> actionsModuleRefs = entity.getActions().stream()
-            .map(a -> ModuleRef.valueOf(a.getActionId()))
-            .collect(Collectors.toSet());
-        dto.setActions(actionsModuleRefs);
-
-        Set<String> createVariantsStrings = convertContentToListOfString(entity.getCreateVariants());
-        Set<TypeCreateVariantDto> createVariants = createVariantsStrings.stream()
-            .map(typeCreateVariantConverter::entityToDto)
-            .collect(Collectors.toSet());
-        dto.setCreateVariants(createVariants);
+        dto.setActions(Json.getMapper().read(entity.getActions(), RecordRefsList.class));
+        if (dto.getActions() == null) {
+            dto.setActions(Collections.emptyList());
+        }
+        dto.setCreateVariants(Json.getMapper().read(entity.getCreateVariants(), CreateVariantsList.class));
+        if (dto.getCreateVariants() == null) {
+            dto.setCreateVariants(Collections.emptyList());
+        }
 
         return dto;
     }
 
-    @SuppressWarnings("unchecked")
-    private Set<String> convertContentToListOfString(String content) {
-        if (content != null) {
-            try {
-                return objectMapper.readValue(content, Set.class);
-            } catch (IOException ioe) {
-                log.error("Cannot convert content to list of strings");
-            }
-        }
-        return Collections.emptySet();
-    }
+    public static class RecordRefsList extends ArrayList<RecordRef> {}
+    public static class CreateVariantsList extends ArrayList<CreateVariantDto> {}
 }

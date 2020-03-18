@@ -3,15 +3,14 @@
     "attributes": {
         "name": "third-with-overridden",
         "description": "third-with-overridden",
-        "tenant": "third-tenant",
         "inheritActions": true,
         "parent": "emodel/type@type-second",
         "form": null,
         "actions": [
-            "ui/action$print",
-            "ui/action$fire3",
-            "ui/action$reset3",
-            "ui/action$edit"
+            "uiserv/action@print",
+            "uiserv/action@fire3",
+            "uiserv/action@reset3",
+            "uiserv/action@edit"
         ]
     }
 }

@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import ru.citeck.ecos.model.converter.dto.DtoConverter;
 import ru.citeck.ecos.model.domain.AssociationEntity;
 import ru.citeck.ecos.model.domain.TypeEntity;
-import ru.citeck.ecos.model.dto.TypeAssociationDto;
 import ru.citeck.ecos.model.dto.TypeDto;
+import ru.citeck.ecos.model.eapps.listener.AssociationDto;
 import ru.citeck.ecos.model.repository.AssociationRepository;
 import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.model.service.AssociationService;
@@ -24,7 +24,7 @@ public class AssociationServiceImpl implements AssociationService {
 
     private final AssociationRepository associationRepository;
     private final TypeRepository typeRepository;
-    private final DtoConverter<TypeAssociationDto, AssociationEntity> associationConverter;
+    private final DtoConverter<AssociationDto, AssociationEntity> associationConverter;
     private final DtoConverter<TypeDto, TypeEntity> typeConverter;
 
     /*
@@ -43,7 +43,7 @@ public class AssociationServiceImpl implements AssociationService {
                 assocEntity.setSource(sourceEntity);
                 assocEntity.setSourceId(sourceEntity.getId());
 
-                RecordRef targetTypeRecordRef = a.getTargetType();
+                RecordRef targetTypeRecordRef = a.getTarget();
                 if (targetTypeRecordRef == null) {
                     throw new IllegalArgumentException("Target type is null");
                 }
