@@ -6,6 +6,7 @@
     },
     "dashboardType": "case-details",
     "actions": [
+        "uiserv/action@upload-new-version",
         "uiserv/action@edit",
         "uiserv/action@content-download",
         "uiserv/action@record-actions",
