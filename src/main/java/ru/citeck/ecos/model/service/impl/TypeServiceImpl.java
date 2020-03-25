@@ -241,7 +241,7 @@ public class TypeServiceImpl implements TypeService {
         if (StringUtils.isNotBlank(predicateDto.moduleId)) {
             Specification<TypeEntity> idSpec = (root, query, builder) ->
                 builder.like(builder.lower(root.get("extId")), "%" + predicateDto.moduleId.toLowerCase() + "%");
-            spec = spec != null ? spec.and(idSpec) : idSpec;
+            spec = spec != null ? spec.or(idSpec) : idSpec;
         }
 
         return spec;
