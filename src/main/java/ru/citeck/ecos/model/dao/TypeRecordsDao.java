@@ -88,18 +88,17 @@ public class TypeRecordsDao extends LocalRecordsDAO
 
             Predicate predicate = recordsQuery.getQuery(Predicate.class);
 
-            recordsQuery.setSourceId(ID);
-            recordsQuery.setLanguage(LANGUAGE_EMPTY);
+            int max = recordsQuery.getMaxItems();
+            if (max <= 0) {
+                max = 10000;
+            }
 
-            Elements<RecordElement> elements = new RecordElements(recordsService, recordsQuery);
+            Collection<TypeDto> types = typeService.getAll(max, recordsQuery.getSkipCount(), predicate);
 
-            Set<String> filteredResultIds = predicateService.filter(elements, predicate).stream()
-                .map(e -> e.getRecordRef().getId())
-                .collect(Collectors.toSet());
-
-            result.addRecords(typeService.getAll(filteredResultIds).stream()
+            result.setRecords(types.stream()
                 .map(TypeRecord::new)
                 .collect(Collectors.toList()));
+            result.setTotalCount(typeService.getCount(predicate));
 
         } else {
 
