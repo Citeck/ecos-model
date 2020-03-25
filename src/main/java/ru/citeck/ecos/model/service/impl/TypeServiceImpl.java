@@ -82,11 +82,42 @@ public class TypeServiceImpl implements TypeService {
 
         List<TypeDto> result = new ArrayList<>();
         forEachTypeInHierarchy(extId, type -> {
-            result.add(type);
+            if (!Objects.equals(type.getId(), extId)) {
+                result.add(type);
+            }
             return false;
         });
 
         return result;
+    }
+
+    @Override
+    public List<TypeDto> getChildren(String extId) {
+
+        List<TypeDto> result = new ArrayList<>();
+        forEachTypeInDescHierarchy(extId, type -> {
+            if (!Objects.equals(type.getId(), extId)) {
+                result.add(type);
+            }
+            return false;
+        });
+
+        return result;
+    }
+
+    private void forEachTypeInDescHierarchy(String extId, Function<TypeDto, Boolean> action) {
+        forEachTypeInDescHierarchy(typeRepository.findByExtId(extId).orElse(null), action);
+    }
+
+    private void forEachTypeInDescHierarchy(TypeEntity type, Function<TypeDto, Boolean> action) {
+        if (type == null) {
+            return;
+        }
+        if (action.apply(typeConverter.entityToDto(type))) {
+            return;
+        }
+        Set<TypeEntity> types = typeRepository.findAllByParent(type);
+        types.forEach(t -> forEachTypeInDescHierarchy(t, action));
     }
 
     private void forEachTypeInHierarchy(String extId, Function<TypeDto, Boolean> action) {

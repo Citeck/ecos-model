@@ -16,4 +16,6 @@ public interface TypeRepository extends JpaRepository<TypeEntity, Long> {
 
     @Query("SELECT TYPE FROM TypeEntity TYPE WHERE TYPE.extId IN ?1")
     Set<TypeEntity> findAllByExtIds(Set<String> extIds);
+
+    Set<TypeEntity> findAllByParent(TypeEntity parent);
 }

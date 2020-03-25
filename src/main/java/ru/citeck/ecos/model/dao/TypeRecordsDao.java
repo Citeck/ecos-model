@@ -168,14 +168,20 @@ public class TypeRecordsDao extends LocalRecordsDAO
     public class TypeRecord implements MetaValue {
 
         private final TypeDto dto;
+        private final boolean innerType;
 
         public TypeRecord(TypeDto dto) {
+            this(dto, false);
+        }
+
+        public TypeRecord(TypeDto dto, boolean innerType) {
             this.dto = dto;
+            this.innerType = innerType;
         }
 
         @Override
         public String getId() {
-            return dto.getId();
+            return innerType ? "emodel/type@" + dto.getId() : dto.getId();
         }
 
         @Override
@@ -207,10 +213,9 @@ public class TypeRecordsDao extends LocalRecordsDAO
                 case RecordConstants.ATT_PARENT:
                     return dto.getParent();
                 case "parents":
-                    return typeService.getParents(dto.getId())
-                        .stream()
-                        .map(dto -> RecordRef.create("emodel", ID, dto.getId()))
-                        .collect(Collectors.toList());
+                    return toInnerTypeRecords(typeService.getParents(dto.getId()));
+                case "children":
+                    return toInnerTypeRecords(typeService.getChildren(dto.getId()));
                 case "actions":
                     return dto.getActions();
                 case RecordConstants.ATT_ACTIONS:
@@ -243,6 +248,12 @@ public class TypeRecordsDao extends LocalRecordsDAO
         public Object getJson() {
             return dto;
         }
+    }
+
+    private List<TypeRecord> toInnerTypeRecords(Collection<TypeDto> types) {
+        return types.stream()
+            .map(dto -> new TypeRecord(dto, true))
+            .collect(Collectors.toList());
     }
 
     private RecordRef findAndGetInheritedForm(TypeDto typeDto) {
