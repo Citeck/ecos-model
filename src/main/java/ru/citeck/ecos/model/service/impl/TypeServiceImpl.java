@@ -179,6 +179,11 @@ public class TypeServiceImpl implements TypeService {
     }
 
     @Override
+    public TypeDto getByExtIdOrNull(String extId) {
+        return typeRepository.findByExtId(extId).map(typeConverter::entityToDto).orElse(null);
+    }
+
+    @Override
     public TypeDto getOrCreateByExtId(String extId) {
 
         Optional<TypeEntity> byExtId = typeRepository.findByExtId(extId);

@@ -22,6 +22,8 @@ public interface TypeService {
 
     TypeDto getByExtId(String extId);
 
+    TypeDto getByExtIdOrNull(String extId);
+
     TypeDto getOrCreateByExtId(String extId);
 
     List<TypeDto> getParents(String extId);
