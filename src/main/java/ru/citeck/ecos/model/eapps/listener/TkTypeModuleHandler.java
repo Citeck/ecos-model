@@ -6,10 +6,15 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.apps.module.handler.EcosModuleHandler;
+import ru.citeck.ecos.apps.module.handler.ModuleMeta;
 import ru.citeck.ecos.apps.module.handler.ModuleWithMeta;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.service.TypeService;
+import ru.citeck.ecos.records2.RecordRef;
+
+import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -39,7 +44,16 @@ public class TkTypeModuleHandler implements EcosModuleHandler<TypeDto> {
     @NotNull
     @Override
     public ModuleWithMeta<TypeDto> getModuleMeta(@NotNull TypeDto module) {
-        return typeModuleHandler.getModuleMeta(module);
+
+        ModuleWithMeta<TypeDto> meta = typeModuleHandler.getModuleMeta(module);
+
+        List<RecordRef> dependencies = meta.getMeta()
+            .getDependencies()
+            .stream()
+            .map(d -> RecordRef.create(d.getAppName(), "tk_type", d.getId()))
+            .collect(Collectors.toList());
+
+        return new ModuleWithMeta<>(meta.getModule(), new ModuleMeta(meta.getMeta().getId(), dependencies));
     }
 
     @NotNull

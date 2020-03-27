@@ -3,7 +3,7 @@
 
 modelVersion: "1.0"
 
-source-id: "type"
+source-id: "tk_type"
 
 controller:
     type: json
