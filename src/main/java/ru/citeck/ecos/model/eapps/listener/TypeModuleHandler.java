@@ -22,9 +22,20 @@ public class TypeModuleHandler implements EcosModuleHandler<TypeDto> {
 
     private final TypeService typeService;
 
+    private boolean disableListener = false;
+
     @Override
     public void deployModule(@NotNull TypeDto module) {
         typeService.save(module);
+    }
+
+    public void doWithoutChangeListener(Runnable action) {
+        disableListener = true;
+        try {
+            action.run();
+        } finally {
+            disableListener = false;
+        }
     }
 
     @NotNull
@@ -57,7 +68,11 @@ public class TypeModuleHandler implements EcosModuleHandler<TypeDto> {
 
     @Override
     public void listenChanges(@NotNull Consumer<TypeDto> consumer) {
-        typeService.addListener(consumer);
+        typeService.addListener(m -> {
+            if (!disableListener) {
+                consumer.accept(m);
+            }
+        });
     }
 
     @Nullable

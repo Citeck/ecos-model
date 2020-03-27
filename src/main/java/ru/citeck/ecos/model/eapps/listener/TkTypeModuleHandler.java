@@ -21,11 +21,14 @@ public class TkTypeModuleHandler implements EcosModuleHandler<TypeDto> {
 
     @Override
     public void deployModule(@NotNull TypeDto module) {
+
         log.info("Received TK type to deploy: " + module.getId());
+
         TypeDto currentType = typeService.getByExtId(module.getId());
         currentType.setParent(module.getParent());
         currentType.setName(module.getName());
-        typeService.save(currentType);
+
+        typeModuleHandler.doWithoutChangeListener(() -> typeService.save(currentType));
     }
 
     @NotNull
