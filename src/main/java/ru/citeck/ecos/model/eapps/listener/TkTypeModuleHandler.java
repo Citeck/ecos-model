@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import ru.citeck.ecos.apps.module.handler.EcosModuleHandler;
 import ru.citeck.ecos.apps.module.handler.ModuleMeta;
 import ru.citeck.ecos.apps.module.handler.ModuleWithMeta;
+import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.service.TypeService;
 import ru.citeck.ecos.records2.RecordRef;
@@ -33,9 +34,15 @@ public class TkTypeModuleHandler implements EcosModuleHandler<TypeDto> {
         if (currentType == null) {
             currentType = new TypeDto();
             currentType.setId(module.getId());
+            currentType.setName(module.getName());
+        } else {
+            MLText name = currentType.getName();
+            if (name == null || name.getAsMap().size() == 1) {
+                currentType.setName(module.getName());
+            }
         }
         currentType.setParent(module.getParent());
-        currentType.setName(module.getName());
+
 
         TypeDto finalType = currentType;
         typeModuleHandler.doWithoutChangeListener(() -> typeService.save(finalType));
