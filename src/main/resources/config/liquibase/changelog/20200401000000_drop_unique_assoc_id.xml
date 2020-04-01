@@ -1,0 +1,30 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <changeSet author="citeck" id="20200401000000">
+
+        <addColumn tableName="ecos_association">
+            <column name="ext_id_new" type="VARCHAR" valueComputed="ext_id" />
+        </addColumn>
+
+        <dropPrimaryKey constraintName="pk_ecos_association"
+                        tableName="ecos_association"/>
+
+        <dropColumn tableName="ecos_association" columnName="ext_id" />
+
+        <renameColumn tableName="ecos_association" oldColumnName="ext_id_new" newColumnName="ext_id"/>
+
+        <addNotNullConstraint columnName="ext_id"
+                              constraintName="ct_ext_id_not_null"
+                              tableName="ecos_association"
+                              columnDataType="VARCHAR" />
+
+        <addPrimaryKey columnNames="source_id, ext_id"
+                       constraintName="pk_ecos_association"
+                       tableName="ecos_association"/>
+
+    </changeSet>
+
+</databaseChangeLog>
