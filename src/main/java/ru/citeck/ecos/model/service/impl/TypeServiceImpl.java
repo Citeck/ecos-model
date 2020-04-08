@@ -190,19 +190,18 @@ public class TypeServiceImpl implements TypeService {
 
         return byExtId.map(typeConverter::entityToDto)
             .orElseGet(() -> {
+                if ("base".equals(extId) || "user-base".equals(extId)) {
+                    throw new IllegalStateException("Base type doesn't exists!");
+                }
 
-            if ("base".equals(extId) || "user-base".equals(extId)) {
-                throw new IllegalStateException("Base type doesn't exists!");
-            }
+                TypeDto typeDto = new TypeDto();
+                typeDto.setId(extId);
+                typeDto.setInheritActions(true);
+                typeDto.setParent(RecordRef.create("emodel", "type", "user-base"));
+                typeDto.setName(new MLText(extId));
 
-            TypeDto typeDto = new TypeDto();
-            typeDto.setId(extId);
-            typeDto.setInheritActions(true);
-            typeDto.setParent(RecordRef.create("emodel", "type", "user-base"));
-            typeDto.setName(new MLText(extId));
-
-            return save(typeDto);
-        });
+                return save(typeDto);
+            });
     }
 
     public TypeDto getBaseType() {
@@ -226,12 +225,65 @@ public class TypeServiceImpl implements TypeService {
     @Override
     @Transactional
     public TypeDto save(TypeDto dto) {
-        TypeEntity entity = typeConverter.dtoToEntity(dto);
-        entity = typeRepository.save(entity);
-        associationService.extractAndSaveAssocsFromType(dto);
-        TypeDto typeDto = typeConverter.entityToDto(entity);
+        TypeEntity entity;
+        TypeDto savedDto = dto;
+
+        String id = dto.getId();
+        String aliasOwnerId = getAliasOwnerIdIfExists(id);
+        if (aliasOwnerId != null) {
+            savedDto = new TypeDto(dto);
+            savedDto.setId(aliasOwnerId);
+            entity = typeConverter.dtoToEntity(savedDto);
+        } else if (dto.getAliases() != null && !dto.getAliases().isEmpty()) {
+            List<String> aliasedEntitiesIds = savedDto.getAliases().stream()
+                .filter(typeRepository::existsByExtId)
+                .collect(Collectors.toList());
+
+            if (!aliasedEntitiesIds.isEmpty()) {
+                Iterator<String> iterator = aliasedEntitiesIds.iterator();
+
+                String firstEntityId = iterator.next();
+                savedDto = new TypeDto();
+                savedDto.setId(firstEntityId);
+                entity = typeConverter.dtoToEntity(savedDto);
+
+                savedDto.setId(dto.getId());
+                entity.setExtId(dto.getId());
+
+                while (iterator.hasNext()) {
+                    typeRepository.findByExtId(iterator.next())
+                        .ifPresent(forRemoval -> moveChildren(forRemoval, entity));
+                }
+            } else {
+                entity = typeConverter.dtoToEntity(savedDto);
+            }
+        } else {
+            entity = typeConverter.dtoToEntity(savedDto);
+        }
+
+        TypeEntity saved = typeRepository.save(entity);
+        associationService.extractAndSaveAssocsFromType(savedDto);
+        TypeDto typeDto = typeConverter.entityToDto(saved);
         onTypeChangedListener.accept(typeDto);
         return typeDto;
+    }
+
+    private String getAliasOwnerIdIfExists(String extId) {
+        return typeRepository.findByContainsInAliases(extId)
+            .map(TypeEntity::getExtId)
+            .orElse(null);
+    }
+
+    private void moveChildren(TypeEntity from, TypeEntity to) {
+        Set<TypeEntity> children = from.getChildren();
+        TypeEntity child;
+        for (Iterator<TypeEntity> it = children.iterator(); it.hasNext(); ) {
+            child = it.next();
+            child.setParent(to);
+            typeRepository.save(child);
+            to.getChildren().add(child);
+            it.remove();
+        }
     }
 
     private Specification<TypeEntity> toSpec(Predicate predicate) {

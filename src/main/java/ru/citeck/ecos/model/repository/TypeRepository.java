@@ -15,8 +15,16 @@ public interface TypeRepository extends JpaRepository<TypeEntity, Long>, JpaSpec
     @Query("SELECT TYPE FROM TypeEntity TYPE WHERE TYPE.extId = ?1")
     Optional<TypeEntity> findByExtId(String extId);
 
+    boolean existsByExtId(String extId);
+
     @Query("SELECT TYPE FROM TypeEntity TYPE WHERE TYPE.extId IN ?1")
     Set<TypeEntity> findAllByExtIds(Set<String> extIds);
 
     Set<TypeEntity> findAllByParent(TypeEntity parent);
+
+    @Query("SELECT TYPE " +
+        "FROM TypeEntity TYPE " +
+        "JOIN TYPE.aliases aliases " +
+        "WHERE ?1 = aliases")
+    Optional<TypeEntity> findByContainsInAliases(String alias);
 }

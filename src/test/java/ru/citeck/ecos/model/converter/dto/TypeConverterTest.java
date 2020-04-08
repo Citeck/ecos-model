@@ -15,7 +15,6 @@ import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.converter.dto.impl.TypeConverter;
 import ru.citeck.ecos.model.domain.AssociationEntity;
 import ru.citeck.ecos.model.domain.SectionEntity;
-import ru.citeck.ecos.model.domain.TypeActionEntity;
 import ru.citeck.ecos.model.domain.TypeEntity;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.eapps.listener.AssociationDto;
@@ -115,6 +114,7 @@ public class TypeConverterTest {
             "        }\n" +
             "    }\n" +
             "]");
+        typeEntity.setAliases(Collections.singleton("alias"));
 
         associationEntity = new AssociationEntity();
         associationEntity.setExtId("association");
@@ -134,6 +134,7 @@ public class TypeConverterTest {
         typeDto.setAssociations(Collections.singletonList(associationDto));
         typeDto.setInheritActions(true);
         typeDto.setParent(RecordRef.create("type", parent.getExtId()));
+        typeDto.setAliases(Collections.singletonList("alias"));
     }
 
     @Test
@@ -167,6 +168,7 @@ public class TypeConverterTest {
         typeEntity.setActions(null);
         typeEntity.setCreateVariants(null);
         typeEntity.setAttributes(null);
+        typeEntity.setAliases(Collections.emptySet());
 
         //  act
         TypeDto resultDto = typeConverter.targetToSource(typeEntity);
@@ -180,6 +182,7 @@ public class TypeConverterTest {
         Assert.assertEquals(resultDto.getParent(), RecordRef.valueOf("emodel/type@base"));
         Assert.assertEquals(resultDto.getAssociations(), Collections.emptyList());
         Assert.assertEquals(resultDto.getActions(), Collections.emptyList());
+        Assert.assertEquals(Collections.emptyList(), resultDto.getAliases());
     }
 
     @Test
@@ -204,6 +207,7 @@ public class TypeConverterTest {
         Assert.assertEquals(1, resultEntity.getChildren().size());
         Assert.assertEquals(resultEntity.getParent(), parent);
         Assert.assertEquals(1, resultEntity.getSections().size());
+        Assert.assertEquals(1, resultEntity.getAliases().size());
     }
 
     @Test

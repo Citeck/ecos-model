@@ -26,6 +26,8 @@ public class TypeDto {
     private String dashboardType;
     private boolean inheritActions;
 
+    private List<String> aliases = new ArrayList<>();
+
     private List<RecordRef> actions = new ArrayList<>();
     private List<AssociationDto> associations = new ArrayList<>();
     private List<CreateVariantDto> createVariants = new ArrayList<>();
@@ -34,15 +36,18 @@ public class TypeDto {
 
     public TypeDto(TypeDto dto) {
 
+        this.id = dto.id;
         this.name = dto.name;
         this.description = dto.description;
         this.parent = dto.parent;
         this.form = dto.form;
-        this.id = dto.id;
-        this.inheritActions = dto.inheritActions;
-        this.attributes = ObjectData.deepCopy(dto.attributes);
         this.system = dto.system;
         this.dashboardType = dto.dashboardType;
+        this.inheritActions = dto.inheritActions;
+
+        if (dto.aliases != null) {
+            this.aliases = new ArrayList<>(dto.aliases);
+        }
 
         if (dto.associations != null) {
             this.associations = new ArrayList<>(dto.associations);
@@ -53,5 +58,7 @@ public class TypeDto {
         if (dto.createVariants != null) {
             this.createVariants = new ArrayList<>(dto.createVariants);
         }
+
+        this.attributes = ObjectData.deepCopy(dto.attributes);
     }
 }
