@@ -22,6 +22,7 @@
     <include file="config/liquibase/changelog/20200212000000_increase_type_ext_id_column_size.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20200220000000_update_type_table.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20200316000000_add_actions_str_column.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20200401000000_drop_unique_assoc_id.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20200401000000_type_aliases.xml" relativeToChangelogFile="false"/>
 
     <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->

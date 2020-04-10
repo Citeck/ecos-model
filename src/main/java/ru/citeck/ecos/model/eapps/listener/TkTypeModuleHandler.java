@@ -32,12 +32,17 @@ public class TkTypeModuleHandler implements EcosModuleHandler<TypeDto> {
 
         TypeDto currentType = typeService.getByExtIdOrNull(module.getId());
         if (currentType == null) {
+
             currentType = new TypeDto();
             currentType.setId(module.getId());
             currentType.setName(module.getName());
+
         } else {
-            MLText name = currentType.getName();
-            if (name == null || name.getAsMap().size() == 1) {
+
+            MLText newName = module.getName();
+            MLText currentName = currentType.getName();
+
+            if (isValidNewName(newName, module.getId()) && !isValidNewName(currentName, module.getId())) {
                 currentType.setName(module.getName());
             }
         }
@@ -46,6 +51,14 @@ public class TkTypeModuleHandler implements EcosModuleHandler<TypeDto> {
 
         TypeDto finalType = currentType;
         typeModuleHandler.doWithoutChangeListener(() -> typeService.save(finalType));
+    }
+
+    private boolean isValidNewName(MLText newName, String moduleId) {
+
+        if (newName == null || moduleId == null) {
+            return false;
+        }
+        return !newName.getAsMap().values().contains(moduleId);
     }
 
     @NotNull
