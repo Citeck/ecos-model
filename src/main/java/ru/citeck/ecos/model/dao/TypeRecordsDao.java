@@ -349,7 +349,6 @@ public class TypeRecordsDao extends LocalRecordsDAO
             super(dto);
         }
 
-        @JsonIgnore
         public String getModuleId() {
             return getId();
         }

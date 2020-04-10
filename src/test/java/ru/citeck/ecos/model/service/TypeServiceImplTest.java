@@ -1,6 +1,5 @@
 package ru.citeck.ecos.model.service;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,21 +8,22 @@ import org.mockito.Mockito;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.json.Json;
-import ru.citeck.ecos.model.eapps.listener.AssociationDto;
 import ru.citeck.ecos.model.converter.dto.impl.TypeConverter;
 import ru.citeck.ecos.model.domain.AssociationEntity;
 import ru.citeck.ecos.model.domain.SectionEntity;
 import ru.citeck.ecos.model.domain.TypeEntity;
 import ru.citeck.ecos.model.dto.TypeDto;
+import ru.citeck.ecos.model.eapps.listener.AssociationDto;
 import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.model.service.exception.ForgottenChildsException;
 import ru.citeck.ecos.model.service.impl.TypeServiceImpl;
 import ru.citeck.ecos.records2.RecordRef;
 
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -83,6 +83,7 @@ public class TypeServiceImplTest {
         typeEntity.setParent(parent);
         typeEntity.setChildren(Collections.singleton(child));
         typeEntity.setSections(Collections.singleton(sectionEntity));
+        typeEntity.setAliases(Collections.singleton("alias"));
 
         actionRef = RecordRef.create("uiserv", "action", "action");
 
@@ -97,6 +98,7 @@ public class TypeServiceImplTest {
         typeDto.setActions(Collections.singletonList(actionRef));
         typeDto.setAssociations(Collections.singletonList(associationDto));
         typeDto.setParent(RecordRef.create("type", "parent"));
+        typeDto.setAliases(Collections.singletonList("alias"));
     }
 
     @Test
@@ -110,14 +112,15 @@ public class TypeServiceImplTest {
         Set<TypeDto> resultTypeDtos = typeService.getAll();
 
         //  assert
-        Assert.assertEquals(resultTypeDtos.size(), 1);
+        assertEquals(resultTypeDtos.size(), 1);
         TypeDto resultTypeDto = resultTypeDtos.iterator().next();
-        Assert.assertEquals(resultTypeDto.getId(), typeEntity.getExtId());
-        Assert.assertEquals(resultTypeDto.getName(), Json.getMapper().read(typeEntity.getName(), MLText.class));
-        Assert.assertEquals(resultTypeDto.getDescription(), Json.getMapper().read(typeEntity.getDescription(), MLText.class));
-        Assert.assertEquals(resultTypeDto.getAssociations(), Collections.singletonList(associationDto));
-        Assert.assertEquals(resultTypeDto.getActions(), Collections.singletonList(actionRef));
-        Assert.assertEquals(resultTypeDto.getParent(), RecordRef.create("type", "parent"));
+        assertEquals(resultTypeDto.getId(), typeEntity.getExtId());
+        assertEquals(resultTypeDto.getName(), Json.getMapper().read(typeEntity.getName(), MLText.class));
+        assertEquals(resultTypeDto.getDescription(), Json.getMapper().read(typeEntity.getDescription(), MLText.class));
+        assertEquals(resultTypeDto.getAssociations(), Collections.singletonList(associationDto));
+        assertEquals(resultTypeDto.getActions(), Collections.singletonList(actionRef));
+        assertEquals(resultTypeDto.getParent(), RecordRef.create("type", "parent"));
+        assertEquals(resultTypeDto.getAliases(), Collections.singletonList("alias"));
     }
 
     @Test
@@ -132,14 +135,15 @@ public class TypeServiceImplTest {
         Set<TypeDto> resultTypeDtos = typeService.getAll(Collections.singleton(typeExtId));
 
         //  assert
-        Assert.assertEquals(resultTypeDtos.size(), 1);
+        assertEquals(resultTypeDtos.size(), 1);
         TypeDto resultTypeDto = resultTypeDtos.iterator().next();
-        Assert.assertEquals(resultTypeDto.getId(), typeEntity.getExtId());
-        Assert.assertEquals(resultTypeDto.getName(), Json.getMapper().read(typeEntity.getName(), MLText.class));
-        Assert.assertEquals(resultTypeDto.getDescription(), Json.getMapper().read(typeEntity.getDescription(), MLText.class));
-        Assert.assertEquals(resultTypeDto.getAssociations(), Collections.singletonList(associationDto));
-        Assert.assertEquals(resultTypeDto.getActions(), Collections.singletonList(actionRef));
-        Assert.assertEquals(resultTypeDto.getParent(), RecordRef.create("type", "parent"));
+        assertEquals(resultTypeDto.getId(), typeEntity.getExtId());
+        assertEquals(resultTypeDto.getName(), Json.getMapper().read(typeEntity.getName(), MLText.class));
+        assertEquals(resultTypeDto.getDescription(), Json.getMapper().read(typeEntity.getDescription(), MLText.class));
+        assertEquals(resultTypeDto.getAssociations(), Collections.singletonList(associationDto));
+        assertEquals(resultTypeDto.getActions(), Collections.singletonList(actionRef));
+        assertEquals(resultTypeDto.getParent(), RecordRef.create("type", "parent"));
+        assertEquals(resultTypeDto.getAliases(), Collections.singletonList("alias"));
     }
 
     @Test
@@ -153,12 +157,13 @@ public class TypeServiceImplTest {
         TypeDto resultTypeDto = typeService.getByExtId(typeExtId);
 
         //  assert
-        Assert.assertEquals(resultTypeDto.getId(), typeEntity.getExtId());
-        Assert.assertEquals(resultTypeDto.getName(), Json.getMapper().read(typeEntity.getName(), MLText.class));
-        Assert.assertEquals(resultTypeDto.getDescription(), Json.getMapper().read(typeEntity.getDescription(), MLText.class));
-        Assert.assertEquals(resultTypeDto.getAssociations(), Collections.singletonList(associationDto));
-        Assert.assertEquals(resultTypeDto.getActions(), Collections.singletonList(actionRef));
-        Assert.assertEquals(resultTypeDto.getParent(), RecordRef.create("type", "parent"));
+        assertEquals(resultTypeDto.getId(), typeEntity.getExtId());
+        assertEquals(resultTypeDto.getName(), Json.getMapper().read(typeEntity.getName(), MLText.class));
+        assertEquals(resultTypeDto.getDescription(), Json.getMapper().read(typeEntity.getDescription(), MLText.class));
+        assertEquals(resultTypeDto.getAssociations(), Collections.singletonList(associationDto));
+        assertEquals(resultTypeDto.getActions(), Collections.singletonList(actionRef));
+        assertEquals(resultTypeDto.getParent(), RecordRef.create("type", "parent"));
+        assertEquals(resultTypeDto.getAliases(), Collections.singletonList("alias"));
     }
 
     @Test
@@ -173,7 +178,7 @@ public class TypeServiceImplTest {
         } catch (IllegalArgumentException iae) {
             //  assert
             Mockito.verify(typeConverter, Mockito.times(0)).entityToDto(Mockito.any());
-            Assert.assertEquals(iae.getMessage(), "Type doesnt exists: " + typeExtId);
+            assertEquals(iae.getMessage(), "Type doesnt exists: " + typeExtId);
         }
     }
 
@@ -203,7 +208,7 @@ public class TypeServiceImplTest {
         } catch (ForgottenChildsException fce) {
             //  assert
             Mockito.verify(typeRepository, Mockito.times(0)).deleteById(1L);
-            Assert.assertEquals(fce.getMessage(), "Children types could be forgotten");
+            assertEquals(fce.getMessage(), "Children types could be forgotten");
         }
     }
 
@@ -249,5 +254,106 @@ public class TypeServiceImplTest {
 //        Mockito.verify(typeRepository, Mockito.times(1)).save(typeEntity);
 //        Mockito.verify(typeConverter, Mockito.times(1)).entityToDto(typeEntity);
 //        Mockito.verify(associationService, Mockito.times(0)).saveAll(Mockito.anySet());
+    }
+
+    @Test
+    void save_typeWithoutOwnerAndAliasTypes() {
+
+        String typeId = "typeId";
+        String alias = "alias";
+
+        TypeDto dto = new TypeDto();
+        dto.setId(typeId);
+        dto.setAliases(Collections.singletonList(alias));
+
+        TypeEntity entity = new TypeEntity();
+        when(typeConverter.dtoToEntity(dto)).thenReturn(entity);
+
+        when(typeRepository.findByContainsInAliases(typeId)).thenReturn(Optional.empty());
+        when(typeRepository.findByExtId(alias)).thenReturn(Optional.empty());
+
+        TypeEntity saved = new TypeEntity();
+        when(typeRepository.save(entity)).thenReturn(saved);
+
+        TypeDto savedDto = new TypeDto();
+        when(typeConverter.entityToDto(saved)).thenReturn(savedDto);
+
+        assertEquals(savedDto, typeService.save(dto));
+
+        Mockito.verify(typeRepository, Mockito.times(1)).save(entity);
+    }
+
+    @Test
+    void save_typeWithIdContainingInAliasesOfOtherType() {
+
+        String typeId = "typeId";
+        String ownerId = "ownerId";
+        String alias = "ownerId";
+
+        TypeDto ownerDto = new TypeDto();
+        ownerDto.setId(typeId);
+        ownerDto.setAliases(Collections.singletonList(alias));
+
+        TypeEntity ownerEntity = new TypeEntity();
+        ownerEntity.setExtId(ownerId);
+        when(typeRepository.findByContainsInAliases(alias)).thenReturn(Optional.of(ownerEntity));
+
+        when(typeConverter.dtoToEntity(ownerDto)).thenReturn(ownerEntity);
+        when(typeConverter.entityToDto(ownerEntity)).thenReturn(ownerDto);
+
+        TypeDto newType = new TypeDto();
+        newType.setId(alias);
+
+        assertEquals(ownerDto, typeService.save(newType));
+
+        Mockito.verify(typeRepository, Mockito.times(0)).save(any());
+        Mockito.verify(typeRepository, Mockito.times(0)).findByExtId(alias);
+    }
+
+    @Test
+    void save_typeWithAliasesHavingPersistedTypes() {
+
+        String typeId = "typeId";
+        String alias1 = "alias1";
+        String alias2 = "alias2";
+        String alias3 = "alias3";
+
+        TypeDto newDto = new TypeDto();
+        newDto.setId(typeId);
+        newDto.setAliases(Arrays.asList(alias1, alias2));
+
+        TypeEntity newEntity = new TypeEntity();
+        newEntity.setExtId(typeId);
+        newEntity.setAliases(new HashSet<>(newDto.getAliases()));
+
+        when(typeConverter.dtoToEntity(newDto)).thenReturn(newEntity);
+        when(typeConverter.entityToDto(newEntity)).thenReturn(newDto);
+        when(typeRepository.save(newEntity)).thenReturn(newEntity);
+
+        TypeEntity aliasedEntity1 = new TypeEntity();
+        TypeEntity aliasedEntity2 = new TypeEntity();
+        TypeEntity aliasedEntity2Child = new TypeEntity();
+        Set<TypeEntity> aliasedEntity2Children = new HashSet<>();
+        aliasedEntity2Children.add(aliasedEntity2Child);
+        aliasedEntity2.setChildren(aliasedEntity2Children);
+
+        when(typeRepository.existsByExtId(alias1)).thenReturn(true);
+        when(typeRepository.existsByExtId(alias2)).thenReturn(true);
+        when(typeRepository.existsByExtId(alias3)).thenReturn(false);
+
+        when(typeRepository.findByExtId(alias1)).thenReturn(Optional.of(aliasedEntity1));
+        when(typeRepository.findByExtId(alias2)).thenReturn(Optional.of(aliasedEntity2));
+
+        TypeEntity updatedFirstEntity = new TypeEntity();
+        when(typeConverter.dtoToEntity(argThat((dto) -> alias1.equals(dto.getId())))).thenReturn(updatedFirstEntity);
+
+        TypeEntity savedEntity = new TypeEntity();
+        when(typeRepository.save(updatedFirstEntity)).thenReturn(savedEntity);
+
+        TypeDto savedDto = new TypeDto();
+        when(typeConverter.entityToDto(savedEntity)).thenReturn(savedDto);
+
+        assertEquals(newDto, typeService.save(newDto));
+        //assertEquals(Collections.singleton(aliasedEntity2Child), updatedFirstEntity.getChildren());
     }
 }

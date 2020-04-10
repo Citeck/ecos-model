@@ -7,7 +7,8 @@ import lombok.Setter;
 import ru.citeck.ecos.model.utils.EntityCollectionUtils;
 
 import javax.persistence.*;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "ecos_type")
@@ -46,15 +47,20 @@ public class TypeEntity {
     @Column(name = "inherit_actions")
     private boolean inheritActions;
 
-    @ManyToOne(cascade={CascadeType.DETACH})
-    @JoinColumn(name="parent_id")
+    @ManyToOne(cascade = {CascadeType.DETACH})
+    @JoinColumn(name = "parent_id")
     private TypeEntity parent;
 
-    @OneToMany(mappedBy="parent", cascade = CascadeType.DETACH)
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.DETACH)
     private Set<TypeEntity> children = new HashSet<>();
 
     @ManyToMany(mappedBy = "types", fetch = FetchType.EAGER)
     private Set<SectionEntity> sections = new HashSet<>();
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "ecos_type_alias", joinColumns = @JoinColumn(name = "type_id"))
+    @Column(name = "alias")
+    private Set<String> aliases = new HashSet<>();
 
     /*
      * Set of associations to this type
@@ -72,7 +78,7 @@ public class TypeEntity {
         mappedBy = "source",
         fetch = FetchType.EAGER,
         cascade = CascadeType.ALL,
-        orphanRemoval=true)
+        orphanRemoval = true)
     private Set<AssociationEntity> assocsToOthers = new HashSet<>();
 
     @Column(name = "actions_str")

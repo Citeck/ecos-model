@@ -83,6 +83,12 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
         typeEntity.setActions(Json.getMapper().toString(dto.getActions()));
         typeEntity.setCreateVariants(Json.getMapper().toString(dto.getCreateVariants()));
 
+        if (dto.getAliases() != null) {
+            typeEntity.setAliases(new HashSet<>(dto.getAliases()));
+        } else {
+            typeEntity.setAliases(Collections.emptySet());
+        }
+
         checkCyclicDependencies(typeEntity);
 
         return typeEntity;
@@ -149,9 +155,12 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
             dto.setCreateVariants(Collections.emptyList());
         }
 
+        dto.setAliases(new ArrayList<>(entity.getAliases()));
+
         return dto;
     }
 
     public static class RecordRefsList extends ArrayList<RecordRef> {}
+
     public static class CreateVariantsList extends ArrayList<CreateVariantDto> {}
 }

@@ -190,19 +190,18 @@ public class TypeServiceImpl implements TypeService {
 
         return byExtId.map(typeConverter::entityToDto)
             .orElseGet(() -> {
+                if ("base".equals(extId) || "user-base".equals(extId)) {
+                    throw new IllegalStateException("Base type doesn't exists!");
+                }
 
-            if ("base".equals(extId) || "user-base".equals(extId)) {
-                throw new IllegalStateException("Base type doesn't exists!");
-            }
+                TypeDto typeDto = new TypeDto();
+                typeDto.setId(extId);
+                typeDto.setInheritActions(true);
+                typeDto.setParent(RecordRef.create("emodel", "type", "user-base"));
+                typeDto.setName(new MLText(extId));
 
-            TypeDto typeDto = new TypeDto();
-            typeDto.setId(extId);
-            typeDto.setInheritActions(true);
-            typeDto.setParent(RecordRef.create("emodel", "type", "user-base"));
-            typeDto.setName(new MLText(extId));
-
-            return save(typeDto);
-        });
+                return save(typeDto);
+            });
     }
 
     public TypeDto getBaseType() {
@@ -226,12 +225,65 @@ public class TypeServiceImpl implements TypeService {
     @Override
     @Transactional
     public TypeDto save(TypeDto dto) {
+
+        TypeEntity aliasOwner = getAliasOwner(dto.getId());
+
+        if (aliasOwner != null) {
+            return typeConverter.entityToDto(aliasOwner);
+        }
+
         TypeEntity entity = typeConverter.dtoToEntity(dto);
         entity = typeRepository.save(entity);
         associationService.extractAndSaveAssocsFromType(dto);
+
+        removeAliasedTypes(entity);
+
         TypeDto typeDto = typeConverter.entityToDto(entity);
         onTypeChangedListener.accept(typeDto);
         return typeDto;
+    }
+
+    private void removeAliasedTypes(final TypeEntity entity) {
+
+        Set<String> aliases = entity.getAliases();
+
+        if (aliases == null || aliases.isEmpty()) {
+            return;
+        }
+
+        aliases.forEach(alias -> {
+
+            if (alias.equals("base") || alias.equals("user-base") || alias.equals("case")) {
+                throw new IllegalArgumentException("You can't override base types by alias. Type: "
+                    + entity.getExtId() + " Aliases: " + entity.getAliases());
+            }
+
+            TypeEntity typeToRemove = typeRepository.findByExtId(alias).orElse(null);
+            if (typeToRemove != null) {
+                moveChildren(typeToRemove, entity);
+                typeRepository.delete(typeToRemove);
+            }
+        });
+    }
+
+    private TypeEntity getAliasOwner(String extId) {
+        if (StringUtils.isBlank(extId)) {
+            return null;
+        }
+        return typeRepository.findByContainsInAliases(extId)
+            .orElse(null);
+    }
+
+    private void moveChildren(TypeEntity from, TypeEntity to) {
+        Set<TypeEntity> children = from.getChildren();
+        TypeEntity child;
+        for (Iterator<TypeEntity> it = children.iterator(); it.hasNext(); ) {
+            child = it.next();
+            child.setParent(to);
+            typeRepository.save(child);
+            to.getChildren().add(child);
+            it.remove();
+        }
     }
 
     private Specification<TypeEntity> toSpec(Predicate predicate) {
