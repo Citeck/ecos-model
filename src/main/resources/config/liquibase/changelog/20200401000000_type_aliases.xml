@@ -3,16 +3,17 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
 
-    <changeSet author="citeck" id="20200316000000">
+    <changeSet author="citeck" id="20200401000000">
 
         <createTable tableName="ecos_type_alias">
-            <column name="type_id" type="bigint">
+            <column name="type_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
             <column name="alias" type="VARCHAR(36)">
                 <constraints nullable="false"/>
             </column>
         </createTable>
+
         <addForeignKeyConstraint baseColumnNames="type_id"
                                  baseTableName="ecos_type_alias"
                                  constraintName="fk_ecos_type_alias_type_id_ecos_type_id"

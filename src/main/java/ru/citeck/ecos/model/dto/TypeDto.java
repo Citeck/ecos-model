@@ -48,7 +48,6 @@ public class TypeDto {
         if (dto.aliases != null) {
             this.aliases = new ArrayList<>(dto.aliases);
         }
-
         if (dto.associations != null) {
             this.associations = new ArrayList<>(dto.associations);
         }

@@ -85,6 +85,8 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
 
         if (dto.getAliases() != null) {
             typeEntity.setAliases(new HashSet<>(dto.getAliases()));
+        } else {
+            typeEntity.setAliases(Collections.emptySet());
         }
 
         checkCyclicDependencies(typeEntity);

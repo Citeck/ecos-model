@@ -225,52 +225,52 @@ public class TypeServiceImpl implements TypeService {
     @Override
     @Transactional
     public TypeDto save(TypeDto dto) {
-        TypeEntity entity;
-        TypeDto savedDto = dto;
 
-        String id = dto.getId();
-        String aliasOwnerId = getAliasOwnerIdIfExists(id);
-        if (aliasOwnerId != null) {
-            savedDto = new TypeDto(dto);
-            savedDto.setId(aliasOwnerId);
-            entity = typeConverter.dtoToEntity(savedDto);
-        } else if (dto.getAliases() != null && !dto.getAliases().isEmpty()) {
-            List<String> aliasedEntitiesIds = savedDto.getAliases().stream()
-                .filter(typeRepository::existsByExtId)
-                .collect(Collectors.toList());
+        TypeEntity aliasOwner = getAliasOwner(dto.getId());
 
-            if (!aliasedEntitiesIds.isEmpty()) {
-                Iterator<String> iterator = aliasedEntitiesIds.iterator();
-
-                String firstEntityId = iterator.next();
-                savedDto = new TypeDto();
-                savedDto.setId(firstEntityId);
-                entity = typeConverter.dtoToEntity(savedDto);
-
-                savedDto.setId(dto.getId());
-                entity.setExtId(dto.getId());
-
-                while (iterator.hasNext()) {
-                    typeRepository.findByExtId(iterator.next())
-                        .ifPresent(forRemoval -> moveChildren(forRemoval, entity));
-                }
-            } else {
-                entity = typeConverter.dtoToEntity(savedDto);
-            }
-        } else {
-            entity = typeConverter.dtoToEntity(savedDto);
+        if (aliasOwner != null) {
+            return typeConverter.entityToDto(aliasOwner);
         }
 
-        TypeEntity saved = typeRepository.save(entity);
-        associationService.extractAndSaveAssocsFromType(savedDto);
-        TypeDto typeDto = typeConverter.entityToDto(saved);
+        TypeEntity entity = typeConverter.dtoToEntity(dto);
+        entity = typeRepository.save(entity);
+        associationService.extractAndSaveAssocsFromType(dto);
+
+        removeAliasedTypes(entity);
+
+        TypeDto typeDto = typeConverter.entityToDto(entity);
         onTypeChangedListener.accept(typeDto);
         return typeDto;
     }
 
-    private String getAliasOwnerIdIfExists(String extId) {
+    private void removeAliasedTypes(final TypeEntity entity) {
+
+        Set<String> aliases = entity.getAliases();
+
+        if (aliases == null || aliases.isEmpty()) {
+            return;
+        }
+
+        aliases.forEach(alias -> {
+
+            if (alias.equals("base") || alias.equals("user-base") || alias.equals("case")) {
+                throw new IllegalArgumentException("You can't override base types by alias. Type: "
+                    + entity.getExtId() + " Aliases: " + entity.getAliases());
+            }
+
+            TypeEntity typeToRemove = typeRepository.findByExtId(alias).orElse(null);
+            if (typeToRemove != null) {
+                moveChildren(typeToRemove, entity);
+                typeRepository.delete(typeToRemove);
+            }
+        });
+    }
+
+    private TypeEntity getAliasOwner(String extId) {
+        if (StringUtils.isBlank(extId)) {
+            return null;
+        }
         return typeRepository.findByContainsInAliases(extId)
-            .map(TypeEntity::getExtId)
             .orElse(null);
     }
 
