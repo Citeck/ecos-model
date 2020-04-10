@@ -3,7 +3,7 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
 
-    <changeSet author="citeck" id="20200401000000">
+    <changeSet author="citeck" id="20200401000001">
 
         <createTable tableName="ecos_type_alias">
             <column name="type_id" type="BIGINT">
