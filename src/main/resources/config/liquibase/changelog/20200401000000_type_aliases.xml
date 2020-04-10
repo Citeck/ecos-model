@@ -9,7 +9,7 @@
             <column name="type_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
-            <column name="alias" type="VARCHAR(36)">
+            <column name="alias" type="VARCHAR">
                 <constraints nullable="false"/>
             </column>
         </createTable>
