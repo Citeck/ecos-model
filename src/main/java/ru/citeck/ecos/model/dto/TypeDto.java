@@ -22,6 +22,7 @@ public class TypeDto {
     private MLText description;
     private RecordRef parent;
     private RecordRef form;
+    private RecordRef journal;
     private boolean system;
     private String dashboardType;
     private boolean inheritActions;
@@ -41,6 +42,7 @@ public class TypeDto {
         this.description = dto.description;
         this.parent = dto.parent;
         this.form = dto.form;
+        this.journal = dto.journal;
         this.system = dto.system;
         this.dashboardType = dto.dashboardType;
         this.inheritActions = dto.inheritActions;

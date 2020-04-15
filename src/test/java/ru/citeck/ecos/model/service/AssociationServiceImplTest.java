@@ -8,7 +8,6 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.model.converter.dto.DtoConverter;
-import ru.citeck.ecos.model.dao.TypeRecordsDao;
 import ru.citeck.ecos.model.domain.AssociationEntity;
 import ru.citeck.ecos.model.domain.TypeEntity;
 import ru.citeck.ecos.model.dto.TypeDto;
@@ -16,6 +15,7 @@ import ru.citeck.ecos.model.eapps.listener.AssociationDto;
 import ru.citeck.ecos.model.repository.AssociationRepository;
 import ru.citeck.ecos.model.repository.TypeRepository;
 import ru.citeck.ecos.model.service.impl.AssociationServiceImpl;
+import ru.citeck.ecos.model.web.records.dao.TypeRecordsDao;
 import ru.citeck.ecos.records2.RecordRef;
 
 import java.util.ArrayList;

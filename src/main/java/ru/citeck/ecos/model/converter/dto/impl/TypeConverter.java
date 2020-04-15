@@ -8,13 +8,13 @@ import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.converter.dto.AbstractDtoConverter;
 import ru.citeck.ecos.model.converter.dto.DtoConverter;
-import ru.citeck.ecos.model.dao.TypeRecordsDao;
 import ru.citeck.ecos.model.domain.AssociationEntity;
 import ru.citeck.ecos.model.domain.TypeEntity;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.eapps.listener.AssociationDto;
 import ru.citeck.ecos.model.eapps.listener.CreateVariantDto;
 import ru.citeck.ecos.model.repository.TypeRepository;
+import ru.citeck.ecos.model.web.records.dao.TypeRecordsDao;
 import ru.citeck.ecos.records2.RecordRef;
 
 import java.util.*;
@@ -61,6 +61,7 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
         }
         typeEntity.setAttributes(attributes.toString());
         typeEntity.setForm(RecordRef.toString(dto.getForm()));
+        typeEntity.setJournal(RecordRef.toString(dto.getJournal()));
 
         RecordRef parentRef = dto.getParent();
         String parentExtId;
@@ -123,6 +124,7 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
         dto.setDescription(Json.getMapper().read(entity.getDescription(), MLText.class));
         dto.setInheritActions(entity.isInheritActions());
         dto.setForm(RecordRef.valueOf(entity.getForm()));
+        dto.setJournal(RecordRef.valueOf(entity.getJournal()));
 
         String attributesStr = entity.getAttributes();
         dto.setAttributes(Json.getMapper().read(attributesStr, ObjectData.class));

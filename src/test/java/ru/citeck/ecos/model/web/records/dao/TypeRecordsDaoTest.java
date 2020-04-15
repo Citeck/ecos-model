@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.dao;
+package ru.citeck.ecos.model.web.records.dao;
 
 import graphql.language.Field;
 import org.junit.Assert;
@@ -12,16 +12,16 @@ import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.eapps.listener.AssociationDto;
 import ru.citeck.ecos.model.service.impl.TypeServiceImpl;
-import ru.citeck.ecos.records2.predicate.PredicateServiceImpl;
-import ru.citeck.ecos.records2.predicate.model.Predicate;
-import ru.citeck.ecos.records2.predicate.model.ValuePredicate;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.RecordsService;
 import ru.citeck.ecos.records2.RecordsServiceFactory;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
 import ru.citeck.ecos.records2.graphql.meta.value.field.MetaFieldImpl;
+import ru.citeck.ecos.records2.predicate.PredicateServiceImpl;
 import ru.citeck.ecos.records2.predicate.RecordElement;
 import ru.citeck.ecos.records2.predicate.RecordElements;
+import ru.citeck.ecos.records2.predicate.model.Predicate;
+import ru.citeck.ecos.records2.predicate.model.ValuePredicate;
 import ru.citeck.ecos.records2.request.query.RecordsQuery;
 import ru.citeck.ecos.records2.request.query.RecordsQueryResult;
 
@@ -53,7 +53,7 @@ public class TypeRecordsDaoTest {
     @BeforeEach
     void setUp() {
 
-        typeRecordsDao = new TypeRecordsDao(typeService, predicateService, recordsService);
+        typeRecordsDao = new TypeRecordsDao(typeService, recordsService);
         typeRecordsDao.setRecordsServiceFactory(new RecordsServiceFactory());
 
         recordRefs = Collections.singletonList(
@@ -71,7 +71,7 @@ public class TypeRecordsDaoTest {
         typeDto.setId("type");
         typeDto.setName(new MLText("name"));
         typeDto.setDescription(new MLText("desc"));
-        typeDto.setParent(RecordRef.create("type","parent"));
+        typeDto.setParent(RecordRef.create("type", "parent"));
         typeDto.setInheritActions(false);
         typeDto.setAssociations(Collections.singletonList(associationDto));
         typeDto.setActions(Collections.singletonList(RecordRef.create("uiserv", "action", "action")));

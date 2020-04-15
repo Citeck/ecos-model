@@ -35,6 +35,8 @@ public class TypeEntity {
 
     private String form;
 
+    private String journal;
+
     private String attributes;
 
     private Boolean system;

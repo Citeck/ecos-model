@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.dao;
+package ru.citeck.ecos.model.web.records.dao;
 
 import ecos.com.fasterxml.jackson210.annotation.JsonIgnore;
 import ecos.com.fasterxml.jackson210.annotation.JsonProperty;
@@ -48,22 +48,18 @@ public class TypeRecordsDao extends LocalRecordsDAO
 
     public static final String ID = "type";
 
-    private static final String LANGUAGE_EMPTY = "";
     private static final String TYPE_ACTIONS_WITH_INHERIT_ATT_JSON = "_actions[]?id";
 
     private final TypeRecord EMPTY_RECORD = new TypeRecord(new TypeDto());
 
     private final TypeService typeService;
-    private final PredicateService predicateService;
     private RecordsService recordsService;
 
     @Autowired
     public TypeRecordsDao(TypeService typeService,
-                          PredicateService predicateService,
                           @Lazy RecordsService recordsService) {
         setId(ID);
         this.typeService = typeService;
-        this.predicateService = predicateService;
         this.recordsService = recordsService;
     }
 
@@ -225,6 +221,8 @@ public class TypeRecordsDao extends LocalRecordsDAO
                     return getTypeAndParentsAssociations(dto);
                 case "form":
                     return dto.getForm();
+                case "journal":
+                    return dto.getJournal();
                 case "inheritedForm":
                     return findAndGetInheritedForm(dto);
                 case "attributes":

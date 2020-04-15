@@ -8,11 +8,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.converter.dto.impl.TypeAssociationConverter;
-import ru.citeck.ecos.model.dao.TypeRecordsDao;
 import ru.citeck.ecos.model.domain.AssociationEntity;
 import ru.citeck.ecos.model.domain.TypeEntity;
 import ru.citeck.ecos.model.eapps.listener.AssocDirection;
 import ru.citeck.ecos.model.eapps.listener.AssociationDto;
+import ru.citeck.ecos.model.web.records.dao.TypeRecordsDao;
 import ru.citeck.ecos.records2.RecordRef;
 
 import java.util.UUID;
