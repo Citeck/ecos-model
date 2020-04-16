@@ -13,7 +13,7 @@ import ru.citeck.ecos.model.domain.TypeEntity;
 import ru.citeck.ecos.model.dto.SectionDto;
 import ru.citeck.ecos.model.repository.SectionRepository;
 import ru.citeck.ecos.model.repository.TypeRepository;
-import ru.citeck.ecos.model.web.records.dao.TypeRecordsDao;
+import ru.citeck.ecos.model.records.dao.TypeRecordsDao;
 import ru.citeck.ecos.records2.RecordRef;
 
 import java.util.Collections;

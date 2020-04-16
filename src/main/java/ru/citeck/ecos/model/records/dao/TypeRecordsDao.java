@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.web.records.dao;
+package ru.citeck.ecos.model.records.dao;
 
 import ecos.com.fasterxml.jackson210.annotation.JsonIgnore;
 import ecos.com.fasterxml.jackson210.annotation.JsonProperty;
@@ -14,7 +14,6 @@ import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.eapps.listener.AssociationDto;
 import ru.citeck.ecos.records2.RecordMeta;
 import ru.citeck.ecos.records2.graphql.meta.annotation.DisplayName;
-import ru.citeck.ecos.records2.predicate.Elements;
 import ru.citeck.ecos.records2.predicate.PredicateService;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
 import ru.citeck.ecos.model.dto.TypeDto;
@@ -24,8 +23,6 @@ import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.RecordsService;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaValue;
-import ru.citeck.ecos.records2.predicate.RecordElement;
-import ru.citeck.ecos.records2.predicate.RecordElements;
 import ru.citeck.ecos.records2.request.delete.RecordsDelResult;
 import ru.citeck.ecos.records2.request.delete.RecordsDeletion;
 import ru.citeck.ecos.records2.request.mutation.RecordsMutResult;

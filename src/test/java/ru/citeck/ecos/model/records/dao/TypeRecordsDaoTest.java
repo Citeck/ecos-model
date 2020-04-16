@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.web.records.dao;
+package ru.citeck.ecos.model.records.dao;
 
 import graphql.language.Field;
 import org.junit.Assert;

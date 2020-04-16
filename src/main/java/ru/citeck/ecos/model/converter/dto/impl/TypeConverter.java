@@ -14,7 +14,7 @@ import ru.citeck.ecos.model.dto.TypeDto;
 import ru.citeck.ecos.model.eapps.listener.AssociationDto;
 import ru.citeck.ecos.model.eapps.listener.CreateVariantDto;
 import ru.citeck.ecos.model.repository.TypeRepository;
-import ru.citeck.ecos.model.web.records.dao.TypeRecordsDao;
+import ru.citeck.ecos.model.records.dao.TypeRecordsDao;
 import ru.citeck.ecos.records2.RecordRef;
 
 import java.util.*;

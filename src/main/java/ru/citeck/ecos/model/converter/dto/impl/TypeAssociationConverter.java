@@ -8,7 +8,7 @@ import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.converter.dto.AbstractDtoConverter;
 import ru.citeck.ecos.model.domain.AssociationEntity;
 import ru.citeck.ecos.model.eapps.listener.AssociationDto;
-import ru.citeck.ecos.model.web.records.dao.TypeRecordsDao;
+import ru.citeck.ecos.model.records.dao.TypeRecordsDao;
 import ru.citeck.ecos.records2.RecordRef;
 
 import java.util.UUID;
