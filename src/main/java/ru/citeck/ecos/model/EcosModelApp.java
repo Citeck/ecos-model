@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model;
 
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import ru.citeck.ecos.model.config.ApplicationProperties;
 import ru.citeck.ecos.model.config.DefaultProfileUtil;
 
@@ -26,6 +27,7 @@ import java.util.Collection;
 })
 @EnableConfigurationProperties({LiquibaseProperties.class, ApplicationProperties.class})
 @EnableDiscoveryClient
+@EnableJpaRepositories("ru.citeck.ecos.model.*.repository")
 public class EcosModelApp {
 
     private static final Logger log = LoggerFactory.getLogger(EcosModelApp.class);

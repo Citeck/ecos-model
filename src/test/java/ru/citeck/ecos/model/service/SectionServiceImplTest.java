@@ -7,12 +7,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.citeck.ecos.model.converter.dto.impl.SectionConverter;
-import ru.citeck.ecos.model.domain.SectionEntity;
-import ru.citeck.ecos.model.domain.TypeEntity;
-import ru.citeck.ecos.model.dto.SectionDto;
-import ru.citeck.ecos.model.repository.SectionRepository;
-import ru.citeck.ecos.model.service.impl.SectionServiceImpl;
+import ru.citeck.ecos.model.section.converter.SectionConverter;
+import ru.citeck.ecos.model.section.domain.SectionEntity;
+import ru.citeck.ecos.model.type.domain.TypeEntity;
+import ru.citeck.ecos.model.section.dto.SectionDto;
+import ru.citeck.ecos.model.section.repository.SectionRepository;
+import ru.citeck.ecos.model.section.service.impl.SectionServiceImpl;
 import ru.citeck.ecos.records2.RecordRef;
 
 import java.util.Collections;
@@ -70,7 +70,7 @@ public class SectionServiceImplTest {
 
         //  arrange
         when(sectionRepository.findAll()).thenReturn(Collections.singletonList(sectionEntity));
-        when(sectionConverter.targetToSource(sectionEntity)).thenReturn(sectionDto);
+        when(sectionConverter.entityToDto(sectionEntity)).thenReturn(sectionDto);
 
         //  act
         Set<SectionDto> resultSectionDtos = sectionService.getAll();
@@ -94,7 +94,7 @@ public class SectionServiceImplTest {
         //  arrange
         when(sectionRepository.findAllByExtIds(Collections.singleton(sectionExtId)))
             .thenReturn(Collections.singleton(sectionEntity));
-        when(sectionConverter.targetToSource(sectionEntity)).thenReturn(sectionDto);
+        when(sectionConverter.entityToDto(sectionEntity)).thenReturn(sectionDto);
 
         //  act
         Set<SectionDto> resultSectionDtos = sectionService.getAll(Collections.singleton(sectionExtId));
@@ -117,7 +117,7 @@ public class SectionServiceImplTest {
 
         //  arrange
         when(sectionRepository.findByExtId(sectionExtId)).thenReturn(Optional.of(sectionEntity));
-        when(sectionConverter.targetToSource(sectionEntity)).thenReturn(sectionDto);
+        when(sectionConverter.entityToDto(sectionEntity)).thenReturn(sectionDto);
 
         //  act
         SectionDto resultSectionDto = sectionService.getByExtId(sectionExtId);
@@ -145,7 +145,7 @@ public class SectionServiceImplTest {
         } catch (IllegalArgumentException iae) {
 
             //  assert
-            Mockito.verify(sectionConverter, Mockito.times(0)).targetToSource(Mockito.any());
+            Mockito.verify(sectionConverter, Mockito.times(0)).entityToDto(Mockito.any());
             Assert.assertEquals(iae.getMessage(), "Section doesnt exists: " + sectionExtId);
         }
     }
@@ -167,13 +167,13 @@ public class SectionServiceImplTest {
     void testUpdate() {
 
         //  arrange
-        when(sectionConverter.sourceToTarget(sectionDto)).thenReturn(sectionEntity);
+        when(sectionConverter.dtoToEntity(sectionDto)).thenReturn(sectionEntity);
 
         //  act
         sectionService.save(sectionDto);
 
         //  assert
         Mockito.verify(sectionRepository, Mockito.times(1)).save(sectionEntity);
-        Mockito.verify(sectionConverter, Mockito.times(1)).targetToSource(sectionEntity);
+        Mockito.verify(sectionConverter, Mockito.times(1)).entityToDto(sectionEntity);
     }
 }

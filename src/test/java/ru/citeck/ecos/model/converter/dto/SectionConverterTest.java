@@ -7,12 +7,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.citeck.ecos.model.converter.dto.impl.SectionConverter;
-import ru.citeck.ecos.model.domain.SectionEntity;
-import ru.citeck.ecos.model.domain.TypeEntity;
-import ru.citeck.ecos.model.dto.SectionDto;
-import ru.citeck.ecos.model.repository.SectionRepository;
-import ru.citeck.ecos.model.repository.TypeRepository;
+import ru.citeck.ecos.model.section.converter.SectionConverter;
+import ru.citeck.ecos.model.section.domain.SectionEntity;
+import ru.citeck.ecos.model.type.domain.TypeEntity;
+import ru.citeck.ecos.model.section.dto.SectionDto;
+import ru.citeck.ecos.model.section.repository.SectionRepository;
+import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
 
 import java.util.Collections;
@@ -68,7 +68,7 @@ public class SectionConverterTest {
         when(sectionRepository.findByExtId(sectionEntity.getExtId())).thenReturn(Optional.of(sectionEntity));
 
         //  act
-        SectionEntity resultSectionEntity = sectionConverter.sourceToTarget(sectionDto);
+        SectionEntity resultSectionEntity = sectionConverter.dtoToEntity(sectionDto);
 
         //  assert
         Assert.assertEquals(resultSectionEntity.getId().longValue(), 123L);
@@ -87,7 +87,7 @@ public class SectionConverterTest {
         sectionDto.setId(Strings.EMPTY);
 
         //  act
-        SectionEntity resultSectionEntity = sectionConverter.sourceToTarget(sectionDto);
+        SectionEntity resultSectionEntity = sectionConverter.dtoToEntity(sectionDto);
 
         //  assert
         Assert.assertEquals(resultSectionEntity.getName(), sectionDto.getName());
@@ -102,7 +102,7 @@ public class SectionConverterTest {
     void testEntityToDto() {
 
         //  act
-        SectionDto resultSectionDto = sectionConverter.targetToSource(sectionEntity);
+        SectionDto resultSectionDto = sectionConverter.entityToDto(sectionEntity);
 
         //  assert
         Assert.assertEquals(resultSectionDto.getId(), sectionEntity.getExtId());
@@ -119,7 +119,7 @@ public class SectionConverterTest {
         sectionEntity.setTypes(null);
 
         //  act
-        SectionDto resultSectionDto = sectionConverter.targetToSource(sectionEntity);
+        SectionDto resultSectionDto = sectionConverter.entityToDto(sectionEntity);
 
         //  assert
         Assert.assertEquals(resultSectionDto.getId(), sectionEntity.getExtId());

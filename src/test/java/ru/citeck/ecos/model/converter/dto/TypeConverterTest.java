@@ -12,14 +12,15 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.json.Json;
-import ru.citeck.ecos.model.converter.dto.impl.TypeConverter;
-import ru.citeck.ecos.model.domain.AssociationEntity;
-import ru.citeck.ecos.model.domain.SectionEntity;
-import ru.citeck.ecos.model.domain.TypeEntity;
-import ru.citeck.ecos.model.dto.TypeDto;
-import ru.citeck.ecos.model.eapps.listener.AssociationDto;
-import ru.citeck.ecos.model.eapps.listener.CreateVariantDto;
-import ru.citeck.ecos.model.repository.TypeRepository;
+import ru.citeck.ecos.model.converter.DtoConverter;
+import ru.citeck.ecos.model.type.converter.TypeConverter;
+import ru.citeck.ecos.model.association.domain.AssociationEntity;
+import ru.citeck.ecos.model.section.domain.SectionEntity;
+import ru.citeck.ecos.model.type.domain.TypeEntity;
+import ru.citeck.ecos.model.type.dto.TypeDto;
+import ru.citeck.ecos.model.association.dto.AssociationDto;
+import ru.citeck.ecos.model.type.dto.CreateVariantDto;
+import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
 
 import java.util.Collections;
@@ -146,7 +147,7 @@ public class TypeConverterTest {
         when(typeCreateVariantConverter.entityToDto(Mockito.anyString())).thenReturn(createVariantDto);
 
         //  act
-        TypeDto resultDto = typeConverter.targetToSource(typeEntity);
+        TypeDto resultDto = typeConverter.entityToDto(typeEntity);
 
         //  assert
         Assert.assertEquals(resultDto.getId(), typeEntity.getExtId());
@@ -171,7 +172,7 @@ public class TypeConverterTest {
         typeEntity.setAliases(Collections.emptySet());
 
         //  act
-        TypeDto resultDto = typeConverter.targetToSource(typeEntity);
+        TypeDto resultDto = typeConverter.entityToDto(typeEntity);
 
         //  assert
         Assert.assertEquals(resultDto.getId(), typeEntity.getExtId());
@@ -195,7 +196,7 @@ public class TypeConverterTest {
         when(typeRepository.findByExtId(typeEntity.getExtId())).thenReturn(Optional.of(typeEntity));
 
         //  act
-        TypeEntity resultEntity = typeConverter.sourceToTarget(typeDto);
+        TypeEntity resultEntity = typeConverter.dtoToEntity(typeDto);
 
         //  assert
         Assert.assertEquals(resultEntity.getExtId(), typeDto.getId());
@@ -220,7 +221,7 @@ public class TypeConverterTest {
         typeDto.setAssociations(Collections.emptyList());
 
         //  act
-        TypeEntity resultEntity = typeConverter.sourceToTarget(typeDto);
+        TypeEntity resultEntity = typeConverter.dtoToEntity(typeDto);
 
         //  assert
         Assert.assertEquals(Json.getMapper().read(resultEntity.getName(), MLText.class), typeDto.getName());
