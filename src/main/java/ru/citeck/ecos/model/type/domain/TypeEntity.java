@@ -1,23 +1,18 @@
 package ru.citeck.ecos.model.type.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 import ru.citeck.ecos.model.association.domain.AssociationEntity;
 import ru.citeck.ecos.model.section.domain.SectionEntity;
 import ru.citeck.ecos.model.utils.EntityCollectionUtils;
 
 import javax.persistence.*;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
+@Data
 @Entity
 @Table(name = "ecos_type")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class TypeEntity {
 
     @Column(unique = true, nullable = false)
@@ -44,6 +39,10 @@ public class TypeEntity {
     private Boolean system;
 
     private String dashboardType;
+
+    private String configForm;
+
+    private String config;
 
     @Column(name = "create_variants")
     private String createVariants;
@@ -90,5 +89,18 @@ public class TypeEntity {
 
     public void setAssocsToOthers(Set<AssociationEntity> assocsToOthers) {
         EntityCollectionUtils.changeHibernateSet(this.assocsToOthers, assocsToOthers, AssociationEntity::getId);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TypeEntity that = (TypeEntity) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return 31;
     }
 }

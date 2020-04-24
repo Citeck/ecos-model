@@ -7,16 +7,17 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.commons.data.MLText;
+import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
-import ru.citeck.ecos.model.association.service.AssociationService;
-import ru.citeck.ecos.model.type.converter.TypeConverter;
 import ru.citeck.ecos.model.association.domain.AssociationEntity;
+import ru.citeck.ecos.model.association.dto.AssociationDto;
+import ru.citeck.ecos.model.association.service.AssociationService;
 import ru.citeck.ecos.model.section.domain.SectionEntity;
+import ru.citeck.ecos.model.service.exception.ForgottenChildsException;
+import ru.citeck.ecos.model.type.converter.TypeConverter;
 import ru.citeck.ecos.model.type.domain.TypeEntity;
 import ru.citeck.ecos.model.type.dto.TypeDto;
-import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
-import ru.citeck.ecos.model.service.exception.ForgottenChildsException;
 import ru.citeck.ecos.model.type.service.impl.TypeServiceImpl;
 import ru.citeck.ecos.records2.RecordRef;
 
@@ -85,6 +86,11 @@ public class TypeServiceImplTest {
         typeEntity.setChildren(Collections.singleton(child));
         typeEntity.setSections(Collections.singleton(sectionEntity));
         typeEntity.setAliases(Collections.singleton("alias"));
+        typeEntity.setConfigForm("eform@config-form");
+        typeEntity.setConfig("{\n" +
+            "  \"color\": \"red\",\n" +
+            "  \"icon\": \"urgent\"\n" +
+            "}");
 
         actionRef = RecordRef.create("uiserv", "action", "action");
 
@@ -100,6 +106,10 @@ public class TypeServiceImplTest {
         typeDto.setAssociations(Collections.singletonList(associationDto));
         typeDto.setParent(RecordRef.create("type", "parent"));
         typeDto.setAliases(Collections.singletonList("alias"));
+        typeDto.setConfig(Json.getMapper().read("{\n" +
+            "  \"color\": \"red\",\n" +
+            "  \"icon\": \"urgent\"\n" +
+            "}", ObjectData.class));
     }
 
     @Test

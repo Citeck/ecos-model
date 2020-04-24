@@ -6,15 +6,15 @@ import org.springframework.stereotype.Component;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
+import ru.citeck.ecos.model.association.domain.AssociationEntity;
+import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.converter.AbstractDtoConverter;
 import ru.citeck.ecos.model.converter.DtoConverter;
-import ru.citeck.ecos.model.association.domain.AssociationEntity;
 import ru.citeck.ecos.model.type.domain.TypeEntity;
-import ru.citeck.ecos.model.type.dto.TypeDto;
-import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.type.dto.CreateVariantDto;
-import ru.citeck.ecos.model.type.repository.TypeRepository;
+import ru.citeck.ecos.model.type.dto.TypeDto;
 import ru.citeck.ecos.model.type.records.dao.TypeRecordsDao;
+import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
 
 import java.util.*;
@@ -55,11 +55,14 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
         typeEntity.setDescription(Json.getMapper().toString(dto.getDescription()));
         typeEntity.setInheritActions(dto.isInheritActions());
 
-        ObjectData attributes = dto.getAttributes();
-        if (attributes == null) {
-            attributes = new ObjectData();
-        }
+        ObjectData attributes = dto.getAttributes() != null ? dto.getAttributes() : new ObjectData();
         typeEntity.setAttributes(attributes.toString());
+
+        ObjectData config = dto.getConfig() != null ? dto.getConfig() : new ObjectData();
+        typeEntity.setConfig(config.toString());
+
+        typeEntity.setTenant(dto.getTenant());
+        typeEntity.setConfigForm(RecordRef.toString(dto.getConfigForm()));
         typeEntity.setForm(RecordRef.toString(dto.getForm()));
         typeEntity.setJournal(RecordRef.toString(dto.getJournal()));
 
@@ -125,6 +128,9 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
         dto.setInheritActions(entity.isInheritActions());
         dto.setForm(RecordRef.valueOf(entity.getForm()));
         dto.setJournal(RecordRef.valueOf(entity.getJournal()));
+        dto.setTenant(entity.getTenant());
+        dto.setConfigForm(RecordRef.valueOf(entity.getConfigForm()));
+        dto.setConfig(Json.getMapper().read(entity.getConfig(), ObjectData.class));
 
         String attributesStr = entity.getAttributes();
         dto.setAttributes(Json.getMapper().read(attributesStr, ObjectData.class));

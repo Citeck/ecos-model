@@ -19,6 +19,7 @@ public class TypeDto {
     private String id;
     private MLText name;
     private MLText description;
+    private String tenant;
     private RecordRef parent;
     private RecordRef form;
     private RecordRef journal;
@@ -33,6 +34,9 @@ public class TypeDto {
     private List<CreateVariantDto> createVariants = new ArrayList<>();
 
     private ObjectData attributes = new ObjectData();
+
+    private RecordRef configForm;
+    private ObjectData config = new ObjectData();
 
     public TypeDto(TypeDto dto) {
 
