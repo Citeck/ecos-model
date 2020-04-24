@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.converter.dto;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,9 +10,9 @@ import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.association.converter.TypeAssociationConverter;
 import ru.citeck.ecos.model.association.domain.AssociationEntity;
-import ru.citeck.ecos.model.type.domain.TypeEntity;
 import ru.citeck.ecos.model.association.dto.AssocDirection;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
+import ru.citeck.ecos.model.type.domain.TypeEntity;
 import ru.citeck.ecos.model.type.records.dao.TypeRecordsDao;
 import ru.citeck.ecos.records2.RecordRef;
 
@@ -25,17 +26,14 @@ public class TypeAssociationConverterTest {
     private AssociationEntity entity;
     private AssociationDto dto;
 
-    private TypeEntity targetTypeEntity;
-    private TypeEntity sourceTypeEntity;
-
     @BeforeEach
     void setUp() {
         typeAssociationConverter = new TypeAssociationConverter();
 
-        targetTypeEntity = new TypeEntity();
+        TypeEntity targetTypeEntity = new TypeEntity();
         targetTypeEntity.setExtId("targetEntityId");
 
-        sourceTypeEntity = new TypeEntity();
+        TypeEntity sourceTypeEntity = new TypeEntity();
         sourceTypeEntity.setExtId("sourceEntityId");
 
         entity = new AssociationEntity();
@@ -78,19 +76,12 @@ public class TypeAssociationConverterTest {
         Assert.assertEquals(dto.getDirection(), resultEntity.getDirection());
 
         // check that id it is generated UUID
-        UUID.fromString(resultEntity.getExtId());
+        Assertions.assertThatCode(() -> UUID.fromString(resultEntity.getExtId())).doesNotThrowAnyException();
     }
 
     @Test
     void testEntityToDto() {
-
-        //  act
         AssociationDto resultDto = typeAssociationConverter.entityToDto(entity);
-
-        //  assert
-        Assert.assertEquals(resultDto.getId(), entity.getExtId());
-        Assert.assertEquals(resultDto.getDirection(), entity.getDirection());
-        Assert.assertEquals(resultDto.getName(), Json.getMapper().read(entity.getName(), MLText.class));
-        Assert.assertEquals(resultDto.getTarget().getId(), entity.getTarget().getExtId());
+        Assert.assertEquals(dto, resultDto);
     }
 }

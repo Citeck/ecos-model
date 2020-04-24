@@ -1,27 +1,28 @@
 package ru.citeck.ecos.model.type.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import ru.citeck.ecos.model.association.domain.AssociationEntity;
+import ru.citeck.ecos.model.domain.BaseEntity;
 import ru.citeck.ecos.model.section.domain.SectionEntity;
 import ru.citeck.ecos.model.utils.EntityCollectionUtils;
 
 import javax.persistence.*;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 @Data
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 @Table(name = "ecos_type")
-public class TypeEntity {
+public class TypeEntity extends BaseEntity {
 
     @Column(unique = true, nullable = false)
     private String extId;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
-    @SequenceGenerator(name = "sequenceGenerator")
-    private Long id;
 
     @Column(nullable = false)
     private String name;
@@ -91,16 +92,8 @@ public class TypeEntity {
         EntityCollectionUtils.changeHibernateSet(this.assocsToOthers, assocsToOthers, AssociationEntity::getId);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TypeEntity that = (TypeEntity) o;
-        return Objects.equals(id, that.id);
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    @Override
-    public int hashCode() {
-        return 31;
-    }
 }

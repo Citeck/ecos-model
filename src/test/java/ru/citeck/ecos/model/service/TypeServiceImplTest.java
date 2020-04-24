@@ -13,7 +13,6 @@ import ru.citeck.ecos.model.association.domain.AssociationEntity;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.association.service.AssociationService;
 import ru.citeck.ecos.model.section.domain.SectionEntity;
-import ru.citeck.ecos.model.service.exception.ForgottenChildsException;
 import ru.citeck.ecos.model.type.converter.TypeConverter;
 import ru.citeck.ecos.model.type.domain.TypeEntity;
 import ru.citeck.ecos.model.type.dto.TypeDto;
@@ -24,6 +23,7 @@ import ru.citeck.ecos.records2.RecordRef;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
@@ -179,18 +179,12 @@ public class TypeServiceImplTest {
 
     @Test
     void testGetByExtIdThrowsException() {
-
-        //  arrange
         when(typeRepository.findByExtId(typeExtId)).thenReturn(Optional.empty());
 
-        //  act
-        try {
-            typeService.getByExtId(typeExtId);
-        } catch (IllegalArgumentException iae) {
-            //  assert
-            Mockito.verify(typeConverter, Mockito.times(0)).entityToDto(Mockito.any());
-            assertEquals(iae.getMessage(), "Type doesnt exists: " + typeExtId);
-        }
+        Exception exception = assertThrows(RuntimeException.class, () -> typeService.getByExtId(typeExtId));
+
+        Mockito.verify(typeConverter, Mockito.times(0)).entityToDto(Mockito.any());
+        assertEquals(exception.getMessage(), "Type doesnt exists: " + typeExtId);
     }
 
     @Test
@@ -209,18 +203,12 @@ public class TypeServiceImplTest {
 
     @Test
     void testDeleteThrowsException() {
-
-        //  arrange
         when(typeRepository.findByExtId(typeExtId)).thenReturn(Optional.of(typeEntity));
 
-        //  act
-        try {
-            typeService.delete(typeExtId);
-        } catch (ForgottenChildsException fce) {
-            //  assert
-            Mockito.verify(typeRepository, Mockito.times(0)).deleteById(1L);
-            assertEquals(fce.getMessage(), "Children types could be forgotten");
-        }
+        Exception exception = assertThrows(RuntimeException.class, () -> typeService.delete(typeExtId));
+
+        Mockito.verify(typeRepository, Mockito.times(0)).deleteById(1L);
+        assertEquals(exception.getMessage(), "Children types could be forgotten");
     }
 
     @Test
@@ -325,6 +313,7 @@ public class TypeServiceImplTest {
     void save_typeWithAliasesHavingPersistedTypes() {
 
         String typeId = "typeId";
+
         String alias1 = "alias1";
         String alias2 = "alias2";
         String alias3 = "alias3";
@@ -364,7 +353,7 @@ public class TypeServiceImplTest {
         TypeDto savedDto = new TypeDto();
         when(typeConverter.entityToDto(savedEntity)).thenReturn(savedDto);
 
-        assertEquals(newDto, typeService.save(newDto));
+        assertEquals(savedDto, typeService.save(newDto));
         //assertEquals(Collections.singleton(aliasedEntity2Child), updatedFirstEntity.getChildren());
     }
 }

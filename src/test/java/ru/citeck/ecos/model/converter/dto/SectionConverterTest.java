@@ -9,9 +9,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.model.section.converter.SectionConverter;
 import ru.citeck.ecos.model.section.domain.SectionEntity;
-import ru.citeck.ecos.model.type.domain.TypeEntity;
 import ru.citeck.ecos.model.section.dto.SectionDto;
 import ru.citeck.ecos.model.section.repository.SectionRepository;
+import ru.citeck.ecos.model.type.domain.TypeEntity;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
 
@@ -100,16 +100,8 @@ public class SectionConverterTest {
 
     @Test
     void testEntityToDto() {
-
-        //  act
         SectionDto resultSectionDto = sectionConverter.entityToDto(sectionEntity);
-
-        //  assert
-        Assert.assertEquals(resultSectionDto.getId(), sectionEntity.getExtId());
-        Assert.assertEquals(resultSectionDto.getName(), sectionEntity.getName());
-        Assert.assertEquals(resultSectionDto.getDescription(), sectionEntity.getDescription());
-        Assert.assertEquals(resultSectionDto.getTenant(), sectionEntity.getTenant());
-        Assert.assertEquals(resultSectionDto.getTypes(), Collections.singleton(RecordRef.create("type", "type")));
+        Assert.assertEquals(sectionDto, resultSectionDto);
     }
 
     @Test
@@ -117,15 +109,12 @@ public class SectionConverterTest {
 
         //  arrange
         sectionEntity.setTypes(null);
+        sectionDto.setTypes(null);
 
         //  act
         SectionDto resultSectionDto = sectionConverter.entityToDto(sectionEntity);
 
         //  assert
-        Assert.assertEquals(resultSectionDto.getId(), sectionEntity.getExtId());
-        Assert.assertEquals(resultSectionDto.getName(), sectionEntity.getName());
-        Assert.assertEquals(resultSectionDto.getDescription(), sectionEntity.getDescription());
-        Assert.assertEquals(resultSectionDto.getTenant(), sectionEntity.getTenant());
-        Assert.assertNull(resultSectionDto.getTypes());
+        Assert.assertEquals(sectionDto, resultSectionDto);
     }
 }

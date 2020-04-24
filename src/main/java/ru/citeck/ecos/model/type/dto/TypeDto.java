@@ -49,6 +49,9 @@ public class TypeDto {
         this.system = dto.system;
         this.dashboardType = dto.dashboardType;
         this.inheritActions = dto.inheritActions;
+        this.tenant = dto.getTenant();
+        this.configForm = dto.getConfigForm();
+        this.config = dto.getConfig();
 
         if (dto.aliases != null) {
             this.aliases = new ArrayList<>(dto.aliases);

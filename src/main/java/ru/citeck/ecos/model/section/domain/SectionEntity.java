@@ -1,32 +1,28 @@
 package ru.citeck.ecos.model.section.domain;
 
 import lombok.*;
+import ru.citeck.ecos.model.domain.BaseEntity;
 import ru.citeck.ecos.model.type.domain.TypeEntity;
 
 import javax.persistence.*;
 import java.util.Set;
 
+@Data
 @Entity
-@Table(name = "ecos_section")
-@Getter
-@Setter
-@NoArgsConstructor
 @AllArgsConstructor
-public class SectionEntity {
+@NoArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
+@Table(name = "ecos_section")
+public class SectionEntity extends BaseEntity {
 
     @Column(unique = true, nullable = false)
     private String extId;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
-    @SequenceGenerator(name = "sequenceGenerator")
-    private Long id;
-
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "section_type",
-        joinColumns = { @JoinColumn(name = "section_id") },
-        inverseJoinColumns = { @JoinColumn(name = "type_id") }
+        joinColumns = {@JoinColumn(name = "section_id")},
+        inverseJoinColumns = {@JoinColumn(name = "type_id")}
     )
     private Set<TypeEntity> types;
 
