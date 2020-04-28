@@ -1,0 +1,33 @@
+
+id: base-journal
+
+source-id: uiserv/journal
+
+label: { ru: Базовый журнал, en: Base journal }
+
+attributes:
+  actionFormatter: ''
+  listId: global-system
+
+actions:
+    - uiserv/action@upload-new-version
+    - uiserv/action@content-download
+    - uiserv/action@record-actions
+    - uiserv/action@edit-in-onlyoffice
+
+columns:
+
+  - name: "displayName"
+    label: { ru: "Имя", en: "Name" }
+    attribute: ".disp"
+    type: "text"
+
+  - name: "modifier"
+    label: { ru: "Кем изменен", en: "Changed by" }
+    attribute: "_modifier"
+    type: "text"
+
+  - name: "modified"
+    label: { ru: "Когда изменен", en: "Changed time" }
+    attribute: "_modified"
+    type: "datetime"
