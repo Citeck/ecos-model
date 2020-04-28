@@ -12,6 +12,7 @@
         "uiserv/action@record-actions",
         "uiserv/action@edit-in-onlyoffice"
     ],
+    "journal": "uiserv/journal@base",
     "associations": [
         {
             "id": "assoc:associatedWith",
