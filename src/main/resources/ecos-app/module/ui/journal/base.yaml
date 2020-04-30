@@ -5,17 +5,6 @@ source-id: uiserv/journal
 
 label: { ru: Базовый журнал, en: Base journal }
 
-attributes:
-  actionFormatter: ''
-  listId: global-system
-
-actions:
-    - uiserv/action@upload-new-version
-    - uiserv/action@edit
-    - uiserv/action@content-download
-    - uiserv/action@record-actions
-    - uiserv/action@edit-in-onlyoffice
-
 columns:
 
   - name: "displayName"
