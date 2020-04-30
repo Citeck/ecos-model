@@ -1,8 +1,6 @@
 
 id: base
 
-source-id: uiserv/journal
-
 label: { ru: Базовый журнал, en: Base journal }
 
 columns:
