@@ -231,6 +231,8 @@ public class TypeRecordsDao extends LocalRecordsDAO
                     return dto.getDashboardType();
                 case "inhDashboardType":
                     return typeService.getDashboardType(dto.getId());
+                case "inhCreateVariants":
+                    return typeService.getCreateVariants(dto.getId());
                 case "isSystem":
                     return dto.isSystem();
                 case RecordConstants.ATT_FORM_KEY:

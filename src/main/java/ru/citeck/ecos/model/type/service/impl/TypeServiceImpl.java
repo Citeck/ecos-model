@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.model.converter.DtoConverter;
 import ru.citeck.ecos.model.type.domain.TypeEntity;
+import ru.citeck.ecos.model.type.dto.CreateVariantDto;
 import ru.citeck.ecos.model.type.dto.TypeDto;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.model.association.service.AssociationService;
@@ -80,6 +81,22 @@ public class TypeServiceImpl implements TypeService {
         return typeRepository.findAll().stream()
             .map(typeConverter::entityToDto)
             .collect(Collectors.toSet());
+    }
+
+    @Override
+    public List<CreateVariantDto> getCreateVariants(String extId) {
+
+        Map<String, CreateVariantDto> result = new LinkedHashMap<>();
+
+        forEachTypeInDescHierarchy(extId, type -> {
+            List<CreateVariantDto> createVariants = type.getCreateVariants();
+            if (createVariants != null) {
+                createVariants.forEach(cv -> result.put(cv.getId(), cv));
+            }
+            return false;
+        });
+
+        return new ArrayList<>(result.values());
     }
 
     @Override
