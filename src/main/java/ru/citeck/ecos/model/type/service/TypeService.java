@@ -21,6 +21,8 @@ public interface TypeService {
 
     Set<TypeDto> getAll(Collection<String> extIds);
 
+    List<TypeDto> getTypesByJournalList(String journalListId);
+
     TypeDto getByExtId(String extId);
 
     TypeDto getByExtIdOrNull(String extId);

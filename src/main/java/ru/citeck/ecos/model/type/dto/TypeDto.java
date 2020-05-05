@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.type.dto;
 
+import ecos.com.fasterxml.jackson210.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,14 +12,16 @@ import ru.citeck.ecos.records2.RecordRef;
 import java.util.ArrayList;
 import java.util.List;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class TypeDto {
 
     private String id;
     private MLText name;
     private MLText description;
+    private String sourceId;
     private RecordRef parent;
     private RecordRef form;
     private RecordRef journal;
@@ -38,6 +41,7 @@ public class TypeDto {
 
         this.id = dto.id;
         this.name = dto.name;
+        this.sourceId = dto.sourceId;
         this.description = dto.description;
         this.parent = dto.parent;
         this.form = dto.form;

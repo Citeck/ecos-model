@@ -3,6 +3,7 @@ package ru.citeck.ecos.model.type.records.dao;
 import ecos.com.fasterxml.jackson210.annotation.JsonIgnore;
 import ecos.com.fasterxml.jackson210.annotation.JsonProperty;
 import ecos.com.fasterxml.jackson210.annotation.JsonValue;
+import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -47,6 +48,7 @@ public class TypeRecordsDao extends LocalRecordsDAO
     public static final String ID = "type";
 
     private static final String TYPE_ACTIONS_WITH_INHERIT_ATT_JSON = "_actions[]?id";
+    private static final String LANG_TYPES_BY_JOURNAL_LIST = "journal-list";
 
     private final TypeRecord EMPTY_RECORD = new TypeRecord(new TypeDto());
 
@@ -78,7 +80,19 @@ public class TypeRecordsDao extends LocalRecordsDAO
 
         RecordsQueryResult<TypeRecord> result = new RecordsQueryResult<>();
 
-        if (recordsQuery.getLanguage().equals(PredicateService.LANGUAGE_PREDICATE)) {
+        if (recordsQuery.getLanguage().equals(LANG_TYPES_BY_JOURNAL_LIST)) {
+
+            TypesByJournalListQuery query = recordsQuery.getQuery(TypesByJournalListQuery.class);
+            if (query == null) {
+                return result;
+            }
+
+            result.setRecords(typeService.getTypesByJournalList(query.listId)
+                .stream()
+                .map(TypeRecord::new)
+                .collect(Collectors.toList()));
+
+        } else if (recordsQuery.getLanguage().equals(PredicateService.LANGUAGE_PREDICATE)) {
 
             Predicate predicate = recordsQuery.getQuery(Predicate.class);
 
@@ -336,6 +350,11 @@ public class TypeRecordsDao extends LocalRecordsDAO
         }
 
         return new ArrayList<>(actionDtoMap.values());
+    }
+
+    @Data
+    public static class TypesByJournalListQuery {
+        private String listId;
     }
 
     public static class TypeMutRecord extends TypeDto {
