@@ -277,6 +277,7 @@ public class TypeServiceImplTest {
         when(typeRepository.save(entity)).thenReturn(saved);
 
         TypeDto savedDto = new TypeDto();
+        savedDto.setId("test");
         when(typeConverter.entityToDto(saved)).thenReturn(savedDto);
 
         assertEquals(savedDto, typeService.save(dto));

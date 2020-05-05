@@ -6,9 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
+import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.records2.RecordRef;
 
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +20,7 @@ import java.util.List;
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class TypeDto {
 
+    @NotNull
     private String id;
     private MLText name;
     private MLText description;
@@ -39,30 +42,26 @@ public class TypeDto {
 
     public TypeDto(TypeDto dto) {
 
-        this.id = dto.id;
-        this.name = dto.name;
-        this.sourceId = dto.sourceId;
-        this.description = dto.description;
-        this.parent = dto.parent;
-        this.form = dto.form;
-        this.journal = dto.journal;
-        this.system = dto.system;
-        this.dashboardType = dto.dashboardType;
-        this.inheritActions = dto.inheritActions;
+        TypeDto copy = Json.getMapper().copy(dto);
 
-        if (dto.aliases != null) {
-            this.aliases = new ArrayList<>(dto.aliases);
-        }
-        if (dto.associations != null) {
-            this.associations = new ArrayList<>(dto.associations);
-        }
-        if (dto.actions != null) {
-            this.actions = new ArrayList<>(dto.actions);
-        }
-        if (dto.createVariants != null) {
-            this.createVariants = new ArrayList<>(dto.createVariants);
+        if (copy == null) {
+            return;
         }
 
-        this.attributes = ObjectData.deepCopy(dto.attributes);
+        this.id = copy.id;
+        this.name = copy.name;
+        this.sourceId = copy.sourceId;
+        this.description = copy.description;
+        this.parent = copy.parent;
+        this.form = copy.form;
+        this.journal = copy.journal;
+        this.system = copy.system;
+        this.dashboardType = copy.dashboardType;
+        this.inheritActions = copy.inheritActions;
+        this.aliases = copy.aliases;
+        this.associations = copy.associations;
+        this.actions = copy.actions;
+        this.createVariants = copy.createVariants;
+        this.attributes = copy.attributes;
     }
 }
