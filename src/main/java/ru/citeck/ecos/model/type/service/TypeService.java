@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.type.service;
 
+import ru.citeck.ecos.model.type.dto.CreateVariantDto;
 import ru.citeck.ecos.model.type.dto.TypeDto;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
 
@@ -20,6 +21,8 @@ public interface TypeService {
 
     Set<TypeDto> getAll(Collection<String> extIds);
 
+    List<TypeDto> getTypesByJournalList(String journalListId);
+
     TypeDto getByExtId(String extId);
 
     TypeDto getByExtIdOrNull(String extId);
@@ -31,6 +34,8 @@ public interface TypeService {
     List<TypeDto> getChildren(String extId);
 
     String getDashboardType(String extId);
+
+    List<CreateVariantDto> getCreateVariants(String extId);
 
     void delete(String extId);
 

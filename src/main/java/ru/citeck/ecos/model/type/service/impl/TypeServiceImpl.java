@@ -9,19 +9,23 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.citeck.ecos.commons.data.MLText;
+import ru.citeck.ecos.commons.data.ObjectData;
+import ru.citeck.ecos.model.association.service.AssociationService;
 import ru.citeck.ecos.model.converter.DtoConverter;
+import ru.citeck.ecos.model.service.exception.ForgottenChildsException;
 import ru.citeck.ecos.model.type.domain.TypeEntity;
+import ru.citeck.ecos.model.type.dto.CreateVariantDto;
 import ru.citeck.ecos.model.type.dto.TypeDto;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
-import ru.citeck.ecos.model.association.service.AssociationService;
 import ru.citeck.ecos.model.type.service.TypeService;
-import ru.citeck.ecos.model.service.exception.ForgottenChildsException;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.predicate.PredicateUtils;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
 import springfox.documentation.annotations.Cacheable;
 
+import javax.annotation.PostConstruct;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -36,6 +40,16 @@ public class TypeServiceImpl implements TypeService {
     private final DtoConverter<TypeDto, TypeEntity> typeConverter;
 
     private Consumer<TypeDto> onTypeChangedListener = dto -> {};
+
+    private final Map<String, Set<String>> typesByJournalListId = new ConcurrentHashMap<>();
+    private final Map<String, String> journalListByTypeId = new ConcurrentHashMap<>();
+
+    @PostConstruct
+    public void init() {
+        typeRepository.findAll().forEach(journal ->
+            updateJournalLists(typeConverter.entityToDto(journal))
+        );
+    }
 
     @Override
     public List<TypeDto> getAll(int max, int skip, Predicate predicate) {
@@ -80,6 +94,38 @@ public class TypeServiceImpl implements TypeService {
         return typeRepository.findAll().stream()
             .map(typeConverter::entityToDto)
             .collect(Collectors.toSet());
+    }
+
+    @Override
+    public List<CreateVariantDto> getCreateVariants(String extId) {
+
+        Map<String, CreateVariantDto> result = new LinkedHashMap<>();
+
+        forEachTypeInDescHierarchy(extId, type -> {
+            List<CreateVariantDto> createVariants = type.getCreateVariants();
+            if (createVariants != null) {
+                createVariants.forEach(cv -> {
+                    CreateVariantDto variant = new CreateVariantDto(cv);
+                    if (!variant.getAttributes().has("_etype")) {
+                        variant.getAttributes().set("_etype", "emodel/type@" + type.getId());
+                    }
+                    if (variant.getFormRef() == null) {
+                        variant.setFormRef(type.getForm());
+                    }
+                    if (RecordRef.isEmpty(variant.getRecordRef())) {
+                        if (StringUtils.isNotBlank(type.getSourceId())) {
+                            variant.setRecordRef(RecordRef.valueOf(type.getSourceId() + "@"));
+                        } else {
+                            variant.setRecordRef(RecordRef.valueOf("dict@idocs:doc"));
+                        }
+                    }
+                    result.put(variant.getId(), variant);
+                });
+            }
+            return false;
+        });
+
+        return new ArrayList<>(result.values());
     }
 
     @Override
@@ -239,8 +285,27 @@ public class TypeServiceImpl implements TypeService {
         removeAliasedTypes(entity);
 
         TypeDto typeDto = typeConverter.entityToDto(entity);
+
+        updateJournalLists(typeDto);
+
         onTypeChangedListener.accept(typeDto);
         return typeDto;
+    }
+
+    @Override
+    public List<TypeDto> getTypesByJournalList(String journalListId) {
+
+        if (StringUtils.isBlank(journalListId)) {
+            return Collections.emptyList();
+        }
+
+        return typesByJournalListId.getOrDefault(journalListId, Collections.emptySet())
+            .stream()
+            .map(typeRepository::findByExtId)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .map(typeConverter::entityToDto)
+            .collect(Collectors.toList());
     }
 
     private void removeAliasedTypes(final TypeEntity entity) {
@@ -302,6 +367,47 @@ public class TypeServiceImpl implements TypeService {
         }
 
         return spec;
+    }
+
+    private synchronized void updateJournalLists(TypeDto typeDto) {
+
+        ObjectData attributes = typeDto.getAttributes();
+        String listId = attributes != null ? attributes.get("journalsListId").asText() : "";
+
+        if (StringUtils.isNotBlank(listId)) {
+
+            Set<String> listJournals = typesByJournalListId.computeIfAbsent(listId, id ->
+                Collections.newSetFromMap(new ConcurrentHashMap<>())
+            );
+
+            String listIdBefore = journalListByTypeId.get(typeDto.getId());
+            if (StringUtils.isNotBlank(listIdBefore)) {
+                if (!listIdBefore.equals(listId)) {
+                    Set<String> listBefore = typesByJournalListId.computeIfAbsent(listIdBefore, id ->
+                        Collections.newSetFromMap(new ConcurrentHashMap<>())
+                    );
+                    listBefore.remove(typeDto.getId());
+                    listJournals.add(typeDto.getId());
+                }
+            } else {
+                listJournals.add(typeDto.getId());
+            }
+
+            journalListByTypeId.put(typeDto.getId(), listId);
+
+        } else {
+
+            String listIdBefore = journalListByTypeId.get(typeDto.getId());
+
+            if (StringUtils.isNotBlank(listIdBefore)) {
+
+                typesByJournalListId.computeIfAbsent(listIdBefore, id ->
+                    Collections.newSetFromMap(new ConcurrentHashMap<>())
+                ).remove(typeDto.getId());
+
+                journalListByTypeId.remove(typeDto.getId());
+            }
+        }
     }
 
     @Data

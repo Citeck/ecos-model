@@ -1,0 +1,21 @@
+
+id: base
+
+label: { ru: Базовый журнал, en: Base journal }
+
+columns:
+
+  - name: "displayName"
+    label: { ru: "Имя", en: "Name" }
+    attribute: ".disp"
+    type: "text"
+
+  - name: "modifier"
+    label: { ru: "Кем изменен", en: "Changed by" }
+    attribute: "_modifier"
+    type: "text"
+
+  - name: "modified"
+    label: { ru: "Когда изменен", en: "Changed time" }
+    attribute: "_modified"
+    type: "datetime"

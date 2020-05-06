@@ -3,6 +3,7 @@ package ru.citeck.ecos.model.type.records.dao;
 import ecos.com.fasterxml.jackson210.annotation.JsonIgnore;
 import ecos.com.fasterxml.jackson210.annotation.JsonProperty;
 import ecos.com.fasterxml.jackson210.annotation.JsonValue;
+import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -13,17 +14,17 @@ import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.section.records.record.SectionRecord;
-import ru.citeck.ecos.records2.RecordMeta;
-import ru.citeck.ecos.records2.graphql.meta.annotation.DisplayName;
-import ru.citeck.ecos.records2.predicate.PredicateService;
-import ru.citeck.ecos.records2.predicate.model.Predicate;
 import ru.citeck.ecos.model.type.dto.TypeDto;
 import ru.citeck.ecos.model.type.service.TypeService;
 import ru.citeck.ecos.records2.RecordConstants;
+import ru.citeck.ecos.records2.RecordMeta;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.RecordsService;
+import ru.citeck.ecos.records2.graphql.meta.annotation.DisplayName;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaValue;
+import ru.citeck.ecos.records2.predicate.PredicateService;
+import ru.citeck.ecos.records2.predicate.model.Predicate;
 import ru.citeck.ecos.records2.request.delete.RecordsDelResult;
 import ru.citeck.ecos.records2.request.delete.RecordsDeletion;
 import ru.citeck.ecos.records2.request.mutation.RecordsMutResult;
@@ -47,6 +48,7 @@ public class TypeRecordsDao extends LocalRecordsDAO
     public static final String ID = "type";
 
     private static final String TYPE_ACTIONS_WITH_INHERIT_ATT_JSON = "_actions[]?id";
+    private static final String LANG_TYPES_BY_JOURNAL_LIST = "journal-list";
 
     private final TypeRecord EMPTY_RECORD = new TypeRecord(new TypeDto());
 
@@ -78,7 +80,19 @@ public class TypeRecordsDao extends LocalRecordsDAO
 
         RecordsQueryResult<TypeRecord> result = new RecordsQueryResult<>();
 
-        if (recordsQuery.getLanguage().equals(PredicateService.LANGUAGE_PREDICATE)) {
+        if (recordsQuery.getLanguage().equals(LANG_TYPES_BY_JOURNAL_LIST)) {
+
+            TypesByJournalListQuery query = recordsQuery.getQuery(TypesByJournalListQuery.class);
+            if (query == null) {
+                return result;
+            }
+
+            result.setRecords(typeService.getTypesByJournalList(query.listId)
+                .stream()
+                .map(TypeRecord::new)
+                .collect(Collectors.toList()));
+
+        } else if (recordsQuery.getLanguage().equals(PredicateService.LANGUAGE_PREDICATE)) {
 
             Predicate predicate = recordsQuery.getQuery(Predicate.class);
 
@@ -231,6 +245,8 @@ public class TypeRecordsDao extends LocalRecordsDAO
                     return dto.getDashboardType();
                 case "inhDashboardType":
                     return typeService.getDashboardType(dto.getId());
+                case "inhCreateVariants":
+                    return typeService.getCreateVariants(dto.getId());
                 case "isSystem":
                     return dto.isSystem();
                 case RecordConstants.ATT_FORM_KEY:
@@ -334,6 +350,11 @@ public class TypeRecordsDao extends LocalRecordsDAO
         }
 
         return new ArrayList<>(actionDtoMap.values());
+    }
+
+    @Data
+    public static class TypesByJournalListQuery {
+        private String listId;
     }
 
     public static class TypeMutRecord extends TypeDto {

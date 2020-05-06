@@ -229,6 +229,7 @@ public class TypeServiceImplTest {
 
         //  arrange
         when(typeConverter.dtoToEntity(typeDto)).thenReturn(typeEntity);
+        when(typeConverter.entityToDto(typeEntity)).thenReturn(typeDto);
         when(typeRepository.save(typeEntity)).thenReturn(typeEntity);
 
         //  act
@@ -275,6 +276,7 @@ public class TypeServiceImplTest {
         when(typeRepository.save(entity)).thenReturn(saved);
 
         TypeDto savedDto = new TypeDto();
+        savedDto.setId("test");
         when(typeConverter.entityToDto(saved)).thenReturn(savedDto);
 
         assertEquals(savedDto, typeService.save(dto));

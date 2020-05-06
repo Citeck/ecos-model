@@ -1,25 +1,31 @@
 package ru.citeck.ecos.model.type.dto;
 
+import ecos.com.fasterxml.jackson210.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
+import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.records2.RecordRef;
 
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class TypeDto {
 
+    @NotNull
     private String id;
     private MLText name;
     private MLText description;
     private String tenant;
+    private String sourceId;
     private RecordRef parent;
     private RecordRef form;
     private RecordRef journal;
@@ -40,6 +46,12 @@ public class TypeDto {
 
     public TypeDto(TypeDto dto) {
 
+        TypeDto copy = Json.getMapper().copy(dto);
+
+        if (copy == null) {
+            return;
+        }
+
         this.id = dto.id;
         this.name = dto.name;
         this.description = dto.description;
@@ -49,23 +61,13 @@ public class TypeDto {
         this.system = dto.system;
         this.dashboardType = dto.dashboardType;
         this.inheritActions = dto.inheritActions;
-        this.tenant = dto.getTenant();
-        this.configForm = dto.getConfigForm();
-        this.config = dto.getConfig();
-
-        if (dto.aliases != null) {
-            this.aliases = new ArrayList<>(dto.aliases);
-        }
-        if (dto.associations != null) {
-            this.associations = new ArrayList<>(dto.associations);
-        }
-        if (dto.actions != null) {
-            this.actions = new ArrayList<>(dto.actions);
-        }
-        if (dto.createVariants != null) {
-            this.createVariants = new ArrayList<>(dto.createVariants);
-        }
-
-        this.attributes = ObjectData.deepCopy(dto.attributes);
+        this.tenant = dto.tenant;
+        this.configForm = dto.configForm;
+        this.config = dto.config;
+        this.aliases = copy.aliases;
+        this.associations = copy.associations;
+        this.actions = copy.actions;
+        this.createVariants = copy.createVariants;
+        this.attributes = copy.attributes;
     }
 }
