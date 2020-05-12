@@ -251,6 +251,10 @@ public class TypeRecordsDao extends LocalRecordsDAO
                     return dto.isSystem();
                 case RecordConstants.ATT_FORM_KEY:
                     return "module_model/type";
+                case "config":
+                    return dto.getConfig();
+                case "configForm":
+                    return dto.getConfigForm();
             }
             return null;
         }

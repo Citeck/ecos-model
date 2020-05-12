@@ -12,7 +12,19 @@
         "actions": [
             "uiserv/action@delete",
             "uiserv/action@view"
-        ]
+        ],
+        "configForm": "uiserv/eform@test-config-form",
+        "config": {
+            "isActive": true,
+            "balance": "$3,924.34",
+            "picture": "http://placehold.it/32x32",
+            "age": 33,
+            "eyeColor": "blue",
+            "name": {
+                "first": "Josie",
+                "last": "Koch"
+            }
+        }
     },
     {
         "id": "type-first",
