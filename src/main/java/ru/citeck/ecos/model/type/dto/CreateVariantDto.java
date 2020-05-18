@@ -18,7 +18,7 @@ public class CreateVariantDto {
     private RecordRef formRef;
     private RecordRef recordRef;
     @NotNull
-    private ObjectData attributes = new ObjectData();
+    private ObjectData attributes = ObjectData.create();
 
     public CreateVariantDto(CreateVariantDto other) {
         CreateVariantDto copy = Json.getMapper().copy(other);

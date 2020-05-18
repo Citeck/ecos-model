@@ -55,10 +55,10 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
         typeEntity.setDescription(Json.getMapper().toString(dto.getDescription()));
         typeEntity.setInheritActions(dto.isInheritActions());
 
-        ObjectData attributes = dto.getAttributes() != null ? dto.getAttributes() : new ObjectData();
+        ObjectData attributes = dto.getAttributes() != null ? dto.getAttributes() : ObjectData.create();
         typeEntity.setAttributes(attributes.toString());
 
-        ObjectData config = dto.getConfig() != null ? dto.getConfig() : new ObjectData();
+        ObjectData config = dto.getConfig() != null ? dto.getConfig() : ObjectData.create();
         typeEntity.setConfig(config.toString());
 
         typeEntity.setTenant(dto.getTenant());
