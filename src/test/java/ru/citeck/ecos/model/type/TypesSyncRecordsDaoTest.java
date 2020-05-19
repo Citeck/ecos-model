@@ -83,8 +83,6 @@ public class TypesSyncRecordsDaoTest {
         localRecordsService.register(remoteSyncRecordsDAO);
 
         generateData();
-
-        localFactory.initJobs(null);
     }
 
     @Test
