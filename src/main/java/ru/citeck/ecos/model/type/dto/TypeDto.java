@@ -4,6 +4,7 @@ import ecos.com.fasterxml.jackson210.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.citeck.ecos.commons.data.DataValue;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
@@ -46,15 +47,10 @@ public class TypeDto {
 
     public TypeDto(TypeDto dto) {
 
-        TypeDto copy = Json.getMapper().copy(dto);
-
-        if (copy == null) {
-            return;
-        }
-
         this.id = dto.id;
-        this.name = dto.name;
-        this.description = dto.description;
+        this.sourceId = dto.sourceId;
+        this.name = Json.getMapper().copy(dto.name);
+        this.description = Json.getMapper().copy(dto.description);
         this.parent = dto.parent;
         this.form = dto.form;
         this.journal = dto.journal;
@@ -63,11 +59,11 @@ public class TypeDto {
         this.inheritActions = dto.inheritActions;
         this.tenant = dto.tenant;
         this.configForm = dto.configForm;
-        this.config = dto.config;
-        this.aliases = copy.aliases;
-        this.associations = copy.associations;
-        this.actions = copy.actions;
-        this.createVariants = copy.createVariants;
-        this.attributes = copy.attributes;
+        this.config = ObjectData.deepCopy(dto.config);
+        this.aliases = DataValue.create(dto.aliases).toList(String.class);
+        this.associations = DataValue.create(dto.associations).toList(AssociationDto.class);
+        this.actions = DataValue.create(dto.actions).toList(RecordRef.class);
+        this.createVariants = DataValue.create(dto.createVariants).toList(CreateVariantDto.class);
+        this.attributes = ObjectData.deepCopy(dto.attributes);
     }
 }

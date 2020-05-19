@@ -2,6 +2,7 @@ package ru.citeck.ecos.model.type.service.impl;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -10,20 +11,25 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
+import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.association.service.AssociationService;
 import ru.citeck.ecos.model.converter.DtoConverter;
 import ru.citeck.ecos.model.service.exception.ForgottenChildsException;
 import ru.citeck.ecos.model.type.domain.TypeEntity;
 import ru.citeck.ecos.model.type.dto.CreateVariantDto;
 import ru.citeck.ecos.model.type.dto.TypeDto;
+import ru.citeck.ecos.model.type.dto.TypeWithMetaDto;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.model.type.service.TypeService;
+import ru.citeck.ecos.records2.RecordConstants;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.predicate.PredicateUtils;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
+import ru.citeck.ecos.records2.predicate.model.ValuePredicate;
 import springfox.documentation.annotations.Cacheable;
 
 import javax.annotation.PostConstruct;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -31,13 +37,14 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class TypeServiceImpl implements TypeService {
 
     private final TypeRepository typeRepository;
     private final AssociationService associationService;
-    private final DtoConverter<TypeDto, TypeEntity> typeConverter;
+    private final DtoConverter<TypeWithMetaDto, TypeEntity> typeConverter;
 
     private Consumer<TypeDto> onTypeChangedListener = dto -> {};
 
@@ -52,9 +59,18 @@ public class TypeServiceImpl implements TypeService {
     }
 
     @Override
-    public List<TypeDto> getAll(int max, int skip, Predicate predicate) {
+    public List<TypeWithMetaDto> getAll(int max, int skip, Predicate predicate) {
+        return getAll(max, skip, predicate, null);
+    }
 
-        PageRequest page = PageRequest.of(skip / max, max, Sort.by(Sort.Direction.DESC, "id"));
+    @Override
+    public List<TypeWithMetaDto> getAll(int max, int skip, Predicate predicate, Sort sort) {
+
+        if (sort == null) {
+            sort = Sort.by(Sort.Direction.DESC, "id");
+        }
+
+        PageRequest page = PageRequest.of(skip / max, max, sort);
 
         return typeRepository.findAll(toSpec(predicate), page)
             .stream()
@@ -63,7 +79,7 @@ public class TypeServiceImpl implements TypeService {
     }
 
     @Override
-    public List<TypeDto> getAll(int max, int skip) {
+    public List<TypeWithMetaDto> getAll(int max, int skip) {
 
         PageRequest page = PageRequest.of(skip / max, max, Sort.by(Sort.Direction.DESC, "id"));
 
@@ -90,7 +106,7 @@ public class TypeServiceImpl implements TypeService {
     }
 
     @Cacheable("types")
-    public Set<TypeDto> getAll() {
+    public Set<TypeWithMetaDto> getAll() {
         return typeRepository.findAll().stream()
             .map(typeConverter::entityToDto)
             .collect(Collectors.toSet());
@@ -145,9 +161,9 @@ public class TypeServiceImpl implements TypeService {
     }
 
     @Override
-    public List<TypeDto> getParents(String extId) {
+    public List<TypeWithMetaDto> getParents(String extId) {
 
-        List<TypeDto> result = new ArrayList<>();
+        List<TypeWithMetaDto> result = new ArrayList<>();
         forEachTypeInHierarchy(extId, type -> {
             if (!Objects.equals(type.getId(), extId)) {
                 result.add(type);
@@ -159,9 +175,9 @@ public class TypeServiceImpl implements TypeService {
     }
 
     @Override
-    public List<TypeDto> getChildren(String extId) {
+    public List<TypeWithMetaDto> getChildren(String extId) {
 
-        List<TypeDto> result = new ArrayList<>();
+        List<TypeWithMetaDto> result = new ArrayList<>();
         forEachTypeInDescHierarchy(extId, type -> {
             if (!Objects.equals(type.getId(), extId)) {
                 result.add(type);
@@ -172,11 +188,11 @@ public class TypeServiceImpl implements TypeService {
         return result;
     }
 
-    private void forEachTypeInDescHierarchy(String extId, Function<TypeDto, Boolean> action) {
+    private void forEachTypeInDescHierarchy(String extId, Function<TypeWithMetaDto, Boolean> action) {
         forEachTypeInDescHierarchy(typeRepository.findByExtId(extId).orElse(null), action);
     }
 
-    private void forEachTypeInDescHierarchy(TypeEntity type, Function<TypeDto, Boolean> action) {
+    private void forEachTypeInDescHierarchy(TypeEntity type, Function<TypeWithMetaDto, Boolean> action) {
         if (type == null) {
             return;
         }
@@ -187,9 +203,9 @@ public class TypeServiceImpl implements TypeService {
         types.forEach(t -> forEachTypeInDescHierarchy(t, action));
     }
 
-    private void forEachTypeInHierarchy(String extId, Function<TypeDto, Boolean> action) {
+    private void forEachTypeInHierarchy(String extId, Function<TypeWithMetaDto, Boolean> action) {
 
-        TypeDto type = getByExtId(extId);
+        TypeWithMetaDto type = getByExtId(extId);
         if (action.apply(type)) {
             return;
         }
@@ -212,25 +228,25 @@ public class TypeServiceImpl implements TypeService {
     }
 
     @Override
-    public Set<TypeDto> getAll(Collection<String> extIds) {
+    public Set<TypeWithMetaDto> getAll(Collection<String> extIds) {
         return typeRepository.findAllByExtIds(new HashSet<>(extIds)).stream()
             .map(typeConverter::entityToDto)
             .collect(Collectors.toSet());
     }
 
     @Override
-    public TypeDto getByExtId(String extId) {
+    public TypeWithMetaDto getByExtId(String extId) {
         return typeRepository.findByExtId(extId).map(typeConverter::entityToDto)
             .orElseThrow(() -> new IllegalArgumentException("Type doesnt exists: " + extId));
     }
 
     @Override
-    public TypeDto getByExtIdOrNull(String extId) {
+    public TypeWithMetaDto getByExtIdOrNull(String extId) {
         return typeRepository.findByExtId(extId).map(typeConverter::entityToDto).orElse(null);
     }
 
     @Override
-    public TypeDto getOrCreateByExtId(String extId) {
+    public TypeWithMetaDto getOrCreateByExtId(String extId) {
 
         Optional<TypeEntity> byExtId = typeRepository.findByExtId(extId);
 
@@ -246,7 +262,7 @@ public class TypeServiceImpl implements TypeService {
                 typeDto.setParent(RecordRef.create("emodel", "type", "user-base"));
                 typeDto.setName(new MLText(extId));
 
-                return save(typeDto);
+                return new TypeWithMetaDto(save(typeDto));
             });
     }
 
@@ -270,7 +286,7 @@ public class TypeServiceImpl implements TypeService {
 
     @Override
     @Transactional
-    public TypeDto save(TypeDto dto) {
+    public TypeWithMetaDto save(TypeDto dto) {
 
         TypeEntity aliasOwner = getAliasOwner(dto.getId());
 
@@ -278,13 +294,13 @@ public class TypeServiceImpl implements TypeService {
             return typeConverter.entityToDto(aliasOwner);
         }
 
-        TypeEntity entity = typeConverter.dtoToEntity(dto);
+        TypeEntity entity = typeConverter.dtoToEntity(new TypeWithMetaDto(dto));
         entity = typeRepository.save(entity);
-        associationService.extractAndSaveAssocsFromType(dto);
+        associationService.extractAndSaveAssocsFromType(new TypeWithMetaDto(dto));
 
         removeAliasedTypes(entity);
 
-        TypeDto typeDto = typeConverter.entityToDto(entity);
+        TypeWithMetaDto typeDto = typeConverter.entityToDto(entity);
 
         updateJournalLists(typeDto);
 
@@ -293,7 +309,7 @@ public class TypeServiceImpl implements TypeService {
     }
 
     @Override
-    public List<TypeDto> getTypesByJournalList(String journalListId) {
+    public List<TypeWithMetaDto> getTypesByJournalList(String journalListId) {
 
         if (StringUtils.isBlank(journalListId)) {
             return Collections.emptyList();
@@ -351,7 +367,27 @@ public class TypeServiceImpl implements TypeService {
         }
     }
 
+    // todo: this method should be in ecos-records-spring
     private Specification<TypeEntity> toSpec(Predicate predicate) {
+
+        if (predicate instanceof ValuePredicate) {
+
+            ValuePredicate valuePred = (ValuePredicate) predicate;
+
+            ValuePredicate.Type type = valuePred.getType();
+            Object value = valuePred.getValue();
+            String attribute = valuePred.getAttribute();
+
+            if (RecordConstants.ATT_MODIFIED.equals(attribute)
+                    && ValuePredicate.Type.GT.equals(type)) {
+
+                Instant instant = Json.getMapper().convert(value, Instant.class);
+                if (instant != null) {
+                    return (root, query, builder) ->
+                        builder.greaterThan(root.get("lastModifiedDate").as(Instant.class), instant);
+                }
+            }
+        }
 
         PredicateDto predicateDto = PredicateUtils.convertToDto(predicate, PredicateDto.class);
         Specification<TypeEntity> spec = null;

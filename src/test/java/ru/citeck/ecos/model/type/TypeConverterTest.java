@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.converter.dto;
+package ru.citeck.ecos.model.type;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
@@ -19,6 +19,7 @@ import ru.citeck.ecos.model.type.converter.TypeConverter;
 import ru.citeck.ecos.model.type.domain.TypeEntity;
 import ru.citeck.ecos.model.type.dto.CreateVariantDto;
 import ru.citeck.ecos.model.type.dto.TypeDto;
+import ru.citeck.ecos.model.type.dto.TypeWithMetaDto;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
 
@@ -41,7 +42,7 @@ public class TypeConverterTest {
     private TypeConverter typeConverter;
 
     private TypeEntity typeEntity;
-    private TypeDto typeDto;
+    private TypeWithMetaDto typeDto;
 
     private TypeEntity parent;
 
@@ -135,7 +136,7 @@ public class TypeConverterTest {
         associationDto.setId("association");
         associationDto.setTarget(RecordRef.create("type", "parent"));
 
-        typeDto = new TypeDto();
+        typeDto = new TypeWithMetaDto();
         typeDto.setId("type");
         typeDto.setName(new MLText("name"));
         typeDto.setDescription(new MLText("desc"));

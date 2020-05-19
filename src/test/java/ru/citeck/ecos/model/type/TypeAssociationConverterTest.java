@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.converter.dto;
+package ru.citeck.ecos.model.type;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;

@@ -13,6 +13,7 @@ import ru.citeck.ecos.model.type.domain.TypeEntity;
 import ru.citeck.ecos.model.type.dto.TypeDto;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.association.repository.AssociationRepository;
+import ru.citeck.ecos.model.type.dto.TypeWithMetaDto;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.model.association.service.impl.AssociationServiceImpl;
 import ru.citeck.ecos.model.type.records.dao.TypeRecordsDao;
@@ -39,7 +40,7 @@ public class AssociationServiceImplTest {
     private DtoConverter<AssociationDto, AssociationEntity> associationConverter;
 
     @MockBean
-    private DtoConverter<TypeDto, TypeEntity> typeConverter;
+    private DtoConverter<TypeWithMetaDto, TypeEntity> typeConverter;
 
     private AssociationServiceImpl associationService;
 
@@ -65,7 +66,7 @@ public class AssociationServiceImplTest {
 
         when(associationConverter.dtoToEntity(associationDto)).thenReturn(associationEntity);
 
-        TypeDto typeDto = new TypeDto();
+        TypeWithMetaDto typeDto = new TypeWithMetaDto();
         typeDto.setAssociations(Collections.singletonList(associationDto));
 
         TypeEntity typeEntity = new TypeEntity();
@@ -97,7 +98,7 @@ public class AssociationServiceImplTest {
 
         when(associationConverter.dtoToEntity(associationDto)).thenReturn(associationEntity);
 
-        TypeDto typeDto = new TypeDto();
+        TypeWithMetaDto typeDto = new TypeWithMetaDto();
         typeDto.setAssociations(Collections.singletonList(associationDto));
 
         TypeEntity typeEntity = new TypeEntity();
@@ -131,7 +132,7 @@ public class AssociationServiceImplTest {
 
         when(associationConverter.dtoToEntity(associationDto)).thenReturn(associationEntity);
 
-        TypeDto typeDto = new TypeDto();
+        TypeWithMetaDto typeDto = new TypeWithMetaDto();
         typeDto.setAssociations(Collections.singletonList(associationDto));
 
         TypeEntity typeEntity = new TypeEntity();

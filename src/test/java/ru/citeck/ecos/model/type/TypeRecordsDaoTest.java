@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.records.dao;
+package ru.citeck.ecos.model.type;
 
 import graphql.language.Field;
 import org.junit.Assert;
@@ -11,6 +11,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.model.type.dto.TypeDto;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
+import ru.citeck.ecos.model.type.dto.TypeWithMetaDto;
 import ru.citeck.ecos.model.type.service.impl.TypeServiceImpl;
 import ru.citeck.ecos.model.type.records.dao.TypeRecordsDao;
 import ru.citeck.ecos.records2.RecordRef;
@@ -47,7 +48,7 @@ public class TypeRecordsDaoTest {
 
     private List<RecordRef> recordRefs;
     private RecordsQuery recordsQuery;
-    private TypeDto typeDto;
+    private TypeWithMetaDto typeDto;
     private MetaField metaField;
     private Predicate predicate;
 
@@ -68,7 +69,7 @@ public class TypeRecordsDaoTest {
         AssociationDto associationDto = new AssociationDto();
         associationDto.setId("association");
 
-        typeDto = new TypeDto();
+        typeDto = new TypeWithMetaDto();
         typeDto.setId("type");
         typeDto.setName(new MLText("name"));
         typeDto.setDescription(new MLText("desc"));

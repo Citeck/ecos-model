@@ -7,9 +7,9 @@ import org.springframework.stereotype.Service;
 import ru.citeck.ecos.model.converter.DtoConverter;
 import ru.citeck.ecos.model.association.domain.AssociationEntity;
 import ru.citeck.ecos.model.type.domain.TypeEntity;
-import ru.citeck.ecos.model.type.dto.TypeDto;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.association.repository.AssociationRepository;
+import ru.citeck.ecos.model.type.dto.TypeWithMetaDto;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.model.association.service.AssociationService;
 import ru.citeck.ecos.records2.RecordRef;
@@ -25,7 +25,7 @@ public class AssociationServiceImpl implements AssociationService {
     private final AssociationRepository associationRepository;
     private final TypeRepository typeRepository;
     private final DtoConverter<AssociationDto, AssociationEntity> associationConverter;
-    private final DtoConverter<TypeDto, TypeEntity> typeConverter;
+    private final DtoConverter<TypeWithMetaDto, TypeEntity> typeConverter;
 
     /*
      *  Note:
@@ -33,7 +33,7 @@ public class AssociationServiceImpl implements AssociationService {
      *  We use this, because needed to save assocs separately from types
      *  Sometimes we need to save type with assoc to itself
      */
-    public void extractAndSaveAssocsFromType(TypeDto source) {
+    public void extractAndSaveAssocsFromType(TypeWithMetaDto source) {
 
         Set<AssociationEntity> associationEntities = source.getAssociations().stream()
             .filter(a -> StringUtils.isNotBlank(a.getId()))

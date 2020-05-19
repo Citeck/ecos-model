@@ -1,7 +1,9 @@
 package ru.citeck.ecos.model.type.service;
 
+import org.springframework.data.domain.Sort;
 import ru.citeck.ecos.model.type.dto.CreateVariantDto;
 import ru.citeck.ecos.model.type.dto.TypeDto;
+import ru.citeck.ecos.model.type.dto.TypeWithMetaDto;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
 
 import java.util.Collection;
@@ -13,25 +15,27 @@ public interface TypeService {
 
     void addListener(Consumer<TypeDto> onTypeChangedListener);
 
-    List<TypeDto> getAll(int max, int skip);
+    List<TypeWithMetaDto> getAll(int max, int skip);
 
-    List<TypeDto> getAll(int max, int skip, Predicate predicate);
+    List<TypeWithMetaDto> getAll(int max, int skip, Predicate predicate);
 
-    Set<TypeDto> getAll();
+    Set<TypeWithMetaDto> getAll();
 
-    Set<TypeDto> getAll(Collection<String> extIds);
+    Set<TypeWithMetaDto> getAll(Collection<String> extIds);
 
-    List<TypeDto> getTypesByJournalList(String journalListId);
+    List<TypeWithMetaDto> getAll(int max, int skip, Predicate predicate, Sort sort);
 
-    TypeDto getByExtId(String extId);
+    List<TypeWithMetaDto> getTypesByJournalList(String journalListId);
 
-    TypeDto getByExtIdOrNull(String extId);
+    TypeWithMetaDto getByExtId(String extId);
 
-    TypeDto getOrCreateByExtId(String extId);
+    TypeWithMetaDto getByExtIdOrNull(String extId);
 
-    List<TypeDto> getParents(String extId);
+    TypeWithMetaDto getOrCreateByExtId(String extId);
 
-    List<TypeDto> getChildren(String extId);
+    List<TypeWithMetaDto> getParents(String extId);
+
+    List<TypeWithMetaDto> getChildren(String extId);
 
     String getDashboardType(String extId);
 
@@ -39,7 +43,7 @@ public interface TypeService {
 
     void delete(String extId);
 
-    TypeDto save(TypeDto dto);
+    TypeWithMetaDto save(TypeDto dto);
 
     int getCount(Predicate predicate);
 

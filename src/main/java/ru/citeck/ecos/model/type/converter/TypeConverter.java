@@ -12,7 +12,7 @@ import ru.citeck.ecos.model.converter.AbstractDtoConverter;
 import ru.citeck.ecos.model.converter.DtoConverter;
 import ru.citeck.ecos.model.type.domain.TypeEntity;
 import ru.citeck.ecos.model.type.dto.CreateVariantDto;
-import ru.citeck.ecos.model.type.dto.TypeDto;
+import ru.citeck.ecos.model.type.dto.TypeWithMetaDto;
 import ru.citeck.ecos.model.type.records.dao.TypeRecordsDao;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 @Component
 @Slf4j
-public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
+public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEntity> {
 
     private static final String BASE_TYPE_ID = "base";
 
@@ -37,13 +37,14 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
     }
 
     @Override
-    public TypeEntity dtoToEntity(TypeDto dto) {
+    public TypeEntity dtoToEntity(TypeWithMetaDto dto) {
 
         Optional<TypeEntity> storedType = typeRepository.findByExtId(dto.getId());
         TypeEntity typeEntity = storedType.orElseGet(TypeEntity::new);
 
         typeEntity.setSystem(dto.isSystem());
         typeEntity.setDashboardType(dto.getDashboardType());
+        typeEntity.setSourceId(dto.getSourceId());
 
         String typeDtoId = dto.getId();
         if (Strings.isBlank(typeDtoId)) {
@@ -116,9 +117,9 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
     }
 
     @Override
-    public TypeDto entityToDto(TypeEntity entity) {
+    public TypeWithMetaDto entityToDto(TypeEntity entity) {
 
-        TypeDto dto = new TypeDto();
+        TypeWithMetaDto dto = new TypeWithMetaDto();
 
         dto.setSystem(Boolean.TRUE.equals(entity.getSystem()));
         dto.setDashboardType(entity.getDashboardType());
@@ -131,6 +132,7 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
         dto.setTenant(entity.getTenant());
         dto.setConfigForm(RecordRef.valueOf(entity.getConfigForm()));
         dto.setConfig(Json.getMapper().read(entity.getConfig(), ObjectData.class));
+        dto.setSourceId(entity.getSourceId());
 
         String attributesStr = entity.getAttributes();
         dto.setAttributes(Json.getMapper().read(attributesStr, ObjectData.class));
@@ -164,6 +166,11 @@ public class TypeConverter extends AbstractDtoConverter<TypeDto, TypeEntity> {
         }
 
         dto.setAliases(new ArrayList<>(entity.getAliases()));
+
+        dto.setCreated(entity.getCreatedDate());
+        dto.setCreator(entity.getCreatedBy());
+        dto.setModified(entity.getLastModifiedDate());
+        dto.setModifier(entity.getLastModifiedBy());
 
         return dto;
     }

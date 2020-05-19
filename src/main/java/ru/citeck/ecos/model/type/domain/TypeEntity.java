@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import ru.citeck.ecos.model.association.domain.AssociationEntity;
+import ru.citeck.ecos.model.domain.AbstractAuditingEntity;
 import ru.citeck.ecos.model.domain.BaseEntity;
 import ru.citeck.ecos.model.section.domain.SectionEntity;
 import ru.citeck.ecos.model.utils.EntityCollectionUtils;
@@ -19,7 +20,12 @@ import java.util.Set;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 @Table(name = "ecos_type")
-public class TypeEntity extends BaseEntity {
+public class TypeEntity extends AbstractAuditingEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ecos_types_seq_gen")
+    @SequenceGenerator(name = "ecos_types_seq_gen")
+    private Long id;
 
     @Column(unique = true, nullable = false)
     private String extId;
@@ -44,6 +50,9 @@ public class TypeEntity extends BaseEntity {
     private String configForm;
 
     private String config;
+
+    @Column(name = "source_id")
+    private String sourceId;
 
     @Column(name = "create_variants")
     private String createVariants;

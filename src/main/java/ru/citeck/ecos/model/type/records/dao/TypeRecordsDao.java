@@ -7,6 +7,7 @@ import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.commons.data.DataValue;
 import ru.citeck.ecos.commons.data.MLText;
@@ -15,6 +16,7 @@ import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.section.records.record.SectionRecord;
 import ru.citeck.ecos.model.type.dto.TypeDto;
+import ru.citeck.ecos.model.type.dto.TypeWithMetaDto;
 import ru.citeck.ecos.model.type.service.TypeService;
 import ru.citeck.ecos.records2.RecordConstants;
 import ru.citeck.ecos.records2.RecordMeta;
@@ -30,6 +32,7 @@ import ru.citeck.ecos.records2.request.delete.RecordsDeletion;
 import ru.citeck.ecos.records2.request.mutation.RecordsMutResult;
 import ru.citeck.ecos.records2.request.query.RecordsQuery;
 import ru.citeck.ecos.records2.request.query.RecordsQueryResult;
+import ru.citeck.ecos.records2.request.query.SortBy;
 import ru.citeck.ecos.records2.source.dao.local.LocalRecordsDAO;
 import ru.citeck.ecos.records2.source.dao.local.MutableRecordsLocalDAO;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsMetaDAO;
@@ -50,10 +53,10 @@ public class TypeRecordsDao extends LocalRecordsDAO
     private static final String TYPE_ACTIONS_WITH_INHERIT_ATT_JSON = "_actions[]?id";
     private static final String LANG_TYPES_BY_JOURNAL_LIST = "journal-list";
 
-    private final TypeRecord EMPTY_RECORD = new TypeRecord(new TypeDto());
+    private final TypeRecord EMPTY_RECORD = new TypeRecord(new TypeWithMetaDto());
 
     private final TypeService typeService;
-    private RecordsService recordsService;
+    private final RecordsService recordsService;
 
     @Autowired
     public TypeRecordsDao(TypeService typeService,
@@ -101,7 +104,23 @@ public class TypeRecordsDao extends LocalRecordsDAO
                 max = 10000;
             }
 
-            Collection<TypeDto> types = typeService.getAll(max, recordsQuery.getSkipCount(), predicate);
+            List<Sort.Order> order = recordsQuery.getSortBy()
+                .stream()
+                .map(s -> {
+                    String attribute = s.getAttribute();
+                    if (RecordConstants.ATT_MODIFIED.equals(attribute)) {
+                        attribute = "lastModifiedDate";
+                    }
+                    return s.isAscending() ? Sort.Order.asc(attribute) : Sort.Order.desc(attribute);
+                })
+                .collect(Collectors.toList());
+
+            Collection<TypeWithMetaDto> types = typeService.getAll(
+                max,
+                recordsQuery.getSkipCount(),
+                predicate,
+                !order.isEmpty() ? Sort.by(order) : null
+            );
 
             result.setRecords(types.stream()
                 .map(TypeRecord::new)
@@ -111,7 +130,7 @@ public class TypeRecordsDao extends LocalRecordsDAO
         } else {
 
             int max = recordsQuery.getMaxItems();
-            Collection<TypeDto> types;
+            Collection<TypeWithMetaDto> types;
             if (max < 0) {
                 types = typeService.getAll();
             } else {
@@ -174,14 +193,14 @@ public class TypeRecordsDao extends LocalRecordsDAO
      */
     public class TypeRecord implements MetaValue {
 
-        private final TypeDto dto;
+        private final TypeWithMetaDto dto;
         private final boolean innerType;
 
-        public TypeRecord(TypeDto dto) {
+        public TypeRecord(TypeWithMetaDto dto) {
             this(dto, false);
         }
 
-        public TypeRecord(TypeDto dto, boolean innerType) {
+        public TypeRecord(TypeWithMetaDto dto, boolean innerType) {
             this.dto = dto;
             this.innerType = innerType;
         }
@@ -255,6 +274,16 @@ public class TypeRecordsDao extends LocalRecordsDAO
                     return dto.getConfig();
                 case "configForm":
                     return dto.getConfigForm();
+                case RecordConstants.ATT_MODIFIED:
+                    return dto.getModified();
+                case RecordConstants.ATT_MODIFIER:
+                    return dto.getModifier(); //todo: return RecordRef of User
+                case "_created":
+                    return dto.getCreated();
+                case "_creator":
+                    return dto.getCreator();
+                case "sourceId":
+                    return dto.getSourceId();
             }
             return null;
         }
@@ -265,7 +294,7 @@ public class TypeRecordsDao extends LocalRecordsDAO
         }
     }
 
-    private List<TypeRecord> toInnerTypeRecords(Collection<TypeDto> types) {
+    private List<TypeRecord> toInnerTypeRecords(Collection<TypeWithMetaDto> types) {
         return types.stream()
             .map(dto -> new TypeRecord(dto, true))
             .collect(Collectors.toList());

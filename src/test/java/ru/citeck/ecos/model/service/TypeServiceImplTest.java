@@ -16,6 +16,7 @@ import ru.citeck.ecos.model.section.domain.SectionEntity;
 import ru.citeck.ecos.model.type.converter.TypeConverter;
 import ru.citeck.ecos.model.type.domain.TypeEntity;
 import ru.citeck.ecos.model.type.dto.TypeDto;
+import ru.citeck.ecos.model.type.dto.TypeWithMetaDto;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.model.type.service.impl.TypeServiceImpl;
 import ru.citeck.ecos.records2.RecordRef;
@@ -45,7 +46,7 @@ public class TypeServiceImplTest {
 
     private TypeEntity typeEntity;
 
-    private TypeDto typeDto;
+    private TypeWithMetaDto typeDto;
 
     private String typeExtId;
     private RecordRef actionRef;
@@ -98,7 +99,7 @@ public class TypeServiceImplTest {
         associationDto = new AssociationDto();
         associationDto.setId("association");
 
-        typeDto = new TypeDto();
+        typeDto = new TypeWithMetaDto();
         typeDto.setId(typeExtId);
         typeDto.setName(new MLText("name"));
         typeDto.setDescription(new MLText("desc"));
@@ -121,7 +122,7 @@ public class TypeServiceImplTest {
         when(typeConverter.entityToDto(typeEntity)).thenReturn(typeDto);
 
         //  act
-        Set<TypeDto> resultTypeDtos = typeService.getAll();
+        Set<TypeWithMetaDto> resultTypeDtos = typeService.getAll();
 
         //  assert
         assertEquals(resultTypeDtos.size(), 1);
@@ -144,7 +145,7 @@ public class TypeServiceImplTest {
         when(typeConverter.entityToDto(typeEntity)).thenReturn(typeDto);
 
         //  act
-        Set<TypeDto> resultTypeDtos = typeService.getAll(Collections.singleton(typeExtId));
+        Set<TypeWithMetaDto> resultTypeDtos = typeService.getAll(Collections.singleton(typeExtId));
 
         //  assert
         assertEquals(resultTypeDtos.size(), 1);
@@ -263,7 +264,7 @@ public class TypeServiceImplTest {
         String typeId = "typeId";
         String alias = "alias";
 
-        TypeDto dto = new TypeDto();
+        TypeWithMetaDto dto = new TypeWithMetaDto();
         dto.setId(typeId);
         dto.setAliases(Collections.singletonList(alias));
 
@@ -276,7 +277,7 @@ public class TypeServiceImplTest {
         TypeEntity saved = new TypeEntity();
         when(typeRepository.save(entity)).thenReturn(saved);
 
-        TypeDto savedDto = new TypeDto();
+        TypeWithMetaDto savedDto = new TypeWithMetaDto();
         savedDto.setId("test");
         when(typeConverter.entityToDto(saved)).thenReturn(savedDto);
 
@@ -292,7 +293,7 @@ public class TypeServiceImplTest {
         String ownerId = "ownerId";
         String alias = "ownerId";
 
-        TypeDto ownerDto = new TypeDto();
+        TypeWithMetaDto ownerDto = new TypeWithMetaDto();
         ownerDto.setId(typeId);
         ownerDto.setAliases(Collections.singletonList(alias));
 
