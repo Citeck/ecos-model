@@ -163,7 +163,7 @@ public class TypeConverterTest {
 
         TypeDto resultDto = typeConverter.entityToDto(typeEntity);
 
-        Assert.assertEquals(typeDto, resultDto);
+        Assert.assertEquals(new TypeDto(typeDto), new TypeDto(resultDto));
     }
 
     @Test
@@ -185,7 +185,7 @@ public class TypeConverterTest {
 
         TypeDto resultDto = typeConverter.entityToDto(typeEntity);
 
-        Assert.assertEquals(typeDto, resultDto);
+        Assert.assertEquals(new TypeDto(typeDto), new TypeDto(resultDto));
     }
 
     @Test
@@ -221,8 +221,11 @@ public class TypeConverterTest {
 
     @Test
     void testDtoToEntityWithoutParentAndAssociationsAndExtIdAndActions() {
+
+        when(typeRepository.findByExtId(parent.getExtId())).thenReturn(Optional.of(parent));
+
         typeDto.setActions(Collections.emptyList());
-        typeDto.setParent(null);
+        typeDto.setParent(RecordRef.create("emodel", "type", parent.getExtId()));
         typeDto.setId(Strings.EMPTY);
         typeDto.setAssociations(Collections.emptyList());
 

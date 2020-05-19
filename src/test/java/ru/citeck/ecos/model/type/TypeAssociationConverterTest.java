@@ -47,7 +47,7 @@ public class TypeAssociationConverterTest {
         dto.setId("assocId");
         dto.setName(new MLText("assoc-name"));
         dto.setDirection(AssocDirection.TARGET);
-        dto.setTarget(RecordRef.create(TypeRecordsDao.ID, targetTypeEntity.getExtId()));
+        dto.setTarget(RecordRef.create("emodel", TypeRecordsDao.ID, targetTypeEntity.getExtId()));
     }
 
     @Test

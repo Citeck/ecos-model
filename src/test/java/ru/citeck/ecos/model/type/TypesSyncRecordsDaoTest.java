@@ -15,6 +15,7 @@ import ru.citeck.ecos.model.association.dto.AssocDirection;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.type.dto.CreateVariantDto;
 import ru.citeck.ecos.model.type.dto.TypeDto;
+import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.model.type.service.TypeService;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.RecordsService;
@@ -33,6 +34,7 @@ import ru.citeck.ecos.records2.source.dao.local.RemoteSyncRecordsDAO;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @RunWith(SpringRunner.class)
@@ -46,6 +48,8 @@ public class TypesSyncRecordsDaoTest {
     private RecordsServiceFactory remoteServiceFactory;
     @Autowired
     private TypeService typeService;
+    @Autowired
+    private TypeRepository typeRepository;
 
     private RecordsService localRecordsService;
     private RemoteSyncRecordsDAO<TypeDto> remoteSyncRecordsDAO;
@@ -54,6 +58,8 @@ public class TypesSyncRecordsDaoTest {
 
     @Before
     public void setup() {
+
+        typeRepository.deleteAll();
 
         RecordsServiceFactory localFactory = new RecordsServiceFactory() {
             @Override
