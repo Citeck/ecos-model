@@ -84,7 +84,7 @@ public class TypesSyncRecordsDaoTest {
 
         generateData();
 
-        localFactory.init();
+        localFactory.initJobs(null);
     }
 
     @Test
