@@ -8,6 +8,7 @@ import ru.citeck.ecos.records2.RecordRef;
 public class AssociationDto {
     private String id;
     private MLText name;
+    private String attribute;
     private RecordRef target;
     private AssocDirection direction;
 }

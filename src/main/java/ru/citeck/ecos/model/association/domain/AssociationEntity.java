@@ -25,6 +25,7 @@ public class AssociationEntity {
     private Long sourceId;
 
     private String name;
+    private String attribute;
 
     @ManyToOne(cascade = CascadeType.DETACH)
     @JoinColumn(name = "source_id", insertable = false, updatable = false)
