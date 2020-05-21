@@ -27,6 +27,7 @@
     <include file="config/liquibase/changelog/20200413000001_add_journal_field_in_type_table.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20200424065451_add_config_to_type.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20200519070000_add_audit_to_type.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20200521000000_add_attribute_prop_to_assoc.xml" relativeToChangelogFile="false"/>
 
     <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
     <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->

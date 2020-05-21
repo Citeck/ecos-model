@@ -25,6 +25,7 @@ public class TypeAssociationConverter extends AbstractDtoConverter<AssociationDt
         associationEntity.setExtId(associationDto.getId());
         associationEntity.setName(Json.getMapper().toString(associationDto.getName()));
         associationEntity.setDirection(associationDto.getDirection());
+        associationEntity.setAttribute(associationDto.getAttribute());
 
         if (Strings.isBlank(associationEntity.getExtId())) {
             associationEntity.setExtId(UUID.randomUUID().toString());
@@ -41,6 +42,7 @@ public class TypeAssociationConverter extends AbstractDtoConverter<AssociationDt
         assocDto.setId(associationEntity.getExtId());
         assocDto.setName(Json.getMapper().read(associationEntity.getName(), MLText.class));
         assocDto.setDirection(associationEntity.getDirection());
+        assocDto.setAttribute(associationEntity.getAttribute());
 
         String targetTypeId = associationEntity.getTarget().getExtId();
         RecordRef targetTypeRecordRef = RecordRef.create("emodel", TypeRecordsDao.ID, targetTypeId);
