@@ -234,7 +234,7 @@ public class TypeServiceImpl implements TypeService {
 
         TypeEntity entity = typeConverter.dtoToEntity(dto);
         entity = typeRepository.save(entity);
-        associationService.extractAndSaveAssocsFromType(dto);
+        associationService.extractAndSaveAssocsFromType(dto, entity);
 
         removeAliasedTypes(entity);
 

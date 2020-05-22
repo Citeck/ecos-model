@@ -33,13 +33,12 @@ public class AssociationServiceImpl implements AssociationService {
      *  We use this, because needed to save assocs separately from types
      *  Sometimes we need to save type with assoc to itself
      */
-    public void extractAndSaveAssocsFromType(TypeDto source) {
+    public void extractAndSaveAssocsFromType(TypeDto source, TypeEntity sourceEntity) {
 
         Set<AssociationEntity> associationEntities = source.getAssociations().stream()
             .filter(a -> StringUtils.isNotBlank(a.getId()))
             .map(a -> {
                 AssociationEntity assocEntity = associationConverter.dtoToEntity(a);
-                TypeEntity sourceEntity = typeConverter.dtoToEntity(source);
                 assocEntity.setSource(sourceEntity);
                 assocEntity.setSourceId(sourceEntity.getId());
 

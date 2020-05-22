@@ -76,7 +76,7 @@ public class AssociationServiceImplTest {
         when(typeRepository.findByExtId("typeId")).thenReturn(Optional.of(typeEntity));
 
         //  act
-        associationService.extractAndSaveAssocsFromType(typeDto);
+        associationService.extractAndSaveAssocsFromType(typeDto, typeEntity);
 
         //  assert
         List<AssociationEntity> associationEntities = new ArrayList<>();
@@ -109,7 +109,7 @@ public class AssociationServiceImplTest {
 
         //  act
         try {
-            associationService.extractAndSaveAssocsFromType(typeDto);
+            associationService.extractAndSaveAssocsFromType(typeDto, typeEntity);
         } catch (IllegalArgumentException iae) {
             //  assert
             Assert.assertEquals("Target type is null", iae.getMessage());
@@ -143,7 +143,7 @@ public class AssociationServiceImplTest {
 
         //  act
         try {
-            associationService.extractAndSaveAssocsFromType(typeDto);
+            associationService.extractAndSaveAssocsFromType(typeDto, typeEntity);
         } catch (IllegalArgumentException iae) {
             //  assert
             Assert.assertEquals("Target type doesnt exists: notExistableTypeId", iae.getMessage());
