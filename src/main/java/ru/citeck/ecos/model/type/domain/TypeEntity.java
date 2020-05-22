@@ -6,7 +6,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import ru.citeck.ecos.model.association.domain.AssociationEntity;
 import ru.citeck.ecos.model.domain.AbstractAuditingEntity;
-import ru.citeck.ecos.model.domain.BaseEntity;
 import ru.citeck.ecos.model.section.domain.SectionEntity;
 import ru.citeck.ecos.model.utils.EntityCollectionUtils;
 
@@ -50,6 +49,15 @@ public class TypeEntity extends AbstractAuditingEntity {
     private String configForm;
 
     private String config;
+
+    @Column(name = "disp_name_template")
+    private String dispNameTemplate;
+
+    @Column(name = "auto_num_template")
+    private String autoNumTemplate;
+
+    @Column(name = "inherit_auto_num")
+    private Boolean inheritAutoNum;
 
     @Column(name = "source_id")
     private String sourceId;

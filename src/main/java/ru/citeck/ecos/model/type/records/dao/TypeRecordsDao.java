@@ -284,6 +284,12 @@ public class TypeRecordsDao extends LocalRecordsDAO
                     return dto.getCreator();
                 case "sourceId":
                     return dto.getSourceId();
+                case "autoNumTemplate":
+                    return dto.getAutoNumTemplate();
+                case "dispNameTemplate":
+                    return dto.getDispNameTemplate();
+                case "inheritAutoNum":
+                    return dto.isInheritAutoNum();
             }
             return null;
         }

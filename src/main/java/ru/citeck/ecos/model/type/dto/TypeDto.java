@@ -34,6 +34,10 @@ public class TypeDto {
     private String dashboardType;
     private boolean inheritActions;
 
+    private MLText dispNameTemplate;
+    private String autoNumTemplate;
+    private boolean inheritAutoNum;
+
     private List<String> aliases = new ArrayList<>();
 
     private List<RecordRef> actions = new ArrayList<>();
@@ -59,6 +63,9 @@ public class TypeDto {
         this.inheritActions = dto.inheritActions;
         this.tenant = dto.tenant;
         this.configForm = dto.configForm;
+        this.dispNameTemplate = Json.getMapper().copy(dto.getDispNameTemplate());
+        this.autoNumTemplate = Json.getMapper().copy(dto.getAutoNumTemplate());
+        this.inheritAutoNum = dto.isInheritAutoNum();
         this.config = ObjectData.deepCopy(dto.config);
         this.aliases = DataValue.create(dto.aliases).toList(String.class);
         this.associations = DataValue.create(dto.associations).toList(AssociationDto.class);

@@ -54,6 +54,10 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
         }
         typeEntity.setName(Json.getMapper().toString(dto.getName()));
         typeEntity.setDescription(Json.getMapper().toString(dto.getDescription()));
+        typeEntity.setDispNameTemplate(Json.getMapper().toString(dto.getDispNameTemplate()));
+        typeEntity.setAutoNumTemplate(dto.getAutoNumTemplate());
+        typeEntity.setInheritAutoNum(dto.isInheritAutoNum());
+
         typeEntity.setInheritActions(dto.isInheritActions());
 
         ObjectData attributes = dto.getAttributes() != null ? dto.getAttributes() : ObjectData.create();
@@ -126,6 +130,9 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
         dto.setId(entity.getExtId());
         dto.setName(Json.getMapper().read(entity.getName(), MLText.class));
         dto.setDescription(Json.getMapper().read(entity.getDescription(), MLText.class));
+        dto.setDispNameTemplate(Json.getMapper().read(entity.getDispNameTemplate(), MLText.class));
+        dto.setAutoNumTemplate(entity.getAutoNumTemplate());
+        dto.setInheritAutoNum(Boolean.TRUE.equals(entity.getInheritAutoNum()));
         dto.setInheritActions(entity.isInheritActions());
         dto.setForm(RecordRef.valueOf(entity.getForm()));
         dto.setJournal(RecordRef.valueOf(entity.getJournal()));
