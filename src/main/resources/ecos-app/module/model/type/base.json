@@ -10,7 +10,8 @@
         "uiserv/action@edit",
         "uiserv/action@content-download",
         "uiserv/action@record-actions",
-        "uiserv/action@edit-in-onlyoffice"
+        "uiserv/action@edit-in-onlyoffice",
+        "uiserv/action@save-as-case-template"
     ],
     "journal": "uiserv/journal@base",
     "associations": [
