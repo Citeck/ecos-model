@@ -291,8 +291,6 @@ public class TypeRecordsDao extends LocalRecordsDAO
                     return dto.isInheritAutoNum();
                 case "computedAttributes":
                     return dto.getComputedAttributes();
-                case RecordConstants.ATT_ECOS_TYPE:
-                    return RecordRef.create("emodel", "type", "type");
             }
             return null;
         }
