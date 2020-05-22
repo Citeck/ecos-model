@@ -32,7 +32,6 @@ import ru.citeck.ecos.records2.request.delete.RecordsDeletion;
 import ru.citeck.ecos.records2.request.mutation.RecordsMutResult;
 import ru.citeck.ecos.records2.request.query.RecordsQuery;
 import ru.citeck.ecos.records2.request.query.RecordsQueryResult;
-import ru.citeck.ecos.records2.request.query.SortBy;
 import ru.citeck.ecos.records2.source.dao.local.LocalRecordsDAO;
 import ru.citeck.ecos.records2.source.dao.local.MutableRecordsLocalDAO;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsMetaDAO;
@@ -290,6 +289,8 @@ public class TypeRecordsDao extends LocalRecordsDAO
                     return dto.getDispNameTemplate();
                 case "inheritAutoNum":
                     return dto.isInheritAutoNum();
+                case "computedAttributes":
+                    return dto.getComputedAttributes();
             }
             return null;
         }

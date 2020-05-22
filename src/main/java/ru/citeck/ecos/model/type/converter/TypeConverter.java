@@ -16,6 +16,7 @@ import ru.citeck.ecos.model.type.dto.TypeWithMetaDto;
 import ru.citeck.ecos.model.type.records.dao.TypeRecordsDao;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
+import ru.citeck.ecos.records2.type.ComputedAttribute;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -57,6 +58,7 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
         typeEntity.setDispNameTemplate(Json.getMapper().toString(dto.getDispNameTemplate()));
         typeEntity.setAutoNumTemplate(dto.getAutoNumTemplate());
         typeEntity.setInheritAutoNum(dto.isInheritAutoNum());
+        typeEntity.setComputedAttributes(Json.getMapper().toString(dto.getComputedAttributes()));
 
         typeEntity.setInheritActions(dto.isInheritActions());
 
@@ -140,6 +142,7 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
         dto.setConfigForm(RecordRef.valueOf(entity.getConfigForm()));
         dto.setConfig(Json.getMapper().read(entity.getConfig(), ObjectData.class));
         dto.setSourceId(entity.getSourceId());
+        dto.setComputedAttributes(Json.getMapper().readList(entity.getComputedAttributes(), ComputedAttribute.class));
 
         String attributesStr = entity.getAttributes();
         dto.setAttributes(Json.getMapper().read(attributesStr, ObjectData.class));

@@ -30,6 +30,7 @@ import ru.citeck.ecos.records2.request.rest.QueryBody;
 import ru.citeck.ecos.records2.resolver.RemoteRecordsResolver;
 import ru.citeck.ecos.records2.rest.RemoteRecordsRestApi;
 import ru.citeck.ecos.records2.source.dao.local.RemoteSyncRecordsDAO;
+import ru.citeck.ecos.records2.type.ComputedAttribute;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -168,11 +169,23 @@ public class TypesSyncRecordsDaoTest {
             typeDto.setParent(RecordRef.valueOf("emodel/type@base"));
             typeDto.setAutoNumTemplate("autp${template}");
             typeDto.setDispNameTemplate(DataValue.create("{\"ru\": \"Тест\"}").getAs(MLText.class));
+            typeDto.setComputedAttributes(generateComputedAtts(i));
             typeDto.setInheritAutoNum(true);
 
             types.add(typeDto);
             typeService.save(typeDto);
         }
+    }
+
+    List<ComputedAttribute> generateComputedAtts(int idx) {
+
+        ComputedAttribute att = new ComputedAttribute();
+        att.setType("test-" + idx);
+        att.setConfig(ObjectData.create("{\"aa\":\"bb\"}"));
+        att.setModel(Collections.emptyMap());
+        att.setId("id_" + idx);
+
+        return Collections.singletonList(att);
     }
 
     List<CreateVariantDto> generateCreateVariants(int idx) {

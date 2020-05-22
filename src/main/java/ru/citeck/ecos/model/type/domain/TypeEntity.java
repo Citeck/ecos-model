@@ -59,6 +59,9 @@ public class TypeEntity extends AbstractAuditingEntity {
     @Column(name = "inherit_auto_num")
     private Boolean inheritAutoNum;
 
+    @Column(name = "computed_attributes")
+    private String computedAttributes;
+
     @Column(name = "source_id")
     private String sourceId;
 

@@ -10,6 +10,7 @@
             <column name="disp_name_template" type="VARCHAR"/>
             <column name="auto_num_template" type="VARCHAR"/>
             <column name="inherit_auto_num" type="BOOLEAN"/>
+            <column name="computed_attributes" type="VARCHAR"/>
 
         </addColumn>
 

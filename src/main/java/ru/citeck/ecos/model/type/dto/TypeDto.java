@@ -10,6 +10,7 @@ import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.records2.RecordRef;
+import ru.citeck.ecos.records2.type.ComputedAttribute;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -43,6 +44,7 @@ public class TypeDto {
     private List<RecordRef> actions = new ArrayList<>();
     private List<AssociationDto> associations = new ArrayList<>();
     private List<CreateVariantDto> createVariants = new ArrayList<>();
+    private List<ComputedAttribute> computedAttributes = new ArrayList<>();
 
     private ObjectData attributes = ObjectData.create();
 
@@ -71,6 +73,7 @@ public class TypeDto {
         this.associations = DataValue.create(dto.associations).toList(AssociationDto.class);
         this.actions = DataValue.create(dto.actions).toList(RecordRef.class);
         this.createVariants = DataValue.create(dto.createVariants).toList(CreateVariantDto.class);
+        this.computedAttributes = DataValue.create(dto.computedAttributes).toList(ComputedAttribute.class);
         this.attributes = ObjectData.deepCopy(dto.attributes);
     }
 }
