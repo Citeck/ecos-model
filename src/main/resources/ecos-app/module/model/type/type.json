@@ -1,0 +1,15 @@
+{
+    "id": "type",
+    "name": {
+        "ru": "Тип ECOS",
+        "en": "ECOS type"
+    },
+    "computedAttributes": [
+        {
+            "id": ".disp",
+            "model": {
+                "<": "name"
+            }
+        }
+    ]
+}
