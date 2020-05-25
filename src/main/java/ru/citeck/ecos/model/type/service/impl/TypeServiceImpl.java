@@ -48,16 +48,6 @@ public class TypeServiceImpl implements TypeService {
 
     private Consumer<TypeDto> onTypeChangedListener = dto -> {};
 
-    private final Map<String, Set<String>> typesByJournalListId = new ConcurrentHashMap<>();
-    private final Map<String, String> journalListByTypeId = new ConcurrentHashMap<>();
-
-    @PostConstruct
-    public void init() {
-        typeRepository.findAll().forEach(journal ->
-            updateJournalLists(typeConverter.entityToDto(journal))
-        );
-    }
-
     @Override
     public List<TypeWithMetaDto> getAll(int max, int skip, Predicate predicate) {
         return getAll(max, skip, predicate, null);
@@ -302,26 +292,8 @@ public class TypeServiceImpl implements TypeService {
 
         TypeWithMetaDto typeDto = typeConverter.entityToDto(entity);
 
-        updateJournalLists(typeDto);
-
         onTypeChangedListener.accept(typeDto);
         return typeDto;
-    }
-
-    @Override
-    public List<TypeWithMetaDto> getTypesByJournalList(String journalListId) {
-
-        if (StringUtils.isBlank(journalListId)) {
-            return Collections.emptyList();
-        }
-
-        return typesByJournalListId.getOrDefault(journalListId, Collections.emptySet())
-            .stream()
-            .map(typeRepository::findByExtId)
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .map(typeConverter::entityToDto)
-            .collect(Collectors.toList());
     }
 
     private void removeAliasedTypes(final TypeEntity entity) {
@@ -403,47 +375,6 @@ public class TypeServiceImpl implements TypeService {
         }
 
         return spec;
-    }
-
-    private synchronized void updateJournalLists(TypeDto typeDto) {
-
-        ObjectData attributes = typeDto.getAttributes();
-        String listId = attributes != null ? attributes.get("journalsListId").asText() : "";
-
-        if (StringUtils.isNotBlank(listId)) {
-
-            Set<String> listJournals = typesByJournalListId.computeIfAbsent(listId, id ->
-                Collections.newSetFromMap(new ConcurrentHashMap<>())
-            );
-
-            String listIdBefore = journalListByTypeId.get(typeDto.getId());
-            if (StringUtils.isNotBlank(listIdBefore)) {
-                if (!listIdBefore.equals(listId)) {
-                    Set<String> listBefore = typesByJournalListId.computeIfAbsent(listIdBefore, id ->
-                        Collections.newSetFromMap(new ConcurrentHashMap<>())
-                    );
-                    listBefore.remove(typeDto.getId());
-                    listJournals.add(typeDto.getId());
-                }
-            } else {
-                listJournals.add(typeDto.getId());
-            }
-
-            journalListByTypeId.put(typeDto.getId(), listId);
-
-        } else {
-
-            String listIdBefore = journalListByTypeId.get(typeDto.getId());
-
-            if (StringUtils.isNotBlank(listIdBefore)) {
-
-                typesByJournalListId.computeIfAbsent(listIdBefore, id ->
-                    Collections.newSetFromMap(new ConcurrentHashMap<>())
-                ).remove(typeDto.getId());
-
-                journalListByTypeId.remove(typeDto.getId());
-            }
-        }
     }
 
     @Data

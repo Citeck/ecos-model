@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.type.dto;
 
+import ecos.com.fasterxml.jackson210.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.time.Instant;
@@ -7,9 +8,13 @@ import java.time.Instant;
 @Data
 public class TypeWithMetaDto extends TypeDto {
 
+    @JsonIgnore
     private String modifier;
+    @JsonIgnore
     private Instant modified;
+    @JsonIgnore
     private String creator;
+    @JsonIgnore
     private Instant created;
 
     public TypeWithMetaDto() {

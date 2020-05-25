@@ -25,8 +25,6 @@ public interface TypeService {
 
     List<TypeWithMetaDto> getAll(int max, int skip, Predicate predicate, Sort sort);
 
-    List<TypeWithMetaDto> getTypesByJournalList(String journalListId);
-
     TypeWithMetaDto getByExtId(String extId);
 
     TypeWithMetaDto getByExtIdOrNull(String extId);
