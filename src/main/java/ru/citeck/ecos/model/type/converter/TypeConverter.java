@@ -56,9 +56,9 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
         typeEntity.setName(Json.getMapper().toString(dto.getName()));
         typeEntity.setDescription(Json.getMapper().toString(dto.getDescription()));
         typeEntity.setDispNameTemplate(Json.getMapper().toString(dto.getDispNameTemplate()));
-        typeEntity.setAutoNumTemplate(dto.getAutoNumTemplate());
-        typeEntity.setInheritAutoNum(dto.isInheritAutoNum());
+        typeEntity.setInheritNumTemplate(dto.isInheritNumTemplate());
         typeEntity.setComputedAttributes(Json.getMapper().toString(dto.getComputedAttributes()));
+        typeEntity.setNumTemplateRef(RecordRef.toString(dto.getNumTemplateRef()));
 
         typeEntity.setInheritActions(dto.isInheritActions());
 
@@ -133,8 +133,8 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
         dto.setName(Json.getMapper().read(entity.getName(), MLText.class));
         dto.setDescription(Json.getMapper().read(entity.getDescription(), MLText.class));
         dto.setDispNameTemplate(Json.getMapper().read(entity.getDispNameTemplate(), MLText.class));
-        dto.setAutoNumTemplate(entity.getAutoNumTemplate());
-        dto.setInheritAutoNum(Boolean.TRUE.equals(entity.getInheritAutoNum()));
+        dto.setNumTemplateRef(RecordRef.valueOf(entity.getNumTemplateRef()));
+        dto.setInheritNumTemplate(Boolean.TRUE.equals(entity.getInheritNumTemplate()));
         dto.setInheritActions(entity.isInheritActions());
         dto.setForm(RecordRef.valueOf(entity.getForm()));
         dto.setJournal(RecordRef.valueOf(entity.getJournal()));

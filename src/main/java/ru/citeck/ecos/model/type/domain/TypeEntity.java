@@ -53,11 +53,11 @@ public class TypeEntity extends AbstractAuditingEntity {
     @Column(name = "disp_name_template")
     private String dispNameTemplate;
 
-    @Column(name = "auto_num_template")
-    private String autoNumTemplate;
+    @Column(name = "num_template_ref")
+    private String numTemplateRef;
 
-    @Column(name = "inherit_auto_num")
-    private Boolean inheritAutoNum;
+    @Column(name = "inherit_num_template")
+    private Boolean inheritNumTemplate;
 
     @Column(name = "computed_attributes")
     private String computedAttributes;

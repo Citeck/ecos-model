@@ -264,22 +264,22 @@ public class TypeRecordsDao extends LocalRecordsDAO
                     return dto.getModified();
                 case RecordConstants.ATT_MODIFIER:
                     return dto.getModifier(); //todo: return RecordRef of User
-                case "_created":
+                case RecordConstants.ATT_CREATED:
                     return dto.getCreated();
-                case "_creator":
+                case RecordConstants.ATT_CREATOR:
                     return dto.getCreator();
                 case "sourceId":
                     return dto.getSourceId();
-                case "autoNumTemplate":
-                    return dto.getAutoNumTemplate();
                 case "dispNameTemplate":
                     return dto.getDispNameTemplate();
-                case "inheritAutoNum":
-                    return dto.isInheritAutoNum();
+                case "inheritNumTemplate":
+                    return dto.isInheritNumTemplate();
                 case "computedAttributes":
                     return dto.getComputedAttributes();
                 case RecordConstants.ATT_ECOS_TYPE:
                     return RecordRef.create("emodel", "type", "type");
+                case "numTemplateRef":
+                    return dto.getNumTemplateRef();
             }
             return null;
         }

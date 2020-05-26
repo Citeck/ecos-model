@@ -28,6 +28,7 @@ public class TypeDto {
     private MLText description;
     private String tenant;
     private String sourceId;
+    //todo: rename RecordRef fields to *Ref
     private RecordRef parent;
     private RecordRef form;
     private RecordRef journal;
@@ -36,8 +37,9 @@ public class TypeDto {
     private boolean inheritActions;
 
     private MLText dispNameTemplate;
-    private String autoNumTemplate;
-    private boolean inheritAutoNum;
+
+    private RecordRef numTemplateRef;
+    private boolean inheritNumTemplate;
 
     private List<String> aliases = new ArrayList<>();
 
@@ -66,8 +68,7 @@ public class TypeDto {
         this.tenant = dto.tenant;
         this.configForm = dto.configForm;
         this.dispNameTemplate = Json.getMapper().copy(dto.getDispNameTemplate());
-        this.autoNumTemplate = Json.getMapper().copy(dto.getAutoNumTemplate());
-        this.inheritAutoNum = dto.isInheritAutoNum();
+        this.inheritNumTemplate = dto.isInheritNumTemplate();
         this.config = ObjectData.deepCopy(dto.config);
         this.aliases = DataValue.create(dto.aliases).toList(String.class);
         this.associations = DataValue.create(dto.associations).toList(AssociationDto.class);
@@ -75,5 +76,6 @@ public class TypeDto {
         this.createVariants = DataValue.create(dto.createVariants).toList(CreateVariantDto.class);
         this.computedAttributes = DataValue.create(dto.computedAttributes).toList(ComputedAttribute.class);
         this.attributes = ObjectData.deepCopy(dto.attributes);
+        this.numTemplateRef = dto.getNumTemplateRef();
     }
 }

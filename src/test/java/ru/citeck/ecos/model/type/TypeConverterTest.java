@@ -124,6 +124,7 @@ public class TypeConverterTest {
         typeEntity.setAliases(Collections.singleton("alias"));
         typeEntity.setForm("emodel/eform@type-form");
         typeEntity.setConfigForm("emodel/eform@config-form");
+        typeEntity.setNumTemplateRef("emodel/num-template@test");
         typeEntity.setConfig(Json.getMapper().toString(configData));
 
         associationEntity = new AssociationEntity();
@@ -151,6 +152,7 @@ public class TypeConverterTest {
         typeDto.setCreateVariants(Arrays.asList(createVariantDto1, createVariantDto2));
         typeDto.setForm(RecordRef.create("emodel", "eform", "type-form"));
         typeDto.setConfigForm(RecordRef.create("emodel", "eform", "config-form"));
+        typeDto.setNumTemplateRef(RecordRef.valueOf("emodel/num-template@test"));
         typeDto.setConfig(Json.getMapper().read("{\n" +
             "  \"color\": \"red\",\n" +
             "  \"icon\": \"urgent\"\n" +
@@ -159,6 +161,7 @@ public class TypeConverterTest {
 
     @Test
     void testEntityToDto() {
+
         when(associationConverter.entityToDto(associationEntity)).thenReturn(associationDto);
 
         TypeDto resultDto = typeConverter.entityToDto(typeEntity);
@@ -181,7 +184,6 @@ public class TypeConverterTest {
         typeDto.setCreateVariants(Collections.emptyList());
         typeDto.setAttributes(null);
         typeDto.setAliases(Collections.emptyList());
-
 
         TypeDto resultDto = typeConverter.entityToDto(typeEntity);
 

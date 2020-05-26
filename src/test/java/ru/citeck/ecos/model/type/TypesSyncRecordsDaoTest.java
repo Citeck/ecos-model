@@ -167,10 +167,10 @@ public class TypesSyncRecordsDaoTest {
             typeDto.setSourceId("source-" + i);
             typeDto.setName(new MLText("name-" + i));
             typeDto.setParent(RecordRef.valueOf("emodel/type@base"));
-            typeDto.setAutoNumTemplate("autp${template}");
             typeDto.setDispNameTemplate(DataValue.create("{\"ru\": \"Тест\"}").getAs(MLText.class));
             typeDto.setComputedAttributes(generateComputedAtts(i));
-            typeDto.setInheritAutoNum(true);
+            typeDto.setInheritNumTemplate(true);
+            typeDto.setNumTemplateRef(RecordRef.valueOf("emodel/num-template@test"));
 
             types.add(typeDto);
             typeService.save(typeDto);
