@@ -16,7 +16,7 @@ import ru.citeck.ecos.model.num.service.NumTemplateService;
 import ru.citeck.ecos.records2.RecordConstants;
 import ru.citeck.ecos.records2.RecordMeta;
 import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records2.graphql.meta.annotation.DisplayName;
+import ru.citeck.ecos.records2.graphql.meta.annotation.MetaAtt;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
 import ru.citeck.ecos.records2.request.delete.RecordsDelResult;
@@ -163,7 +163,7 @@ public class NumTemplateRecordsDao extends LocalRecordsDAO
             setId(value);
         }
 
-        @DisplayName
+        @MetaAtt(".disp")
         public String getDisplayName() {
             return getId();
         }
