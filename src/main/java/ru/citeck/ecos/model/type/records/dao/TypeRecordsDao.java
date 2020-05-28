@@ -96,9 +96,13 @@ public class TypeRecordsDao extends LocalRecordsDAO
                     String attribute = s.getAttribute();
                     if (RecordConstants.ATT_MODIFIED.equals(attribute)) {
                         attribute = "lastModifiedDate";
+                    } else {
+                        return Optional.<Sort.Order>empty();
                     }
-                    return s.isAscending() ? Sort.Order.asc(attribute) : Sort.Order.desc(attribute);
+                    return Optional.of(s.isAscending() ? Sort.Order.asc(attribute) : Sort.Order.desc(attribute));
                 })
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .collect(Collectors.toList());
 
             Collection<TypeWithMetaDto> types = typeService.getAll(
@@ -276,8 +280,6 @@ public class TypeRecordsDao extends LocalRecordsDAO
                     return dto.isInheritNumTemplate();
                 case "computedAttributes":
                     return dto.getComputedAttributes();
-                case RecordConstants.ATT_ECOS_TYPE:
-                    return RecordRef.create("emodel", "type", "type");
                 case "numTemplateRef":
                     return dto.getNumTemplateRef();
             }
@@ -287,6 +289,11 @@ public class TypeRecordsDao extends LocalRecordsDAO
         @Override
         public Object getJson() {
             return dto;
+        }
+
+        @Override
+        public RecordRef getRecordType() {
+            return RecordRef.create("emodel", "type", "type");
         }
     }
 
