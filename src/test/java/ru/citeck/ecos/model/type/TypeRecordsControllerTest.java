@@ -9,7 +9,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.model.EcosModelApp;
+import ru.citeck.ecos.model.type.dto.TypeDto;
+import ru.citeck.ecos.model.type.service.TypeService;
 import ru.citeck.ecos.model.web.rest.TestUtil;
 import ru.citeck.ecos.records2.request.rest.RestHandler;
 import ru.citeck.ecos.records2.spring.web.rest.RecordsRestApi;
@@ -35,12 +38,20 @@ public class TypeRecordsControllerTest {
     @Autowired
     private RestHandler restHandler;
 
+    @Autowired
+    private TypeService typeService;
+
     @Before
     public void setup() {
         RecordsRestApi recordsApi = new RecordsRestApi(restHandler);
         this.mockRecordsApi = MockMvcBuilders
             .standaloneSetup(recordsApi)
             .build();
+
+        TypeDto type = new TypeDto();
+        type.setId("type");
+        type.setName(new MLText("type"));
+        typeService.save(type);
     }
 
     @Test
