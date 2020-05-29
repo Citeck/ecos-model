@@ -18,9 +18,12 @@
     "associations": [
         {
             "id": "assoc:associatedWith",
-            "name": "Связан с",
-            "direction": "BOTH",
-            "target": "emodel/type@base"
+            "name": {
+                "en": "Connected with",
+                "ru": "Связан с"
+            },
+            "target": "emodel/type@base",
+            "direction": "BOTH"
         }
     ]
 }
