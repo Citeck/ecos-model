@@ -96,7 +96,8 @@ public class TypesSyncRecordsDaoTest {
         query.setMaxItems(1000);
 
         RecordsQueryResult<RecordRef> result = localRecordsService.queryRecords(query);
-        assertEquals(TOTAL_TYPES + 1 /* +1 for base type */, result.getTotalCount());
+        assertEquals(TOTAL_TYPES + 2 /* +1 for base and type types */, result.getTotalCount());
+        assertEquals(TOTAL_TYPES + 2, remoteSyncRecordsDAO.getRecords().size());
 
         TypeDto dto = localRecordsService.getMeta(RecordRef.valueOf(TYPES_SOURCE_ID + "@type-id-100"), TypeDto.class);
         TypeDto origDto = types.stream().filter(v -> v.getId().equals("type-id-100")).findFirst().orElse(null);
@@ -121,8 +122,13 @@ public class TypesSyncRecordsDaoTest {
 
         assertEquals(origDto, normalize(resultWithMeta.getRecords().get(0)));
 
-        assertEquals(new HashSet<>(types), new HashSet<>(
-            remoteSyncRecordsDAO.getRecords()
+        Set<TypeDto> expectedSet = new TreeSet<>(Comparator.comparing(TypeDto::getId));
+        expectedSet.addAll(types);
+
+        Set<TypeDto> actualSet = new TreeSet<>(Comparator.comparing(TypeDto::getId));
+        actualSet.addAll(remoteSyncRecordsDAO.getRecords());
+
+        assertEquals(expectedSet, new HashSet<>(actualSet
                 .stream()
                 .map(this::normalize)
                 .collect(Collectors.toList())
@@ -141,8 +147,12 @@ public class TypesSyncRecordsDaoTest {
         TypeDto base = new TypeDto();
         base.setId("base");
         base.setName(new MLText("base"));
-        typeService.save(base);
-        types.add(base);
+        types.add(new TypeDto(typeService.save(base)));
+
+        TypeDto type = new TypeDto();
+        type.setId("type");
+        type.setName(new MLText("type"));
+        types.add(new TypeDto(typeService.save(type)));
 
         for (int i = 0; i < TOTAL_TYPES; i++) {
 

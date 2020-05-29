@@ -239,8 +239,8 @@ public class TypeServiceImpl implements TypeService {
 
         return byExtId.map(typeConverter::entityToDto)
             .orElseGet(() -> {
-                if ("base".equals(extId) || "user-base".equals(extId)) {
-                    throw new IllegalStateException("Base type doesn't exists!");
+                if ("base".equals(extId) || "user-base".equals(extId) || "type".equals(extId)) {
+                    throw new IllegalStateException("Base type doesn't exists: '" + extId + "'");
                 }
 
                 TypeDto typeDto = new TypeDto();
