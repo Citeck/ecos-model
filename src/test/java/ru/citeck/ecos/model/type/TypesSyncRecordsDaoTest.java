@@ -126,7 +126,7 @@ public class TypesSyncRecordsDaoTest {
         expectedSet.addAll(types);
 
         Set<TypeDto> actualSet = new TreeSet<>(Comparator.comparing(TypeDto::getId));
-        actualSet.addAll(remoteSyncRecordsDAO.getRecords());
+        actualSet.addAll(remoteSyncRecordsDAO.getRecords().values());
 
         assertEquals(expectedSet, new HashSet<>(actualSet
                 .stream()

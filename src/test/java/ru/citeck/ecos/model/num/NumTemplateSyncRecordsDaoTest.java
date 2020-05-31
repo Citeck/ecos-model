@@ -99,6 +99,7 @@ public class NumTemplateSyncRecordsDaoTest {
 
         assertEquals(new HashSet<>(templates), new HashSet<>(
             remoteSyncRecordsDAO.getRecords()
+                .values()
                 .stream()
                 .map(this::normalize)
                 .collect(Collectors.toList())
