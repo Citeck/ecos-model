@@ -67,6 +67,7 @@ public class NumTemplateRecordsDao extends LocalRecordsDAO
 
             List<Sort.Order> order = recordsQuery.getSortBy()
                 .stream()
+                .filter(s -> RecordConstants.ATT_MODIFIED.equals(s.getAttribute()))
                 .map(s -> {
                     String attribute = s.getAttribute();
                     if (RecordConstants.ATT_MODIFIED.equals(attribute)) {
