@@ -267,6 +267,8 @@ public class TypeRecordsDao extends LocalRecordsDao
                     return dto.getConfig();
                 case "configFormRef":
                     return dto.getConfigFormRef();
+                case "inhConfigFormRef":
+                    return typeService.getConfigFormRef(dto.getId());
                 case RecordConstants.ATT_MODIFIED:
                     return dto.getModified();
                 case RecordConstants.ATT_MODIFIER:

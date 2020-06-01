@@ -100,6 +100,19 @@ public class TypeServiceImpl implements TypeService {
     }
 
     @Override
+    public RecordRef getConfigFormRef(String extId) {
+        AtomicReference<RecordRef> result = new AtomicReference<>();
+        forEachTypeInHierarchy(extId, dto -> {
+            if (RecordRef.isNotEmpty(dto.getConfigFormRef())) {
+                result.set(dto.getConfigFormRef());
+                return true;
+            }
+            return false;
+        });
+        return result.get();
+    }
+
+    @Override
     public List<CreateVariantDto> getCreateVariants(String extId) {
 
         Map<String, CreateVariantDto> result = new LinkedHashMap<>();

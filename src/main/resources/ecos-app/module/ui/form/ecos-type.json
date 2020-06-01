@@ -128,7 +128,7 @@
                             "mask": false,
                             "inputType": "text",
                             "inputMask": "",
-                            "id": "enqwd2n"
+                            "id": "e1nxbf"
                           },
                           {
                             "conditional": {
@@ -235,7 +235,7 @@
                             "isTableMode": false,
                             "sortAttribute": "sys:node-dbid",
                             "sortAscending": "asc",
-                            "id": "et62oc"
+                            "id": "ez5pauk"
                           },
                           {
                             "conditional": {
@@ -338,7 +338,7 @@
                             "isTableMode": false,
                             "sortAttribute": "sys:node-dbid",
                             "sortAscending": "asc",
-                            "id": "e1e1wl"
+                            "id": "ev1y46v"
                           },
                           {
                             "label": "Journal",
@@ -424,7 +424,7 @@
                             "isTableMode": false,
                             "sortAttribute": "sys:node-dbid",
                             "sortAscending": "asc",
-                            "id": "eu2a4vn"
+                            "id": "ed909d"
                           },
                           {
                             "label": "Number template",
@@ -511,7 +511,7 @@
                             "isTableMode": false,
                             "sortAttribute": "sys:node-dbid",
                             "sortAscending": "asc",
-                            "id": "epl8bm"
+                            "id": "eh4fp1r"
                           },
                           {
                             "label": "Inherit number template",
@@ -575,7 +575,191 @@
                             "inputType": "checkbox",
                             "value": "",
                             "name": "",
-                            "id": "etzdk6b"
+                            "id": "ebwy89"
+                          },
+                          {
+                            "label": "Edit config",
+                            "action": "custom",
+                            "state": "",
+                            "showValidations": false,
+                            "custom": "var ownerId = Math.random().toString();\nvar currentRecord = Citeck.Records.get(instance.options.recordId);\n\nvar configFormRef = data.configFormRef;\nif (Array.isArray(configFormRef)) {\n    configFormRef = configFormRef[0];\n}\n\nif (!configFormRef) {\n    configFormRef = currentRecord.load('inhConfigFormRef?id', true);\n}\n\nPromise.all([configFormRef, currentRecord.load('config?json')])\n    .then(function(formAndConfig) {\n\n        var formRef = formAndConfig[0];\n        var config = formAndConfig[1];\n\n        if (formRef == null) {\n            throw new Error(\"Config form is not set\");\n        }\n\n        if (!config) {\n            config = {};\n        }\n\n        var configRecord = Citeck.Records.create(config, ownerId);\n\n        Citeck.forms.eform(configRecord.id, {\n            params: {\n                formId: formRef,\n                onSubmit: function (record) {\n                    var data = record.toJson().attributes;\n                    var resData = {};\n                    for (var key in data) {\n                        if (key[0] !== '_' && key !== 'pendingUpdate') {\n                            resData[key] = data[key];\n                        }\n                    }\n                    currentRecord.att(\"config?json\", resData);\n                    Citeck.Records.release(configRecord.id, ownerId);\n                },\n                onCancel: function () {\n                    Citeck.Records.release(configRecord.id, ownerId);\n                },\n                saveOnSubmit: false\n            },\n            class: 'ecos-modal_width-lg',\n            isBigHeader: true\n        });\n    })",
+                            "shortcut": "",
+                            "block": true,
+                            "mask": false,
+                            "tableView": true,
+                            "alwaysEnabled": false,
+                            "encrypted": false,
+                            "triggerChangeWhenCalculate": false,
+                            "validate": {
+                              "customMessage": "",
+                              "json": "",
+                              "required": false,
+                              "custom": "",
+                              "customPrivate": false
+                            },
+                            "key": "editconfig",
+                            "properties": {},
+                            "conditional": {
+                              "show": "",
+                              "when": "",
+                              "json": "",
+                              "eq": ""
+                            },
+                            "customConditional": "",
+                            "logic": [],
+                            "attributes": {},
+                            "type": "button",
+                            "input": true,
+                            "tags": [],
+                            "placeholder": "",
+                            "prefix": "",
+                            "customClass": "",
+                            "suffix": "",
+                            "multiple": false,
+                            "defaultValue": null,
+                            "protected": false,
+                            "unique": false,
+                            "persistent": false,
+                            "hidden": false,
+                            "clearOnHide": true,
+                            "dataGridLabel": true,
+                            "labelPosition": "top",
+                            "labelWidth": 30,
+                            "labelMargin": 3,
+                            "description": "",
+                            "errorLabel": "",
+                            "tooltip": "",
+                            "hideLabel": false,
+                            "tabindex": "",
+                            "disabled": false,
+                            "autofocus": false,
+                            "dbIndex": false,
+                            "customDefaultValue": "",
+                            "calculateValue": "",
+                            "allowCalculateOverride": false,
+                            "widget": null,
+                            "refreshOn": "",
+                            "clearOnRefresh": false,
+                            "validateOn": "change",
+                            "size": "md",
+                            "leftIcon": "",
+                            "rightIcon": "",
+                            "disableOnInvalid": false,
+                            "theme": "default",
+                            "removeIndents": false,
+                            "id": "efabscd"
+                          },
+                          {
+                            "label": "Config form",
+                            "mask": false,
+                            "tableView": true,
+                            "alwaysEnabled": false,
+                            "journalId": "ecos-forms",
+                            "displayColumns": [],
+                            "source": {
+                              "type": "journal",
+                              "custom": {
+                                "columns": []
+                              },
+                              "viewMode": "default"
+                            },
+                            "computed": {
+                              "valueDisplayName": ""
+                            },
+                            "searchField": "",
+                            "ecos": {
+                              "dataType": "assoc"
+                            },
+                            "triggerChangeWhenCalculate": false,
+                            "encrypted": false,
+                            "displayColumnsAsyncData": [
+                              {
+                                "label": "moduleId",
+                                "value": "moduleId"
+                              },
+                              {
+                                "label": "formKey",
+                                "value": "formKey"
+                              },
+                              {
+                                "label": "title",
+                                "value": "title"
+                              },
+                              {
+                                "label": "description",
+                                "value": "description"
+                              },
+                              {
+                                "label": "_modified",
+                                "value": "_modified"
+                              },
+                              {
+                                "label": "_modifier",
+                                "value": "_modifier"
+                              }
+                            ],
+                            "validate": {
+                              "customMessage": "",
+                              "json": "",
+                              "required": false,
+                              "custom": "",
+                              "customPrivate": false
+                            },
+                            "key": "configFormRef",
+                            "properties": {},
+                            "conditional": {
+                              "json": "",
+                              "show": "",
+                              "when": "",
+                              "eq": ""
+                            },
+                            "customConditional": "",
+                            "logic": [],
+                            "attributes": {},
+                            "type": "selectJournal",
+                            "input": true,
+                            "defaultValue": "",
+                            "tags": [],
+                            "customPredicateJs": "",
+                            "presetFilterPredicatesJs": "",
+                            "placeholder": "",
+                            "prefix": "",
+                            "customClass": "",
+                            "suffix": "",
+                            "multiple": false,
+                            "protected": false,
+                            "unique": false,
+                            "persistent": true,
+                            "hidden": false,
+                            "clearOnHide": true,
+                            "dataGridLabel": false,
+                            "labelPosition": "top",
+                            "labelWidth": 30,
+                            "labelMargin": 3,
+                            "description": "",
+                            "errorLabel": "",
+                            "tooltip": "",
+                            "hideLabel": false,
+                            "tabindex": "",
+                            "disabled": false,
+                            "autofocus": false,
+                            "dbIndex": false,
+                            "customDefaultValue": "",
+                            "calculateValue": "",
+                            "allowCalculateOverride": false,
+                            "widget": null,
+                            "refreshOn": "",
+                            "clearOnRefresh": false,
+                            "validateOn": "change",
+                            "hideCreateButton": false,
+                            "hideEditRowButton": false,
+                            "hideDeleteRowButton": false,
+                            "isFullScreenWidthModal": false,
+                            "isSelectedValueAsText": false,
+                            "isTableMode": false,
+                            "sortAttribute": "sys:node-dbid",
+                            "sortAscending": "asc",
+                            "id": "ewn7co6"
                           }
                         ],
                         "xs": 0,
@@ -631,7 +815,7 @@
                           "when": null,
                           "eq": ""
                         },
-                        "id": "eppj7"
+                        "id": "enezetk"
                       },
                       {
                         "xs": 0,
@@ -751,7 +935,7 @@
                                 "mask": false,
                                 "inputType": "text",
                                 "inputMask": "",
-                                "id": "ewph48"
+                                "id": "eqh7pr"
                               },
                               {
                                 "label": "Name Ru",
@@ -827,7 +1011,7 @@
                                 "mask": false,
                                 "inputType": "text",
                                 "inputMask": "",
-                                "id": "eo2d4ks"
+                                "id": "ely5bk"
                               }
                             ],
                             "tags": [],
@@ -861,7 +1045,7 @@
                             "clearOnRefresh": false,
                             "validateOn": "change",
                             "tree": true,
-                            "id": "ev4xksp"
+                            "id": "e85coqr"
                           },
                           {
                             "label": "Display name template",
@@ -966,7 +1150,7 @@
                                 "mask": false,
                                 "inputType": "text",
                                 "inputMask": "",
-                                "id": "ex0naqf7"
+                                "id": "e7zan8a"
                               },
                               {
                                 "label": "Display name template Ru",
@@ -1042,7 +1226,7 @@
                                 "mask": false,
                                 "inputType": "text",
                                 "inputMask": "",
-                                "id": "ej5vti"
+                                "id": "et3g55m"
                               }
                             ],
                             "tags": [],
@@ -1076,7 +1260,7 @@
                             "clearOnRefresh": false,
                             "validateOn": "change",
                             "tree": true,
-                            "id": "e2krlp"
+                            "id": "eerfdzh"
                           },
                           {
                             "conditional": {
@@ -1156,7 +1340,7 @@
                             "rows": 3,
                             "wysiwyg": false,
                             "editor": "",
-                            "id": "ect55e"
+                            "id": "ese7yze"
                           },
                           {
                             "conditional": {
@@ -1243,7 +1427,7 @@
                             "isTableMode": false,
                             "sortAttribute": "sys:node-dbid",
                             "sortAscending": "asc",
-                            "id": "eeq8ylj"
+                            "id": "e84y4iw"
                           },
                           {
                             "conditional": {
@@ -1306,7 +1490,7 @@
                             "inputType": "checkbox",
                             "value": "",
                             "name": "",
-                            "id": "ed3y0x9"
+                            "id": "emgur6"
                           }
                         ],
                         "placeholder": "",
@@ -1349,7 +1533,7 @@
                           "when": null,
                           "eq": ""
                         },
-                        "id": "eikizf"
+                        "id": "euoxsph"
                       }
                     ],
                     "mask": false,
@@ -1407,7 +1591,7 @@
                     "inlineColumns": false,
                     "autoAdjust": false,
                     "hideOnChildrenHidden": false,
-                    "id": "eue23l"
+                    "id": "e1qcsol"
                   }
                 ]
               },
@@ -2253,7 +2437,7 @@
               "customPrivate": false
             },
             "scrollableContent": false,
-            "id": "e0vot6"
+            "id": "eors92m"
           }
         ],
         "tags": [],
@@ -2290,7 +2474,7 @@
         "theme": "default",
         "breadcrumb": "default",
         "lazyLoad": false,
-        "id": "e8n4oe5"
+        "id": "e65n0jo"
       },
       {
         "conditional": {
@@ -2373,7 +2557,7 @@
                 "disableOnInvalid": false,
                 "theme": "default",
                 "removeIndents": false,
-                "id": "ehex4k9"
+                "id": "ez3286v"
               }
             ],
             "classes": "",
@@ -2427,7 +2611,7 @@
               "when": null,
               "eq": ""
             },
-            "id": "eygapc"
+            "id": "eord33q"
           },
           {
             "type": "column",
@@ -2488,7 +2672,7 @@
               "when": null,
               "eq": ""
             },
-            "id": "e8y2lt5"
+            "id": "e8fkc5i"
           },
           {
             "components": [
@@ -2558,7 +2742,7 @@
                 "rightIcon": "",
                 "action": "submit",
                 "removeIndents": false,
-                "id": "ebleg66"
+                "id": "ey5jry4"
               }
             ],
             "classes": "",
@@ -2614,7 +2798,7 @@
               "when": null,
               "eq": ""
             },
-            "id": "e5nomk"
+            "id": "ee02bid"
           }
         ],
         "key": "columns2",
@@ -2662,7 +2846,7 @@
         "inlineColumns": false,
         "autoAdjust": false,
         "hideOnChildrenHidden": false,
-        "id": "eha35w4"
+        "id": "e136qz"
       }
     ],
     "display": "form"

@@ -4,6 +4,7 @@ import org.springframework.data.domain.Sort;
 import ru.citeck.ecos.model.type.dto.CreateVariantDto;
 import ru.citeck.ecos.model.type.dto.TypeDto;
 import ru.citeck.ecos.model.type.dto.TypeWithMetaDto;
+import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
 
 import java.util.Collection;
@@ -38,6 +39,8 @@ public interface TypeService {
     String getDashboardType(String extId);
 
     List<CreateVariantDto> getCreateVariants(String extId);
+
+    RecordRef getConfigFormRef(String extId);
 
     void delete(String extId);
 
