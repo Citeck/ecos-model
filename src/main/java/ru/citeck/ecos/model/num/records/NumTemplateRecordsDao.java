@@ -3,6 +3,7 @@ package ru.citeck.ecos.model.num.records;
 import ecos.com.fasterxml.jackson210.annotation.JsonProperty;
 import ecos.com.fasterxml.jackson210.annotation.JsonValue;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.data.domain.Sort;
@@ -143,6 +144,7 @@ public class NumTemplateRecordsDao extends LocalRecordsDAO
             .collect(Collectors.toList());
     }
 
+    @NoArgsConstructor
     public static class NumTemplateRecord extends NumTemplateWithMetaDto {
 
         @Getter @Setter
@@ -153,7 +155,9 @@ public class NumTemplateRecordsDao extends LocalRecordsDAO
             modelAttributes = new ArrayList<>(TmplUtils.getAtts(this.getCounterKey()));
         }
 
-        public NumTemplateRecord() {
+        @MetaAtt(".type")
+        public RecordRef getEcosType() {
+            return RecordRef.create("emodel", "type", "number-template");
         }
 
         public String getModuleId() {

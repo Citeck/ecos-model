@@ -19,6 +19,5 @@ insert_final_newline = true
 [*.md]
 trim_trailing_whitespace = false
 
-[package.json]
-indent_style = space
+[{*.json,*.yaml,*.yml}]
 indent_size = 2

@@ -106,7 +106,7 @@ public class TypeRecordsControllerTest {
             "        \"inheritActions\": \"inheritActions?bool\",\n" +
             "        \"actions\": \"" + actionAtt + "\",\n" +
             "        \"config\": \"config?json\",\n" +
-            "        \"configForm\": \"configForm?id\"\n" +
+            "        \"configFormRef\": \"configFormRef?id\"\n" +
             "    }\n" +
             "}";
         String createTypeResponseJson = TestUtil.getJsonFromResource(PATH_TO_RESPONSE_DATA + responseFile);

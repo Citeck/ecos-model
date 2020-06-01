@@ -29,13 +29,12 @@ import ru.citeck.ecos.records2.request.query.RecordsQueryResult;
 import ru.citeck.ecos.records2.request.rest.QueryBody;
 import ru.citeck.ecos.records2.resolver.RemoteRecordsResolver;
 import ru.citeck.ecos.records2.rest.RemoteRecordsRestApi;
-import ru.citeck.ecos.records2.source.dao.local.RemoteSyncRecordsDAO;
+import ru.citeck.ecos.records2.source.dao.local.RemoteSyncRecordsDao;
 import ru.citeck.ecos.records2.type.ComputedAttribute;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @RunWith(SpringRunner.class)
@@ -53,7 +52,7 @@ public class TypesSyncRecordsDaoTest {
     private TypeRepository typeRepository;
 
     private RecordsService localRecordsService;
-    private RemoteSyncRecordsDAO<TypeDto> remoteSyncRecordsDAO;
+    private RemoteSyncRecordsDao<TypeDto> remoteSyncRecordsDao;
 
     private final List<TypeDto> types = new ArrayList<>();
 
@@ -80,8 +79,8 @@ public class TypesSyncRecordsDaoTest {
 
         this.localRecordsService = localFactory.getRecordsService();
 
-        remoteSyncRecordsDAO = new RemoteSyncRecordsDAO<>(TYPES_SOURCE_ID, TypeDto.class);
-        localRecordsService.register(remoteSyncRecordsDAO);
+        remoteSyncRecordsDao = new RemoteSyncRecordsDao<>(TYPES_SOURCE_ID, TypeDto.class);
+        localRecordsService.register(remoteSyncRecordsDao);
 
         generateData();
     }
@@ -97,7 +96,7 @@ public class TypesSyncRecordsDaoTest {
 
         RecordsQueryResult<RecordRef> result = localRecordsService.queryRecords(query);
         assertEquals(TOTAL_TYPES + 2 /* +1 for base and type types */, result.getTotalCount());
-        assertEquals(TOTAL_TYPES + 2, remoteSyncRecordsDAO.getRecords().size());
+        assertEquals(TOTAL_TYPES + 2, remoteSyncRecordsDao.getRecords().size());
 
         TypeDto dto = localRecordsService.getMeta(RecordRef.valueOf(TYPES_SOURCE_ID + "@type-id-100"), TypeDto.class);
         TypeDto origDto = types.stream().filter(v -> v.getId().equals("type-id-100")).findFirst().orElse(null);
@@ -126,7 +125,7 @@ public class TypesSyncRecordsDaoTest {
         expectedSet.addAll(types);
 
         Set<TypeDto> actualSet = new TreeSet<>(Comparator.comparing(TypeDto::getId));
-        actualSet.addAll(remoteSyncRecordsDAO.getRecords().values());
+        actualSet.addAll(remoteSyncRecordsDao.getRecords().values());
 
         assertEquals(expectedSet, new HashSet<>(actualSet
                 .stream()
@@ -168,7 +167,7 @@ public class TypesSyncRecordsDaoTest {
             typeDto.setAssociations(generateAssocs(i));
             typeDto.setAttributes(ObjectData.create("{\"attKey\":\"attValue-" + i + "\"}"));
             typeDto.setConfig(ObjectData.create("{\"configKey\":\"configValue-" + i + "\"}"));
-            typeDto.setConfigForm(RecordRef.create("uiserv", "eform", "config-form-" + i));
+            typeDto.setConfigFormRef(RecordRef.create("uiserv", "eform", "config-form-" + i));
             typeDto.setCreateVariants(generateCreateVariants(i));
             typeDto.setDashboardType("card-details");
             typeDto.setDescription(new MLText("Description-" + i));

@@ -7,11 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import ru.citeck.ecos.commons.data.DataValue;
+import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.EcosModelApp;
 import ru.citeck.ecos.model.num.dto.NumTemplateDto;
 import ru.citeck.ecos.model.num.repository.NumTemplateRepository;
 import ru.citeck.ecos.model.num.service.NumTemplateService;
+import ru.citeck.ecos.model.type.dto.TypeDto;
+import ru.citeck.ecos.model.type.service.TypeService;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.RecordsService;
 import ru.citeck.ecos.records2.RecordsServiceFactory;
@@ -47,6 +50,9 @@ public class NumTemplateSyncRecordsDaoTest {
     private RemoteSyncRecordsDAO<NumTemplateDto> remoteSyncRecordsDAO;
 
     private final List<NumTemplateDto> templates = new ArrayList<>();
+
+    @Autowired
+    private TypeService typeService;
 
     @Before
     public void setup() {
@@ -111,6 +117,16 @@ public class NumTemplateSyncRecordsDaoTest {
     }
 
     void generateData() {
+
+        TypeDto base = new TypeDto();
+        base.setId("base");
+        base.setName(new MLText("base"));
+        typeService.save(base);
+
+        TypeDto numTmpltType = new TypeDto();
+        numTmpltType.setId("number-template");
+        numTmpltType.setName(new MLText("number-template"));
+        typeService.save(numTmpltType);
 
         for (int i = 0; i < TOTAL_TEMPLATES; i++) {
 

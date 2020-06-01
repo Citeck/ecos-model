@@ -10,6 +10,7 @@ import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.records2.RecordRef;
+import ru.citeck.ecos.records2.graphql.meta.annotation.MetaAtt;
 import ru.citeck.ecos.records2.type.ComputedAttribute;
 
 import javax.validation.constraints.NotNull;
@@ -28,10 +29,9 @@ public class TypeDto {
     private MLText description;
     private String tenant;
     private String sourceId;
-    //todo: rename RecordRef fields to *Ref
-    private RecordRef parent;
-    private RecordRef form;
-    private RecordRef journal;
+    private RecordRef parentRef;
+    private RecordRef formRef;
+    private RecordRef journalRef;
     private boolean system;
     private String dashboardType;
     private boolean inheritActions;
@@ -50,7 +50,7 @@ public class TypeDto {
 
     private ObjectData attributes = ObjectData.create();
 
-    private RecordRef configForm;
+    private RecordRef configFormRef;
     private ObjectData config = ObjectData.create();
 
     public TypeDto(TypeDto dto) {
@@ -59,14 +59,14 @@ public class TypeDto {
         this.sourceId = dto.sourceId;
         this.name = Json.getMapper().copy(dto.name);
         this.description = Json.getMapper().copy(dto.description);
-        this.parent = dto.parent;
-        this.form = dto.form;
-        this.journal = dto.journal;
+        this.parentRef = dto.parentRef;
+        this.formRef = dto.formRef;
+        this.journalRef = dto.journalRef;
         this.system = dto.system;
         this.dashboardType = dto.dashboardType;
         this.inheritActions = dto.inheritActions;
         this.tenant = dto.tenant;
-        this.configForm = dto.configForm;
+        this.configFormRef = dto.configFormRef;
         this.dispNameTemplate = Json.getMapper().copy(dto.getDispNameTemplate());
         this.inheritNumTemplate = dto.isInheritNumTemplate();
         this.config = ObjectData.deepCopy(dto.config);
@@ -77,5 +77,20 @@ public class TypeDto {
         this.computedAttributes = DataValue.create(dto.computedAttributes).toList(ComputedAttribute.class);
         this.attributes = ObjectData.deepCopy(dto.attributes);
         this.numTemplateRef = dto.getNumTemplateRef();
+    }
+
+    @MetaAtt("parentRef")
+    public void setParent(RecordRef parentRef) {
+        this.parentRef = parentRef;
+    }
+
+    @MetaAtt("formRef")
+    public void setForm(RecordRef formRef) {
+        this.formRef = formRef;
+    }
+
+    @MetaAtt("journalRef")
+    public void setJournal(RecordRef journalRef) {
+        this.journalRef = journalRef;
     }
 }

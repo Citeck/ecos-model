@@ -69,11 +69,11 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
         typeEntity.setConfig(config.toString());
 
         typeEntity.setTenant(dto.getTenant());
-        typeEntity.setConfigForm(RecordRef.toString(dto.getConfigForm()));
-        typeEntity.setForm(RecordRef.toString(dto.getForm()));
-        typeEntity.setJournal(RecordRef.toString(dto.getJournal()));
+        typeEntity.setConfigForm(RecordRef.toString(dto.getConfigFormRef()));
+        typeEntity.setForm(RecordRef.toString(dto.getFormRef()));
+        typeEntity.setJournal(RecordRef.toString(dto.getJournalRef()));
 
-        RecordRef parentRef = dto.getParent();
+        RecordRef parentRef = dto.getParentRef();
         String parentExtId;
         if (RecordRef.isEmpty(parentRef)) {
             if (!Objects.equals(dto.getId(), BASE_TYPE_ID)) {
@@ -136,10 +136,10 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
         dto.setNumTemplateRef(RecordRef.valueOf(entity.getNumTemplateRef()));
         dto.setInheritNumTemplate(Boolean.TRUE.equals(entity.getInheritNumTemplate()));
         dto.setInheritActions(entity.isInheritActions());
-        dto.setForm(RecordRef.valueOf(entity.getForm()));
-        dto.setJournal(RecordRef.valueOf(entity.getJournal()));
+        dto.setFormRef(RecordRef.valueOf(entity.getForm()));
+        dto.setJournalRef(RecordRef.valueOf(entity.getJournal()));
         dto.setTenant(entity.getTenant());
-        dto.setConfigForm(RecordRef.valueOf(entity.getConfigForm()));
+        dto.setConfigFormRef(RecordRef.valueOf(entity.getConfigForm()));
         dto.setConfig(Json.getMapper().read(entity.getConfig(), ObjectData.class));
         dto.setSourceId(entity.getSourceId());
         dto.setComputedAttributes(Json.getMapper().readList(entity.getComputedAttributes(), ComputedAttribute.class));
@@ -158,7 +158,7 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
         }
         if (parentExtId != null) {
             RecordRef parentRecordRef = RecordRef.create("emodel", TypeRecordsDao.ID, parentExtId);
-            dto.setParent(parentRecordRef);
+            dto.setParentRef(parentRecordRef);
         }
 
         Set<AssociationDto> associationDtoSet = entity.getAssocsToOthers().stream()

@@ -113,7 +113,7 @@ public class TypeServiceImpl implements TypeService {
                         variant.getAttributes().set("_etype", "emodel/type@" + type.getId());
                     }
                     if (variant.getFormRef() == null) {
-                        variant.setFormRef(type.getForm());
+                        variant.setFormRef(type.getFormRef());
                     }
                     if (RecordRef.isEmpty(variant.getRecordRef())) {
                         if (StringUtils.isNotBlank(type.getSourceId())) {
@@ -199,7 +199,7 @@ public class TypeServiceImpl implements TypeService {
 
         while (type != null) {
 
-            RecordRef parentRef = type.getParent();
+            RecordRef parentRef = type.getParentRef();
 
             if (parentRef != null) {
                 type = getByExtId(parentRef.getId());

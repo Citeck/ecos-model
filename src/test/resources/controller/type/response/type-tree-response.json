@@ -21,6 +21,6 @@
                 "last": "Koch"
             }
         },
-        "configForm": "uiserv/eform@test-config-form"
+        "configFormRef": "uiserv/eform@test-config-form"
     }
 }

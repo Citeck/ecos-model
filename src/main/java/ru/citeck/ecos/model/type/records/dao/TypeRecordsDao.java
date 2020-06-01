@@ -32,20 +32,20 @@ import ru.citeck.ecos.records2.request.delete.RecordsDeletion;
 import ru.citeck.ecos.records2.request.mutation.RecordsMutResult;
 import ru.citeck.ecos.records2.request.query.RecordsQuery;
 import ru.citeck.ecos.records2.request.query.RecordsQueryResult;
-import ru.citeck.ecos.records2.source.dao.local.LocalRecordsDAO;
-import ru.citeck.ecos.records2.source.dao.local.MutableRecordsLocalDAO;
-import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsMetaDAO;
-import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsQueryWithMetaDAO;
+import ru.citeck.ecos.records2.source.dao.local.LocalRecordsDao;
+import ru.citeck.ecos.records2.source.dao.local.MutableRecordsLocalDao;
+import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsMetaDao;
+import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsQueryWithMetaDao;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
-public class TypeRecordsDao extends LocalRecordsDAO
-    implements LocalRecordsQueryWithMetaDAO<TypeRecordsDao.TypeRecord>,
-            LocalRecordsMetaDAO<TypeRecordsDao.TypeRecord>,
-            MutableRecordsLocalDAO<TypeRecordsDao.TypeMutRecord> {
+public class TypeRecordsDao extends LocalRecordsDao
+                            implements LocalRecordsQueryWithMetaDao<TypeRecordsDao.TypeRecord>,
+                                       LocalRecordsMetaDao<TypeRecordsDao.TypeRecord>,
+                                       MutableRecordsLocalDao<TypeRecordsDao.TypeMutRecord> {
 
     public static final String ID = "type";
 
@@ -226,8 +226,9 @@ public class TypeRecordsDao extends LocalRecordsDAO
                 case "inheritActions":
                     return dto.isInheritActions();
                 case "parent":
+                case "parentRef":
                 case RecordConstants.ATT_PARENT:
-                    return dto.getParent();
+                    return dto.getParentRef();
                 case "parents":
                     return toInnerTypeRecords(typeService.getParents(dto.getId()));
                 case "children":
@@ -241,9 +242,11 @@ public class TypeRecordsDao extends LocalRecordsDAO
                 case "assocsFull":
                     return getTypeAndParentsAssociations(dto);
                 case "form":
-                    return dto.getForm();
+                case "formRef":
+                    return dto.getFormRef();
                 case "journal":
-                    return dto.getJournal();
+                case "journalRef":
+                    return dto.getJournalRef();
                 case "inheritedForm":
                     return findAndGetInheritedForm(dto);
                 case "attributes":
@@ -262,8 +265,8 @@ public class TypeRecordsDao extends LocalRecordsDAO
                     return "module_model/type";
                 case "config":
                     return dto.getConfig();
-                case "configForm":
-                    return dto.getConfigForm();
+                case "configFormRef":
+                    return dto.getConfigFormRef();
                 case RecordConstants.ATT_MODIFIED:
                     return dto.getModified();
                 case RecordConstants.ATT_MODIFIER:
@@ -309,13 +312,13 @@ public class TypeRecordsDao extends LocalRecordsDAO
 
         while (currentType != null) {
 
-            RecordRef formId = currentType.getForm();
+            RecordRef formId = currentType.getFormRef();
 
             if (formId != null) {
                 return formId;
             } else {
-                if (currentType.getParent() != null) {
-                    currentType = typeService.getByExtId(currentType.getParent().getId());
+                if (currentType.getParentRef() != null) {
+                    currentType = typeService.getByExtId(currentType.getParentRef().getId());
                 } else {
                     return null;
                 }
@@ -334,9 +337,9 @@ public class TypeRecordsDao extends LocalRecordsDAO
 
             resultAssociations.addAll(currentType.getAssociations());
 
-            RecordRef parentRecordRef = currentType.getParent();
+            RecordRef parentRecordRef = currentType.getParentRef();
             if (parentRecordRef != null) {
-                currentType = typeService.getByExtId(currentType.getParent().getId());
+                currentType = typeService.getByExtId(currentType.getParentRef().getId());
             } else {
                 currentType = null;
             }
@@ -347,11 +350,11 @@ public class TypeRecordsDao extends LocalRecordsDAO
 
     private List<RecordRef> getInheritTypeActions(TypeDto dto) {
 
-        if (!dto.isInheritActions() || dto.getParent() == null) {
+        if (!dto.isInheritActions() || dto.getParentRef() == null) {
             return dto.getActions();
         }
 
-        RecordRef parent = dto.getParent();
+        RecordRef parent = dto.getParentRef();
         DataValue actionsNode = recordsService.getAttribute(parent, TYPE_ACTIONS_WITH_INHERIT_ATT_JSON);
 
         if (actionsNode == null || actionsNode.isNull()) {

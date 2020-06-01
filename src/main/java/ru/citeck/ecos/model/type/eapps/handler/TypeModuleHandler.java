@@ -45,10 +45,10 @@ public class TypeModuleHandler implements EcosModuleHandler<TypeDto> {
 
         List<RecordRef> dependencies = new ArrayList<>();
 
-        if (RecordRef.isEmpty(module.getParent())) {
+        if (RecordRef.isEmpty(module.getParentRef())) {
             dependencies.add(RecordRef.valueOf("emodel/type@base"));
         } else {
-            dependencies.add(module.getParent());
+            dependencies.add(module.getParentRef());
         }
 
         List<AssociationDto> assocs = module.getAssociations();

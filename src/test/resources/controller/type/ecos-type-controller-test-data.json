@@ -13,7 +13,7 @@
             "uiserv/action@delete",
             "uiserv/action@view"
         ],
-        "configForm": "uiserv/eform@test-config-form",
+        "configFormRef": "uiserv/eform@test-config-form",
         "config": {
             "isActive": true,
             "balance": "$3,924.34",

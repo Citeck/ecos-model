@@ -151,7 +151,7 @@ public class TypeConverterTest {
         typeDto.setAliases(Collections.singletonList("alias"));
         typeDto.setCreateVariants(Arrays.asList(createVariantDto1, createVariantDto2));
         typeDto.setForm(RecordRef.create("emodel", "eform", "type-form"));
-        typeDto.setConfigForm(RecordRef.create("emodel", "eform", "config-form"));
+        typeDto.setConfigFormRef(RecordRef.create("emodel", "eform", "config-form"));
         typeDto.setNumTemplateRef(RecordRef.valueOf("emodel/num-template@test"));
         typeDto.setConfig(Json.getMapper().read("{\n" +
             "  \"color\": \"red\",\n" +
@@ -209,15 +209,15 @@ public class TypeConverterTest {
         Assert.assertEquals(parent, resultEntity.getParent());
         Assert.assertEquals(1, resultEntity.getSections().size());
         Assert.assertEquals(1, resultEntity.getAliases().size());
-        Assert.assertEquals(typeDto.getForm(), RecordRef.valueOf(resultEntity.getForm()));
-        Assert.assertEquals(typeDto.getConfigForm(), RecordRef.valueOf(resultEntity.getConfigForm()));
+        Assert.assertEquals(typeDto.getFormRef(), RecordRef.valueOf(resultEntity.getForm()));
+        Assert.assertEquals(typeDto.getConfigFormRef(), RecordRef.valueOf(resultEntity.getConfigForm()));
         Assert.assertEquals(typeDto.getCreateVariants(),
             Arrays.asList(Json.getMapper().read(resultEntity.getCreateVariants(), CreateVariantDto[].class)));
         Assert.assertEquals(typeDto.getAttributes(), Json.getMapper().read(resultEntity.getAttributes(),
             ObjectData.class));
         Assert.assertEquals(typeDto.getTenant(), resultEntity.getTenant());
         Assert.assertEquals(typeDto.isInheritActions(), resultEntity.isInheritActions());
-        Assert.assertEquals(typeDto.getJournal(), RecordRef.valueOf(resultEntity.getJournal()));
+        Assert.assertEquals(typeDto.getJournalRef(), RecordRef.valueOf(resultEntity.getJournal()));
         Assert.assertEquals(typeDto.getAliases(), resultEntity.getAliases().stream().collect(Collectors.toList()));
     }
 
@@ -245,15 +245,15 @@ public class TypeConverterTest {
         Assert.assertEquals(typeDto.getAssociations().size(), resultEntity.getAssocsToOthers().size());
         Assert.assertEquals(parent, resultEntity.getParent());
         Assert.assertEquals(1, resultEntity.getAliases().size());
-        Assert.assertEquals(typeDto.getForm(), RecordRef.valueOf(resultEntity.getForm()));
-        Assert.assertEquals(typeDto.getConfigForm(), RecordRef.valueOf(resultEntity.getConfigForm()));
+        Assert.assertEquals(typeDto.getFormRef(), RecordRef.valueOf(resultEntity.getForm()));
+        Assert.assertEquals(typeDto.getConfigFormRef(), RecordRef.valueOf(resultEntity.getConfigForm()));
         Assert.assertEquals(typeDto.getCreateVariants(),
             Arrays.asList(Json.getMapper().read(resultEntity.getCreateVariants(), CreateVariantDto[].class)));
         Assert.assertEquals(typeDto.getAttributes(), Json.getMapper().read(resultEntity.getAttributes(),
             ObjectData.class));
         Assert.assertEquals(typeDto.getTenant(), resultEntity.getTenant());
         Assert.assertEquals(typeDto.isInheritActions(), resultEntity.isInheritActions());
-        Assert.assertEquals(typeDto.getJournal(), RecordRef.valueOf(resultEntity.getJournal()));
+        Assert.assertEquals(typeDto.getJournalRef(), RecordRef.valueOf(resultEntity.getJournal()));
         Assert.assertEquals(typeDto.getAliases(), resultEntity.getAliases().stream().collect(Collectors.toList()));
     }
 

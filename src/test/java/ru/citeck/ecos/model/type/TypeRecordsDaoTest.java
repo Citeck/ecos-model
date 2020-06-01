@@ -102,7 +102,7 @@ public class TypeRecordsDaoTest {
         Assert.assertEquals(resultTypeRecord.getAttribute("description", metaField), typeDto.getDescription());
         Assert.assertEquals(resultTypeRecord.getAttribute("extId", metaField), typeDto.getId());
         Assert.assertEquals(resultTypeRecord.getAttribute("inheritActions", metaField), typeDto.isInheritActions());
-        Assert.assertEquals(resultTypeRecord.getAttribute("parent", metaField), typeDto.getParent());
+        Assert.assertEquals(resultTypeRecord.getAttribute("parent", metaField), typeDto.getParentRef());
         Assert.assertEquals(resultTypeRecord.getAttribute("actions", metaField), typeDto.getActions());
         Assert.assertEquals(resultTypeRecord.getAttribute("associations", metaField), typeDto.getAssociations());
     }
@@ -149,7 +149,7 @@ public class TypeRecordsDaoTest {
         Assert.assertEquals(resultTypeRecord.getAttribute("description", metaField), new MLText("desc"));
         Assert.assertEquals(resultTypeRecord.getAttribute("extId", metaField), typeDto.getId());
         Assert.assertEquals(resultTypeRecord.getAttribute("inheritActions", metaField), typeDto.isInheritActions());
-        Assert.assertEquals(resultTypeRecord.getAttribute("parent", metaField), typeDto.getParent());
+        Assert.assertEquals(resultTypeRecord.getAttribute("parent", metaField), typeDto.getParentRef());
         Assert.assertEquals(resultTypeRecord.getAttribute("actions", metaField), typeDto.getActions());
         Assert.assertEquals(resultTypeRecord.getAttribute("associations", metaField), typeDto.getAssociations());
     }
@@ -175,7 +175,7 @@ public class TypeRecordsDaoTest {
         Assert.assertEquals(resultTypeRecord.getAttribute("description", metaField), new MLText("desc"));
         Assert.assertEquals(resultTypeRecord.getAttribute("extId", metaField), typeDto.getId());
         Assert.assertEquals(resultTypeRecord.getAttribute("inheritActions", metaField), typeDto.isInheritActions());
-        Assert.assertEquals(resultTypeRecord.getAttribute("parent", metaField), typeDto.getParent());
+        Assert.assertEquals(resultTypeRecord.getAttribute("parent", metaField), typeDto.getParentRef());
         Assert.assertEquals(resultTypeRecord.getAttribute("actions", metaField), typeDto.getActions());
         Assert.assertEquals(resultTypeRecord.getAttribute("associations", metaField), typeDto.getAssociations());
     }

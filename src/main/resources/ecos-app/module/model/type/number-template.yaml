@@ -8,12 +8,13 @@ name:
 system: true
 
 journal: uiserv/journal@number-templates
+form: uiserv/eform@num-template-form
 
 createVariants:
 
     - id: create-new-template
       name: { ru: Создать новый шаблон, en: Create new template }
-      recordRef: uiserv/eform@
+      recordRef: emodel/num-template@
 
     - id: upload-template
       name: { ru: Загрузить шаблон, en: Upload template }

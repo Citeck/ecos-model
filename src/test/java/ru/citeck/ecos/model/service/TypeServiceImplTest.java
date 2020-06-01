@@ -132,7 +132,7 @@ public class TypeServiceImplTest {
         assertEquals(resultTypeDto.getDescription(), Json.getMapper().read(typeEntity.getDescription(), MLText.class));
         assertEquals(resultTypeDto.getAssociations(), Collections.singletonList(associationDto));
         assertEquals(resultTypeDto.getActions(), Collections.singletonList(actionRef));
-        assertEquals(resultTypeDto.getParent(), RecordRef.create("type", "parent"));
+        assertEquals(resultTypeDto.getParentRef(), RecordRef.create("type", "parent"));
         assertEquals(resultTypeDto.getAliases(), Collections.singletonList("alias"));
     }
 
@@ -155,7 +155,7 @@ public class TypeServiceImplTest {
         assertEquals(resultTypeDto.getDescription(), Json.getMapper().read(typeEntity.getDescription(), MLText.class));
         assertEquals(resultTypeDto.getAssociations(), Collections.singletonList(associationDto));
         assertEquals(resultTypeDto.getActions(), Collections.singletonList(actionRef));
-        assertEquals(resultTypeDto.getParent(), RecordRef.create("type", "parent"));
+        assertEquals(resultTypeDto.getParentRef(), RecordRef.create("type", "parent"));
         assertEquals(resultTypeDto.getAliases(), Collections.singletonList("alias"));
     }
 
@@ -175,7 +175,7 @@ public class TypeServiceImplTest {
         assertEquals(resultTypeDto.getDescription(), Json.getMapper().read(typeEntity.getDescription(), MLText.class));
         assertEquals(resultTypeDto.getAssociations(), Collections.singletonList(associationDto));
         assertEquals(resultTypeDto.getActions(), Collections.singletonList(actionRef));
-        assertEquals(resultTypeDto.getParent(), RecordRef.create("type", "parent"));
+        assertEquals(resultTypeDto.getParentRef(), RecordRef.create("type", "parent"));
         assertEquals(resultTypeDto.getAliases(), Collections.singletonList("alias"));
     }
 

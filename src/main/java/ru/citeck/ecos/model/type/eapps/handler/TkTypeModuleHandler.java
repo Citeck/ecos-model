@@ -46,7 +46,7 @@ public class TkTypeModuleHandler implements EcosModuleHandler<TypeDto> {
                 currentType.setName(module.getName());
             }
         }
-        currentType.setParent(module.getParent());
+        currentType.setParent(module.getParentRef());
 
 
         TypeDto finalType = currentType;
