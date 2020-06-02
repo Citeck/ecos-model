@@ -11,6 +11,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
+import ru.citeck.ecos.model.association.converter.AssociationConverter;
 import ru.citeck.ecos.model.association.domain.AssociationEntity;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.converter.DtoConverter;
@@ -37,7 +38,7 @@ public class TypeConverterTest {
     private TypeRepository typeRepository;
 
     @MockBean
-    private DtoConverter<AssociationDto, AssociationEntity> associationConverter;
+    private AssociationConverter associationConverter;
 
     private TypeConverter typeConverter;
 
@@ -131,7 +132,7 @@ public class TypeConverterTest {
         associationEntity.setExtId("association");
         associationEntity.setTarget(parent);
 
-        typeEntity.setAssocsToOthers(Collections.singleton(associationEntity));
+        typeEntity.setAssociations(Collections.singleton(associationEntity));
 
         associationDto = new AssociationDto();
         associationDto.setId("association");
@@ -172,7 +173,7 @@ public class TypeConverterTest {
     @Test
     void testEntityToDtoWithoutParentAndAssociationsAndActionsAndAttributesAndCreateVariants() {
         typeEntity.setParent(null);
-        typeEntity.setAssocsToOthers(Collections.emptySet());
+        typeEntity.setAssociations(Collections.emptySet());
         typeEntity.setActions(null);
         typeEntity.setCreateVariants(null);
         typeEntity.setAttributes(null);
@@ -192,7 +193,7 @@ public class TypeConverterTest {
 
     @Test
     void testDtoToEntity() {
-        when(associationConverter.dtoToEntity(associationDto)).thenReturn(associationEntity);
+        when(associationConverter.dtoToEntity(typeEntity, associationDto)).thenReturn(associationEntity);
         when(typeRepository.findByExtId(parent.getExtId())).thenReturn(Optional.of(parent));
         when(typeRepository.findByExtId(typeEntity.getExtId())).thenReturn(Optional.of(typeEntity));
 
@@ -202,7 +203,7 @@ public class TypeConverterTest {
         Assert.assertEquals(typeDto.getName(), Json.getMapper().read(resultEntity.getName(), MLText.class));
         Assert.assertEquals(typeDto.getDescription(), Json.getMapper().read(resultEntity.getDescription(),
             MLText.class));
-        Assert.assertEquals(typeDto.getAssociations().size(), resultEntity.getAssocsToOthers().size());
+        Assert.assertEquals(typeDto.getAssociations().size(), resultEntity.getAssociations().size());
         Assert.assertEquals(typeDto.getActions(), Arrays.asList(Json.getMapper().read(resultEntity.getActions(),
             RecordRef[].class)));
         Assert.assertEquals(1, resultEntity.getChildren().size());
@@ -242,7 +243,7 @@ public class TypeConverterTest {
         Assert.assertEquals(typeDto.getName(), Json.getMapper().read(resultEntity.getName(), MLText.class));
         Assert.assertEquals(typeDto.getDescription(), Json.getMapper().read(resultEntity.getDescription(),
             MLText.class));
-        Assert.assertEquals(typeDto.getAssociations().size(), resultEntity.getAssocsToOthers().size());
+        Assert.assertEquals(typeDto.getAssociations().size(), resultEntity.getAssociations().size());
         Assert.assertEquals(parent, resultEntity.getParent());
         Assert.assertEquals(1, resultEntity.getAliases().size());
         Assert.assertEquals(typeDto.getFormRef(), RecordRef.valueOf(resultEntity.getForm()));

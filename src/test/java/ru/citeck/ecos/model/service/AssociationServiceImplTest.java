@@ -33,124 +33,14 @@ public class AssociationServiceImplTest {
     @MockBean
     private AssociationRepository associationRepository;
 
-    @MockBean
-    private TypeRepository typeRepository;
-
-    @MockBean
-    private DtoConverter<AssociationDto, AssociationEntity> associationConverter;
-
-    @MockBean
-    private DtoConverter<TypeWithMetaDto, TypeEntity> typeConverter;
-
     private AssociationServiceImpl associationService;
 
     private AssociationEntity associationEntity;
 
     @BeforeEach
     void setUp() {
-        associationService = new AssociationServiceImpl(associationRepository, typeRepository, associationConverter,
-            typeConverter);
+        associationService = new AssociationServiceImpl(associationRepository);
         associationEntity = new AssociationEntity();
-    }
-
-    @Test
-    void testExtractAndSaveAssocsFromType() {
-
-        //  arrange
-        AssociationDto associationDto = new AssociationDto();
-        associationDto.setId("assocId");
-        associationDto.setTarget(RecordRef.create(TypeRecordsDao.ID, "typeId"));
-
-        AssociationEntity associationEntity = new AssociationEntity();
-        associationEntity.setExtId("assocId");
-
-        when(associationConverter.dtoToEntity(associationDto)).thenReturn(associationEntity);
-
-        TypeWithMetaDto typeDto = new TypeWithMetaDto();
-        typeDto.setAssociations(Collections.singletonList(associationDto));
-
-        TypeEntity typeEntity = new TypeEntity();
-        typeEntity.setId(1L);
-        typeEntity.setExtId("typeId");
-
-        when(typeConverter.dtoToEntity(typeDto)).thenReturn(typeEntity);
-        when(typeRepository.findByExtId("typeId")).thenReturn(Optional.of(typeEntity));
-
-        //  act
-        associationService.extractAndSaveAssocsFromType(typeDto);
-
-        //  assert
-        List<AssociationEntity> associationEntities = new ArrayList<>();
-        associationEntities.add(associationEntity);
-        Mockito.verify(associationRepository, times(1))
-            .saveAll(associationEntities);
-    }
-
-    @Test
-    void testExtractAndSaveAssocsFromTypeTargetTypeIsNull() {
-
-        //  arrange
-        AssociationDto associationDto = new AssociationDto();
-        associationDto.setId("assocId");
-
-        AssociationEntity associationEntity = new AssociationEntity();
-        associationEntity.setExtId("assocId");
-
-        when(associationConverter.dtoToEntity(associationDto)).thenReturn(associationEntity);
-
-        TypeWithMetaDto typeDto = new TypeWithMetaDto();
-        typeDto.setAssociations(Collections.singletonList(associationDto));
-
-        TypeEntity typeEntity = new TypeEntity();
-        typeEntity.setId(1L);
-        typeEntity.setExtId("typeId");
-
-        when(typeConverter.dtoToEntity(typeDto)).thenReturn(typeEntity);
-        when(typeRepository.findByExtId("typeId")).thenReturn(Optional.of(typeEntity));
-
-        //  act
-        try {
-            associationService.extractAndSaveAssocsFromType(typeDto);
-        } catch (IllegalArgumentException iae) {
-            //  assert
-            Assert.assertEquals("Target type is null", iae.getMessage());
-            Mockito.verify(associationRepository, times(0))
-                .saveAll(Mockito.anySet());
-        }
-    }
-
-    @Test
-    void testExtractAndSaveAssocsFromTypeTargetTypeIsNotExists() {
-
-        //  arrange
-        AssociationDto associationDto = new AssociationDto();
-        associationDto.setId("assocId");
-        associationDto.setTarget(RecordRef.create(TypeRecordsDao.ID, "notExistableTypeId"));
-
-        AssociationEntity associationEntity = new AssociationEntity();
-        associationEntity.setExtId("assocId");
-
-        when(associationConverter.dtoToEntity(associationDto)).thenReturn(associationEntity);
-
-        TypeWithMetaDto typeDto = new TypeWithMetaDto();
-        typeDto.setAssociations(Collections.singletonList(associationDto));
-
-        TypeEntity typeEntity = new TypeEntity();
-        typeEntity.setId(1L);
-        typeEntity.setExtId("typeId");
-
-        when(typeConverter.dtoToEntity(typeDto)).thenReturn(typeEntity);
-        when(typeRepository.findByExtId("typeId")).thenReturn(Optional.of(typeEntity));
-
-        //  act
-        try {
-            associationService.extractAndSaveAssocsFromType(typeDto);
-        } catch (IllegalArgumentException iae) {
-            //  assert
-            Assert.assertEquals("Target type doesnt exists: notExistableTypeId", iae.getMessage());
-            Mockito.verify(associationRepository, times(0))
-                .saveAll(Mockito.anySet());
-        }
     }
 
     @Test
