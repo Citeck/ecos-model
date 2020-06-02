@@ -23,6 +23,7 @@ import ru.citeck.ecos.records2.RecordMeta;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.RecordsService;
 import ru.citeck.ecos.records2.graphql.meta.annotation.MetaAtt;
+import ru.citeck.ecos.records2.graphql.meta.value.EmptyValue;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaValue;
 import ru.citeck.ecos.records2.predicate.PredicateService;
@@ -44,7 +45,7 @@ import java.util.stream.Collectors;
 @Component
 public class TypeRecordsDao extends LocalRecordsDao
                             implements LocalRecordsQueryWithMetaDao<TypeRecordsDao.TypeRecord>,
-                                       LocalRecordsMetaDao<TypeRecordsDao.TypeRecord>,
+                                       LocalRecordsMetaDao<MetaValue>,
                                        MutableRecordsLocalDao<TypeRecordsDao.TypeMutRecord> {
 
     public static final String ID = "type";
@@ -65,14 +66,17 @@ public class TypeRecordsDao extends LocalRecordsDao
     }
 
     @Override
-    public List<TypeRecord> getLocalRecordsMeta(List<RecordRef> list, MetaField metaField) {
+    public List<MetaValue> getLocalRecordsMeta(List<RecordRef> list, MetaField metaField) {
 
         if (list.size() == 1 && list.get(0).getId().isEmpty()) {
             return Collections.singletonList(EMPTY_RECORD);
         }
 
         return list.stream()
-            .map(ref -> new TypeRecord(typeService.getOrCreateByExtId(ref.getId())))
+            .map(ref -> {
+                TypeWithMetaDto type = typeService.getByExtIdOrNull(ref.getId());
+                return type != null ? new TypeRecord(type) : EmptyValue.INSTANCE;
+            })
             .collect(Collectors.toList());
     }
 
