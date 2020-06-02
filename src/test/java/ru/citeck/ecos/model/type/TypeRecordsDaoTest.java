@@ -9,7 +9,6 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.commons.data.MLText;
-import ru.citeck.ecos.model.type.dto.TypeDto;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.type.dto.TypeWithMetaDto;
 import ru.citeck.ecos.model.type.service.impl.TypeServiceImpl;
@@ -18,6 +17,7 @@ import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.RecordsService;
 import ru.citeck.ecos.records2.RecordsServiceFactory;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
+import ru.citeck.ecos.records2.graphql.meta.value.MetaValue;
 import ru.citeck.ecos.records2.graphql.meta.value.field.MetaFieldImpl;
 import ru.citeck.ecos.records2.predicate.PredicateServiceImpl;
 import ru.citeck.ecos.records2.predicate.RecordElement;
@@ -85,18 +85,19 @@ public class TypeRecordsDaoTest {
     }
 
     @Test
-    void testGetLocalRecordsMetaFromRecordRefs() {
+    void testGetLocalRecordsMetaFromRecordRefs() throws Exception {
 
         //  arrange
         when(typeService.getByExtId(typeDto.getId())).thenReturn(typeDto);
         when(typeService.getOrCreateByExtId(typeDto.getId())).thenReturn(typeDto);
+        when(typeService.getByExtIdOrNull(typeDto.getId())).thenReturn(typeDto);
 
         //  act
-        List<TypeRecordsDao.TypeRecord> resultTypeRecords = typeRecordsDao.getLocalRecordsMeta(recordRefs, Mockito.any());
+        List<MetaValue> resultTypeRecords = typeRecordsDao.getLocalRecordsMeta(recordRefs, Mockito.any());
 
         //  assert
         Assert.assertEquals(resultTypeRecords.size(), 1);
-        TypeRecordsDao.TypeRecord resultTypeRecord = resultTypeRecords.get(0);
+        MetaValue resultTypeRecord = resultTypeRecords.get(0);
         Assert.assertEquals(resultTypeRecord.getId(), typeDto.getId());
         Assert.assertEquals(resultTypeRecord.getAttribute("name", metaField), typeDto.getName());
         Assert.assertEquals(resultTypeRecord.getAttribute("description", metaField), typeDto.getDescription());
@@ -108,16 +109,16 @@ public class TypeRecordsDaoTest {
     }
 
     @Test
-    void testGetLocalRecordsMetaFromRecordRefsWithEmptyID() {
+    void testGetLocalRecordsMetaFromRecordRefsWithEmptyID() throws Exception {
 
         //  act
-        List<TypeRecordsDao.TypeRecord> resultTypeRecords = typeRecordsDao.getLocalRecordsMeta(
+        List<MetaValue> resultTypeRecords = typeRecordsDao.getLocalRecordsMeta(
             Collections.singletonList(RecordRef.create("type", "")), metaField);
 
         //  assert
         Mockito.verify(typeService, Mockito.times(0)).getByExtId(Mockito.anyString());
         Assert.assertEquals(resultTypeRecords.size(), 1);
-        TypeRecordsDao.TypeRecord resultTypeRecord = resultTypeRecords.get(0);
+        MetaValue resultTypeRecord = resultTypeRecords.get(0);
         Assert.assertNull(resultTypeRecord.getId());
         Assert.assertNull(resultTypeRecord.getAttribute("name", metaField));
         Assert.assertNull(resultTypeRecord.getAttribute("description", metaField));
