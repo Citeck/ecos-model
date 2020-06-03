@@ -2,6 +2,7 @@ package ru.citeck.ecos.model.association.converter;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.util.Strings;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.json.Json;
@@ -16,6 +17,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Component
 public class TypeAssociationConverter extends AbstractDtoConverter<AssociationDto, AssociationEntity> {
+
+    @Value("${spring.application.name}")
+    private String appName;
 
     @Override
     public AssociationEntity dtoToEntity(AssociationDto associationDto) {
@@ -45,7 +49,7 @@ public class TypeAssociationConverter extends AbstractDtoConverter<AssociationDt
         assocDto.setAttribute(associationEntity.getAttribute());
 
         String targetTypeId = associationEntity.getTarget().getExtId();
-        RecordRef targetTypeRecordRef = RecordRef.create(TypeRecordsDao.ID, targetTypeId);
+        RecordRef targetTypeRecordRef = RecordRef.create(appName, TypeRecordsDao.ID, targetTypeId);
         assocDto.setTarget(targetTypeRecordRef);
 
         return assocDto;
