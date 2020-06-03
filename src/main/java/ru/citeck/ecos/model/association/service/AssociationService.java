@@ -8,8 +8,6 @@ import java.util.Set;
 
 public interface AssociationService {
 
-    void extractAndSaveAssocsFromType(TypeWithMetaDto dto);
-
     void saveAll(Set<AssociationEntity> associationEntities);
 
 }

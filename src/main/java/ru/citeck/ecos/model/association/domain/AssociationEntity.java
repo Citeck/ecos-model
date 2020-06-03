@@ -41,4 +41,13 @@ public class AssociationEntity {
     public AssociationId getId() {
         return new AssociationId(extId, sourceId);
     }
+
+    public void setSource(TypeEntity source) {
+        this.source = source;
+    }
+
+    @PrePersist
+    public void prePersist() {
+        this.sourceId = source.getId();
+    }
 }

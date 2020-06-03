@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.apache.commons.collections.CollectionUtils;
 import ru.citeck.ecos.model.association.domain.AssociationEntity;
 import ru.citeck.ecos.model.domain.AbstractAuditingEntity;
 import ru.citeck.ecos.model.section.domain.SectionEntity;
@@ -11,7 +12,9 @@ import ru.citeck.ecos.model.utils.EntityCollectionUtils;
 
 import javax.persistence.*;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Data
 @Entity
@@ -87,29 +90,21 @@ public class TypeEntity extends AbstractAuditingEntity {
     private Set<String> aliases = new HashSet<>();
 
     /*
-     * Set of associations to this type
-     */
-    @OneToMany(
-        mappedBy = "target",
-        fetch = FetchType.EAGER,
-        cascade = CascadeType.ALL)
-    private Set<AssociationEntity> assocsToThis = new HashSet<>();
-
-    /*
-     * Set of associations to other types
+     * Set of associations to other types.
      */
     @OneToMany(
         mappedBy = "source",
         fetch = FetchType.EAGER,
         cascade = CascadeType.ALL,
         orphanRemoval = true)
-    private Set<AssociationEntity> assocsToOthers = new HashSet<>();
+    private Set<AssociationEntity> associations = new HashSet<>();
 
     @Column(name = "actions_str")
     private String actions;
 
-    public void setAssocsToOthers(Set<AssociationEntity> assocsToOthers) {
-        EntityCollectionUtils.changeHibernateSet(this.assocsToOthers, assocsToOthers, AssociationEntity::getId);
+    public void setAssociations(Set<AssociationEntity> associations) {
+        associations = associations.stream().filter(Objects::nonNull).collect(Collectors.toSet());
+        EntityCollectionUtils.changeHibernateSet(this.associations, associations, AssociationEntity::getId);
     }
 
     public void setId(Long id) {

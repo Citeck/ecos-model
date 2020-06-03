@@ -57,7 +57,6 @@ public class TypeServiceImplTest {
 
         typeService = new TypeServiceImpl(
             typeRepository,
-            associationService,
             typeConverter
         );
 
@@ -83,7 +82,7 @@ public class TypeServiceImplTest {
         typeEntity.setDescription("desc");
         typeEntity.setInheritActions(false);
         typeEntity.setActions("[\"uiserv/action@action\"]");
-        typeEntity.setAssocsToOthers(Collections.singleton(associationEntity));
+        typeEntity.setAssociations(Collections.singleton(associationEntity));
         typeEntity.setParent(parent);
         typeEntity.setChildren(Collections.singleton(child));
         typeEntity.setSections(Collections.singleton(sectionEntity));

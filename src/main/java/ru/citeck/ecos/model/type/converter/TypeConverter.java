@@ -1,11 +1,13 @@
 package ru.citeck.ecos.model.type.converter;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
+import ru.citeck.ecos.model.association.converter.AssociationConverter;
 import ru.citeck.ecos.model.association.domain.AssociationEntity;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.converter.AbstractDtoConverter;
@@ -28,10 +30,10 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
     private static final String BASE_TYPE_ID = "base";
 
     private final TypeRepository typeRepository;
-    private final DtoConverter<AssociationDto, AssociationEntity> associationConverter;
+    private final AssociationConverter associationConverter;
 
     public TypeConverter(TypeRepository typeRepository,
-                         DtoConverter<AssociationDto, AssociationEntity> associationConverter) {
+                         AssociationConverter associationConverter) {
 
         this.typeRepository = typeRepository;
         this.associationConverter = associationConverter;
@@ -100,7 +102,14 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
             typeEntity.setAliases(Collections.emptySet());
         }
 
+        Set<AssociationEntity> associations = dto.getAssociations().stream()
+            .map(a -> associationConverter.dtoToEntity(typeEntity, a))
+            .collect(Collectors.toSet());
+        typeEntity.setAssociations(associations);
+
         checkCyclicDependencies(typeEntity);
+
+        typeEntity.setSourceId(dto.getSourceId());
 
         return typeEntity;
     }
@@ -161,10 +170,11 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
             dto.setParentRef(parentRecordRef);
         }
 
-        Set<AssociationDto> associationDtoSet = entity.getAssocsToOthers().stream()
+        List<AssociationDto> associationDtoSet = entity.getAssociations().stream()
             .map(associationConverter::entityToDto)
-            .collect(Collectors.toSet());
-        dto.setAssociations(new ArrayList<>(associationDtoSet));
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+        dto.setAssociations(associationDtoSet);
 
         dto.setActions(Json.getMapper().read(entity.getActions(), RecordRefsList.class));
         if (dto.getActions() == null) {

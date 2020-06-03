@@ -40,7 +40,6 @@ import java.util.stream.Collectors;
 public class TypeServiceImpl implements TypeService {
 
     private final TypeRepository typeRepository;
-    private final AssociationService associationService;
     private final DtoConverter<TypeWithMetaDto, TypeEntity> typeConverter;
 
     private Consumer<TypeDto> onTypeChangedListener = dto -> {};
@@ -296,8 +295,6 @@ public class TypeServiceImpl implements TypeService {
 
         TypeEntity entity = typeConverter.dtoToEntity(new TypeWithMetaDto(dto));
         entity = typeRepository.save(entity);
-        associationService.extractAndSaveAssocsFromType(new TypeWithMetaDto(dto));
-
         removeAliasedTypes(entity);
 
         TypeWithMetaDto typeDto = typeConverter.entityToDto(entity);

@@ -5,35 +5,45 @@ import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.json.Json;
-import ru.citeck.ecos.model.association.converter.TypeAssociationConverter;
+import ru.citeck.ecos.model.association.converter.AssociationConverter;
 import ru.citeck.ecos.model.association.domain.AssociationEntity;
 import ru.citeck.ecos.model.association.dto.AssocDirection;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.type.domain.TypeEntity;
 import ru.citeck.ecos.model.type.records.dao.TypeRecordsDao;
+import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
 
+import java.util.Optional;
 import java.util.UUID;
+
+import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 public class TypeAssociationConverterTest {
 
-    private TypeAssociationConverter typeAssociationConverter;
+    @MockBean
+    private TypeRepository typeRepository;
+
+    private AssociationConverter typeAssociationConverter;
 
     private AssociationEntity entity;
     private AssociationDto dto;
+    private TypeEntity targetTypeEntity;
+    private TypeEntity sourceTypeEntity;
 
     @BeforeEach
     void setUp() {
-        typeAssociationConverter = new TypeAssociationConverter();
+        typeAssociationConverter = new AssociationConverter(typeRepository);
 
-        TypeEntity targetTypeEntity = new TypeEntity();
+        targetTypeEntity = new TypeEntity();
         targetTypeEntity.setExtId("targetEntityId");
 
-        TypeEntity sourceTypeEntity = new TypeEntity();
+        sourceTypeEntity = new TypeEntity();
         sourceTypeEntity.setExtId("sourceEntityId");
 
         entity = new AssociationEntity();
@@ -53,13 +63,19 @@ public class TypeAssociationConverterTest {
     @Test
     void testDtoToEntity() {
 
+        // arrange
+//        when(typeRepository.findByExtId("sourceEntityId")).thenReturn(Optional.of(sourceTypeEntity));
+        when(typeRepository.findByExtId("targetEntityId")).thenReturn(Optional.of(targetTypeEntity));
+
         //  act
-        AssociationEntity resultEntity = typeAssociationConverter.dtoToEntity(dto);
+        AssociationEntity resultEntity = typeAssociationConverter.dtoToEntity(sourceTypeEntity, dto);
 
         //  assert
         Assert.assertEquals(dto.getId(), resultEntity.getExtId());
         Assert.assertEquals(dto.getName(), Json.getMapper().read(resultEntity.getName(), MLText.class));
         Assert.assertEquals(dto.getDirection(), resultEntity.getDirection());
+        Assert.assertEquals("sourceEntityId", resultEntity.getSource().getExtId());
+        Assert.assertEquals("targetEntityId", resultEntity.getTarget().getExtId());
     }
 
     @Test
@@ -67,9 +83,11 @@ public class TypeAssociationConverterTest {
 
         //  arrange
         dto.setId("");
+//        when(typeRepository.findByExtId("sourceEntityId")).thenReturn(Optional.of(sourceTypeEntity));
+        when(typeRepository.findByExtId("targetEntityId")).thenReturn(Optional.of(targetTypeEntity));
 
         //  act
-        AssociationEntity resultEntity = typeAssociationConverter.dtoToEntity(dto);
+        AssociationEntity resultEntity = typeAssociationConverter.dtoToEntity(sourceTypeEntity, dto);
 
         //  assert
         Assert.assertEquals(dto.getName(), Json.getMapper().read(resultEntity.getName(), MLText.class));
