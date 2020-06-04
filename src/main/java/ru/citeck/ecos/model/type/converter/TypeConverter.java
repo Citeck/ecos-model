@@ -1,7 +1,7 @@
 package ru.citeck.ecos.model.type.converter;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.commons.data.MLText;
@@ -11,7 +11,6 @@ import ru.citeck.ecos.model.association.converter.AssociationConverter;
 import ru.citeck.ecos.model.association.domain.AssociationEntity;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.converter.AbstractDtoConverter;
-import ru.citeck.ecos.model.converter.DtoConverter;
 import ru.citeck.ecos.model.type.domain.TypeEntity;
 import ru.citeck.ecos.model.type.dto.CreateVariantDto;
 import ru.citeck.ecos.model.type.dto.TypeWithMetaDto;
@@ -103,6 +102,7 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
         }
 
         Set<AssociationEntity> associations = dto.getAssociations().stream()
+            .filter(a -> StringUtils.isNotBlank(a.getId()))
             .map(a -> associationConverter.dtoToEntity(typeEntity, a))
             .collect(Collectors.toSet());
         typeEntity.setAssociations(associations);
