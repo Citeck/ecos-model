@@ -67,7 +67,7 @@ public class AssociationConverter {
         assocDto.setAttribute(associationEntity.getAttribute());
 
         String targetTypeId = associationEntity.getTarget().getExtId();
-        RecordRef targetTypeRecordRef = RecordRef.create(appName, TypeRecordsDao.ID, targetTypeId);
+        RecordRef targetTypeRecordRef = RecordRef.create("emodel", TypeRecordsDao.ID, targetTypeId);
         assocDto.setTarget(targetTypeRecordRef);
 
         return assocDto;
