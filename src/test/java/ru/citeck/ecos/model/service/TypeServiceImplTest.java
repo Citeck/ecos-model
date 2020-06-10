@@ -92,7 +92,7 @@ public class TypeServiceImplTest {
         parent.setExtId("parent");
         parent.setAssociations(new HashSet<>(Arrays.asList(parentAssocEntity, parentAssocEntity2)));
 
-        TypeDto parentDto = new TypeDto();
+        TypeWithMetaDto parentDto = new TypeWithMetaDto();
         parentDto.setId("parent");
         parentDto.setAssociations(Arrays.asList(parentAssocDto, parentAssocDto2));
 
@@ -179,7 +179,7 @@ public class TypeServiceImplTest {
         assertEquals(resultTypeDto.getDescription(), Json.getMapper().read(typeEntity.getDescription(), MLText.class));
         assertEquals(resultTypeDto.getAssociations(), Collections.singletonList(childAssocDto));
         assertEquals(resultTypeDto.getActions(), Collections.singletonList(actionRef));
-        assertEquals(resultTypeDto.getParentRef(), RecordRef.create("type", "parent"));
+        assertEquals(resultTypeDto.getParentRef(), RecordRef.create("emodel", "type", "parent"));
         assertEquals(resultTypeDto.getAliases(), Collections.singletonList("alias"));
     }
 
@@ -202,7 +202,7 @@ public class TypeServiceImplTest {
         assertEquals(resultTypeDto.getDescription(), Json.getMapper().read(typeEntity.getDescription(), MLText.class));
         assertEquals(resultTypeDto.getAssociations(), Collections.singletonList(childAssocDto));
         assertEquals(resultTypeDto.getActions(), Collections.singletonList(actionRef));
-        assertEquals(resultTypeDto.getParentRef(), RecordRef.create("type", "parent"));
+        assertEquals(resultTypeDto.getParentRef(), RecordRef.create("emodel", "type", "parent"));
         assertEquals(resultTypeDto.getAliases(), Collections.singletonList("alias"));
     }
 
@@ -222,7 +222,7 @@ public class TypeServiceImplTest {
         assertEquals(resultTypeDto.getDescription(), Json.getMapper().read(typeEntity.getDescription(), MLText.class));
         assertEquals(resultTypeDto.getAssociations(), Collections.singletonList(childAssocDto));
         assertEquals(resultTypeDto.getActions(), Collections.singletonList(actionRef));
-        assertEquals(resultTypeDto.getParentRef(), RecordRef.create("type", "parent"));
+        assertEquals(resultTypeDto.getParentRef(), RecordRef.create("emodel", "type", "parent"));
         assertEquals(resultTypeDto.getAliases(), Collections.singletonList("alias"));
     }
 

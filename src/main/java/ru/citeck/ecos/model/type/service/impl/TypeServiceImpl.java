@@ -206,7 +206,7 @@ public class TypeServiceImpl implements TypeService {
         return new ArrayList<>(assocs.values());
     }
 
-    private void forEachTypeInDescHierarchy(String extId, Function<TypeDto, Boolean> action) {
+    private void forEachTypeInDescHierarchy(String extId, Function<TypeWithMetaDto, Boolean> action) {
         forEachTypeInDescHierarchy(typeRepository.findByExtId(extId).orElse(null), action);
     }
 
@@ -236,7 +236,7 @@ public class TypeServiceImpl implements TypeService {
         }
     }
 
-    private void forEachTypeInAscHierarchy(String extId, Function<TypeDto, Boolean> action) {
+    private void forEachTypeInAscHierarchy(String extId, Function<TypeWithMetaDto, Boolean> action) {
 
         TypeWithMetaDto type = getByExtId(extId);
         if (action.apply(type)) {
