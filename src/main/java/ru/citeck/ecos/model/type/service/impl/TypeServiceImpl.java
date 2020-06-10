@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.association.service.AssociationService;
+import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.converter.DtoConverter;
 import ru.citeck.ecos.model.service.exception.ForgottenChildsException;
 import ru.citeck.ecos.model.type.domain.TypeEntity;
@@ -101,7 +102,7 @@ public class TypeServiceImpl implements TypeService {
     @Override
     public RecordRef getConfigFormRef(String extId) {
         AtomicReference<RecordRef> result = new AtomicReference<>();
-        forEachTypeInHierarchy(extId, dto -> {
+        forEachTypeInAscHierarchy(extId, dto -> {
             if (RecordRef.isNotEmpty(dto.getConfigFormRef())) {
                 result.set(dto.getConfigFormRef());
                 return true;
@@ -148,7 +149,7 @@ public class TypeServiceImpl implements TypeService {
 
         AtomicReference<String> result = new AtomicReference<>();
 
-        forEachTypeInHierarchy(extId, type -> {
+        forEachTypeInAscHierarchy(extId, type -> {
             if (StringUtils.isNotBlank(type.getDashboardType())) {
                 result.set(type.getDashboardType());
                 return true;
@@ -163,7 +164,7 @@ public class TypeServiceImpl implements TypeService {
     public List<TypeWithMetaDto> getParents(String extId) {
 
         List<TypeWithMetaDto> result = new ArrayList<>();
-        forEachTypeInHierarchy(extId, type -> {
+        forEachTypeInAscHierarchy(extId, type -> {
             if (!Objects.equals(type.getId(), extId)) {
                 result.add(type);
             }
@@ -187,7 +188,25 @@ public class TypeServiceImpl implements TypeService {
         return result;
     }
 
-    private void forEachTypeInDescHierarchy(String extId, Function<TypeWithMetaDto, Boolean> action) {
+    @Override
+    public List<AssociationDto> getFullAssocs(String extId) {
+
+        Map<String, AssociationDto> assocs = new TreeMap<>();
+        forEachTypeInAscHierarchyInv(extId, dto -> {
+
+            List<AssociationDto> typeAssocs = dto.getAssociations();
+            if (typeAssocs != null) {
+                for (AssociationDto assoc : typeAssocs) {
+                    assocs.put(assoc.getId(), assoc);
+                }
+            }
+            return false;
+        });
+
+        return new ArrayList<>(assocs.values());
+    }
+
+    private void forEachTypeInDescHierarchy(String extId, Function<TypeDto, Boolean> action) {
         forEachTypeInDescHierarchy(typeRepository.findByExtId(extId).orElse(null), action);
     }
 
@@ -202,7 +221,22 @@ public class TypeServiceImpl implements TypeService {
         types.forEach(t -> forEachTypeInDescHierarchy(t, action));
     }
 
-    private void forEachTypeInHierarchy(String extId, Function<TypeWithMetaDto, Boolean> action) {
+    private void forEachTypeInAscHierarchyInv(String extId, Function<TypeDto, Boolean> action) {
+
+        List<TypeDto> types = new ArrayList<>();
+        forEachTypeInAscHierarchy(extId, dto -> {
+            types.add(dto);
+            return false;
+        });
+
+        for (int i = types.size() - 1; i >= 0; i--) {
+            if (action.apply(types.get(i))) {
+                break;
+            }
+        }
+    }
+
+    private void forEachTypeInAscHierarchy(String extId, Function<TypeDto, Boolean> action) {
 
         TypeWithMetaDto type = getByExtId(extId);
         if (action.apply(type)) {

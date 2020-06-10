@@ -21,9 +21,7 @@ import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.model.type.service.impl.TypeServiceImpl;
 import ru.citeck.ecos.records2.RecordRef;
 
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -50,7 +48,14 @@ public class TypeServiceImplTest {
 
     private String typeExtId;
     private RecordRef actionRef;
-    private AssociationDto associationDto;
+
+    private AssociationEntity parentAssocEntity;
+    private AssociationEntity parentAssocEntity2;
+    private AssociationEntity childAssocEntity;
+
+    AssociationDto childAssocDto;
+    AssociationDto parentAssocDto;
+    AssociationDto parentAssocDto2;
 
     @BeforeEach
     void init() {
@@ -62,11 +67,34 @@ public class TypeServiceImplTest {
 
         typeExtId = "type";
 
-        AssociationEntity associationEntity = new AssociationEntity();
-        associationEntity.setExtId("association");
+        parentAssocEntity = new AssociationEntity();
+        parentAssocEntity.setExtId("association");
+        parentAssocEntity.setName("name0");
+        parentAssocDto = new AssociationDto();
+        parentAssocDto.setId("association");
+        parentAssocDto.setName(new MLText("name0"));
+
+        parentAssocEntity2 = new AssociationEntity();
+        parentAssocEntity2.setExtId("association2");
+        parentAssocEntity2.setName("name2");
+        parentAssocDto2 = new AssociationDto();
+        parentAssocDto2.setId("association2");
+        parentAssocDto2.setName(new MLText("name2"));
+
+        childAssocEntity = new AssociationEntity();
+        childAssocEntity.setExtId("association");
+        childAssocEntity.setName("name1");
+        childAssocDto = new AssociationDto();
+        childAssocDto.setId("association");
+        childAssocDto.setName(new MLText("name1"));
 
         TypeEntity parent = new TypeEntity();
         parent.setExtId("parent");
+        parent.setAssociations(new HashSet<>(Arrays.asList(parentAssocEntity, parentAssocEntity2)));
+
+        TypeDto parentDto = new TypeDto();
+        parentDto.setId("parent");
+        parentDto.setAssociations(Arrays.asList(parentAssocDto, parentAssocDto2));
 
         TypeEntity child = new TypeEntity();
         child.setExtId("child");
@@ -82,7 +110,7 @@ public class TypeServiceImplTest {
         typeEntity.setDescription("desc");
         typeEntity.setInheritActions(false);
         typeEntity.setActions("[\"uiserv/action@action\"]");
-        typeEntity.setAssociations(Collections.singleton(associationEntity));
+        typeEntity.setAssociations(Collections.singleton(childAssocEntity));
         typeEntity.setParent(parent);
         typeEntity.setChildren(Collections.singleton(child));
         typeEntity.setSections(Collections.singleton(sectionEntity));
@@ -95,22 +123,42 @@ public class TypeServiceImplTest {
 
         actionRef = RecordRef.create("uiserv", "action", "action");
 
-        associationDto = new AssociationDto();
-        associationDto.setId("association");
-
         typeDto = new TypeWithMetaDto();
         typeDto.setId(typeExtId);
         typeDto.setName(new MLText("name"));
         typeDto.setDescription(new MLText("desc"));
         typeDto.setInheritActions(false);
         typeDto.setActions(Collections.singletonList(actionRef));
-        typeDto.setAssociations(Collections.singletonList(associationDto));
-        typeDto.setParent(RecordRef.create("type", "parent"));
+        typeDto.setAssociations(Collections.singletonList(childAssocDto));
+        typeDto.setParent(RecordRef.create("emodel", "type", "parent"));
         typeDto.setAliases(Collections.singletonList("alias"));
         typeDto.setConfig(Json.getMapper().read("{\n" +
             "  \"color\": \"red\",\n" +
             "  \"icon\": \"urgent\"\n" +
             "}", ObjectData.class));
+
+        when(typeRepository.findByExtId(parent.getExtId())).thenReturn(Optional.of(parent));
+        when(typeRepository.findByExtId(typeEntity.getExtId())).thenReturn(Optional.of(typeEntity));
+
+        when(typeConverter.entityToDto(typeEntity)).thenReturn(typeDto);
+        when(typeConverter.entityToDto(parent)).thenReturn(parentDto);
+    }
+
+    @Test
+    void testAllAssocs() {
+
+        List<AssociationDto> assocs = typeService.getFullAssocs(typeEntity.getExtId());
+        assertEquals(2, assocs.size());
+
+        for (AssociationDto dto : assocs) {
+            if (dto.getId().equals("association")) {
+                assertEquals("name1", dto.getName().getClosestValue(Locale.ENGLISH));
+            } else if (dto.getId().equals("association2")) {
+                assertEquals("name2", dto.getName().getClosestValue(Locale.ENGLISH));
+            } else {
+                throw new IllegalStateException("Unknown association: " + dto);
+            }
+        }
     }
 
     @Test
@@ -129,7 +177,7 @@ public class TypeServiceImplTest {
         assertEquals(resultTypeDto.getId(), typeEntity.getExtId());
         assertEquals(resultTypeDto.getName(), Json.getMapper().read(typeEntity.getName(), MLText.class));
         assertEquals(resultTypeDto.getDescription(), Json.getMapper().read(typeEntity.getDescription(), MLText.class));
-        assertEquals(resultTypeDto.getAssociations(), Collections.singletonList(associationDto));
+        assertEquals(resultTypeDto.getAssociations(), Collections.singletonList(childAssocDto));
         assertEquals(resultTypeDto.getActions(), Collections.singletonList(actionRef));
         assertEquals(resultTypeDto.getParentRef(), RecordRef.create("type", "parent"));
         assertEquals(resultTypeDto.getAliases(), Collections.singletonList("alias"));
@@ -152,7 +200,7 @@ public class TypeServiceImplTest {
         assertEquals(resultTypeDto.getId(), typeEntity.getExtId());
         assertEquals(resultTypeDto.getName(), Json.getMapper().read(typeEntity.getName(), MLText.class));
         assertEquals(resultTypeDto.getDescription(), Json.getMapper().read(typeEntity.getDescription(), MLText.class));
-        assertEquals(resultTypeDto.getAssociations(), Collections.singletonList(associationDto));
+        assertEquals(resultTypeDto.getAssociations(), Collections.singletonList(childAssocDto));
         assertEquals(resultTypeDto.getActions(), Collections.singletonList(actionRef));
         assertEquals(resultTypeDto.getParentRef(), RecordRef.create("type", "parent"));
         assertEquals(resultTypeDto.getAliases(), Collections.singletonList("alias"));
@@ -172,7 +220,7 @@ public class TypeServiceImplTest {
         assertEquals(resultTypeDto.getId(), typeEntity.getExtId());
         assertEquals(resultTypeDto.getName(), Json.getMapper().read(typeEntity.getName(), MLText.class));
         assertEquals(resultTypeDto.getDescription(), Json.getMapper().read(typeEntity.getDescription(), MLText.class));
-        assertEquals(resultTypeDto.getAssociations(), Collections.singletonList(associationDto));
+        assertEquals(resultTypeDto.getAssociations(), Collections.singletonList(childAssocDto));
         assertEquals(resultTypeDto.getActions(), Collections.singletonList(actionRef));
         assertEquals(resultTypeDto.getParentRef(), RecordRef.create("type", "parent"));
         assertEquals(resultTypeDto.getAliases(), Collections.singletonList("alias"));

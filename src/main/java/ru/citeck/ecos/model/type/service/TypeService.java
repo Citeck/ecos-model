@@ -2,6 +2,7 @@ package ru.citeck.ecos.model.type.service;
 
 import org.springframework.data.domain.Sort;
 import ru.citeck.ecos.model.type.dto.CreateVariantDto;
+import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.type.dto.TypeDto;
 import ru.citeck.ecos.model.type.dto.TypeWithMetaDto;
 import ru.citeck.ecos.records2.RecordRef;
@@ -35,6 +36,8 @@ public interface TypeService {
     List<TypeWithMetaDto> getParents(String extId);
 
     List<TypeWithMetaDto> getChildren(String extId);
+
+    List<AssociationDto> getFullAssocs(String extId);
 
     String getDashboardType(String extId);
 

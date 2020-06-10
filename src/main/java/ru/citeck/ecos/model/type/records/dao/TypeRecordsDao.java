@@ -244,7 +244,7 @@ public class TypeRecordsDao extends LocalRecordsDao
                 case "associations":
                     return dto.getAssociations();
                 case "assocsFull":
-                    return getTypeAndParentsAssociations(dto);
+                    return typeService.getFullAssocs(dto.getId());
                 case "form":
                 case "formRef":
                     return dto.getFormRef();
@@ -332,26 +332,6 @@ public class TypeRecordsDao extends LocalRecordsDao
         }
 
         return null;
-    }
-
-    private Set<AssociationDto> getTypeAndParentsAssociations(TypeDto typeDto) {
-
-        Set<AssociationDto> resultAssociations = new HashSet<>();
-
-        TypeDto currentType = typeDto;
-        while (currentType != null) {
-
-            resultAssociations.addAll(currentType.getAssociations());
-
-            RecordRef parentRecordRef = currentType.getParentRef();
-            if (parentRecordRef != null) {
-                currentType = typeService.getByExtId(currentType.getParentRef().getId());
-            } else {
-                currentType = null;
-            }
-        }
-
-        return resultAssociations;
     }
 
     private List<RecordRef> getInheritTypeActions(TypeDto dto) {
