@@ -33,7 +33,16 @@ public class AssociationConverter {
     private final TypeRepository typeRepository;
 
     public AssociationEntity dtoToEntity(TypeEntity source, AssociationDto associationDto) {
-        AssociationEntity associationEntity = new AssociationEntity();
+
+        AssociationEntity associationEntity = source.getAssociations()
+            .stream()
+            .filter(a -> associationDto.getId().equals(a.getExtId()))
+            .findFirst()
+            .orElse(null);
+
+        if (associationEntity == null) {
+            associationEntity = new AssociationEntity();
+        }
 
         associationEntity.setExtId(associationDto.getId());
         associationEntity.setName(Json.getMapper().toString(associationDto.getName()));
