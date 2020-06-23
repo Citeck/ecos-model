@@ -1,0 +1,24 @@
+
+id: type
+
+name:
+  ru: Тип кейса
+  en: Case type
+
+system: true
+
+createVariants:
+
+  - id: create-new-template
+    name: { ru: Создать новый тип, en: Create new type }
+    recordRef: emodel/type@
+
+  - id: upload-template
+    name: { ru: Загрузить тип, en: Upload type }
+    recordRef: emodel/type@
+    formRef: uiserv/eform@ecos-module-upload
+
+computedAttributes:
+  - id: .disp
+    model:
+      <: name
