@@ -9,9 +9,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.citeck.ecos.commons.data.DataValue;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.json.Json;
-import ru.citeck.ecos.model.association.service.AssociationService;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.converter.DtoConverter;
 import ru.citeck.ecos.model.service.exception.ForgottenChildsException;
@@ -110,6 +110,32 @@ public class TypeServiceImpl implements TypeService {
             return false;
         });
         return result.get();
+    }
+
+    @Override
+    public DataValue getInhAttribute(String extId, String name) {
+
+        AtomicReference<DataValue> result = new AtomicReference<>();
+
+        forEachTypeInAscHierarchy(extId, type -> {
+
+            if (type.getAttributes() == null) {
+                return false;
+            }
+
+            DataValue value = type.getAttributes().get(name);
+            if (value.isNotNull() && (!value.isTextual() || StringUtils.isNotBlank(value.asText()))) {
+                result.set(value);
+                return true;
+            }
+            return false;
+        });
+
+        DataValue resValue = result.get();
+        if (resValue == null) {
+            return DataValue.NULL;
+        }
+        return resValue;
     }
 
     @Override
