@@ -128,7 +128,7 @@
                             "mask": false,
                             "inputType": "text",
                             "inputMask": "",
-                            "id": "e1nxbf"
+                            "id": "ekskjh"
                           },
                           {
                             "conditional": {
@@ -235,7 +235,7 @@
                             "isTableMode": false,
                             "sortAttribute": "sys:node-dbid",
                             "sortAscending": "asc",
-                            "id": "ez5pauk"
+                            "id": "efqh74k"
                           },
                           {
                             "conditional": {
@@ -338,7 +338,7 @@
                             "isTableMode": false,
                             "sortAttribute": "sys:node-dbid",
                             "sortAscending": "asc",
-                            "id": "ev1y46v"
+                            "id": "eim0gq"
                           },
                           {
                             "label": "Journal",
@@ -424,7 +424,7 @@
                             "isTableMode": false,
                             "sortAttribute": "sys:node-dbid",
                             "sortAscending": "asc",
-                            "id": "ed909d"
+                            "id": "e5micrd"
                           },
                           {
                             "label": "Number template",
@@ -511,7 +511,7 @@
                             "isTableMode": false,
                             "sortAttribute": "sys:node-dbid",
                             "sortAscending": "asc",
-                            "id": "eh4fp1r"
+                            "id": "e57eoxt"
                           },
                           {
                             "label": "Inherit number template",
@@ -575,7 +575,7 @@
                             "inputType": "checkbox",
                             "value": "",
                             "name": "",
-                            "id": "ebwy89"
+                            "id": "eppajgj"
                           },
                           {
                             "label": "Edit config",
@@ -647,7 +647,7 @@
                             "disableOnInvalid": false,
                             "theme": "default",
                             "removeIndents": false,
-                            "id": "efabscd"
+                            "id": "eb6clif"
                           },
                           {
                             "label": "Config form",
@@ -759,7 +759,7 @@
                             "isTableMode": false,
                             "sortAttribute": "sys:node-dbid",
                             "sortAscending": "asc",
-                            "id": "ewn7co6"
+                            "id": "e5nnkch"
                           }
                         ],
                         "xs": 0,
@@ -815,7 +815,7 @@
                           "when": null,
                           "eq": ""
                         },
-                        "id": "enezetk"
+                        "id": "ensr28"
                       },
                       {
                         "xs": 0,
@@ -935,7 +935,7 @@
                                 "mask": false,
                                 "inputType": "text",
                                 "inputMask": "",
-                                "id": "eqh7pr"
+                                "id": "ezw7vhl"
                               },
                               {
                                 "label": "Name Ru",
@@ -1011,7 +1011,7 @@
                                 "mask": false,
                                 "inputType": "text",
                                 "inputMask": "",
-                                "id": "ely5bk"
+                                "id": "e15jnej"
                               }
                             ],
                             "tags": [],
@@ -1045,7 +1045,7 @@
                             "clearOnRefresh": false,
                             "validateOn": "change",
                             "tree": true,
-                            "id": "e85coqr"
+                            "id": "eeiimr"
                           },
                           {
                             "label": "Display name template",
@@ -1150,7 +1150,7 @@
                                 "mask": false,
                                 "inputType": "text",
                                 "inputMask": "",
-                                "id": "e7zan8a"
+                                "id": "eaa2bn"
                               },
                               {
                                 "label": "Display name template Ru",
@@ -1226,7 +1226,7 @@
                                 "mask": false,
                                 "inputType": "text",
                                 "inputMask": "",
-                                "id": "et3g55m"
+                                "id": "e706ihe"
                               }
                             ],
                             "tags": [],
@@ -1260,7 +1260,7 @@
                             "clearOnRefresh": false,
                             "validateOn": "change",
                             "tree": true,
-                            "id": "eerfdzh"
+                            "id": "el7whgd"
                           },
                           {
                             "conditional": {
@@ -1340,7 +1340,7 @@
                             "rows": 3,
                             "wysiwyg": false,
                             "editor": "",
-                            "id": "ese7yze"
+                            "id": "e73vwb1"
                           },
                           {
                             "conditional": {
@@ -1427,7 +1427,7 @@
                             "isTableMode": false,
                             "sortAttribute": "sys:node-dbid",
                             "sortAscending": "asc",
-                            "id": "e84y4iw"
+                            "id": "ezhnvxvi"
                           },
                           {
                             "conditional": {
@@ -1490,7 +1490,134 @@
                             "inputType": "checkbox",
                             "value": "",
                             "name": "",
-                            "id": "emgur6"
+                            "id": "ew6w64m"
+                          },
+                          {
+                            "label": "Attributes",
+                            "disableInlineEdit": false,
+                            "keyLabel": "",
+                            "mask": false,
+                            "tableView": true,
+                            "alwaysEnabled": false,
+                            "triggerChangeWhenCalculate": false,
+                            "encrypted": false,
+                            "validate": {
+                              "customMessage": "",
+                              "json": "",
+                              "required": false,
+                              "custom": "",
+                              "customPrivate": false,
+                              "maxLength": 0,
+                              "minLength": 0
+                            },
+                            "key": "attributes",
+                            "properties": {},
+                            "conditional": {
+                              "show": "",
+                              "when": "",
+                              "json": "",
+                              "eq": ""
+                            },
+                            "customConditional": "",
+                            "logic": [],
+                            "attributes": {},
+                            "type": "datamap",
+                            "input": true,
+                            "valueComponent": {
+                              "type": "textfield",
+                              "key": "value",
+                              "label": "Value",
+                              "defaultValue": "Value",
+                              "input": true,
+                              "tableView": true,
+                              "placeholder": "",
+                              "prefix": "",
+                              "customClass": "",
+                              "suffix": "",
+                              "multiple": false,
+                              "protected": false,
+                              "unique": false,
+                              "persistent": true,
+                              "hidden": false,
+                              "clearOnHide": true,
+                              "dataGridLabel": false,
+                              "labelPosition": "top",
+                              "labelWidth": 30,
+                              "labelMargin": 3,
+                              "description": "",
+                              "errorLabel": "",
+                              "tooltip": "",
+                              "hideLabel": false,
+                              "tabindex": "",
+                              "disabled": false,
+                              "autofocus": false,
+                              "dbIndex": false,
+                              "customDefaultValue": "",
+                              "calculateValue": "",
+                              "allowCalculateOverride": false,
+                              "widget": {
+                                "format": "yyyy-MM-dd hh:mm a",
+                                "dateFormat": "yyyy-MM-dd hh:mm a",
+                                "saveAs": "text"
+                              },
+                              "refreshOn": "",
+                              "clearOnRefresh": false,
+                              "validateOn": "change",
+                              "validate": {
+                                "required": false,
+                                "custom": "",
+                                "customPrivate": false,
+                                "minLength": "",
+                                "maxLength": "",
+                                "minWords": "",
+                                "maxWords": "",
+                                "pattern": ""
+                              },
+                              "conditional": {
+                                "show": null,
+                                "when": null,
+                                "eq": ""
+                              },
+                              "mask": false,
+                              "inputType": "text",
+                              "inputMask": "",
+                              "id": "evt775k"
+                            },
+                            "tags": [],
+                            "placeholder": "",
+                            "prefix": "",
+                            "customClass": "",
+                            "suffix": "",
+                            "multiple": false,
+                            "defaultValue": null,
+                            "protected": false,
+                            "unique": false,
+                            "persistent": true,
+                            "hidden": false,
+                            "clearOnHide": true,
+                            "dataGridLabel": false,
+                            "labelPosition": "top",
+                            "labelWidth": 30,
+                            "labelMargin": 3,
+                            "description": "",
+                            "errorLabel": "",
+                            "tooltip": "",
+                            "hideLabel": false,
+                            "tabindex": "",
+                            "disabled": false,
+                            "autofocus": false,
+                            "dbIndex": false,
+                            "customDefaultValue": "",
+                            "calculateValue": "",
+                            "allowCalculateOverride": false,
+                            "widget": null,
+                            "refreshOn": "",
+                            "clearOnRefresh": false,
+                            "validateOn": "change",
+                            "addAnother": "Add Another",
+                            "disableAddingRemovingRows": false,
+                            "keyBeforeValue": true,
+                            "id": "ej78gfl"
                           }
                         ],
                         "placeholder": "",
@@ -1533,7 +1660,7 @@
                           "when": null,
                           "eq": ""
                         },
-                        "id": "euoxsph"
+                        "id": "emkz4gf"
                       }
                     ],
                     "mask": false,
@@ -1553,6 +1680,7 @@
                     "type": "columns",
                     "input": false,
                     "tags": [],
+                    "tab": 0,
                     "placeholder": "",
                     "prefix": "",
                     "customClass": "",
@@ -1591,8 +1719,7 @@
                     "inlineColumns": false,
                     "autoAdjust": false,
                     "hideOnChildrenHidden": false,
-                    "id": "e1qcsol",
-                    "tab": 0
+                    "id": "e4us4za"
                   }
                 ]
               },
@@ -3255,7 +3382,7 @@
               "customPrivate": false
             },
             "scrollableContent": false,
-            "id": "ej0fb2"
+            "id": "exscl0s"
           }
         ],
         "tags": [],
@@ -3292,7 +3419,7 @@
         "theme": "default",
         "breadcrumb": "default",
         "lazyLoad": false,
-        "id": "eegig6q"
+        "id": "eaky9hc"
       },
       {
         "conditional": {
@@ -3375,7 +3502,7 @@
                 "disableOnInvalid": false,
                 "theme": "default",
                 "removeIndents": false,
-                "id": "es44k43"
+                "id": "efob5yh"
               }
             ],
             "classes": "",
@@ -3429,7 +3556,7 @@
               "when": null,
               "eq": ""
             },
-            "id": "etk6dch"
+            "id": "elow9lc"
           },
           {
             "type": "column",
@@ -3490,7 +3617,7 @@
               "when": null,
               "eq": ""
             },
-            "id": "ec9dr5f"
+            "id": "e1rdusx"
           },
           {
             "components": [
@@ -3560,7 +3687,7 @@
                 "rightIcon": "",
                 "action": "submit",
                 "removeIndents": false,
-                "id": "e5bx9k"
+                "id": "eflhwng"
               }
             ],
             "classes": "",
@@ -3616,7 +3743,7 @@
               "when": null,
               "eq": ""
             },
-            "id": "e3ct3d"
+            "id": "e3etbar"
           }
         ],
         "key": "columns2",
@@ -3664,7 +3791,7 @@
         "inlineColumns": false,
         "autoAdjust": false,
         "hideOnChildrenHidden": false,
-        "id": "et7sgnj"
+        "id": "elnnynn"
       }
     ],
     "display": "form"

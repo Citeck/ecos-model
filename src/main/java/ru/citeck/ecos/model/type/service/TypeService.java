@@ -1,6 +1,7 @@
 package ru.citeck.ecos.model.type.service;
 
 import org.springframework.data.domain.Sort;
+import ru.citeck.ecos.commons.data.DataValue;
 import ru.citeck.ecos.model.type.dto.CreateVariantDto;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.type.dto.TypeDto;
@@ -42,6 +43,8 @@ public interface TypeService {
     String getDashboardType(String extId);
 
     List<CreateVariantDto> getCreateVariants(String extId);
+
+    DataValue getInhAttribute(String extId, String name);
 
     RecordRef getConfigFormRef(String extId);
 

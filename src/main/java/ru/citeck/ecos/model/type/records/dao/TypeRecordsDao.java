@@ -4,6 +4,7 @@ import ecos.com.fasterxml.jackson210.annotation.JsonIgnore;
 import ecos.com.fasterxml.jackson210.annotation.JsonProperty;
 import ecos.com.fasterxml.jackson210.annotation.JsonValue;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -13,7 +14,6 @@ import ru.citeck.ecos.commons.data.DataValue;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
-import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.section.records.record.SectionRecord;
 import ru.citeck.ecos.model.type.dto.TypeDto;
 import ru.citeck.ecos.model.type.dto.TypeWithMetaDto;
@@ -273,6 +273,8 @@ public class TypeRecordsDao extends LocalRecordsDao
                     return dto.getConfigFormRef();
                 case "inhConfigFormRef":
                     return typeService.getConfigFormRef(dto.getId());
+                case "inhAttributes":
+                    return new InhAttributes(dto.getId());
                 case RecordConstants.ATT_MODIFIED:
                     return dto.getModified();
                 case RecordConstants.ATT_MODIFIER:
@@ -380,6 +382,17 @@ public class TypeRecordsDao extends LocalRecordsDao
     @Data
     public static class TypesByJournalListQuery {
         private String listId;
+    }
+
+    @RequiredArgsConstructor
+    public class InhAttributes implements MetaValue {
+
+        private final String extId;
+
+        @Override
+        public Object getAttribute(String name, MetaField field) {
+            return typeService.getInhAttribute(extId, name);
+        }
     }
 
     public static class TypeMutRecord extends TypeDto {
