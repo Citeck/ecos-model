@@ -40,6 +40,8 @@ public interface TypeService {
 
     List<AssociationDto> getFullAssocs(String extId);
 
+    RecordRef getInhFormRef(String extId);
+
     String getDashboardType(String extId);
 
     List<CreateVariantDto> getCreateVariants(String extId);

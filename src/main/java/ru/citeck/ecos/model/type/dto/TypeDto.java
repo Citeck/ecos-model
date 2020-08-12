@@ -35,6 +35,7 @@ public class TypeDto {
     private boolean system;
     private String dashboardType;
     private boolean inheritActions;
+    private boolean inheritForm;
 
     private MLText dispNameTemplate;
 
@@ -77,6 +78,7 @@ public class TypeDto {
         this.computedAttributes = DataValue.create(dto.computedAttributes).toList(ComputedAttribute.class);
         this.attributes = ObjectData.deepCopy(dto.attributes);
         this.numTemplateRef = dto.getNumTemplateRef();
+        this.inheritForm = dto.isInheritForm();
     }
 
     @MetaAtt("parentRef")

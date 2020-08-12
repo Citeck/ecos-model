@@ -248,6 +248,13 @@ public class TypeRecordsDao extends LocalRecordsDao
                 case "form":
                 case "formRef":
                     return dto.getFormRef();
+                case "inhFormRef":
+                    if (RecordRef.isNotEmpty(dto.getFormRef()) || !dto.isInheritForm()) {
+                        return dto.getFormRef();
+                    }
+                    return typeService.getInhFormRef(dto.getId());
+                case "inheritForm":
+                    return dto.isInheritForm();
                 case "journal":
                 case "journalRef":
                     return dto.getJournalRef();

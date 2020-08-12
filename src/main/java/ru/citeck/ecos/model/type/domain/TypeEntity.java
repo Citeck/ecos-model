@@ -62,6 +62,9 @@ public class TypeEntity extends AbstractAuditingEntity {
     @Column(name = "inherit_num_template")
     private Boolean inheritNumTemplate;
 
+    @Column(name = "inherit_form")
+    private Boolean inheritForm;
+
     @Column(name = "computed_attributes")
     private String computedAttributes;
 

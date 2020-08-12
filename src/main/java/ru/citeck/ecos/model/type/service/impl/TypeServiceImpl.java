@@ -215,6 +215,21 @@ public class TypeServiceImpl implements TypeService {
     }
 
     @Override
+    public RecordRef getInhFormRef(String extId) {
+
+        AtomicReference<RecordRef> result = new AtomicReference<>();
+        forEachTypeInAscHierarchy(extId, dto -> {
+            if (RecordRef.isNotEmpty(dto.getFormRef())) {
+                result.set(dto.getFormRef());
+                return true;
+            }
+            return !dto.isInheritForm();
+        });
+
+        return result.get();
+    }
+
+    @Override
     public List<AssociationDto> getFullAssocs(String extId) {
 
         Map<String, AssociationDto> assocs = new TreeMap<>();
