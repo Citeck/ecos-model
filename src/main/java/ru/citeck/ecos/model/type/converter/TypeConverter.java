@@ -146,7 +146,7 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
         dto.setDispNameTemplate(Json.getMapper().read(entity.getDispNameTemplate(), MLText.class));
         dto.setNumTemplateRef(RecordRef.valueOf(entity.getNumTemplateRef()));
         dto.setInheritNumTemplate(Boolean.TRUE.equals(entity.getInheritNumTemplate()));
-        dto.setInheritForm(Boolean.TRUE.equals(entity.getInheritForm()));
+        dto.setInheritForm(!Boolean.FALSE.equals(entity.getInheritForm()));
         dto.setInheritActions(entity.isInheritActions());
         dto.setFormRef(RecordRef.valueOf(entity.getForm()));
         dto.setJournalRef(RecordRef.valueOf(entity.getJournal()));
