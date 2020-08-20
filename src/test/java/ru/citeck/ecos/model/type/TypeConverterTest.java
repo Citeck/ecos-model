@@ -146,6 +146,7 @@ public class TypeConverterTest {
         typeDto.setActions(Collections.singletonList(actionRef));
         typeDto.setAssociations(Collections.singletonList(associationDto));
         typeDto.setInheritActions(true);
+        typeDto.setInheritForm(true);
         typeDto.setJournal(RecordRef.EMPTY);
         typeDto.setAttributes(Json.getMapper().read("{\"field\":\"value\"}", ObjectData.class));
         typeDto.setParent(RecordRef.create("emodel", "type", parent.getExtId()));
