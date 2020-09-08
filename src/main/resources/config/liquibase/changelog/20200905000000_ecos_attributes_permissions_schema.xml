@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="20200905000000" author="citeck">
+
+        <createTable tableName="ecos_attrs_permission">
+            <column name="id" type="BIGINT" autoIncrement="${autoIncrement}">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="ext_id" type="VARCHAR(36)">
+                <constraints nullable="false" unique="true" />
+            </column>
+            <column name="type_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_ecos_attrs_permission_type_id" references="ecos_type(id)"/>
+            </column>
+            <column name="rules_str" type="TEXT"/>
+            <column name="created_date" type="TIMESTAMP" />
+            <column name="created_by" type="VARCHAR(50)" />
+            <column name="last_modified_date" type="TIMESTAMP" />
+            <column name="last_modified_by" type="VARCHAR(50)" />
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

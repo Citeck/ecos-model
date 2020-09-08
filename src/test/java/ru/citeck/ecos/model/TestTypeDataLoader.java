@@ -21,7 +21,7 @@ public class TestTypeDataLoader {
     @Bean
     public CommandLineRunner dataLoader(TypeService typeService, ObjectMapper objectMapper) {
         return args -> {
-            String dataToLoad = TestUtil.getJsonFromResource("/controller/type/ecos-type-controller-test-data.json");
+            String dataToLoad = TestUtil.getFromResource("/controller/type/ecos-type-controller-test-data.json");
 
             TypeDto[] types = objectMapper.readValue(dataToLoad, TypeDto[].class);
 

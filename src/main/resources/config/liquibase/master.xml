@@ -31,6 +31,7 @@
     <include file="config/liquibase/changelog/20200522000000_add_type_columns.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20200526000000_create_num_tables.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20200812000000_add_inh_form_to_type.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20200905000000_ecos_attributes_permissions_schema.xml" relativeToChangelogFile="false"/>
 
     <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
     <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->

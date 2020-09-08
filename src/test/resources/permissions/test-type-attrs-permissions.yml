@@ -1,0 +1,23 @@
+﻿id: test-type-attrs-permissions
+
+typeRef: emodel/type@test-type
+
+rules:
+
+  - attributes:
+      - name: 'ANY'
+        permissions: { Read: true, Edit: true }
+
+  - roles: [ role1 ]
+    condition:
+      - predicate: { t: gt, att: 'ts:conditionAttr', val: 1000000 }
+    attributes:
+      - name: 'ts:testAttr'
+        permissions: { Read: true, Edit: false }
+
+  - roles: [ role1, role2 ]
+    condition:
+      - predicate: { t: gt, att: 'ts:conditionAttr', val: 1000000 }
+    attributes:
+      - name: 'ts:testAttr'
+        permissions: { Read: true, Edit: true }

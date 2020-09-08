@@ -109,7 +109,7 @@ public class TypeRecordsControllerTest {
             "        \"configFormRef\": \"configFormRef?id\"\n" +
             "    }\n" +
             "}";
-        String createTypeResponseJson = TestUtil.getJsonFromResource(PATH_TO_RESPONSE_DATA + responseFile);
+        String createTypeResponseJson = TestUtil.getFromResource(PATH_TO_RESPONSE_DATA + responseFile);
 
         mockRecordsApi.perform(
             post(TestUtil.URL_RECORDS_QUERY)

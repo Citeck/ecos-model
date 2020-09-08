@@ -31,7 +31,7 @@ public final class TestUtil {
 
     private static final ObjectMapper mapper = createObjectMapper();
 
-    public static String getJsonFromResource(String resource) throws IOException {
+    public static String getFromResource(String resource) throws IOException {
         ClassPathResource createTypeResource = new ClassPathResource(resource);
         return StreamUtils.copyToString(createTypeResource.getInputStream(), Charset.defaultCharset());
     }
