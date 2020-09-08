@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.permissions;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,6 +17,7 @@ import ru.citeck.ecos.model.domain.permissions.dto.RuleDto;
 import ru.citeck.ecos.model.domain.permissions.repo.AttributesPermissionsRepository;
 import ru.citeck.ecos.model.domain.permissions.service.AttributesPermissionsService;
 import ru.citeck.ecos.model.type.dto.TypeDto;
+import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.model.type.service.TypeService;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.RecordsService;
@@ -45,15 +47,14 @@ public class AttrPermissionsSyncRecordsDaoTest {
 
     @Autowired
     private RecordsServiceFactory remoteServiceFactory;
-
     @Autowired
     private AttributesPermissionsService service;
-
     @Autowired
     private TypeService typeService;
-
     @Autowired
     private AttributesPermissionsRepository repository;
+    @Autowired
+    private TypeRepository typeRepository;
 
     private RecordsService localRecordsService;
     private RemoteSyncRecordsDao<AttributesPermissionDto> remoteSyncRecordsDao;
@@ -64,6 +65,7 @@ public class AttrPermissionsSyncRecordsDaoTest {
     public void setup() {
 
         repository.deleteAll();
+        typeRepository.deleteAll();
 
         RecordsServiceFactory localFactory = new RecordsServiceFactory() {
             @Override
@@ -87,6 +89,12 @@ public class AttrPermissionsSyncRecordsDaoTest {
         localRecordsService.register(remoteSyncRecordsDao);
 
         generateData();
+    }
+
+    @After
+    public void afterTest() {
+        repository.deleteAll();
+        typeRepository.deleteAll();
     }
 
     @Test
@@ -149,12 +157,12 @@ public class AttrPermissionsSyncRecordsDaoTest {
             dto.setId("att-perm-id-" + i);
 
             TypeDto type = new TypeDto();
-            type.setId("type-id-" + i);
-            type.setName(new MLText("type-id-" + i));
+            type.setId("atype-id-" + i);
+            type.setName(new MLText("atype-id-" + i));
             type.setParent(RecordRef.valueOf("emodel/type@base"));
             typeService.save(type);
 
-            dto.setTypeRef(RecordRef.valueOf("emodel/type@type-id-" + i));
+            dto.setTypeRef(RecordRef.valueOf("emodel/type@atype-id-" + i));
 
             RuleDto rule = new RuleDto();
             rule.setAttributes(Collections.singletonList(

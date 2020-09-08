@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.type;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -83,6 +84,11 @@ public class TypesSyncRecordsDaoTest {
         localRecordsService.register(remoteSyncRecordsDao);
 
         generateData();
+    }
+
+    @After
+    public void afterTest() {
+        typeRepository.deleteAll();
     }
 
     @Test
