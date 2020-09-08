@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.permissions.service;
+package ru.citeck.ecos.model.domain.permissions.service;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -11,10 +11,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.converter.DtoConverter;
-import ru.citeck.ecos.model.permissions.domain.AttributesPermissionEntity;
-import ru.citeck.ecos.model.permissions.dto.AttributesPermissionWithMetaDto;
-import ru.citeck.ecos.model.permissions.dto.AttributesPermissionDto;
-import ru.citeck.ecos.model.permissions.repository.AttributesPermissionsRepository;
+import ru.citeck.ecos.model.domain.permissions.repo.AttributesPermissionEntity;
+import ru.citeck.ecos.model.domain.permissions.dto.AttributesPermissionDto;
+import ru.citeck.ecos.model.domain.permissions.dto.AttributesPermissionWithMetaDto;
+import ru.citeck.ecos.model.domain.permissions.repo.AttributesPermissionsRepository;
 import ru.citeck.ecos.records2.RecordConstants;
 import ru.citeck.ecos.records2.predicate.PredicateUtils;
 import ru.citeck.ecos.records2.predicate.model.Predicate;

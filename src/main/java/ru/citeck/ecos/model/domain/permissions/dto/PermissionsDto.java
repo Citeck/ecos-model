@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.permissions.dto;
+package ru.citeck.ecos.model.domain.permissions.dto;
 
 import ecos.com.fasterxml.jackson210.annotation.JsonInclude;
 import ecos.com.fasterxml.jackson210.annotation.JsonProperty;

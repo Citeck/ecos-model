@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.permissions.eapps.handler;
+package ru.citeck.ecos.model.domain.permissions.eapp.handler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 import ru.citeck.ecos.apps.module.handler.EcosModuleHandler;
 import ru.citeck.ecos.apps.module.handler.ModuleMeta;
 import ru.citeck.ecos.apps.module.handler.ModuleWithMeta;
-import ru.citeck.ecos.model.permissions.dto.AttributesPermissionDto;
-import ru.citeck.ecos.model.permissions.service.AttributesPermissionsService;
+import ru.citeck.ecos.model.domain.permissions.dto.AttributesPermissionDto;
+import ru.citeck.ecos.model.domain.permissions.service.AttributesPermissionsService;
 
 import java.util.function.Consumer;
 

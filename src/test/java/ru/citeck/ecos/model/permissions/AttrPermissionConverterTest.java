@@ -7,12 +7,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.commons.json.Json;
-import ru.citeck.ecos.model.permissions.converter.AttributesPermissionConverter;
-import ru.citeck.ecos.model.permissions.domain.AttributesPermissionEntity;
-import ru.citeck.ecos.model.permissions.dto.AttributesPermissionWithMetaDto;
-import ru.citeck.ecos.model.permissions.dto.AttributesPermissionDto;
-import ru.citeck.ecos.model.permissions.dto.RuleDto;
-import ru.citeck.ecos.model.permissions.repository.AttributesPermissionsRepository;
+import ru.citeck.ecos.model.domain.permissions.repo.AttributesPermissionEntity;
+import ru.citeck.ecos.model.domain.permissions.service.converter.AttributesPermissionConverter;
+import ru.citeck.ecos.model.domain.permissions.dto.AttributesPermissionDto;
+import ru.citeck.ecos.model.domain.permissions.dto.AttributesPermissionWithMetaDto;
+import ru.citeck.ecos.model.domain.permissions.dto.RuleDto;
+import ru.citeck.ecos.model.domain.permissions.repo.AttributesPermissionsRepository;
 import ru.citeck.ecos.model.type.domain.TypeEntity;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
@@ -59,7 +59,9 @@ public class AttrPermissionConverterTest {
         when(attributesPermissionsRepository.findByExtId("testAttrPermId")).thenReturn(Optional.ofNullable(null));
 
         AttributesPermissionDto dto = converter.entityToDto(targetEntity);
-        Assert.assertEquals(dto, targetDto);
+        Assert.assertEquals(dto.getId(), targetDto.getId());
+        Assert.assertEquals(dto.getTypeRef(), targetDto.getTypeRef());
+        Assert.assertEquals(dto.getRules(), targetDto.getRules());
     }
 
     @Test
