@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.permissions.records.dao;
+package ru.citeck.ecos.model.domain.permissions.api.records;
 
 import ecos.com.fasterxml.jackson210.annotation.JsonIgnore;
 import ecos.com.fasterxml.jackson210.annotation.JsonProperty;
@@ -9,10 +9,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
-import ru.citeck.ecos.model.permissions.dto.AttributesPermissionWithMetaDto;
-import ru.citeck.ecos.model.permissions.dto.AttributesPermissionDto;
-import ru.citeck.ecos.model.permissions.records.AttributesPermissionRecord;
-import ru.citeck.ecos.model.permissions.service.AttributesPermissionsService;
+import ru.citeck.ecos.model.domain.permissions.dto.AttributesPermissionDto;
+import ru.citeck.ecos.model.domain.permissions.dto.AttributesPermissionWithMetaDto;
+import ru.citeck.ecos.model.domain.permissions.service.AttributesPermissionsService;
 import ru.citeck.ecos.records2.RecordConstants;
 import ru.citeck.ecos.records2.RecordMeta;
 import ru.citeck.ecos.records2.RecordRef;

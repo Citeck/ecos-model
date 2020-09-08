@@ -27,7 +27,7 @@ import java.util.Collection;
 })
 @EnableConfigurationProperties({LiquibaseProperties.class, ApplicationProperties.class})
 @EnableDiscoveryClient
-@EnableJpaRepositories("ru.citeck.ecos.model.*.repository")
+@EnableJpaRepositories({"ru.citeck.ecos.model.*.repository", "ru.citeck.ecos.model.domain.**.repo"})
 public class EcosModelApp {
 
     private static final Logger log = LoggerFactory.getLogger(EcosModelApp.class);

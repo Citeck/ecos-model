@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.permissions.converter;
+package ru.citeck.ecos.model.domain.permissions.service.converter;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,10 +8,10 @@ import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.converter.AbstractDtoConverter;
-import ru.citeck.ecos.model.permissions.domain.AttributesPermissionEntity;
-import ru.citeck.ecos.model.permissions.dto.AttributesPermissionWithMetaDto;
-import ru.citeck.ecos.model.permissions.dto.RuleDto;
-import ru.citeck.ecos.model.permissions.repository.AttributesPermissionsRepository;
+import ru.citeck.ecos.model.domain.permissions.repo.AttributesPermissionEntity;
+import ru.citeck.ecos.model.domain.permissions.dto.AttributesPermissionWithMetaDto;
+import ru.citeck.ecos.model.domain.permissions.dto.RuleDto;
+import ru.citeck.ecos.model.domain.permissions.repo.AttributesPermissionsRepository;
 import ru.citeck.ecos.model.service.exception.TypeNotFoundException;
 import ru.citeck.ecos.model.type.domain.TypeEntity;
 import ru.citeck.ecos.model.type.records.dao.TypeRecordsDao;

@@ -8,18 +8,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.citeck.ecos.commons.data.MLText;
-import ru.citeck.ecos.model.association.dto.AssociationDto;
-import ru.citeck.ecos.model.permissions.dto.AttributeDto;
-import ru.citeck.ecos.model.permissions.dto.AttributesPermissionWithMetaDto;
-import ru.citeck.ecos.model.permissions.dto.PermissionsDto;
-import ru.citeck.ecos.model.permissions.dto.RuleDto;
-import ru.citeck.ecos.model.permissions.records.AttributesPermissionRecord;
-import ru.citeck.ecos.model.permissions.records.dao.AttributesPermissionRecordsDao;
-import ru.citeck.ecos.model.permissions.service.AttributesPermissionsService;
-import ru.citeck.ecos.model.type.dto.TypeWithMetaDto;
-import ru.citeck.ecos.model.type.records.dao.TypeRecordsDao;
-import ru.citeck.ecos.model.type.service.impl.TypeServiceImpl;
+import ru.citeck.ecos.model.domain.permissions.dto.AttributeDto;
+import ru.citeck.ecos.model.domain.permissions.dto.AttributesPermissionWithMetaDto;
+import ru.citeck.ecos.model.domain.permissions.dto.PermissionsDto;
+import ru.citeck.ecos.model.domain.permissions.dto.RuleDto;
+import ru.citeck.ecos.model.domain.permissions.api.records.AttributesPermissionRecordsDao;
+import ru.citeck.ecos.model.domain.permissions.service.AttributesPermissionsService;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.RecordsService;
 import ru.citeck.ecos.records2.RecordsServiceFactory;
@@ -118,7 +112,7 @@ public class AttrPermissionsRecordsDaoTest {
         Assert.assertNull(resultRecord.getId());
         Assert.assertNull(resultRecord.getAttribute("extId", metaField));
         Assert.assertNull(resultRecord.getAttribute("typeRef", metaField));
-        Assert.assertNull(resultRecord.getAttribute("rules", metaField));
+        Assert.assertEquals(resultRecord.getAttribute("rules", metaField), Collections.EMPTY_LIST);
     }
 
     @Test

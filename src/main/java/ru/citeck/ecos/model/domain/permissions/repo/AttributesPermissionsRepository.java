@@ -1,10 +1,8 @@
-package ru.citeck.ecos.model.permissions.repository;
+package ru.citeck.ecos.model.domain.permissions.repo;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
-import ru.citeck.ecos.model.permissions.domain.AttributesPermissionEntity;
-import ru.citeck.ecos.model.type.domain.TypeEntity;
 
 import java.util.Optional;
 import java.util.Set;

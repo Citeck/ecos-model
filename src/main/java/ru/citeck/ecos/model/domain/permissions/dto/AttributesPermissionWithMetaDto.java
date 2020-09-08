@@ -1,9 +1,7 @@
-package ru.citeck.ecos.model.permissions.dto;
+package ru.citeck.ecos.model.domain.permissions.dto;
 
 import ecos.com.fasterxml.jackson210.annotation.JsonIgnore;
 import lombok.Data;
-import ru.citeck.ecos.records2.RecordConstants;
-import ru.citeck.ecos.records2.graphql.meta.annotation.MetaAtt;
 
 import java.time.Instant;
 
