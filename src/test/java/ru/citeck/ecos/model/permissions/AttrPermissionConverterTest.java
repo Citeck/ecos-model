@@ -24,6 +24,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 public class AttrPermissionConverterTest {
 
+    private final String rules = "[{\"condition\":{\"att\":\"t:conditionAttr\",\"val\":\"1000000\",\"t\":\"gt\"},\"attributes\":[{\"name\":\"ANY\",\"permissions\":{\"Read\":true,\"Edit\":true}}]}]";
+
     @MockBean
     private TypeRepository typeRepository;
     @MockBean
@@ -45,12 +47,12 @@ public class AttrPermissionConverterTest {
         targetEntity = new AttributesPermissionEntity();
         targetEntity.setExtId("testAttrPermId");
         targetEntity.setType(typeEntity);
-        targetEntity.setRules("[{\"attributes\":[{\"name\":\"ANY\",\"permissions\":{\"Read\":true,\"Edit\":true}}]}]");
+        targetEntity.setRules(rules);
 
         targetDto = new AttributesPermissionWithMetaDto();
         targetDto.setId("testAttrPermId");
         targetDto.setTypeRef(RecordRef.create("emodel", "type", "type"));
-        targetDto.setRules(Json.getMapper().readList("[{\"attributes\":[{\"name\":\"ANY\",\"permissions\":{\"Read\":true,\"Edit\":true}}]}]", RuleDto.class));
+        targetDto.setRules(Json.getMapper().readList(rules, RuleDto.class));
     }
 
     @Test
@@ -59,9 +61,9 @@ public class AttrPermissionConverterTest {
         when(attributesPermissionsRepository.findByExtId("testAttrPermId")).thenReturn(Optional.ofNullable(null));
 
         AttributesPermissionDto dto = converter.entityToDto(targetEntity);
-        Assert.assertEquals(dto.getId(), targetDto.getId());
-        Assert.assertEquals(dto.getTypeRef(), targetDto.getTypeRef());
-        Assert.assertEquals(dto.getRules(), targetDto.getRules());
+        Assert.assertEquals(targetDto.getId(), dto.getId());
+        Assert.assertEquals(targetDto.getTypeRef(), dto.getTypeRef());
+        Assert.assertEquals(targetDto.getRules(), dto.getRules());
     }
 
     @Test
@@ -71,9 +73,8 @@ public class AttrPermissionConverterTest {
 
         AttributesPermissionEntity entity = converter.dtoToEntity(targetDto);
 
-        Assert.assertEquals(entity.getExtId(), targetEntity.getExtId());
-        Assert.assertEquals(entity.getType(), targetEntity.getType());
-        Assert.assertEquals(entity.getRules(), targetEntity.getRules());
+        Assert.assertEquals(targetEntity.getExtId(), entity.getExtId());
+        Assert.assertEquals(targetEntity.getType(), entity.getType());
+        Assert.assertEquals(targetEntity.getRules(), entity.getRules());
     }
-
 }

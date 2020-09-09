@@ -4,9 +4,6 @@ import ecos.com.fasterxml.jackson210.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.citeck.ecos.commons.data.ObjectData;
-
-import java.util.Collection;
 
 @Data
 @NoArgsConstructor

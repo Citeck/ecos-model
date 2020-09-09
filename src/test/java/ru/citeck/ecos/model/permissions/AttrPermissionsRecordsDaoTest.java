@@ -70,7 +70,7 @@ public class AttrPermissionsRecordsDaoTest {
 
         RuleDto rule = new RuleDto();
         rule.setAttributes(Collections.singletonList(
-                new AttributeDto("cm:name", new PermissionsDto(true, true))));
+                new AttributeDto("t:testProp", new PermissionsDto(true, true))));
 
         metaDto = new AttributesPermissionWithMetaDto();
         metaDto.setId("test_attrs_permission");
@@ -92,11 +92,13 @@ public class AttrPermissionsRecordsDaoTest {
         List<MetaValue> resultRecords = recordsDao.getLocalRecordsMeta(recordRefs, Mockito.any());
 
         Assert.assertEquals(resultRecords.size(), 1);
+
         MetaValue resultRecord = resultRecords.get(0);
-        Assert.assertEquals(resultRecord.getId(), metaDto.getId());
-        Assert.assertEquals(resultRecord.getAttribute("extId", metaField), metaDto.getId());
-        Assert.assertEquals(resultRecord.getAttribute("typeRef", metaField), metaDto.getTypeRef());
-        Assert.assertEquals(resultRecord.getAttribute("rules", metaField), metaDto.getRules());
+
+        Assert.assertEquals(metaDto.getId(), resultRecord.getId());
+        Assert.assertEquals(metaDto.getId(), resultRecord.getAttribute("extId", metaField));
+        Assert.assertEquals(metaDto.getRules(), resultRecord.getAttribute("rules", metaField));
+        Assert.assertEquals(metaDto.getTypeRef(), resultRecord.getAttribute("typeRef", metaField));
     }
 
     @Test
@@ -108,7 +110,9 @@ public class AttrPermissionsRecordsDaoTest {
         Mockito.verify(service, Mockito.times(0)).getById(Mockito.anyString());
 
         Assert.assertEquals(resultRecords.size(), 1);
+
         MetaValue resultRecord = resultRecords.get(0);
+
         Assert.assertNull(resultRecord.getId());
         Assert.assertNull(resultRecord.getAttribute("extId", metaField));
         Assert.assertNull(resultRecord.getAttribute("typeRef", metaField));
@@ -129,28 +133,31 @@ public class AttrPermissionsRecordsDaoTest {
 
         Assert.assertEquals(resultRecordsQueryResult.getTotalCount(), 1);
         AttributesPermissionRecordsDao.AttributesPermissionRecord resultRecord = resultRecordsQueryResult.getRecords().get(0);
-        Assert.assertEquals(resultRecord.getAttribute("extId", metaField), metaDto.getId());
-        Assert.assertEquals(resultRecord.getAttribute("typeRef", metaField), metaDto.getTypeRef());
-        Assert.assertEquals(resultRecord.getAttribute("rules", metaField), metaDto.getRules());
+
+        Assert.assertEquals(metaDto.getId(), resultRecord.getAttribute("extId", metaField));
+        Assert.assertEquals(metaDto.getRules(), resultRecord.getAttribute("rules", metaField));
+        Assert.assertEquals(metaDto.getTypeRef(), resultRecord.getAttribute("typeRef", metaField));
     }
 
     @Test
     void testQueryLocalRecordsLanguageIsNotPredicate() {
 
         recordsQuery.setLanguage("");
+
         when(service.getAll(Mockito.anyInt(), Mockito.anyInt())).thenReturn(Collections.singletonList(metaDto));
 
         RecordsQueryResult<AttributesPermissionRecordsDao.AttributesPermissionRecord> resultRecordsQueryResult = recordsDao
                 .queryLocalRecords(recordsQuery, metaField);
 
-        //  assert
         Mockito.verify(predicateService, Mockito.times(0)).filter(Mockito.any(), Mockito.any());
         Mockito.verify(service, Mockito.times(0)).getAll(Mockito.anySet());
+
         Assert.assertEquals(resultRecordsQueryResult.getTotalCount(), 1);
+
         AttributesPermissionRecordsDao.AttributesPermissionRecord resultRecord = resultRecordsQueryResult.getRecords().get(0);
 
-        Assert.assertEquals(resultRecord.getAttribute("extId", metaField), metaDto.getId());
-        Assert.assertEquals(resultRecord.getAttribute("rules", metaField), metaDto.getRules());
-        Assert.assertEquals(resultRecord.getAttribute("typeRef", metaField), metaDto.getTypeRef());
+        Assert.assertEquals(metaDto.getId(), resultRecord.getAttribute("extId", metaField));
+        Assert.assertEquals(metaDto.getRules(), resultRecord.getAttribute("rules", metaField));
+        Assert.assertEquals(metaDto.getTypeRef(), resultRecord.getAttribute("typeRef", metaField));
     }
 }

@@ -9,15 +9,13 @@ rules:
         permissions: { Read: true, Edit: true }
 
   - roles: [ role1 ]
-    condition:
-      - predicate: { t: gt, att: 'ts:conditionAttr', val: 1000000 }
+    condition: { t: gt, att: 't:conditionAttr', val: 1000000 }
     attributes:
       - name: 'ts:testAttr'
         permissions: { Read: true, Edit: false }
 
   - roles: [ role1, role2 ]
-    condition:
-      - predicate: { t: gt, att: 'ts:conditionAttr', val: 1000000 }
+    condition: { t: gt, att: 't:conditionAttr', val: 1000000 }
     attributes:
-      - name: 'ts:testAttr'
+      - name: 't:testAttr'
         permissions: { Read: true, Edit: true }

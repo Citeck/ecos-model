@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import ru.citeck.ecos.commons.data.MLText;
+import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.EcosModelApp;
 import ru.citeck.ecos.model.domain.permissions.dto.AttributeDto;
@@ -165,13 +166,15 @@ public class AttrPermissionsSyncRecordsDaoTest {
             dto.setTypeRef(RecordRef.valueOf("emodel/type@atype-id-" + i));
 
             RuleDto rule = new RuleDto();
+            rule.setCondition(ObjectData.create("{\"att\":\"t:conditionAttr\",\"val\":\"1000000\",\"t\":\"gt\"}"));
             rule.setAttributes(Collections.singletonList(
-                    new AttributeDto("cm:name", new PermissionsDto(true, true))));
+                    new AttributeDto("t:test", new PermissionsDto(true, true))));
 
             dto.setRules(Collections.singletonList(rule));
 
-            permissions.add(dto);
             service.save(dto);
+
+            permissions.add(dto);
         }
     }
 }

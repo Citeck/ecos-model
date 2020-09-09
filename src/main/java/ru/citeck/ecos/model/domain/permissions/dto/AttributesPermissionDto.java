@@ -1,11 +1,9 @@
 package ru.citeck.ecos.model.domain.permissions.dto;
 
 import ecos.com.fasterxml.jackson210.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.citeck.ecos.commons.data.DataValue;
-import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.records2.RecordRef;
 
 import javax.validation.constraints.NotNull;
@@ -14,7 +12,6 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class AttributesPermissionDto {
 
