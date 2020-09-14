@@ -70,7 +70,7 @@ public class AttrPermissionsRecordsDaoTest {
 
         RuleDto rule = new RuleDto();
         rule.setAttributes(Collections.singletonList(
-                new AttributeDto("t:testProp", new PermissionsDto(true, true))));
+                new AttributeDto("t:testProp", new PermissionsDto(false, false))));
 
         metaDto = new AttributesPermissionWithMetaDto();
         metaDto.setId("test_attrs_permission");

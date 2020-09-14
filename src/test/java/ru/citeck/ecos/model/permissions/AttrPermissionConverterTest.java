@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 public class AttrPermissionConverterTest {
 
-    private final String rules = "[{\"condition\":{\"att\":\"t:conditionAttr\",\"val\":\"1000000\",\"t\":\"gt\"},\"attributes\":[{\"name\":\"ANY\",\"permissions\":{\"Read\":true,\"Edit\":true}}]}]";
+    private final String rules = "[{\"condition\":{\"att\":\"t:conditionAttr\",\"val\":\"1000000\",\"t\":\"gt\"},\"attributes\":[{\"name\":\"ANY\",\"permissions\":{\"read\":false,\"edit\":false}}]}]";
 
     @MockBean
     private TypeRepository typeRepository;
