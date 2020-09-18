@@ -11,10 +11,7 @@ import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.EcosModelApp;
-import ru.citeck.ecos.model.domain.permissions.dto.AttributeDto;
-import ru.citeck.ecos.model.domain.permissions.dto.AttributesPermissionDto;
-import ru.citeck.ecos.model.domain.permissions.dto.PermissionsDto;
-import ru.citeck.ecos.model.domain.permissions.dto.RuleDto;
+import ru.citeck.ecos.model.domain.permissions.dto.*;
 import ru.citeck.ecos.model.domain.permissions.repo.AttributesPermissionsRepository;
 import ru.citeck.ecos.model.domain.permissions.service.AttributesPermissionsService;
 import ru.citeck.ecos.model.type.dto.TypeDto;
@@ -111,8 +108,8 @@ public class AttrPermissionsSyncRecordsDaoTest {
         assertEquals(TOTAL_TYPES , result.getTotalCount());
         assertEquals(TOTAL_TYPES, remoteSyncRecordsDao.getRecords().size());
 
-        AttributesPermissionDto dto = localRecordsService.getMeta(RecordRef.valueOf(SOURCE_ID + "@att-perm-id-1"), AttributesPermissionDto.class);
         AttributesPermissionDto origDto = permissions.stream().filter(v -> v.getId().equals("att-perm-id-1")).findFirst().orElse(null);
+        AttributesPermissionDto dto = localRecordsService.getMeta(RecordRef.valueOf(SOURCE_ID + "@att-perm-id-1"), AttributesPermissionDto.class);
 
         assertEquals(origDto, dto);
 
@@ -131,6 +128,8 @@ public class AttrPermissionsSyncRecordsDaoTest {
         RecordsQueryResult<AttributesPermissionDto> resultWithMeta = localRecordsService.queryRecords(query1, AttributesPermissionDto.class);
         assertEquals(0, resultWithMeta.getErrors().size());
         assertEquals(1, resultWithMeta.getRecords().size());
+
+        System.out.println(resultWithMeta.getRecords());
 
         Set<AttributesPermissionDto> expectedSet = new TreeSet<>(Comparator.comparing(AttributesPermissionDto::getId));
         expectedSet.addAll(permissions);
@@ -168,7 +167,7 @@ public class AttrPermissionsSyncRecordsDaoTest {
             RuleDto rule = new RuleDto();
             rule.setCondition(ObjectData.create("{\"att\":\"t:conditionAttr\",\"val\":\"1000000\",\"t\":\"gt\"}"));
             rule.setAttributes(Collections.singletonList(
-                    new AttributeDto("t:test", new PermissionsDto(true, true))));
+                    new AttributeDto("t:test", new PermissionsDto(false, false))));
 
             dto.setRules(Collections.singletonList(rule));
 
@@ -176,5 +175,11 @@ public class AttrPermissionsSyncRecordsDaoTest {
 
             permissions.add(dto);
         }
+
+        TypeDto typeNotFound = new TypeDto();
+        typeNotFound.setId("not-f");
+        typeNotFound.setName(new MLText("not-f"));
+        typeNotFound.setParent(RecordRef.valueOf("emodel/type@atype-id-0"));
+        typeService.save(typeNotFound);
     }
 }
