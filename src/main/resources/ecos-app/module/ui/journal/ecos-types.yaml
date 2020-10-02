@@ -11,6 +11,7 @@ attributes:
   journalsListId: global-system
 
 actions:
+  - uiserv/action@edit-doc-permissions
   - uiserv/action@ecos-module-download
   - uiserv/action@delete
   - uiserv/action@edit
