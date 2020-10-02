@@ -1,0 +1,8 @@
+{
+    "id": "edit-doc-permissions",
+    "name": {
+        "ru": "Редактировать права на документ",
+        "en": "Edit document permissions"
+    },
+    "type": "edit-doc-permissions"
+}

@@ -3,6 +3,7 @@ package ru.citeck.ecos.model.type.records.dao;
 import ecos.com.fasterxml.jackson210.annotation.JsonIgnore;
 import ecos.com.fasterxml.jackson210.annotation.JsonProperty;
 import ecos.com.fasterxml.jackson210.annotation.JsonValue;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -300,6 +301,18 @@ public class TypeRecordsDao extends LocalRecordsDao
                     return dto.getComputedAttributes();
                 case "numTemplateRef":
                     return dto.getNumTemplateRef();
+                case "docPermRef":
+                    //todo
+                    return RecordRef.create("emodel", "docperm", "perm-config-123");
+                case "roles":
+                    return Arrays.asList(
+                        new RoleInfo("initiator",
+                            Json.getMapper().convert("{\"ru\":\"Инициатор\",\"en\":\"Initiator\"}", MLText.class)),
+                        new RoleInfo("approver",
+                            Json.getMapper().convert("{\"ru\":\"Согласующий\",\"en\":\"Approver\"}", MLText.class)),
+                        new RoleInfo("technologist",
+                            Json.getMapper().convert("{\"ru\":\"Технолог\",\"en\":\"Technologist\"}", MLText.class))
+                    );
             }
             return null;
         }
@@ -440,5 +453,12 @@ public class TypeRecordsDao extends LocalRecordsDao
         public TypeDto toJson() {
             return new TypeDto(this);
         }
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class RoleInfo {
+        private String roleId;
+        private MLText name;
     }
 }

@@ -7,6 +7,9 @@ name:
 
 system: true
 
+actions:
+  - uiserv/action@edit-doc-permissions
+
 createVariants:
 
   - id: create-new-template
