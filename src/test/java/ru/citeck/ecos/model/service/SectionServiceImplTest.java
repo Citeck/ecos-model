@@ -8,6 +8,7 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.commons.data.MLText;
+import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.section.converter.SectionConverter;
 import ru.citeck.ecos.model.section.domain.SectionEntity;
 import ru.citeck.ecos.model.type.domain.TypeEntity;
@@ -79,7 +80,7 @@ public class SectionServiceImplTest {
         //  assert
         Assert.assertEquals(resultSectionDtos.size(), 1);
         SectionDto resultSectionDto = resultSectionDtos.iterator().next();
-        Assert.assertEquals(resultSectionDto.getName(), sectionEntity.getName());
+        Assert.assertEquals(resultSectionDto.getName(), Json.getMapper().read(sectionEntity.getName(), MLText.class));
         Assert.assertEquals(resultSectionDto.getTenant(), sectionEntity.getTenant());
         Assert.assertEquals(resultSectionDto.getDescription(), sectionEntity.getDescription());
         Assert.assertEquals(resultSectionDto.getId(), sectionEntity.getExtId());
@@ -103,7 +104,7 @@ public class SectionServiceImplTest {
         //  assert
         Assert.assertEquals(resultSectionDtos.size(), 1);
         SectionDto resultSectionDto = resultSectionDtos.iterator().next();
-        Assert.assertEquals(resultSectionDto.getName(), sectionEntity.getName());
+        Assert.assertEquals(resultSectionDto.getName(), Json.getMapper().read(sectionEntity.getName(), MLText.class));
         Assert.assertEquals(resultSectionDto.getTenant(), sectionEntity.getTenant());
         Assert.assertEquals(resultSectionDto.getDescription(), sectionEntity.getDescription());
         Assert.assertEquals(resultSectionDto.getId(), sectionEntity.getExtId());
@@ -124,7 +125,7 @@ public class SectionServiceImplTest {
         SectionDto resultSectionDto = sectionService.getByExtId(sectionExtId);
 
         //  assert
-        Assert.assertEquals(resultSectionDto.getName(), sectionEntity.getName());
+        Assert.assertEquals(resultSectionDto.getName(), Json.getMapper().read(sectionEntity.getName(), MLText.class));
         Assert.assertEquals(resultSectionDto.getTenant(), sectionEntity.getTenant());
         Assert.assertEquals(resultSectionDto.getDescription(), sectionEntity.getDescription());
         Assert.assertEquals(resultSectionDto.getId(), sectionEntity.getExtId());

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.commons.data.MLText;
+import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.section.converter.SectionConverter;
 import ru.citeck.ecos.model.section.domain.SectionEntity;
 import ru.citeck.ecos.model.section.dto.SectionDto;
@@ -74,7 +75,7 @@ public class SectionConverterTest {
         //  assert
         Assert.assertEquals(resultSectionEntity.getId().longValue(), 123L);
         Assert.assertEquals(resultSectionEntity.getExtId(), sectionDto.getId());
-        Assert.assertEquals(resultSectionEntity.getName(), sectionDto.getName());
+        Assert.assertEquals(Json.getMapper().read(resultSectionEntity.getName(), MLText.class), sectionDto.getName());
         Assert.assertEquals(resultSectionEntity.getTenant(), sectionDto.getTenant());
         Assert.assertEquals(resultSectionEntity.getDescription(), sectionDto.getDescription());
         Assert.assertEquals(resultSectionEntity.getTypes(), Collections.singleton(typeEntity));
@@ -91,7 +92,7 @@ public class SectionConverterTest {
         SectionEntity resultSectionEntity = sectionConverter.dtoToEntity(sectionDto);
 
         //  assert
-        Assert.assertEquals(resultSectionEntity.getName(), sectionDto.getName());
+        Assert.assertEquals(Json.getMapper().read(resultSectionEntity.getName(), MLText.class), sectionDto.getName());
         Assert.assertEquals(resultSectionEntity.getTenant(), sectionDto.getTenant());
         Assert.assertEquals(resultSectionEntity.getDescription(), sectionDto.getDescription());
 

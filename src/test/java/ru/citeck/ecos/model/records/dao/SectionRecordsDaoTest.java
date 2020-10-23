@@ -9,6 +9,7 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.commons.data.MLText;
+import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.section.records.dao.SectionRecordsDao;
 import ru.citeck.ecos.model.section.records.record.SectionRecord;
 import ru.citeck.ecos.model.section.dto.SectionDto;
@@ -136,7 +137,7 @@ public class SectionRecordsDaoTest {
         //  assert
         Assert.assertEquals(resultRecordsQueryResult.getTotalCount(), 1);
         SectionRecord resultSectionRecord = resultRecordsQueryResult.getRecords().get(0);
-        Assert.assertEquals(resultSectionRecord.getAttribute("name", metaField), "name");
+        Assert.assertEquals(resultSectionRecord.getAttribute("name", metaField), new MLText("name"));
         Assert.assertEquals(resultSectionRecord.getAttribute("description", metaField), "desc");
         Assert.assertEquals(resultSectionRecord.getAttribute("tenant", metaField), "tenant");
         Assert.assertEquals(resultSectionRecord.getAttribute("types", metaField), types);
@@ -158,7 +159,7 @@ public class SectionRecordsDaoTest {
         Mockito.verify(sectionService, Mockito.times(0)).getAll(Mockito.anySet());
         Assert.assertEquals(resultRecordsQueryResult.getTotalCount(), 1);
         SectionRecord resultSectionRecord = resultRecordsQueryResult.getRecords().get(0);
-        Assert.assertEquals(resultSectionRecord.getAttribute("name", metaField), "name");
+        Assert.assertEquals(resultSectionRecord.getAttribute("name", metaField), new MLText("name"));
         Assert.assertEquals(resultSectionRecord.getAttribute("description", metaField), "desc");
         Assert.assertEquals(resultSectionRecord.getAttribute("tenant", metaField), "tenant");
         Assert.assertEquals(resultSectionRecord.getAttribute("types", metaField), types);
