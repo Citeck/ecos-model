@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.model.section.converter.SectionConverter;
 import ru.citeck.ecos.model.section.domain.SectionEntity;
 import ru.citeck.ecos.model.type.domain.TypeEntity;
@@ -46,7 +47,7 @@ public class SectionServiceImplTest {
 
         sectionDto = new SectionDto();
         sectionDto.setId(sectionExtId);
-        sectionDto.setName("name");
+        sectionDto.setName(new MLText("name"));
         sectionDto.setDescription("desc");
         sectionDto.setTenant("tenant");
         sectionDto.setTypes(typesRefs);

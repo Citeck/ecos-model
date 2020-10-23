@@ -2,7 +2,9 @@ package ru.citeck.ecos.model.section.dto;
 
 import ecos.com.fasterxml.jackson210.annotation.JsonIgnore;
 import lombok.*;
+import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
+import ru.citeck.ecos.records2.QueryContext;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.graphql.meta.annotation.MetaAtt;
 
@@ -15,7 +17,7 @@ import java.util.Set;
 public class SectionDto {
 
     private String id;
-    private String name;
+    private MLText name;
     private String description;
     private String tenant;
     private Set<RecordRef> types;
@@ -36,6 +38,6 @@ public class SectionDto {
     @MetaAtt(".disp")
     @JsonIgnore
     public String getDisplayName() {
-        return name;
+        return MLText.getClosestValue(name, QueryContext.getCurrent().getLocale());
     }
 }

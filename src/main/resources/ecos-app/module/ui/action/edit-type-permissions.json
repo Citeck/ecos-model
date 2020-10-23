@@ -1,0 +1,8 @@
+{
+    "id": "edit-type-permissions",
+    "name": {
+        "ru": "Редактировать права",
+        "en": "Edit permissions"
+    },
+    "type": "edit-type-permissions"
+}

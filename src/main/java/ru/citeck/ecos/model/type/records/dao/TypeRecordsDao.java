@@ -3,18 +3,19 @@ package ru.citeck.ecos.model.type.records.dao;
 import ecos.com.fasterxml.jackson210.annotation.JsonIgnore;
 import ecos.com.fasterxml.jackson210.annotation.JsonProperty;
 import ecos.com.fasterxml.jackson210.annotation.JsonValue;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.commons.data.DataValue;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
+import ru.citeck.ecos.model.lib.role.dto.RoleDef;
+import ru.citeck.ecos.model.lib.role.dto.RoleType;
+import ru.citeck.ecos.model.lib.status.dto.StatusDef;
 import ru.citeck.ecos.model.section.records.record.SectionRecord;
 import ru.citeck.ecos.model.type.dto.TypeDto;
 import ru.citeck.ecos.model.type.dto.TypeWithMetaDto;
@@ -22,7 +23,6 @@ import ru.citeck.ecos.model.type.service.TypeService;
 import ru.citeck.ecos.records2.RecordConstants;
 import ru.citeck.ecos.records2.RecordMeta;
 import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records2.RecordsService;
 import ru.citeck.ecos.records2.graphql.meta.annotation.MetaAtt;
 import ru.citeck.ecos.records2.graphql.meta.value.EmptyValue;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
@@ -56,14 +56,11 @@ public class TypeRecordsDao extends LocalRecordsDao
     private final TypeRecord EMPTY_RECORD = new TypeRecord(new TypeWithMetaDto());
 
     private final TypeService typeService;
-    private final RecordsService recordsService;
 
     @Autowired
-    public TypeRecordsDao(TypeService typeService,
-                          @Lazy RecordsService recordsService) {
+    public TypeRecordsDao(TypeService typeService) {
         setId(ID);
         this.typeService = typeService;
-        this.recordsService = recordsService;
     }
 
     @Override
@@ -301,17 +298,26 @@ public class TypeRecordsDao extends LocalRecordsDao
                     return dto.getComputedAttributes();
                 case "numTemplateRef":
                     return dto.getNumTemplateRef();
-                case "docPermRef":
-                    //todo
-                    return RecordRef.create("emodel", "docperm", "perm-config-123");
                 case "roles":
                     return Arrays.asList(
-                        new RoleInfo("initiator",
-                            Json.getMapper().convert("{\"ru\":\"Инициатор\",\"en\":\"Initiator\"}", MLText.class)),
-                        new RoleInfo("approver",
-                            Json.getMapper().convert("{\"ru\":\"Согласующий\",\"en\":\"Approver\"}", MLText.class)),
-                        new RoleInfo("technologist",
-                            Json.getMapper().convert("{\"ru\":\"Технолог\",\"en\":\"Technologist\"}", MLText.class))
+                        new RoleDef("initiator",
+                            Json.getMapper().convert("{\"ru\":\"Инициатор\",\"en\":\"Initiator\"}", MLText.class),
+                            RoleType.AUTHORITY, "", Collections.emptyList()),
+                        new RoleDef("approver",
+                            Json.getMapper().convert("{\"ru\":\"Согласующий\",\"en\":\"Approver\"}", MLText.class),
+                            RoleType.AUTHORITY, "", Collections.emptyList()),
+                        new RoleDef("technologist",
+                            Json.getMapper().convert("{\"ru\":\"Технолог\",\"en\":\"Technologist\"}", MLText.class),
+                            RoleType.AUTHORITY, "", Collections.emptyList())
+                    );
+                case "statuses":
+                    return Arrays.asList(
+                        new StatusDef("draft",
+                            Json.getMapper().convert("{\"ru\":\"Черновик\",\"en\":\"Draft\"}", MLText.class), ""),
+                        new StatusDef("approve",
+                            Json.getMapper().convert("{\"ru\":\"Согласование\",\"en\":\"Approve\"}", MLText.class), ""),
+                        new StatusDef("scanning",
+                            Json.getMapper().convert("{\"ru\":\"Сканирование\",\"en\":\"Scanning\"}", MLText.class), "")
                     );
             }
             return null;
@@ -453,12 +459,5 @@ public class TypeRecordsDao extends LocalRecordsDao
         public TypeDto toJson() {
             return new TypeDto(this);
         }
-    }
-
-    @Data
-    @AllArgsConstructor
-    public static class RoleInfo {
-        private String roleId;
-        private MLText name;
     }
 }

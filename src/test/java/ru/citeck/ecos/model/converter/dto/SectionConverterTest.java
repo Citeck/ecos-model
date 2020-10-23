@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.model.section.converter.SectionConverter;
 import ru.citeck.ecos.model.section.domain.SectionEntity;
 import ru.citeck.ecos.model.section.dto.SectionDto;
@@ -46,7 +47,7 @@ public class SectionConverterTest {
 
         sectionDto = new SectionDto();
         sectionDto.setId("section");
-        sectionDto.setName("name");
+        sectionDto.setName(new MLText("name"));
         sectionDto.setTenant("tenant");
         sectionDto.setDescription("desc");
         sectionDto.setTypes(Collections.singleton(RecordRef.create("type", "type")));

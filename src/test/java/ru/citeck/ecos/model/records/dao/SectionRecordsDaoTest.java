@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.model.section.records.dao.SectionRecordsDao;
 import ru.citeck.ecos.model.section.records.record.SectionRecord;
 import ru.citeck.ecos.model.section.dto.SectionDto;
@@ -72,7 +73,7 @@ public class SectionRecordsDaoTest {
 
         sectionDto = new SectionDto();
         sectionDto.setId("section");
-        sectionDto.setName("name");
+        sectionDto.setName(new MLText("name"));
         sectionDto.setTenant("tenant");
         sectionDto.setDescription("desc");
         sectionDto.setTypes(types);

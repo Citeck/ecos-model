@@ -55,7 +55,7 @@ public class TypeRecordsDaoTest {
     @BeforeEach
     void setUp() {
 
-        typeRecordsDao = new TypeRecordsDao(typeService, recordsService);
+        typeRecordsDao = new TypeRecordsDao(typeService);
         typeRecordsDao.setRecordsServiceFactory(new RecordsServiceFactory());
 
         recordRefs = Collections.singletonList(
@@ -81,7 +81,6 @@ public class TypeRecordsDaoTest {
         metaField = new MetaFieldImpl(new Field(""));
 
         predicate = new ValuePredicate();
-
     }
 
     @Test

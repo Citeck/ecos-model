@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
+import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.converter.AbstractDtoConverter;
@@ -34,7 +35,7 @@ public class SectionConverter extends AbstractDtoConverter<SectionDto, SectionEn
     public SectionEntity dtoToEntity(SectionDto dto) {
 
         SectionEntity sectionEntity = new SectionEntity();
-        sectionEntity.setName(dto.getName());
+        sectionEntity.setName(Json.getMapper().toString(dto.getName()));
         sectionEntity.setExtId(dto.getId());
         sectionEntity.setDescription(dto.getDescription());
         sectionEntity.setTenant(dto.getTenant());
@@ -94,7 +95,7 @@ public class SectionConverter extends AbstractDtoConverter<SectionDto, SectionEn
 
         return new SectionDto(
             entity.getExtId(),
-            entity.getName(),
+            Json.getMapper().read(entity.getName(), MLText.class),
             entity.getDescription(),
             entity.getTenant(),
             typesRefs,

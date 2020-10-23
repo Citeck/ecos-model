@@ -1,6 +1,8 @@
 package ru.citeck.ecos.model.section.records.record;
 
+import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.model.section.dto.SectionDto;
+import ru.citeck.ecos.records2.QueryContext;
 import ru.citeck.ecos.records2.RecordConstants;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaValue;
@@ -25,11 +27,7 @@ public class SectionRecord implements MetaValue {
 
     @Override
     public String getDisplayName() {
-        String dispName = dto.getName();
-        if (dispName == null) {
-            dispName = dto.getId();
-        }
-        return dispName;
+        return MLText.getClosestValue(dto.getName(), QueryContext.getCurrent().getLocale(), dto.getId());
     }
 
     @Override
