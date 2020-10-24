@@ -11,31 +11,34 @@ import ru.citeck.ecos.commons.json.JsonMapper;
 import ru.citeck.ecos.model.domain.perms.repo.TypePermsEntity;
 import ru.citeck.ecos.model.domain.perms.repo.TypePermsRepository;
 import ru.citeck.ecos.model.lib.permissions.dto.PermissionsDef;
-import ru.citeck.ecos.model.lib.permissions.dto.RecordPermsDef;
+import ru.citeck.ecos.model.lib.permissions.dto.TypePermsDef;
 import ru.citeck.ecos.records2.RecordRef;
 
 import java.util.UUID;
+import java.util.function.Consumer;
 
 @Service
 @RequiredArgsConstructor
-public class RecordPermsService {
+public class TypePermsService {
 
     private final TypePermsRepository repository;
 
     private final JsonMapper mapper = Json.getMapper();
 
+    private Consumer<TypePermsDef> listener;
+
     @Nullable
-    public RecordPermsDef getPermsForType(RecordRef typeRef) {
+    public TypePermsDef getPermsForType(RecordRef typeRef) {
         return toDto(repository.findByTypeRef(typeRef.toString()));
     }
 
     @Nullable
-    public RecordPermsDef getPermsById(String id) {
+    public TypePermsDef getPermsById(String id) {
         return toDto(repository.findByExtId(id));
     }
 
     @NotNull
-    public RecordPermsDef save(RecordPermsDef permissions) {
+    public TypePermsDef save(TypePermsDef permissions) {
 
         if (RecordRef.isEmpty(permissions.getTypeRef())) {
             throw new IllegalStateException("TypeRef is a mandatory parameter!");
@@ -44,15 +47,24 @@ public class RecordPermsService {
         TypePermsEntity entity = toEntity(permissions);
         entity = repository.save(entity);
 
-        RecordPermsDef def = toDto(entity);
-        if (def == null) {
+        TypePermsDef resultPermissions = toDto(entity);
+        if (resultPermissions == null) {
             throw new IllegalStateException("Record permissions conversion error. Permissions: " + entity);
         }
-        return def;
+
+        if (listener != null) {
+            listener.accept(resultPermissions);
+        }
+
+        return resultPermissions;
+    }
+
+    public void setListener(Consumer<TypePermsDef> listener) {
+        this.listener = listener;
     }
 
     @Nullable
-    private RecordPermsDef toDto(@Nullable TypePermsEntity entity) {
+    private TypePermsDef toDto(@Nullable TypePermsEntity entity) {
 
         if (entity == null) {
             return null;
@@ -63,7 +75,7 @@ public class RecordPermsService {
             permissionsDef = PermissionsDef.EMPTY;
         }
 
-        return RecordPermsDef.create()
+        return TypePermsDef.create()
             .withId(entity.getExtId())
             .withTypeRef(RecordRef.valueOf(entity.getTypeRef()))
             .withAttributes(DataValue.create(entity.getAttributes()).asMap(String.class, PermissionsDef.class))
@@ -71,7 +83,7 @@ public class RecordPermsService {
             .build();
     }
 
-    private TypePermsEntity toEntity(RecordPermsDef dto) {
+    private TypePermsEntity toEntity(TypePermsDef dto) {
 
         TypePermsEntity entity = null;
         if (StringUtils.isNotBlank(dto.getId())) {
