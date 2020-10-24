@@ -750,12 +750,12 @@
                 "label": "Download Permissions",
                 "action": "custom",
                 "state": "",
+                "showValidations": false,
+                "custom": "var mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = 'emodel/type@' + data.moduleId;\nvar roles = (data.roles || []).map(mapToSingleLang);\nvar statuses = (data.statuses || []).map(mapToSingleLang);\nvar attributes = (data.attributeDefs || []).map(mapToSingleLang);\n\nCiteck.TypePermissionsService.downloadPermissionsConfig(typeRef, roles, statuses, attributes);",
                 "block": true,
                 "key": "submit7",
                 "type": "button",
-                "input": true,
-                "showValidations": false,
-                "custom": "var typeRef = 'emodel/type@' + data.moduleId;\n\nCiteck.TypePermissionsService.downloadPermissionsConfig(typeRef);"
+                "input": true
               }
             ],
             "key": "column",
