@@ -6,9 +6,9 @@
     <changeSet author="citeck" id="20201023000000">
 
         <addColumn tableName="ecos_type">
-            <column name="attribute_defs" type="TEXT" />
-            <column name="roles" type="TEXT" />
-            <column name="statuses" type="TEXT" />
+            <column name="attribute_defs" type="VARCHAR" />
+            <column name="roles" type="VARCHAR" />
+            <column name="statuses" type="VARCHAR" />
         </addColumn>
 
     </changeSet>
