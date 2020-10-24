@@ -64,10 +64,10 @@ public class RecordPermsService {
         }
 
         return RecordPermsDef.create()
-            .setId(entity.getExtId())
-            .setTypeRef(RecordRef.valueOf(entity.getTypeRef()))
-            .setAttributes(DataValue.create(entity.getAttributes()).asMap(String.class, PermissionsDef.class))
-            .setPermissions(permissionsDef)
+            .withId(entity.getExtId())
+            .withTypeRef(RecordRef.valueOf(entity.getTypeRef()))
+            .withAttributes(DataValue.create(entity.getAttributes()).asMap(String.class, PermissionsDef.class))
+            .withPermissions(permissionsDef)
             .build();
     }
 

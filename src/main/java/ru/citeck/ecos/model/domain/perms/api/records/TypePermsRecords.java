@@ -48,8 +48,8 @@ public class TypePermsRecords extends LocalRecordsDao
             RecordPermsDef permsDef = permsService.getPermsForType(typeQuery.typeRef);
             if (permsDef == null) {
                 permsDef = RecordPermsDef.create()
-                    .setId(UUID.randomUUID().toString())
-                    .setTypeRef(typeQuery.typeRef)
+                    .withId(UUID.randomUUID().toString())
+                    .withTypeRef(typeQuery.typeRef)
                     .build();
             }
 
@@ -73,7 +73,7 @@ public class TypePermsRecords extends LocalRecordsDao
     public List<RecordPermsDef.Builder> getValuesToMutate(@NotNull List<RecordRef> list) {
         return list.stream().map(l -> {
             RecordPermsDef permsDef = permsService.getPermsById(l.getId());
-            return permsDef != null ? permsDef.copy() : RecordPermsDef.create().setId(l.getId());
+            return permsDef != null ? permsDef.copy() : RecordPermsDef.create().withId(l.getId());
         }).collect(Collectors.toList());
     }
 

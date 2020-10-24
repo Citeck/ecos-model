@@ -4,16 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.apache.commons.collections.CollectionUtils;
 import ru.citeck.ecos.model.association.domain.AssociationEntity;
 import ru.citeck.ecos.model.domain.AbstractAuditingEntity;
 import ru.citeck.ecos.model.section.domain.SectionEntity;
 import ru.citeck.ecos.model.utils.EntityCollectionUtils;
 
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Data
@@ -104,6 +101,12 @@ public class TypeEntity extends AbstractAuditingEntity {
 
     @Column(name = "actions_str")
     private String actions;
+
+    private String attributeDefs;
+
+    private String roles;
+
+    private String statuses;
 
     public void setAssociations(Set<AssociationEntity> associations) {
         associations = associations.stream().filter(Objects::nonNull).collect(Collectors.toSet());

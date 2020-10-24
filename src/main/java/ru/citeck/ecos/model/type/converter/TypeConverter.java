@@ -7,10 +7,14 @@ import org.springframework.stereotype.Component;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
+import ru.citeck.ecos.commons.json.JsonMapper;
 import ru.citeck.ecos.model.association.converter.AssociationConverter;
 import ru.citeck.ecos.model.association.domain.AssociationEntity;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.converter.AbstractDtoConverter;
+import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef;
+import ru.citeck.ecos.model.lib.role.dto.RoleDef;
+import ru.citeck.ecos.model.lib.status.dto.StatusDef;
 import ru.citeck.ecos.model.type.domain.TypeEntity;
 import ru.citeck.ecos.model.type.dto.CreateVariantDto;
 import ru.citeck.ecos.model.type.dto.TypeWithMetaDto;
@@ -20,6 +24,7 @@ import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.type.ComputedAttribute;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
@@ -30,6 +35,8 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
 
     private final TypeRepository typeRepository;
     private final AssociationConverter associationConverter;
+
+    private final JsonMapper mapper = Json.getMapper();
 
     public TypeConverter(TypeRepository typeRepository,
                          AssociationConverter associationConverter) {
@@ -54,12 +61,16 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
         } else {
             typeEntity.setExtId(typeDtoId);
         }
-        typeEntity.setName(Json.getMapper().toString(dto.getName()));
-        typeEntity.setDescription(Json.getMapper().toString(dto.getDescription()));
-        typeEntity.setDispNameTemplate(Json.getMapper().toString(dto.getDispNameTemplate()));
+        typeEntity.setName(mapper.toString(dto.getName()));
+        typeEntity.setDescription(mapper.toString(dto.getDescription()));
+        typeEntity.setDispNameTemplate(mapper.toString(dto.getDispNameTemplate()));
         typeEntity.setInheritNumTemplate(dto.isInheritNumTemplate());
-        typeEntity.setComputedAttributes(Json.getMapper().toString(dto.getComputedAttributes()));
+        typeEntity.setComputedAttributes(mapper.toString(dto.getComputedAttributes()));
         typeEntity.setNumTemplateRef(RecordRef.toString(dto.getNumTemplateRef()));
+
+        typeEntity.setRoles(mapper.toString(filterNotBlank(dto.getRoles(), RoleDef::getId)));
+        typeEntity.setStatuses(mapper.toString(filterNotBlank(dto.getStatuses(), StatusDef::getId)));
+        typeEntity.setAttributeDefs(mapper.toString(filterNotBlank(dto.getAttributeDefs(), AttributeDef::getId)));
 
         typeEntity.setInheritActions(dto.isInheritActions());
 
@@ -94,8 +105,8 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
                 new IllegalStateException("Type is undefined: '" + parentExtId + "'")));
         }
 
-        typeEntity.setActions(Json.getMapper().toString(dto.getActions()));
-        typeEntity.setCreateVariants(Json.getMapper().toString(dto.getCreateVariants()));
+        typeEntity.setActions(mapper.toString(dto.getActions()));
+        typeEntity.setCreateVariants(mapper.toString(dto.getCreateVariants()));
 
         if (dto.getAliases() != null) {
             typeEntity.setAliases(new HashSet<>(dto.getAliases()));
@@ -114,6 +125,15 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
         typeEntity.setSourceId(dto.getSourceId());
 
         return typeEntity;
+    }
+
+    private <T> List<T> filterNotBlank(List<T> elements, Function<T, String> getter) {
+        if (elements == null) {
+            return Collections.emptyList();
+        }
+        return elements.stream()
+            .filter(it -> StringUtils.isNotBlank(getter.apply(it)))
+            .collect(Collectors.toList());
     }
 
     private void checkCyclicDependencies(TypeEntity entity) {
@@ -141,9 +161,9 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
         dto.setSystem(Boolean.TRUE.equals(entity.getSystem()));
         dto.setDashboardType(entity.getDashboardType());
         dto.setId(entity.getExtId());
-        dto.setName(Json.getMapper().read(entity.getName(), MLText.class));
-        dto.setDescription(Json.getMapper().read(entity.getDescription(), MLText.class));
-        dto.setDispNameTemplate(Json.getMapper().read(entity.getDispNameTemplate(), MLText.class));
+        dto.setName(mapper.read(entity.getName(), MLText.class));
+        dto.setDescription(mapper.read(entity.getDescription(), MLText.class));
+        dto.setDispNameTemplate(mapper.read(entity.getDispNameTemplate(), MLText.class));
         dto.setNumTemplateRef(RecordRef.valueOf(entity.getNumTemplateRef()));
         dto.setInheritNumTemplate(Boolean.TRUE.equals(entity.getInheritNumTemplate()));
         dto.setInheritForm(!Boolean.FALSE.equals(entity.getInheritForm()));
@@ -152,12 +172,16 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
         dto.setJournalRef(RecordRef.valueOf(entity.getJournal()));
         dto.setTenant(entity.getTenant());
         dto.setConfigFormRef(RecordRef.valueOf(entity.getConfigForm()));
-        dto.setConfig(Json.getMapper().read(entity.getConfig(), ObjectData.class));
+        dto.setConfig(mapper.read(entity.getConfig(), ObjectData.class));
         dto.setSourceId(entity.getSourceId());
-        dto.setComputedAttributes(Json.getMapper().readList(entity.getComputedAttributes(), ComputedAttribute.class));
+        dto.setComputedAttributes(mapper.readList(entity.getComputedAttributes(), ComputedAttribute.class));
+
+        dto.setRoles(mapper.readList(entity.getRoles(), RoleDef.class));
+        dto.setStatuses(mapper.readList(entity.getStatuses(), StatusDef.class));
+        dto.setAttributeDefs(mapper.readList(entity.getAttributeDefs(), AttributeDef.class));
 
         String attributesStr = entity.getAttributes();
-        dto.setAttributes(Json.getMapper().read(attributesStr, ObjectData.class));
+        dto.setAttributes(mapper.read(attributesStr, ObjectData.class));
 
         TypeEntity parent = entity.getParent();
         String parentExtId = null;
@@ -179,11 +203,11 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
             .collect(Collectors.toList());
         dto.setAssociations(associationDtoSet);
 
-        dto.setActions(Json.getMapper().read(entity.getActions(), RecordRefsList.class));
+        dto.setActions(mapper.read(entity.getActions(), RecordRefsList.class));
         if (dto.getActions() == null) {
             dto.setActions(Collections.emptyList());
         }
-        dto.setCreateVariants(Json.getMapper().read(entity.getCreateVariants(), CreateVariantsList.class));
+        dto.setCreateVariants(mapper.read(entity.getCreateVariants(), CreateVariantsList.class));
         if (dto.getCreateVariants() == null) {
             dto.setCreateVariants(Collections.emptyList());
         }

@@ -33,6 +33,7 @@
     <include file="config/liquibase/changelog/20200812000000_add_inh_form_to_type.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20200905000000_ecos_attributes_permissions_schema.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20201022000000_record_permissions_table.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20201023000000_ecos_type_add_roles_and_statuses.xml" relativeToChangelogFile="false"/>
 
     <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
     <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->

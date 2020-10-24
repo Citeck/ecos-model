@@ -9,12 +9,16 @@ import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
+import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef;
+import ru.citeck.ecos.model.lib.role.dto.RoleDef;
+import ru.citeck.ecos.model.lib.status.dto.StatusDef;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.graphql.meta.annotation.MetaAtt;
 import ru.citeck.ecos.records2.type.ComputedAttribute;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Data
@@ -54,6 +58,10 @@ public class TypeDto {
     private RecordRef configFormRef;
     private ObjectData config = ObjectData.create();
 
+    private List<AttributeDef> attributeDefs = Collections.emptyList();
+    private List<RoleDef> roles = Collections.emptyList();
+    private List<StatusDef> statuses = Collections.emptyList();
+
     public TypeDto(TypeDto dto) {
 
         this.id = dto.id;
@@ -79,6 +87,9 @@ public class TypeDto {
         this.attributes = ObjectData.deepCopy(dto.attributes);
         this.numTemplateRef = dto.getNumTemplateRef();
         this.inheritForm = dto.isInheritForm();
+        this.roles = DataValue.create(dto.getRoles()).toList(RoleDef.class);
+        this.statuses = DataValue.create(dto.getStatuses()).toList(StatusDef.class);
+        this.attributeDefs = DataValue.create(dto.getAttributeDefs()).toList(AttributeDef.class);
     }
 
     @MetaAtt("parentRef")

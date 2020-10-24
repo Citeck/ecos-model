@@ -152,13 +152,9 @@
                             "input": true
                           },
                           {
-                            "defaultValue": "",
-                            "type": "textarea",
-                            "key": "description",
                             "label": "Description",
-                            "properties": {
-                              "attribute": "description"
-                            },
+                            "key": "description",
+                            "type": "mlTextarea",
                             "input": true
                           },
                           {
@@ -230,10 +226,7 @@
                         "textField": "",
                         "container": {},
                         "attribute": "",
-                        "name": {
-                          "ru": "",
-                          "en": ""
-                        },
+                        "name": {},
                         "target": "",
                         "direction": "TARGET",
                         "id2": "",
@@ -334,7 +327,7 @@
                         "input": false
                       }
                     ],
-                    "tab": 2,
+                    "tab": 1,
                     "addAnother": "",
                     "addAnotherPosition": "bottom",
                     "removePlacement": "col",
@@ -361,10 +354,7 @@
                         "textField": "",
                         "container": {},
                         "attribute": "",
-                        "name": {
-                          "ru": "",
-                          "en": ""
-                        },
+                        "name": {},
                         "target": "",
                         "direction": "TARGET",
                         "mlText": {
@@ -462,6 +452,257 @@
                     "input": true
                   }
                 ]
+              },
+              {
+                "label": "Model",
+                "key": "model",
+                "components": [
+                  {
+                    "label": "Attributes",
+                    "disableAddingRemovingRows": false,
+                    "addAnother": "",
+                    "addAnotherPosition": "bottom",
+                    "removePlacement": "col",
+                    "defaultOpen": false,
+                    "layoutFixed": false,
+                    "enableRowGroups": false,
+                    "multiple": true,
+                    "reorder": true,
+                    "defaultValue": [
+                      {
+                        "id2": "",
+                        "id": "",
+                        "name2": {},
+                        "name": {},
+                        "submit3": false,
+                        "submit4": false,
+                        "type": "TEXT",
+                        "submit": false,
+                        "submit6": false,
+                        "submit7": false,
+                        "submit8": false,
+                        "container": {
+                          "submit7": false
+                        }
+                      }
+                    ],
+                    "validate": {
+                      "minLength": "",
+                      "maxLength": ""
+                    },
+                    "key": "attributeDefs",
+                    "type": "datagrid",
+                    "input": true,
+                    "components": [
+                      {
+                        "label": "Id",
+                        "defaultValue": "",
+                        "validate": {
+                          "pattern": "(^$|[a-zA-Z][\\w-.:]*)"
+                        },
+                        "key": "id",
+                        "type": "textfield",
+                        "input": true,
+                        "row": "0-0"
+                      },
+                      {
+                        "label": "Name",
+                        "key": "name",
+                        "type": "mlText",
+                        "input": true,
+                        "row": "0-1"
+                      },
+                      {
+                        "label": "Type",
+                        "dataSrc": "values",
+                        "data": {
+                          "values": [
+                            {
+                              "label": "Text",
+                              "value": "TEXT"
+                            },
+                            {
+                              "label": "Association",
+                              "value": "ASSOC"
+                            },
+                            {
+                              "label": "Number",
+                              "value": "NUMBER"
+                            },
+                            {
+                              "label": "Boolean",
+                              "value": "BOOLEAN"
+                            },
+                            {
+                              "label": "Computed",
+                              "value": "COMPUTED"
+                            }
+                          ]
+                        },
+                        "defaultValue": "TEXT",
+                        "key": "type",
+                        "type": "ecosSelect",
+                        "input": true,
+                        "row": "0-2"
+                      },
+                      {
+                        "label": "Permissions",
+                        "hideLabel": true,
+                        "action": "custom",
+                        "state": "",
+                        "showValidations": false,
+                        "custom": "\nvar mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = 'emodel/type@' + data.moduleId;\nvar customProps = {\n  roles: (data.roles || []).map(mapToSingleLang),\n  statuses: (data.statuses || []).map(mapToSingleLang),\n  attributeName: Citeck.helpers.getMLValue(row.name)\n};\n\nvar typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypeAttPermissions(\n  typeRef, \n  row.id, \n  customProps\n)",
+                        "leftIcon": "icon-decision-tables",
+                        "block": true,
+                        "dataGridLabel": false,
+                        "key": "submit3",
+                        "type": "button",
+                        "input": true,
+                        "row": "0-3"
+                      }
+                    ],
+                    "tab": 3
+                  }
+                ]
+              },
+              {
+                "label": "Roles",
+                "key": "roles",
+                "components": [
+                  {
+                    "label": "Roles",
+                    "hideLabel": true,
+                    "disableAddingRemovingRows": false,
+                    "addAnother": "",
+                    "addAnotherPosition": "bottom",
+                    "removePlacement": "col",
+                    "defaultOpen": false,
+                    "layoutFixed": false,
+                    "enableRowGroups": false,
+                    "multiple": true,
+                    "reorder": true,
+                    "defaultValue": [
+                      {
+                        "id2": "",
+                        "id": "",
+                        "name2": {},
+                        "name": {},
+                        "submit3": false,
+                        "submit4": false
+                      }
+                    ],
+                    "validate": {
+                      "minLength": "",
+                      "maxLength": ""
+                    },
+                    "key": "roles",
+                    "type": "datagrid",
+                    "input": true,
+                    "components": [
+                      {
+                        "label": "Id",
+                        "defaultValue": "",
+                        "validate": {
+                          "pattern": "(^$|[a-zA-Z][\\w-.:]*)"
+                        },
+                        "key": "id",
+                        "type": "textfield",
+                        "input": true,
+                        "row": "0-0"
+                      },
+                      {
+                        "label": "Name",
+                        "key": "name",
+                        "type": "mlText",
+                        "input": true,
+                        "row": "0-1"
+                      },
+                      {
+                        "label": "Settings",
+                        "action": "custom",
+                        "state": "",
+                        "key": "submit4",
+                        "type": "button",
+                        "input": true,
+                        "showValidations": false,
+                        "custom": "alarm(\"SETTINGS\")",
+                        "row": "0-2"
+                      }
+                    ],
+                    "tab": 4
+                  }
+                ]
+              },
+              {
+                "label": "Statuses",
+                "key": "statuses",
+                "components": [
+                  {
+                    "label": "Statuses",
+                    "hideLabel": true,
+                    "disableAddingRemovingRows": false,
+                    "addAnother": "",
+                    "addAnotherPosition": "bottom",
+                    "removePlacement": "col",
+                    "defaultOpen": false,
+                    "layoutFixed": false,
+                    "enableRowGroups": false,
+                    "multiple": true,
+                    "reorder": true,
+                    "defaultValue": [
+                      {
+                        "id2": "",
+                        "id": "",
+                        "name2": {},
+                        "name": {},
+                        "submit3": false,
+                        "submit4": false,
+                        "id3": "",
+                        "name3": {},
+                        "submit5": false
+                      }
+                    ],
+                    "validate": {
+                      "minLength": "",
+                      "maxLength": ""
+                    },
+                    "key": "statuses",
+                    "type": "datagrid",
+                    "input": true,
+                    "components": [
+                      {
+                        "label": "Id",
+                        "defaultValue": "",
+                        "validate": {
+                          "pattern": "(^$|[a-zA-Z][\\w-.:]*)"
+                        },
+                        "key": "id",
+                        "type": "textfield",
+                        "input": true,
+                        "row": "0-0"
+                      },
+                      {
+                        "label": "Name",
+                        "key": "name",
+                        "type": "mlText",
+                        "input": true,
+                        "row": "0-1"
+                      },
+                      {
+                        "label": "Settings",
+                        "action": "custom",
+                        "state": "",
+                        "key": "submit5",
+                        "type": "button",
+                        "input": true,
+                        "showValidations": false,
+                        "custom": "alarm(\"SETTINGS\")",
+                        "row": "0-2"
+                      }
+                    ],
+                    "tab": 5
+                  }
+                ]
               }
             ],
             "key": "tabs",
@@ -472,7 +713,6 @@
         "input": false
       },
       {
-        "type": "columns",
         "columns": [
           {
             "type": "column",
@@ -505,24 +745,39 @@
           {
             "type": "column",
             "index": 1,
-            "components": [],
+            "components": [
+              {
+                "label": "Download Permissions",
+                "action": "custom",
+                "state": "",
+                "block": true,
+                "key": "submit7",
+                "type": "button",
+                "input": true,
+                "showValidations": false,
+                "custom": "var typeRef = 'emodel/type@' + data.moduleId;\n\nCiteck.TypePermissionsService.downloadPermissionsConfig(typeRef);"
+              }
+            ],
             "key": "column",
             "conditional": {
               "show": null,
               "when": null
             },
-            "input": false
+            "input": false,
+            "md": 3
           },
           {
             "components": [
               {
-                "type": "button",
-                "disableOnInvalid": true,
+                "label": "Edit Permissions",
+                "action": "custom",
                 "block": true,
+                "key": "submit6",
+                "type": "button",
+                "input": true,
+                "showValidations": false,
                 "state": "",
-                "theme": "primary",
-                "key": "submit",
-                "input": true
+                "custom": "var mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = 'emodel/type@' + data.moduleId;\nvar customProps = {\n  roles: (data.roles || []).map(mapToSingleLang),\n  statuses: (data.statuses || []).map(mapToSingleLang)\n};\n\nvar typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypePermissions(\n  typeRef,\n  customProps\n);"
               }
             ],
             "type": "column",
@@ -534,9 +789,28 @@
               "when": null
             },
             "input": false
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 3,
+            "components": [
+              {
+                "type": "button",
+                "disableOnInvalid": true,
+                "block": true,
+                "state": "",
+                "theme": "primary",
+                "key": "submit",
+                "input": true
+              }
+            ]
           }
         ],
         "key": "columns2",
+        "type": "columns",
         "input": false
       }
     ],
