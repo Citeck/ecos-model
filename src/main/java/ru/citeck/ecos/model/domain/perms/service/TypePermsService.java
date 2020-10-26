@@ -59,6 +59,13 @@ public class TypePermsService {
         return resultPermissions;
     }
 
+    public void delete(String id) {
+        TypePermsEntity typePerms = repository.findByExtId(id);
+        if (typePerms != null) {
+            repository.delete(typePerms);
+        }
+    }
+
     public void setListener(Consumer<TypePermsDef> listener) {
         this.listener = listener;
     }

@@ -15,6 +15,7 @@ import ru.citeck.ecos.records2.request.delete.RecordsDeletion;
 import ru.citeck.ecos.records2.request.mutation.RecordsMutResult;
 import ru.citeck.ecos.records2.request.query.RecordsQuery;
 import ru.citeck.ecos.records2.request.query.RecordsQueryResult;
+import ru.citeck.ecos.records2.request.result.RecordsResult;
 import ru.citeck.ecos.records2.source.dao.local.LocalRecordsDao;
 import ru.citeck.ecos.records2.source.dao.local.MutableRecordsLocalDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsMetaDao;
@@ -23,7 +24,6 @@ import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsQueryWithMetaDao;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
@@ -43,17 +43,9 @@ public class TypePermsRecords extends LocalRecordsDao
     public RecordsQueryResult<Object> queryLocalRecords(@NotNull RecordsQuery query, MetaField field) {
 
         if (query.getLanguage().equals(LANG_TYPE)) {
-
             TypeQuery typeQuery = query.getQuery(TypeQuery.class);
             TypePermsDef permsDef = permsService.getPermsForType(typeQuery.typeRef);
-            if (permsDef == null) {
-                permsDef = TypePermsDef.create()
-                    .withId(UUID.randomUUID().toString())
-                    .withTypeRef(typeQuery.typeRef)
-                    .build();
-            }
-
-            return RecordsQueryResult.of(permsDef);
+            return permsDef != null ? RecordsQueryResult.of(permsDef) : new RecordsQueryResult<>();
         }
 
         return new RecordsQueryResult<>();
@@ -92,7 +84,12 @@ public class TypePermsRecords extends LocalRecordsDao
 
     @Override
     public RecordsDelResult delete(RecordsDeletion recordsDeletion) {
-        return null;
+        List<RecordMeta> result = new ArrayList<>();
+        recordsDeletion.getRecords().forEach(r -> {
+            permsService.delete(r.getId());
+            result.add(new RecordMeta(r));
+        });
+        return new RecordsDelResult(new RecordsResult<>(result));
     }
 
     @Override
