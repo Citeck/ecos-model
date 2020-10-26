@@ -3,13 +3,17 @@ package ru.citeck.ecos.model.domain.perms.api.records;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.model.domain.perms.service.TypePermsService;
 import ru.citeck.ecos.model.lib.permissions.dto.TypePermsDef;
+import ru.citeck.ecos.records2.RecordConstants;
 import ru.citeck.ecos.records2.RecordMeta;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.graphql.meta.value.EmptyValue;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
+import ru.citeck.ecos.records2.predicate.PredicateService;
+import ru.citeck.ecos.records2.predicate.model.Predicate;
 import ru.citeck.ecos.records2.request.delete.RecordsDelResult;
 import ru.citeck.ecos.records2.request.delete.RecordsDeletion;
 import ru.citeck.ecos.records2.request.mutation.RecordsMutResult;
@@ -22,6 +26,7 @@ import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsMetaDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsQueryWithMetaDao;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -46,6 +51,43 @@ public class TypePermsRecords extends LocalRecordsDao
             TypeQuery typeQuery = query.getQuery(TypeQuery.class);
             TypePermsDef permsDef = permsService.getPermsForType(typeQuery.typeRef);
             return permsDef != null ? RecordsQueryResult.of(permsDef) : new RecordsQueryResult<>();
+        }
+
+        if (query.getLanguage().equals(PredicateService.LANGUAGE_PREDICATE)) {
+
+            Predicate predicate = query.getQuery(Predicate.class);
+
+            int max = query.getMaxItems();
+            if (max <= 0) {
+                max = 10000;
+            }
+
+            List<Sort.Order> order = query.getSortBy()
+                .stream()
+                .map(s -> {
+                    String attribute = s.getAttribute();
+                    if (RecordConstants.ATT_MODIFIED.equals(attribute)) {
+                        attribute = "lastModifiedDate";
+                    } else {
+                        return Optional.<Sort.Order>empty();
+                    }
+                    return Optional.of(s.isAscending() ? Sort.Order.asc(attribute) : Sort.Order.desc(attribute));
+                })
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+
+            Collection<TypePermsDef> perms = permsService.getAll(
+                max,
+                query.getSkipCount(),
+                predicate,
+                !order.isEmpty() ? Sort.by(order) : null
+            );
+
+            RecordsQueryResult<Object> permissions =  new RecordsQueryResult<>();
+            permissions.setRecords(new ArrayList<>(perms));
+
+            permissions.setTotalCount(permsService.getCount(predicate));
         }
 
         return new RecordsQueryResult<>();
