@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import ru.citeck.ecos.commons.data.DataValue;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.commons.json.JsonMapper;
+import ru.citeck.ecos.model.domain.perms.dto.TypePermsMeta;
 import ru.citeck.ecos.model.domain.perms.repo.TypePermsEntity;
 import ru.citeck.ecos.model.domain.perms.repo.TypePermsRepository;
 import ru.citeck.ecos.model.lib.permissions.dto.PermissionsDef;
@@ -37,6 +38,15 @@ public class TypePermsService {
     private final JsonMapper mapper = Json.getMapper();
 
     private Consumer<TypePermsDef> listener;
+
+    @Nullable
+    public TypePermsMeta getPermsMeta(String id) {
+        TypePermsEntity entity = repository.findByExtId(id);
+        if (entity != null) {
+           return new TypePermsMeta(entity.getLastModifiedDate());
+        }
+        return null;
+    }
 
     @Nullable
     public TypePermsDef getPermsForType(RecordRef typeRef) {

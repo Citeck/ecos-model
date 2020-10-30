@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
+import ru.citeck.ecos.model.domain.perms.dto.TypePermsMeta;
 import ru.citeck.ecos.model.domain.perms.service.TypePermsService;
 import ru.citeck.ecos.model.lib.permissions.dto.TypePermsDef;
 import ru.citeck.ecos.records2.RecordConstants;
@@ -12,6 +13,7 @@ import ru.citeck.ecos.records2.RecordMeta;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.graphql.meta.value.EmptyValue;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
+import ru.citeck.ecos.records2.graphql.meta.value.MetaValue;
 import ru.citeck.ecos.records2.predicate.PredicateService;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
 import ru.citeck.ecos.records2.request.delete.RecordsDelResult;
@@ -25,6 +27,7 @@ import ru.citeck.ecos.records2.source.dao.local.MutableRecordsLocalDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsMetaDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsQueryWithMetaDao;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -77,17 +80,18 @@ public class TypePermsRecords extends LocalRecordsDao
                 .map(Optional::get)
                 .collect(Collectors.toList());
 
-            Collection<TypePermsDef> perms = permsService.getAll(
+            Collection<PermsRecord> perms = permsService.getAll(
                 max,
                 query.getSkipCount(),
                 predicate,
                 !order.isEmpty() ? Sort.by(order) : null
-            );
+            ).stream().map(this::toRecord).collect(Collectors.toList());
 
             RecordsQueryResult<Object> permissions =  new RecordsQueryResult<>();
             permissions.setRecords(new ArrayList<>(perms));
 
             permissions.setTotalCount(permsService.getCount(predicate));
+            return permissions;
         }
 
         return new RecordsQueryResult<>();
@@ -98,7 +102,7 @@ public class TypePermsRecords extends LocalRecordsDao
     public List<Object> getLocalRecordsMeta(@NotNull List<RecordRef> list, @NotNull MetaField metaField) {
         return list.stream()
             .map(ref -> Optional.ofNullable(permsService.getPermsById(ref.getId())))
-            .map(perms -> perms.isPresent() ? perms.get() : EmptyValue.INSTANCE)
+            .map(perms -> perms.isPresent() ? toRecord(perms.get()) : EmptyValue.INSTANCE)
             .collect(Collectors.toList());
     }
 
@@ -137,6 +141,43 @@ public class TypePermsRecords extends LocalRecordsDao
     @Override
     public String getId() {
         return ID;
+    }
+
+    private PermsRecord toRecord(TypePermsDef permsDef) {
+        TypePermsMeta permsMeta = permsService.getPermsMeta(permsDef.getId());
+        if (permsMeta == null) {
+            permsMeta = new TypePermsMeta(Instant.EPOCH);
+        }
+        return new PermsRecord(permsDef, permsMeta);
+    }
+
+    @RequiredArgsConstructor
+    public static class PermsRecord implements MetaValue {
+
+        private final TypePermsDef typePermsDef;
+        private final TypePermsMeta typePermsMeta;
+
+        @Override
+        public String getId() {
+            return typePermsDef.getId();
+        }
+
+        @Override
+        public Object getAttribute(@NotNull String name, @NotNull MetaField field) {
+            switch (name) {
+                case RecordConstants.ATT_MODIFIED:
+                    return typePermsMeta.getModified();
+                case "moduleId":
+                    return typePermsDef.getId();
+                case "typeRef":
+                    return typePermsDef.getTypeRef();
+                case "permissions":
+                    return typePermsDef.getPermissions();
+                case "attributes":
+                    return typePermsDef.getAttributes();
+            }
+            return null;
+        }
     }
 
     @Data
