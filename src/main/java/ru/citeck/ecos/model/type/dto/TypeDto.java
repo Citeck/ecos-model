@@ -9,9 +9,6 @@ import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
-import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef;
-import ru.citeck.ecos.model.lib.role.dto.RoleDef;
-import ru.citeck.ecos.model.lib.status.dto.StatusDef;
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.graphql.meta.annotation.MetaAtt;
@@ -19,7 +16,6 @@ import ru.citeck.ecos.records2.type.ComputedAttribute;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Data

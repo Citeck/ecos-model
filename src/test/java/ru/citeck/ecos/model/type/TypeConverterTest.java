@@ -14,7 +14,7 @@ import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.association.converter.AssociationConverter;
 import ru.citeck.ecos.model.association.domain.AssociationEntity;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
-import ru.citeck.ecos.model.converter.DtoConverter;
+import ru.citeck.ecos.model.lib.type.dto.TypeModelDef;
 import ru.citeck.ecos.model.section.domain.SectionEntity;
 import ru.citeck.ecos.model.type.converter.TypeConverter;
 import ru.citeck.ecos.model.type.domain.TypeEntity;
@@ -127,6 +127,7 @@ public class TypeConverterTest {
         typeEntity.setConfigForm("emodel/eform@config-form");
         typeEntity.setNumTemplateRef("emodel/num-template@test");
         typeEntity.setConfig(Json.getMapper().toString(configData));
+        typeEntity.setModel(Json.getMapper().toString(TypeModelDef.EMPTY));
 
         associationEntity = new AssociationEntity();
         associationEntity.setExtId("association");
@@ -159,6 +160,7 @@ public class TypeConverterTest {
             "  \"color\": \"red\",\n" +
             "  \"icon\": \"urgent\"\n" +
             "}", ObjectData.class));
+        typeDto.setModel(TypeModelDef.EMPTY);
     }
 
     @Test
