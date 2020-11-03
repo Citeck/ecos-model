@@ -12,6 +12,7 @@ import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef;
 import ru.citeck.ecos.model.lib.role.dto.RoleDef;
 import ru.citeck.ecos.model.lib.status.dto.StatusDef;
+import ru.citeck.ecos.model.lib.type.dto.TypeModelDef;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.graphql.meta.annotation.MetaAtt;
 import ru.citeck.ecos.records2.type.ComputedAttribute;
@@ -58,9 +59,7 @@ public class TypeDto {
     private RecordRef configFormRef;
     private ObjectData config = ObjectData.create();
 
-    private List<AttributeDef> attributeDefs = Collections.emptyList();
-    private List<RoleDef> roles = Collections.emptyList();
-    private List<StatusDef> statuses = Collections.emptyList();
+    private TypeModelDef model = TypeModelDef.EMPTY;
 
     public TypeDto(TypeDto dto) {
 
@@ -87,9 +86,7 @@ public class TypeDto {
         this.attributes = ObjectData.deepCopy(dto.attributes);
         this.numTemplateRef = dto.getNumTemplateRef();
         this.inheritForm = dto.isInheritForm();
-        this.roles = DataValue.create(dto.getRoles()).toList(RoleDef.class);
-        this.statuses = DataValue.create(dto.getStatuses()).toList(StatusDef.class);
-        this.attributeDefs = DataValue.create(dto.getAttributeDefs()).toList(AttributeDef.class);
+        this.model = dto.getModel() != null ? dto.getModel().copy().build() : null;
     }
 
     @MetaAtt("parentRef")

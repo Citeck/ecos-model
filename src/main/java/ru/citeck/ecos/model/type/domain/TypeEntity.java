@@ -102,11 +102,7 @@ public class TypeEntity extends AbstractAuditingEntity {
     @Column(name = "actions_str")
     private String actions;
 
-    private String attributeDefs;
-
-    private String roles;
-
-    private String statuses;
+    private String model;
 
     public void setAssociations(Set<AssociationEntity> associations) {
         associations = associations.stream().filter(Objects::nonNull).collect(Collectors.toSet());
@@ -116,5 +112,4 @@ public class TypeEntity extends AbstractAuditingEntity {
     public void setId(Long id) {
         this.id = id;
     }
-
 }

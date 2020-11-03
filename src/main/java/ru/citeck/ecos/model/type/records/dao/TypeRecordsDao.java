@@ -13,6 +13,10 @@ import ru.citeck.ecos.commons.data.DataValue;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
+import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef;
+import ru.citeck.ecos.model.lib.role.dto.RoleDef;
+import ru.citeck.ecos.model.lib.status.dto.StatusDef;
+import ru.citeck.ecos.model.lib.type.dto.TypeModelDef;
 import ru.citeck.ecos.model.section.records.record.SectionRecord;
 import ru.citeck.ecos.model.type.dto.TypeDto;
 import ru.citeck.ecos.model.type.dto.TypeWithMetaDto;
@@ -295,12 +299,14 @@ public class TypeRecordsDao extends LocalRecordsDao
                     return dto.getComputedAttributes();
                 case "numTemplateRef":
                     return dto.getNumTemplateRef();
-                case "roles":
-                    return dto.getRoles();
-                case "statuses":
-                    return dto.getStatuses();
-                case "attributeDefs":
-                    return dto.getAttributeDefs();
+                case "model":
+                    return dto.getModel();
+                case "modelRoles":
+                    return dto.getModel().getRoles();
+                case "modelStatuses":
+                    return dto.getModel().getStatuses();
+                case "modelAttributes":
+                    return dto.getModel().getAttributes();
             }
             return null;
         }
@@ -353,7 +359,7 @@ public class TypeRecordsDao extends LocalRecordsDao
         RecordRef parent = dto.getParentRef();
         DataValue actionsNode = recordsService.getAttribute(parent, TYPE_ACTIONS_WITH_INHERIT_ATT_JSON);
 
-        if (actionsNode == null || actionsNode.isNull()) {
+        if (actionsNode.isNull()) {
             return dto.getActions();
         }
 
@@ -410,6 +416,9 @@ public class TypeRecordsDao extends LocalRecordsDao
 
         TypeMutRecord(TypeDto dto) {
             super(dto);
+            if (getModel() == null) {
+                setModel(TypeModelDef.EMPTY);
+            }
         }
 
         public String getModuleId() {
@@ -418,6 +427,18 @@ public class TypeRecordsDao extends LocalRecordsDao
 
         public void setModuleId(String value) {
             setId(value);
+        }
+
+        public void setModelRoles(List<RoleDef> roles) {
+            setModel(getModel().copy().withRoles(roles).build());
+        }
+
+        public void setModelStatuses(List<StatusDef> statuses) {
+            setModel(getModel().copy().withStatuses(statuses).build());
+        }
+
+        public void setModelAttributes(List<AttributeDef> attributes) {
+            setModel(getModel().copy().withAttributes(attributes).build());
         }
 
         @JsonIgnore

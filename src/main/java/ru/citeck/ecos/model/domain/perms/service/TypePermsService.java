@@ -16,7 +16,7 @@ import ru.citeck.ecos.model.domain.perms.dto.TypePermsMeta;
 import ru.citeck.ecos.model.domain.perms.repo.TypePermsEntity;
 import ru.citeck.ecos.model.domain.perms.repo.TypePermsRepository;
 import ru.citeck.ecos.model.lib.permissions.dto.PermissionsDef;
-import ru.citeck.ecos.model.lib.permissions.dto.TypePermsDef;
+import ru.citeck.ecos.model.lib.type.dto.TypePermsDef;
 import ru.citeck.ecos.records2.RecordConstants;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.predicate.PredicateUtils;

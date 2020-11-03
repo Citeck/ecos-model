@@ -500,7 +500,7 @@
                           "minLength": "",
                           "maxLength": ""
                         },
-                        "key": "attributeDefs",
+                        "key": "modelAttributes",
                         "type": "datagrid",
                         "input": true,
                         "components": [
@@ -561,7 +561,7 @@
                             "action": "custom",
                             "state": "",
                             "showValidations": false,
-                            "custom": "\nvar mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = 'emodel/type@' + data.moduleId;\nvar customProps = {\n  roles: (data.roles || []).map(mapToSingleLang),\n  statuses: (data.statuses || []).map(mapToSingleLang),\n  attributeName: Citeck.helpers.getMLValue(row.name)\n};\n\nvar typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypeAttPermissions(\n  typeRef, \n  row.id, \n  customProps\n)",
+                            "custom": "\nvar mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = 'emodel/type@' + data.moduleId;\nvar customProps = {\n  roles: (data.modelRoles || []).map(mapToSingleLang),\n  statuses: (data.modelStatuses || []).map(mapToSingleLang),\n  attributeName: Citeck.helpers.getMLValue(row.name)\n};\n\nvar typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypeAttPermissions(\n  typeRef, \n  row.id, \n  customProps\n)",
                             "leftIcon": "icon-decision-tables",
                             "block": true,
                             "dataGridLabel": false,
@@ -606,7 +606,7 @@
                                 "input": true,
                                 "showValidations": false,
                                 "state": "",
-                                "custom": "var mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = 'emodel/type@' + data.moduleId;\nvar customProps = {\n  roles: (data.roles || []).map(mapToSingleLang),\n  statuses: (data.statuses || []).map(mapToSingleLang)\n};\n\nvar typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypePermissions(\n  typeRef,\n  customProps\n);"
+                                "custom": "var mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = 'emodel/type@' + data.moduleId;\nvar customProps = {\n  roles: (data.modelRoles || []).map(mapToSingleLang),\n  statuses: (data.modelStatuses || []).map(mapToSingleLang)\n};\n\nvar typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypePermissions(\n  typeRef,\n  customProps\n);"
                               }
                             ],
                             "md": 4,
@@ -627,7 +627,7 @@
                                 "action": "custom",
                                 "state": "",
                                 "showValidations": false,
-                                "custom": "var mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = 'emodel/type@' + data.moduleId;\nvar roles = (data.roles || []).map(mapToSingleLang);\nvar statuses = (data.statuses || []).map(mapToSingleLang);\nvar attributes = (data.attributeDefs || []).map(mapToSingleLang);\n\nCiteck.TypePermissionsService.downloadPermissionsConfig(typeRef, roles, statuses, attributes);",
+                                "custom": "var mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = 'emodel/type@' + data.moduleId;\nvar roles = (data.modelRoles || []).map(mapToSingleLang);\nvar statuses = (data.modelStatuses || []).map(mapToSingleLang);\nvar attributes = (data.modelAttributes || []).map(mapToSingleLang);\n\nCiteck.TypePermissionsService.downloadPermissionsConfig(typeRef, roles, statuses, attributes);",
                                 "block": true,
                                 "key": "submit11",
                                 "type": "button",
@@ -695,7 +695,7 @@
                       "minLength": "",
                       "maxLength": ""
                     },
-                    "key": "roles",
+                    "key": "modelRoles",
                     "type": "datagrid",
                     "input": true,
                     "components": [
@@ -766,7 +766,7 @@
                       "minLength": "",
                       "maxLength": ""
                     },
-                    "key": "statuses",
+                    "key": "modelStatuses",
                     "type": "datagrid",
                     "input": true,
                     "components": [

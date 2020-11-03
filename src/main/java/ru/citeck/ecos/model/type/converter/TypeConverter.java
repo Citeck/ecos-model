@@ -15,6 +15,7 @@ import ru.citeck.ecos.model.converter.AbstractDtoConverter;
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef;
 import ru.citeck.ecos.model.lib.role.dto.RoleDef;
 import ru.citeck.ecos.model.lib.status.dto.StatusDef;
+import ru.citeck.ecos.model.lib.type.dto.TypeModelDef;
 import ru.citeck.ecos.model.type.domain.TypeEntity;
 import ru.citeck.ecos.model.type.dto.CreateVariantDto;
 import ru.citeck.ecos.model.type.dto.TypeWithMetaDto;
@@ -68,9 +69,17 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
         typeEntity.setComputedAttributes(mapper.toString(dto.getComputedAttributes()));
         typeEntity.setNumTemplateRef(RecordRef.toString(dto.getNumTemplateRef()));
 
-        typeEntity.setRoles(mapper.toString(filterNotBlank(dto.getRoles(), RoleDef::getId)));
-        typeEntity.setStatuses(mapper.toString(filterNotBlank(dto.getStatuses(), StatusDef::getId)));
-        typeEntity.setAttributeDefs(mapper.toString(filterNotBlank(dto.getAttributeDefs(), AttributeDef::getId)));
+        TypeModelDef modelDef;
+        if (dto.getModel() == null) {
+            modelDef = TypeModelDef.EMPTY;
+        } else {
+            modelDef = dto.getModel().copy()
+                .withRoles(filterNotBlank(dto.getModel().getRoles(), RoleDef::getId))
+                .withStatuses(filterNotBlank(dto.getModel().getStatuses(), StatusDef::getId))
+                .withAttributes(filterNotBlank(dto.getModel().getAttributes(), AttributeDef::getId))
+                .build();
+        }
+        typeEntity.setModel(mapper.toString(modelDef));
 
         typeEntity.setInheritActions(dto.isInheritActions());
 
@@ -175,10 +184,7 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
         dto.setConfig(mapper.read(entity.getConfig(), ObjectData.class));
         dto.setSourceId(entity.getSourceId());
         dto.setComputedAttributes(mapper.readList(entity.getComputedAttributes(), ComputedAttribute.class));
-
-        dto.setRoles(mapper.readList(entity.getRoles(), RoleDef.class));
-        dto.setStatuses(mapper.readList(entity.getStatuses(), StatusDef.class));
-        dto.setAttributeDefs(mapper.readList(entity.getAttributeDefs(), AttributeDef.class));
+        dto.setModel(mapper.read(entity.getModel(), TypeModelDef.class));
 
         String attributesStr = entity.getAttributes();
         dto.setAttributes(mapper.read(attributesStr, ObjectData.class));

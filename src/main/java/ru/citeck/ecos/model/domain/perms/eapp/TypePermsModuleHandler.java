@@ -9,7 +9,7 @@ import ru.citeck.ecos.apps.module.handler.EcosModuleHandler;
 import ru.citeck.ecos.apps.module.handler.ModuleMeta;
 import ru.citeck.ecos.apps.module.handler.ModuleWithMeta;
 import ru.citeck.ecos.model.domain.perms.service.TypePermsService;
-import ru.citeck.ecos.model.lib.permissions.dto.TypePermsDef;
+import ru.citeck.ecos.model.lib.type.dto.TypePermsDef;
 
 import java.util.function.Consumer;
 

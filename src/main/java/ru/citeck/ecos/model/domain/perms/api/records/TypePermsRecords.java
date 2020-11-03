@@ -7,7 +7,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.model.domain.perms.dto.TypePermsMeta;
 import ru.citeck.ecos.model.domain.perms.service.TypePermsService;
-import ru.citeck.ecos.model.lib.permissions.dto.TypePermsDef;
+import ru.citeck.ecos.model.lib.type.dto.TypePermsDef;
 import ru.citeck.ecos.records2.RecordConstants;
 import ru.citeck.ecos.records2.RecordMeta;
 import ru.citeck.ecos.records2.RecordRef;
