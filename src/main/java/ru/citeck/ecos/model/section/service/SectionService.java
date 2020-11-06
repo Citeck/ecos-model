@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.section.service;
 
+import org.jetbrains.annotations.Nullable;
 import ru.citeck.ecos.model.section.dto.SectionDto;
 
 import java.util.List;
@@ -16,6 +17,7 @@ public interface SectionService {
 
     Set<SectionDto> getAll(Set<String> extIds);
 
+    @Nullable
     SectionDto getByExtId(String extId);
 
     void delete(String extId);

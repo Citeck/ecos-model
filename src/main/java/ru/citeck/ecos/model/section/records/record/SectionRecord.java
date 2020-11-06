@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.section.records.record;
 
+import org.jetbrains.annotations.Nullable;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.model.section.dto.SectionDto;
 import ru.citeck.ecos.records2.QueryContext;
@@ -11,8 +12,8 @@ public class SectionRecord implements MetaValue {
 
     private final SectionDto dto;
 
-    public SectionRecord(SectionDto dto) {
-        this.dto = dto;
+    public SectionRecord(@Nullable SectionDto dto) {
+        this.dto = dto != null ? dto : new SectionDto();
     }
 
     @Override

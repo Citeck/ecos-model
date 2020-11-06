@@ -65,8 +65,7 @@ public class SectionServiceImpl implements SectionService {
 
     @Override
     public SectionDto getByExtId(String extId) {
-        return sectionRepository.findByExtId(extId).map(sectionConverter::entityToDto)
-            .orElseThrow(() -> new IllegalArgumentException("Section doesnt exists: " + extId));
+        return sectionRepository.findByExtId(extId).map(sectionConverter::entityToDto).orElse(null);
     }
 
     @Override
