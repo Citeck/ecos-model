@@ -542,10 +542,6 @@
                                 {
                                   "label": "Boolean",
                                   "value": "BOOLEAN"
-                                },
-                                {
-                                  "label": "Computed",
-                                  "value": "COMPUTED"
                                 }
                               ]
                             },
