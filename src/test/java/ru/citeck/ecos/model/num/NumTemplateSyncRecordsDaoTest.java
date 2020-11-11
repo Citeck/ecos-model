@@ -16,16 +16,15 @@ import ru.citeck.ecos.model.num.service.NumTemplateService;
 import ru.citeck.ecos.model.type.dto.TypeDto;
 import ru.citeck.ecos.model.type.service.TypeService;
 import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records2.RecordsService;
-import ru.citeck.ecos.records2.RecordsServiceFactory;
+import ru.citeck.ecos.records3.RecordsService;
+import ru.citeck.ecos.records3.RecordsServiceFactory;
 import ru.citeck.ecos.records2.predicate.PredicateService;
 import ru.citeck.ecos.records2.predicate.model.VoidPredicate;
-import ru.citeck.ecos.records2.request.query.RecordsQuery;
-import ru.citeck.ecos.records2.request.query.RecordsQueryResult;
-import ru.citeck.ecos.records2.request.rest.QueryBody;
-import ru.citeck.ecos.records2.resolver.RemoteRecordsResolver;
 import ru.citeck.ecos.records2.rest.RemoteRecordsRestApi;
 import ru.citeck.ecos.records2.source.dao.local.RemoteSyncRecordsDao;
+import ru.citeck.ecos.records3.record.op.query.dto.RecsQueryRes;
+import ru.citeck.ecos.records3.record.op.query.dto.query.RecordsQuery;
+import ru.citeck.ecos.records3.record.resolver.RemoteRecordsResolver;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -47,6 +46,7 @@ public class NumTemplateSyncRecordsDaoTest {
     private NumTemplateRepository numTemplateRepository;
 
     private RecordsService localRecordsService;
+    private RecordsServiceFactory localServiceFactory;
     private RemoteSyncRecordsDao<NumTemplateDto> remoteSyncRecordsDAO;
 
     private final List<NumTemplateDto> templates = new ArrayList<>();
@@ -59,23 +59,21 @@ public class NumTemplateSyncRecordsDaoTest {
 
         numTemplateRepository.deleteAll();
 
-        RecordsServiceFactory localFactory = new RecordsServiceFactory() {
+        localServiceFactory = new RecordsServiceFactory() {
             @Override
             protected RemoteRecordsResolver createRemoteRecordsResolver() {
                 return new RemoteRecordsResolver(this, new RemoteRecordsRestApi() {
                     @Override
                     public <T> T jsonPost(String url, Object request, Class<T> respType) {
                         @SuppressWarnings("unchecked")
-                        T res = (T) remoteServiceFactory.getRestHandler().queryRecords(
-                            Objects.requireNonNull(Json.getMapper().convert(request, QueryBody.class))
-                        );
+                        T res = (T) remoteServiceFactory.getRestHandlerAdapter().queryRecords(request);
                         return Json.getMapper().convert(res, respType);
                     }
                 });
             }
         };
 
-        this.localRecordsService = localFactory.getRecordsService();
+        this.localRecordsService = localServiceFactory.getRecordsServiceV1();
 
         remoteSyncRecordsDAO = new RemoteSyncRecordsDao<>(SOURCE_ID, NumTemplateDto.class);
         localRecordsService.register(remoteSyncRecordsDAO);
@@ -86,16 +84,17 @@ public class NumTemplateSyncRecordsDaoTest {
     @Test
     public void test() {
 
-        RecordsQuery query = new RecordsQuery();
-        query.setSourceId(SOURCE_ID);
-        query.setQuery(VoidPredicate.INSTANCE);
-        query.setLanguage(PredicateService.LANGUAGE_PREDICATE);
-        query.setMaxItems(1000);
+        RecordsQuery query = RecordsQuery.create()
+            .withSourceId(SOURCE_ID)
+            .withQuery(VoidPredicate.INSTANCE)
+            .withLanguage(PredicateService.LANGUAGE_PREDICATE)
+            .withMaxItems(1000)
+            .build();
 
-        RecordsQueryResult<RecordRef> result = localRecordsService.queryRecords(query);
+        RecsQueryRes<RecordRef> result = localRecordsService.query(query);
         assertEquals(TOTAL_TEMPLATES, result.getTotalCount());
 
-        NumTemplateDto dto = localRecordsService.getMeta(RecordRef.valueOf(SOURCE_ID + "@template-id-100"), NumTemplateDto.class);
+        NumTemplateDto dto = localRecordsService.getAtts(RecordRef.valueOf(SOURCE_ID + "@template-id-100"), NumTemplateDto.class);
         NumTemplateDto origDto = templates.stream().filter(v -> v.getId().equals("template-id-100")).findFirst().orElse(null);
 
         assertEquals(origDto, normalize(dto));

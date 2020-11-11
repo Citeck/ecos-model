@@ -7,7 +7,6 @@ import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 @Data
@@ -15,8 +14,8 @@ import java.util.List;
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class RuleDto {
 
-    private Collection roles;
-    private Collection statuses;
+    private List<String> roles;
+    private List<String> statuses;
     private ObjectData condition;
     private List<AttributeDto> attributes = new ArrayList<>();
 

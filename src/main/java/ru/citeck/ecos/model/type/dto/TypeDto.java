@@ -12,7 +12,6 @@ import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.graphql.meta.annotation.MetaAtt;
-import ru.citeck.ecos.records2.type.ComputedAttribute;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -48,13 +47,13 @@ public class TypeDto {
     private List<RecordRef> actions = new ArrayList<>();
     private List<AssociationDto> associations = new ArrayList<>();
     private List<CreateVariantDto> createVariants = new ArrayList<>();
-    private List<ComputedAttribute> computedAttributes = new ArrayList<>();
 
     private ObjectData attributes = ObjectData.create();
 
     private RecordRef configFormRef;
     private ObjectData config = ObjectData.create();
 
+    @MetaAtt("model?json")
     private TypeModelDef model = TypeModelDef.EMPTY;
 
     public TypeDto(TypeDto dto) {
@@ -78,7 +77,6 @@ public class TypeDto {
         this.associations = DataValue.create(dto.associations).toList(AssociationDto.class);
         this.actions = DataValue.create(dto.actions).toList(RecordRef.class);
         this.createVariants = DataValue.create(dto.createVariants).toList(CreateVariantDto.class);
-        this.computedAttributes = DataValue.create(dto.computedAttributes).toList(ComputedAttribute.class);
         this.attributes = ObjectData.deepCopy(dto.attributes);
         this.numTemplateRef = dto.getNumTemplateRef();
         this.inheritForm = dto.isInheritForm();

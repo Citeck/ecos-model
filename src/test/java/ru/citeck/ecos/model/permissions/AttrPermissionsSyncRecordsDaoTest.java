@@ -18,21 +18,20 @@ import ru.citeck.ecos.model.type.dto.TypeDto;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.model.type.service.TypeService;
 import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records2.RecordsService;
-import ru.citeck.ecos.records2.RecordsServiceFactory;
+import ru.citeck.ecos.records3.RecordsService;
+import ru.citeck.ecos.records3.RecordsServiceFactory;
 import ru.citeck.ecos.records2.predicate.PredicateService;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
 import ru.citeck.ecos.records2.predicate.model.Predicates;
 import ru.citeck.ecos.records2.predicate.model.VoidPredicate;
-import ru.citeck.ecos.records2.request.query.RecordsQuery;
-import ru.citeck.ecos.records2.request.query.RecordsQueryResult;
-import ru.citeck.ecos.records2.request.rest.QueryBody;
-import ru.citeck.ecos.records2.resolver.RemoteRecordsResolver;
 import ru.citeck.ecos.records2.rest.RemoteRecordsRestApi;
 import ru.citeck.ecos.records2.source.dao.local.RemoteSyncRecordsDao;
+import ru.citeck.ecos.records3.record.op.query.dto.RecsQueryRes;
+import ru.citeck.ecos.records3.record.op.query.dto.query.RecordsQuery;
+import ru.citeck.ecos.records3.record.request.RequestContext;
+import ru.citeck.ecos.records3.record.resolver.RemoteRecordsResolver;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -55,6 +54,7 @@ public class AttrPermissionsSyncRecordsDaoTest {
     private TypeRepository typeRepository;
 
     private RecordsService localRecordsService;
+    private RecordsServiceFactory localServiceFactory;
     private RemoteSyncRecordsDao<AttributesPermissionDto> remoteSyncRecordsDao;
 
     private final List<AttributesPermissionDto> permissions = new ArrayList<>();
@@ -65,23 +65,21 @@ public class AttrPermissionsSyncRecordsDaoTest {
         repository.deleteAll();
         typeRepository.deleteAll();
 
-        RecordsServiceFactory localFactory = new RecordsServiceFactory() {
+        localServiceFactory = new RecordsServiceFactory() {
             @Override
             protected RemoteRecordsResolver createRemoteRecordsResolver() {
                 return new RemoteRecordsResolver(this, new RemoteRecordsRestApi() {
                     @Override
                     public <T> T jsonPost(String url, Object request, Class<T> respType) {
                         @SuppressWarnings("unchecked")
-                        T res = (T) remoteServiceFactory.getRestHandler().queryRecords(
-                            Objects.requireNonNull(Json.getMapper().convert(request, QueryBody.class))
-                        );
+                        T res = (T) remoteServiceFactory.getRestHandlerAdapter().queryRecords(request);
                         return Json.getMapper().convert(res, respType);
                     }
                 });
             }
         };
 
-        this.localRecordsService = localFactory.getRecordsService();
+        this.localRecordsService = localServiceFactory.getRecordsServiceV1();
 
         remoteSyncRecordsDao = new RemoteSyncRecordsDao<>(SOURCE_ID, AttributesPermissionDto.class);
         localRecordsService.register(remoteSyncRecordsDao);
@@ -98,35 +96,43 @@ public class AttrPermissionsSyncRecordsDaoTest {
     @Test
     public void test() {
 
-        RecordsQuery query = new RecordsQuery();
-        query.setSourceId(SOURCE_ID);
-        query.setQuery(VoidPredicate.INSTANCE);
-        query.setLanguage(PredicateService.LANGUAGE_PREDICATE);
-        query.setMaxItems(100);
+        RecordsQuery query = RecordsQuery.create()
+            .withSourceId(SOURCE_ID)
+            .withQuery(VoidPredicate.INSTANCE)
+            .withLanguage(PredicateService.LANGUAGE_PREDICATE)
+            .withMaxItems(100)
+            .build();
 
-        RecordsQueryResult<RecordRef> result = localRecordsService.queryRecords(query);
+        RecsQueryRes<RecordRef> result = localRecordsService.query(query);
         assertEquals(TOTAL_TYPES , result.getTotalCount());
         assertEquals(TOTAL_TYPES, remoteSyncRecordsDao.getRecords().size());
 
         AttributesPermissionDto origDto = permissions.stream().filter(v -> v.getId().equals("att-perm-id-1")).findFirst().orElse(null);
-        AttributesPermissionDto dto = localRecordsService.getMeta(RecordRef.valueOf(SOURCE_ID + "@att-perm-id-1"), AttributesPermissionDto.class);
+        AttributesPermissionDto dto = localRecordsService.getAtts(RecordRef.valueOf(SOURCE_ID + "@att-perm-id-1"), AttributesPermissionDto.class);
 
         assertEquals(origDto, dto);
 
         assert origDto != null;
-        Predicate predicate = Predicates.eq("typeRef", origDto.getTypeRef());
-        RecordsQuery query1 = new RecordsQuery();
-        query1.setLanguage(PredicateService.LANGUAGE_PREDICATE);
-        query1.setSourceId(SOURCE_ID);
-        query1.setQuery(predicate);
+        Predicate predicate = Predicates.eq("typeRef?id", origDto.getTypeRef());
+        RecordsQuery query1 = RecordsQuery.create()
+            .withLanguage(PredicateService.LANGUAGE_PREDICATE)
+            .withSourceId(SOURCE_ID)
+            .withQuery(predicate)
+            .build();
 
-        RecordsQueryResult<RecordRef> recs = localRecordsService.queryRecords(query1);
-        assertEquals(0, recs.getErrors().size());
+        RecsQueryRes<RecordRef> recs = RequestContext.doWithCtx(localServiceFactory, ctx -> {
+            RecsQueryRes<RecordRef> res = localRecordsService.query(query1);
+            assertEquals(0, ctx.getErrors().size());
+            return res;
+        });
         assertEquals(1, recs.getRecords().size());
         assertEquals(RecordRef.valueOf(SOURCE_ID + "@att-perm-id-1"), recs.getRecords().get(0));
 
-        RecordsQueryResult<AttributesPermissionDto> resultWithMeta = localRecordsService.queryRecords(query1, AttributesPermissionDto.class);
-        assertEquals(0, resultWithMeta.getErrors().size());
+        RecsQueryRes<AttributesPermissionDto> resultWithMeta = RequestContext.doWithCtx(localServiceFactory, ctx -> {
+            RecsQueryRes<AttributesPermissionDto> res = localRecordsService.query(query1, AttributesPermissionDto.class);
+            assertEquals(0, ctx.getErrors().size());
+            return res;
+        });
         assertEquals(1, resultWithMeta.getRecords().size());
 
         System.out.println(resultWithMeta.getRecords());
@@ -137,10 +143,7 @@ public class AttrPermissionsSyncRecordsDaoTest {
         Set<AttributesPermissionDto> actualSet = new TreeSet<>(Comparator.comparing(AttributesPermissionDto::getId));
         actualSet.addAll(remoteSyncRecordsDao.getRecords().values());
 
-        assertEquals(expectedSet, new HashSet<>(actualSet
-                .stream()
-                .collect(Collectors.toList())
-        ));
+        assertEquals(expectedSet, new HashSet<>(new ArrayList<>(actualSet)));
     }
 
     void generateData() {
@@ -165,6 +168,8 @@ public class AttrPermissionsSyncRecordsDaoTest {
             dto.setTypeRef(RecordRef.valueOf("emodel/type@atype-id-" + i));
 
             RuleDto rule = new RuleDto();
+            rule.setRoles(Collections.emptyList());
+            rule.setStatuses(Collections.emptyList());
             rule.setCondition(ObjectData.create("{\"att\":\"t:conditionAttr\",\"val\":\"1000000\",\"t\":\"gt\"}"));
             rule.setAttributes(Collections.singletonList(
                     new AttributeDto("t:test", new PermissionsDto(false, false))));

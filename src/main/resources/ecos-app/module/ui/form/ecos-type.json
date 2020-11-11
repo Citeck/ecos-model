@@ -542,6 +542,14 @@
                                 {
                                   "label": "Boolean",
                                   "value": "BOOLEAN"
+                                },
+                                {
+                                  "label": "Date",
+                                  "value": "DATE"
+                                },
+                                {
+                                  "label": "DateTime",
+                                  "value": "DATETIME"
                                 }
                               ]
                             },

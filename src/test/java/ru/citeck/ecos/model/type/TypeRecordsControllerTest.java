@@ -15,7 +15,8 @@ import ru.citeck.ecos.model.type.dto.TypeDto;
 import ru.citeck.ecos.model.type.service.TypeService;
 import ru.citeck.ecos.model.web.rest.TestUtil;
 import ru.citeck.ecos.records2.request.rest.RestHandler;
-import ru.citeck.ecos.records2.spring.web.rest.RecordsRestApi;
+import ru.citeck.ecos.records3.RecordsServiceFactory;
+import ru.citeck.ecos.records3.spring.web.rest.RecordsRestApi;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -41,9 +42,13 @@ public class TypeRecordsControllerTest {
     @Autowired
     private TypeService typeService;
 
+    @Autowired
+    private RecordsServiceFactory recordsServiceFactory;
+
     @Before
     public void setup() {
-        RecordsRestApi recordsApi = new RecordsRestApi(restHandler);
+
+        RecordsRestApi recordsApi = new RecordsRestApi(recordsServiceFactory);
         this.mockRecordsApi = MockMvcBuilders
             .standaloneSetup(recordsApi)
             .build();

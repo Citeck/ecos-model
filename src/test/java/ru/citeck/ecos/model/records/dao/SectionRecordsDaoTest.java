@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.dao;
+package ru.citeck.ecos.model.records.dao;
 
 import graphql.language.Field;
 import org.junit.Assert;
@@ -9,7 +9,6 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.commons.data.MLText;
-import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.section.records.dao.SectionRecordsDao;
 import ru.citeck.ecos.model.section.records.record.SectionRecord;
 import ru.citeck.ecos.model.section.dto.SectionDto;
@@ -19,7 +18,7 @@ import ru.citeck.ecos.records2.predicate.model.Predicate;
 import ru.citeck.ecos.records2.predicate.model.ValuePredicate;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.RecordsService;
-import ru.citeck.ecos.records2.RecordsServiceFactory;
+import ru.citeck.ecos.records3.RecordsServiceFactory;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
 import ru.citeck.ecos.records2.graphql.meta.value.field.MetaFieldImpl;
 import ru.citeck.ecos.records2.predicate.RecordElement;

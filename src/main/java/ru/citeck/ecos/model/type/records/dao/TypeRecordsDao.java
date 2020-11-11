@@ -295,8 +295,6 @@ public class TypeRecordsDao extends LocalRecordsDao
                     return dto.getDispNameTemplate();
                 case "inheritNumTemplate":
                     return dto.isInheritNumTemplate();
-                case "computedAttributes":
-                    return dto.getComputedAttributes();
                 case "numTemplateRef":
                     return dto.getNumTemplateRef();
                 case "model":
