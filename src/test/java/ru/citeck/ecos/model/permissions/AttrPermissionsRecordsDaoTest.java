@@ -149,7 +149,6 @@ public class AttrPermissionsRecordsDaoTest {
         RecordsQueryResult<AttributesPermissionRecordsDao.AttributesPermissionRecord> resultRecordsQueryResult = recordsDao
                 .queryLocalRecords(recordsQuery, metaField);
 
-        Mockito.verify(predicateService, Mockito.times(0)).filter(Mockito.any(), Mockito.any());
         Mockito.verify(service, Mockito.times(0)).getAll(Mockito.anySet());
 
         Assert.assertEquals(resultRecordsQueryResult.getTotalCount(), 1);

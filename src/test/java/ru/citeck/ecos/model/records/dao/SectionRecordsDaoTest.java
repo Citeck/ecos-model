@@ -154,7 +154,6 @@ public class SectionRecordsDaoTest {
         RecordsQueryResult<SectionRecord> resultRecordsQueryResult = sectionRecordsDao.queryLocalRecords(recordsQuery, metaField);
 
         //  assert
-        Mockito.verify(predicateService, Mockito.times(0)).filter(Mockito.any(), Mockito.any());
         Mockito.verify(sectionService, Mockito.times(0)).getAll(Mockito.anySet());
         Assert.assertEquals(resultRecordsQueryResult.getTotalCount(), 1);
         SectionRecord resultSectionRecord = resultRecordsQueryResult.getRecords().get(0);
