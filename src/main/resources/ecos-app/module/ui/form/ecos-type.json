@@ -493,7 +493,8 @@
                             "container": {
                               "submit7": false
                             },
-                            "submit9": false
+                            "submit9": false,
+                            "multiple": false
                           }
                         ],
                         "validate": {
@@ -575,14 +576,24 @@
                             "row": "0-3"
                           },
                           {
-                            "label": "Settings",
-                            "hideLabel": true,
-                            "state": "",
-                            "leftIcon": "icon-settings",
-                            "key": "submit9",
-                            "type": "button",
+                            "label": "Multiple",
+                            "labelPosition": "left-left",
+                            "key": "multiple",
+                            "type": "checkbox",
                             "input": true,
                             "row": "0-4"
+                          },
+                          {
+                            "label": "Settings",
+                            "hideLabel": true,
+                            "action": "custom",
+                            "state": "",
+                            "leftIcon": "icon-settings",
+                            "key": "submit6",
+                            "type": "button",
+                            "input": true,
+                            "showValidations": false,
+                            "custom": ""
                           }
                         ],
                         "tab": 3
