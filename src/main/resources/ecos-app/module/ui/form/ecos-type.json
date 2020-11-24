@@ -703,7 +703,10 @@
                         "name2": {},
                         "name": {},
                         "submit3": false,
-                        "submit4": false
+                        "submit4": false,
+                        "assignees": [],
+                        "attribute2": "",
+                        "attribute": ""
                       }
                     ],
                     "validate": {
@@ -733,15 +736,24 @@
                         "row": "0-1"
                       },
                       {
-                        "label": "Settings",
-                        "action": "custom",
-                        "state": "",
-                        "key": "submit4",
-                        "type": "button",
+                        "label": "Assignees",
+                        "multiple": true,
+                        "key": "assignees",
+                        "type": "selectOrgstruct",
                         "input": true,
-                        "showValidations": false,
-                        "custom": "alarm(\"SETTINGS\")",
-                        "row": "0-2"
+                        "row": "0-2",
+                        "reorder": false
+                      },
+                      {
+                        "label": "Attribute",
+                        "dataSrc": "custom",
+                        "data": {
+                          "custom": "values = (data['modelAttributes'] || []).filter(att => {\n  return !!att.id;\n}).map(function(att) {\n  return {\n    value: att.id,\n    label: Citeck.helpers.getMLValue(att.name)\n  };\n});\n\n"
+                        },
+                        "key": "attribute",
+                        "type": "ecosSelect",
+                        "input": true,
+                        "row": "0-3"
                       }
                     ],
                     "tab": 4
