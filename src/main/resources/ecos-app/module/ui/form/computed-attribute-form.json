@@ -151,7 +151,7 @@
               {
                 "label": "Number template",
                 "journalId": "number-templates",
-                "key": "numTemplateRef2",
+                "key": "numTemplateRef",
                 "type": "selectJournal",
                 "input": true
               }
