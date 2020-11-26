@@ -1,0 +1,222 @@
+{
+  "id": "computed-attribute-form",
+  "formKey": "",
+  "title": {
+    "en": "computed-attribute-form"
+  },
+  "description": {
+    "en": ""
+  },
+  "customModule": null,
+  "typeRef": "",
+  "width": "default",
+  "i18n": {},
+  "definition": {
+    "components": [
+      {
+        "columns": [
+          {
+            "components": [
+              {
+                "label": "Type",
+                "labelPosition": "left-left",
+                "dataSrc": "values",
+                "data": {
+                  "values": [
+                    {
+                      "label": "None",
+                      "value": "NONE"
+                    },
+                    {
+                      "label": "Script",
+                      "value": "SCRIPT"
+                    },
+                    {
+                      "label": "Attribute",
+                      "value": "ATTRIBUTE"
+                    },
+                    {
+                      "label": "Value",
+                      "value": "VALUE"
+                    },
+                    {
+                      "label": "Counter",
+                      "value": "COUNTER"
+                    }
+                  ]
+                },
+                "defaultValue": "NONE",
+                "key": "type",
+                "type": "ecosSelect",
+                "input": true
+              }
+            ],
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 0
+          },
+          {
+            "index": 1,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "components": [
+              {
+                "label": "Persistent",
+                "labelPosition": "left-left",
+                "key": "persistent",
+                "conditional": {
+                  "json": {
+                    "!": {
+                      "or": [
+                        {
+                          "==": [
+                            {
+                              "var": "data.type"
+                            },
+                            "NONE"
+                          ]
+                        },
+                        {
+                          "==": [
+                            {
+                              "var": "data.type"
+                            },
+                            "COUNTER"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                },
+                "type": "checkbox",
+                "input": true
+              }
+            ]
+          }
+        ],
+        "key": "columns2",
+        "type": "columns",
+        "input": false
+      },
+      {
+        "title": "Script",
+        "key": "script-panel",
+        "conditional": {
+          "show": "true",
+          "when": "type",
+          "eq": "SCRIPT"
+        },
+        "type": "panel",
+        "input": false,
+        "components": [
+          {
+            "label": "Config",
+            "hideLabel": true,
+            "key": "SCRIPT_config",
+            "type": "container",
+            "input": true,
+            "components": [
+              {
+                "label": "Script",
+                "defaultValue": "",
+                "key": "script",
+                "type": "textarea",
+                "input": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Counter",
+        "key": "counter-panel2",
+        "conditional": {
+          "show": "true",
+          "when": "type",
+          "eq": "COUNTER"
+        },
+        "type": "panel",
+        "input": false,
+        "components": [
+          {
+            "label": "Config",
+            "hideLabel": true,
+            "key": "COUNTER_config",
+            "type": "container",
+            "input": true,
+            "components": [
+              {
+                "label": "Number template",
+                "journalId": "number-templates",
+                "key": "numTemplateRef2",
+                "type": "selectJournal",
+                "input": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Value",
+        "key": "counter-panel",
+        "conditional": {
+          "show": "true",
+          "when": "type",
+          "eq": "VALUE"
+        },
+        "type": "panel",
+        "input": false,
+        "components": [
+          {
+            "label": "Config",
+            "hideLabel": true,
+            "key": "VALUE_config",
+            "type": "container",
+            "input": true,
+            "components": [
+              {
+                "label": "Value",
+                "defaultValue": "",
+                "key": "value",
+                "type": "textfield",
+                "input": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Attribute",
+        "key": "panel2",
+        "conditional": {
+          "show": "true",
+          "when": "type",
+          "eq": "ATTRIBUTE"
+        },
+        "type": "panel",
+        "input": false,
+        "components": [
+          {
+            "label": "Config",
+            "hideLabel": true,
+            "key": "ATTRIBUTE_config",
+            "type": "container",
+            "input": true,
+            "components": [
+              {
+                "label": "Attribute",
+                "defaultValue": "",
+                "key": "attribute",
+                "type": "textfield",
+                "input": true
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "attributes": {}
+}

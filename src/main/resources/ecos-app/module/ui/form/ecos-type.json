@@ -524,7 +524,7 @@
                             "row": "0-1"
                           },
                           {
-                            "label": "Type",
+                            "label": "Type            ",
                             "dataSrc": "values",
                             "data": {
                               "values": [
@@ -584,16 +584,32 @@
                             "row": "0-4"
                           },
                           {
-                            "label": "Settings",
-                            "hideLabel": true,
-                            "action": "custom",
-                            "state": "",
-                            "leftIcon": "icon-settings",
-                            "key": "submit6",
-                            "type": "button",
-                            "input": true,
-                            "showValidations": false,
-                            "custom": ""
+                            "key": "panel10",
+                            "type": "panel",
+                            "input": false,
+                            "components": [
+                              {
+                                "label": "Computed",
+                                "action": "custom",
+                                "state": "",
+                                "showValidations": false,
+                                "custom": "var currentRow = row;\nvar computed = row.computed || {}; \nvar computedType = computed.type || 'NONE';\nvar formData = {\n    type: computedType,\n    persistent: computed.persistent || false\n};\nformData[computedType + '_config'] = computed.config || {};\n\n\nCiteck.EcosFormUtils.getFormById('uiserv/eform@computed-attribute-form', {\n    definition: 'definition?json'\n}).then(function(formConfig) {\n    \n    Citeck.Dialogs.showFormDialog({\n        title: 'Computed attribute',\n        showDefaultButtons: true,\n        formDefinition: formConfig.definition,\n        formData: formData,\n        onSubmit: submission => {\n            var data = submission.data || {};\n\n            currentRow.computed = {\n                type: data.type,\n                persistent: data.persistent,\n                config: data[data.type + '_config']\n            }\n        }\n    })\n    \n});",
+                                "key": "submit7",
+                                "type": "button",
+                                "input": true,
+                                "row": "0-5"
+                              },
+                              {
+                                "label": "computed",
+                                "key": "computed",
+                                "properties": {
+                                  "dataType": "json"
+                                },
+                                "type": "hidden",
+                                "input": true
+                              }
+                            ],
+                            "row": "0-5"
                           }
                         ],
                         "tab": 3
