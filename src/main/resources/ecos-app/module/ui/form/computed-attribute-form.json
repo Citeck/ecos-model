@@ -123,7 +123,8 @@
                 "defaultValue": "",
                 "key": "script",
                 "type": "textarea",
-                "input": true
+                "input": true,
+                "editor": "ace"
               }
             ]
           }
