@@ -19,7 +19,6 @@
             "components": [
               {
                 "label": "Type",
-                "labelPosition": "left-left",
                 "dataSrc": "values",
                 "data": {
                   "values": [
@@ -42,6 +41,10 @@
                     {
                       "label": "Counter",
                       "value": "COUNTER"
+                    },
+                    {
+                      "label": "Template",
+                      "value": "TEMPLATE"
                     }
                   ]
                 },
@@ -63,9 +66,30 @@
             "key": "column",
             "components": [
               {
-                "label": "Persistent",
-                "labelPosition": "left-left",
-                "key": "persistent",
+                "label": "Storing type",
+                "dataSrc": "values",
+                "data": {
+                  "values": [
+                    {
+                      "label": "None",
+                      "value": "NONE"
+                    },
+                    {
+                      "label": "On empty",
+                      "value": "ON_EMPTY"
+                    },
+                    {
+                      "label": "On create",
+                      "value": "ON_CREATE"
+                    },
+                    {
+                      "label": "On mutate",
+                      "value": "ON_MUTATE"
+                    }
+                  ]
+                },
+                "defaultValue": "NONE",
+                "key": "storingType",
                 "conditional": {
                   "json": {
                     "!": {
@@ -90,7 +114,7 @@
                     }
                   }
                 },
-                "type": "checkbox",
+                "type": "ecosSelect",
                 "input": true
               }
             ]
@@ -132,7 +156,7 @@
       },
       {
         "title": "Counter",
-        "key": "counter-panel2",
+        "key": "counter-panel",
         "conditional": {
           "show": "true",
           "when": "type",
@@ -160,8 +184,37 @@
         ]
       },
       {
+        "title": "Attribute",
+        "key": "attribute-panel",
+        "conditional": {
+          "show": "true",
+          "when": "type",
+          "eq": "ATTRIBUTE"
+        },
+        "type": "panel",
+        "input": false,
+        "components": [
+          {
+            "label": "Config",
+            "hideLabel": true,
+            "key": "ATTRIBUTE_config",
+            "type": "container",
+            "input": true,
+            "components": [
+              {
+                "label": "Attribute",
+                "defaultValue": "",
+                "key": "attribute",
+                "type": "textfield",
+                "input": true
+              }
+            ]
+          }
+        ]
+      },
+      {
         "title": "Value",
-        "key": "counter-panel",
+        "key": "value-panel",
         "conditional": {
           "show": "true",
           "when": "type",
@@ -189,12 +242,12 @@
         ]
       },
       {
-        "title": "Attribute",
-        "key": "panel2",
+        "title": "Template",
+        "key": "template-panel",
         "conditional": {
           "show": "true",
           "when": "type",
-          "eq": "ATTRIBUTE"
+          "eq": "TEMPLATE"
         },
         "type": "panel",
         "input": false,
@@ -202,14 +255,14 @@
           {
             "label": "Config",
             "hideLabel": true,
-            "key": "ATTRIBUTE_config",
+            "key": "TEMPLATE_config",
             "type": "container",
             "input": true,
             "components": [
               {
-                "label": "Attribute",
+                "label": "Template",
                 "defaultValue": "",
-                "key": "attribute",
+                "key": "template",
                 "type": "textfield",
                 "input": true
               }
