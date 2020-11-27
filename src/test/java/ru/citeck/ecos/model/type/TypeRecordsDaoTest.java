@@ -10,6 +10,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
+import ru.citeck.ecos.model.lib.ModelServiceFactory;
 import ru.citeck.ecos.model.type.dto.TypeWithMetaDto;
 import ru.citeck.ecos.model.type.service.impl.TypeServiceImpl;
 import ru.citeck.ecos.model.type.records.dao.TypeRecordsDao;
@@ -55,7 +56,11 @@ public class TypeRecordsDaoTest {
     @BeforeEach
     void setUp() {
 
-        typeRecordsDao = new TypeRecordsDao(typeService);
+        ModelServiceFactory modelServices = new ModelServiceFactory();
+        RecordsServiceFactory recordsServices = new RecordsServiceFactory();
+        modelServices.setRecordsServices(recordsServices);
+
+        typeRecordsDao = new TypeRecordsDao(typeService, modelServices.getTypeDefService());
         typeRecordsDao.setRecordsServiceFactory(new RecordsServiceFactory());
 
         recordRefs = Collections.singletonList(

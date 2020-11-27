@@ -65,7 +65,7 @@ public class TypeServiceImplTest {
             typeConverter
         );
 
-        typeExtId = "type";
+        typeExtId = "test-type";
 
         parentAssocEntity = new AssociationEntity();
         parentAssocEntity.setExtId("association");
@@ -224,16 +224,6 @@ public class TypeServiceImplTest {
         assertEquals(resultTypeDto.getActions(), Collections.singletonList(actionRef));
         assertEquals(resultTypeDto.getParentRef(), RecordRef.create("emodel", "type", "parent"));
         assertEquals(resultTypeDto.getAliases(), Collections.singletonList("alias"));
-    }
-
-    @Test
-    void testGetByExtIdThrowsException() {
-        when(typeRepository.findByExtId(typeExtId)).thenReturn(Optional.empty());
-
-        Exception exception = assertThrows(RuntimeException.class, () -> typeService.getByExtId(typeExtId));
-
-        Mockito.verify(typeConverter, Mockito.times(0)).entityToDto(Mockito.any());
-        assertEquals(exception.getMessage(), "Type doesnt exists: " + typeExtId);
     }
 
     @Test

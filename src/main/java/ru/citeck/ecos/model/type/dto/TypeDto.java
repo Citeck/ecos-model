@@ -9,6 +9,7 @@ import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
+import ru.citeck.ecos.model.lib.type.dto.DocLibDef;
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.graphql.meta.annotation.MetaAtt;
@@ -56,6 +57,9 @@ public class TypeDto {
     @MetaAtt("model?json")
     private TypeModelDef model = TypeModelDef.EMPTY;
 
+    @MetaAtt("docLib?json")
+    private DocLibDef docLib = DocLibDef.EMPTY;
+
     public TypeDto(TypeDto dto) {
 
         this.id = dto.id;
@@ -81,6 +85,7 @@ public class TypeDto {
         this.numTemplateRef = dto.getNumTemplateRef();
         this.inheritForm = dto.isInheritForm();
         this.model = dto.getModel() != null ? dto.getModel().copy().build() : null;
+        this.docLib = dto.getDocLib() != null ? dto.getDocLib().copy().build() : null;
     }
 
     @MetaAtt("parentRef")

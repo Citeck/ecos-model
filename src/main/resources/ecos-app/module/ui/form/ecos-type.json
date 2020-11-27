@@ -615,7 +615,8 @@
                         "tab": 3
                       }
                     ],
-                    "collapsed": false
+                    "collapsed": false,
+                    "tab": 3
                   },
                   {
                     "title": "Type Permissions",
@@ -692,7 +693,8 @@
                         "input": false
                       }
                     ],
-                    "collapsed": false
+                    "collapsed": false,
+                    "tab": 3
                   }
                 ]
               },
@@ -844,6 +846,92 @@
                       }
                     ],
                     "tab": 5
+                  }
+                ]
+              },
+              {
+                "label": "Documents Library",
+                "key": "documentsLibrary",
+                "components": [
+                  {
+                    "hideLabel": true,
+                    "columns": [
+                      {
+                        "components": [
+                          {
+                            "label": "Enabled",
+                            "labelPosition": "",
+                            "key": "docLibEnabled",
+                            "type": "checkbox",
+                            "input": true
+                          }
+                        ],
+                        "md": 4,
+                        "type": "column",
+                        "input": false,
+                        "key": "column",
+                        "index": 0
+                      },
+                      {
+                        "md": 4,
+                        "type": "column",
+                        "input": false,
+                        "key": "column",
+                        "index": 1,
+                        "components": [
+                          {
+                            "label": "Folder Type",
+                            "journalId": "ecos-types",
+                            "key": "docLibDirTypeRef",
+                            "conditional": {
+                              "show": "true",
+                              "when": "docLibEnabled",
+                              "eq": "true"
+                            },
+                            "type": "selectJournal",
+                            "input": true,
+                            "source": {
+                              "custom": {
+                                "columns": []
+                              },
+                              "type": "journal"
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "md": 4,
+                        "type": "column",
+                        "input": false,
+                        "key": "column",
+                        "index": 2,
+                        "components": [
+                          {
+                            "label": "File Types",
+                            "multiple": true,
+                            "journalId": "ecos-types",
+                            "source": {
+                              "type": "journal",
+                              "custom": {
+                                "columns": []
+                              }
+                            },
+                            "key": "docLibFileTypeRefs",
+                            "conditional": {
+                              "show": "true",
+                              "when": "docLibEnabled",
+                              "eq": "true"
+                            },
+                            "type": "selectJournal",
+                            "input": true,
+                            "reorder": false
+                          }
+                        ]
+                      }
+                    ],
+                    "key": "columns3",
+                    "type": "columns",
+                    "input": false
                   }
                 ]
               }

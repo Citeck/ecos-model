@@ -104,6 +104,9 @@ public class TypeEntity extends AbstractAuditingEntity {
 
     private String model;
 
+    @Column(name = "doc_lib")
+    private String docLib;
+
     public void setAssociations(Set<AssociationEntity> associations) {
         associations = associations.stream().filter(Objects::nonNull).collect(Collectors.toSet());
         EntityCollectionUtils.changeHibernateSet(this.associations, associations, AssociationEntity::getId);

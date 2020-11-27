@@ -1,0 +1,9 @@
+{
+  "id": "file",
+  "parentRef": "emodel/type@user-base",
+  "name": {
+    "ru": "Файл",
+    "en": "File"
+  },
+  "dashboardType": "case-details"
+}

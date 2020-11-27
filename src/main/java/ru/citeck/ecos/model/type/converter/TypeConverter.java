@@ -15,6 +15,7 @@ import ru.citeck.ecos.model.converter.AbstractDtoConverter;
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef;
 import ru.citeck.ecos.model.lib.role.dto.RoleDef;
 import ru.citeck.ecos.model.lib.status.dto.StatusDef;
+import ru.citeck.ecos.model.lib.type.dto.DocLibDef;
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef;
 import ru.citeck.ecos.model.type.domain.TypeEntity;
 import ru.citeck.ecos.model.type.dto.CreateVariantDto;
@@ -72,12 +73,23 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
             modelDef = TypeModelDef.EMPTY;
         } else {
             modelDef = dto.getModel().copy()
-                .withRoles(filterNotBlank(dto.getModel().getRoles(), RoleDef::getId))
-                .withStatuses(filterNotBlank(dto.getModel().getStatuses(), StatusDef::getId))
-                .withAttributes(filterNotBlank(dto.getModel().getAttributes(), AttributeDef::getId))
+                .withRoles(filterNotEmpty(dto.getModel().getRoles(), RoleDef::getId))
+                .withStatuses(filterNotEmpty(dto.getModel().getStatuses(), StatusDef::getId))
+                .withAttributes(filterNotEmpty(dto.getModel().getAttributes(), AttributeDef::getId))
                 .build();
         }
         typeEntity.setModel(mapper.toString(modelDef));
+
+        DocLibDef docLibDef;
+        if (dto.getDocLib() == null) {
+            docLibDef = DocLibDef.EMPTY;
+        } else {
+            docLibDef = dto.getDocLib().copy()
+                .withDirTypeRef(dto.getDocLib().getDirTypeRef())
+                .withFileTypeRefs(filterNotEmptyRefs(dto.getDocLib().getFileTypeRefs()))
+                .build();
+        }
+        typeEntity.setDocLib(mapper.toString(docLibDef));
 
         typeEntity.setInheritActions(dto.isInheritActions());
 
@@ -134,7 +146,14 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
         return typeEntity;
     }
 
-    private <T> List<T> filterNotBlank(List<T> elements, Function<T, String> getter) {
+    private List<RecordRef> filterNotEmptyRefs(List<RecordRef> elements) {
+        if (elements == null || elements.isEmpty()) {
+            return elements;
+        }
+        return elements.stream().filter(RecordRef::isNotEmpty).collect(Collectors.toList());
+    }
+
+    private <T> List<T> filterNotEmpty(List<T> elements, Function<T, String> getter) {
         if (elements == null) {
             return Collections.emptyList();
         }
@@ -181,7 +200,16 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
         dto.setConfigFormRef(RecordRef.valueOf(entity.getConfigForm()));
         dto.setConfig(mapper.read(entity.getConfig(), ObjectData.class));
         dto.setSourceId(entity.getSourceId());
+
         dto.setModel(mapper.read(entity.getModel(), TypeModelDef.class));
+        if (dto.getModel() == null) {
+            dto.setModel(TypeModelDef.EMPTY);
+        }
+
+        dto.setDocLib(mapper.read(entity.getDocLib(), DocLibDef.class));
+        if (dto.getDocLib() == null) {
+            dto.setDocLib(DocLibDef.EMPTY);
+        }
 
         String attributesStr = entity.getAttributes();
         dto.setAttributes(mapper.read(attributesStr, ObjectData.class));

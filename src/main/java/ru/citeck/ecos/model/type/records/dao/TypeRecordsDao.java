@@ -17,6 +17,8 @@ import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef;
 import ru.citeck.ecos.model.lib.role.dto.RoleDef;
 import ru.citeck.ecos.model.lib.status.dto.StatusDef;
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef;
+import ru.citeck.ecos.model.lib.type.service.TypeDefService;
+import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils;
 import ru.citeck.ecos.model.section.records.record.SectionRecord;
 import ru.citeck.ecos.model.type.dto.TypeDto;
 import ru.citeck.ecos.model.type.dto.TypeWithMetaDto;
@@ -57,11 +59,13 @@ public class TypeRecordsDao extends LocalRecordsDao
     private final TypeRecord EMPTY_RECORD = new TypeRecord(new TypeWithMetaDto());
 
     private final TypeService typeService;
+    private final TypeDefService typeDefService;
 
     @Autowired
-    public TypeRecordsDao(TypeService typeService) {
+    public TypeRecordsDao(TypeService typeService, TypeDefService typeDefService) {
         setId(ID);
         this.typeService = typeService;
+        this.typeDefService = typeDefService;
     }
 
     @Override
@@ -305,6 +309,16 @@ public class TypeRecordsDao extends LocalRecordsDao
                     return dto.getModel().getStatuses();
                 case "modelAttributes":
                     return dto.getModel().getAttributes();
+                case "docLibEnabled":
+                    return dto.getDocLib().getEnabled();
+                case "docLibFileTypeRefs":
+                    return dto.getDocLib().getFileTypeRefs();
+                case "docLibDirTypeRef":
+                    return dto.getDocLib().getDirTypeRef();
+                case "docLib":
+                    return dto.getDocLib();
+                case "resolvedDocLib":
+                    return typeDefService.getDocLib(TypeUtils.getTypeRef(dto.getId()));
             }
             return null;
         }
@@ -437,6 +451,18 @@ public class TypeRecordsDao extends LocalRecordsDao
 
         public void setModelAttributes(List<AttributeDef> attributes) {
             setModel(getModel().copy().withAttributes(attributes).build());
+        }
+
+        public void setDocLibEnabled(boolean enabled) {
+            setDocLib(getDocLib().copy().withEnabled(enabled).build());
+        }
+
+        public void setDocLibFileTypeRefs(List<RecordRef> fileTypeRefs) {
+            setDocLib(getDocLib().copy().withFileTypeRefs(fileTypeRefs).build());
+        }
+
+        public void setDocLibDirTypeRef(RecordRef typeRef) {
+            setDocLib(getDocLib().copy().withDirTypeRef(typeRef).build());
         }
 
         @JsonIgnore

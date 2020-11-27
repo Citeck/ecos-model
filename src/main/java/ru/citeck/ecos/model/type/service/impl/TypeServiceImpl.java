@@ -1,9 +1,12 @@
 package ru.citeck.ecos.model.type.service.impl;
 
+import kotlin.Unit;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -14,6 +17,9 @@ import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.converter.DtoConverter;
+import ru.citeck.ecos.model.lib.type.dto.TypeDef;
+import ru.citeck.ecos.model.lib.type.repo.TypesRepo;
+import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils;
 import ru.citeck.ecos.model.service.exception.ForgottenChildsException;
 import ru.citeck.ecos.model.type.domain.TypeEntity;
 import ru.citeck.ecos.model.type.dto.CreateVariantDto;
@@ -38,12 +44,57 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class TypeServiceImpl implements TypeService {
+public class TypeServiceImpl implements TypeService, TypesRepo {
 
     private final TypeRepository typeRepository;
     private final DtoConverter<TypeWithMetaDto, TypeEntity> typeConverter;
 
     private Consumer<TypeDto> onTypeChangedListener = dto -> {};
+
+    private final Set<String> PROTECTED_TYPES = new HashSet<>(Arrays.asList(
+        "base",
+        "case",
+        "document",
+        "number-template",
+        "type",
+        "user-base",
+        "file",
+        "directory"
+    ));
+
+    @NotNull
+    @Override
+    public List<RecordRef> getChildren(@NotNull RecordRef recordRef) {
+
+        TypeEntity typeEntity = typeRepository.findByExtId(recordRef.getId()).orElse(null) ;
+        if (typeEntity == null) {
+            return Collections.emptyList();
+        }
+
+        Set<TypeEntity> children = typeRepository.findAllByParent(typeEntity);
+
+        return children.stream()
+            .map(child -> TypeUtils.getTypeRef(child.getExtId()))
+            .collect(Collectors.toList());
+    }
+
+    @Nullable
+    @Override
+    public TypeDef getTypeDef(@NotNull RecordRef recordRef) {
+        TypeWithMetaDto typeDto = getByExtId(recordRef.getId());
+        if (typeDto == null) {
+            return null;
+        }
+        return TypeDef.create(b -> {
+            b.setId(typeDto.getId());
+            b.setModel(typeDto.getModel());
+            b.setDocLib(typeDto.getDocLib());
+            b.setInheritNumTemplate(typeDto.isInheritNumTemplate());
+            b.setNumTemplateRef(typeDto.getNumTemplateRef());
+            b.setParentRef(typeDto.getParentRef());
+            return Unit.INSTANCE;
+        });
+    }
 
     @Override
     public List<TypeWithMetaDto> getAll(int max, int skip, Predicate predicate) {
@@ -308,10 +359,10 @@ public class TypeServiceImpl implements TypeService {
             .collect(Collectors.toSet());
     }
 
+    @Nullable
     @Override
     public TypeWithMetaDto getByExtId(String extId) {
-        return typeRepository.findByExtId(extId).map(typeConverter::entityToDto)
-            .orElseThrow(() -> new IllegalArgumentException("Type doesnt exists: " + extId));
+        return typeRepository.findByExtId(extId).map(typeConverter::entityToDto).orElse(null);
     }
 
     @Override
@@ -349,6 +400,9 @@ public class TypeServiceImpl implements TypeService {
     @Override
     @Transactional
     public void delete(String extId) {
+        if (PROTECTED_TYPES.contains(extId)) {
+            throw new RuntimeException("Type '" + extId + "' is protected");
+        }
         Optional<TypeEntity> optional = typeRepository.findByExtId(extId);
         optional.ifPresent(e -> {
             if (e.getChildren().size() > 0) {
