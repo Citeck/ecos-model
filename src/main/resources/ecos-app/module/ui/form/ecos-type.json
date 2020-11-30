@@ -551,6 +551,10 @@
                                 {
                                   "label": "DateTime",
                                   "value": "DATETIME"
+                                },
+                                {
+                                  "label": "Content",
+                                  "value": "CONTENT"
                                 }
                               ]
                             },
