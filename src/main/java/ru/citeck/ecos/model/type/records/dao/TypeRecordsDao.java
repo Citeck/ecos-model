@@ -303,6 +303,8 @@ public class TypeRecordsDao extends LocalRecordsDao
                     return dto.getNumTemplateRef();
                 case "model":
                     return dto.getModel();
+                case "resolvedModel":
+                    return typeDefService.getModelDef(TypeUtils.getTypeRef(dto.getId()));
                 case "modelRoles":
                     return dto.getModel().getRoles();
                 case "modelStatuses":
