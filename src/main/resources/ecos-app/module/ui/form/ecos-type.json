@@ -760,11 +760,12 @@
                       {
                         "label": "Assignees",
                         "multiple": true,
+                        "reorder": false,
+                        "dataType": "authority",
                         "key": "assignees",
                         "type": "selectOrgstruct",
                         "input": true,
-                        "row": "0-2",
-                        "reorder": false
+                        "row": "0-2"
                       },
                       {
                         "label": "Attribute",
