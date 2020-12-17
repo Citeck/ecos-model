@@ -313,6 +313,16 @@ public class TypeRecordsDao extends LocalRecordsDao
                         new RoleInfo("technologist",
                             Json.getMapper().convert("{\"ru\":\"Технолог\",\"en\":\"Technologist\"}", MLText.class))
                     );
+                case "resolvedModel":
+                    //temp solution for ECOS 3.*
+                    DataValue value = dto.getAttributes().get("resolvedModel");
+                    if (value.isTextual()) {
+                        value = DataValue.create(value.asText());
+                    }
+                    if (!value.get("attributes").isArray()) {
+                        value.set("attributes", DataValue.createArr());
+                    }
+                    return value.asJavaObj();
             }
             return null;
         }
