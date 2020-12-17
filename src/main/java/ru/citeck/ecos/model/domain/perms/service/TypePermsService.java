@@ -106,7 +106,11 @@ public class TypePermsService {
     public void delete(String id) {
         TypePermsEntity typePerms = repository.findByExtId(id);
         if (typePerms != null) {
-            repository.delete(typePerms);
+            // Full deletion is not available. Other remote services can save this configs in cache
+            TypePermsEntity emptyEntity = toEntity(TypePermsDef.EMPTY);
+            typePerms.setAttributes(emptyEntity.getAttributes());
+            typePerms.setPermissions(emptyEntity.getPermissions());
+            repository.save(typePerms);
         }
     }
 
