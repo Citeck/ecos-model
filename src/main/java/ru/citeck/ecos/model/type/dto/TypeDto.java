@@ -86,6 +86,22 @@ public class TypeDto {
     public TypeDto() {
     }
 
+    public TypeModelDef getModel() {
+        return model;
+    }
+
+    public void setModel(TypeModelDef model) {
+        this.model = model;
+    }
+
+    public DocLibDef getDocLib() {
+        return docLib;
+    }
+
+    public void setDocLib(DocLibDef docLib) {
+        this.docLib = docLib;
+    }
+
     @MetaAtt("parentRef")
     public void setParent(RecordRef parentRef) {
         this.parentRef = parentRef;
@@ -253,14 +269,6 @@ public class TypeDto {
         this.createVariants = createVariants;
     }
 
-    public List<ComputedAttribute> getComputedAttributes() {
-        return computedAttributes;
-    }
-
-    public void setComputedAttributes(List<ComputedAttribute> computedAttributes) {
-        this.computedAttributes = computedAttributes;
-    }
-
     public ObjectData getAttributes() {
         return attributes;
     }
@@ -313,7 +321,6 @@ public class TypeDto {
             Objects.equals(actions, typeDto.actions) &&
             Objects.equals(associations, typeDto.associations) &&
             Objects.equals(createVariants, typeDto.createVariants) &&
-            Objects.equals(computedAttributes, typeDto.computedAttributes) &&
             Objects.equals(attributes, typeDto.attributes) &&
             Objects.equals(configFormRef, typeDto.configFormRef) &&
             Objects.equals(config, typeDto.config);
@@ -341,7 +348,6 @@ public class TypeDto {
             actions,
             associations,
             createVariants,
-            computedAttributes,
             attributes,
             configFormRef,
             config
