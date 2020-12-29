@@ -25,7 +25,7 @@ import ru.citeck.ecos.records2.request.query.RecordsQueryResult;
 import ru.citeck.ecos.records2.request.rest.QueryBody;
 import ru.citeck.ecos.records2.resolver.RemoteRecordsResolver;
 import ru.citeck.ecos.records2.rest.RemoteRecordsRestApi;
-import ru.citeck.ecos.records2.source.dao.local.RemoteSyncRecordsDAO;
+import ru.citeck.ecos.records2.source.dao.local.RemoteSyncRecordsDao;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -47,7 +47,7 @@ public class NumTemplateSyncRecordsDaoTest {
     private NumTemplateRepository numTemplateRepository;
 
     private RecordsService localRecordsService;
-    private RemoteSyncRecordsDAO<NumTemplateDto> remoteSyncRecordsDAO;
+    private RemoteSyncRecordsDao<NumTemplateDto> remoteSyncRecordsDAO;
 
     private final List<NumTemplateDto> templates = new ArrayList<>();
 
@@ -77,7 +77,7 @@ public class NumTemplateSyncRecordsDaoTest {
 
         this.localRecordsService = localFactory.getRecordsService();
 
-        remoteSyncRecordsDAO = new RemoteSyncRecordsDAO<>(SOURCE_ID, NumTemplateDto.class);
+        remoteSyncRecordsDAO = new RemoteSyncRecordsDao<>(SOURCE_ID, NumTemplateDto.class);
         localRecordsService.register(remoteSyncRecordsDAO);
 
         generateData();

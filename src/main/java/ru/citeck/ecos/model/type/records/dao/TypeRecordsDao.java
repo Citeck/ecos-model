@@ -50,6 +50,7 @@ public class TypeRecordsDao extends LocalRecordsDao
                                        MutableRecordsLocalDao<TypeRecordsDao.TypeMutRecord> {
 
     public static final String ID = "type";
+    public static final String LANG_EXPAND_TYPES = "expand-types";
 
     private static final String TYPE_ACTIONS_WITH_INHERIT_ATT_JSON = "_actions[]?id";
 
@@ -86,7 +87,15 @@ public class TypeRecordsDao extends LocalRecordsDao
 
         RecordsQueryResult<TypeRecord> result = new RecordsQueryResult<>();
 
-        if (recordsQuery.getLanguage().equals(PredicateService.LANGUAGE_PREDICATE)) {
+        if (recordsQuery.getLanguage().equals(LANG_EXPAND_TYPES)) {
+
+            ExpandTypesQuery expandTypesQuery = recordsQuery.getQuery(ExpandTypesQuery.class);
+            List<TypeWithMetaDto> resultTypesDto = typeService.expandTypes(expandTypesQuery.getTypeRefs());
+            result.setRecords(resultTypesDto.stream()
+                .map(TypeRecord::new)
+                .collect(Collectors.toList()));
+
+        } else if (recordsQuery.getLanguage().equals(PredicateService.LANGUAGE_PREDICATE)) {
 
             Predicate predicate = recordsQuery.getQuery(Predicate.class);
 
@@ -470,5 +479,10 @@ public class TypeRecordsDao extends LocalRecordsDao
     public static class RoleInfo {
         private String roleId;
         private MLText name;
+    }
+
+    @Data
+    public static class ExpandTypesQuery {
+        private List<RecordRef> typeRefs;
     }
 }

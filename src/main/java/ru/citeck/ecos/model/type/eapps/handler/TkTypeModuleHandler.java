@@ -13,6 +13,7 @@ import ru.citeck.ecos.model.type.dto.TypeDto;
 import ru.citeck.ecos.model.type.service.TypeService;
 import ru.citeck.ecos.records2.RecordRef;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -73,7 +74,15 @@ public class TkTypeModuleHandler implements EcosModuleHandler<TypeDto> {
             .map(d -> RecordRef.create(d.getAppName(), "tk_type", d.getId()))
             .collect(Collectors.toList());
 
-        return new ModuleWithMeta<>(meta.getModule(), new ModuleMeta(meta.getMeta().getId(), dependencies));
+        return new ModuleWithMeta<>(
+            meta.getModule(),
+            new ModuleMeta(
+                meta.getMeta().getId(),
+                meta.getModule().getName(),
+                Collections.emptyList(),
+                dependencies
+            )
+        );
     }
 
     @NotNull

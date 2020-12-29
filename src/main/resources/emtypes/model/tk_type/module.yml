@@ -3,6 +3,7 @@
 
 modelVersion: "1.0"
 
+internal: true
 source-id: "tk_type"
 
 controller:

@@ -40,6 +40,8 @@ public interface TypeService {
 
     List<AssociationDto> getFullAssocs(String extId);
 
+    List<TypeWithMetaDto> expandTypes(Collection<RecordRef> typeRefs);
+
     RecordRef getInhFormRef(String extId);
 
     String getDashboardType(String extId);

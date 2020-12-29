@@ -25,19 +25,19 @@ import ru.citeck.ecos.records2.request.delete.RecordsDeletion;
 import ru.citeck.ecos.records2.request.mutation.RecordsMutResult;
 import ru.citeck.ecos.records2.request.query.RecordsQuery;
 import ru.citeck.ecos.records2.request.query.RecordsQueryResult;
-import ru.citeck.ecos.records2.source.dao.local.LocalRecordsDAO;
-import ru.citeck.ecos.records2.source.dao.local.MutableRecordsLocalDAO;
-import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsMetaDAO;
-import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsQueryWithMetaDAO;
+import ru.citeck.ecos.records2.source.dao.local.LocalRecordsDao;
+import ru.citeck.ecos.records2.source.dao.local.MutableRecordsLocalDao;
+import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsMetaDao;
+import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsQueryWithMetaDao;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-public class SectionRecordsDao extends LocalRecordsDAO
-    implements LocalRecordsQueryWithMetaDAO<SectionRecord>,
-               LocalRecordsMetaDAO<SectionRecord>,
-               MutableRecordsLocalDAO<SectionRecordsDao.SectionMutRecord> {
+public class SectionRecordsDao extends LocalRecordsDao
+    implements LocalRecordsQueryWithMetaDao<SectionRecord>,
+               LocalRecordsMetaDao<SectionRecord>,
+               MutableRecordsLocalDao<SectionRecordsDao.SectionMutRecord> {
 
     private static final String ID = "section";
     private static final String LANGUAGE_EMPTY = "";

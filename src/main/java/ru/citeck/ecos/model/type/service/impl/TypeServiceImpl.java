@@ -215,6 +215,28 @@ public class TypeServiceImpl implements TypeService {
     }
 
     @Override
+    public List<TypeWithMetaDto> expandTypes(Collection<RecordRef> typeRefs) {
+
+        if (typeRefs == null || typeRefs.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<TypeWithMetaDto> result = new ArrayList<>();
+        Set<String> resultIdsSet = new HashSet<>();
+
+        for (RecordRef typeRef : typeRefs) {
+            forEachTypeInDescHierarchy(typeRef.getId(), type -> {
+                if (resultIdsSet.add(type.getId())) {
+                    result.add(type);
+                }
+                return false;
+            });
+        }
+
+        return result;
+    }
+
+    @Override
     public RecordRef getInhFormRef(String extId) {
 
         AtomicReference<RecordRef> result = new AtomicReference<>();
