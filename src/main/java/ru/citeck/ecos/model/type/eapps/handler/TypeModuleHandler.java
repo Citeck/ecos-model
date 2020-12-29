@@ -58,7 +58,12 @@ public class TypeModuleHandler implements EcosModuleHandler<TypeDto> {
             }
         }
 
-        return new ModuleWithMeta<>(module, new ModuleMeta(module.getId(), dependencies));
+        return new ModuleWithMeta<>(module, new ModuleMeta(
+            module.getId(),
+            module.getName(),
+            Collections.emptyList(),
+            dependencies
+        ));
     }
 
     @NotNull

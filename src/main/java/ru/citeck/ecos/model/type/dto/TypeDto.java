@@ -1,9 +1,6 @@
 package ru.citeck.ecos.model.type.dto;
 
 import ecos.com.fasterxml.jackson210.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import ru.citeck.ecos.commons.data.DataValue;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
@@ -17,10 +14,8 @@ import ru.citeck.ecos.records2.graphql.meta.annotation.MetaAtt;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class TypeDto {
 
@@ -88,6 +83,9 @@ public class TypeDto {
         this.docLib = dto.getDocLib() != null ? dto.getDocLib().copy().build() : null;
     }
 
+    public TypeDto() {
+    }
+
     @MetaAtt("parentRef")
     public void setParent(RecordRef parentRef) {
         this.parentRef = parentRef;
@@ -101,5 +99,252 @@ public class TypeDto {
     @MetaAtt("journalRef")
     public void setJournal(RecordRef journalRef) {
         this.journalRef = journalRef;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public MLText getName() {
+        return name;
+    }
+
+    public void setName(MLText name) {
+        this.name = name;
+    }
+
+    public MLText getDescription() {
+        return description;
+    }
+
+    public void setDescription(MLText description) {
+        this.description = description;
+    }
+
+    public String getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(String tenant) {
+        this.tenant = tenant;
+    }
+
+    public String getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(String sourceId) {
+        this.sourceId = sourceId;
+    }
+
+    public RecordRef getParentRef() {
+        return parentRef;
+    }
+
+    public void setParentRef(RecordRef parentRef) {
+        this.parentRef = parentRef;
+    }
+
+    public RecordRef getFormRef() {
+        return formRef;
+    }
+
+    public void setFormRef(RecordRef formRef) {
+        this.formRef = formRef;
+    }
+
+    public RecordRef getJournalRef() {
+        return journalRef;
+    }
+
+    public void setJournalRef(RecordRef journalRef) {
+        this.journalRef = journalRef;
+    }
+
+    public boolean isSystem() {
+        return system;
+    }
+
+    public void setSystem(boolean system) {
+        this.system = system;
+    }
+
+    public String getDashboardType() {
+        return dashboardType;
+    }
+
+    public void setDashboardType(String dashboardType) {
+        this.dashboardType = dashboardType;
+    }
+
+    public boolean isInheritActions() {
+        return inheritActions;
+    }
+
+    public void setInheritActions(boolean inheritActions) {
+        this.inheritActions = inheritActions;
+    }
+
+    public boolean isInheritForm() {
+        return inheritForm;
+    }
+
+    public void setInheritForm(boolean inheritForm) {
+        this.inheritForm = inheritForm;
+    }
+
+    public MLText getDispNameTemplate() {
+        return dispNameTemplate;
+    }
+
+    public void setDispNameTemplate(MLText dispNameTemplate) {
+        this.dispNameTemplate = dispNameTemplate;
+    }
+
+    public RecordRef getNumTemplateRef() {
+        return numTemplateRef;
+    }
+
+    public void setNumTemplateRef(RecordRef numTemplateRef) {
+        this.numTemplateRef = numTemplateRef;
+    }
+
+    public boolean isInheritNumTemplate() {
+        return inheritNumTemplate;
+    }
+
+    public void setInheritNumTemplate(boolean inheritNumTemplate) {
+        this.inheritNumTemplate = inheritNumTemplate;
+    }
+
+    public List<String> getAliases() {
+        return aliases;
+    }
+
+    public void setAliases(List<String> aliases) {
+        this.aliases = aliases;
+    }
+
+    public List<RecordRef> getActions() {
+        return actions;
+    }
+
+    public void setActions(List<RecordRef> actions) {
+        this.actions = actions;
+    }
+
+    public List<AssociationDto> getAssociations() {
+        return associations;
+    }
+
+    public void setAssociations(List<AssociationDto> associations) {
+        this.associations = associations;
+    }
+
+    public List<CreateVariantDto> getCreateVariants() {
+        return createVariants;
+    }
+
+    public void setCreateVariants(List<CreateVariantDto> createVariants) {
+        this.createVariants = createVariants;
+    }
+
+    public List<ComputedAttribute> getComputedAttributes() {
+        return computedAttributes;
+    }
+
+    public void setComputedAttributes(List<ComputedAttribute> computedAttributes) {
+        this.computedAttributes = computedAttributes;
+    }
+
+    public ObjectData getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(ObjectData attributes) {
+        this.attributes = attributes;
+    }
+
+    public RecordRef getConfigFormRef() {
+        return configFormRef;
+    }
+
+    public void setConfigFormRef(RecordRef configFormRef) {
+        this.configFormRef = configFormRef;
+    }
+
+    public ObjectData getConfig() {
+        return config;
+    }
+
+    public void setConfig(ObjectData config) {
+        this.config = config;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        TypeDto typeDto = (TypeDto) o;
+        return system == typeDto.system &&
+            inheritActions == typeDto.inheritActions &&
+            inheritForm == typeDto.inheritForm &&
+            inheritNumTemplate == typeDto.inheritNumTemplate &&
+            Objects.equals(id, typeDto.id) &&
+            Objects.equals(name, typeDto.name) &&
+            Objects.equals(description, typeDto.description) &&
+            Objects.equals(tenant, typeDto.tenant) &&
+            Objects.equals(sourceId, typeDto.sourceId) &&
+            Objects.equals(parentRef, typeDto.parentRef) &&
+            Objects.equals(formRef, typeDto.formRef) &&
+            Objects.equals(journalRef, typeDto.journalRef) &&
+            Objects.equals(dashboardType, typeDto.dashboardType) &&
+            Objects.equals(dispNameTemplate, typeDto.dispNameTemplate) &&
+            Objects.equals(numTemplateRef, typeDto.numTemplateRef) &&
+            Objects.equals(aliases, typeDto.aliases) &&
+            Objects.equals(actions, typeDto.actions) &&
+            Objects.equals(associations, typeDto.associations) &&
+            Objects.equals(createVariants, typeDto.createVariants) &&
+            Objects.equals(computedAttributes, typeDto.computedAttributes) &&
+            Objects.equals(attributes, typeDto.attributes) &&
+            Objects.equals(configFormRef, typeDto.configFormRef) &&
+            Objects.equals(config, typeDto.config);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+            id,
+            name,
+            description,
+            tenant,
+            sourceId,
+            parentRef,
+            formRef,
+            journalRef,
+            system,
+            dashboardType,
+            inheritActions,
+            inheritForm,
+            dispNameTemplate,
+            numTemplateRef,
+            inheritNumTemplate,
+            aliases,
+            actions,
+            associations,
+            createVariants,
+            computedAttributes,
+            attributes,
+            configFormRef,
+            config
+        );
     }
 }

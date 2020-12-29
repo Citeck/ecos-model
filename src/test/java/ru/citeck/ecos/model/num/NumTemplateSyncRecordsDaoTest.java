@@ -25,6 +25,7 @@ import ru.citeck.ecos.records2.source.dao.local.RemoteSyncRecordsDao;
 import ru.citeck.ecos.records3.record.op.query.dto.RecsQueryRes;
 import ru.citeck.ecos.records3.record.op.query.dto.query.RecordsQuery;
 import ru.citeck.ecos.records3.record.resolver.RemoteRecordsResolver;
+import ru.citeck.ecos.records2.source.dao.local.RemoteSyncRecordsDao;
 
 import java.util.*;
 import java.util.stream.Collectors;

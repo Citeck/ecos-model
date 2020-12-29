@@ -7,11 +7,13 @@ import org.springframework.stereotype.Component;
 import ru.citeck.ecos.apps.module.handler.EcosModuleHandler;
 import ru.citeck.ecos.apps.module.handler.ModuleMeta;
 import ru.citeck.ecos.apps.module.handler.ModuleWithMeta;
+import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.model.section.dto.SectionDto;
 import ru.citeck.ecos.model.section.service.SectionService;
 import ru.citeck.ecos.records2.RecordRef;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -37,7 +39,15 @@ public class SectionModuleHandler implements EcosModuleHandler<SectionDto> {
             dependencies.addAll(types);
         }
 
-        return new ModuleWithMeta<>(sectionModule, new ModuleMeta(sectionModule.getId(), dependencies));
+        return new ModuleWithMeta<>(
+            sectionModule,
+            new ModuleMeta(
+                sectionModule.getId(),
+                new MLText(sectionModule.getName()),
+                Collections.emptyList(),
+                dependencies
+            )
+        );
     }
 
     @Override

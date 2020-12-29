@@ -355,11 +355,6 @@
         <!-- jhipster-needle-maven-add-dependency -->
 
         <dependency>
-            <groupId>io.github.microutils</groupId>
-            <artifactId>kotlin-logging</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>ru.citeck.ecos</groupId>
             <artifactId>ecos-commands-spring</artifactId>
         </dependency>
