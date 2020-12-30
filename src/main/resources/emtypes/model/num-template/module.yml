@@ -1,6 +1,10 @@
 
 modelVersion: "1.0"
 
+name:
+  ru: Шаблон нумерации
+  en: Number template
+
 source-id: ""
 
 controller:

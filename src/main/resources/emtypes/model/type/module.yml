@@ -1,6 +1,10 @@
 
 modelVersion: "1.0"
 
+name:
+  ru: Тип данных
+  en: Data type
+
 source-id: "type"
 
 controller:
