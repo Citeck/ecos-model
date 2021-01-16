@@ -1,14 +1,14 @@
 package ru.citeck.ecos.model.type.artifacts
 
 import org.springframework.stereotype.Component
-import ru.citeck.ecos.apps.TypeArtifactsResolver
+import ru.citeck.ecos.apps.app.domain.ecostype.service.ModelTypeArtifactResolver
 import ru.citeck.ecos.model.type.service.TypeService
 import ru.citeck.ecos.records2.RecordRef
 
 @Component
 class TypeArtifactsResolverImpl(
     private val typeService: TypeService
-) : TypeArtifactsResolver {
+) : ModelTypeArtifactResolver {
 
     override fun getTypeArtifacts(typeRef: RecordRef): List<RecordRef> {
 
