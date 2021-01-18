@@ -1,9 +1,15 @@
-
 modelVersion: "1.0"
 
 source-id: "type"
 
 controller:
-    type: json
+  type: json
+  config:
+    metaFields:
+      dependencies:
+        - parent?str!"emodel/type@base"
+        - parentRef?str!"emodel/type@base"
+        - associations.target[]?str
+
 
 
