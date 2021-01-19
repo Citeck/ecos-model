@@ -2,5 +2,9 @@ modelVersion: "1.0"
 
 source-id: "perms"
 
+name:
+  ru: Настройка прав
+  en: Permissions
+
 controller:
   type: json

@@ -2,6 +2,10 @@ modelVersion: "1.0"
 
 source-id: "type"
 
+name:
+  ru: Тип данных
+  en: Data type
+
 controller:
   type: json
   config:
