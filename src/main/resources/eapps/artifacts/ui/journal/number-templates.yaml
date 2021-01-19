@@ -7,7 +7,6 @@ sourceId: emodel/num-template
 typeRef: emodel/type@number-template
 
 attributes:
-  actionFormatter: '' #include include/legacy-actions.js
   journalsListId: global-system
 
 actions:

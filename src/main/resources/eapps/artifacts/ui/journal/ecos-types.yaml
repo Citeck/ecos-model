@@ -7,7 +7,6 @@ sourceId: emodel/type
 typeRef: emodel/type@type
 
 attributes:
-  actionFormatter: '' #include include/legacy-actions.js
   journalsListId: global-system
 
 actions:
