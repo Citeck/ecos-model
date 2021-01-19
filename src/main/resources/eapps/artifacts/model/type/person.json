@@ -1,0 +1,9 @@
+{
+  "id": "person",
+  "name": {
+    "ru": "Человек",
+    "en": "Person"
+  },
+  "inheritActions": true,
+  "dashboardType": "profile-details"
+}
