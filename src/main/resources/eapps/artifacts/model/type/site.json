@@ -4,6 +4,7 @@
     "en": "Site",
     "ru": "Сайт"
   },
+  "system": true,
   "inheritActions": true,
   "dashboardType": "site-details"
 }

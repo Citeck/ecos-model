@@ -1,6 +1,7 @@
 {
   "id": "ecos-type",
   "formKey": "module_model/type",
+  "system": true,
   "title": {
     "en": "Type form"
   },

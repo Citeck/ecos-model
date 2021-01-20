@@ -1,10 +1,12 @@
 
 id: ecos-types
-label: { ru: Типы кейсов, en: Case types }
+label: { ru: Типы данных, en: Data types }
 
 sourceId: emodel/type
 
 typeRef: emodel/type@type
+
+system: true
 
 attributes:
   journalsListId: global-system

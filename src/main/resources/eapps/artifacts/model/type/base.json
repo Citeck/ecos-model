@@ -4,6 +4,7 @@
     "ru": "Базовый тип",
     "en": "Base type"
   },
+  "system": true,
   "dashboardType": "case-details",
   "actions": [
     "uiserv/action@upload-new-version",

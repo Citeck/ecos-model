@@ -4,6 +4,7 @@
     "ru": "Человек",
     "en": "Person"
   },
+  "system": true,
   "inheritActions": true,
   "dashboardType": "profile-details"
 }

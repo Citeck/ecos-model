@@ -1,6 +1,7 @@
 {
   "id": "num-template-form",
   "formKey": "num-template-form",
+  "system": true,
   "title": {
     "en": "Number template form"
   },

@@ -3,6 +3,8 @@ id: base
 
 label: { ru: Базовый журнал, en: Base journal }
 
+system: true
+
 columns:
 
   - name: "displayName"
