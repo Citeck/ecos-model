@@ -1,6 +1,7 @@
 package ru.citeck.ecos.model.type.service.impl;
 
 import kotlin.Unit;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.citeck.ecos.commands.CommandsService;
+import ru.citeck.ecos.commands.annotation.CommandType;
 import ru.citeck.ecos.commons.data.DataValue;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.json.Json;
@@ -34,6 +37,7 @@ import ru.citeck.ecos.records2.predicate.model.Predicate;
 import ru.citeck.ecos.records2.predicate.model.ValuePredicate;
 import springfox.documentation.annotations.Cacheable;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -46,6 +50,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TypeServiceImpl implements TypeService, TypesRepo {
 
+    private final CommandsService commandsService;
     private final TypeRepository typeRepository;
     private final DtoConverter<TypeWithMetaDto, TypeEntity> typeConverter;
 
@@ -451,6 +456,18 @@ public class TypeServiceImpl implements TypeService, TypesRepo {
         TypeWithMetaDto typeDto = typeConverter.entityToDto(entity);
 
         onTypeChangedListener.accept(typeDto);
+
+        commandsService.execute(b -> {
+            b.setTargetApp("uiserv");
+            b.setBody(new UiservTypeUpdatedCommand(
+                RecordRef.create("emodel", "type", dto.getId()),
+                typeDto.getFormRef(),
+                typeDto.getJournalRef()
+            ));
+            b.setTtl(Duration.ZERO);
+            return Unit.INSTANCE;
+        });
+
         return typeDto;
     }
 
@@ -550,5 +567,14 @@ public class TypeServiceImpl implements TypeService, TypesRepo {
         private String name;
         private String moduleId;
         private Boolean system;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @CommandType("uiserv.type-updated")
+    public static class UiservTypeUpdatedCommand {
+        private RecordRef typeRef;
+        private RecordRef formRef;
+        private RecordRef journalRef;
     }
 }
