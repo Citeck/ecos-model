@@ -532,6 +532,16 @@ public class TypeServiceImpl implements TypeService, TypesRepo {
             spec = spec != null ? spec.or(idSpec) : idSpec;
         }
 
+        if (predicateDto.system != null) {
+            Specification<TypeEntity> systemSpec;
+            if (!predicateDto.system) {
+                systemSpec = (root, query, builder) -> builder.not(builder.equal(root.get("system"), true));
+            } else {
+                systemSpec = (root, query, builder) -> builder.equal(root.get("system"), true);
+            }
+            spec = spec != null ? spec.and(systemSpec) : systemSpec;
+        }
+
         return spec;
     }
 
@@ -539,5 +549,6 @@ public class TypeServiceImpl implements TypeService, TypesRepo {
     public static class PredicateDto {
         private String name;
         private String moduleId;
+        private Boolean system;
     }
 }
