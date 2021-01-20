@@ -1,14 +1,14 @@
 
 alfresco:
-    ribbon:
-        listOfServers: localhost:8080
-        NIWSServerListClassName: com.netflix.loadbalancer.ConfigurationBasedServerList
+  ribbon:
+    listOfServers: localhost:8080
+    NIWSServerListClassName: com.netflix.loadbalancer.ConfigurationBasedServerList
 
 eapps:
-    ribbon:
-        listOfServers: localhost:8089
-        NIWSServerListClassName: com.netflix.loadbalancer.ConfigurationBasedServerList
-    watcher:
-      artifacts:
-        enabled: true
-        locations: './src/main/resources/eapps/artifacts'
+  ribbon:
+    listOfServers: localhost:8089
+    NIWSServerListClassName: com.netflix.loadbalancer.ConfigurationBasedServerList
+  watcher:
+    artifacts:
+      enabled: true
+      locations: './src/main/resources/eapps/artifacts'

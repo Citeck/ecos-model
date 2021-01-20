@@ -19,7 +19,6 @@ public class TypeArtifactHandler implements EcosArtifactHandler<TypeDto> {
 
     @Override
     public void deployArtifact(@NotNull TypeDto artifact) {
-        log.info("Deploy type artifact: " + artifact.getId());
         typeService.save(artifact);
     }
 
