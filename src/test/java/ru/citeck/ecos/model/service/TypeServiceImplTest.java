@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.commands.CommandsService;
+import ru.citeck.ecos.commands.CommandsServiceFactory;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
@@ -41,9 +42,6 @@ public class TypeServiceImplTest {
     @Mock
     private TypeConverter typeConverter;
 
-    @Mock
-    private CommandsService commandsService;
-
     private TypeServiceImpl typeService;
 
     private TypeEntity typeEntity;
@@ -63,6 +61,8 @@ public class TypeServiceImplTest {
 
     @BeforeEach
     void init() {
+
+        CommandsService commandsService = new CommandsServiceFactory().getCommandsService();
 
         typeService = new TypeServiceImpl(
             commandsService,
