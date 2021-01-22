@@ -30,6 +30,7 @@ class BuildInfoSender(
 
     @PostConstruct
     fun init() {
+        log.info { "BuildInfoSender init" }
 
         val rabbitMqConn = rabbitMqConnProvider.getConnection()
         if (rabbitMqConn == null) {
@@ -52,7 +53,9 @@ class BuildInfoSender(
         val info = mapper.read(buildInfoFile, ObjectData::class.java) ?: return
 
         executor.execute {
+            log.info { "Wait until RabbitMQ is ready" }
             rabbitMqConn.waitUntilReady(Duration.ofHours(1).toMillis())
+            log.info { "Send build info" }
             sendBuildInfo(info)
         }
     }
