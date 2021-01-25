@@ -455,8 +455,8 @@
                 ]
               },
               {
-                "label": "Model",
-                "key": "model",
+                "label": "Attributes",
+                "key": "attributes",
                 "components": [
                   {
                     "title": "Attributes",
