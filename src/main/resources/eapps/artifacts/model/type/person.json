@@ -6,5 +6,6 @@
   },
   "system": true,
   "inheritActions": true,
-  "dashboardType": "profile-details"
+  "dashboardType": "profile-details",
+  "sourceId": "alfresco/"
 }

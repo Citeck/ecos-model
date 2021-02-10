@@ -7,6 +7,7 @@ name:
 
 system: true
 
+sourceId: emodel/num-template
 journal: uiserv/journal@number-templates
 form: uiserv/eform@num-template-form
 

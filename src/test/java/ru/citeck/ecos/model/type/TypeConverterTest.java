@@ -14,12 +14,12 @@ import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.association.converter.AssociationConverter;
 import ru.citeck.ecos.model.association.domain.AssociationEntity;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
+import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef;
 import ru.citeck.ecos.model.lib.type.dto.DocLibDef;
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef;
 import ru.citeck.ecos.model.section.domain.SectionEntity;
 import ru.citeck.ecos.model.type.converter.TypeConverter;
 import ru.citeck.ecos.model.type.domain.TypeEntity;
-import ru.citeck.ecos.model.type.dto.CreateVariantDto;
 import ru.citeck.ecos.model.type.dto.TypeDto;
 import ru.citeck.ecos.model.type.dto.TypeWithMetaDto;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
@@ -53,35 +53,8 @@ public class TypeConverterTest {
     private AssociationEntity associationEntity;
     private AssociationDto associationDto;
 
-    private CreateVariantDto createVariantDto1;
-    private CreateVariantDto createVariantDto2;
-
-    private final ObjectData[] createVariantsData = Json.getMapper().read("[\n" +
-        "  {\n" +
-        "    \"id\": \"id1\",\n" +
-        "    \"name\": {\n" +
-        "      \"en\": \"name1\"\n" +
-        "    },\n" +
-        "    \"formRef\": \"eform@cr-form-1\",\n" +
-        "    \"recordRef\": \"type@cr-ref-1\",\n" +
-        "    \"attributes\": {\n" +
-        "      \"key1\": \"value1\",\n" +
-        "      \"key2\": \"value2\"\n" +
-        "    }\n" +
-        "  },\n" +
-        "  {\n" +
-        "    \"id\": \"id2\",\n" +
-        "    \"name\": {\n" +
-        "      \"en\": \"name2\"\n" +
-        "    },\n" +
-        "    \"formRef\": \"eform@cr-form-2\",\n" +
-        "    \"recordRef\": \"type@cr-ref-2\",\n" +
-        "    \"attributes\": {\n" +
-        "      \"key3\": \"value3\",\n" +
-        "      \"key4\": \"value4\"\n" +
-        "    }\n" +
-        "  }\n" +
-        "]", ObjectData[].class);
+    private CreateVariantDef createVariantDto1;
+    private CreateVariantDef createVariantDto2;
 
     private final ObjectData configData = Json.getMapper().read("{\n" +
         "  \"color\": \"red\",\n" +
@@ -108,7 +81,6 @@ public class TypeConverterTest {
         baseType.setExtId("base");
         when(typeRepository.findByExtId("base")).thenReturn(Optional.of(baseType));
 
-
         typeEntity = new TypeEntity();
         typeEntity.setExtId("type");
         typeEntity.setName("{\"en\":\"name\"}");
@@ -122,7 +94,7 @@ public class TypeConverterTest {
         typeEntity.setJournal(RecordRef.EMPTY.toString());
         typeEntity.setSections(Collections.singleton(sectionEntity));
         typeEntity.setAttributes("{\"field\":\"value\"}");
-        typeEntity.setCreateVariants(Json.getMapper().toString(createVariantsData));
+        typeEntity.setCreateVariants(Json.getMapper().toString(Arrays.asList(createVariantDto1, createVariantDto2)));
         typeEntity.setAliases(Collections.singleton("alias"));
         typeEntity.setForm("emodel/eform@type-form");
         typeEntity.setConfigForm("emodel/eform@config-form");
@@ -130,6 +102,7 @@ public class TypeConverterTest {
         typeEntity.setConfig(Json.getMapper().toString(configData));
         typeEntity.setModel(Json.getMapper().toString(TypeModelDef.EMPTY));
         typeEntity.setDocLib(Json.getMapper().toString(DocLibDef.EMPTY));
+        typeEntity.setDefaultCreateVariant(true);
 
         associationEntity = new AssociationEntity();
         associationEntity.setExtId("association");
@@ -164,6 +137,7 @@ public class TypeConverterTest {
             "}", ObjectData.class));
         typeDto.setModel(TypeModelDef.EMPTY);
         typeDto.setDocLib(DocLibDef.EMPTY);
+        typeDto.setDefaultCreateVariant(true);
     }
 
     @Test
@@ -219,7 +193,7 @@ public class TypeConverterTest {
         Assert.assertEquals(typeDto.getFormRef(), RecordRef.valueOf(resultEntity.getForm()));
         Assert.assertEquals(typeDto.getConfigFormRef(), RecordRef.valueOf(resultEntity.getConfigForm()));
         Assert.assertEquals(typeDto.getCreateVariants(),
-            Arrays.asList(Json.getMapper().read(resultEntity.getCreateVariants(), CreateVariantDto[].class)));
+            Arrays.asList(Json.getMapper().read(resultEntity.getCreateVariants(), CreateVariantDef[].class)));
         Assert.assertEquals(typeDto.getAttributes(), Json.getMapper().read(resultEntity.getAttributes(),
             ObjectData.class));
         Assert.assertEquals(typeDto.getTenant(), resultEntity.getTenant());
@@ -255,7 +229,7 @@ public class TypeConverterTest {
         Assert.assertEquals(typeDto.getFormRef(), RecordRef.valueOf(resultEntity.getForm()));
         Assert.assertEquals(typeDto.getConfigFormRef(), RecordRef.valueOf(resultEntity.getConfigForm()));
         Assert.assertEquals(typeDto.getCreateVariants(),
-            Arrays.asList(Json.getMapper().read(resultEntity.getCreateVariants(), CreateVariantDto[].class)));
+            Arrays.asList(Json.getMapper().read(resultEntity.getCreateVariants(), CreateVariantDef[].class)));
         Assert.assertEquals(typeDto.getAttributes(), Json.getMapper().read(resultEntity.getAttributes(),
             ObjectData.class));
         Assert.assertEquals(typeDto.getTenant(), resultEntity.getTenant());
@@ -265,24 +239,27 @@ public class TypeConverterTest {
     }
 
     private void initCreateVariantDto() {
-        createVariantDto1 = new CreateVariantDto();
-        createVariantDto1.setId("id1");
-        createVariantDto1.setName(new MLText("name1"));
-        createVariantDto1.setFormRef(RecordRef.create("eform", "cr-form-1"));
-        createVariantDto1.setRecordRef(RecordRef.create("type", "cr-ref-1"));
-        createVariantDto1.setAttributes(Json.getMapper().read("{\n" +
+
+        createVariantDto1 = CreateVariantDef.create()
+            .withId("id1")
+            .withName(new MLText("name1"))
+            .withFormRef(RecordRef.create("eform", "cr-form-1"))
+            .withSourceId("cr-ref-1")
+            .withAttributes(Json.getMapper().read("{\n" +
             "  \"key1\": \"value1\",\n" +
             "  \"key2\": \"value2\"\n" +
-            "}", ObjectData.class));
+            "}", ObjectData.class))
+            .build();
 
-        createVariantDto2 = new CreateVariantDto();
-        createVariantDto2.setId("id2");
-        createVariantDto2.setName(new MLText("name2"));
-        createVariantDto2.setFormRef(RecordRef.create("eform", "cr-form-2"));
-        createVariantDto2.setRecordRef(RecordRef.create("type", "cr-ref-2"));
-        createVariantDto2.setAttributes(Json.getMapper().read("{\n" +
-            "  \"key3\": \"value3\",\n" +
-            "  \"key4\": \"value4\"\n" +
-            "}", ObjectData.class));
+        createVariantDto2 = CreateVariantDef.create()
+            .withId("id2")
+            .withName(new MLText("name2"))
+            .withFormRef(RecordRef.create("eform", "cr-form-2"))
+            .withSourceId("cr-ref-2")
+            .withAttributes(Json.getMapper().read("{\n" +
+                "  \"key3\": \"value3\",\n" +
+                "  \"key4\": \"value4\"\n" +
+                "}", ObjectData.class))
+            .build();
     }
 }

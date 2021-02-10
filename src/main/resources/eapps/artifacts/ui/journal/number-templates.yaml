@@ -2,14 +2,7 @@
 id: number-templates
 label: { ru: Шаблоны нумерации, en: Number templates }
 
-sourceId: emodel/num-template
-
-typeRef: emodel/type@number-template
-
 system: true
-
-attributes:
-  journalsListId: global-system
 
 actions:
   - uiserv/action@ecos-module-download

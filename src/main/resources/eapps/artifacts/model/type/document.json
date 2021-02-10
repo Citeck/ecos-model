@@ -6,5 +6,6 @@
     "en": "Document"
   },
   "system": true,
-  "inheritActions": true
+  "inheritActions": true,
+  "sourceId": "alfresco/"
 }

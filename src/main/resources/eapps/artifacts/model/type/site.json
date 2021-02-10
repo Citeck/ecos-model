@@ -6,5 +6,6 @@
   },
   "system": true,
   "inheritActions": true,
-  "dashboardType": "site-details"
+  "dashboardType": "site-details",
+  "sourceId": "emodel/site"
 }

@@ -15,10 +15,10 @@ import ru.citeck.ecos.model.converter.AbstractDtoConverter;
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef;
 import ru.citeck.ecos.model.lib.role.dto.RoleDef;
 import ru.citeck.ecos.model.lib.status.dto.StatusDef;
+import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef;
 import ru.citeck.ecos.model.lib.type.dto.DocLibDef;
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef;
 import ru.citeck.ecos.model.type.domain.TypeEntity;
-import ru.citeck.ecos.model.type.dto.CreateVariantDto;
 import ru.citeck.ecos.model.type.dto.TypeWithMetaDto;
 import ru.citeck.ecos.model.type.records.dao.TypeRecordsDao;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
@@ -125,7 +125,10 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
         }
 
         typeEntity.setActions(mapper.toString(dto.getActions()));
-        typeEntity.setCreateVariants(mapper.toString(dto.getCreateVariants()));
+        typeEntity.setCreateVariants(mapper.toString(filterNotEmpty(dto.getCreateVariants(), CreateVariantDef::getId)));
+
+        typeEntity.setDefaultCreateVariant(dto.getDefaultCreateVariant());
+        typeEntity.setPostCreateActionRef(RecordRef.toString(dto.getPostCreateActionRef()));
 
         if (dto.getAliases() != null) {
             typeEntity.setAliases(new HashSet<>(dto.getAliases()));
@@ -243,6 +246,9 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
             dto.setCreateVariants(Collections.emptyList());
         }
 
+        dto.setDefaultCreateVariant(Boolean.TRUE.equals(entity.getDefaultCreateVariant()));
+        dto.setPostCreateActionRef(RecordRef.valueOf(entity.getPostCreateActionRef()));
+
         dto.setAliases(new ArrayList<>(entity.getAliases()));
 
         dto.setCreated(entity.getCreatedDate());
@@ -255,5 +261,5 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
 
     public static class RecordRefsList extends ArrayList<RecordRef> {}
 
-    public static class CreateVariantsList extends ArrayList<CreateVariantDto> {}
+    public static class CreateVariantsList extends ArrayList<CreateVariantDef> {}
 }

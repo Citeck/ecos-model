@@ -1,13 +1,10 @@
 {
   "id": "ecos-type",
   "formKey": "module_model/type",
-  "system": true,
   "title": {
     "en": "Type form"
   },
-  "description": {
-    "en": ""
-  },
+  "description": {},
   "customModule": null,
   "typeRef": "emodel/type@type",
   "width": "extra-lg",
@@ -192,6 +189,13 @@
                               }
                             },
                             "input": true
+                          },
+                          {
+                            "label": "Source ID",
+                            "defaultValue": "",
+                            "key": "sourceId",
+                            "type": "textfield",
+                            "input": true
                           }
                         ],
                         "conditional": {
@@ -212,6 +216,17 @@
                 "label": "Create variants",
                 "key": "createVariants",
                 "components": [
+                  {
+                    "label": {
+                      "en": "Default create variant",
+                      "ru": "Вариант создания по умолчанию"
+                    },
+                    "labelPosition": "",
+                    "key": "defaultCreateVariant",
+                    "defaultValue": true,
+                    "type": "checkbox",
+                    "input": true
+                  },
                   {
                     "label": "Create variants",
                     "hideLabel": true,
@@ -244,7 +259,8 @@
                         "mlText": {
                           "ru": "",
                           "en": ""
-                        }
+                        },
+                        "submit4": false
                       }
                     ],
                     "validate": {
@@ -262,13 +278,6 @@
                             "label": "Id",
                             "defaultValue": "",
                             "key": "id",
-                            "type": "textfield",
-                            "input": true
-                          },
-                          {
-                            "label": "Record Ref",
-                            "defaultValue": "",
-                            "key": "recordRef",
                             "type": "textfield",
                             "input": true
                           }
@@ -302,30 +311,24 @@
                             "customPredicateJs": null,
                             "presetFilterPredicatesJs": null,
                             "input": true
-                          },
-                          {
-                            "label": "Attributes",
-                            "keyLabel": "",
-                            "key": "attributes",
-                            "type": "datamap",
-                            "valueComponent": {
-                              "type": "textfield",
-                              "key": "value",
-                              "label": "Value",
-                              "defaultValue": "Value",
-                              "input": true,
-                              "conditional": {
-                                "show": null,
-                                "when": null,
-                                "eq": "",
-                                "json": ""
-                              }
-                            },
-                            "input": true
                           }
                         ],
                         "row": "0-2",
                         "input": false
+                      },
+                      {
+                        "label": {
+                          "en": "Additional",
+                          "ru": "Дополнительно"
+                        },
+                        "action": "custom",
+                        "state": "",
+                        "showValidations": false,
+                        "custom": "var currentRow = row;\nvar atts = [\n  ['attributes', {}], \n  ['formOptions', {}], \n  ['postActionRef', ''], \n  ['properties', {}]\n];\nvar formData = {};\nfor (var key of atts) {\n  formData[key[0]] = row[key[0]] || key[1];\n}\nCiteck.EcosFormUtils.getFormById('uiserv/eform@create-variant-form', {\n    definition: 'definition?json'\n}).then(function(formConfig) {\n    \n    Citeck.Dialogs.showFormDialog({\n        title: 'Create variant',\n        showDefaultButtons: true,\n        formDefinition: formConfig.definition,\n        formData: formData,\n        onSubmit: submission => {\n            var data = submission.data || {};\n\n\t\t\tfor (var key of atts) {\n\t\t\t  currentRow[key[0]] = data[key[0]] || key[1];\n\t\t\t}\n        }\n    })\n    \n});",
+                        "key": "submit4",
+                        "type": "button",
+                        "input": true,
+                        "row": "0-3"
                       }
                     ],
                     "tab": 1,
@@ -532,6 +535,22 @@
                                 {
                                   "label": "Text",
                                   "value": "TEXT"
+                                },
+                                {
+                                  "label": "ML Text",
+                                  "value": "ML_TEXT"
+                                },
+                                {
+                                  "label": "Person",
+                                  "value": "PERSON"
+                                },
+                                {
+                                  "label": "Group",
+                                  "value": "GROUP"
+                                },
+                                {
+                                  "label": "Authority",
+                                  "value": "AUTHORITY"
                                 },
                                 {
                                   "label": "Association",

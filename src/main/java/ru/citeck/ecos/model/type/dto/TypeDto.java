@@ -6,10 +6,11 @@ import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
+import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef;
 import ru.citeck.ecos.model.lib.type.dto.DocLibDef;
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef;
 import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records2.graphql.meta.annotation.MetaAtt;
+import ru.citeck.ecos.records3.record.op.atts.service.schema.annotation.AttName;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -42,17 +43,21 @@ public class TypeDto {
 
     private List<RecordRef> actions = new ArrayList<>();
     private List<AssociationDto> associations = new ArrayList<>();
-    private List<CreateVariantDto> createVariants = new ArrayList<>();
+
+    private RecordRef postCreateActionRef = RecordRef.EMPTY;
+
+    private Boolean defaultCreateVariant;
+    private List<CreateVariantDef> createVariants = new ArrayList<>();
 
     private ObjectData attributes = ObjectData.create();
 
     private RecordRef configFormRef;
     private ObjectData config = ObjectData.create();
 
-    @MetaAtt("model?json")
+    @AttName("model?json")
     private TypeModelDef model = TypeModelDef.EMPTY;
 
-    @MetaAtt("docLib?json")
+    @AttName("docLib?json")
     private DocLibDef docLib = DocLibDef.EMPTY;
 
     public TypeDto(TypeDto dto) {
@@ -75,7 +80,9 @@ public class TypeDto {
         this.aliases = DataValue.create(dto.aliases).toList(String.class);
         this.associations = DataValue.create(dto.associations).toList(AssociationDto.class);
         this.actions = DataValue.create(dto.actions).toList(RecordRef.class);
-        this.createVariants = DataValue.create(dto.createVariants).toList(CreateVariantDto.class);
+        this.postCreateActionRef = dto.postCreateActionRef;
+        this.defaultCreateVariant = dto.defaultCreateVariant;
+        this.createVariants = DataValue.create(dto.createVariants).toList(CreateVariantDef.class);
         this.attributes = ObjectData.deepCopy(dto.attributes);
         this.numTemplateRef = dto.getNumTemplateRef();
         this.inheritForm = dto.isInheritForm();
@@ -102,17 +109,17 @@ public class TypeDto {
         this.docLib = docLib;
     }
 
-    @MetaAtt("parentRef")
+    @AttName("parentRef")
     public void setParent(RecordRef parentRef) {
         this.parentRef = parentRef;
     }
 
-    @MetaAtt("formRef")
+    @AttName("formRef")
     public void setForm(RecordRef formRef) {
         this.formRef = formRef;
     }
 
-    @MetaAtt("journalRef")
+    @AttName("journalRef")
     public void setJournal(RecordRef journalRef) {
         this.journalRef = journalRef;
     }
@@ -261,12 +268,28 @@ public class TypeDto {
         this.associations = associations;
     }
 
-    public List<CreateVariantDto> getCreateVariants() {
+    public List<CreateVariantDef> getCreateVariants() {
         return createVariants;
     }
 
-    public void setCreateVariants(List<CreateVariantDto> createVariants) {
+    public void setCreateVariants(List<CreateVariantDef> createVariants) {
         this.createVariants = createVariants;
+    }
+
+    public RecordRef getPostCreateActionRef() {
+        return postCreateActionRef;
+    }
+
+    public void setPostCreateActionRef(RecordRef postCreateActionRef) {
+        this.postCreateActionRef = postCreateActionRef;
+    }
+
+    public Boolean getDefaultCreateVariant() {
+        return defaultCreateVariant;
+    }
+
+    public void setDefaultCreateVariant(Boolean defaultCreateVariant) {
+        this.defaultCreateVariant = defaultCreateVariant;
     }
 
     public ObjectData getAttributes() {
@@ -321,6 +344,7 @@ public class TypeDto {
             Objects.equals(actions, typeDto.actions) &&
             Objects.equals(associations, typeDto.associations) &&
             Objects.equals(createVariants, typeDto.createVariants) &&
+            Objects.equals(postCreateActionRef, typeDto.postCreateActionRef) &&
             Objects.equals(attributes, typeDto.attributes) &&
             Objects.equals(configFormRef, typeDto.configFormRef) &&
             Objects.equals(config, typeDto.config);
@@ -348,6 +372,7 @@ public class TypeDto {
             actions,
             associations,
             createVariants,
+            postCreateActionRef,
             attributes,
             configFormRef,
             config
