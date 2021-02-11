@@ -156,7 +156,7 @@ public class TypeDto {
     }
 
     public void setSourceId(String sourceId) {
-        this.sourceId = sourceId;
+        this.sourceId = StringUtils.defaultIfBlank(sourceId, "");
     }
 
     public RecordRef getParentRef() {
@@ -340,6 +340,7 @@ public class TypeDto {
             Objects.equals(aliases, typeDto.aliases) &&
             Objects.equals(actions, typeDto.actions) &&
             Objects.equals(associations, typeDto.associations) &&
+            Objects.equals(defaultCreateVariant, typeDto.defaultCreateVariant) &&
             Objects.equals(createVariants, typeDto.createVariants) &&
             Objects.equals(postCreateActionRef, typeDto.postCreateActionRef) &&
             Objects.equals(attributes, typeDto.attributes) &&
@@ -367,6 +368,7 @@ public class TypeDto {
             aliases,
             actions,
             associations,
+            defaultCreateVariant,
             createVariants,
             postCreateActionRef,
             attributes,

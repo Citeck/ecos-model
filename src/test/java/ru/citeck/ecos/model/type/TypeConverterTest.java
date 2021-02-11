@@ -82,6 +82,7 @@ public class TypeConverterTest {
         when(typeRepository.findByExtId("base")).thenReturn(Optional.of(baseType));
 
         typeEntity = new TypeEntity();
+        typeEntity.setSourceId("");
         typeEntity.setExtId("type");
         typeEntity.setName("{\"en\":\"name\"}");
         typeEntity.setTenant("tenant");
@@ -116,12 +117,14 @@ public class TypeConverterTest {
 
         typeDto = new TypeWithMetaDto();
         typeDto.setId("type");
+        typeDto.setSourceId("");
         typeDto.setName(new MLText("name"));
         typeDto.setDescription(new MLText("desc"));
         typeDto.setActions(Collections.singletonList(actionRef));
         typeDto.setAssociations(Collections.singletonList(associationDto));
         typeDto.setInheritActions(true);
         typeDto.setInheritForm(true);
+        typeDto.setJournal(RecordRef.EMPTY);
         typeDto.setJournal(RecordRef.EMPTY);
         typeDto.setAttributes(Json.getMapper().read("{\"field\":\"value\"}", ObjectData.class));
         typeDto.setParent(RecordRef.create("emodel", "type", parent.getExtId()));

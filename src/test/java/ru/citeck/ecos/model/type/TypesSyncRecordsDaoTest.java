@@ -151,9 +151,15 @@ public class TypesSyncRecordsDaoTest {
     }
 
     TypeDto normalize(TypeDto dto) {
+
         List<AssociationDto> assocs = DataValue.create(dto.getAssociations()).toList(AssociationDto.class);
         assocs.sort(Comparator.comparing(AssociationDto::getId));
         dto.setAssociations(assocs);
+
+        if (!Boolean.TRUE.equals(dto.getDefaultCreateVariant())) {
+            dto.setDefaultCreateVariant(null);
+        }
+
         return dto;
     }
 

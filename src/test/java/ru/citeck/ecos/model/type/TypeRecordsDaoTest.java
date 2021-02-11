@@ -124,12 +124,12 @@ public class TypeRecordsDaoTest {
         Assert.assertEquals(resultTypeRecords.size(), 1);
         MetaValue resultTypeRecord = resultTypeRecords.get(0);
         Assert.assertNull(resultTypeRecord.getId());
-        Assert.assertNull(resultTypeRecord.getAttribute("name", metaField));
-        Assert.assertNull(resultTypeRecord.getAttribute("description", metaField));
+        Assert.assertEquals(MLText.EMPTY, resultTypeRecord.getAttribute("name", metaField));
+        Assert.assertEquals(MLText.EMPTY, resultTypeRecord.getAttribute("description", metaField));
         Assert.assertNull(resultTypeRecord.getAttribute("tenant", metaField));
         Assert.assertNull(resultTypeRecord.getAttribute("extId", metaField));
         Assert.assertEquals(resultTypeRecord.getAttribute("inheritActions", metaField), false);
-        Assert.assertNull(resultTypeRecord.getAttribute("parent", metaField));
+        Assert.assertEquals(RecordRef.EMPTY, resultTypeRecord.getAttribute("parent", metaField));
         Assert.assertEquals(resultTypeRecord.getAttribute("actions", metaField), Collections.emptyList());
         Assert.assertEquals(resultTypeRecord.getAttribute("associations", metaField), Collections.emptyList());
     }
