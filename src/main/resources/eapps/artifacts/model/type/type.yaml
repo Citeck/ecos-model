@@ -6,6 +6,8 @@ name:
   en: Case type
 
 system: true
+sourceId: emodel/type
+journalRef: uiserv/journal@ecos-types
 
 createVariants:
 

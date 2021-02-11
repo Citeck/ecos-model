@@ -6,5 +6,6 @@
     "en": "Case"
   },
   "system": true,
-  "inheritActions": true
+  "inheritActions": true,
+  "sourceId": "alfresco/"
 }

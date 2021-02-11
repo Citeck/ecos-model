@@ -1,58 +1,61 @@
 package ru.citeck.ecos.model.type.dto;
 
-import ecos.com.fasterxml.jackson210.annotation.JsonInclude;
+import org.apache.commons.lang.StringUtils;
 import ru.citeck.ecos.commons.data.DataValue;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
+import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef;
 import ru.citeck.ecos.model.lib.type.dto.DocLibDef;
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef;
 import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records2.graphql.meta.annotation.MetaAtt;
+import ru.citeck.ecos.records3.record.op.atts.service.schema.annotation.AttName;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class TypeDto {
 
     @NotNull
     private String id;
-    private MLText name;
-    private MLText description;
-    private String tenant;
-    private String sourceId;
-    private RecordRef parentRef;
-    private RecordRef formRef;
-    private RecordRef journalRef;
+    private MLText name = MLText.EMPTY;
+    private MLText description = MLText.EMPTY;
+    private String sourceId = "";
+    private RecordRef parentRef = RecordRef.EMPTY;
+    private RecordRef formRef = RecordRef.EMPTY;
+    private RecordRef journalRef = RecordRef.EMPTY;
     private boolean system;
-    private String dashboardType;
+    private String dashboardType = "";
     private boolean inheritActions;
     private boolean inheritForm;
 
-    private MLText dispNameTemplate;
+    private MLText dispNameTemplate = MLText.EMPTY;
 
-    private RecordRef numTemplateRef;
+    private RecordRef numTemplateRef = RecordRef.EMPTY;
     private boolean inheritNumTemplate;
 
     private List<String> aliases = new ArrayList<>();
 
     private List<RecordRef> actions = new ArrayList<>();
     private List<AssociationDto> associations = new ArrayList<>();
-    private List<CreateVariantDto> createVariants = new ArrayList<>();
+
+    private RecordRef postCreateActionRef = RecordRef.EMPTY;
+
+    private Boolean defaultCreateVariant;
+    private List<CreateVariantDef> createVariants = new ArrayList<>();
 
     private ObjectData attributes = ObjectData.create();
 
-    private RecordRef configFormRef;
+    private RecordRef configFormRef = RecordRef.EMPTY;
     private ObjectData config = ObjectData.create();
 
-    @MetaAtt("model?json")
+    @AttName("model?json")
     private TypeModelDef model = TypeModelDef.EMPTY;
 
-    @MetaAtt("docLib?json")
+    @AttName("docLib?json")
     private DocLibDef docLib = DocLibDef.EMPTY;
 
     public TypeDto(TypeDto dto) {
@@ -67,7 +70,6 @@ public class TypeDto {
         this.system = dto.system;
         this.dashboardType = dto.dashboardType;
         this.inheritActions = dto.inheritActions;
-        this.tenant = dto.tenant;
         this.configFormRef = dto.configFormRef;
         this.dispNameTemplate = Json.getMapper().copy(dto.getDispNameTemplate());
         this.inheritNumTemplate = dto.isInheritNumTemplate();
@@ -75,7 +77,9 @@ public class TypeDto {
         this.aliases = DataValue.create(dto.aliases).toList(String.class);
         this.associations = DataValue.create(dto.associations).toList(AssociationDto.class);
         this.actions = DataValue.create(dto.actions).toList(RecordRef.class);
-        this.createVariants = DataValue.create(dto.createVariants).toList(CreateVariantDto.class);
+        this.postCreateActionRef = dto.postCreateActionRef;
+        this.defaultCreateVariant = dto.defaultCreateVariant;
+        this.createVariants = DataValue.create(dto.createVariants).toList(CreateVariantDef.class);
         this.attributes = ObjectData.deepCopy(dto.attributes);
         this.numTemplateRef = dto.getNumTemplateRef();
         this.inheritForm = dto.isInheritForm();
@@ -102,17 +106,17 @@ public class TypeDto {
         this.docLib = docLib;
     }
 
-    @MetaAtt("parentRef")
+    @AttName("parentRef")
     public void setParent(RecordRef parentRef) {
         this.parentRef = parentRef;
     }
 
-    @MetaAtt("formRef")
+    @AttName("formRef")
     public void setForm(RecordRef formRef) {
         this.formRef = formRef;
     }
 
-    @MetaAtt("journalRef")
+    @AttName("journalRef")
     public void setJournal(RecordRef journalRef) {
         this.journalRef = journalRef;
     }
@@ -131,6 +135,9 @@ public class TypeDto {
 
     public void setName(MLText name) {
         this.name = name;
+        if (this.name == null) {
+            this.name = MLText.EMPTY;
+        }
     }
 
     public MLText getDescription() {
@@ -139,14 +146,9 @@ public class TypeDto {
 
     public void setDescription(MLText description) {
         this.description = description;
-    }
-
-    public String getTenant() {
-        return tenant;
-    }
-
-    public void setTenant(String tenant) {
-        this.tenant = tenant;
+        if (this.description == null) {
+            this.description = MLText.EMPTY;
+        }
     }
 
     public String getSourceId() {
@@ -162,7 +164,7 @@ public class TypeDto {
     }
 
     public void setParentRef(RecordRef parentRef) {
-        this.parentRef = parentRef;
+        this.parentRef = RecordRef.valueOf(parentRef);
     }
 
     public RecordRef getFormRef() {
@@ -170,7 +172,7 @@ public class TypeDto {
     }
 
     public void setFormRef(RecordRef formRef) {
-        this.formRef = formRef;
+        this.formRef = RecordRef.valueOf(formRef);
     }
 
     public RecordRef getJournalRef() {
@@ -178,7 +180,7 @@ public class TypeDto {
     }
 
     public void setJournalRef(RecordRef journalRef) {
-        this.journalRef = journalRef;
+        this.journalRef = RecordRef.valueOf(journalRef);
     }
 
     public boolean isSystem() {
@@ -194,7 +196,7 @@ public class TypeDto {
     }
 
     public void setDashboardType(String dashboardType) {
-        this.dashboardType = dashboardType;
+        this.dashboardType = StringUtils.defaultIfBlank(dashboardType, "");
     }
 
     public boolean isInheritActions() {
@@ -218,7 +220,7 @@ public class TypeDto {
     }
 
     public void setDispNameTemplate(MLText dispNameTemplate) {
-        this.dispNameTemplate = dispNameTemplate;
+        this.dispNameTemplate = dispNameTemplate != null ? dispNameTemplate : MLText.EMPTY;
     }
 
     public RecordRef getNumTemplateRef() {
@@ -226,7 +228,7 @@ public class TypeDto {
     }
 
     public void setNumTemplateRef(RecordRef numTemplateRef) {
-        this.numTemplateRef = numTemplateRef;
+        this.numTemplateRef = RecordRef.valueOf(numTemplateRef);
     }
 
     public boolean isInheritNumTemplate() {
@@ -261,12 +263,28 @@ public class TypeDto {
         this.associations = associations;
     }
 
-    public List<CreateVariantDto> getCreateVariants() {
+    public List<CreateVariantDef> getCreateVariants() {
         return createVariants;
     }
 
-    public void setCreateVariants(List<CreateVariantDto> createVariants) {
+    public void setCreateVariants(List<CreateVariantDef> createVariants) {
         this.createVariants = createVariants;
+    }
+
+    public RecordRef getPostCreateActionRef() {
+        return postCreateActionRef;
+    }
+
+    public void setPostCreateActionRef(RecordRef postCreateActionRef) {
+        this.postCreateActionRef = postCreateActionRef;
+    }
+
+    public Boolean getDefaultCreateVariant() {
+        return defaultCreateVariant;
+    }
+
+    public void setDefaultCreateVariant(Boolean defaultCreateVariant) {
+        this.defaultCreateVariant = defaultCreateVariant;
     }
 
     public ObjectData getAttributes() {
@@ -282,7 +300,7 @@ public class TypeDto {
     }
 
     public void setConfigFormRef(RecordRef configFormRef) {
-        this.configFormRef = configFormRef;
+        this.configFormRef = RecordRef.valueOf(configFormRef);
     }
 
     public ObjectData getConfig() {
@@ -291,6 +309,9 @@ public class TypeDto {
 
     public void setConfig(ObjectData config) {
         this.config = config;
+        if (this.config == null) {
+            this.config = ObjectData.create();
+        }
     }
 
     @Override
@@ -309,7 +330,6 @@ public class TypeDto {
             Objects.equals(id, typeDto.id) &&
             Objects.equals(name, typeDto.name) &&
             Objects.equals(description, typeDto.description) &&
-            Objects.equals(tenant, typeDto.tenant) &&
             Objects.equals(sourceId, typeDto.sourceId) &&
             Objects.equals(parentRef, typeDto.parentRef) &&
             Objects.equals(formRef, typeDto.formRef) &&
@@ -321,6 +341,7 @@ public class TypeDto {
             Objects.equals(actions, typeDto.actions) &&
             Objects.equals(associations, typeDto.associations) &&
             Objects.equals(createVariants, typeDto.createVariants) &&
+            Objects.equals(postCreateActionRef, typeDto.postCreateActionRef) &&
             Objects.equals(attributes, typeDto.attributes) &&
             Objects.equals(configFormRef, typeDto.configFormRef) &&
             Objects.equals(config, typeDto.config);
@@ -332,7 +353,6 @@ public class TypeDto {
             id,
             name,
             description,
-            tenant,
             sourceId,
             parentRef,
             formRef,
@@ -348,6 +368,7 @@ public class TypeDto {
             actions,
             associations,
             createVariants,
+            postCreateActionRef,
             attributes,
             configFormRef,
             config

@@ -274,8 +274,12 @@ public class TypeRecordsDao extends LocalRecordsDao
                     return findAndGetInheritedForm(dto);
                 case "attributes":
                     return dto.getAttributes();
+                case "defaultCreateVariant":
+                    return dto.getDefaultCreateVariant();
                 case "createVariants":
                     return dto.getCreateVariants();
+                case "postCreateActionRef":
+                    return dto.getPostCreateActionRef();
                 case "dashboardType":
                     return dto.getDashboardType();
                 case "inhDashboardType":
@@ -336,7 +340,7 @@ public class TypeRecordsDao extends LocalRecordsDao
 
         @Override
         public Object getJson() {
-            return dto;
+            return Json.getMapper().toNonDefaultJson(new TypeDto(dto));
         }
 
         @Override
@@ -494,8 +498,8 @@ public class TypeRecordsDao extends LocalRecordsDao
         }
 
         @JsonValue
-        public TypeDto toJson() {
-            return new TypeDto(this);
+        public Object toJson() {
+            return Json.getMapper().toNonDefaultJson(new TypeDto(this));
         }
     }
 

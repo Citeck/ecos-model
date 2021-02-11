@@ -14,7 +14,7 @@ import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.EcosModelApp;
 import ru.citeck.ecos.model.association.dto.AssocDirection;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
-import ru.citeck.ecos.model.type.dto.CreateVariantDto;
+import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef;
 import ru.citeck.ecos.model.type.dto.TypeDto;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.model.type.service.TypeService;
@@ -195,20 +195,22 @@ public class TypesSyncRecordsDaoTest {
             typeDto.setDispNameTemplate(DataValue.create("{\"ru\": \"Тест\"}").getAs(MLText.class));
             typeDto.setInheritNumTemplate(true);
             typeDto.setNumTemplateRef(RecordRef.valueOf("emodel/num-template@test"));
+            typeDto.setPostCreateActionRef(RecordRef.valueOf("uiserv/action@post-create-action"));
 
             types.add(typeDto);
             typeService.save(typeDto);
         }
     }
 
-    List<CreateVariantDto> generateCreateVariants(int idx) {
+    List<CreateVariantDef> generateCreateVariants(int idx) {
 
-        List<CreateVariantDto> result = new ArrayList<>();
+        List<CreateVariantDef> result = new ArrayList<>();
         for (int i = 0; i < 2; i++) {
-            CreateVariantDto dto = new CreateVariantDto();
-            dto.setId("cv-" + idx + "-" + i);
-            dto.setName(new MLText("Assoc " + idx + "-" + i));
-            dto.setAttributes(ObjectData.create("{\"cvKey\":\"cvValue-" + idx + "-" + i + "\"}"));
+            CreateVariantDef dto = CreateVariantDef.create()
+                .withId("cv-" + idx + "-" + i)
+                .withName(new MLText("Assoc " + idx + "-" + i))
+                .withAttributes(ObjectData.create("{\"cvKey\":\"cvValue-" + idx + "-" + i + "\"}"))
+                .build();
             result.add(dto);
         }
         return result;

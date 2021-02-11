@@ -20,12 +20,12 @@ import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.converter.DtoConverter;
+import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef;
 import ru.citeck.ecos.model.lib.type.dto.TypeDef;
 import ru.citeck.ecos.model.lib.type.repo.TypesRepo;
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils;
 import ru.citeck.ecos.model.service.exception.ForgottenChildsException;
 import ru.citeck.ecos.model.type.domain.TypeEntity;
-import ru.citeck.ecos.model.type.dto.CreateVariantDto;
 import ru.citeck.ecos.model.type.dto.TypeDto;
 import ru.citeck.ecos.model.type.dto.TypeWithMetaDto;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
@@ -37,7 +37,6 @@ import ru.citeck.ecos.records2.predicate.model.Predicate;
 import ru.citeck.ecos.records2.predicate.model.ValuePredicate;
 import springfox.documentation.annotations.Cacheable;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -50,7 +49,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TypeServiceImpl implements TypeService, TypesRepo {
 
-    private final CommandsService commandsService;
     private final TypeRepository typeRepository;
     private final DtoConverter<TypeWithMetaDto, TypeEntity> typeConverter;
 
@@ -91,12 +89,12 @@ public class TypeServiceImpl implements TypeService, TypesRepo {
             return null;
         }
         return TypeDef.create(b -> {
-            b.setId(typeDto.getId());
-            b.setModel(typeDto.getModel());
-            b.setDocLib(typeDto.getDocLib());
-            b.setInheritNumTemplate(typeDto.isInheritNumTemplate());
-            b.setNumTemplateRef(typeDto.getNumTemplateRef());
-            b.setParentRef(typeDto.getParentRef());
+            b.withId(typeDto.getId());
+            b.withModel(typeDto.getModel());
+            b.withDocLib(typeDto.getDocLib());
+            b.withInheritNumTemplate(typeDto.isInheritNumTemplate());
+            b.withNumTemplateRef(typeDto.getNumTemplateRef());
+            b.withParentRef(typeDto.getParentRef());
             return Unit.INSTANCE;
         });
     }
@@ -195,35 +193,113 @@ public class TypeServiceImpl implements TypeService, TypesRepo {
     }
 
     @Override
-    public List<CreateVariantDto> getCreateVariants(String extId) {
+    public List<CreateVariantDef> getCreateVariants(String extId) {
 
-        Map<String, CreateVariantDto> result = new LinkedHashMap<>();
+        List<CreateVariantDef> result = new ArrayList<>();
 
         forEachTypeInDescHierarchy(extId, type -> {
-            List<CreateVariantDto> createVariants = type.getCreateVariants();
-            if (createVariants != null) {
-                createVariants.forEach(cv -> {
-                    CreateVariantDto variant = new CreateVariantDto(cv);
-                    if (!variant.getAttributes().has("_etype")) {
-                        variant.getAttributes().set("_etype", "emodel/type@" + type.getId());
-                    }
-                    if (variant.getFormRef() == null) {
-                        variant.setFormRef(type.getFormRef());
-                    }
-                    if (RecordRef.isEmpty(variant.getRecordRef())) {
-                        if (StringUtils.isNotBlank(type.getSourceId())) {
-                            variant.setRecordRef(RecordRef.valueOf(type.getSourceId() + "@"));
-                        } else {
-                            variant.setRecordRef(RecordRef.valueOf("dict@idocs:doc"));
+
+            List<CreateVariantDef> createVariants = type.getCreateVariants();
+            if (createVariants == null) {
+                createVariants = Collections.emptyList();
+            }
+
+            if (Boolean.TRUE.equals(type.getDefaultCreateVariant())) {
+                List<CreateVariantDef> newVariants = new ArrayList<>();
+                newVariants.add(CreateVariantDef.create()
+                    .withId("DEFAULT")
+                    .build());
+                newVariants.addAll(createVariants);
+                createVariants = newVariants;
+            }
+
+            createVariants.forEach(cv -> {
+
+                CreateVariantDef.Builder variant = cv.copy();
+                if (RecordRef.isEmpty(variant.getTypeRef())) {
+                    variant.withTypeRef(TypeUtils.getTypeRef(type.getId()));
+                }
+
+                if (MLText.isEmpty(variant.getName()) && RecordRef.isNotEmpty(variant.getTypeRef())) {
+
+                    TypeWithMetaDto typeDto = getByExtId(variant.getTypeRef().getId());
+                    MLText typeName = null;
+                    if (typeDto != null) {
+                        typeName = typeDto.getName();
+                        if (MLText.isEmpty(typeName)) {
+                            typeName = new MLText(typeDto.getId());
                         }
                     }
-                    result.put(variant.getId(), variant);
-                });
+                    if (typeName != null && !MLText.isEmpty(typeName)) {
+                        Map<Locale, String> createVariantText = new HashMap<>();
+                        createVariantText.put(
+                            Locale.ENGLISH,
+                            "Create " + typeName.getClosestValue(Locale.ENGLISH)
+                        );
+                        createVariantText.put(
+                            new Locale("ru"),
+                            "Создать " + typeName.getClosestValue(new Locale("ru"))
+                        );
+                        variant.withName(new MLText(createVariantText));
+                    }
+                }
+                if (RecordRef.isEmpty(variant.getFormRef())) {
+                    variant.withFormRef(getInhFormRef(variant.getTypeRef().getId()));
+                }
+                if (variant.getSourceId().isEmpty()) {
+                    variant.withSourceId(getSourceIdForType(type));
+                }
+                if (RecordRef.isEmpty(variant.getPostActionRef())) {
+                    variant.withPostActionRef(getPostCreateActionRef(type));
+                }
+                if (!variant.getSourceId().isEmpty()) {
+                    result.add(variant.build());
+                } else {
+                    log.warn("Create variant without sourceId will be ignored: " + variant.build());
+                }
+            });
+            return false;
+        });
+
+        return result;
+    }
+
+    private RecordRef getPostCreateActionRef(TypeDto type) {
+
+        if (RecordRef.isNotEmpty(type.getPostCreateActionRef())) {
+            return type.getPostCreateActionRef();
+        }
+
+        AtomicReference<RecordRef> result = new AtomicReference<>(RecordRef.EMPTY);
+
+        forEachTypeInAscHierarchy(type.getId(), inhType -> {
+            if (RecordRef.isNotEmpty(inhType.getPostCreateActionRef())) {
+                result.set(inhType.getPostCreateActionRef());
+                return true;
             }
             return false;
         });
 
-        return new ArrayList<>(result.values());
+        return result.get();
+    }
+
+    private String getSourceIdForType(TypeDto type) {
+
+        if (StringUtils.isNotBlank(type.getSourceId())) {
+            return type.getSourceId();
+        }
+
+        AtomicReference<String> result = new AtomicReference<>("");
+
+        forEachTypeInAscHierarchy(type.getId(), inhType -> {
+            if (StringUtils.isNotBlank(inhType.getSourceId())) {
+                result.set(inhType.getSourceId());
+                return true;
+            }
+            return false;
+        });
+
+        return result.get();
     }
 
     @Override
@@ -358,7 +434,7 @@ public class TypeServiceImpl implements TypeService, TypesRepo {
     private void forEachTypeInAscHierarchy(String extId, Function<TypeWithMetaDto, Boolean> action) {
 
         TypeWithMetaDto type = getByExtId(extId);
-        if (action.apply(type)) {
+        if (type == null || action.apply(type)) {
             return;
         }
 
@@ -451,24 +527,32 @@ public class TypeServiceImpl implements TypeService, TypesRepo {
 
         TypeEntity entity = typeConverter.dtoToEntity(new TypeWithMetaDto(dto));
         entity = typeRepository.save(entity);
+        updateModifiedTimeForLinkedTypes(dto.getId());
+
         removeAliasedTypes(entity);
 
         TypeWithMetaDto typeDto = typeConverter.entityToDto(entity);
 
         onTypeChangedListener.accept(typeDto);
 
-        commandsService.execute(b -> {
-            b.setTargetApp("uiserv");
-            b.setBody(new UiservTypeUpdatedCommand(
-                RecordRef.create("emodel", "type", dto.getId()),
-                typeDto.getFormRef(),
-                typeDto.getJournalRef()
-            ));
-            b.setTtl(Duration.ZERO);
-            return Unit.INSTANCE;
-        });
-
         return typeDto;
+    }
+
+    private void updateModifiedTimeForLinkedTypes(@NotNull String typeId) {
+
+        Function<TypeWithMetaDto, Boolean> action = type -> {
+            if (!typeId.equals(type.getId())) {
+                TypeEntity childEntity = typeRepository.findByExtId(type.getId()).orElse(null);
+                if (childEntity != null) {
+                    childEntity.setLastModifiedDate(Instant.now());
+                    typeRepository.save(childEntity);
+                }
+            }
+            return false;
+        };
+
+        forEachTypeInDescHierarchy(typeId, action);
+        forEachTypeInAscHierarchy(typeId, action);
     }
 
     private void removeAliasedTypes(final TypeEntity entity) {
@@ -567,14 +651,5 @@ public class TypeServiceImpl implements TypeService, TypesRepo {
         private String name;
         private String moduleId;
         private Boolean system;
-    }
-
-    @Data
-    @AllArgsConstructor
-    @CommandType("uiserv.type-updated")
-    public static class UiservTypeUpdatedCommand {
-        private RecordRef typeRef;
-        private RecordRef formRef;
-        private RecordRef journalRef;
     }
 }

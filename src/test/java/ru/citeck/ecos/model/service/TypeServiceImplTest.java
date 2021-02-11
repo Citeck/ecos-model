@@ -65,7 +65,6 @@ public class TypeServiceImplTest {
         CommandsService commandsService = new CommandsServiceFactory().getCommandsService();
 
         typeService = new TypeServiceImpl(
-            commandsService,
             typeRepository,
             typeConverter
         );
@@ -281,7 +280,6 @@ public class TypeServiceImplTest {
 
         //  assert
         Mockito.verify(typeRepository, Mockito.times(1)).save(typeEntity);
-        Mockito.verify(typeConverter, Mockito.times(1)).entityToDto(typeEntity);
     }
 
     @Test

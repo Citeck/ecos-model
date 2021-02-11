@@ -6,5 +6,6 @@
     "en": "Folder"
   },
   "system": true,
-  "dashboardType": "case-details"
+  "dashboardType": "case-details",
+  "sourceId": "alfresco/"
 }

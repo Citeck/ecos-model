@@ -50,29 +50,25 @@ public class TypeEntity extends AbstractAuditingEntity {
 
     private String config;
 
-    @Column(name = "disp_name_template")
     private String dispNameTemplate;
 
-    @Column(name = "num_template_ref")
     private String numTemplateRef;
 
-    @Column(name = "inherit_num_template")
     private Boolean inheritNumTemplate;
 
-    @Column(name = "inherit_form")
     private Boolean inheritForm;
 
-    @Column(name = "computed_attributes")
     private String computedAttributes;
 
-    @Column(name = "source_id")
     private String sourceId;
 
-    @Column(name = "create_variants")
     private String createVariants;
 
-    @Column(name = "inherit_actions")
     private boolean inheritActions;
+
+    private Boolean defaultCreateVariant;
+
+    private String postCreateActionRef;
 
     @ManyToOne(cascade = {CascadeType.DETACH})
     @JoinColumn(name = "parent_id")
@@ -104,7 +100,6 @@ public class TypeEntity extends AbstractAuditingEntity {
 
     private String model;
 
-    @Column(name = "doc_lib")
     private String docLib;
 
     public void setAssociations(Set<AssociationEntity> associations) {

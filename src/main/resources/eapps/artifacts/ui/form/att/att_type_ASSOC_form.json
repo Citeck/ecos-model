@@ -1,0 +1,27 @@
+{
+  "id": "att-type-ASSOC-form",
+  "formKey": "",
+  "title": {
+    "en": "Association form"
+  },
+  "description": {},
+  "customModule": null,
+  "typeRef": "",
+  "width": "default",
+  "i18n": {},
+  "definition": {
+    "components": [
+      {
+        "label": {
+          "ru": "Type",
+          "en": "Тип"
+        },
+        "journalId": "ecos-types",
+        "key": "typeRef",
+        "type": "selectJournal",
+        "input": true
+      }
+    ]
+  },
+  "attributes": {}
+}

@@ -15,10 +15,10 @@ import ru.citeck.ecos.model.converter.AbstractDtoConverter;
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef;
 import ru.citeck.ecos.model.lib.role.dto.RoleDef;
 import ru.citeck.ecos.model.lib.status.dto.StatusDef;
+import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef;
 import ru.citeck.ecos.model.lib.type.dto.DocLibDef;
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef;
 import ru.citeck.ecos.model.type.domain.TypeEntity;
-import ru.citeck.ecos.model.type.dto.CreateVariantDto;
 import ru.citeck.ecos.model.type.dto.TypeWithMetaDto;
 import ru.citeck.ecos.model.type.records.dao.TypeRecordsDao;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
@@ -99,7 +99,6 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
         ObjectData config = dto.getConfig() != null ? dto.getConfig() : ObjectData.create();
         typeEntity.setConfig(config.toString());
 
-        typeEntity.setTenant(dto.getTenant());
         typeEntity.setConfigForm(RecordRef.toString(dto.getConfigFormRef()));
         typeEntity.setForm(RecordRef.toString(dto.getFormRef()));
         typeEntity.setInheritForm(dto.isInheritForm());
@@ -125,7 +124,10 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
         }
 
         typeEntity.setActions(mapper.toString(dto.getActions()));
-        typeEntity.setCreateVariants(mapper.toString(dto.getCreateVariants()));
+        typeEntity.setCreateVariants(mapper.toString(filterNotEmpty(dto.getCreateVariants(), CreateVariantDef::getId)));
+
+        typeEntity.setDefaultCreateVariant(dto.getDefaultCreateVariant());
+        typeEntity.setPostCreateActionRef(RecordRef.toString(dto.getPostCreateActionRef()));
 
         if (dto.getAliases() != null) {
             typeEntity.setAliases(new HashSet<>(dto.getAliases()));
@@ -196,7 +198,6 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
         dto.setInheritActions(entity.isInheritActions());
         dto.setFormRef(RecordRef.valueOf(entity.getForm()));
         dto.setJournalRef(RecordRef.valueOf(entity.getJournal()));
-        dto.setTenant(entity.getTenant());
         dto.setConfigFormRef(RecordRef.valueOf(entity.getConfigForm()));
         dto.setConfig(mapper.read(entity.getConfig(), ObjectData.class));
         dto.setSourceId(entity.getSourceId());
@@ -243,6 +244,9 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
             dto.setCreateVariants(Collections.emptyList());
         }
 
+        dto.setDefaultCreateVariant(Boolean.TRUE.equals(entity.getDefaultCreateVariant()));
+        dto.setPostCreateActionRef(RecordRef.valueOf(entity.getPostCreateActionRef()));
+
         dto.setAliases(new ArrayList<>(entity.getAliases()));
 
         dto.setCreated(entity.getCreatedDate());
@@ -255,5 +259,5 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
 
     public static class RecordRefsList extends ArrayList<RecordRef> {}
 
-    public static class CreateVariantsList extends ArrayList<CreateVariantDto> {}
+    public static class CreateVariantsList extends ArrayList<CreateVariantDef> {}
 }
