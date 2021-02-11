@@ -231,16 +231,7 @@ public class TypeServiceImpl implements TypeService, TypesRepo {
                         }
                     }
                     if (typeName != null && !MLText.isEmpty(typeName)) {
-                        Map<Locale, String> createVariantText = new HashMap<>();
-                        createVariantText.put(
-                            Locale.ENGLISH,
-                            "Create " + typeName.getClosestValue(Locale.ENGLISH)
-                        );
-                        createVariantText.put(
-                            new Locale("ru"),
-                            "Создать " + typeName.getClosestValue(new Locale("ru"))
-                        );
-                        variant.withName(new MLText(createVariantText));
+                        variant.withName(typeName);
                     }
                 }
                 if (RecordRef.isEmpty(variant.getFormRef())) {
