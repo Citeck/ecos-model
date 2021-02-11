@@ -99,7 +99,6 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
         ObjectData config = dto.getConfig() != null ? dto.getConfig() : ObjectData.create();
         typeEntity.setConfig(config.toString());
 
-        typeEntity.setTenant(dto.getTenant());
         typeEntity.setConfigForm(RecordRef.toString(dto.getConfigFormRef()));
         typeEntity.setForm(RecordRef.toString(dto.getFormRef()));
         typeEntity.setInheritForm(dto.isInheritForm());
@@ -199,7 +198,6 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
         dto.setInheritActions(entity.isInheritActions());
         dto.setFormRef(RecordRef.valueOf(entity.getForm()));
         dto.setJournalRef(RecordRef.valueOf(entity.getJournal()));
-        dto.setTenant(entity.getTenant());
         dto.setConfigFormRef(RecordRef.valueOf(entity.getConfigForm()));
         dto.setConfig(mapper.read(entity.getConfig(), ObjectData.class));
         dto.setSourceId(entity.getSourceId());

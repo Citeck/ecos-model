@@ -118,7 +118,6 @@ public class TypeConverterTest {
         typeDto.setId("type");
         typeDto.setName(new MLText("name"));
         typeDto.setDescription(new MLText("desc"));
-        typeDto.setTenant("tenant");
         typeDto.setActions(Collections.singletonList(actionRef));
         typeDto.setAssociations(Collections.singletonList(associationDto));
         typeDto.setInheritActions(true);
@@ -196,7 +195,6 @@ public class TypeConverterTest {
             Arrays.asList(Json.getMapper().read(resultEntity.getCreateVariants(), CreateVariantDef[].class)));
         Assert.assertEquals(typeDto.getAttributes(), Json.getMapper().read(resultEntity.getAttributes(),
             ObjectData.class));
-        Assert.assertEquals(typeDto.getTenant(), resultEntity.getTenant());
         Assert.assertEquals(typeDto.isInheritActions(), resultEntity.isInheritActions());
         Assert.assertEquals(typeDto.getJournalRef(), RecordRef.valueOf(resultEntity.getJournal()));
         Assert.assertEquals(typeDto.getAliases(), resultEntity.getAliases().stream().collect(Collectors.toList()));
@@ -232,7 +230,6 @@ public class TypeConverterTest {
             Arrays.asList(Json.getMapper().read(resultEntity.getCreateVariants(), CreateVariantDef[].class)));
         Assert.assertEquals(typeDto.getAttributes(), Json.getMapper().read(resultEntity.getAttributes(),
             ObjectData.class));
-        Assert.assertEquals(typeDto.getTenant(), resultEntity.getTenant());
         Assert.assertEquals(typeDto.isInheritActions(), resultEntity.isInheritActions());
         Assert.assertEquals(typeDto.getJournalRef(), RecordRef.valueOf(resultEntity.getJournal()));
         Assert.assertEquals(typeDto.getAliases(), resultEntity.getAliases().stream().collect(Collectors.toList()));

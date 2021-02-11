@@ -340,7 +340,7 @@ public class TypeRecordsDao extends LocalRecordsDao
 
         @Override
         public Object getJson() {
-            return dto;
+            return Json.getMapper().toNonDefaultJson(new TypeDto(dto));
         }
 
         @Override
@@ -498,8 +498,8 @@ public class TypeRecordsDao extends LocalRecordsDao
         }
 
         @JsonValue
-        public TypeDto toJson() {
-            return new TypeDto(this);
+        public Object toJson() {
+            return Json.getMapper().toNonDefaultJson(new TypeDto(this));
         }
     }
 
