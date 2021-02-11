@@ -20,62 +20,6 @@
         "key": "typeRef",
         "type": "selectJournal",
         "input": true
-      },
-      {
-        "label": {
-          "ru": "Columns"
-        },
-        "columns": [
-          {
-            "components": [],
-            "md": 3,
-            "type": "column",
-            "input": false,
-            "key": "column",
-            "index": 0
-          },
-          {
-            "md": 3,
-            "type": "column",
-            "input": false,
-            "key": "column",
-            "index": 1,
-            "components": []
-          },
-          {
-            "md": 3,
-            "type": "column",
-            "input": false,
-            "key": "column",
-            "index": 2,
-            "components": []
-          },
-          {
-            "md": 3,
-            "type": "column",
-            "input": false,
-            "key": "column",
-            "index": 3,
-            "components": [
-              {
-                "label": {
-                  "ru": "Сохранить",
-                  "en": "Save"
-                },
-                "state": "",
-                "theme": "primary",
-                "block": true,
-                "disableOnInvalid": true,
-                "key": "submit",
-                "type": "button",
-                "input": true
-              }
-            ]
-          }
-        ],
-        "key": "columns2",
-        "type": "columns",
-        "input": false
       }
     ]
   },

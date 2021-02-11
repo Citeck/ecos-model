@@ -1,0 +1,62 @@
+{
+  "id": "create-variant-form",
+  "formKey": "",
+  "title": {
+    "en": "create-variant-form"
+  },
+  "description": {},
+  "customModule": null,
+  "typeRef": "",
+  "width": "default",
+  "i18n": {},
+  "definition": {
+    "components": [
+      {
+        "label": {
+          "ru": "Attributes"
+        },
+        "keyLabel": "",
+        "key": "attributes",
+        "type": "datamap",
+        "input": true
+      },
+      {
+        "label": {
+          "ru": "Form options"
+        },
+        "keyLabel": "",
+        "key": "formOptions",
+        "type": "datamap",
+        "input": true
+      },
+      {
+        "label": {
+          "ru": "Properties"
+        },
+        "keyLabel": "",
+        "key": "properties",
+        "type": "datamap",
+        "input": true
+      },
+      {
+        "label": {
+          "ru": "Source ID"
+        },
+        "defaultValue": "",
+        "key": "sourceId",
+        "type": "textfield",
+        "input": true
+      },
+      {
+        "label": {
+          "ru": "Post create action"
+        },
+        "journalId": "ui-actions",
+        "key": "postActionRef",
+        "type": "selectJournal",
+        "input": true
+      }
+    ]
+  },
+  "attributes": {}
+}

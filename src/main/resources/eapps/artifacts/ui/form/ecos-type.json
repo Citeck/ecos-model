@@ -260,7 +260,8 @@
                           "ru": "",
                           "en": ""
                         },
-                        "submit4": false
+                        "submit4": false,
+                        "submit8": false
                       }
                     ],
                     "validate": {
@@ -310,7 +311,13 @@
                             "type": "selectJournal",
                             "customPredicateJs": null,
                             "presetFilterPredicatesJs": null,
-                            "input": true
+                            "input": true,
+                            "source": {
+                              "custom": {
+                                "columns": []
+                              },
+                              "type": "journal"
+                            }
                           }
                         ],
                         "row": "0-2",
@@ -318,16 +325,76 @@
                       },
                       {
                         "label": {
-                          "en": "Additional",
-                          "ru": "Дополнительно"
+                          "ru": "Panel"
                         },
-                        "action": "custom",
-                        "state": "",
-                        "showValidations": false,
-                        "custom": "var currentRow = row;\nvar atts = [\n  ['attributes', {}], \n  ['formOptions', {}], \n  ['postActionRef', ''], \n  ['properties', {}]\n];\nvar formData = {};\nfor (var key of atts) {\n  formData[key[0]] = row[key[0]] || key[1];\n}\nCiteck.EcosFormUtils.getFormById('uiserv/eform@create-variant-form', {\n    definition: 'definition?json'\n}).then(function(formConfig) {\n    \n    Citeck.Dialogs.showFormDialog({\n        title: 'Create variant',\n        showDefaultButtons: true,\n        formDefinition: formConfig.definition,\n        formData: formData,\n        onSubmit: submission => {\n            var data = submission.data || {};\n\n\t\t\tfor (var key of atts) {\n\t\t\t  currentRow[key[0]] = data[key[0]] || key[1];\n\t\t\t}\n        }\n    })\n    \n});",
-                        "key": "submit4",
-                        "type": "button",
-                        "input": true,
+                        "key": "panel10",
+                        "type": "panel",
+                        "input": false,
+                        "components": [
+                          {
+                            "label": {
+                              "en": "Additional",
+                              "ru": "Дополнительно"
+                            },
+                            "action": "custom",
+                            "state": "",
+                            "showValidations": false,
+                            "custom": "var currentRow = row;\nvar atts = [\n  ['attributes', {}], \n  ['formOptions', {}], \n  ['postActionRef', ''], \n  ['properties', {}],\n  ['sourceId', []]\n];\nvar formData = {};\nfor (var key of atts) {\n  formData[key[0]] = row[key[0]] || key[1];\n}\nCiteck.EcosFormUtils.getFormById('uiserv/eform@create-variant-form', {\n    definition: 'definition?json'\n}).then(function(formConfig) {\n    \n    Citeck.Dialogs.showFormDialog({\n        title: 'Create variant',\n        showDefaultButtons: true,\n        formDefinition: formConfig.definition,\n        formData: formData,\n        onSubmit: submission => {\n            var data = submission.data || {};\n\n\t\t\tfor (var key of atts) {\n\t\t\t  currentRow[key[0]] = data[key[0]] || key[1];\n\t\t\t}\n        }\n    })\n    \n});",
+                            "key": "submit8",
+                            "type": "button",
+                            "input": true,
+                            "row": "0-3"
+                          },
+                          {
+                            "label": {
+                              "ru": "attributes"
+                            },
+                            "key": "attributes",
+                            "properties": {
+                              "dataType": "json"
+                            },
+                            "type": "hidden",
+                            "input": true
+                          },
+                          {
+                            "label": {
+                              "ru": "formOptions"
+                            },
+                            "key": "formOptions",
+                            "properties": {
+                              "dataType": "json"
+                            },
+                            "type": "hidden",
+                            "input": true
+                          },
+                          {
+                            "label": {
+                              "ru": "properties"
+                            },
+                            "key": "properties",
+                            "properties": {
+                              "dataType": "json"
+                            },
+                            "type": "hidden",
+                            "input": true
+                          },
+                          {
+                            "label": {
+                              "ru": "postActionRef"
+                            },
+                            "key": "postActionRef",
+                            "type": "hidden",
+                            "input": true
+                          },
+                          {
+                            "label": {
+                              "ru": "sourceId"
+                            },
+                            "key": "sourceId",
+                            "type": "hidden",
+                            "input": true
+                          }
+                        ],
                         "row": "0-3"
                       }
                     ],
@@ -630,6 +697,17 @@
                                     "type": "button",
                                     "input": true,
                                     "row": "0-3"
+                                  },
+                                  {
+                                    "label": {
+                                      "ru": "config"
+                                    },
+                                    "key": "config",
+                                    "properties": {
+                                      "dataType": "json"
+                                    },
+                                    "type": "hidden",
+                                    "input": true
                                   }
                                 ],
                                 "md": 2
@@ -699,6 +777,17 @@
                                     "block": true,
                                     "key": "submit7",
                                     "type": "button",
+                                    "input": true
+                                  },
+                                  {
+                                    "label": {
+                                      "ru": "computed"
+                                    },
+                                    "key": "computed",
+                                    "properties": {
+                                      "dataType": "json"
+                                    },
+                                    "type": "hidden",
                                     "input": true
                                   }
                                 ],
