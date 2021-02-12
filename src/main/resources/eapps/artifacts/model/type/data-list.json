@@ -1,0 +1,11 @@
+{
+  "id": "data-list",
+  "parent": "emodel/type@user-base",
+  "name": {
+    "ru": "Элемент справочника",
+    "en": "Data list item"
+  },
+  "system": true,
+  "inheritActions": true,
+  "sourceId": "alfresco/"
+}
