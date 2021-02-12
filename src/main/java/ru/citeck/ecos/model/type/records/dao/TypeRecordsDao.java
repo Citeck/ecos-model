@@ -308,6 +308,8 @@ public class TypeRecordsDao extends LocalRecordsDao
                     return dto.getCreator();
                 case "sourceId":
                     return dto.getSourceId();
+                case "inhSourceId":
+                    return typeService.getInhSourceId(dto.getId());
                 case "dispNameTemplate":
                     return dto.getDispNameTemplate();
                 case "inheritNumTemplate":

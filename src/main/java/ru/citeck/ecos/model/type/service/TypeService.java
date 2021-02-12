@@ -52,6 +52,8 @@ public interface TypeService {
 
     RecordRef getConfigFormRef(String extId);
 
+    String getInhSourceId(String extId);
+
     void delete(String extId);
 
     TypeWithMetaDto save(TypeDto dto);

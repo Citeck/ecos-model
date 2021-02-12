@@ -167,6 +167,23 @@ public class TypeServiceImpl implements TypeService, TypesRepo {
     }
 
     @Override
+    public String getInhSourceId(String extId) {
+
+        AtomicReference<String> result = new AtomicReference<>();
+
+        forEachTypeInAscHierarchy(extId, dto -> {
+            String sourceId = dto.getSourceId();
+            if (StringUtils.isNotBlank(sourceId)) {
+                result.set(sourceId);
+                return true;
+            }
+            return false;
+        });
+
+        return result.get() == null ? "" : result.get();
+    }
+
+    @Override
     public DataValue getInhAttribute(String extId, String name) {
 
         AtomicReference<DataValue> result = new AtomicReference<>();
