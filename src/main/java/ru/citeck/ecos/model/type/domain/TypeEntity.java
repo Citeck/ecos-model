@@ -40,6 +40,8 @@ public class TypeEntity extends AbstractAuditingEntity {
 
     private String journal;
 
+    private String metaRecord;
+
     private String attributes;
 
     private Boolean system;

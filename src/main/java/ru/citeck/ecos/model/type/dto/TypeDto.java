@@ -24,6 +24,7 @@ public class TypeDto {
     private MLText name = MLText.EMPTY;
     private MLText description = MLText.EMPTY;
     private String sourceId = "";
+    private RecordRef metaRecord = RecordRef.EMPTY;
     private RecordRef parentRef = RecordRef.EMPTY;
     private RecordRef formRef = RecordRef.EMPTY;
     private RecordRef journalRef = RecordRef.EMPTY;
@@ -62,6 +63,7 @@ public class TypeDto {
 
         this.id = dto.id;
         this.sourceId = dto.sourceId;
+        this.metaRecord = dto.metaRecord;
         this.name = Json.getMapper().copy(dto.name);
         this.description = Json.getMapper().copy(dto.description);
         this.parentRef = dto.parentRef;
@@ -157,6 +159,14 @@ public class TypeDto {
 
     public void setSourceId(String sourceId) {
         this.sourceId = StringUtils.defaultIfBlank(sourceId, "");
+    }
+
+    public RecordRef getMetaRecord() {
+        return metaRecord;
+    }
+
+    public void setMetaRecord(RecordRef metaRecord) {
+        this.metaRecord = RecordRef.valueOf(metaRecord);
     }
 
     public RecordRef getParentRef() {

@@ -334,6 +334,8 @@ public class TypeRecordsDao extends LocalRecordsDao
                     return dto.getDocLib();
                 case "resolvedDocLib":
                     return typeDefService.getDocLib(TypeUtils.getTypeRef(dto.getId()));
+                case "metaRecord":
+                    return dto.getMetaRecord();
             }
             return null;
         }

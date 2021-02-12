@@ -55,6 +55,7 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
         typeEntity.setSystem(dto.isSystem());
         typeEntity.setDashboardType(dto.getDashboardType());
         typeEntity.setSourceId(dto.getSourceId());
+        typeEntity.setMetaRecord(RecordRef.toString(dto.getMetaRecord()));
 
         String typeDtoId = dto.getId();
         if (Strings.isBlank(typeDtoId)) {
@@ -201,6 +202,7 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
         dto.setConfigFormRef(RecordRef.valueOf(entity.getConfigForm()));
         dto.setConfig(mapper.read(entity.getConfig(), ObjectData.class));
         dto.setSourceId(entity.getSourceId());
+        dto.setMetaRecord(RecordRef.valueOf(entity.getMetaRecord()));
 
         dto.setModel(mapper.read(entity.getModel(), TypeModelDef.class));
         if (dto.getModel() == null) {
