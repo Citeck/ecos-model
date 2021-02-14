@@ -168,9 +168,8 @@ public class SectionRecordsDao extends LocalRecordsDao
         @JsonProperty("_content")
         public void setContent(List<ObjectData> content) {
 
-            String base64Content = content.get(0).get("url", "");
-            base64Content = base64Content.replaceAll("^data:application/json;base64,", "");
-            ObjectData data = Json.getMapper().read(Base64.getDecoder().decode(base64Content), ObjectData.class);
+            String dataUriContent = content.get(0).get("url", "");
+            ObjectData data = Json.getMapper().read(dataUriContent, ObjectData.class);
 
             Json.getMapper().applyData(this, data);
         }

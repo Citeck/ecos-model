@@ -13,6 +13,7 @@ import ru.citeck.ecos.commons.data.DataValue;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
+import ru.citeck.ecos.commons.json.YamlUtils;
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef;
 import ru.citeck.ecos.model.lib.role.dto.RoleDef;
 import ru.citeck.ecos.model.lib.status.dto.StatusDef;
@@ -42,6 +43,7 @@ import ru.citeck.ecos.records2.source.dao.local.MutableRecordsLocalDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsMetaDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsQueryWithMetaDao;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -338,6 +340,8 @@ public class TypeRecordsDao extends LocalRecordsDao
                     return typeDefService.getDocLib(TypeUtils.getTypeRef(dto.getId()));
                 case "metaRecord":
                     return dto.getMetaRecord();
+                case "data":
+                    return YamlUtils.toNonDefaultString(getJson()).getBytes(StandardCharsets.UTF_8);
             }
             return null;
         }
@@ -494,9 +498,8 @@ public class TypeRecordsDao extends LocalRecordsDao
         @JsonProperty("_content")
         public void setContent(List<ObjectData> content) {
 
-            String base64Content = content.get(0).get("url", "");
-            base64Content = base64Content.replaceAll("^data:application/json;base64,", "");
-            ObjectData data = Json.getMapper().read(Base64.getDecoder().decode(base64Content), ObjectData.class);
+            String dataUriContent = content.get(0).get("url", "");
+            ObjectData data = Json.getMapper().read(dataUriContent, ObjectData.class);
 
             Json.getMapper().applyData(this, data);
         }
@@ -504,6 +507,10 @@ public class TypeRecordsDao extends LocalRecordsDao
         @JsonValue
         public Object toJson() {
             return Json.getMapper().toNonDefaultJson(new TypeDto(this));
+        }
+
+        public byte[] getData() {
+            return YamlUtils.toNonDefaultString(toJson()).getBytes(StandardCharsets.UTF_8);
         }
     }
 

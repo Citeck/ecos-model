@@ -5,6 +5,7 @@ import ru.citeck.ecos.commons.data.DataValue;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
+import ru.citeck.ecos.commons.json.serialization.annotation.IncludeNonDefault;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef;
 import ru.citeck.ecos.model.lib.type.dto.DocLibDef;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@IncludeNonDefault
 public class TypeDto {
 
     @NotNull
