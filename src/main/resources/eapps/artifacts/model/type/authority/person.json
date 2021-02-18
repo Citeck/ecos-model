@@ -4,6 +4,7 @@
     "ru": "Человек",
     "en": "Person"
   },
+  "parentRef": "emodel/type@authority",
   "system": true,
   "inheritActions": true,
   "dashboardType": "profile-details",
