@@ -190,11 +190,11 @@ public class TypeServiceImpl implements TypeService, TypesRepo {
 
         forEachTypeInAscHierarchy(extId, type -> {
 
-            if (type.getAttributes() == null) {
+            if (type.getProperties() == null) {
                 return false;
             }
 
-            DataValue value = type.getAttributes().get(name);
+            DataValue value = type.getProperties().get(name);
             if (value.isNotNull() && (!value.isTextual() || StringUtils.isNotBlank(value.asText()))) {
                 result.set(value);
                 return true;

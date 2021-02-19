@@ -196,7 +196,7 @@ public class TypeConverterTest {
         Assert.assertEquals(typeDto.getConfigFormRef(), RecordRef.valueOf(resultEntity.getConfigForm()));
         Assert.assertEquals(typeDto.getCreateVariants(),
             Arrays.asList(Json.getMapper().read(resultEntity.getCreateVariants(), CreateVariantDef[].class)));
-        Assert.assertEquals(typeDto.getAttributes(), Json.getMapper().read(resultEntity.getAttributes(),
+        Assert.assertEquals(typeDto.getProperties(), Json.getMapper().read(resultEntity.getAttributes(),
             ObjectData.class));
         Assert.assertEquals(typeDto.isInheritActions(), resultEntity.isInheritActions());
         Assert.assertEquals(typeDto.getJournalRef(), RecordRef.valueOf(resultEntity.getJournal()));
@@ -231,7 +231,7 @@ public class TypeConverterTest {
         Assert.assertEquals(typeDto.getConfigFormRef(), RecordRef.valueOf(resultEntity.getConfigForm()));
         Assert.assertEquals(typeDto.getCreateVariants(),
             Arrays.asList(Json.getMapper().read(resultEntity.getCreateVariants(), CreateVariantDef[].class)));
-        Assert.assertEquals(typeDto.getAttributes(), Json.getMapper().read(resultEntity.getAttributes(),
+        Assert.assertEquals(typeDto.getProperties(), Json.getMapper().read(resultEntity.getAttributes(),
             ObjectData.class));
         Assert.assertEquals(typeDto.isInheritActions(), resultEntity.isInheritActions());
         Assert.assertEquals(typeDto.getJournalRef(), RecordRef.valueOf(resultEntity.getJournal()));

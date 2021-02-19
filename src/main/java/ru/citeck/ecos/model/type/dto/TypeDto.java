@@ -47,10 +47,10 @@ public class TypeDto {
 
     private RecordRef postCreateActionRef = RecordRef.EMPTY;
 
-    private Boolean defaultCreateVariant;
+    private Boolean defaultCreateVariant = true;
     private List<CreateVariantDef> createVariants = new ArrayList<>();
 
-    private ObjectData attributes = ObjectData.create();
+    private ObjectData properties = ObjectData.create();
 
     private RecordRef configFormRef = RecordRef.EMPTY;
     private ObjectData config = ObjectData.create();
@@ -84,7 +84,7 @@ public class TypeDto {
         this.postCreateActionRef = dto.postCreateActionRef;
         this.defaultCreateVariant = dto.defaultCreateVariant;
         this.createVariants = DataValue.create(dto.createVariants).toList(CreateVariantDef.class);
-        this.attributes = ObjectData.deepCopy(dto.attributes);
+        this.properties = ObjectData.deepCopy(dto.properties);
         this.numTemplateRef = dto.getNumTemplateRef();
         this.inheritForm = dto.isInheritForm();
         this.model = dto.getModel() != null ? dto.getModel().copy().build() : null;
@@ -296,15 +296,19 @@ public class TypeDto {
     }
 
     public void setDefaultCreateVariant(Boolean defaultCreateVariant) {
-        this.defaultCreateVariant = defaultCreateVariant;
-    }
-
-    public ObjectData getAttributes() {
-        return attributes;
+        this.defaultCreateVariant = !Boolean.FALSE.equals(defaultCreateVariant);
     }
 
     public void setAttributes(ObjectData attributes) {
-        this.attributes = attributes;
+        this.properties = attributes;
+    }
+
+    public ObjectData getProperties() {
+        return properties;
+    }
+
+    public void setProperties(ObjectData properties) {
+        this.properties = properties;
     }
 
     public RecordRef getConfigFormRef() {
@@ -355,7 +359,7 @@ public class TypeDto {
             Objects.equals(defaultCreateVariant, typeDto.defaultCreateVariant) &&
             Objects.equals(createVariants, typeDto.createVariants) &&
             Objects.equals(postCreateActionRef, typeDto.postCreateActionRef) &&
-            Objects.equals(attributes, typeDto.attributes) &&
+            Objects.equals(properties, typeDto.properties) &&
             Objects.equals(configFormRef, typeDto.configFormRef) &&
             Objects.equals(config, typeDto.config);
     }
@@ -383,7 +387,7 @@ public class TypeDto {
             defaultCreateVariant,
             createVariants,
             postCreateActionRef,
-            attributes,
+            properties,
             configFormRef,
             config
         );

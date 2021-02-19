@@ -275,7 +275,8 @@ public class TypeRecordsDao extends LocalRecordsDao
                 case "inheritedForm":
                     return findAndGetInheritedForm(dto);
                 case "attributes":
-                    return dto.getAttributes();
+                case "properties":
+                    return dto.getProperties();
                 case "defaultCreateVariant":
                     return dto.getDefaultCreateVariant();
                 case "createVariants":

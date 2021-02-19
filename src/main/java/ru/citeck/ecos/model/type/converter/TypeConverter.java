@@ -94,7 +94,7 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
 
         typeEntity.setInheritActions(dto.isInheritActions());
 
-        ObjectData attributes = dto.getAttributes() != null ? dto.getAttributes() : ObjectData.create();
+        ObjectData attributes = dto.getProperties() != null ? dto.getProperties() : ObjectData.create();
         typeEntity.setAttributes(attributes.toString());
 
         ObjectData config = dto.getConfig() != null ? dto.getConfig() : ObjectData.create();
@@ -215,7 +215,7 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
         }
 
         String attributesStr = entity.getAttributes();
-        dto.setAttributes(mapper.read(attributesStr, ObjectData.class));
+        dto.setProperties(mapper.read(attributesStr, ObjectData.class));
 
         TypeEntity parent = entity.getParent();
         String parentExtId = null;
@@ -246,7 +246,7 @@ public class TypeConverter extends AbstractDtoConverter<TypeWithMetaDto, TypeEnt
             dto.setCreateVariants(Collections.emptyList());
         }
 
-        dto.setDefaultCreateVariant(Boolean.TRUE.equals(entity.getDefaultCreateVariant()));
+        dto.setDefaultCreateVariant(entity.getDefaultCreateVariant());
         dto.setPostCreateActionRef(RecordRef.valueOf(entity.getPostCreateActionRef()));
 
         dto.setAliases(new ArrayList<>(entity.getAliases()));

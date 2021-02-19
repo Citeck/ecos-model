@@ -112,7 +112,7 @@ public class TypesSyncRecordsDaoTest {
         assertEquals(origDto, normalize(dto));
 
         assert origDto != null;
-        Predicate predicate = Predicates.eq("attributes.attKey?str", origDto.getAttributes().get("attKey").asText());
+        Predicate predicate = Predicates.eq("properties.attKey?str", origDto.getProperties().get("attKey").asText());
         RecordsQuery query1 = RecordsQuery.create()
             .withLanguage(PredicateService.LANGUAGE_PREDICATE)
             .withSourceId(TYPES_SOURCE_ID)
@@ -156,7 +156,7 @@ public class TypesSyncRecordsDaoTest {
         assocs.sort(Comparator.comparing(AssociationDto::getId));
         dto.setAssociations(assocs);
 
-        if (!Boolean.TRUE.equals(dto.getDefaultCreateVariant())) {
+        if (!Boolean.FALSE.equals(dto.getDefaultCreateVariant())) {
             dto.setDefaultCreateVariant(null);
         }
 
