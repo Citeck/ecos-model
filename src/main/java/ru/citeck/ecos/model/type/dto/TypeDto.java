@@ -32,8 +32,10 @@ public class TypeDto {
     private RecordRef journalRef = RecordRef.EMPTY;
     private boolean system;
     private String dashboardType = "";
-    private boolean inheritActions;
+
     private boolean inheritForm;
+    private boolean inheritActions = true;
+    private boolean defaultCreateVariant = true;
 
     private MLText dispNameTemplate = MLText.EMPTY;
 
@@ -47,7 +49,6 @@ public class TypeDto {
 
     private RecordRef postCreateActionRef = RecordRef.EMPTY;
 
-    private Boolean defaultCreateVariant = true;
     private List<CreateVariantDef> createVariants = new ArrayList<>();
 
     private ObjectData properties = ObjectData.create();
@@ -215,8 +216,8 @@ public class TypeDto {
         return inheritActions;
     }
 
-    public void setInheritActions(boolean inheritActions) {
-        this.inheritActions = inheritActions;
+    public void setInheritActions(Boolean inheritActions) {
+        this.inheritActions = !Boolean.FALSE.equals(inheritActions);
     }
 
     public boolean isInheritForm() {
@@ -291,7 +292,7 @@ public class TypeDto {
         this.postCreateActionRef = postCreateActionRef;
     }
 
-    public Boolean getDefaultCreateVariant() {
+    public boolean getDefaultCreateVariant() {
         return defaultCreateVariant;
     }
 
