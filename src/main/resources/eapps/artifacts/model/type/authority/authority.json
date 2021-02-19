@@ -7,5 +7,6 @@
   "system": true,
   "journalRef": "uiserv/journal@authority",
   "inheritActions": true,
-  "sourceId": "alfresco/"
+  "sourceId": "alfresco/",
+  "defaultCreateVariant": false
 }

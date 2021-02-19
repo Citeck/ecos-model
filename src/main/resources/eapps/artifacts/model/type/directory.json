@@ -7,5 +7,6 @@
   },
   "system": true,
   "dashboardType": "case-details",
-  "sourceId": "alfresco/"
+  "sourceId": "alfresco/",
+  "defaultCreateVariant": false
 }

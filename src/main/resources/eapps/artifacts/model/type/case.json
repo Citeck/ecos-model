@@ -7,5 +7,9 @@
   },
   "system": true,
   "inheritActions": true,
-  "sourceId": "alfresco/"
+  "sourceId": "alfresco/",
+  "defaultCreateVariant": false,
+  "properties": {
+    "alfType": "ecos:case"
+  }
 }

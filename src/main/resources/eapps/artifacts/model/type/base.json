@@ -26,5 +26,6 @@
       "target": "emodel/type@base",
       "direction": "BOTH"
     }
-  ]
+  ],
+  "defaultCreateVariant": false
 }

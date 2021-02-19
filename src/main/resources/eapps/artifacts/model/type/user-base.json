@@ -6,5 +6,6 @@
   },
   "system": true,
   "inheritActions": true,
-  "sourceId": "alfresco/"
+  "sourceId": "alfresco/",
+  "defaultCreateVariant": false
 }
