@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.commons.data.DataValue;
 import ru.citeck.ecos.commons.data.MLText;
@@ -21,7 +20,7 @@ import ru.citeck.ecos.model.lib.type.dto.TypeModelDef;
 import ru.citeck.ecos.model.lib.type.service.TypeDefService;
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils;
 import ru.citeck.ecos.model.section.records.record.SectionRecord;
-import ru.citeck.ecos.model.type.dto.TypeDto;
+import ru.citeck.ecos.model.type.dto.TypeDef;
 import ru.citeck.ecos.model.type.dto.TypeWithMetaDto;
 import ru.citeck.ecos.model.type.service.TypeService;
 import ru.citeck.ecos.records2.RecordConstants;
@@ -31,8 +30,6 @@ import ru.citeck.ecos.records2.graphql.meta.annotation.MetaAtt;
 import ru.citeck.ecos.records2.graphql.meta.value.EmptyValue;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaValue;
-import ru.citeck.ecos.records2.predicate.PredicateService;
-import ru.citeck.ecos.records2.predicate.model.Predicate;
 import ru.citeck.ecos.records2.request.delete.RecordsDelResult;
 import ru.citeck.ecos.records2.request.delete.RecordsDeletion;
 import ru.citeck.ecos.records2.request.mutation.RecordsMutResult;
@@ -49,10 +46,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
-public class TypeRecordsDao extends LocalRecordsDao
-                            implements LocalRecordsQueryWithMetaDao<TypeRecordsDao.TypeRecord>,
+public class TypeRecordsDaoOld extends LocalRecordsDao
+                            implements LocalRecordsQueryWithMetaDao<TypeRecordsDaoOld.TypeRecord>,
                                        LocalRecordsMetaDao<MetaValue>,
-                                       MutableRecordsLocalDao<TypeRecordsDao.TypeMutRecord> {
+                                       MutableRecordsLocalDao<TypeRecordsDaoOld.TypeMutRecord> {
 
     public static final String ID = "type";
     public static final String LANG_EXPAND_TYPES = "expand-types";
@@ -65,7 +62,7 @@ public class TypeRecordsDao extends LocalRecordsDao
     private final TypeDefService typeDefService;
 
     @Autowired
-    public TypeRecordsDao(TypeService typeService, TypeDefService typeDefService) {
+    public TypeRecordsDaoOld(TypeService typeService, TypeDefService typeDefService) {
         setId(ID);
         this.typeService = typeService;
         this.typeDefService = typeDefService;
@@ -80,7 +77,7 @@ public class TypeRecordsDao extends LocalRecordsDao
 
         return list.stream()
             .map(ref -> {
-                TypeWithMetaDto type = typeService.getByExtIdOrNull(ref.getId());
+                TypeWithMetaDto type = typeService.getByIdOrNull(ref.getId());
                 return type != null ? new TypeRecord(type) : EmptyValue.INSTANCE;
             })
             .collect(Collectors.toList());
@@ -89,67 +86,7 @@ public class TypeRecordsDao extends LocalRecordsDao
     @Override
     public RecordsQueryResult<TypeRecord> queryLocalRecords(RecordsQuery recordsQuery, MetaField metaField) {
 
-        RecordsQueryResult<TypeRecord> result = new RecordsQueryResult<>();
 
-        if (recordsQuery.getLanguage().equals(LANG_EXPAND_TYPES)) {
-
-            ExpandTypesQuery expandTypesQuery = recordsQuery.getQuery(ExpandTypesQuery.class);
-            List<TypeWithMetaDto> resultTypesDto = typeService.expandTypes(expandTypesQuery.getTypeRefs());
-            result.setRecords(resultTypesDto.stream()
-                .map(TypeRecord::new)
-                .collect(Collectors.toList()));
-
-        } else if (recordsQuery.getLanguage().equals(PredicateService.LANGUAGE_PREDICATE)) {
-
-            Predicate predicate = recordsQuery.getQuery(Predicate.class);
-
-            int max = recordsQuery.getMaxItems();
-            if (max <= 0) {
-                max = 10000;
-            }
-
-            List<Sort.Order> order = recordsQuery.getSortBy()
-                .stream()
-                .map(s -> {
-                    String attribute = s.getAttribute();
-                    if (RecordConstants.ATT_MODIFIED.equals(attribute)) {
-                        attribute = "lastModifiedDate";
-                    } else {
-                        return Optional.<Sort.Order>empty();
-                    }
-                    return Optional.of(s.isAscending() ? Sort.Order.asc(attribute) : Sort.Order.desc(attribute));
-                })
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toList());
-
-            Collection<TypeWithMetaDto> types = typeService.getAll(
-                max,
-                recordsQuery.getSkipCount(),
-                predicate,
-                !order.isEmpty() ? Sort.by(order) : null
-            );
-
-            result.setRecords(types.stream()
-                .map(TypeRecord::new)
-                .collect(Collectors.toList()));
-            result.setTotalCount(typeService.getCount(predicate));
-
-        } else {
-
-            int max = recordsQuery.getMaxItems();
-            Collection<TypeWithMetaDto> types;
-            if (max < 0) {
-                types = typeService.getAll();
-            } else {
-                types = typeService.getAll(max, recordsQuery.getSkipCount());
-            }
-            result.setRecords(types.stream()
-                .map(TypeRecord::new)
-                .collect(Collectors.toList()));
-            result.setTotalCount(typeService.getCount());
-        }
-        return result;
     }
 
     @Override
@@ -176,7 +113,7 @@ public class TypeRecordsDao extends LocalRecordsDao
                 if (StringUtils.isBlank(id)) {
                     return new TypeMutRecord();
                 } else {
-                    return new TypeMutRecord(typeService.getByExtId(id));
+                    return new TypeMutRecord(typeService.getById(id));
                 }
             })
             .collect(Collectors.toList());
@@ -248,7 +185,7 @@ public class TypeRecordsDao extends LocalRecordsDao
                 case RecordConstants.ATT_PARENT:
                     return dto.getParentRef();
                 case "parents":
-                    return toInnerTypeRecords(typeService.getParents(dto.getId()));
+                    return toInnerTypeRecords(typeService.getParentIds(dto.getId()));
                 case "children":
                     return toInnerTypeRecords(typeService.getChildren(dto.getId()));
                 case "actions":
@@ -376,7 +313,7 @@ public class TypeRecordsDao extends LocalRecordsDao
                 return formId;
             } else {
                 if (currentType.getParentRef() != null) {
-                    currentType = typeService.getByExtId(currentType.getParentRef().getId());
+                    currentType = typeService.getById(currentType.getParentRef().getId());
                 } else {
                     return null;
                 }
@@ -384,49 +321,6 @@ public class TypeRecordsDao extends LocalRecordsDao
         }
 
         return null;
-    }
-
-    private List<RecordRef> getInheritTypeActions(TypeDto dto) {
-
-        if (!dto.isInheritActions() || dto.getParentRef() == null) {
-            return dto.getActions();
-        }
-
-        RecordRef parent = dto.getParentRef();
-        DataValue actionsNode = recordsService.getAttribute(parent, TYPE_ACTIONS_WITH_INHERIT_ATT_JSON);
-
-        if (actionsNode.isNull()) {
-            return dto.getActions();
-        }
-
-        Map<String, RecordRef> actionDtoMap = dto.getActions()
-            .stream()
-            .collect(Collectors.toMap(RecordRef::getId, Function.identity()));
-
-        if (actionsNode.isArray()) {
-            RecordRef[] actionsFromParent;
-            try {
-                actionsFromParent = Json.getMapper().convert(actionsNode, RecordRef[].class);
-                if (actionsFromParent != null) {
-                    for (RecordRef actionDto : actionsFromParent) {
-                        actionDtoMap.putIfAbsent(actionDto.getId(), actionDto);
-                    }
-                }
-            } catch (RuntimeException e) {
-                throw new RuntimeException("Can not parse actions from parent", e);
-            }
-        } else {
-            try {
-                RecordRef actionFromParent = Json.getMapper().convert(actionsNode, RecordRef.class);
-                if (actionFromParent != null) {
-                    actionDtoMap.putIfAbsent(actionFromParent.getId(), actionFromParent);
-                }
-            } catch (RuntimeException e) {
-                throw new RuntimeException("Can not parse action from parent", e);
-            }
-        }
-
-        return new ArrayList<>(actionDtoMap.values());
     }
 
     @Data
@@ -450,7 +344,7 @@ public class TypeRecordsDao extends LocalRecordsDao
         TypeMutRecord() {
         }
 
-        TypeMutRecord(TypeDto dto) {
+        TypeMutRecord(TypeDef dto) {
             super(dto);
             if (getModel() == null) {
                 setModel(TypeModelDef.EMPTY);
@@ -507,7 +401,7 @@ public class TypeRecordsDao extends LocalRecordsDao
 
         @JsonValue
         public Object toJson() {
-            return Json.getMapper().toNonDefaultJson(new TypeDto(this));
+            return Json.getMapper().toNonDefaultJson(new TypeDef(this));
         }
 
         public byte[] getData() {

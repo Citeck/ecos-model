@@ -1,64 +1,45 @@
-package ru.citeck.ecos.model.type.service;
+package ru.citeck.ecos.model.type.service
 
-import org.springframework.data.domain.Sort;
-import ru.citeck.ecos.commons.data.DataValue;
-import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef;
-import ru.citeck.ecos.model.association.dto.AssociationDto;
-import ru.citeck.ecos.model.type.dto.TypeDto;
-import ru.citeck.ecos.model.type.dto.TypeWithMetaDto;
-import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records2.predicate.model.Predicate;
+import org.springframework.data.domain.Sort
+import ru.citeck.ecos.model.association.dto.AssociationDto
+import ru.citeck.ecos.model.type.dto.TypeDef
+import ru.citeck.ecos.records2.predicate.model.Predicate
+import ru.citeck.ecos.records3.record.mixin.impl.mutmeta.MutMeta
+import java.util.function.Consumer
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Consumer;
+interface TypeService {
 
-public interface TypeService {
+    fun addListener(onTypeChangedListener: Consumer<TypeDef>)
 
-    void addListener(Consumer<TypeDto> onTypeChangedListener);
+    fun getAll(max: Int, skip: Int): List<TypeDef>
 
-    List<TypeWithMetaDto> getAll(int max, int skip);
+    fun getAll(max: Int, skip: Int, predicate: Predicate): List<TypeDef>
 
-    List<TypeWithMetaDto> getAll(int max, int skip, Predicate predicate);
+    fun getAll(): List<TypeDef>
 
-    Set<TypeWithMetaDto> getAll();
+    fun getAll(typeIds: Collection<String>): List<TypeDef>
 
-    Set<TypeWithMetaDto> getAll(Collection<String> extIds);
+    fun getAll(max: Int, skip: Int, predicate: Predicate, sort: Sort?): List<TypeDef>
 
-    List<TypeWithMetaDto> getAll(int max, int skip, Predicate predicate, Sort sort);
+    fun getById(typeId: String): TypeDef
 
-    TypeWithMetaDto getByExtId(String extId);
+    fun getByIdOrNull(typeId: String): TypeDef?
 
-    TypeWithMetaDto getByExtIdOrNull(String extId);
+    fun getOrCreateByExtId(typeId: String): TypeDef
 
-    TypeWithMetaDto getOrCreateByExtId(String extId);
+    fun getParentIds(id: String): List<String>
 
-    List<TypeWithMetaDto> getParents(String extId);
+    fun getChildren(typeId: String): List<String>
 
-    List<TypeWithMetaDto> getChildren(String extId);
+    fun getFullAssocs(typeId: String): List<AssociationDto>
 
-    List<AssociationDto> getFullAssocs(String extId);
+    fun expandTypes(typeIds: Collection<String>): List<TypeDef>
 
-    List<TypeWithMetaDto> expandTypes(Collection<RecordRef> typeRefs);
+    fun delete(typeId: String)
 
-    RecordRef getInhFormRef(String extId);
+    fun save(dto: TypeDef): TypeDef
 
-    String getDashboardType(String extId);
+    fun getCount(predicate: Predicate): Long
 
-    List<CreateVariantDef> getCreateVariants(String extId);
-
-    DataValue getInhAttribute(String extId, String name);
-
-    RecordRef getConfigFormRef(String extId);
-
-    String getInhSourceId(String extId);
-
-    void delete(String extId);
-
-    TypeWithMetaDto save(TypeDto dto);
-
-    int getCount(Predicate predicate);
-
-    int getCount();
+    fun getCount(): Long
 }

@@ -1,115 +1,60 @@
-package ru.citeck.ecos.model.type.domain;
+package ru.citeck.ecos.model.type.domain
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import ru.citeck.ecos.model.association.domain.AssociationEntity;
-import ru.citeck.ecos.model.domain.AbstractAuditingEntity;
-import ru.citeck.ecos.model.section.domain.SectionEntity;
-import ru.citeck.ecos.model.utils.EntityCollectionUtils;
+import ru.citeck.ecos.model.association.domain.AssociationEntity
+import ru.citeck.ecos.model.domain.AbstractAuditingEntity
+import ru.citeck.ecos.model.utils.EntityCollectionUtils
+import java.util.*
+import javax.persistence.*
 
-import javax.persistence.*;
-import java.util.*;
-import java.util.stream.Collectors;
-
-@Data
 @Entity
-@AllArgsConstructor
-@NoArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 @Table(name = "ecos_type")
-public class TypeEntity extends AbstractAuditingEntity {
+class TypeEntity : AbstractAuditingEntity() {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ecos_types_seq_gen")
     @SequenceGenerator(name = "ecos_types_seq_gen")
-    private Long id;
+    val id: Long? = null
 
-    @Column(unique = true, nullable = false)
-    private String extId;
+    @Column(unique = true)
+    lateinit var extId: String
 
     @Column(nullable = false)
-    private String name;
+    var name: String? = null
+    var description: String? = null
+    var tenant: String? = null
+    var form: String? = null
+    var journal: String? = null
+    var metaRecord: String? = null
+    var attributes: String? = null
+    var system: Boolean? = null
+    var dashboardType: String? = null
+    var configForm: String? = null
+    var config: String? = null
+    var dispNameTemplate: String? = null
+    var numTemplateRef: String? = null
+    var inheritNumTemplate: Boolean? = null
+    var inheritForm: Boolean? = null
+    var sourceId: String? = null
+    var createVariants: String? = null
+    var inheritActions = false
+    var defaultCreateVariant: Boolean? = null
+    var postCreateActionRef: String? = null
 
-    private String description;
-
-    private String tenant;
-
-    private String form;
-
-    private String journal;
-
-    private String metaRecord;
-
-    private String attributes;
-
-    private Boolean system;
-
-    private String dashboardType;
-
-    private String configForm;
-
-    private String config;
-
-    private String dispNameTemplate;
-
-    private String numTemplateRef;
-
-    private Boolean inheritNumTemplate;
-
-    private Boolean inheritForm;
-
-    private String computedAttributes;
-
-    private String sourceId;
-
-    private String createVariants;
-
-    private boolean inheritActions;
-
-    private Boolean defaultCreateVariant;
-
-    private String postCreateActionRef;
-
-    @ManyToOne(cascade = {CascadeType.DETACH})
+    @ManyToOne(cascade = [CascadeType.DETACH])
     @JoinColumn(name = "parent_id")
-    private TypeEntity parent;
+    var parent: TypeEntity? = null
 
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.DETACH)
-    private Set<TypeEntity> children = new HashSet<>();
-
-    @ManyToMany(mappedBy = "types", fetch = FetchType.EAGER)
-    private Set<SectionEntity> sections = new HashSet<>();
-
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "ecos_type_alias", joinColumns = @JoinColumn(name = "type_id"))
-    @Column(name = "alias")
-    private Set<String> aliases = new HashSet<>();
-
-    /*
-     * Set of associations to other types.
-     */
-    @OneToMany(
-        mappedBy = "source",
-        fetch = FetchType.EAGER,
-        cascade = CascadeType.ALL,
-        orphanRemoval = true)
-    private Set<AssociationEntity> associations = new HashSet<>();
+    @OneToMany(mappedBy = "source", fetch = FetchType.EAGER, cascade = [CascadeType.ALL], orphanRemoval = true)
+    val associations: Set<AssociationEntity> = HashSet()
 
     @Column(name = "actions_str")
-    private String actions;
+    var actions: String? = null
 
-    private String model;
+    var model: String? = null
 
-    private String docLib;
+    var docLib: String? = null
 
-    public void setAssociations(Set<AssociationEntity> associations) {
-        associations = associations.stream().filter(Objects::nonNull).collect(Collectors.toSet());
-        EntityCollectionUtils.changeHibernateSet(this.associations, associations, AssociationEntity::getId);
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+    fun setAssociations(associations: Set<AssociationEntity>) {
+        EntityCollectionUtils.changeHibernateSet(this.associations, associations) { it.id }
     }
 }

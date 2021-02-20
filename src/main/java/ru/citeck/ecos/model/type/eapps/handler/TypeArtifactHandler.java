@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.apps.app.domain.handler.EcosArtifactHandler;
-import ru.citeck.ecos.model.type.dto.TypeDto;
+import ru.citeck.ecos.model.type.dto.TypeDef;
 import ru.citeck.ecos.model.type.service.TypeService;
 
 import java.util.function.Consumer;
@@ -13,12 +13,12 @@ import java.util.function.Consumer;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class TypeArtifactHandler implements EcosArtifactHandler<TypeDto> {
+public class TypeArtifactHandler implements EcosArtifactHandler<TypeDef> {
 
     private final TypeService typeService;
 
     @Override
-    public void deployArtifact(@NotNull TypeDto artifact) {
+    public void deployArtifact(@NotNull TypeDef artifact) {
         typeService.save(artifact);
     }
 
@@ -29,7 +29,7 @@ public class TypeArtifactHandler implements EcosArtifactHandler<TypeDto> {
     }
 
     @Override
-    public void listenChanges(@NotNull Consumer<TypeDto> consumer) {
+    public void listenChanges(@NotNull Consumer<TypeDef> consumer) {
         typeService.addListener(consumer);
     }
 }

@@ -1,30 +1,30 @@
-package ru.citeck.ecos.model.type.repository;
+package ru.citeck.ecos.model.type.repository
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
-import ru.citeck.ecos.model.type.domain.TypeEntity;
-
-import java.util.Optional;
-import java.util.Set;
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor
+import org.springframework.data.jpa.repository.Query
+import org.springframework.stereotype.Repository
+import ru.citeck.ecos.model.type.domain.TypeEntity
 
 @Repository
-public interface TypeRepository extends JpaRepository<TypeEntity, Long>, JpaSpecificationExecutor<TypeEntity> {
+interface TypeRepository : JpaRepository<TypeEntity, Long>, JpaSpecificationExecutor<TypeEntity> {
 
     @Query("SELECT TYPE FROM TypeEntity TYPE WHERE TYPE.extId = ?1")
-    Optional<TypeEntity> findByExtId(String extId);
+    fun findByExtId(extId: String): TypeEntity?
 
-    boolean existsByExtId(String extId);
+    fun existsByExtId(extId: String): Boolean
 
     @Query("SELECT TYPE FROM TypeEntity TYPE WHERE TYPE.extId IN ?1")
-    Set<TypeEntity> findAllByExtIds(Set<String> extIds);
+    fun findAllByExtIds(extIds: Set<String>): Set<TypeEntity>
 
-    Set<TypeEntity> findAllByParent(TypeEntity parent);
+    fun findAllByParent(parent: TypeEntity): Set<TypeEntity>
+
+    @Query("SELECT TYPE.extId FROM TypeEntity TYPE WHERE TYPE.parent = ?1")
+    fun getChildrenIds(parentId: String): Set<String>
 
     @Query("SELECT TYPE " +
         "FROM TypeEntity TYPE " +
         "JOIN TYPE.aliases aliases " +
         "WHERE ?1 = aliases")
-    Optional<TypeEntity> findByContainsInAliases(String alias);
+    fun findByContainsInAliases(alias: String): TypeEntity?
 }

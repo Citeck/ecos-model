@@ -13,7 +13,7 @@ import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.lib.ModelServiceFactory;
 import ru.citeck.ecos.model.type.dto.TypeWithMetaDto;
 import ru.citeck.ecos.model.type.service.impl.TypeServiceImpl;
-import ru.citeck.ecos.model.type.records.dao.TypeRecordsDao;
+import ru.citeck.ecos.model.type.records.dao.TypeRecordsDaoOld;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.RecordsService;
 import ru.citeck.ecos.records3.RecordsServiceFactory;
@@ -45,7 +45,7 @@ public class TypeRecordsDaoTest {
     @MockBean
     private RecordsService recordsService;
 
-    private TypeRecordsDao typeRecordsDao;
+    private TypeRecordsDaoOld typeRecordsDao;
 
     private List<RecordRef> recordRefs;
     private RecordsQuery recordsQuery;
@@ -60,7 +60,7 @@ public class TypeRecordsDaoTest {
         RecordsServiceFactory recordsServices = new RecordsServiceFactory();
         modelServices.setRecordsServices(recordsServices);
 
-        typeRecordsDao = new TypeRecordsDao(typeService, modelServices.getTypeDefService());
+        typeRecordsDao = new TypeRecordsDaoOld(typeService, modelServices.getTypeDefService());
         typeRecordsDao.setRecordsServiceFactory(new RecordsServiceFactory());
 
         recordRefs = Collections.singletonList(
@@ -92,9 +92,9 @@ public class TypeRecordsDaoTest {
     void testGetLocalRecordsMetaFromRecordRefs() throws Exception {
 
         //  arrange
-        when(typeService.getByExtId(typeDto.getId())).thenReturn(typeDto);
+        when(typeService.getById(typeDto.getId())).thenReturn(typeDto);
         when(typeService.getOrCreateByExtId(typeDto.getId())).thenReturn(typeDto);
-        when(typeService.getByExtIdOrNull(typeDto.getId())).thenReturn(typeDto);
+        when(typeService.getByIdOrNull(typeDto.getId())).thenReturn(typeDto);
 
         //  act
         List<MetaValue> resultTypeRecords = typeRecordsDao.getLocalRecordsMeta(recordRefs, Mockito.any());
@@ -120,7 +120,7 @@ public class TypeRecordsDaoTest {
             Collections.singletonList(RecordRef.create("type", "")), metaField);
 
         //  assert
-        Mockito.verify(typeService, Mockito.times(0)).getByExtId(Mockito.anyString());
+        Mockito.verify(typeService, Mockito.times(0)).getById(Mockito.anyString());
         Assert.assertEquals(resultTypeRecords.size(), 1);
         MetaValue resultTypeRecord = resultTypeRecords.get(0);
         Assert.assertNull(resultTypeRecord.getId());
@@ -145,11 +145,11 @@ public class TypeRecordsDaoTest {
         when(typeService.getAll(Mockito.anyInt(), Mockito.anyInt())).thenReturn(Collections.singletonList(typeDto));
 
         //  act
-        RecordsQueryResult<TypeRecordsDao.TypeRecord> resultRecordsQueryResult = typeRecordsDao.queryLocalRecords(recordsQuery, metaField);
+        RecordsQueryResult<TypeRecordsDaoOld.TypeRecord> resultRecordsQueryResult = typeRecordsDao.queryLocalRecords(recordsQuery, metaField);
 
         //  assert
         Assert.assertEquals(resultRecordsQueryResult.getTotalCount(), 1);
-        TypeRecordsDao.TypeRecord resultTypeRecord = resultRecordsQueryResult.getRecords().get(0);
+        TypeRecordsDaoOld.TypeRecord resultTypeRecord = resultRecordsQueryResult.getRecords().get(0);
         Assert.assertEquals(resultTypeRecord.getAttribute("name", metaField), new MLText("name"));
         Assert.assertEquals(resultTypeRecord.getAttribute("description", metaField), new MLText("desc"));
         Assert.assertEquals(resultTypeRecord.getAttribute("extId", metaField), typeDto.getId());
@@ -168,12 +168,12 @@ public class TypeRecordsDaoTest {
         when(typeService.getAll(Mockito.anyInt(), Mockito.anyInt())).thenReturn(Collections.singletonList(typeDto));
 
         //  act
-        RecordsQueryResult<TypeRecordsDao.TypeRecord> resultRecordsQueryResult = typeRecordsDao.queryLocalRecords(recordsQuery, metaField);
+        RecordsQueryResult<TypeRecordsDaoOld.TypeRecord> resultRecordsQueryResult = typeRecordsDao.queryLocalRecords(recordsQuery, metaField);
 
         //  assert
         Mockito.verify(typeService, Mockito.times(0)).getAll(Mockito.anySet());
         Assert.assertEquals(resultRecordsQueryResult.getTotalCount(), 1);
-        TypeRecordsDao.TypeRecord resultTypeRecord = resultRecordsQueryResult.getRecords().get(0);
+        TypeRecordsDaoOld.TypeRecord resultTypeRecord = resultRecordsQueryResult.getRecords().get(0);
 
         Assert.assertEquals(resultTypeRecord.getAttribute("name", metaField), new MLText("name"));
         Assert.assertEquals(resultTypeRecord.getAttribute("description", metaField), new MLText("desc"));

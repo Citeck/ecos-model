@@ -14,7 +14,7 @@ import ru.citeck.ecos.model.type.domain.TypeEntity;
 import ru.citeck.ecos.model.section.dto.SectionDto;
 import ru.citeck.ecos.model.section.repository.SectionRepository;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
-import ru.citeck.ecos.model.type.records.dao.TypeRecordsDao;
+import ru.citeck.ecos.model.type.records.dao.TypeRecordsDaoOld;
 import ru.citeck.ecos.records2.RecordRef;
 
 import java.util.Collections;
@@ -77,7 +77,7 @@ public class SectionConverter extends AbstractDtoConverter<SectionDto, SectionEn
         Set<RecordRef> typesRefs = null;
         if (entity.getTypes() != null) {
             typesRefs = entity.getTypes().stream()
-                .map(e -> RecordRef.create(TypeRecordsDao.ID, e.getExtId()))
+                .map(e -> RecordRef.create(TypeRecordsDaoOld.ID, e.getExtId()))
                 .collect(Collectors.toSet());
         }
 

@@ -27,8 +27,8 @@ import ru.citeck.ecos.records2.predicate.model.Predicates;
 import ru.citeck.ecos.records2.predicate.model.VoidPredicate;
 import ru.citeck.ecos.records2.rest.RemoteRecordsRestApi;
 import ru.citeck.ecos.records2.source.dao.local.RemoteSyncRecordsDao;
-import ru.citeck.ecos.records3.record.op.query.dto.RecsQueryRes;
-import ru.citeck.ecos.records3.record.op.query.dto.query.RecordsQuery;
+import ru.citeck.ecos.records3.record.query.dto.RecsQueryRes;
+import ru.citeck.ecos.records3.record.query.dto.query.RecordsQuery;
 import ru.citeck.ecos.records3.record.request.RequestContext;
 import ru.citeck.ecos.records3.record.resolver.RemoteRecordsResolver;
 

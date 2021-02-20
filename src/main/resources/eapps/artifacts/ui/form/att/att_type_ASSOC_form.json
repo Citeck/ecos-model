@@ -13,12 +13,36 @@
     "components": [
       {
         "label": {
-          "ru": "Type",
-          "en": "Тип"
+          "ru": "Тип",
+          "en": "Type"
         },
         "journalId": "ecos-types",
         "key": "typeRef",
         "type": "selectJournal",
+        "input": true
+      },
+      {
+        "label": "Direction",
+        "dataSrc": "values",
+        "data": {
+          "values": [
+            {
+              "label": "Target",
+              "value": "TARGET"
+            },
+            {
+              "label": "Source",
+              "value": "SOURCE"
+            },
+            {
+              "label": "Both",
+              "value": "BOTH"
+            }
+          ]
+        },
+        "defaultValue": "TARGET",
+        "key": "direction",
+        "type": "ecosSelect",
         "input": true
       }
     ]

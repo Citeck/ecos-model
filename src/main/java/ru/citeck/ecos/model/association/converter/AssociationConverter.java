@@ -10,7 +10,7 @@ import ru.citeck.ecos.model.association.domain.AssociationEntity;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.service.exception.TypeNotFoundException;
 import ru.citeck.ecos.model.type.domain.TypeEntity;
-import ru.citeck.ecos.model.type.records.dao.TypeRecordsDao;
+import ru.citeck.ecos.model.type.records.dao.TypeRecordsDaoOld;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
 
@@ -77,7 +77,7 @@ public class AssociationConverter {
         assocDto.setAttribute(associationEntity.getAttribute());
 
         String targetTypeId = associationEntity.getTarget().getExtId();
-        RecordRef targetTypeRecordRef = RecordRef.create("emodel", TypeRecordsDao.ID, targetTypeId);
+        RecordRef targetTypeRecordRef = RecordRef.create("emodel", TypeRecordsDaoOld.ID, targetTypeId);
         assocDto.setTarget(targetTypeRecordRef);
 
         return assocDto;

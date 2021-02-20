@@ -218,7 +218,7 @@ public class TypeServiceImplTest {
         when(typeConverter.entityToDto(typeEntity)).thenReturn(typeDto);
 
         //  act
-        TypeDto resultTypeDto = typeService.getByExtId(typeExtId);
+        TypeDto resultTypeDto = typeService.getById(typeExtId);
 
         //  assert
         assertEquals(resultTypeDto.getId(), typeEntity.getExtId());

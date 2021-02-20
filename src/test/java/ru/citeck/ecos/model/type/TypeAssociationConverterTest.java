@@ -14,7 +14,7 @@ import ru.citeck.ecos.model.association.domain.AssociationEntity;
 import ru.citeck.ecos.model.association.dto.AssocDirection;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.type.domain.TypeEntity;
-import ru.citeck.ecos.model.type.records.dao.TypeRecordsDao;
+import ru.citeck.ecos.model.type.records.dao.TypeRecordsDaoOld;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
 
@@ -57,7 +57,7 @@ public class TypeAssociationConverterTest {
         dto.setId("assocId");
         dto.setName(new MLText("assoc-name"));
         dto.setDirection(AssocDirection.TARGET);
-        dto.setTarget(RecordRef.create("emodel", TypeRecordsDao.ID, targetTypeEntity.getExtId()));
+        dto.setTarget(RecordRef.create("emodel", TypeRecordsDaoOld.ID, targetTypeEntity.getExtId()));
     }
 
     @Test
