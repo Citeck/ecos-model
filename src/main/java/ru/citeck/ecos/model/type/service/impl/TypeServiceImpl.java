@@ -221,7 +221,9 @@ public class TypeServiceImpl implements TypeService, TypesRepo {
                 createVariants = Collections.emptyList();
             }
 
-            if (Boolean.TRUE.equals(type.getDefaultCreateVariant())) {
+            if (Boolean.TRUE.equals(type.getDefaultCreateVariant())
+                        && RecordRef.isNotEmpty(type.getFormRef())) {
+
                 List<CreateVariantDef> newVariants = new ArrayList<>();
                 newVariants.add(CreateVariantDef.create()
                     .withId("DEFAULT")
