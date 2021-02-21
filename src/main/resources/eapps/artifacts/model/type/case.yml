@@ -1,15 +1,14 @@
 {
-  "id": "document",
+  "id": "case",
   "parent": "emodel/type@user-base",
   "name": {
-    "ru": "Документ",
-    "en": "Document"
+    "ru": "Кейс",
+    "en": "Case"
   },
   "system": true,
-  "inheritActions": true,
   "sourceId": "alfresco/",
   "defaultCreateVariant": false,
   "properties": {
-    "alfType": "ecos:document"
+    "alfType": "ecos:case"
   }
 }

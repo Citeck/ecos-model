@@ -1,15 +1,14 @@
 {
-  "id": "case",
+  "id": "data-list",
   "parent": "emodel/type@user-base",
   "name": {
-    "ru": "Кейс",
-    "en": "Case"
+    "ru": "Элемент справочника",
+    "en": "Data list item"
   },
   "system": true,
-  "inheritActions": true,
   "sourceId": "alfresco/",
   "defaultCreateVariant": false,
   "properties": {
-    "alfType": "ecos:case"
+    "alfType": "dl:dataListItem"
   }
 }
