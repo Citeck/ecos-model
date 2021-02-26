@@ -193,7 +193,7 @@ public class TypesSyncRecordsDaoTest {
             typeDto.setCreateVariants(generateCreateVariants(i));
             typeDto.setDashboardType("card-details");
             typeDto.setDescription(new MLText("Description-" + i));
-            typeDto.setForm(RecordRef.valueOf("uiserv/eform@form-" + i));
+            typeDto.setForm(RecordRef.valueOf("uiserv/form@form-" + i));
             typeDto.setJournal(RecordRef.valueOf("uiserv/journal@journal-" + i));
             typeDto.setSourceId("source-" + i);
             typeDto.setName(new MLText("name-" + i));

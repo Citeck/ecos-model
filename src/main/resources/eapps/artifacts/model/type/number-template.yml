@@ -9,7 +9,7 @@ system: true
 
 sourceId: emodel/num-template
 journal: uiserv/journal@number-templates
-form: uiserv/eform@num-template-form
+form: uiserv/form@num-template-form
 
 createVariants:
 
@@ -18,4 +18,4 @@ createVariants:
 
   - id: upload-template
     name: { ru: Загрузить шаблон, en: Upload template }
-    formRef: uiserv/eform@ecos-module-upload
+    formRef: uiserv/form@ecos-module-upload

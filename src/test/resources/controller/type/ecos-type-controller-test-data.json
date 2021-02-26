@@ -8,12 +8,12 @@
         "name": "test-type",
         "description": "some description",
         "inheritActions": true,
-        "form": "uiserv/eform@test-form",
+        "form": "uiserv/form@test-form",
         "actions": [
             "uiserv/action@delete",
             "uiserv/action@view"
         ],
-        "configFormRef": "uiserv/eform@test-config-form",
+        "configFormRef": "uiserv/form@test-config-form",
         "config": {
             "isActive": true,
             "balance": "$3,924.34",
