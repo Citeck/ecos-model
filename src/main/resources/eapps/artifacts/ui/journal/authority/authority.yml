@@ -1,13 +1,7 @@
-
+---
 id: authority
-label: { ru: Группы и люди, en: Authority }
-
-predicate:
-  t: and
-  val:
-    - { t: eq, att: _type, val: ''}
-    - { t: eq, att: TYPE, val: cm:authority }
+name: { ru: Группы и люди, en: Authority }
 
 columns:
-  - name: cm:authorityName
-  - name: cm:authorityDisplayName
+  - id: cm:authorityName
+  - id: cm:authorityDisplayName

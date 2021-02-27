@@ -1,23 +1,22 @@
-
+---
 id: base
-
-label: { ru: Базовый журнал, en: Base journal }
+name: { ru: Базовый журнал, en: Base journal }
 
 system: true
 
 columns:
 
-  - name: "displayName"
-    label: { ru: "Имя", en: "Name" }
-    attribute: ".disp"
-    type: "text"
+  - id: displayName
+    name: { ru: Имя, en: Name }
+    attribute: _disp
+    type: text
 
-  - name: "modifier"
-    label: { ru: "Кем изменен", en: "Changed by" }
-    attribute: "_modifier"
-    type: "text"
+  - id: modifier
+    name: { ru: Кем изменен, en: Changed by }
+    attribute: _modifier
+    type: text
 
-  - name: "modified"
-    label: { ru: "Когда изменен", en: "Changed time" }
-    attribute: "_modified"
-    type: "datetime"
+  - id: modified
+    name: { ru: Когда изменен, en: Changed time }
+    attribute: _modified
+    type: datetime

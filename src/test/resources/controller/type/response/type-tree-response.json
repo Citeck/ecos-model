@@ -5,7 +5,7 @@
         "description": "some description",
         "inheritActions": true,
         "parent": "emodel/type@base",
-        "form": "uiserv/eform@test-form",
+        "form": "uiserv/form@test-form",
         "actions": [
             "uiserv/action@delete",
             "uiserv/action@view"
@@ -21,6 +21,6 @@
                 "last": "Koch"
             }
         },
-        "configFormRef": "uiserv/eform@test-config-form"
+        "configFormRef": "uiserv/form@test-config-form"
     }
 }

@@ -1,0 +1,6 @@
+modelVersion: "1.0"
+
+internal: true
+
+controller:
+  type: json

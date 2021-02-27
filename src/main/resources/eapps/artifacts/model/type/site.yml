@@ -5,7 +5,6 @@
     "ru": "Сайт"
   },
   "system": true,
-  "inheritActions": true,
   "dashboardType": "site-details",
   "sourceId": "emodel/site",
   "defaultCreateVariant": false

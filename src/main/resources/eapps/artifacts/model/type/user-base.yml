@@ -5,7 +5,6 @@
     "en": "Base user type"
   },
   "system": true,
-  "inheritActions": true,
   "sourceId": "alfresco/",
   "defaultCreateVariant": false
 }
