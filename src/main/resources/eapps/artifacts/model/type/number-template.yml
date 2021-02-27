@@ -1,4 +1,4 @@
-
+---
 id: number-template
 
 name:
@@ -8,8 +8,8 @@ name:
 system: true
 
 sourceId: emodel/num-template
-journal: uiserv/journal@number-templates
-form: uiserv/form@num-template-form
+journalRef: uiserv/journal@number-templates
+formRef: uiserv/form@num-template-form
 
 createVariants:
 

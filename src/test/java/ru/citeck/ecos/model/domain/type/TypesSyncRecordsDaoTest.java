@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.type;
+package ru.citeck.ecos.model.domain.type;
 
 import org.junit.After;
 import org.junit.Before;
@@ -15,7 +15,7 @@ import ru.citeck.ecos.model.EcosModelApp;
 import ru.citeck.ecos.model.association.dto.AssocDirection;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef;
-import ru.citeck.ecos.model.type.dto.TypeDto;
+import ru.citeck.ecos.model.type.dto.TypeDef;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.model.type.service.TypeService;
 import ru.citeck.ecos.records2.RecordRef;
@@ -27,8 +27,8 @@ import ru.citeck.ecos.records2.predicate.model.Predicates;
 import ru.citeck.ecos.records2.predicate.model.VoidPredicate;
 import ru.citeck.ecos.records2.rest.RemoteRecordsRestApi;
 import ru.citeck.ecos.records2.source.dao.local.RemoteSyncRecordsDao;
-import ru.citeck.ecos.records3.record.query.dto.RecsQueryRes;
-import ru.citeck.ecos.records3.record.query.dto.query.RecordsQuery;
+import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery;
+import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes;
 import ru.citeck.ecos.records3.record.request.RequestContext;
 import ru.citeck.ecos.records3.record.resolver.RemoteRecordsResolver;
 
@@ -54,9 +54,9 @@ public class TypesSyncRecordsDaoTest {
     private RecordsService localRecordsService;
     private RecordsServiceFactory localServiceFactory;
 
-    private RemoteSyncRecordsDao<TypeDto> remoteSyncRecordsDao;
+    private RemoteSyncRecordsDao<TypeDef> remoteSyncRecordsDao;
 
-    private final List<TypeDto> types = new ArrayList<>();
+    private final List<TypeDef> types = new ArrayList<>();
 
     @Before
     public void setup() {
@@ -81,7 +81,7 @@ public class TypesSyncRecordsDaoTest {
 
         this.localRecordsService = localServiceFactory.getRecordsServiceV1();
 
-        remoteSyncRecordsDao = new RemoteSyncRecordsDao<>(TYPES_SOURCE_ID, TypeDto.class);
+        remoteSyncRecordsDao = new RemoteSyncRecordsDao<>(TYPES_SOURCE_ID, TypeDef.class);
         localRecordsService.register(remoteSyncRecordsDao);
 
         generateData();
@@ -106,8 +106,8 @@ public class TypesSyncRecordsDaoTest {
         assertEquals(TOTAL_TYPES + 2 /* +1 for base and type types */, result.getTotalCount());
         assertEquals(TOTAL_TYPES + 2, remoteSyncRecordsDao.getRecords().size());
 
-        TypeDto dto = localRecordsService.getAtts(RecordRef.valueOf(TYPES_SOURCE_ID + "@type-id-100"), TypeDto.class);
-        TypeDto origDto = types.stream().filter(v -> v.getId().equals("type-id-100")).findFirst().orElse(null);
+        TypeDef dto = localRecordsService.getAtts(RecordRef.valueOf(TYPES_SOURCE_ID + "@type-id-100"), TypeDef.class);
+        TypeDef origDto = types.stream().filter(v -> v.getId().equals("type-id-100")).findFirst().orElse(null);
 
         assertEquals(origDto, normalize(dto));
 
@@ -128,8 +128,8 @@ public class TypesSyncRecordsDaoTest {
         assertEquals(1, recs.getRecords().size());
         assertEquals(RecordRef.valueOf(TYPES_SOURCE_ID + "@type-id-100"), recs.getRecords().get(0));
 
-        RecsQueryRes<TypeDto> resultWithMeta = RequestContext.doWithCtx(localServiceFactory, ctx -> {
-            RecsQueryRes<TypeDto> res = localRecordsService.query(query1, TypeDto.class);
+        RecsQueryRes<TypeDef> resultWithMeta = RequestContext.doWithCtx(localServiceFactory, ctx -> {
+            RecsQueryRes<TypeDef> res = localRecordsService.query(query1, TypeDef.class);
             assertEquals(0, ctx.getErrors().size());
             return res;
         });
@@ -137,10 +137,10 @@ public class TypesSyncRecordsDaoTest {
 
         assertEquals(origDto, normalize(resultWithMeta.getRecords().get(0)));
 
-        Set<TypeDto> expectedSet = new TreeSet<>(Comparator.comparing(TypeDto::getId));
+        Set<TypeDef> expectedSet = new TreeSet<>(Comparator.comparing(TypeDef::getId));
         expectedSet.addAll(types);
 
-        Set<TypeDto> actualSet = new TreeSet<>(Comparator.comparing(TypeDto::getId));
+        Set<TypeDef> actualSet = new TreeSet<>(Comparator.comparing(TypeDef::getId));
         actualSet.addAll(remoteSyncRecordsDao.getRecords().values());
 
         assertEquals(expectedSet, new HashSet<>(actualSet
@@ -150,61 +150,62 @@ public class TypesSyncRecordsDaoTest {
         ));
     }
 
-    TypeDto normalize(TypeDto dto) {
+    TypeDef normalize(TypeDef dto) {
 
-        List<AssociationDto> assocs = DataValue.create(dto.getAssociations()).toList(AssociationDto.class);
+     /*   List<AssociationDto> assocs = DataValue.create(dto.getAssociations()).toList(AssociationDto.class);
         assocs.sort(Comparator.comparing(AssociationDto::getId));
         dto.setAssociations(assocs);
 
         if (!Boolean.FALSE.equals(dto.getDefaultCreateVariant())) {
             dto.setDefaultCreateVariant(null);
         }
-
+*/
         return dto;
     }
 
     void generateData() {
 
-        TypeDto base = new TypeDto();
-        base.setId("base");
-        base.setName(new MLText("base"));
-        types.add(new TypeDto(typeService.save(base)));
+        TypeDef.Builder base = TypeDef.create();
+        base.withId("base");
+        base.withName(new MLText("base"));
+        types.add(typeService.save(base.build()));
 
-        TypeDto type = new TypeDto();
-        type.setId("type");
-        type.setName(new MLText("type"));
-        types.add(new TypeDto(typeService.save(type)));
+        TypeDef.Builder type = TypeDef.create();
+        type.withId("type");
+        type.withName(new MLText("type"));
+        types.add(typeService.save(type.build()));
 
         for (int i = 0; i < TOTAL_TYPES; i++) {
 
-            TypeDto typeDto = new TypeDto();
+            TypeDef.Builder typeDto = TypeDef.create();
 
-            typeDto.setId("type-id-" + i);
+            typeDto.withId("type-id-" + i);
 
             typeDto.setActions(Arrays.asList(
                 RecordRef.valueOf("uiserv/action@action-" + i + "-0"),
                 RecordRef.valueOf("uiserv/action@action-" + i + "-1")
             ));
 
-            typeDto.setAssociations(generateAssocs(i));
-            typeDto.setAttributes(ObjectData.create("{\"attKey\":\"attValue-" + i + "\"}"));
+            //typeDto.setAssociations(generateAssocs(i));
+            typeDto.withProperties(ObjectData.create("{\"attKey\":\"attValue-" + i + "\"}"));
             typeDto.setConfig(ObjectData.create("{\"configKey\":\"configValue-" + i + "\"}"));
-            typeDto.setConfigFormRef(RecordRef.create("uiserv", "eform", "config-form-" + i));
-            typeDto.setCreateVariants(generateCreateVariants(i));
-            typeDto.setDashboardType("card-details");
-            typeDto.setDescription(new MLText("Description-" + i));
-            typeDto.setForm(RecordRef.valueOf("uiserv/form@form-" + i));
-            typeDto.setJournal(RecordRef.valueOf("uiserv/journal@journal-" + i));
-            typeDto.setSourceId("source-" + i);
-            typeDto.setName(new MLText("name-" + i));
-            typeDto.setParent(RecordRef.valueOf("emodel/type@base"));
-            typeDto.setDispNameTemplate(DataValue.create("{\"ru\": \"Тест\"}").getAs(MLText.class));
-            typeDto.setInheritNumTemplate(true);
-            typeDto.setNumTemplateRef(RecordRef.valueOf("emodel/num-template@test"));
-            typeDto.setPostCreateActionRef(RecordRef.valueOf("uiserv/action@post-create-action"));
+            typeDto.withConfigFormRef(RecordRef.create("uiserv", "eform", "config-form-" + i));
+            typeDto.withCreateVariants(generateCreateVariants(i));
+            typeDto.withDashboardType("card-details");
+            typeDto.withDescription(new MLText("Description-" + i));
+            typeDto.withFormRef(RecordRef.valueOf("uiserv/form@form-" + i));
+            typeDto.withJournalRef(RecordRef.valueOf("uiserv/journal@journal-" + i));
+            typeDto.withSourceId("source-" + i);
+            typeDto.withName(new MLText("name-" + i));
+            typeDto.withParentRef(RecordRef.valueOf("emodel/type@base"));
+            typeDto.withDispNameTemplate(DataValue.create("{\"ru\": \"Тест\"}").getAs(MLText.class));
+            typeDto.withInheritNumTemplate(true);
+            typeDto.withNumTemplateRef(RecordRef.valueOf("emodel/num-template@test"));
+            typeDto.withPostCreateActionRef(RecordRef.valueOf("uiserv/action@post-create-action"));
 
-            types.add(typeDto);
-            typeService.save(typeDto);
+            TypeDef typeDef = typeDto.build();
+            types.add(typeDef);
+            typeService.save(typeDef);
         }
     }
 

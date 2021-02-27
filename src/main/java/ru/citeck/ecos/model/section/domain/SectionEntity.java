@@ -2,7 +2,7 @@ package ru.citeck.ecos.model.section.domain;
 
 import lombok.*;
 import ru.citeck.ecos.model.domain.BaseEntity;
-import ru.citeck.ecos.model.type.domain.TypeEntity;
+import ru.citeck.ecos.model.type.repository.TypeEntity;
 
 import javax.persistence.*;
 import java.util.Set;

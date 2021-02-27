@@ -1,19 +1,18 @@
 package ru.citeck.ecos.model.type.converter
 
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.commons.json.Json
-import ru.citeck.ecos.model.association.converter.AssociationConverter
 import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef
 import ru.citeck.ecos.model.lib.type.dto.DocLibDef
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
-import ru.citeck.ecos.model.type.domain.TypeEntity
+import ru.citeck.ecos.model.type.repository.TypeEntity
 import ru.citeck.ecos.model.type.dto.TypeDef
 import ru.citeck.ecos.model.type.repository.TypeRepository
+import ru.citeck.ecos.model.type.service.dao.TypeRepoDao
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records3.record.mixin.impl.mutmeta.MutMeta
 import ru.citeck.ecos.records3.record.mixin.impl.mutmeta.MutMetaMixin
@@ -22,22 +21,23 @@ import java.util.*
 import kotlin.collections.LinkedHashSet
 
 @Component
-class TypeConverter(private val typeRepository: TypeRepository,
-                    private val associationConverter: AssociationConverter,
-                    @Qualifier("typesMutMetaMixin")
-                    private val mutMetaMixin: MutMetaMixin) {
+class TypeConverter(private val typeRepoDao: TypeRepoDao) {
 
-    fun dtoToEntity(dto: TypeDef): TypeEntity {
+    var mutMetaMixin: MutMetaMixin? = null
 
-        var entity = typeRepository.findByExtId(dto.id)
+    fun toEntity(dto: TypeDef): TypeEntity {
+
+        var entity = typeRepoDao.findByExtId(dto.id)
         if (entity == null) {
             entity = TypeEntity()
-            entity.extId = UUID.randomUUID().toString()
+            entity.extId = if (dto.id.isBlank()) {
+                UUID.randomUUID().toString()
+            } else {
+                dto.id
+            }
         }
 
-        val typeDef = dto.copy()
-            .withParentRef(dto.parentRef)
-            .build()
+        val typeDef = dto.copy().build()
 
         if (RecordRef.isEmpty(typeDef.parentRef)) {
 
@@ -45,7 +45,7 @@ class TypeConverter(private val typeRepository: TypeRepository,
 
         } else {
 
-            val parentEntity = typeRepository.findByExtId(typeDef.parentRef.id)
+            val parentEntity = typeRepoDao.findByExtId(typeDef.parentRef.id)
                     ?: error("Parent type is not found: ${typeDef.parentRef.id}")
             entity.parent = parentEntity
         }
@@ -91,9 +91,9 @@ class TypeConverter(private val typeRepository: TypeRepository,
         }
     }
 
-    fun entityToDto(entity: TypeEntity): TypeDef {
+    fun toDto(entity: TypeEntity): TypeDef {
 
-        mutMetaMixin.addCtxMeta(entity.extId, MutMeta(
+        mutMetaMixin?.addCtxMeta(entity.extId, MutMeta(
             entity.createdBy ?: "anonymous",
             entity.createdDate ?: Instant.EPOCH,
             entity.lastModifiedBy ?: "anonymous",

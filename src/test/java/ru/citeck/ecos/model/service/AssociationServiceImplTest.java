@@ -7,7 +7,6 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.citeck.ecos.model.association.domain.AssociationEntity;
-import ru.citeck.ecos.model.type.dto.TypeDto;
 import ru.citeck.ecos.model.association.repository.AssociationRepository;
 import ru.citeck.ecos.model.association.service.impl.AssociationServiceImpl;
 

@@ -1,14 +1,13 @@
-{
-  "id": "case",
-  "parent": "emodel/type@user-base",
-  "name": {
-    "ru": "Кейс",
-    "en": "Case"
-  },
-  "system": true,
-  "sourceId": "alfresco/",
-  "defaultCreateVariant": false,
-  "properties": {
-    "alfType": "ecos:case"
-  }
-}
+---
+id: case
+name:
+  ru: Кейс
+  en: Case
+
+parentRef: emodel/type@user-base
+
+system: true
+sourceId: alfresco/
+
+properties:
+  alfType: ecos:case

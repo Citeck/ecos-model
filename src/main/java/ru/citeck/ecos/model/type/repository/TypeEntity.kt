@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.type.domain
+package ru.citeck.ecos.model.type.repository
 
 import ru.citeck.ecos.model.association.domain.AssociationEntity
 import ru.citeck.ecos.model.domain.AbstractAuditingEntity

@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.type;
+package ru.citeck.ecos.model.domain.type;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -11,7 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.model.EcosModelApp;
-import ru.citeck.ecos.model.type.dto.TypeDto;
+import ru.citeck.ecos.model.type.dto.TypeDef;
 import ru.citeck.ecos.model.type.service.TypeService;
 import ru.citeck.ecos.model.web.rest.TestUtil;
 import ru.citeck.ecos.records2.request.rest.RestHandler;
@@ -53,10 +53,10 @@ public class TypeRecordsControllerTest {
             .standaloneSetup(recordsApi)
             .build();
 
-        TypeDto type = new TypeDto();
+        TypeDef.Builder type = TypeDef.create();
         type.setId("type");
         type.setName(new MLText("type"));
-        typeService.save(type);
+        typeService.save(type.build());
     }
 
     @Test

@@ -1,12 +1,13 @@
 ---
 id: type
-
 name:
   ru: Тип кейса
   en: Case type
 
 system: true
 sourceId: emodel/type
+
+formRef: uiserv/form@ecos-type
 journalRef: uiserv/journal@ecos-types
 
 createVariants:

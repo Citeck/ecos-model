@@ -2,13 +2,13 @@ package ru.citeck.ecos.model.type.api.records
 
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.records2.RecordConstants
-import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records3.record.atts.value.AttValueCtx
 import ru.citeck.ecos.records3.record.mixin.AttMixin
 
 @Component
-class TypeInhMixin(
-    private val resolvedTypeRecordsDao: ResolvedTypeRecordsDao
+final class TypeInhMixin(
+    private val resolvedTypeRecordsDao: ResolvedTypeRecordsDao,
+    typeRecordsDao: TypeRecordsDao
 ) : AttMixin {
 
     companion object {
@@ -17,7 +17,6 @@ class TypeInhMixin(
             "extId",
             "parent",
             RecordConstants.ATT_PARENT,
-            "parents",
             "children",
             RecordConstants.ATT_ACTIONS,
             "associations",
@@ -39,55 +38,90 @@ class TypeInhMixin(
             "docLibEnabled",
             "docLibFileTypeRefs",
             "docLibDirTypeRef",
-            "resolvedDocLib",
-            "data"
+            "resolvedDocLib"
         )
     }
 
+    init {
+        typeRecordsDao.addAttributesMixin(this)
+        resolvedTypeRecordsDao.addAttributesMixin(this)
+    }
+
     override fun getAtt(path: String, value: AttValueCtx): Any? {
+
+        val rtypeDef = resolvedTypeRecordsDao.getResolvedTypeRecord(value.getLocalId())
+        val typeDef = rtypeDef.typeRec.typeDef
+
         return when (path) {
             "moduleId", "extId", "localId" -> {
                 value.getLocalId()
             }
             "parent",
             RecordConstants.ATT_PARENT -> {
-                RecordRef.valueOf(value.getAtt("parentRef?id").asText())
-            }
-            "parents" -> {
-                emptyList<Any>()//todo
-            }
-            "children" -> {
-                emptyList<Any>()//todo
+                typeDef.parentRef
             }
             RecordConstants.ATT_ACTIONS -> {
-                val rec = resolvedTypeRecordsDao.getResolvedTypeRecord(value.getLocalId())
-                return rec.getActions()
+                rtypeDef.getActions()
             }
             "associations",
             "assocsFull" -> {
-                return emptyList<Any>()
+                //todo
+                emptyList<Any>()
             }
             "form" -> {
-
+                typeDef.formRef
             }
-            "inhFormRef",
-            "journal",
-            "attributes",
-            "inhDashboardType",
-            "inhCreateVariants",
-            "isSystem",
-            "inhConfigFormRef",
-            "inhAttributes",
-            "inhSourceId",
-            "resolvedModel",
-            "modelRoles",
-            "modelStatuses",
-            "modelAttributes",
-            "docLibEnabled",
-            "docLibFileTypeRefs",
-            "docLibDirTypeRef",
-            "resolvedDocLib",
-            "data" -> {null}
+            "inhFormRef" -> {
+                rtypeDef.getFormRef()
+            }
+            "journal" -> {
+                typeDef.journalRef
+            }
+            "attributes" -> {
+                typeDef.properties
+            }
+            "inhDashboardType" -> {
+                rtypeDef.getDashboardType()
+            }
+            "inhCreateVariants" -> {
+                rtypeDef.getCreateVariants()
+            }
+            "isSystem" -> {
+                typeDef.system
+            }
+            "inhConfigFormRef" -> {
+                rtypeDef.getConfigFormRef()
+            }
+            "inhAttributes" -> {
+                rtypeDef.getProperties()
+            }
+            "inhSourceId" -> {
+                rtypeDef.getSourceId()
+            }
+            "resolvedModel" -> {
+                rtypeDef.getModel()
+            }
+            "modelRoles" -> {
+                typeDef.model.roles
+            }
+            "modelStatuses" -> {
+                typeDef.model.statuses
+            }
+            "modelAttributes" -> {
+                typeDef.model.attributes
+            }
+            "docLibEnabled" -> {
+                typeDef.docLib.enabled
+            }
+            "docLibFileTypeRefs" -> {
+                typeDef.docLib.fileTypeRefs
+            }
+            "docLibDirTypeRef" -> {
+                typeDef.docLib.dirTypeRef
+            }
+            "resolvedDocLib" -> {
+                rtypeDef.getDocLib()
+            }
             else -> {
                 null
             }

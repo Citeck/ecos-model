@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import ru.citeck.ecos.model.domain.BaseEntity;
-import ru.citeck.ecos.model.type.domain.TypeEntity;
+import ru.citeck.ecos.model.type.repository.TypeEntity;
 
 import javax.persistence.*;
 

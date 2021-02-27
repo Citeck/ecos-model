@@ -8,6 +8,7 @@ import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
 import ru.citeck.ecos.model.lib.role.dto.RoleDef
 import ru.citeck.ecos.model.lib.status.dto.StatusDef
 import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef
+import ru.citeck.ecos.model.lib.type.dto.DocLibDef
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.model.type.dto.TypeDef
@@ -75,6 +76,26 @@ class ResolvedTypeRecordsDao(
 
             resolvedRecById[typeRec.typeDef.id] = this
             typeDefById[typeRec.typeDef.id] = typeRec.typeDef
+        }
+
+        fun getParentRef(): RecordRef {
+            val parentRef = typeRec.typeDef.parentRef
+            if (RecordRef.isEmpty(parentRef) && typeRec.typeDef.id != "base") {
+                return TypeUtils.getTypeRef("base")
+            }
+            return parentRef
+        }
+
+        fun getParents(): List<RecordRef> {
+            return typeRec.getParents().map {
+                RecordRef.create(it.appName, ID, it.id)
+            }
+        }
+
+        fun getChildren(): List<RecordRef> {
+            return typeRec.getChildren().map {
+                RecordRef.create(it.appName, ID, it.id)
+            }
         }
 
         fun getFormRef(): RecordRef {
@@ -157,13 +178,18 @@ class ResolvedTypeRecordsDao(
 
         fun getCreateVariants(): List<CreateVariantDef> {
 
+            val typeId = typeRec.typeDef.id
+            if (typeId == "base" || typeId == "user-base" || typeId == "case" || typeId == "data-list") {
+                return typeRec.typeDef.createVariants
+            }
+
             val result = ArrayList<CreateVariantDef>()
 
             forEachDescTypes(typeRec.typeDef.id) { typeDef ->
 
                 val variants = ArrayList<CreateVariantDef>()
 
-                if (typeDef.defaultCreateVariant) {
+                if (typeDef.defaultCreateVariant && RecordRef.isNotEmpty(typeDef.formRef)) {
                     variants.add(CreateVariantDef.create()
                         .withId("DEFAULT")
                         .build())
@@ -218,6 +244,28 @@ class ResolvedTypeRecordsDao(
                 withRoles(roles.values.toList())
                 withStatuses(statuses.values.toList())
                 withAttributes(attributes.values.toList())
+            }
+        }
+
+        fun getDocLib(): DocLibDef {
+
+            val docLib = typeRec.typeDef.docLib
+            if (!docLib.enabled) {
+                return DocLibDef.EMPTY
+            }
+
+            return DocLibDef.create {
+                enabled = true
+                fileTypeRefs = if (docLib.fileTypeRefs.isEmpty()) {
+                    listOf(TypeUtils.getTypeRef(typeRec.typeDef.id))
+                } else {
+                    docLib.fileTypeRefs
+                }
+                dirTypeRef = if (RecordRef.isEmpty(docLib.dirTypeRef)) {
+                    TypeUtils.DOCLIB_DEFAULT_DIR_TYPE
+                } else {
+                    docLib.dirTypeRef
+                }
             }
         }
 
@@ -303,7 +351,8 @@ class ResolvedTypeRecordsDao(
 
         private fun getResolvedRecById(id: String): ResolvedTypeRecord {
             return resolvedRecById.computeIfAbsent(id) {
-                val typeDef = TypeRecordsDao.TypeRecord(getTypeDefById(id) ?: TypeDef.EMPTY, typeService)
+                val typeDef = TypeRecordsDao.TypeRecord(getTypeDefById(id)
+                    ?: TypeDef.EMPTY, typeService)
                 ResolvedTypeRecord(typeDef, typeService)
             }
         }

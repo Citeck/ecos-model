@@ -1,11 +1,13 @@
 package ru.citeck.ecos.model.type.api.records
 
+import ecos.com.fasterxml.jackson210.databind.JsonNode
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
+import ru.citeck.ecos.commons.data.MLText
+import ru.citeck.ecos.commons.json.Json.mapper
+import ru.citeck.ecos.commons.json.YamlUtils
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.model.type.dto.TypeDef
-import ru.citeck.ecos.model.type.records.dao.TypeRecordsDaoOld
-import ru.citeck.ecos.model.type.records.dao.TypeRecordsDaoOld.ExpandTypesQuery
 import ru.citeck.ecos.model.type.service.TypeService
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.RecordRef
@@ -17,6 +19,7 @@ import ru.citeck.ecos.records3.record.dao.atts.RecordAttsDao
 import ru.citeck.ecos.records3.record.dao.query.RecordsQueryDao
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes
+import java.nio.charset.StandardCharsets
 
 @Component
 class TypeRecordsDao(
@@ -25,6 +28,8 @@ class TypeRecordsDao(
 
     companion object {
         const val ID = "type"
+
+        private const val LANG_EXPAND_TYPES = "expand-types";
     }
 
     override fun getId() = ID
@@ -35,13 +40,12 @@ class TypeRecordsDao(
 
         when (recsQuery.language) {
 
-            TypeRecordsDaoOld.LANG_EXPAND_TYPES -> {
+            LANG_EXPAND_TYPES -> {
 
                 val expandTypesQuery: ExpandTypesQuery = recsQuery.getQuery(ExpandTypesQuery::class.java)
                 val resultTypesDto = typeService.expandTypes(expandTypesQuery.typeRefs.map { it.id })
 
                 result.setRecords(resultTypesDto.map { TypeRecord(it, typeService) })
-
             }
             PredicateService.LANGUAGE_PREDICATE -> {
 
@@ -113,9 +117,31 @@ class TypeRecordsDao(
             return typeService.getParentIds(typeDef.id).map { TypeUtils.getTypeRef(it) }
         }
 
+        fun getChildren(): List<RecordRef> {
+            return typeService.getChildren(typeDef.id).map { TypeUtils.getTypeRef(it) }
+        }
+
+        fun getData(): ByteArray {
+            return YamlUtils.toNonDefaultString(typeDef).toByteArray(StandardCharsets.UTF_8)
+        }
+
+        @AttName("?json")
+        fun getJson(): JsonNode {
+            return mapper.toNonDefaultJson(typeDef)
+        }
+
+        @AttName("?disp")
+        fun getDisplayName(): MLText {
+            return typeDef.name
+        }
+
         @AttName("_type")
         fun getEcosType() : RecordRef {
             return TypeUtils.getTypeRef("type")
         }
     }
+
+    class ExpandTypesQuery(
+        val typeRefs: List<RecordRef> = emptyList()
+    )
 }

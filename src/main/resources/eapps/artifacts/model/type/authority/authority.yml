@@ -5,12 +5,8 @@ name:
   en: Person or group
 
 system: true
-
 journalRef: uiserv/journal@authority
-
 sourceId: alfresco/
-
-defaultCreateVariant: false
 
 properties:
   alfType: cm:authority

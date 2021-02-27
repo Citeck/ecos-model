@@ -13,7 +13,7 @@ import ru.citeck.ecos.model.EcosModelApp;
 import ru.citeck.ecos.model.num.dto.NumTemplateDto;
 import ru.citeck.ecos.model.num.repository.NumTemplateRepository;
 import ru.citeck.ecos.model.num.service.NumTemplateService;
-import ru.citeck.ecos.model.type.dto.TypeDto;
+import ru.citeck.ecos.model.type.dto.TypeDef;
 import ru.citeck.ecos.model.type.service.TypeService;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records3.RecordsService;
@@ -22,10 +22,9 @@ import ru.citeck.ecos.records2.predicate.PredicateService;
 import ru.citeck.ecos.records2.predicate.model.VoidPredicate;
 import ru.citeck.ecos.records2.rest.RemoteRecordsRestApi;
 import ru.citeck.ecos.records2.source.dao.local.RemoteSyncRecordsDao;
-import ru.citeck.ecos.records3.record.query.dto.RecsQueryRes;
-import ru.citeck.ecos.records3.record.query.dto.query.RecordsQuery;
+import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery;
+import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes;
 import ru.citeck.ecos.records3.record.resolver.RemoteRecordsResolver;
-import ru.citeck.ecos.records2.source.dao.local.RemoteSyncRecordsDao;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -118,15 +117,15 @@ public class NumTemplateSyncRecordsDaoTest {
 
     void generateData() {
 
-        TypeDto base = new TypeDto();
-        base.setId("base");
-        base.setName(new MLText("base"));
-        typeService.save(base);
+        TypeDef.Builder base = TypeDef.create();
+        base.withId("base");
+        base.withName(new MLText("base"));
+        typeService.save(base.build());
 
-        TypeDto numTmpltType = new TypeDto();
-        numTmpltType.setId("number-template");
-        numTmpltType.setName(new MLText("number-template"));
-        typeService.save(numTmpltType);
+        TypeDef.Builder numTmpltType = TypeDef.create();
+        numTmpltType.withId("number-template");
+        numTmpltType.withName(new MLText("number-template"));
+        typeService.save(numTmpltType.build());
 
         for (int i = 0; i < TOTAL_TEMPLATES; i++) {
 

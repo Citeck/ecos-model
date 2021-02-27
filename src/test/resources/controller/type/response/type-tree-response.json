@@ -4,7 +4,6 @@
         "name": "test-type",
         "description": "some description",
         "inheritActions": true,
-        "parent": "emodel/type@base",
         "form": "uiserv/form@test-form",
         "actions": [
             "uiserv/action@delete",

@@ -9,12 +9,11 @@ import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.association.domain.AssociationEntity;
 import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.service.exception.TypeNotFoundException;
-import ru.citeck.ecos.model.type.domain.TypeEntity;
-import ru.citeck.ecos.model.type.records.dao.TypeRecordsDaoOld;
+import ru.citeck.ecos.model.type.api.records.TypeRecordsDao;
+import ru.citeck.ecos.model.type.repository.TypeEntity;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -51,11 +50,11 @@ public class AssociationConverter {
             associationEntity.setTarget(source);
 
         } else {
-            Optional<TypeEntity> optionalTarget = typeRepository.findByExtId(targetRecordRef.getId());
-            if (!optionalTarget.isPresent()) {
+            TypeEntity optionalTarget = typeRepository.findByExtId(targetRecordRef.getId());
+            if (optionalTarget == null) {
                 throw new TypeNotFoundException(targetRecordRef.getId());
             }
-            associationEntity.setTarget(optionalTarget.get());
+            associationEntity.setTarget(optionalTarget);
         }
 
 
@@ -77,7 +76,7 @@ public class AssociationConverter {
         assocDto.setAttribute(associationEntity.getAttribute());
 
         String targetTypeId = associationEntity.getTarget().getExtId();
-        RecordRef targetTypeRecordRef = RecordRef.create("emodel", TypeRecordsDaoOld.ID, targetTypeId);
+        RecordRef targetTypeRecordRef = RecordRef.create("emodel", TypeRecordsDao.ID, targetTypeId);
         assocDto.setTarget(targetTypeRecordRef);
 
         return assocDto;

@@ -39,7 +39,7 @@
                           {
                             "type": "selectJournal",
                             "journalId": "ecos-types",
-                            "key": "parent",
+                            "key": "parentRef",
                             "label": "Parent",
                             "presetFilterPredicatesJs": null,
                             "input": true
@@ -52,7 +52,7 @@
                                   {
                                     "type": "selectJournal",
                                     "journalId": "ecos-forms",
-                                    "key": "form",
+                                    "key": "formRef",
                                     "label": "Form",
                                     "input": true
                                   }
@@ -87,7 +87,7 @@
                           {
                             "label": "Journal",
                             "journalId": "ecos-journals",
-                            "key": "journal",
+                            "key": "journalRef",
                             "type": "selectJournal",
                             "input": true
                           },

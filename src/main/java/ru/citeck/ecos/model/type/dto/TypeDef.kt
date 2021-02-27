@@ -82,7 +82,7 @@ data class TypeDef(
         return builderObj.build()
     }
 
-    class Builder() {
+    open class Builder() {
 
         var id: String = ""
         var name: MLText = MLText.EMPTY
@@ -124,43 +124,43 @@ data class TypeDef(
 
         constructor(base: TypeDef) : this() {
 
-            this.id = base.id
-            this.name = base.name
-            this.description = base.description
+            withId(base.id)
+            withName(base.name)
+            withDescription(base.description)
 
-            this.system = base.system
+            withSystem(base.system)
 
-            this.sourceId = base.sourceId
-            this.metaRecord = base.metaRecord
+            withSourceId(base.sourceId)
+            withMetaRecord(base.metaRecord)
 
-            this.parentRef = base.parentRef
-            this.formRef = base.formRef
-            this.journalRef = base.journalRef
+            withParentRef(base.parentRef)
+            withFormRef(base.formRef)
+            withJournalRef(base.journalRef)
 
-            this.dashboardType = base.dashboardType
+            withDashboardType(base.dashboardType)
 
-            this.inheritForm = base.inheritForm
-            this.inheritActions = base.inheritActions
-            this.inheritNumTemplate = base.inheritNumTemplate
+            withInheritForm(base.inheritForm)
+            withInheritActions(base.inheritActions)
+            withInheritNumTemplate(base.inheritNumTemplate)
 
-            this.dispNameTemplate = base.dispNameTemplate
-            this.numTemplateRef = base.numTemplateRef
+            withDispNameTemplate(base.dispNameTemplate)
+            withNumTemplateRef(base.numTemplateRef)
 
-            this.actions = DataValue.create(base.actions).asList(RecordRef::class.java)
+            withActions(DataValue.create(base.actions).asList(RecordRef::class.java))
 
             /* create */
-            this.defaultCreateVariant = base.defaultCreateVariant
-            this.createVariants = DataValue.create(base.createVariants).asList(CreateVariantDef::class.java)
-            this.postCreateActionRef = base.postCreateActionRef
+            withDefaultCreateVariant(base.defaultCreateVariant)
+            withCreateVariants(DataValue.create(base.createVariants).asList(CreateVariantDef::class.java))
+            withPostCreateActionRef(base.postCreateActionRef)
 
             /* config */
-            this.configFormRef = base.configFormRef
-            this.config = ObjectData.deepCopyOrNew(base.config)
+            withConfigFormRef(base.configFormRef)
+            withConfig(ObjectData.deepCopyOrNew(base.config))
 
-            this.model = base.model
-            this.docLib = base.docLib
+            withModel(base.model)
+            withDocLib(base.docLib)
 
-            this.properties = ObjectData.deepCopyOrNew(base.properties)
+            withProperties(ObjectData.deepCopyOrNew(base.properties))
         }
 
         fun withId(id: String): Builder {
@@ -197,10 +197,14 @@ data class TypeDef(
 
         fun withParentRef(parentRef: RecordRef?): Builder {
             this.parentRef = RecordRef.valueOf(parentRef)
-            if (RecordRef.isEmpty(this.parentRef) && this.id != "base") {
-                this.parentRef = TypeUtils.getTypeRef("base")
+            if (this.parentRef.id.isBlank() || this.parentRef.id == "base") {
+                this.parentRef = RecordRef.EMPTY
             }
             return this
+        }
+
+        fun withParent(parentRef: RecordRef?): Builder {
+            return withParentRef(parentRef)
         }
 
         fun withFormRef(formRef: RecordRef?): Builder {
@@ -208,17 +212,23 @@ data class TypeDef(
             return this
         }
 
+        fun withForm(formRef: RecordRef?): Builder {
+            return withFormRef(formRef)
+        }
+
         fun withJournalRef(journalRef: RecordRef?): Builder {
             this.journalRef = RecordRef.valueOf(journalRef)
             return this
         }
 
+        fun withJournal(journalRef: RecordRef?): Builder {
+            return withJournalRef(journalRef)
+        }
 
         fun withDashboardType(dashboardType: String?): Builder {
             this.dashboardType = dashboardType ?: ""
             return this
         }
-
 
         fun withInheritForm(inheritForm: Boolean?): Builder {
             this.inheritForm = inheritForm == true
@@ -235,7 +245,6 @@ data class TypeDef(
             return this
         }
 
-
         fun withDispNameTemplate(dispNameTemplate: MLText?): Builder {
             this.dispNameTemplate = dispNameTemplate ?: MLText.EMPTY
             return this
@@ -244,6 +253,10 @@ data class TypeDef(
         fun withNumTemplateRef(numTemplateRef: RecordRef?): Builder {
             this.numTemplateRef = RecordRef.valueOf(numTemplateRef)
             return this
+        }
+
+        fun withNumTemplate(numTemplateRef: RecordRef?): Builder {
+            return withNumTemplateRef(numTemplateRef)
         }
 
         fun withActions(actions: List<RecordRef>?): Builder {
@@ -287,7 +300,6 @@ data class TypeDef(
             this.docLib = docLib ?: DocLibDef.EMPTY
             return this
         }
-
 
         fun withProperties(properties: ObjectData?): Builder {
             this.properties = properties ?: ObjectData.create()
