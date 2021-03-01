@@ -8,7 +8,6 @@ import ru.citeck.ecos.commons.json.serialization.annotation.IncludeNonDefault
 import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef
 import ru.citeck.ecos.model.lib.type.dto.DocLibDef
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
-import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.records2.RecordRef
 
 @IncludeNonDefault
@@ -38,6 +37,8 @@ data class TypeDef(
     val numTemplateRef: RecordRef,
 
     val actions: List<RecordRef>,
+
+    val associations: List<AssocDef>,
 
     /* create */
     val defaultCreateVariant: Boolean,
@@ -108,6 +109,8 @@ data class TypeDef(
 
         var actions: List<RecordRef> = emptyList()
 
+        var associations: List<AssocDef> = emptyList()
+
         /* create */
         var defaultCreateVariant: Boolean = true
         var createVariants: List<CreateVariantDef> = emptyList()
@@ -147,6 +150,7 @@ data class TypeDef(
             withNumTemplateRef(base.numTemplateRef)
 
             withActions(DataValue.create(base.actions).asList(RecordRef::class.java))
+            withAssociations(DataValue.create(base.associations).asList(AssocDef::class.java))
 
             /* create */
             withDefaultCreateVariant(base.defaultCreateVariant)
@@ -178,12 +182,10 @@ data class TypeDef(
             return this
         }
 
-
         fun withSystem(system: Boolean?): Builder {
             this.system = system == true
             return this
         }
-
 
         fun withSourceId(sourceId: String?): Builder {
             this.sourceId = sourceId ?: ""
@@ -264,6 +266,11 @@ data class TypeDef(
             return this
         }
 
+        fun withAssociations(associations: List<AssocDef>?): Builder {
+            this.associations = associations?.filter { it.id.isNotBlank() } ?: emptyList()
+            return this
+        }
+
         /* create */
         fun withDefaultCreateVariant(defaultCreateVariant: Boolean?): Builder {
             this.defaultCreateVariant = defaultCreateVariant != false
@@ -324,6 +331,7 @@ data class TypeDef(
                 dispNameTemplate,
                 numTemplateRef,
                 actions,
+                associations,
                 defaultCreateVariant,
                 createVariants,
                 postCreateActionRef,

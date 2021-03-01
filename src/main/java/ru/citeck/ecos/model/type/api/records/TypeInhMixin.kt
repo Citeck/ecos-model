@@ -19,7 +19,6 @@ final class TypeInhMixin(
             RecordConstants.ATT_PARENT,
             "children",
             RecordConstants.ATT_ACTIONS,
-            "associations",
             "assocsFull",
             "form",
             "inhFormRef",
@@ -63,10 +62,8 @@ final class TypeInhMixin(
             RecordConstants.ATT_ACTIONS -> {
                 rtypeDef.getActions()
             }
-            "associations",
             "assocsFull" -> {
-                //todo
-                emptyList<Any>()
+                rtypeDef.getAssociations()
             }
             "form" -> {
                 typeDef.formRef

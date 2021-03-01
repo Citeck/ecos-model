@@ -4,7 +4,6 @@ import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import ru.citeck.ecos.commons.data.MLText
-import ru.citeck.ecos.model.association.dto.AssociationDto
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.model.type.converter.TypeConverter
 import ru.citeck.ecos.model.type.repository.TypeEntity
@@ -36,10 +35,6 @@ class TypeServiceImpl(
     }
 
     private var onTypeChangedListener: (TypeDef) -> Unit = {}
-
-    override fun getFullAssocs(typeId: String): List<AssociationDto> {
-        TODO("Not yet implemented")
-    }
 
     override fun getChildren(typeId: String): List<String> {
         return typeRepoDao.getChildrenIds(typeId).toList()

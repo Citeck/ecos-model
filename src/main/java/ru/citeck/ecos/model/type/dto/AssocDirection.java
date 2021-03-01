@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.association.dto;
+package ru.citeck.ecos.model.type.dto;
 
 public enum AssocDirection {
     BOTH,

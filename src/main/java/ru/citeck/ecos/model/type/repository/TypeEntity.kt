@@ -1,9 +1,6 @@
 package ru.citeck.ecos.model.type.repository
 
-import ru.citeck.ecos.model.association.domain.AssociationEntity
 import ru.citeck.ecos.model.domain.AbstractAuditingEntity
-import ru.citeck.ecos.model.utils.EntityCollectionUtils
-import java.util.*
 import javax.persistence.*
 
 @Entity
@@ -39,13 +36,11 @@ class TypeEntity : AbstractAuditingEntity() {
     var inheritActions = false
     var defaultCreateVariant: Boolean? = null
     var postCreateActionRef: String? = null
+    var associations: String? = null
 
     @ManyToOne(cascade = [CascadeType.DETACH])
     @JoinColumn(name = "parent_id")
     var parent: TypeEntity? = null
-
-    @OneToMany(mappedBy = "source", fetch = FetchType.EAGER, cascade = [CascadeType.ALL], orphanRemoval = true)
-    val associations: Set<AssociationEntity> = HashSet()
 
     @Column(name = "actions_str")
     var actions: String? = null
@@ -53,8 +48,4 @@ class TypeEntity : AbstractAuditingEntity() {
     var model: String? = null
 
     var docLib: String? = null
-
-    fun setAssociations(associations: Set<AssociationEntity>) {
-        EntityCollectionUtils.changeHibernateSet(this.associations, associations) { it.id }
-    }
 }

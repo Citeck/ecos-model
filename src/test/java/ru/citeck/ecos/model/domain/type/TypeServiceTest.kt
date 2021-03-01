@@ -18,6 +18,8 @@ import ru.citeck.ecos.model.type.api.records.TypeInhMixin
 import ru.citeck.ecos.model.type.api.records.TypeRecordsDao
 import ru.citeck.ecos.model.type.config.TypesConfig
 import ru.citeck.ecos.model.type.converter.TypeConverter
+import ru.citeck.ecos.model.type.dto.AssocDef
+import ru.citeck.ecos.model.type.dto.AssocDirection
 import ru.citeck.ecos.model.type.dto.TypeDef
 import ru.citeck.ecos.model.type.eapps.handler.TypeArtifactHandler
 import ru.citeck.ecos.model.type.service.TypeService
@@ -72,6 +74,12 @@ class TypeServiceTest {
         val baseType = TypeDef.create {
             withId("base")
             withName(MLText("Base Type"))
+            withAssociations(listOf(
+                AssocDef.create {
+                    withId("base-test")
+                    withName(MLText("test-name"))
+                }
+            ))
         }
 
         testType(baseType)
@@ -84,6 +92,15 @@ class TypeServiceTest {
             withActions(listOf(
                 RecordRef.valueOf("uiserv/action@test0"),
                 RecordRef.valueOf("uiserv/action@test2")
+            ))
+            withAssociations(listOf(
+                AssocDef.create {
+                    withId("test")
+                    withAttribute("test-att")
+                    withName(MLText("test-assoc-name"))
+                    withTarget(RecordRef.valueOf("emodel/type@base"))
+                    withDirection(AssocDirection.SOURCE)
+                }
             ))
             withFormRef(RecordRef.valueOf("uiserv/form@test-form"))
             withConfig(ObjectData.create("{\"aa\":\"bb\"}"))
@@ -204,5 +221,22 @@ class TypeServiceTest {
         val displayName = MLText.getClosestValue(typeDef.name, RequestContext.getLocale())
         assertEquals(displayName, records.getAtt(typeRef, "?disp").asText())
         assertEquals(displayName, records.getAtt(typeRef, "_disp").asText())
+
+        val assocs = records.getAtt(RecordRef.create("emodel", "rtype", typeRef.id), "assocsFull[].name")
+
+        var assocsCount = 0
+        var assocsTypeDef: TypeDef? = typeDef
+
+        while (assocsTypeDef != null) {
+            assocsCount += assocsTypeDef.associations.size
+            val currentId = assocsTypeDef.id
+            assocsTypeDef = typeService.getByIdOrNull(assocsTypeDef.parentRef.id)
+            if (assocsTypeDef == null && currentId != "base") {
+                assocsTypeDef = typeService.getById("base")
+            }
+        }
+
+        assertEquals(assocsCount, assocs.size())
+        assertEquals("test-name", assocs.get(0).asText())
     }
 }

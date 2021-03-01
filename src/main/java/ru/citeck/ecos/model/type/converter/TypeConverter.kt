@@ -9,6 +9,7 @@ import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef
 import ru.citeck.ecos.model.lib.type.dto.DocLibDef
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
+import ru.citeck.ecos.model.type.dto.AssocDef
 import ru.citeck.ecos.model.type.repository.TypeEntity
 import ru.citeck.ecos.model.type.dto.TypeDef
 import ru.citeck.ecos.model.type.repository.TypeRepository
@@ -64,6 +65,7 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
         entity.dispNameTemplate = Json.mapper.toString(typeDef.dispNameTemplate)
         entity.numTemplateRef = typeDef.numTemplateRef.toString()
         entity.actions = Json.mapper.toString(typeDef.actions)
+        entity.associations = Json.mapper.toString(typeDef.associations)
         entity.defaultCreateVariant = typeDef.defaultCreateVariant
         entity.createVariants = Json.mapper.toString(typeDef.createVariants)
         entity.postCreateActionRef = typeDef.postCreateActionRef.toString()
@@ -117,6 +119,7 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
             .withDispNameTemplate(Json.mapper.read(entity.dispNameTemplate, MLText::class.java))
             .withNumTemplateRef(RecordRef.valueOf(entity.numTemplateRef))
             .withActions(DataValue.create(entity.actions).asList(RecordRef::class.java))
+            .withAssociations(DataValue.create(entity.associations).asList(AssocDef::class.java))
             .withDefaultCreateVariant(entity.defaultCreateVariant)
             .withCreateVariants(DataValue.create(entity.createVariants).asList(CreateVariantDef::class.java))
             .withPostCreateActionRef(RecordRef.valueOf(entity.postCreateActionRef))

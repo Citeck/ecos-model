@@ -1,7 +1,6 @@
 package ru.citeck.ecos.model.type.service
 
 import org.springframework.data.domain.Sort
-import ru.citeck.ecos.model.association.dto.AssociationDto
 import ru.citeck.ecos.model.type.dto.TypeDef
 import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records3.record.mixin.impl.mutmeta.MutMeta
@@ -30,8 +29,6 @@ interface TypeService {
     fun getParentIds(id: String): List<String>
 
     fun getChildren(typeId: String): List<String>
-
-    fun getFullAssocs(typeId: String): List<AssociationDto>
 
     fun expandTypes(typeIds: Collection<String>): List<TypeDef>
 

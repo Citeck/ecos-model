@@ -11,6 +11,7 @@ import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef
 import ru.citeck.ecos.model.lib.type.dto.DocLibDef
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
+import ru.citeck.ecos.model.type.dto.AssocDef
 import ru.citeck.ecos.model.type.dto.TypeDef
 import ru.citeck.ecos.model.type.service.TypeService
 import ru.citeck.ecos.records2.RecordRef
@@ -84,6 +85,14 @@ class ResolvedTypeRecordsDao(
                 return TypeUtils.getTypeRef("base")
             }
             return parentRef
+        }
+
+        fun getAssociations(): List<AssocDef> {
+            val assocs = LinkedHashMap<String, AssocDef>()
+            forEachAscInv({ true }) { typeDef ->
+                typeDef.associations.forEach { assocs[it.id] = it }
+            }
+            return assocs.values.toList()
         }
 
         fun getParents(): List<RecordRef> {
@@ -301,7 +310,6 @@ class ResolvedTypeRecordsDao(
                     true
                 }
             }
-
             for (i in ascTypes.lastIndex downTo 0) {
                 action.invoke(ascTypes[i])
             }
@@ -310,12 +318,21 @@ class ResolvedTypeRecordsDao(
         private fun <K : Any> getFirstByAscTypes(action: (TypeDef) -> K?): K? {
 
             var itTypeDef: TypeDef? = typeRec.typeDef
+
             while (itTypeDef != null) {
+
                 val res = action.invoke(itTypeDef)
                 if (res != null) {
                     return res
                 }
-                itTypeDef = getTypeDefById(itTypeDef.parentRef.id)
+                val parentId = itTypeDef.parentRef.id
+                val parentTypeDef = getTypeDefById(parentId)
+
+                itTypeDef = if (parentTypeDef == null && itTypeDef.id != "base") {
+                    getTypeDefById("base")
+                } else {
+                    parentTypeDef
+                }
             }
             return null
         }

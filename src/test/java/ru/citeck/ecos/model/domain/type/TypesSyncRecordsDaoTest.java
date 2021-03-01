@@ -12,8 +12,6 @@ import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.EcosModelApp;
-import ru.citeck.ecos.model.association.dto.AssocDirection;
-import ru.citeck.ecos.model.association.dto.AssociationDto;
 import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef;
 import ru.citeck.ecos.model.type.dto.TypeDef;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
@@ -223,7 +221,7 @@ public class TypesSyncRecordsDaoTest {
         return result;
     }
 
-    List<AssociationDto> generateAssocs(int idx) {
+   /* List<AssociationDto> generateAssocs(int idx) {
 
         List<AssociationDto> result = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
@@ -235,5 +233,5 @@ public class TypesSyncRecordsDaoTest {
             result.add(dto);
         }
         return result;
-    }
+    }*/
 }
