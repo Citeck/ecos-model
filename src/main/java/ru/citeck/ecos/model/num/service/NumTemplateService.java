@@ -139,7 +139,7 @@ public class NumTemplateService {
 
             if (updatedCount == 0) {
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(i * 10);
                 } catch (InterruptedException e) {
                     ExceptionUtils.throwException(e);
                 }
