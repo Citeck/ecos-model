@@ -8,6 +8,7 @@ import ru.citeck.ecos.commons.json.serialization.annotation.IncludeNonDefault
 import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef
 import ru.citeck.ecos.model.lib.type.dto.DocLibDef
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
+import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.records2.RecordRef
 
 @IncludeNonDefault
@@ -57,6 +58,8 @@ data class TypeDef(
 
     companion object {
 
+        val BASE_TYPE_REF = TypeUtils.getTypeRef("base")
+
         @JvmField
         val EMPTY = create {}
 
@@ -94,7 +97,7 @@ data class TypeDef(
         var sourceId: String = ""
         var metaRecord: RecordRef = RecordRef.EMPTY
 
-        var parentRef: RecordRef = RecordRef.EMPTY
+        var parentRef: RecordRef = BASE_TYPE_REF
         var formRef: RecordRef = RecordRef.EMPTY
         var journalRef: RecordRef = RecordRef.EMPTY
 
@@ -200,7 +203,7 @@ data class TypeDef(
         fun withParentRef(parentRef: RecordRef?): Builder {
             this.parentRef = RecordRef.valueOf(parentRef)
             if (this.parentRef.id.isBlank() || this.parentRef.id == "base") {
-                this.parentRef = RecordRef.EMPTY
+                this.parentRef = BASE_TYPE_REF
             }
             return this
         }
