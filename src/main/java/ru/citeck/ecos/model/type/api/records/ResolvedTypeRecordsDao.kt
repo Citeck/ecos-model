@@ -80,11 +80,11 @@ class ResolvedTypeRecordsDao(
         }
 
         fun getParentRef(): RecordRef {
-            val parentRef = typeRec.typeDef.parentRef
-            if (RecordRef.isEmpty(parentRef) && typeRec.typeDef.id != "base") {
-                return TypeUtils.getTypeRef("base")
+            var parentRef = typeRec.typeDef.parentRef
+            if (parentRef.id.isBlank() && typeRec.typeDef.id != "base") {
+                parentRef = TypeUtils.getTypeRef("base")
             }
-            return parentRef
+            return RecordRef.create(parentRef.appName, ID, parentRef.id)
         }
 
         fun getAssociations(): List<AssocDef> {
