@@ -79,10 +79,13 @@ class ResolvedTypeRecordsDao(
             typeDefById[typeRec.typeDef.id] = typeRec.typeDef
         }
 
-        fun getParentRef(): RecordRef {
+        fun getParentRef(): RecordRef? {
             var parentRef = typeRec.typeDef.parentRef
             if (parentRef.id.isBlank() && typeRec.typeDef.id != "base") {
                 parentRef = TypeUtils.getTypeRef("base")
+            }
+            if (parentRef.id.isBlank()) {
+                return RecordRef.EMPTY
             }
             return RecordRef.create(parentRef.appName, ID, parentRef.id)
         }
