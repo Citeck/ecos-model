@@ -87,6 +87,9 @@ class TypeServiceImpl(
             parents.add(typeEntity.extId)
             typeEntity = typeEntity.parent
         }
+        if (parents.isEmpty() || parents.last() != "base") {
+            parents.add("base")
+        }
         return parents
     }
 

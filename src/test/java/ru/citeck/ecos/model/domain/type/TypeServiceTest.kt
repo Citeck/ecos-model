@@ -1,6 +1,7 @@
 package ru.citeck.ecos.model.domain.type
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import ru.citeck.ecos.commons.data.DataValue
@@ -238,5 +239,8 @@ class TypeServiceTest {
 
         assertEquals(assocsCount, assocs.size())
         assertEquals("test-name", assocs.get(0).asText())
+
+        val parents = records.getAtt(typeRef, "parents[]?id").asList(RecordRef::class.java);
+        assertTrue(parents.contains(TypeUtils.getTypeRef("base")))
     }
 }
