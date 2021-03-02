@@ -317,6 +317,9 @@ data class TypeDef(
         }
 
         fun build(): TypeDef {
+            if (id == BASE_TYPE_REF.id) {
+                parentRef = RecordRef.EMPTY
+            }
             return TypeDef(
                 id,
                 name,
