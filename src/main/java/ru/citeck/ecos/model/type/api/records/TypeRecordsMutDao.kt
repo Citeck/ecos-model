@@ -1,6 +1,6 @@
 package ru.citeck.ecos.model.type.api.records
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import ecos.com.fasterxml.jackson210.annotation.JsonProperty
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.commons.json.Json
