@@ -11,6 +11,8 @@ sourceId: emodel/num-template
 journalRef: uiserv/journal@number-templates
 formRef: uiserv/form@num-template-form
 
+defaultCreateVariant: false
+
 createVariants:
 
   - id: create-new-template

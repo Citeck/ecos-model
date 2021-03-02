@@ -10,6 +10,8 @@ sourceId: emodel/type
 formRef: uiserv/form@ecos-type
 journalRef: uiserv/journal@ecos-types
 
+defaultCreateVariant: false
+
 createVariants:
 
   - id: create-new-template
