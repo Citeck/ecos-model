@@ -119,6 +119,9 @@ final class TypeInhMixin(
             "resolvedDocLib" -> {
                 rtypeDef.getDocLib()
             }
+            "children" -> {
+                rtypeDef.getChildren()
+            }
             else -> {
                 null
             }
