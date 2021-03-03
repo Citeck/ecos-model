@@ -17,7 +17,6 @@ final class TypeInhMixin(
             "extId",
             "parent",
             RecordConstants.ATT_PARENT,
-            "children",
             RecordConstants.ATT_ACTIONS,
             "assocsFull",
             "form",
@@ -118,9 +117,6 @@ final class TypeInhMixin(
             }
             "resolvedDocLib" -> {
                 rtypeDef.getDocLib()
-            }
-            "children" -> {
-                rtypeDef.getChildren()
             }
             else -> {
                 null
