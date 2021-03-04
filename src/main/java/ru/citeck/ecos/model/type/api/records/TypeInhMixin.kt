@@ -52,7 +52,7 @@ final class TypeInhMixin(
 
         return when (path) {
             "moduleId", "extId", "localId" -> {
-                value.getLocalId()
+                typeDef.id
             }
             "parent",
             RecordConstants.ATT_PARENT -> {
