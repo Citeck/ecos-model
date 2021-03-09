@@ -25,6 +25,7 @@ final class TypeInhMixin(
             "attributes",
             "inhDashboardType",
             "inhCreateVariants",
+            "inhNumTemplateRef",
             "isSystem",
             "inhConfigFormRef",
             "inhAttributes",
@@ -81,6 +82,9 @@ final class TypeInhMixin(
             }
             "inhCreateVariants" -> {
                 rtypeDef.getCreateVariants()
+            }
+            "inhNumTemplateRef" -> {
+                rtypeDef.getNumTemplateRef()
             }
             "isSystem" -> {
                 typeDef.system
