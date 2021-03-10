@@ -14,59 +14,22 @@ import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef
 import ru.citeck.ecos.model.lib.type.dto.DocLibDef
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
-import ru.citeck.ecos.model.type.api.records.ResolvedTypeRecordsDao
-import ru.citeck.ecos.model.type.api.records.TypeInhMixin
-import ru.citeck.ecos.model.type.api.records.TypeRecordsDao
-import ru.citeck.ecos.model.type.config.TypesConfig
-import ru.citeck.ecos.model.type.converter.TypeConverter
 import ru.citeck.ecos.model.type.dto.AssocDef
 import ru.citeck.ecos.model.type.dto.AssocDirection
 import ru.citeck.ecos.model.type.dto.TypeDef
-import ru.citeck.ecos.model.type.eapps.handler.TypeArtifactHandler
-import ru.citeck.ecos.model.type.service.TypeService
-import ru.citeck.ecos.model.type.service.TypeServiceImpl
 import ru.citeck.ecos.records2.RecordRef
-import ru.citeck.ecos.records3.RecordsProperties
 import ru.citeck.ecos.records3.RecordsService
-import ru.citeck.ecos.records3.RecordsServiceFactory
 import ru.citeck.ecos.records3.record.request.RequestContext
 import java.util.*
 
 class TypeServiceTest {
 
-    private lateinit var recordsServices: RecordsServiceFactory
-    private lateinit var typesRepo: TypeRepoMock
-    private lateinit var typeService: TypeService
-    private lateinit var typeArtifactHandler: TypeArtifactHandler
-
     private lateinit var records: RecordsService
+    private lateinit var services: TypeTestServices
 
     @BeforeEach
     fun before() {
-
-        recordsServices = object : RecordsServiceFactory() {
-            override fun createProperties(): RecordsProperties {
-                val props = super.createProperties()
-                props.appInstanceId = "123456"
-                props.appName = "emodel"
-                return props
-            }
-        }
-
-        typesRepo = TypeRepoMock(recordsServices)
-        val typeConverter = TypeConverter(typesRepo)
-        typeService = TypeServiceImpl(typeConverter, typesRepo)
-        typeArtifactHandler = TypeArtifactHandler(typeService)
-
-        val typeRecordsDao = TypeRecordsDao(typeService)
-        recordsServices.recordsServiceV1.register(typeRecordsDao)
-        val resolvedRecordsDao = ResolvedTypeRecordsDao(typeService, typeRecordsDao)
-        recordsServices.recordsServiceV1.register(resolvedRecordsDao)
-        TypeInhMixin(resolvedRecordsDao, typeRecordsDao)
-
-        TypesConfig().typesMutMetaMixin(typeRecordsDao, typeConverter, resolvedRecordsDao)
-
-        records = recordsServices.recordsServiceV1
+        services = TypeTestServices()
     }
 
     @Test
@@ -207,9 +170,9 @@ class TypeServiceTest {
 
     private fun testType(typeDef: TypeDef) {
 
-        typeArtifactHandler.deployArtifact(typeDef)
+        services.artifactHandler.deployArtifact(typeDef)
 
-        val typeFromService = typeService.getById(typeDef.id)
+        val typeFromService = services.typeService.getById(typeDef.id)
         assertEquals(typeDef, typeFromService)
 
         val typeRef = TypeUtils.getTypeRef(typeDef.id)
@@ -231,9 +194,9 @@ class TypeServiceTest {
         while (assocsTypeDef != null) {
             assocsCount += assocsTypeDef.associations.size
             val currentId = assocsTypeDef.id
-            assocsTypeDef = typeService.getByIdOrNull(assocsTypeDef.parentRef.id)
+            assocsTypeDef = services.typeService.getByIdOrNull(assocsTypeDef.parentRef.id)
             if (assocsTypeDef == null && currentId != "base") {
-                assocsTypeDef = typeService.getById("base")
+                assocsTypeDef = services.typeService.getById("base")
             }
         }
 
@@ -242,5 +205,46 @@ class TypeServiceTest {
 
         val parents = records.getAtt(typeRef, "parents[]?id").asList(RecordRef::class.java);
         assertTrue(parents.contains(TypeUtils.getTypeRef("base")))
+    }
+
+    @Test
+    fun testInhNumTemplate() {
+
+        services.artifactHandler.deployArtifact(TypeDef.create { withId("base") })
+
+        val custom0 = TypeDef.create {
+            withId("custom0")
+            withNumTemplateRef(RecordRef.valueOf("numTemplateRefValue"))
+        };
+        services.artifactHandler.deployArtifact(custom0)
+        val custom0Ref = RecordRef.valueOf("emodel/type@custom0")
+        val getCustom0AttStr = { att: String ->
+            services.records.getAtt(custom0Ref, att).asText()
+        }
+
+        assertEquals(custom0.numTemplateRef.toString(), getCustom0AttStr("numTemplateRef?id"))
+        assertEquals(custom0.numTemplateRef.toString(), getCustom0AttStr("inhNumTemplateRef?id"))
+        val typeDto0 = services.records.getAtts(custom0Ref, TypeDto0::class.java)
+        assertEquals(custom0.numTemplateRef.toString(), typeDto0.inhNumTemplateRef.toString())
+
+        val custom1 = TypeDef.create {
+            withId("custom1")
+            withNumTemplateRef(RecordRef.valueOf("numTemplateRefValue1123"))
+            withInheritNumTemplate(false)
+        };
+        services.artifactHandler.deployArtifact(custom1)
+        val custom1Ref = RecordRef.valueOf("emodel/type@custom1")
+        val getCustom1AttStr = { att: String ->
+            services.records.getAtt(custom1Ref, att).asText()
+        }
+
+        assertEquals(custom1.numTemplateRef.toString(), getCustom1AttStr("numTemplateRef?id"))
+        assertEquals(custom1.numTemplateRef.toString(), getCustom1AttStr("inhNumTemplateRef?id"))
+        val typeDto1 = services.records.getAtts(custom1Ref, TypeDto0::class.java)
+        assertEquals(custom1.numTemplateRef.toString(), typeDto1.inhNumTemplateRef.toString())
+    }
+
+    class TypeDto0 {
+        var inhNumTemplateRef: RecordRef = RecordRef.EMPTY
     }
 }
