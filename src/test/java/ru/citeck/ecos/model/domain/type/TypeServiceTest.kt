@@ -30,6 +30,7 @@ class TypeServiceTest {
     @BeforeEach
     fun before() {
         services = TypeTestServices()
+        records = services.records
     }
 
     @Test
