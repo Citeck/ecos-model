@@ -9,5 +9,10 @@ parentRef: emodel/type@user-base
 system: true
 sourceId: alfresco/
 
+inheritActions: false
+actions:
+  - uiserv/action@edit
+  - uiserv/action@delete
+
 properties:
   alfType: dl:dataListItem
