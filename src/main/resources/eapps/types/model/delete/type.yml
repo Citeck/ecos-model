@@ -2,5 +2,9 @@ modelVersion: "1.0"
 
 internal: true
 
+name:
+  ru: Шаблон нумерации
+  en: Number template
+
 controller:
   type: json
