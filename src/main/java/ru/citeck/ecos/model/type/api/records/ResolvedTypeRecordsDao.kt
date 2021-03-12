@@ -201,7 +201,9 @@ class ResolvedTypeRecordsDao(
 
                 val variants = ArrayList<CreateVariantDef>()
 
-                if (typeDef.defaultCreateVariant && RecordRef.isNotEmpty(typeDef.formRef)) {
+                val defaultCreateVariant = typeDef.defaultCreateVariant ?: typeDef.createVariants.isEmpty()
+
+                if (defaultCreateVariant && RecordRef.isNotEmpty(typeDef.formRef)) {
                     variants.add(CreateVariantDef.create()
                         .withId("DEFAULT")
                         .build())

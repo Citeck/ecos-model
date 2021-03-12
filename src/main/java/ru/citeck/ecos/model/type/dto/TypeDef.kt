@@ -42,7 +42,7 @@ data class TypeDef(
     val associations: List<AssocDef>,
 
     /* create */
-    val defaultCreateVariant: Boolean,
+    val defaultCreateVariant: Boolean?,
     val createVariants: List<CreateVariantDef>,
     val postCreateActionRef: RecordRef,
 
@@ -115,7 +115,7 @@ data class TypeDef(
         var associations: List<AssocDef> = emptyList()
 
         /* create */
-        var defaultCreateVariant: Boolean = true
+        var defaultCreateVariant: Boolean? = null
         var createVariants: List<CreateVariantDef> = emptyList()
         var postCreateActionRef: RecordRef = RecordRef.EMPTY
 
@@ -276,7 +276,7 @@ data class TypeDef(
 
         /* create */
         fun withDefaultCreateVariant(defaultCreateVariant: Boolean?): Builder {
-            this.defaultCreateVariant = defaultCreateVariant != false
+            this.defaultCreateVariant = defaultCreateVariant
             return this
         }
 

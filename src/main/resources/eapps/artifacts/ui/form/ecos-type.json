@@ -224,6 +224,7 @@
                     "labelPosition": "",
                     "key": "defaultCreateVariant",
                     "defaultValue": true,
+                    "hasThreeStates": true,
                     "type": "checkbox",
                     "input": true
                   },
