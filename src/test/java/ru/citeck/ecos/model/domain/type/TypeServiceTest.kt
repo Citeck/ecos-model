@@ -50,27 +50,28 @@ class TypeServiceTest {
         testType(baseType)
 
         val fullType = TypeDef.create {
-            withId("test-type")
-            withName(MLText.EMPTY
+            this.withId("test-type")
+            this.withName(MLText.EMPTY
                 .withValue(Locale.ENGLISH, "English")
-                .withValue(Locale.FRANCE, "France"))
-            withActions(listOf(
+                .withValue(Locale.FRANCE, "France")
+            )
+            this.withActions(listOf(
                 RecordRef.valueOf("uiserv/action@test0"),
                 RecordRef.valueOf("uiserv/action@test2")
             ))
-            withAssociations(listOf(
+            this.withAssociations(listOf(
                 AssocDef.create {
-                    withId("test")
-                    withAttribute("test-att")
-                    withName(MLText("test-assoc-name"))
-                    withTarget(RecordRef.valueOf("emodel/type@base"))
-                    withDirection(AssocDirection.SOURCE)
+                    this.withId("test")
+                    this.withAttribute("test-att")
+                    this.withName(MLText("test-assoc-name"))
+                    this.withTarget(RecordRef.valueOf("emodel/type@base"))
+                    this.withDirection(AssocDirection.SOURCE)
                 }
             ))
-            withFormRef(RecordRef.valueOf("uiserv/form@test-form"))
-            withConfig(ObjectData.create("{\"aa\":\"bb\"}"))
-            withConfigFormRef(RecordRef.valueOf("uiserv/form@config-form"))
-            withCreateVariants(listOf(
+            this.withFormRef(RecordRef.valueOf("uiserv/form@test-form"))
+            this.withConfig(ObjectData.create("{\"aa\":\"bb\"}"))
+            this.withConfigFormRef(RecordRef.valueOf("uiserv/form@config-form"))
+            this.withCreateVariants(listOf(
                 CreateVariantDef.create {
                     withId("create-0")
                     withFormRef(RecordRef.valueOf("uiserv/form@cv-form-0"))
@@ -82,39 +83,39 @@ class TypeServiceTest {
                     withName(MLText("cv-1-name"))
                 }
             ))
-            withDescription(MLText("Description"))
-            withDashboardType("dashboard-type")
-            withDefaultCreateVariant(true)
-            withDispNameTemplate(MLText("Disp name template"))
-            withDocLib(DocLibDef.create {
+            this.withDescription(MLText("Description"))
+            this.withDashboardType("dashboard-type")
+            this.withDefaultCreateVariant(true)
+            this.withDispNameTemplate(MLText("Disp name template"))
+            this.withDocLib(DocLibDef.create {
                 withFileTypeRefs(listOf(
                     TypeUtils.getTypeRef("test"),
                     TypeUtils.getTypeRef("type")
                 ))
                 withEnabled(true)
             })
-            withInheritActions(true)
-            withInheritForm(true)
-            withInheritNumTemplate(true)
-            withJournalRef(RecordRef.valueOf("journal-ref"))
-            withModel(TypeModelDef.create {
-                withRoles(listOf(
+            this.withInheritActions(true)
+            this.withInheritForm(true)
+            this.withInheritNumTemplate(true)
+            this.withJournalRef(RecordRef.valueOf("journal-ref"))
+            this.withModel(TypeModelDef.create {
+                this.withRoles(listOf(
                     RoleDef.create {
-                        withId("role-0")
-                        withName(MLText("Role 0"))
-                        withAttribute("cm:assignees")
+                        this.withId("role-0")
+                        this.withName(MLText("Role 0"))
+                        this.withAttribute("cm:assignees")
                     },
                     RoleDef.create {
-                        withId("role-1")
-                        withName(MLText("Role 1"))
-                        withAttribute("cm:assignees2")
+                        this.withId("role-1")
+                        this.withName(MLText("Role 1"))
+                        this.withAttribute("cm:assignees2")
                     }
                 ))
-                withAttributes(listOf(
+                this.withAttributes(listOf(
                     AttributeDef.create {
-                        withId("attribute-0")
-                        withName(MLText("Attribute 0"))
-                        withMandatory(true)
+                        this.withId("attribute-0")
+                        this.withName(MLText("Attribute 0"))
+                        this.withMandatory(true)
                     },
                     AttributeDef.create {
                         withId("attribute-1")
@@ -122,20 +123,20 @@ class TypeServiceTest {
                         withMandatory(false)
                     }
                 ))
-                withStatuses(listOf(
+                this.withStatuses(listOf(
                     StatusDef.create {
-                        withId("status-0")
-                        withName(MLText("Status 0"))
+                        this.withId("status-0")
+                        this.withName(MLText("Status 0"))
                     },
                     StatusDef.create {
-                        withId("status-1")
-                        withName(MLText("Status 1"))
+                        this.withId("status-1")
+                        this.withName(MLText("Status 1"))
                     }
                 ))
             })
-            withNumTemplateRef(RecordRef.valueOf("num-template-ref"))
-            withProperties(ObjectData.create("""{"aa":"aaa","bb":"bbb"}"""))
-            withSystem(true)
+            this.withNumTemplateRef(RecordRef.valueOf("num-template-ref"))
+            this.withProperties(ObjectData.create("""{"aa":"aaa","bb":"bbb"}"""))
+            this.withSystem(true)
         }
 
         testType(fullType)
@@ -206,6 +207,14 @@ class TypeServiceTest {
 
         val parents = records.getAtt(typeRef, "parents[]?id").asList(RecordRef::class.java);
         assertTrue(parents.contains(TypeUtils.getTypeRef("base")))
+
+        typeDef.createVariants.forEach {
+
+            val createVariant = records.getAtt(typeRef, "createVariantsById." + it.id + "?json")
+                .getAs(CreateVariantDef::class.java)
+
+            assertEquals(it, createVariant)
+        }
     }
 
     @Test

@@ -1,8 +1,9 @@
 package ru.citeck.ecos.model.domain.type
 
 import ru.citeck.ecos.model.type.api.records.ResolvedTypeRecordsDao
-import ru.citeck.ecos.model.type.api.records.TypeInhMixin
+import ru.citeck.ecos.model.type.api.records.mixin.TypeInhMixin
 import ru.citeck.ecos.model.type.api.records.TypeRecordsDao
+import ru.citeck.ecos.model.type.api.records.mixin.CreateVariantsByIdMixin
 import ru.citeck.ecos.model.type.config.TypesConfig
 import ru.citeck.ecos.model.type.converter.TypeConverter
 import ru.citeck.ecos.model.type.eapps.handler.TypeArtifactHandler
@@ -42,6 +43,7 @@ class TypeTestServices {
         val resolvedRecordsDao = ResolvedTypeRecordsDao(typeService, typeRecordsDao)
         recordsServices.recordsServiceV1.register(resolvedRecordsDao)
         TypeInhMixin(resolvedRecordsDao, typeRecordsDao)
+        CreateVariantsByIdMixin(resolvedRecordsDao, typeRecordsDao)
 
         TypesConfig().typesMutMetaMixin(typeRecordsDao, typeConverter, resolvedRecordsDao)
 

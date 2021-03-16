@@ -1,6 +1,8 @@
-package ru.citeck.ecos.model.type.api.records
+package ru.citeck.ecos.model.type.api.records.mixin
 
 import org.springframework.stereotype.Component
+import ru.citeck.ecos.model.type.api.records.ResolvedTypeRecordsDao
+import ru.citeck.ecos.model.type.api.records.TypeRecordsDao
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records3.record.atts.value.AttValueCtx
 import ru.citeck.ecos.records3.record.mixin.AttMixin
