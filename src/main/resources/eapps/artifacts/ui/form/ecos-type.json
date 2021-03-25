@@ -171,9 +171,12 @@
                             "input": true
                           },
                           {
-                            "label": "Attributes",
+                            "label": {
+                              "ru": "Дополнительные свойства",
+                              "en": "Additional properties"
+                            },
                             "keyLabel": "",
-                            "key": "attributes",
+                            "key": "properties",
                             "type": "datamap",
                             "valueComponent": {
                               "type": "textfield",
