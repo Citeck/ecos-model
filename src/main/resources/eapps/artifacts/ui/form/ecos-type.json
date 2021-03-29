@@ -754,7 +754,9 @@
                                 "key": "column",
                                 "components": [
                                   {
-                                    "label": "Permissions",
+                                    "label": {
+                                      "en": "Permissions"
+                                    },
                                     "hideLabel": true,
                                     "action": "custom",
                                     "state": "",
@@ -762,8 +764,8 @@
                                     "custom": "\nvar mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = 'emodel/type@' + data.moduleId;\nvar customProps = {\n  roles: (data.modelRoles || []).map(mapToSingleLang),\n  statuses: (data.modelStatuses || []).map(mapToSingleLang),\n  attributeName: Citeck.helpers.getMLValue(row.name)\n};\n\nvar typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypeAttPermissions(\n  typeRef, \n  row.id, \n  customProps\n)",
                                     "leftIcon": "icon-decision-tables",
                                     "block": true,
-                                    "dataGridLabel": false,
                                     "key": "submit3",
+                                    "customConditional": "show = _.get(data, 'ecosEdition.edition') === 'enterprise'",
                                     "type": "button",
                                     "input": true,
                                     "row": "0-4"
@@ -811,9 +813,14 @@
                     "tab": 3
                   },
                   {
+                    "label": {
+                      "en": "Panel"
+                    },
                     "title": "Type Permissions",
                     "collapsible": true,
+                    "collapsed": false,
                     "key": "panel9",
+                    "customConditional": "show = _.get(data, 'ecosEdition.edition') === 'enterprise'",
                     "type": "panel",
                     "input": false,
                     "components": [
@@ -885,8 +892,25 @@
                         "input": false
                       }
                     ],
-                    "collapsed": false,
                     "tab": 3
+                  },
+                  {
+                    "label": "ecosEdition",
+                    "source": {
+                      "type": "record",
+                      "record": {
+                        "id": "alfresco/meta@",
+                        "attributes": {
+                          "edition": "attributes.edition"
+                        }
+                      }
+                    },
+                    "update": {
+                      "type": "once"
+                    },
+                    "key": "ecosEdition",
+                    "type": "asyncData",
+                    "input": true
                   }
                 ]
               },
