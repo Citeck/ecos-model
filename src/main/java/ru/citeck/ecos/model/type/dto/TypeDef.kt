@@ -103,7 +103,7 @@ data class TypeDef(
 
         var dashboardType: String = ""
 
-        var inheritForm: Boolean = false
+        var inheritForm: Boolean = true
         var inheritActions: Boolean = true
         var inheritNumTemplate: Boolean = false
 
@@ -236,7 +236,7 @@ data class TypeDef(
         }
 
         fun withInheritForm(inheritForm: Boolean?): Builder {
-            this.inheritForm = inheritForm == true
+            this.inheritForm = inheritForm != false
             return this
         }
 

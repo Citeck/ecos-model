@@ -1,8 +1,7 @@
-package ru.citeck.ecos.model.domain.type
+package ru.citeck.ecos.model.domain.type.testutils
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.data.MLText
@@ -18,20 +17,10 @@ import ru.citeck.ecos.model.type.dto.AssocDef
 import ru.citeck.ecos.model.type.dto.AssocDirection
 import ru.citeck.ecos.model.type.dto.TypeDef
 import ru.citeck.ecos.records2.RecordRef
-import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.request.RequestContext
 import java.util.*
 
-class TypeServiceTest {
-
-    private lateinit var records: RecordsService
-    private lateinit var services: TypeTestServices
-
-    @BeforeEach
-    fun before() {
-        services = TypeTestServices()
-        records = services.records
-    }
+class TypeServiceTest : TypeTestBase() {
 
     @Test
     fun test() {
@@ -167,14 +156,14 @@ class TypeServiceTest {
         val child2Ref = TypeUtils.getTypeRef(childType2.id)
 
         assertEquals("", records.getAtt(child2Ref, "formRef?id").asText())
-        assertEquals("", records.getAtt(child2Ref, "inhFormRef?id").asText())
+        assertEquals("uiserv/form@test-form", records.getAtt(child2Ref, "inhFormRef?id").asText())
     }
 
     private fun testType(typeDef: TypeDef) {
 
-        services.artifactHandler.deployArtifact(typeDef)
+        artifactHandler.deployArtifact(typeDef)
 
-        val typeFromService = services.typeService.getById(typeDef.id)
+        val typeFromService = typeService.getById(typeDef.id)
         assertEquals(typeDef, typeFromService)
 
         val typeRef = TypeUtils.getTypeRef(typeDef.id)
@@ -196,9 +185,9 @@ class TypeServiceTest {
         while (assocsTypeDef != null) {
             assocsCount += assocsTypeDef.associations.size
             val currentId = assocsTypeDef.id
-            assocsTypeDef = services.typeService.getByIdOrNull(assocsTypeDef.parentRef.id)
+            assocsTypeDef = typeService.getByIdOrNull(assocsTypeDef.parentRef.id)
             if (assocsTypeDef == null && currentId != "base") {
-                assocsTypeDef = services.typeService.getById("base")
+                assocsTypeDef = typeService.getById("base")
             }
         }
 
@@ -220,21 +209,21 @@ class TypeServiceTest {
     @Test
     fun testInhNumTemplate() {
 
-        services.artifactHandler.deployArtifact(TypeDef.create { withId("base") })
+        artifactHandler.deployArtifact(TypeDef.create { withId("base") })
 
         val custom0 = TypeDef.create {
             withId("custom0")
             withNumTemplateRef(RecordRef.valueOf("numTemplateRefValue"))
         };
-        services.artifactHandler.deployArtifact(custom0)
+        artifactHandler.deployArtifact(custom0)
         val custom0Ref = RecordRef.valueOf("emodel/type@custom0")
         val getCustom0AttStr = { att: String ->
-            services.records.getAtt(custom0Ref, att).asText()
+            records.getAtt(custom0Ref, att).asText()
         }
 
         assertEquals(custom0.numTemplateRef.toString(), getCustom0AttStr("numTemplateRef?id"))
         assertEquals(custom0.numTemplateRef.toString(), getCustom0AttStr("inhNumTemplateRef?id"))
-        val typeDto0 = services.records.getAtts(custom0Ref, TypeDto0::class.java)
+        val typeDto0 = records.getAtts(custom0Ref, TypeDto0::class.java)
         assertEquals(custom0.numTemplateRef.toString(), typeDto0.inhNumTemplateRef.toString())
 
         val custom1 = TypeDef.create {
@@ -242,15 +231,15 @@ class TypeServiceTest {
             withNumTemplateRef(RecordRef.valueOf("numTemplateRefValue1123"))
             withInheritNumTemplate(false)
         };
-        services.artifactHandler.deployArtifact(custom1)
+        artifactHandler.deployArtifact(custom1)
         val custom1Ref = RecordRef.valueOf("emodel/type@custom1")
         val getCustom1AttStr = { att: String ->
-            services.records.getAtt(custom1Ref, att).asText()
+            records.getAtt(custom1Ref, att).asText()
         }
 
         assertEquals(custom1.numTemplateRef.toString(), getCustom1AttStr("numTemplateRef?id"))
         assertEquals(custom1.numTemplateRef.toString(), getCustom1AttStr("inhNumTemplateRef?id"))
-        val typeDto1 = services.records.getAtts(custom1Ref, TypeDto0::class.java)
+        val typeDto1 = records.getAtts(custom1Ref, TypeDto0::class.java)
         assertEquals(custom1.numTemplateRef.toString(), typeDto1.inhNumTemplateRef.toString())
     }
 

@@ -1,5 +1,7 @@
-package ru.citeck.ecos.model.domain.type
+package ru.citeck.ecos.model.domain.type.testutils
 
+import org.junit.jupiter.api.BeforeEach
+import ru.citeck.ecos.model.domain.type.TypeRepoMock
 import ru.citeck.ecos.model.type.api.records.ResolvedTypeRecordsDao
 import ru.citeck.ecos.model.type.api.records.mixin.TypeInhMixin
 import ru.citeck.ecos.model.type.api.records.TypeRecordsDao
@@ -13,16 +15,17 @@ import ru.citeck.ecos.records3.RecordsProperties
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.RecordsServiceFactory
 
-class TypeTestServices {
+open class TypeTestBase {
 
-    val recordsServices: RecordsServiceFactory
-    val typesRepo: TypeRepoMock
-    val typeService: TypeService
-    val artifactHandler: TypeArtifactHandler
+    lateinit var recordsServices: RecordsServiceFactory
+    lateinit var typesRepo: TypeRepoMock
+    lateinit var typeService: TypeService
+    lateinit var artifactHandler: TypeArtifactHandler
 
-    val records: RecordsService
+    lateinit var records: RecordsService
 
-    init {
+    @BeforeEach
+    fun init() {
 
         recordsServices = object : RecordsServiceFactory() {
             override fun createProperties(): RecordsProperties {
