@@ -2,7 +2,6 @@ package ru.citeck.ecos.model.domain.perms.service;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,7 +19,6 @@ import ru.citeck.ecos.model.domain.perms.repo.TypePermsEntity;
 import ru.citeck.ecos.model.domain.perms.repo.TypePermsRepository;
 import ru.citeck.ecos.model.lib.permissions.dto.PermissionsDef;
 import ru.citeck.ecos.model.lib.type.dto.TypePermsDef;
-import ru.citeck.ecos.model.security.jwt.TokenProvider;
 import ru.citeck.ecos.records2.RecordConstants;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.predicate.PredicateUtils;
@@ -30,9 +28,7 @@ import ru.citeck.ecos.records2.predicate.model.ValuePredicate;
 import javax.annotation.PostConstruct;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,11 +44,11 @@ public class TypePermsService {
     private Consumer<TypePermsDef> listener;
 
     @PostConstruct
-    public void init(){
+    public void init() {
         List<TypePermsEntity> typePermsEntities = repository.findAll();
         typePermsEntities.sort(Comparator.comparing(TypePermsEntity::getLastModifiedDate).reversed());
         Map<String, TypePermsEntity> uniqueEntities = new HashMap<>();
-        for (TypePermsEntity entity: typePermsEntities) {
+        for (TypePermsEntity entity : typePermsEntities) {
             if (!uniqueEntities.containsKey(entity.getTypeRef())) {
                 uniqueEntities.put(entity.getTypeRef(), entity);
             } else {
@@ -67,7 +63,7 @@ public class TypePermsService {
     public TypePermsMeta getPermsMeta(String id) {
         TypePermsEntity entity = repository.findByExtId(id);
         if (entity != null) {
-           return new TypePermsMeta(entity.getLastModifiedDate());
+            return new TypePermsMeta(entity.getLastModifiedDate());
         }
         return null;
     }
@@ -167,7 +163,7 @@ public class TypePermsService {
         TypePermsEntity entity = null;
         if (StringUtils.isNotBlank(dto.getId())) {
             entity = repository.findByExtId(dto.getId());
-            if (repository.findByTypeRef(dto.getTypeRef().toString()) != null){
+            if (repository.findByTypeRef(dto.getTypeRef().toString()) != null) {
                 repository.findByTypeRef(dto.getTypeRef().toString()).setExtId(dto.getId());
             }
         }
