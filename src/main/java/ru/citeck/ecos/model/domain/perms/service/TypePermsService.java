@@ -48,7 +48,7 @@ public class TypePermsService {
         Set<String> uniqueEntities = new HashSet<>();
         for (TypePermsEntity entity : typePermsEntities) {
             if (!uniqueEntities.add(entity.getTypeRef())) {
-                log.info("Entity with typeRef: {} was deleted", entity.getTypeRef());
+                log.info("Entity with typeRef: {} will be deleted", entity.getTypeRef());
                 repository.delete(entity);
             }
         }
@@ -157,15 +157,10 @@ public class TypePermsService {
     private TypePermsEntity toEntity(TypePermsDef dto) {
 
         TypePermsEntity entity = null;
-        if (StringUtils.isNotBlank(dto.getId())) {
-            entity = repository.findByExtId(dto.getId());
-            if (dto.getTypeRef() == null) {
-                throw new IllegalStateException("TypeRef is a mandatory parameter!");
-            }
-            if (repository.findByTypeRef(dto.getTypeRef().toString()) != null) {
-                if (StringUtils.isNotBlank(dto.getId())) {
-                    repository.findByTypeRef(dto.getTypeRef().toString()).setExtId(dto.getId());
-                }
+        if (repository.findByTypeRef(dto.getTypeRef().toString()) != null) {
+            entity = repository.findByTypeRef(dto.getTypeRef().toString());
+            if (StringUtils.isNotBlank(dto.getId())) {
+                entity.setExtId(dto.getId());
             }
         }
         if (entity == null) {
