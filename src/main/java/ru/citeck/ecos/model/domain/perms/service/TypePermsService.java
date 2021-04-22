@@ -2,6 +2,7 @@ package ru.citeck.ecos.model.domain.perms.service;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,11 +32,10 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TypePermsService {
-
-    private final Logger log = LoggerFactory.getLogger(TypePermsService.class);
 
     private final TypePermsRepository repository;
 
@@ -47,13 +47,11 @@ public class TypePermsService {
     public void init() {
         List<TypePermsEntity> typePermsEntities = repository.findAll();
         typePermsEntities.sort(Comparator.comparing(TypePermsEntity::getLastModifiedDate).reversed());
-        Map<String, TypePermsEntity> uniqueEntities = new HashMap<>();
+        Set<String> uniqueEntities = new HashSet<>();
         for (TypePermsEntity entity : typePermsEntities) {
-            if (!uniqueEntities.containsKey(entity.getTypeRef())) {
-                uniqueEntities.put(entity.getTypeRef(), entity);
-            } else {
+            if (!uniqueEntities.add(entity.getTypeRef())) {
                 log.info("Entity with typeRef: {} was deleted", entity.getTypeRef());
-                repository.deleteById(entity.getId());
+                repository.delete(entity);
             }
         }
     }
@@ -163,8 +161,13 @@ public class TypePermsService {
         TypePermsEntity entity = null;
         if (StringUtils.isNotBlank(dto.getId())) {
             entity = repository.findByExtId(dto.getId());
+            if (dto.getTypeRef() == null){
+                throw new IllegalStateException("TypeRef is a mandatory parameter!");
+            }
             if (repository.findByTypeRef(dto.getTypeRef().toString()) != null) {
-                repository.findByTypeRef(dto.getTypeRef().toString()).setExtId(dto.getId());
+                if (StringUtils.isNotBlank(dto.getId())) {
+                    repository.findByTypeRef(dto.getTypeRef().toString()).setExtId(dto.getId());
+                }
             }
         }
         if (entity == null) {
