@@ -6,8 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -161,7 +159,7 @@ public class TypePermsService {
         TypePermsEntity entity = null;
         if (StringUtils.isNotBlank(dto.getId())) {
             entity = repository.findByExtId(dto.getId());
-            if (dto.getTypeRef() == null){
+            if (dto.getTypeRef() == null) {
                 throw new IllegalStateException("TypeRef is a mandatory parameter!");
             }
             if (repository.findByTypeRef(dto.getTypeRef().toString()) != null) {
