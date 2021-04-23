@@ -1,0 +1,9 @@
+---
+id: site
+name:
+  en: Site
+  ru: Сайт
+
+system: true
+dashboardType: site-details
+sourceId: emodel/site

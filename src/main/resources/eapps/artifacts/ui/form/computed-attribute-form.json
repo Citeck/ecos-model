@@ -146,7 +146,7 @@
               {
                 "label": "Script",
                 "defaultValue": "",
-                "key": "script",
+                "key": "fn",
                 "type": "textarea",
                 "input": true,
                 "editor": "ace"

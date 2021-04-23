@@ -14,7 +14,7 @@ import ru.citeck.ecos.model.EcosModelApp;
 import ru.citeck.ecos.model.domain.permissions.dto.*;
 import ru.citeck.ecos.model.domain.permissions.repo.AttributesPermissionsRepository;
 import ru.citeck.ecos.model.domain.permissions.service.AttributesPermissionsService;
-import ru.citeck.ecos.model.type.dto.TypeDto;
+import ru.citeck.ecos.model.type.dto.TypeDef;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.model.type.service.TypeService;
 import ru.citeck.ecos.records2.RecordRef;
@@ -26,8 +26,8 @@ import ru.citeck.ecos.records2.predicate.model.Predicates;
 import ru.citeck.ecos.records2.predicate.model.VoidPredicate;
 import ru.citeck.ecos.records2.rest.RemoteRecordsRestApi;
 import ru.citeck.ecos.records2.source.dao.local.RemoteSyncRecordsDao;
-import ru.citeck.ecos.records3.record.op.query.dto.RecsQueryRes;
-import ru.citeck.ecos.records3.record.op.query.dto.query.RecordsQuery;
+import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery;
+import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes;
 import ru.citeck.ecos.records3.record.request.RequestContext;
 import ru.citeck.ecos.records3.record.resolver.RemoteRecordsResolver;
 
@@ -148,10 +148,10 @@ public class AttrPermissionsSyncRecordsDaoTest {
 
     void generateData() {
 
-        TypeDto base = new TypeDto();
-        base.setId("base");
-        base.setName(new MLText("base"));
-        typeService.save(base);
+        TypeDef.Builder base = TypeDef.create();
+        base.withId("base");
+        base.withName(new MLText("base"));
+        typeService.save(base.build());
 
         for (int i = 0; i < TOTAL_TYPES; i++) {
 
@@ -159,11 +159,11 @@ public class AttrPermissionsSyncRecordsDaoTest {
 
             dto.setId("att-perm-id-" + i);
 
-            TypeDto type = new TypeDto();
-            type.setId("atype-id-" + i);
-            type.setName(new MLText("atype-id-" + i));
-            type.setParent(RecordRef.valueOf("emodel/type@base"));
-            typeService.save(type);
+            TypeDef.Builder type = TypeDef.create();
+            type.withId("atype-id-" + i);
+            type.withName(new MLText("atype-id-" + i));
+            type.withParentRef(RecordRef.valueOf("emodel/type@base"));
+            typeService.save(type.build());
 
             dto.setTypeRef(RecordRef.valueOf("emodel/type@atype-id-" + i));
 
@@ -181,10 +181,11 @@ public class AttrPermissionsSyncRecordsDaoTest {
             permissions.add(dto);
         }
 
-        TypeDto typeNotFound = new TypeDto();
-        typeNotFound.setId("not-f");
-        typeNotFound.setName(new MLText("not-f"));
-        typeNotFound.setParent(RecordRef.valueOf("emodel/type@atype-id-0"));
-        typeService.save(typeNotFound);
+        TypeDef.Builder typeNotFound = TypeDef.create();
+        typeNotFound.withId("not-f");
+        typeNotFound.withName(new MLText("not-f"));
+        typeNotFound.withParentRef(RecordRef.valueOf("emodel/type@atype-id-0"));
+
+        typeService.save(typeNotFound.build());
     }
 }

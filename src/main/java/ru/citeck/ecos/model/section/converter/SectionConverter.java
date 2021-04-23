@@ -10,11 +10,11 @@ import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.converter.AbstractDtoConverter;
 import ru.citeck.ecos.model.section.domain.SectionEntity;
-import ru.citeck.ecos.model.type.domain.TypeEntity;
+import ru.citeck.ecos.model.type.api.records.TypeRecordsDao;
+import ru.citeck.ecos.model.type.repository.TypeEntity;
 import ru.citeck.ecos.model.section.dto.SectionDto;
 import ru.citeck.ecos.model.section.repository.SectionRepository;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
-import ru.citeck.ecos.model.type.records.dao.TypeRecordsDao;
 import ru.citeck.ecos.records2.RecordRef;
 
 import java.util.Collections;

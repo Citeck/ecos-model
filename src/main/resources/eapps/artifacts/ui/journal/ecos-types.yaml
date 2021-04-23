@@ -1,38 +1,31 @@
-
+---
 id: ecos-types
-label: { ru: Типы данных, en: Data types }
-
-sourceId: emodel/type
-
-typeRef: emodel/type@type
+name: { ru: Типы данных, en: Data types }
 
 system: true
 
-attributes:
-  journalsListId: global-system
-
 actions:
-  - uiserv/action@ecos-module-download
+  - uiserv/action@download-base64-data-yml
   - uiserv/action@delete
   - uiserv/action@edit
   - uiserv/action@module-copy
 
 columns:
 
-  - name: moduleId
+  - id: moduleId
+    name: { ru: Идентификатор, en: Id }
     type: text
-    label: { ru: Идентификатор, en: Id }
 
-  - name: name
+  - id: name
+    name: { ru: Имя, en: Name }
     type: text
-    label: { ru: Имя, en: Name }
 
-  - name: description
+  - id: description
+    name: { ru: Описание, en: Description }
     type: text
-    label: { ru: Описание, en: Description }
 
-  - name: _modified
-    label: { ru: Изменен, en: Modified }
+  - id: _modified
+    name: { ru: Изменен, en: Modified }
 
-  - name: _modifier
-    label: { ru: Кем изменен, en: Modified by }
+  - id: _modifier
+    name: { ru: Кем изменен, en: Modified by }

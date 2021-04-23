@@ -1,0 +1,13 @@
+---
+id: case
+name:
+  ru: Кейс
+  en: Case
+
+parentRef: emodel/type@user-base
+
+system: true
+sourceId: alfresco/
+
+properties:
+  alfType: ecos:case

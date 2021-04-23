@@ -13,8 +13,8 @@ import ru.citeck.ecos.model.domain.permissions.dto.AttributesPermissionWithMetaD
 import ru.citeck.ecos.model.domain.permissions.dto.RuleDto;
 import ru.citeck.ecos.model.domain.permissions.repo.AttributesPermissionsRepository;
 import ru.citeck.ecos.model.service.exception.TypeNotFoundException;
-import ru.citeck.ecos.model.type.domain.TypeEntity;
-import ru.citeck.ecos.model.type.records.dao.TypeRecordsDao;
+import ru.citeck.ecos.model.type.api.records.TypeRecordsDao;
+import ru.citeck.ecos.model.type.repository.TypeEntity;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
 
@@ -39,12 +39,12 @@ public class AttributesPermissionConverter extends AbstractDtoConverter<Attribut
             throw new IllegalArgumentException("Can't find type of permission attrs matrix");
         }
 
-        Optional<TypeEntity> optionalType = typeRepository.findByExtId(dto.getTypeRef().getId());
-        if (!optionalType.isPresent()) {
+        TypeEntity optionalType = typeRepository.findByExtId(dto.getTypeRef().getId());
+        if (optionalType == null) {
             throw new TypeNotFoundException(dto.getId());
         }
 
-        entity.setType(optionalType.get());
+        entity.setType(optionalType);
 
         String extId = dto.getId();
         if (Strings.isBlank(extId)) {

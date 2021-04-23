@@ -1,0 +1,12 @@
+---
+id: authority
+name:
+  ru: Человек или группа
+  en: Person or group
+
+system: true
+journalRef: uiserv/journal@authority
+sourceId: alfresco/
+
+properties:
+  alfType: cm:authority

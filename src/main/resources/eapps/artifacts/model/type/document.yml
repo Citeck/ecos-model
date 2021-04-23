@@ -1,0 +1,15 @@
+---
+id: document
+name:
+  ru: Документ
+  en: Document
+
+parentRef: emodel/type@user-base
+
+system: true
+sourceId: alfresco/
+
+properties:
+  alfType: ecos:document
+
+

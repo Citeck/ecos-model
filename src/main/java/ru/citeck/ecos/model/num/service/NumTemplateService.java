@@ -130,7 +130,7 @@ public class NumTemplateService {
         }
 
         Integer updatedCount = 0;
-        for (int i = 0; i < 20 && updatedCount == 0; i++) {
+        for (int i = 0; i < 40 && updatedCount == 0; i++) {
 
             updatedCount = updateCounter(counterEntity, numTemplateEntity);
             if (updatedCount == null) {
@@ -139,7 +139,7 @@ public class NumTemplateService {
 
             if (updatedCount == 0) {
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(i * 5);
                 } catch (InterruptedException e) {
                     ExceptionUtils.throwException(e);
                 }

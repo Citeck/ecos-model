@@ -1,0 +1,14 @@
+---
+id: person
+name:
+  ru: Человек
+  en: Person
+
+parentRef: emodel/type@authority
+
+system: true
+dashboardType: profile-details
+sourceId: alfresco/
+
+properties:
+  alfType: cm:person

@@ -1,0 +1,12 @@
+---
+id: directory
+name:
+  ru: Папка
+  en: Folder
+
+parentRef: emodel/type@user-base
+
+system: true
+dashboardType: case-details
+sourceId: alfresco/
+

@@ -13,7 +13,7 @@ import ru.citeck.ecos.model.domain.permissions.dto.AttributesPermissionDto;
 import ru.citeck.ecos.model.domain.permissions.dto.AttributesPermissionWithMetaDto;
 import ru.citeck.ecos.model.domain.permissions.dto.RuleDto;
 import ru.citeck.ecos.model.domain.permissions.repo.AttributesPermissionsRepository;
-import ru.citeck.ecos.model.type.domain.TypeEntity;
+import ru.citeck.ecos.model.type.repository.TypeEntity;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
 
@@ -58,7 +58,7 @@ public class AttrPermissionConverterTest {
     @Test
     void testEntityToDto() {
 
-        when(attributesPermissionsRepository.findByExtId("testAttrPermId")).thenReturn(Optional.ofNullable(null));
+        when(attributesPermissionsRepository.findByExtId("testAttrPermId")).thenReturn(Optional.empty());
 
         AttributesPermissionDto dto = converter.entityToDto(targetEntity);
         Assert.assertEquals(targetDto.getId(), dto.getId());
@@ -69,7 +69,7 @@ public class AttrPermissionConverterTest {
     @Test
     void testDtoToEntity() {
 
-        when(typeRepository.findByExtId("type")).thenReturn(Optional.of(typeEntity));
+        when(typeRepository.findByExtId("type")).thenReturn(typeEntity);
 
         AttributesPermissionEntity entity = converter.dtoToEntity(targetDto);
 

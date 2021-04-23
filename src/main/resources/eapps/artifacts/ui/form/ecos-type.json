@@ -1,13 +1,10 @@
 {
   "id": "ecos-type",
   "formKey": "module_model/type",
-  "system": true,
   "title": {
     "en": "Type form"
   },
-  "description": {
-    "en": ""
-  },
+  "description": {},
   "customModule": null,
   "typeRef": "emodel/type@type",
   "width": "extra-lg",
@@ -42,7 +39,7 @@
                           {
                             "type": "selectJournal",
                             "journalId": "ecos-types",
-                            "key": "parent",
+                            "key": "parentRef",
                             "label": "Parent",
                             "presetFilterPredicatesJs": null,
                             "input": true
@@ -55,7 +52,7 @@
                                   {
                                     "type": "selectJournal",
                                     "journalId": "ecos-forms",
-                                    "key": "form",
+                                    "key": "formRef",
                                     "label": "Form",
                                     "input": true
                                   }
@@ -90,7 +87,7 @@
                           {
                             "label": "Journal",
                             "journalId": "ecos-journals",
-                            "key": "journal",
+                            "key": "journalRef",
                             "type": "selectJournal",
                             "input": true
                           },
@@ -112,7 +109,7 @@
                             "action": "custom",
                             "state": "",
                             "showValidations": false,
-                            "custom": "var ownerId = Math.random().toString();\nvar currentRecord = Citeck.Records.get(instance.options.recordId);\n\nvar configFormRef = data.configFormRef;\nif (Array.isArray(configFormRef)) {\n    configFormRef = configFormRef[0];\n}\n\nif (!configFormRef && data.parent) {\n    configFormRef = Citeck.Records.get(data.parent).load('inhConfigFormRef?id', true);\n}\n\nPromise.all([configFormRef, currentRecord.load('config?json')])\n    .then(function(formAndConfig) {\n\n        var formRef = formAndConfig[0];\n        var config = formAndConfig[1];\n\n        if (formRef == null) {\n            throw new Error(\"Config form is not set\");\n        }\n\n        if (!config) {\n            config = {};\n        }\n\n        var configRecord = Citeck.Records.create(config, ownerId);\n\n        Citeck.forms.eform(configRecord.id, {\n            params: {\n                formId: formRef,\n                onSubmit: function (record) {\n                    var data = record.toJson().attributes;\n                    var resData = {};\n                    for (var key in data) {\n                        if (key[0] !== '_' && key !== 'pendingUpdate') {\n                            resData[key] = data[key];\n                        }\n                    }\n                    currentRecord.att(\"config?json\", resData);\n                    Citeck.Records.release(configRecord.id, ownerId);\n                },\n                onCancel: function () {\n                    Citeck.Records.release(configRecord.id, ownerId);\n                },\n                saveOnSubmit: false\n            },\n            class: 'ecos-modal_width-lg',\n            isBigHeader: true\n        });\n    })",
+                            "custom": "var ownerId = Math.random().toString();\nvar currentRecord = Citeck.Records.get(instance.options.recordId);\n\nvar configFormRef = data.configFormRef;\nif (Array.isArray(configFormRef)) {\n    configFormRef = configFormRef[0];\n}\n\nif (!configFormRef && data.parentRef) {\n    configFormRef = Citeck.Records.get(data.parentRef).load('inhConfigFormRef?id', true);\n}\n\nPromise.all([configFormRef, currentRecord.load('config?json')])\n    .then(function(formAndConfig) {\n\n        var formRef = formAndConfig[0];\n        var config = formAndConfig[1];\n\n        if (formRef == null) {\n            throw new Error(\"Config form is not set\");\n        }\n\n        if (!config) {\n            config = {};\n        }\n\n        var configRecord = Citeck.Records.create(config, ownerId);\n\n        Citeck.forms.eform(configRecord.id, {\n            params: {\n                formId: formRef,\n                onSubmit: function (record) {\n                    var data = record.toJson().attributes;\n                    var resData = {};\n                    for (var key in data) {\n                        if (key[0] !== '_' && key !== 'pendingUpdate') {\n                            resData[key] = data[key];\n                        }\n                    }\n                    currentRecord.att(\"config?json\", resData);\n                    Citeck.Records.release(configRecord.id, ownerId);\n                },\n                onCancel: function () {\n                    Citeck.Records.release(configRecord.id, ownerId);\n                },\n                saveOnSubmit: false\n            },\n            class: 'ecos-modal_width-lg',\n            isBigHeader: true\n        });\n    })",
                             "block": true,
                             "key": "editconfig",
                             "type": "button",
@@ -174,9 +171,12 @@
                             "input": true
                           },
                           {
-                            "label": "Attributes",
+                            "label": {
+                              "ru": "Дополнительные свойства",
+                              "en": "Additional properties"
+                            },
                             "keyLabel": "",
-                            "key": "attributes",
+                            "key": "properties",
                             "type": "datamap",
                             "valueComponent": {
                               "type": "textfield",
@@ -191,6 +191,13 @@
                                 "json": ""
                               }
                             },
+                            "input": true
+                          },
+                          {
+                            "label": "Source ID",
+                            "defaultValue": "",
+                            "key": "sourceId",
+                            "type": "textfield",
                             "input": true
                           }
                         ],
@@ -209,11 +216,22 @@
                 ]
               },
               {
-                "label": "Create variants",
+                "label": "Create",
                 "key": "createVariants",
                 "components": [
                   {
-                    "label": "Create variants",
+                    "label": {
+                      "en": "Default create",
+                      "ru": "Создание по умолчанию"
+                    },
+                    "labelPosition": "",
+                    "key": "defaultCreateVariant",
+                    "defaultValue": true,
+                    "type": "checkbox",
+                    "input": true
+                  },
+                  {
+                    "label": "Create",
                     "hideLabel": true,
                     "disableAddingRemovingRows": false,
                     "defaultOpen": false,
@@ -244,7 +262,9 @@
                         "mlText": {
                           "ru": "",
                           "en": ""
-                        }
+                        },
+                        "submit4": false,
+                        "submit8": false
                       }
                     ],
                     "validate": {
@@ -262,13 +282,6 @@
                             "label": "Id",
                             "defaultValue": "",
                             "key": "id",
-                            "type": "textfield",
-                            "input": true
-                          },
-                          {
-                            "label": "Record Ref",
-                            "defaultValue": "",
-                            "key": "recordRef",
                             "type": "textfield",
                             "input": true
                           }
@@ -301,31 +314,91 @@
                             "type": "selectJournal",
                             "customPredicateJs": null,
                             "presetFilterPredicatesJs": null,
-                            "input": true
-                          },
-                          {
-                            "label": "Attributes",
-                            "keyLabel": "",
-                            "key": "attributes",
-                            "type": "datamap",
-                            "valueComponent": {
-                              "type": "textfield",
-                              "key": "value",
-                              "label": "Value",
-                              "defaultValue": "Value",
-                              "input": true,
-                              "conditional": {
-                                "show": null,
-                                "when": null,
-                                "eq": "",
-                                "json": ""
-                              }
-                            },
-                            "input": true
+                            "input": true,
+                            "source": {
+                              "custom": {
+                                "columns": []
+                              },
+                              "type": "journal"
+                            }
                           }
                         ],
                         "row": "0-2",
                         "input": false
+                      },
+                      {
+                        "label": {
+                          "ru": "Panel"
+                        },
+                        "key": "panel10",
+                        "type": "panel",
+                        "input": false,
+                        "components": [
+                          {
+                            "label": {
+                              "en": "Additional",
+                              "ru": "Дополнительно"
+                            },
+                            "action": "custom",
+                            "state": "",
+                            "showValidations": false,
+                            "custom": "var currentRow = row;\nvar atts = [\n  ['attributes', {}], \n  ['formOptions', {}], \n  ['postActionRef', ''], \n  ['properties', {}],\n  ['sourceId', []]\n];\nvar formData = {};\nfor (var key of atts) {\n  formData[key[0]] = row[key[0]] || key[1];\n}\nCiteck.EcosFormUtils.getFormById('uiserv/form@create-variant-form', {\n    definition: 'definition?json'\n}).then(function(formConfig) {\n    \n    Citeck.Dialogs.showFormDialog({\n        title: 'Create variant',\n        showDefaultButtons: true,\n        formDefinition: formConfig.definition,\n        formData: formData,\n        onSubmit: submission => {\n            var data = submission.data || {};\n\n\t\t\tfor (var key of atts) {\n\t\t\t  currentRow[key[0]] = data[key[0]] || key[1];\n\t\t\t}\n        }\n    })\n    \n});",
+                            "key": "submit8",
+                            "type": "button",
+                            "input": true,
+                            "row": "0-3"
+                          },
+                          {
+                            "label": {
+                              "ru": "attributes"
+                            },
+                            "key": "attributes",
+                            "properties": {
+                              "dataType": "json"
+                            },
+                            "type": "hidden",
+                            "input": true
+                          },
+                          {
+                            "label": {
+                              "ru": "formOptions"
+                            },
+                            "key": "formOptions",
+                            "properties": {
+                              "dataType": "json"
+                            },
+                            "type": "hidden",
+                            "input": true
+                          },
+                          {
+                            "label": {
+                              "ru": "properties"
+                            },
+                            "key": "properties",
+                            "properties": {
+                              "dataType": "json"
+                            },
+                            "type": "hidden",
+                            "input": true
+                          },
+                          {
+                            "label": {
+                              "ru": "postActionRef"
+                            },
+                            "key": "postActionRef",
+                            "type": "hidden",
+                            "input": true
+                          },
+                          {
+                            "label": {
+                              "ru": "sourceId"
+                            },
+                            "key": "sourceId",
+                            "type": "hidden",
+                            "input": true
+                          }
+                        ],
+                        "row": "0-3"
                       }
                     ],
                     "tab": 1,
@@ -495,7 +568,11 @@
                               "submit7": false
                             },
                             "submit9": false,
-                            "multiple": false
+                            "multiple": false,
+                            "ecosSelect": "",
+                            "select": "",
+                            "multiple2": false,
+                            "mandatory": false
                           }
                         ],
                         "validate": {
@@ -507,114 +584,223 @@
                         "input": true,
                         "components": [
                           {
-                            "label": "Id",
-                            "defaultValue": "",
-                            "validate": {
-                              "pattern": "(^$|[a-zA-Z][\\w-.:]*)"
+                            "label": {
+                              "ru": "Columns"
                             },
-                            "key": "id",
-                            "type": "textfield",
-                            "input": true,
-                            "row": "0-0"
-                          },
-                          {
-                            "label": "Name",
-                            "key": "name",
-                            "type": "mlText",
-                            "input": true,
-                            "row": "0-1"
-                          },
-                          {
-                            "label": "Type            ",
-                            "dataSrc": "values",
-                            "data": {
-                              "values": [
-                                {
-                                  "label": "Text",
-                                  "value": "TEXT"
-                                },
-                                {
-                                  "label": "Association",
-                                  "value": "ASSOC"
-                                },
-                                {
-                                  "label": "Number",
-                                  "value": "NUMBER"
-                                },
-                                {
-                                  "label": "Boolean",
-                                  "value": "BOOLEAN"
-                                },
-                                {
-                                  "label": "Date",
-                                  "value": "DATE"
-                                },
-                                {
-                                  "label": "DateTime",
-                                  "value": "DATETIME"
-                                },
-                                {
-                                  "label": "Content",
-                                  "value": "CONTENT"
-                                }
-                              ]
-                            },
-                            "defaultValue": "TEXT",
-                            "key": "type",
-                            "type": "ecosSelect",
-                            "input": true,
-                            "row": "0-2"
-                          },
-                          {
-                            "label": "Permissions",
-                            "hideLabel": true,
-                            "action": "custom",
-                            "state": "",
-                            "showValidations": false,
-                            "custom": "\nvar mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = 'emodel/type@' + data.moduleId;\nvar customProps = {\n  roles: (data.modelRoles || []).map(mapToSingleLang),\n  statuses: (data.modelStatuses || []).map(mapToSingleLang),\n  attributeName: Citeck.helpers.getMLValue(row.name)\n};\n\nvar typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypeAttPermissions(\n  typeRef, \n  row.id, \n  customProps\n)",
-                            "leftIcon": "icon-decision-tables",
-                            "block": true,
-                            "dataGridLabel": false,
-                            "key": "submit3",
-                            "type": "button",
-                            "input": true,
-                            "row": "0-3"
-                          },
-                          {
-                            "label": "Multiple",
-                            "labelPosition": "left-left",
-                            "key": "multiple",
-                            "type": "checkbox",
-                            "input": true,
-                            "row": "0-4"
-                          },
-                          {
-                            "key": "panel10",
-                            "type": "panel",
-                            "input": false,
-                            "components": [
+                            "columns": [
                               {
-                                "label": "Computed",
-                                "action": "custom",
-                                "state": "",
-                                "showValidations": false,
-                                "custom": "var currentRow = row;\nvar computed = row.computed || {}; \nvar computedType = computed.type || 'NONE';\nvar formData = {\n    type: computedType,\n    storingType: computed.storingType || 'NONE'\n};\nformData[computedType + '_config'] = computed.config || {};\n\n\nCiteck.EcosFormUtils.getFormById('uiserv/eform@computed-attribute-form', {\n    definition: 'definition?json'\n}).then(function(formConfig) {\n    \n    Citeck.Dialogs.showFormDialog({\n        title: 'Computed attribute',\n        showDefaultButtons: true,\n        formDefinition: formConfig.definition,\n        formData: formData,\n        onSubmit: submission => {\n            var data = submission.data || {};\n\n            currentRow.computed = {\n                type: data.type,\n                storingType: data.storingType,\n                config: data[data.type + '_config']\n            }\n        }\n    })\n    \n});",
-                                "key": "submit7",
-                                "type": "button",
-                                "input": true,
-                                "row": "0-5"
+                                "components": [
+                                  {
+                                    "label": "Id",
+                                    "defaultValue": "",
+                                    "validate": {
+                                      "pattern": "(^$|[_a-zA-Z][_\\w-.:]*)"
+                                    },
+                                    "key": "id",
+                                    "type": "textfield",
+                                    "input": true
+                                  }
+                                ],
+                                "type": "column",
+                                "input": false,
+                                "key": "column",
+                                "index": 0,
+                                "md": 2
                               },
                               {
-                                "label": "computed",
-                                "key": "computed",
-                                "properties": {
-                                  "dataType": "json"
-                                },
-                                "type": "hidden",
-                                "input": true
+                                "index": 1,
+                                "type": "column",
+                                "input": false,
+                                "key": "column",
+                                "components": [
+                                  {
+                                    "label": "Name",
+                                    "key": "name",
+                                    "type": "mlText",
+                                    "input": true,
+                                    "row": "0-1"
+                                  }
+                                ],
+                                "md": 3
+                              },
+                              {
+                                "index": 2,
+                                "type": "column",
+                                "input": false,
+                                "key": "column",
+                                "components": [
+                                  {
+                                    "label": "Type            ",
+                                    "dataSrc": "values",
+                                    "data": {
+                                      "values": [
+                                        {
+                                          "label": "Text",
+                                          "value": "TEXT"
+                                        },
+                                        {
+                                          "label": "ML Text",
+                                          "value": "MLTEXT"
+                                        },
+                                        {
+                                          "label": "Person",
+                                          "value": "PERSON"
+                                        },
+                                        {
+                                          "label": "Group",
+                                          "value": "AUTHORITY_GROUP"
+                                        },
+                                        {
+                                          "label": "Authority",
+                                          "value": "AUTHORITY"
+                                        },
+                                        {
+                                          "label": "Association",
+                                          "value": "ASSOC"
+                                        },
+                                        {
+                                          "label": "Number",
+                                          "value": "NUMBER"
+                                        },
+                                        {
+                                          "label": "Boolean",
+                                          "value": "BOOLEAN"
+                                        },
+                                        {
+                                          "label": "Date",
+                                          "value": "DATE"
+                                        },
+                                        {
+                                          "label": "DateTime",
+                                          "value": "DATETIME"
+                                        },
+                                        {
+                                          "label": "Content",
+                                          "value": "CONTENT"
+                                        }
+                                      ]
+                                    },
+                                    "defaultValue": "TEXT",
+                                    "key": "type",
+                                    "type": "ecosSelect",
+                                    "input": true,
+                                    "row": "0-2"
+                                  },
+                                  {
+                                    "label": {
+                                      "ru": "Настроить",
+                                      "en": "Setup"
+                                    },
+                                    "action": "custom",
+                                    "state": "",
+                                    "showValidations": false,
+                                    "custom": "var currentRow = row;\nvar config = row.config || {}; \nvar formData = config;\n\nCiteck.EcosFormUtils.getFormById('uiserv/form@att-type-' + row.type + '-form', {\n    definition: 'definition?json'\n}).then(function(formConfig) {\n    \n    var inputs = Citeck.EcosFormUtils.getFormInputs(formConfig.definition);\n\n    Citeck.Dialogs.showFormDialog({\n        title: 'Attribute type config',\n        showDefaultButtons: true,\n        formDefinition: formConfig.definition,\n        formData: formData,\n        onSubmit: submission => {\n            var data = submission.data || {};\n            var configData = {};\n            for (var i in inputs) {\n                var att = inputs[i].attribute;\n                configData[att] = data[att];\n            }\n            currentRow.config = configData;\n        }\n    })\n    \n});",
+                                    "block": true,
+                                    "key": "submit6",
+                                    "type": "button",
+                                    "input": true,
+                                    "row": "0-3"
+                                  },
+                                  {
+                                    "label": {
+                                      "ru": "config"
+                                    },
+                                    "key": "config",
+                                    "properties": {
+                                      "dataType": "json"
+                                    },
+                                    "type": "hidden",
+                                    "input": true
+                                  }
+                                ],
+                                "md": 2
+                              },
+                              {
+                                "index": 3,
+                                "type": "column",
+                                "input": false,
+                                "key": "column",
+                                "components": [
+                                  {
+                                    "label": {
+                                      "ru": "Множественный",
+                                      "en": "Multiple"
+                                    },
+                                    "labelPosition": "left-left",
+                                    "key": "multiple",
+                                    "type": "checkbox",
+                                    "input": true,
+                                    "row": "0-5"
+                                  },
+                                  {
+                                    "label": {
+                                      "ru": "Обязательный",
+                                      "en": "Mandatory"
+                                    },
+                                    "labelPosition": "left-left",
+                                    "key": "mandatory",
+                                    "type": "checkbox",
+                                    "input": true,
+                                    "row": "0-5"
+                                  }
+                                ],
+                                "md": 3
+                              },
+                              {
+                                "index": 4,
+                                "type": "column",
+                                "input": false,
+                                "key": "column",
+                                "components": [
+                                  {
+                                    "label": "Permissions",
+                                    "hideLabel": true,
+                                    "action": "custom",
+                                    "state": "",
+                                    "showValidations": false,
+                                    "custom": "\nvar mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = 'emodel/type@' + data.moduleId;\nvar customProps = {\n  roles: (data.modelRoles || []).map(mapToSingleLang),\n  statuses: (data.modelStatuses || []).map(mapToSingleLang),\n  attributeName: Citeck.helpers.getMLValue(row.name)\n};\n\nvar typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypeAttPermissions(\n  typeRef, \n  row.id, \n  customProps\n)",
+                                    "leftIcon": "icon-decision-tables",
+                                    "block": true,
+                                    "dataGridLabel": false,
+                                    "key": "submit3",
+                                    "type": "button",
+                                    "input": true,
+                                    "row": "0-4"
+                                  },
+                                  {
+                                    "label": {
+                                      "en": " "
+                                    },
+                                    "removeIndents": true,
+                                    "action": "custom",
+                                    "state": "",
+                                    "showValidations": false,
+                                    "custom": "var currentRow = row;\nvar computed = row.computed || {}; \nvar computedType = computed.type || 'NONE';\nvar formData = {\n    type: computedType,\n    storingType: computed.storingType || 'NONE'\n};\nformData[computedType + '_config'] = computed.config || {};\n\n\nCiteck.EcosFormUtils.getFormById('uiserv/form@computed-attribute-form', {\n    definition: 'definition?json'\n}).then(function(formConfig) {\n    \n    Citeck.Dialogs.showFormDialog({\n        title: 'Computed attribute',\n        showDefaultButtons: true,\n        formDefinition: formConfig.definition,\n        formData: formData,\n        onSubmit: submission => {\n            var data = submission.data || {};\n\n            currentRow.computed = {\n                type: data.type,\n                storingType: data.storingType,\n                config: data[data.type + '_config']\n            }\n        }\n    })\n    \n});",
+                                    "leftIcon": "icon-items",
+                                    "block": true,
+                                    "key": "submit7",
+                                    "type": "button",
+                                    "input": true
+                                  },
+                                  {
+                                    "label": {
+                                      "ru": "computed"
+                                    },
+                                    "key": "computed",
+                                    "properties": {
+                                      "dataType": "json"
+                                    },
+                                    "type": "hidden",
+                                    "input": true
+                                  }
+                                ],
+                                "md": 2
                               }
                             ],
-                            "row": "0-5"
+                            "key": "columns5",
+                            "type": "columns",
+                            "input": false,
+                            "row": "0-0"
                           }
                         ],
                         "tab": 3
@@ -744,7 +930,7 @@
                         "label": "Id",
                         "defaultValue": "",
                         "validate": {
-                          "pattern": "(^$|[a-zA-Z][\\w-.:]*)"
+                          "pattern": "(^$|[_a-zA-Z][_\\w-.:]*)"
                         },
                         "key": "id",
                         "type": "textfield",
@@ -825,7 +1011,7 @@
                         "label": "Id",
                         "defaultValue": "",
                         "validate": {
-                          "pattern": "(^$|[a-zA-Z][\\w-.:]*)"
+                          "pattern": "(^$|[_a-zA-Z][_\\w-.:]*)"
                         },
                         "key": "id",
                         "type": "textfield",

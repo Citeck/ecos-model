@@ -1,0 +1,12 @@
+---
+id: file
+name:
+  ru: Файл
+  en: File
+
+parentRef: emodel/type@user-base
+
+system: true
+
+dashboardType: case-details
+sourceId: alfresco/

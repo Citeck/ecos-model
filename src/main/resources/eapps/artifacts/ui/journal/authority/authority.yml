@@ -1,0 +1,7 @@
+---
+id: authority
+name: { ru: Группы и люди, en: Authority }
+
+columns:
+  - id: cm:authorityName
+  - id: cm:authorityDisplayName

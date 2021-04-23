@@ -23,7 +23,7 @@ class TypeArtifactsResolverImpl(
 
     private fun getTypeArtifactsImpl(typeRef: RecordRef): List<RecordRef> {
 
-        val type = typeService.getByExtId(typeRef.id)
+        val type = typeService.getByIdOrNull(typeRef.id)
         val result = mutableListOf<RecordRef>()
 
         if (type == null) {
@@ -32,9 +32,9 @@ class TypeArtifactsResolverImpl(
         if (RecordRef.isNotEmpty(type.formRef)) {
             result.add(type.formRef)
         }
-        if (type.actions != null) {
-            result.addAll(type.actions.filter { RecordRef.isNotEmpty(it) })
-        }
+
+        result.addAll(type.actions.filter { RecordRef.isNotEmpty(it) })
+
         if (RecordRef.isNotEmpty(type.journalRef)) {
             result.add(type.journalRef)
         }

@@ -1,0 +1,23 @@
+---
+id: number-template
+
+name:
+  en: Number template
+  ru: Шаблон нумерации
+
+system: true
+
+sourceId: emodel/num-template
+journalRef: uiserv/journal@number-templates
+formRef: uiserv/form@num-template-form
+
+defaultCreateVariant: false
+
+createVariants:
+
+  - id: create-new-template
+    name: { ru: Создать новый шаблон, en: Create new template }
+
+  - id: upload-template
+    name: { ru: Загрузить шаблон, en: Upload template }
+    formRef: uiserv/form@ecos-module-upload
