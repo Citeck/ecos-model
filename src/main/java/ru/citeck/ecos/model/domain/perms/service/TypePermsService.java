@@ -156,12 +156,9 @@ public class TypePermsService {
 
     private TypePermsEntity toEntity(TypePermsDef dto) {
 
-        TypePermsEntity entity = null;
-        if (repository.findByTypeRef(dto.getTypeRef().toString()) != null) {
-            entity = repository.findByTypeRef(dto.getTypeRef().toString());
-            if (StringUtils.isNotBlank(dto.getId())) {
+        TypePermsEntity entity = repository.findByTypeRef(dto.getTypeRef().toString());
+        if (entity != null && StringUtils.isNotBlank(dto.getId())) {
                 entity.setExtId(dto.getId());
-            }
         }
         if (entity == null) {
             entity = new TypePermsEntity();
