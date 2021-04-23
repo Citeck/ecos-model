@@ -1,0 +1,31 @@
+
+id: number-templates
+label: { ru: Шаблоны нумерации, en: Number templates }
+
+sourceId: emodel/num-template
+
+typeRef: emodel/type@number-template
+
+system: true
+
+attributes:
+  journalsListId: global-system
+
+actions:
+  - uiserv/action@ecos-module-download
+  - uiserv/action@delete
+  - uiserv/action@edit
+
+columns:
+
+  - name: moduleId
+    type: text
+    label: { ru: Идентификатор, en: Id }
+
+  - name: name
+    type: text
+    label: { ru: Имя, en: Name }
+
+  - name: counterKey
+    type: text
+    label: { ru: Ключ счетчика, en: Counter key }

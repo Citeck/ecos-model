@@ -1,0 +1,8 @@
+modelVersion: "1.0"
+
+source-id: "section"
+
+internal: true
+
+controller:
+  type: json

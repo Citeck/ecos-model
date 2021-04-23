@@ -1,0 +1,10 @@
+{
+  "id": "document",
+  "parent": "emodel/type@user-base",
+  "name": {
+    "ru": "Документ",
+    "en": "Document"
+  },
+  "system": true,
+  "inheritActions": true
+}

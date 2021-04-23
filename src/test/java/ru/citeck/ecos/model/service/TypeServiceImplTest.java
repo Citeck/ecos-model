@@ -6,6 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import ru.citeck.ecos.commands.CommandsService;
+import ru.citeck.ecos.commands.CommandsServiceFactory;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
@@ -60,7 +62,10 @@ public class TypeServiceImplTest {
     @BeforeEach
     void init() {
 
+        CommandsService commandsService = new CommandsServiceFactory().getCommandsService();
+
         typeService = new TypeServiceImpl(
+            commandsService,
             typeRepository,
             typeConverter
         );

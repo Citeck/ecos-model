@@ -1,0 +1,30 @@
+{
+  "id": "base",
+  "name": {
+    "ru": "Базовый тип",
+    "en": "Base type"
+  },
+  "system": true,
+  "dashboardType": "case-details",
+  "actions": [
+    "uiserv/action@upload-new-version",
+    "uiserv/action@edit",
+    "uiserv/action@content-download",
+    "uiserv/action@record-actions",
+    "uiserv/action@edit-in-onlyoffice",
+    "uiserv/action@save-as-case-template",
+    "uiserv/action@print"
+  ],
+  "journal": "uiserv/journal@base",
+  "associations": [
+    {
+      "id": "assoc:associatedWith",
+      "name": {
+        "en": "Connected with",
+        "ru": "Связан с"
+      },
+      "target": "emodel/type@base",
+      "direction": "BOTH"
+    }
+  ]
+}

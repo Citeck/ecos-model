@@ -1,0 +1,10 @@
+{
+  "id": "directory",
+  "parentRef": "emodel/type@user-base",
+  "name": {
+    "ru": "Папка",
+    "en": "Folder"
+  },
+  "system": true,
+  "dashboardType": "case-details"
+}

@@ -1,0 +1,11 @@
+modelVersion: "1.0"
+
+# types migration from alf
+
+internal: true
+source-id: "tk_type"
+
+controller:
+  type: json
+
+
