@@ -2,6 +2,7 @@ package ru.citeck.ecos.model.domain.perms.service;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,12 +24,13 @@ import ru.citeck.ecos.records2.predicate.PredicateUtils;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
 import ru.citeck.ecos.records2.predicate.model.ValuePredicate;
 
+import javax.annotation.PostConstruct;
 import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TypePermsService {
@@ -39,11 +41,25 @@ public class TypePermsService {
 
     private Consumer<TypePermsDef> listener;
 
+    @PostConstruct
+    public void init() {
+        List<TypePermsEntity> typePermsEntities = repository.findAll();
+        typePermsEntities.sort(Comparator.comparing(TypePermsEntity::getLastModifiedDate).reversed());
+        Set<String> uniqueEntities = new HashSet<>();
+        for (TypePermsEntity entity : typePermsEntities) {
+            if (!uniqueEntities.add(entity.getTypeRef())) {
+                log.info("Entity with typeRef: {} will be deleted", entity.getTypeRef());
+                repository.delete(entity);
+            }
+        }
+    }
+
+
     @Nullable
     public TypePermsMeta getPermsMeta(String id) {
         TypePermsEntity entity = repository.findByExtId(id);
         if (entity != null) {
-           return new TypePermsMeta(entity.getLastModifiedDate());
+            return new TypePermsMeta(entity.getLastModifiedDate());
         }
         return null;
     }
@@ -140,9 +156,9 @@ public class TypePermsService {
 
     private TypePermsEntity toEntity(TypePermsDef dto) {
 
-        TypePermsEntity entity = null;
-        if (StringUtils.isNotBlank(dto.getId())) {
-            entity = repository.findByExtId(dto.getId());
+        TypePermsEntity entity = repository.findByTypeRef(dto.getTypeRef().toString());
+        if (entity != null && StringUtils.isNotBlank(dto.getId())) {
+            entity.setExtId(dto.getId());
         }
         if (entity == null) {
             entity = new TypePermsEntity();
