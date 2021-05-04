@@ -1,0 +1,20 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <changeSet author="citeck" id="20210504000000">
+
+        <sql splitStatements="true">
+            truncate table ecos_association;
+            truncate table ecos_type_actions;
+            truncate table ecos_actions;
+        </sql>
+
+        <dropTable tableName="ecos_association" />
+        <dropTable tableName="ecos_type_actions" />
+        <dropTable tableName="ecos_actions" />
+
+    </changeSet>
+
+</databaseChangeLog>
