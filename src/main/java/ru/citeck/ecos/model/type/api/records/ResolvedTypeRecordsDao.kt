@@ -358,7 +358,7 @@ class ResolvedTypeRecordsDao(
                 return null
             }
             val res = typeDefById.computeIfAbsent(id) {
-                typeService.getById(id) ?: TypeDef.EMPTY
+                typeService.getByIdOrNull(id) ?: TypeDef.EMPTY
             }
             return if (res === TypeDef.EMPTY) {
                 null

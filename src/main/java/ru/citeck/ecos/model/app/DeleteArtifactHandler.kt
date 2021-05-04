@@ -24,7 +24,7 @@ class DeleteArtifactHandler(
         return "model/delete"
     }
 
-    override fun listenChanges(consumer: Consumer<DeleteDto>) {
+    override fun listenChanges(listener: Consumer<DeleteDto>) {
     }
 
     class DeleteDto(
