@@ -15,15 +15,12 @@
   "definition": {
     "components": [
       {
-        "key": "cm_title",
+        "key": "_disp",
         "label": {
           "en": "Name",
           "ru": "Название"
         },
         "defaultValue": "",
-        "properties": {
-          "attribute": "cm:title"
-        },
         "validate": {
           "required": "true"
         },
@@ -31,7 +28,7 @@
         "input": true
       },
       {
-        "input": "true",
+        "input": true,
         "key": "_content",
         "label": {
           "en": "Content",
@@ -51,13 +48,13 @@
           {
             "sm": "12",
             "md": "4",
-            "lg": "6",
+            "lg": "4",
             "index": "0"
           },
           {
             "sm": "12",
             "md": "4",
-            "lg": "6",
+            "lg": "4",
             "index": "1",
             "components": [
               {
@@ -76,7 +73,7 @@
           {
             "sm": "12",
             "md": "4",
-            "lg": "6",
+            "lg": "4",
             "index": "2",
             "components": [
               {

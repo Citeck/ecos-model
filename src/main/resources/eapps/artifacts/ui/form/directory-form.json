@@ -21,10 +21,7 @@
         "validate": {
           "required": true
         },
-        "key": "cm_title",
-        "properties": {
-          "attribute": "cm:title"
-        },
+        "key": "_disp",
         "type": "textfield",
         "input": true
       },
