@@ -5,6 +5,7 @@ name:
   en: Folder
 
 parentRef: emodel/type@user-base
+formRef: uiserv/form@directory-form
 
 system: true
 dashboardType: case-details

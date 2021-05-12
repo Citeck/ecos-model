@@ -16,7 +16,7 @@ class DeleteArtifactHandler(
 
     override fun deployArtifact(artifact: DeleteDto) {
         artifact.types.forEach {
-            typeService.delete(it)
+            typeService.deleteWithChildren(it)
         }
     }
 

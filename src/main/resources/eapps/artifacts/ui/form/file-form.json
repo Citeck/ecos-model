@@ -1,0 +1,99 @@
+{
+  "id": "file-form",
+  "formKey": "",
+  "title": {
+    "en": "Edit file",
+    "ru": "Редактировать файл"
+  },
+  "description": {},
+  "customModule": null,
+  "typeRef": "",
+  "width": null,
+  "i18n": {},
+  "display": "form",
+  "type": "form",
+  "definition": {
+    "components": [
+      {
+        "key": "cm_title",
+        "label": {
+          "en": "Name",
+          "ru": "Название"
+        },
+        "defaultValue": "",
+        "properties": {
+          "attribute": "cm:title"
+        },
+        "validate": {
+          "required": "true"
+        },
+        "type": "textfield",
+        "input": true
+      },
+      {
+        "input": "true",
+        "key": "_content",
+        "label": {
+          "en": "Content",
+          "ru": "Содержимое"
+        },
+        "storage": "url",
+        "type": "file",
+        "url": "/gateway/alfresco/alfresco/s/eform/file",
+        "validate": {
+          "required": "true"
+        }
+      },
+      {
+        "type": "columns",
+        "label": "Columns",
+        "columns": [
+          {
+            "sm": "12",
+            "md": "4",
+            "lg": "6",
+            "index": "0"
+          },
+          {
+            "sm": "12",
+            "md": "4",
+            "lg": "6",
+            "index": "1",
+            "components": [
+              {
+                "action": "event",
+                "block": "true",
+                "event": "cancel",
+                "label": {
+                  "en": "Cancel",
+                  "ru": "Отмена"
+                },
+                "removeIndents": "true",
+                "type": "button"
+              }
+            ]
+          },
+          {
+            "sm": "12",
+            "md": "4",
+            "lg": "6",
+            "index": "2",
+            "components": [
+              {
+                "action": "submit",
+                "block": "true",
+                "label": {
+                  "en": "Save",
+                  "ru": "Сохранить"
+                },
+                "removeIndents": "true",
+                "type": "button",
+                "theme": "primary"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

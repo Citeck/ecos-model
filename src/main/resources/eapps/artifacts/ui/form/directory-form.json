@@ -1,0 +1,98 @@
+{
+  "id": "directory-form",
+  "formKey": "",
+  "title": {
+    "en": "Edit folder",
+    "ru": "Редактировать папку"
+  },
+  "description": {},
+  "customModule": null,
+  "typeRef": "",
+  "width": null,
+  "i18n": {},
+  "definition": {
+    "components": [
+      {
+        "label": {
+          "en": "Name",
+          "ru": "Название"
+        },
+        "defaultValue": "",
+        "validate": {
+          "required": true
+        },
+        "key": "cm_title",
+        "properties": {
+          "attribute": "cm:title"
+        },
+        "type": "textfield",
+        "input": true
+      },
+      {
+        "type": "columns",
+        "columns": [
+          {
+            "sm": "12",
+            "md": "4",
+            "lg": "6",
+            "index": 0,
+            "components": [],
+            "type": "column",
+            "input": false,
+            "key": "column"
+          },
+          {
+            "sm": "12",
+            "md": "4",
+            "lg": "6",
+            "index": 1,
+            "components": [
+              {
+                "action": "event",
+                "block": "true",
+                "event": "cancel",
+                "label": {
+                  "en": "Cancel",
+                  "ru": "Отмена"
+                },
+                "removeIndents": "true",
+                "type": "button",
+                "input": true,
+                "key": "submit"
+              }
+            ],
+            "type": "column",
+            "input": false,
+            "key": "column"
+          },
+          {
+            "sm": "12",
+            "md": "4",
+            "lg": "6",
+            "index": 2,
+            "components": [
+              {
+                "block": "true",
+                "label": {
+                  "en": "Save",
+                  "ru": "Сохранить"
+                },
+                "removeIndents": "true",
+                "type": "button",
+                "theme": "primary",
+                "input": true,
+                "key": "submit"
+              }
+            ],
+            "type": "column",
+            "input": false,
+            "key": "column"
+          }
+        ],
+        "input": false,
+        "key": "columns"
+      }
+    ]
+  },
+  "attributes": {}
+}
