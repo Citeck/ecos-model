@@ -36,6 +36,7 @@ final class TypeInhMixin(
             "modelRoles",
             "modelStatuses",
             "modelAttributes",
+            "parentModelAttributes",
             "docLibEnabled",
             "docLibFileTypeRefs",
             "docLibDirTypeRef",
@@ -111,6 +112,11 @@ final class TypeInhMixin(
             }
             "modelAttributes" -> {
                 typeDef.model.attributes
+            }
+            "parentModelAttributes" -> {
+                rtypeDef.getParentRef()?.id?.let { parentId ->
+                    resolvedTypeRecordsDao.getResolvedTypeRecord(parentId).getModel().attributes
+                }
             }
             "docLibEnabled" -> {
                 typeDef.docLib.enabled

@@ -813,6 +813,140 @@
                     "tab": 3
                   },
                   {
+                    "title": "Inherited Attributes",
+                    "scrollableContent": true,
+                    "collapsible": true,
+                    "key": "panel1234",
+                    "type": "panel",
+                    "input": false,
+                    "components": [
+                      {
+                        "label": "Inherited Attributes",
+                        "hideLabel": true,
+                        "disableAddingRemovingRows": true,
+                        "addAnother": "",
+                        "addAnotherPosition": "bottom",
+                        "removePlacement": "col",
+                        "defaultOpen": false,
+                        "layoutFixed": false,
+                        "enableRowGroups": false,
+                        "multiple": true,
+                        "reorder": false,
+                        "defaultValue": [
+                          {
+                            "id2": "",
+                            "id": "",
+                            "name": "",
+                            "submit3": false,
+                            "submit4": false,
+                            "type": "TEXT",
+                            "submit": false,
+                            "submit9": false,
+                            "multiple": false,
+                            "ecosSelect": "",
+                            "select": "",
+                            "multiple2": false,
+                            "mandatory": false,
+                            "textField": ""
+                          }
+                        ],
+                        "validate": {
+                          "minLength": "",
+                          "maxLength": ""
+                        },
+                        "key": "parentModelAttributes",
+                        "type": "datagrid",
+                        "input": true,
+                        "components": [
+                          {
+                            "label": {
+                              "ru": "Columns"
+                            },
+                            "columns": [
+                              {
+                                "components": [
+                                  {
+                                    "label": {
+                                      "ru": "Id"
+                                    },
+                                    "hideLabel": true,
+                                    "disabled": true,
+                                    "defaultValue": "",
+                                    "validate": {
+                                      "pattern": "(^$|[_a-zA-Z][_\\w-.:]*)"
+                                    },
+                                    "key": "id",
+                                    "type": "textfield",
+                                    "input": true
+                                  }
+                                ],
+                                "type": "column",
+                                "input": false,
+                                "key": "column",
+                                "index": 0,
+                                "md": 4
+                              },
+                              {
+                                "index": 1,
+                                "type": "column",
+                                "input": false,
+                                "key": "column",
+                                "components": [
+                                  {
+                                    "label": {
+                                      "ru": "Имя",
+                                      "en": "Name"
+                                    },
+                                    "hideLabel": true,
+                                    "defaultValue": "",
+                                    "key": "name",
+                                    "type": "textfield",
+                                    "input": true,
+                                    "disabled": true
+                                  }
+                                ],
+                                "md": 4
+                              },
+                              {
+                                "index": 2,
+                                "type": "column",
+                                "input": false,
+                                "key": "column",
+                                "components": [
+                                  {
+                                    "label": {
+                                      "en": "Permissions"
+                                    },
+                                    "hideLabel": true,
+                                    "action": "custom",
+                                    "state": "",
+                                    "showValidations": false,
+                                    "custom": "\nvar mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = 'emodel/type@' + data.moduleId;\nvar customProps = {\n  roles: (data.modelRoles || []).map(mapToSingleLang),\n  statuses: (data.modelStatuses || []).map(mapToSingleLang),\n  attributeName: Citeck.helpers.getMLValue(row.name)\n};\n\nvar typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypeAttPermissions(\n  typeRef, \n  row.id, \n  customProps\n)",
+                                    "leftIcon": "icon-decision-tables",
+                                    "block": true,
+                                    "key": "submit3",
+                                    "customConditional": "show = _.get(data, 'ecosEdition.edition') === 'enterprise'",
+                                    "type": "button",
+                                    "input": true,
+                                    "row": "0-4"
+                                  }
+                                ],
+                                "md": 4
+                              }
+                            ],
+                            "key": "columns5",
+                            "type": "columns",
+                            "input": false,
+                            "row": "0-0"
+                          }
+                        ],
+                        "tab": 3
+                      }
+                    ],
+                    "collapsed": false,
+                    "tab": 3
+                  },
+                  {
                     "label": {
                       "en": "Panel"
                     },
@@ -903,7 +1037,8 @@
                         "attributes": {
                           "edition": "attributes.edition"
                         }
-                      }
+                      },
+                      "forceLoad": false
                     },
                     "update": {
                       "type": "once"
