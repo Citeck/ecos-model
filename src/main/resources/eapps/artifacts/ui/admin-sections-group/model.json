@@ -1,0 +1,22 @@
+{
+  "id": "model",
+  "name": {
+    "en": "Model",
+    "ru": "Модель"
+  },
+  "order": 20,
+  "sections": [
+    {
+      "type": "JOURNAL",
+      "config": {
+        "journalId": "ecos-types"
+      }
+    },
+    {
+      "type": "JOURNAL",
+      "config": {
+        "journalId": "number-templates"
+      }
+    }
+  ]
+}
