@@ -42,7 +42,8 @@
                             "key": "parentRef",
                             "label": "Parent",
                             "presetFilterPredicatesJs": null,
-                            "input": true
+                            "input": true,
+                            "defaultValue": "emodel/type@case"
                           },
                           {
                             "hideLabel": true,
