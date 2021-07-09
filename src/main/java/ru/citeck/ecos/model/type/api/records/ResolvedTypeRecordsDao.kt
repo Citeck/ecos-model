@@ -79,7 +79,18 @@ class ResolvedTypeRecordsDao(
             typeDefById[typeRec.typeDef.id] = typeRec.typeDef
         }
 
-        fun getParentRef(): RecordRef? {
+        fun getDispNameTemplate(): MLText {
+            return getFirstByAscTypes {
+                val dispNameTemplate = it.dispNameTemplate
+                if (MLText.isEmpty(dispNameTemplate)) {
+                    null
+                } else {
+                    dispNameTemplate
+                }
+            } ?: MLText.EMPTY
+        }
+
+        fun getParentRef(): RecordRef {
             var parentRef = typeRec.typeDef.parentRef
             if (parentRef.id.isBlank() && typeRec.typeDef.id != "base") {
                 parentRef = TypeUtils.getTypeRef("base")
@@ -152,11 +163,7 @@ class ResolvedTypeRecordsDao(
         fun getDashboardType(): String {
             return getFirstByAscTypes {
                 val dashboardType = it.dashboardType
-                if (dashboardType.isNotBlank()) {
-                    dashboardType
-                } else {
-                    null
-                }
+                dashboardType.ifBlank { null }
             } ?: ""
         }
 
