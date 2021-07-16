@@ -439,7 +439,7 @@
                           "en": ""
                         },
                         "selectJournal": "",
-                        "journals": ""
+                        "journals": []
                       }
                     ],
                     "validate": {
@@ -504,6 +504,19 @@
                             "key": "direction",
                             "type": "ecosSelect",
                             "input": true
+                          },
+                          {
+                            "label": {
+                              "ru": "Загружать список журналов из целевого типа",
+                              "en": "Load journals from target type"
+                            },
+                            "key": "journalsFromTarget",
+                            "labelPosition": "",
+                            "hasThreeStates": true,
+                            "defaultValue": false,
+                            "refreshOn": [],
+                            "type": "checkbox",
+                            "input": true
                           }
                         ],
                         "row": "0-1",
@@ -520,13 +533,7 @@
                             "type": "selectJournal",
                             "customPredicateJs": null,
                             "presetFilterPredicatesJs": null,
-                            "input": true,
-                            "source": {
-                              "custom": {
-                                "columns": []
-                              },
-                              "type": "journal"
-                            }
+                            "input": true
                           },
                           {
                             "label": {
@@ -539,12 +546,6 @@
                             "multiple": true,
                             "key": "journals",
                             "journalId": "ecos-journals",
-                            "source": {
-                              "type": "journal",
-                              "custom": {
-                                "columns": []
-                              }
-                            },
                             "refreshOn": [],
                             "type": "selectJournal",
                             "input": true,
