@@ -13,10 +13,10 @@ data class AssocDef(
     val attribute: String,
     val target: RecordRef,
     /**
-     * Types which can be selected to associate by this association.
+     * Journals which can be used to select records to associate by this association.
      * May be empty to allow auto calculation from target type.
      */
-    val subTypes: List<RecordRef>,
+    val journals: List<RecordRef>,
     val direction: AssocDirection
 ) {
     companion object {
@@ -53,7 +53,7 @@ data class AssocDef(
         var name: MLText = MLText.EMPTY
         var attribute: String = ""
         var target: RecordRef = RecordRef.EMPTY
-        var subTypes: List<RecordRef> = emptyList()
+        var journals: List<RecordRef> = emptyList()
         var direction: AssocDirection = AssocDirection.TARGET
 
         constructor(base: AssocDef) : this() {
@@ -61,7 +61,7 @@ data class AssocDef(
             withName(base.name)
             withAttribute(base.attribute)
             withTarget(base.target)
-            withSubTypes(base.subTypes)
+            withJournals(base.journals)
             withDirection(base.direction)
         }
 
@@ -90,8 +90,8 @@ data class AssocDef(
             return this
         }
 
-        fun withSubTypes(subTypes: List<RecordRef>?): Builder {
-            this.subTypes = subTypes ?: emptyList()
+        fun withJournals(journals: List<RecordRef>?): Builder {
+            this.journals = journals ?: emptyList()
             return this
         }
 
@@ -101,7 +101,7 @@ data class AssocDef(
                 name,
                 attribute,
                 target,
-                subTypes,
+                journals,
                 direction
             )
         }

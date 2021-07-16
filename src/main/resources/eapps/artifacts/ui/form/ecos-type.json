@@ -439,7 +439,7 @@
                           "en": ""
                         },
                         "selectJournal": "",
-                        "subTypes": ""
+                        "journals": ""
                       }
                     ],
                     "validate": {
@@ -530,15 +530,15 @@
                           },
                           {
                             "label": {
-                              "ru": "Sub types"
+                              "ru": "Journals"
                             },
                             "tooltip": {
-                              "ru": "Подтипы, которые можно выбрать для создания новой ассоциации. Можно оставить пустым, чтобы подтипы вычислились автоматически из target.",
-                              "en": "Sub types which can be selected to create new association. May be empty to allow automatic sub types calculate by target. \n"
+                              "ru": "Журналы, которые можно использовать для создания новой ассоциации. Можно оставить пустым, чтобы журналы вычислились автоматически из target.",
+                              "en": "Journals which can be used to select records to create association. May be empty to allow automatic journals calculation by target."
                             },
                             "multiple": true,
-                            "key": "subTypes",
-                            "journalId": "ecos-types",
+                            "key": "journals",
+                            "journalId": "ecos-journals",
                             "source": {
                               "type": "journal",
                               "custom": {

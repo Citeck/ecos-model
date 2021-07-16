@@ -107,46 +107,41 @@ class ResolvedTypeRecordsDao(
                 typeDef.associations.forEach { assocs[it.id] = it }
             }
             return assocs.values.mapNotNull {
-                val subTypes = preProcessAssocSubTypes(it.target, it.subTypes)
-                if (subTypes.isEmpty()) {
+                if (RecordRef.isEmpty(it.target)) {
                     null
                 } else {
-                    it.copy()
-                        .withSubTypes(subTypes)
-                        .withAttribute(it.attribute.ifBlank { it.id })
-                        .build()
+                    val journals = preProcessAssocJournals(it.target, it.journals)
+                    if (journals.isEmpty()) {
+                        null
+                    } else {
+                        it.copy()
+                            .withJournals(journals)
+                            .withAttribute(it.attribute.ifBlank { it.id })
+                            .build()
+                    }
                 }
             }
         }
 
-        private fun preProcessAssocSubTypes(target: RecordRef, subTypes: List<RecordRef>): List<RecordRef> {
+        private fun preProcessAssocJournals(target: RecordRef, journals: List<RecordRef>): List<RecordRef> {
 
-            if (RecordRef.isEmpty(target)) {
-                return emptyList()
+            if (journals.isNotEmpty()) {
+                return journals
             }
 
-            val newSubTypes = ArrayList<RecordRef>()
-
-            val subTypesOrTarget = subTypes.ifEmpty { listOf(target) }
-
-            for (subType in subTypesOrTarget) {
-
-                val typeDef = getTypeDefById(subType.id) ?: continue
-                if (RecordRef.isNotEmpty(typeDef.journalRef)) {
-                    newSubTypes.add(subType)
-                    continue
-                }
-
-                val children = getChildrenById(subType.id)
-                for (childId in children) {
-                    val childDef = getTypeDefById(childId) ?: continue
-                    if (RecordRef.isNotEmpty(childDef.journalRef)) {
-                        newSubTypes.add(TypeUtils.getTypeRef(childId))
-                    }
-                }
+            val targetTypeDef = getTypeDefById(target.id) ?: return emptyList()
+            if (RecordRef.isNotEmpty(targetTypeDef.journalRef)) {
+                return listOf(targetTypeDef.journalRef)
             }
 
-            return newSubTypes
+            return getChildrenById(target.id).mapNotNull {
+                val childDef = getTypeDefById(it)
+                if (childDef == null || RecordRef.isEmpty(childDef.journalRef)) {
+                    null
+                } else {
+                    childDef.journalRef
+                }
+            }
         }
 
         fun getParents(): List<RecordRef> {
