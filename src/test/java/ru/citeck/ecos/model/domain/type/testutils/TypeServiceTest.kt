@@ -32,11 +32,18 @@ class TypeServiceTest : TypeTestBase() {
                 AssocDef.create {
                     withId("base-test")
                     withName(MLText("test-name"))
+                    withTarget(RecordRef.create("emodel", "type", "assocTarget"))
                 }
             ))
         }
 
         testType(baseType)
+
+        val assocTargetType = TypeDef.create {
+            withId("assocTarget")
+            withJournalRef(RecordRef.create("uiserv", "journal", "someJournal"))
+        }
+        artifactHandler.deployArtifact(assocTargetType);
 
         val fullType = TypeDef.create {
             this.withId("test-type")
@@ -191,8 +198,13 @@ class TypeServiceTest : TypeTestBase() {
             }
         }
 
-        assertEquals(assocsCount, assocs.size())
-        assertEquals("test-name", assocs.get(0).asText())
+        if (typeDef.id != "base") {
+            assertEquals(assocsCount, assocs.size())
+            assertEquals("test-name", assocs.get(0).asText())
+        } else {
+            // associations targets is not exists yet and associations will be filtered
+            assertEquals(0, assocs.size())
+        }
 
         val parents = records.getAtt(typeRef, "parents[]?id").asList(RecordRef::class.java);
         assertTrue(parents.contains(TypeUtils.getTypeRef("base")))
