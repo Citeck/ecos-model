@@ -110,7 +110,7 @@ class ResolvedTypeRecordsDao(
                 if (RecordRef.isEmpty(it.target)) {
                     null
                 } else {
-                    val journals = preProcessAssocJournals(it.target, it.journals)
+                    val journals = preProcessAssocJournals(it.target, it.journalsFromTarget, it.journals)
                     if (journals.isEmpty()) {
                         null
                     } else {
@@ -123,9 +123,11 @@ class ResolvedTypeRecordsDao(
             }
         }
 
-        private fun preProcessAssocJournals(target: RecordRef, journals: List<RecordRef>): List<RecordRef> {
+        private fun preProcessAssocJournals(target: RecordRef,
+                                            journalsFromTarget: Boolean?,
+                                            journals: List<RecordRef>): List<RecordRef> {
 
-            if (journals.isNotEmpty()) {
+            if (journalsFromTarget == false || journals.isNotEmpty() && journalsFromTarget == null) {
                 return journals
             }
 
@@ -134,14 +136,30 @@ class ResolvedTypeRecordsDao(
                 return listOf(targetTypeDef.journalRef)
             }
 
-            return getChildrenById(target.id).mapNotNull {
-                val childDef = getTypeDefById(it)
-                if (childDef == null || RecordRef.isEmpty(childDef.journalRef)) {
-                    null
-                } else {
-                    childDef.journalRef
+            val existingJournals = HashSet(journals)
+            val result = ArrayList(journals)
+            for (childId in getChildrenById(target.id)) {
+
+                val childDef = getTypeDefById(childId) ?: continue
+
+                if (RecordRef.isNotEmpty(childDef.journalRef)) {
+                    if (existingJournals.add(childDef.journalRef)) {
+                        result.add(childDef.journalRef)
+                    }
+                    continue
+                }
+
+                getChildrenById(childId).forEach { childChildId ->
+                    val childChildDef = getTypeDefById(childChildId)
+                    val journalRef = childChildDef?.journalRef
+                    if (journalRef != null && RecordRef.isNotEmpty(journalRef)) {
+                        if (existingJournals.add(journalRef)) {
+                            result.add(journalRef)
+                        }
+                    }
                 }
             }
+            return result
         }
 
         fun getParents(): List<RecordRef> {

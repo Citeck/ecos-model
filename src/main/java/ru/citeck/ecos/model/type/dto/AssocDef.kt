@@ -12,6 +12,7 @@ data class AssocDef(
     val name: MLText,
     val attribute: String,
     val target: RecordRef,
+    val journalsFromTarget: Boolean?,
     /**
      * Journals which can be used to select records to associate by this association.
      * May be empty to allow auto calculation from target type.
@@ -53,6 +54,7 @@ data class AssocDef(
         var name: MLText = MLText.EMPTY
         var attribute: String = ""
         var target: RecordRef = RecordRef.EMPTY
+        var journalsFromTarget: Boolean? = null
         var journals: List<RecordRef> = emptyList()
         var direction: AssocDirection = AssocDirection.TARGET
 
@@ -61,6 +63,7 @@ data class AssocDef(
             withName(base.name)
             withAttribute(base.attribute)
             withTarget(base.target)
+            withJournalsFromTarget(base.journalsFromTarget)
             withJournals(base.journals)
             withDirection(base.direction)
         }
@@ -90,6 +93,11 @@ data class AssocDef(
             return this
         }
 
+        fun withJournalsFromTarget(journalsFromTarget: Boolean?): Builder {
+            this.journalsFromTarget = journalsFromTarget
+            return this
+        }
+
         fun withJournals(journals: List<RecordRef>?): Builder {
             this.journals = journals ?: emptyList()
             return this
@@ -101,6 +109,7 @@ data class AssocDef(
                 name,
                 attribute,
                 target,
+                journalsFromTarget,
                 journals,
                 direction
             )
