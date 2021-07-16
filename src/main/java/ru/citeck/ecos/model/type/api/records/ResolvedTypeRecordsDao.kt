@@ -106,7 +106,47 @@ class ResolvedTypeRecordsDao(
             forEachAscInv({ true }) { typeDef ->
                 typeDef.associations.forEach { assocs[it.id] = it }
             }
-            return assocs.values.toList()
+            return assocs.values.mapNotNull {
+                val subTypes = preProcessAssocSubTypes(it.target, it.subTypes)
+                if (subTypes.isEmpty()) {
+                    null
+                } else {
+                    it.copy()
+                        .withSubTypes(subTypes)
+                        .withAttribute(it.attribute.ifBlank { it.id })
+                        .build()
+                }
+            }
+        }
+
+        private fun preProcessAssocSubTypes(target: RecordRef, subTypes: List<RecordRef>): List<RecordRef> {
+
+            if (RecordRef.isEmpty(target)) {
+                return emptyList()
+            }
+
+            val newSubTypes = ArrayList<RecordRef>()
+
+            val subTypesOrTarget = subTypes.ifEmpty { listOf(target) }
+
+            for (subType in subTypesOrTarget) {
+
+                val typeDef = getTypeDefById(subType.id) ?: continue
+                if (RecordRef.isNotEmpty(typeDef.journalRef)) {
+                    newSubTypes.add(subType)
+                    continue
+                }
+
+                val children = getChildrenById(subType.id)
+                for (childId in children) {
+                    val childDef = getTypeDefById(childId) ?: continue
+                    if (RecordRef.isNotEmpty(childDef.journalRef)) {
+                        newSubTypes.add(TypeUtils.getTypeRef(childId))
+                    }
+                }
+            }
+
+            return newSubTypes
         }
 
         fun getParents(): List<RecordRef> {

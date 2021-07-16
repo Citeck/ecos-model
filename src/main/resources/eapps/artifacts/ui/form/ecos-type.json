@@ -1,6 +1,6 @@
 {
   "id": "ecos-type",
-  "formKey": "module_model/type",
+  "formKey": "",
   "title": {
     "en": "Type form"
   },
@@ -437,7 +437,9 @@
                         "mlText": {
                           "ru": "",
                           "en": ""
-                        }
+                        },
+                        "selectJournal": "",
+                        "subTypes": ""
                       }
                     ],
                     "validate": {
@@ -478,23 +480,6 @@
                             "key": "name",
                             "type": "mlText",
                             "input": true
-                          }
-                        ],
-                        "row": "0-1",
-                        "input": false
-                      },
-                      {
-                        "key": "panel4",
-                        "type": "panel",
-                        "components": [
-                          {
-                            "label": "Target",
-                            "journalId": "ecos-types",
-                            "key": "target",
-                            "type": "selectJournal",
-                            "customPredicateJs": null,
-                            "presetFilterPredicatesJs": null,
-                            "input": true
                           },
                           {
                             "label": "Direction",
@@ -519,6 +504,51 @@
                             "key": "direction",
                             "type": "ecosSelect",
                             "input": true
+                          }
+                        ],
+                        "row": "0-1",
+                        "input": false
+                      },
+                      {
+                        "key": "panel4",
+                        "type": "panel",
+                        "components": [
+                          {
+                            "label": "Target",
+                            "journalId": "ecos-types",
+                            "key": "target",
+                            "type": "selectJournal",
+                            "customPredicateJs": null,
+                            "presetFilterPredicatesJs": null,
+                            "input": true,
+                            "source": {
+                              "custom": {
+                                "columns": []
+                              },
+                              "type": "journal"
+                            }
+                          },
+                          {
+                            "label": {
+                              "ru": "Sub types"
+                            },
+                            "tooltip": {
+                              "ru": "Подтипы, которые можно выбрать для создания новой ассоциации. Можно оставить пустым, чтобы подтипы вычислились автоматически из target.",
+                              "en": "Sub types which can be selected to create new association. May be empty to allow automatic sub types calculate by target. \n"
+                            },
+                            "multiple": true,
+                            "key": "subTypes",
+                            "journalId": "ecos-types",
+                            "source": {
+                              "type": "journal",
+                              "custom": {
+                                "columns": []
+                              }
+                            },
+                            "refreshOn": [],
+                            "type": "selectJournal",
+                            "input": true,
+                            "reorder": false
                           }
                         ],
                         "row": "0-2",
@@ -633,7 +663,10 @@
                                 "key": "column",
                                 "components": [
                                   {
-                                    "label": "Type            ",
+                                    "label": {
+                                      "ru": "Type            "
+                                    },
+                                    "key": "type",
                                     "dataSrc": "values",
                                     "data": {
                                       "values": [
@@ -680,11 +713,18 @@
                                         {
                                           "label": "Content",
                                           "value": "CONTENT"
+                                        },
+                                        {
+                                          "label": "JSON",
+                                          "value": "JSON"
+                                        },
+                                        {
+                                          "label": "Binary",
+                                          "value": "BINARY"
                                         }
                                       ]
                                     },
                                     "defaultValue": "TEXT",
-                                    "key": "type",
                                     "type": "ecosSelect",
                                     "input": true,
                                     "row": "0-2"

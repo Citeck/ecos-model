@@ -1,13 +1,8 @@
 package ru.citeck.ecos.model.type.dto
 
 import ecos.com.fasterxml.jackson210.databind.annotation.JsonDeserialize
-import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.data.MLText
-import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.commons.json.serialization.annotation.IncludeNonDefault
-import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef
-import ru.citeck.ecos.model.lib.type.dto.DocLibDef
-import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.records2.RecordRef
 
 @IncludeNonDefault
@@ -17,6 +12,11 @@ data class AssocDef(
     val name: MLText,
     val attribute: String,
     val target: RecordRef,
+    /**
+     * Types which can be selected to associate by this association.
+     * May be empty to allow auto calculation from target type.
+     */
+    val subTypes: List<RecordRef>,
     val direction: AssocDirection
 ) {
     companion object {
@@ -53,6 +53,7 @@ data class AssocDef(
         var name: MLText = MLText.EMPTY
         var attribute: String = ""
         var target: RecordRef = RecordRef.EMPTY
+        var subTypes: List<RecordRef> = emptyList()
         var direction: AssocDirection = AssocDirection.TARGET
 
         constructor(base: AssocDef) : this() {
@@ -60,6 +61,7 @@ data class AssocDef(
             withName(base.name)
             withAttribute(base.attribute)
             withTarget(base.target)
+            withSubTypes(base.subTypes)
             withDirection(base.direction)
         }
 
@@ -88,12 +90,18 @@ data class AssocDef(
             return this
         }
 
+        fun withSubTypes(subTypes: List<RecordRef>?): Builder {
+            this.subTypes = subTypes ?: emptyList()
+            return this
+        }
+
         fun build(): AssocDef {
             return AssocDef(
                 id,
                 name,
                 attribute,
                 target,
+                subTypes,
                 direction
             )
         }
