@@ -23,6 +23,11 @@ public class TypePermsModuleHandler implements EcosArtifactHandler<TypePermsDef>
         typePermsService.save(permissions);
     }
 
+    @Override
+    public void deleteArtifact(@NotNull String s) {
+        typePermsService.delete(s);
+    }
+
     @NotNull
     @Override
     public String getArtifactType() {

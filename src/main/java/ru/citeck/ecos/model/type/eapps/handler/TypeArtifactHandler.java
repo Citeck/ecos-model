@@ -22,6 +22,11 @@ public class TypeArtifactHandler implements EcosArtifactHandler<TypeDef> {
         typeService.save(artifact);
     }
 
+    @Override
+    public void deleteArtifact(@NotNull String s) {
+        typeService.delete(s);
+    }
+
     @NotNull
     @Override
     public String getArtifactType() {

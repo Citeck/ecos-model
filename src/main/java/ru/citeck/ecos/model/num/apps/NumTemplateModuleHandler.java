@@ -22,6 +22,11 @@ public class NumTemplateModuleHandler implements EcosArtifactHandler<NumTemplate
         numTemplateService.save(module);
     }
 
+    @Override
+    public void deleteArtifact(@NotNull String s) {
+        numTemplateService.delete(s);
+    }
+
     @NotNull
     @Override
     public String getArtifactType() {

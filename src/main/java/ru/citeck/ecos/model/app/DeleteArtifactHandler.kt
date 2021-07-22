@@ -24,6 +24,10 @@ class DeleteArtifactHandler(
         return "model/delete"
     }
 
+    override fun deleteArtifact(artifactId: String) {
+        error("Not supported")
+    }
+
     override fun listenChanges(listener: Consumer<DeleteDto>) {
     }
 

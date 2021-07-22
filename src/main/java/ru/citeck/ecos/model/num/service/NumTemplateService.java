@@ -110,7 +110,7 @@ public class NumTemplateService {
             throw new IllegalArgumentException("Number template doesn't exists: " + templateRef);
         }
 
-        String key = TmplUtils.applyAtts(numTemplateEntity.getCounterKey(), model);
+        String key = TmplUtils.applyAtts(numTemplateEntity.getCounterKey(), model).asText();
 
         NumCounterEntity counterEntity = counterRepo.findByTemplateAndKey(numTemplateEntity, key);
         if (counterEntity == null) {
