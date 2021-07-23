@@ -13,7 +13,3 @@ controller:
       dependencies:
         - parent?str!"emodel/type@base"
         - parentRef?str!"emodel/type@base"
-        - associations.target[]?str
-
-
-
