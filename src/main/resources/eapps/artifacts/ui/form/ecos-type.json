@@ -267,7 +267,9 @@
                           "en": ""
                         },
                         "submit4": false,
-                        "submit8": false
+                        "submit8": false,
+                        "selectOrgstruct": "",
+                        "allowedFor": ""
                       }
                     ],
                     "validate": {
@@ -287,15 +289,7 @@
                             "key": "id",
                             "type": "textfield",
                             "input": true
-                          }
-                        ],
-                        "row": "0-0",
-                        "input": false
-                      },
-                      {
-                        "key": "panel7",
-                        "type": "panel",
-                        "components": [
+                          },
                           {
                             "label": "Name",
                             "key": "name",
@@ -303,11 +297,11 @@
                             "input": true
                           }
                         ],
-                        "row": "0-1",
+                        "row": "0-0",
                         "input": false
                       },
                       {
-                        "key": "panel6",
+                        "key": "panel7",
                         "type": "panel",
                         "components": [
                           {
@@ -324,6 +318,28 @@
                               },
                               "type": "journal"
                             }
+                          }
+                        ],
+                        "row": "0-1",
+                        "input": false
+                      },
+                      {
+                        "key": "panel6",
+                        "type": "panel",
+                        "components": [
+                          {
+                            "label": {
+                              "ru": "Allowed For"
+                            },
+                            "multiple": true,
+                            "clearOnHide": false,
+                            "allowedAuthorityType": "GROUP",
+                            "dataType": "authority",
+                            "defaultValue": "",
+                            "key": "allowedFor",
+                            "type": "selectOrgstruct",
+                            "input": true,
+                            "reorder": true
                           }
                         ],
                         "row": "0-2",
