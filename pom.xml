@@ -366,11 +366,6 @@
 
         <dependency>
             <groupId>ru.citeck.ecos.model</groupId>
-            <artifactId>ecos-model-lib</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>ru.citeck.ecos.model</groupId>
             <artifactId>ecos-model-lib-spring</artifactId>
         </dependency>
 
