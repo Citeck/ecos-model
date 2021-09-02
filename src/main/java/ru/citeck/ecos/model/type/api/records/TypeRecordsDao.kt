@@ -64,7 +64,7 @@ class TypeRecordsDao(
                             ""
                         }
                         if (attribute.isNotBlank()) {
-                            if (sortBy.isAscending) {
+                            if (sortBy.ascending) {
                                 Sort.Order.asc(attribute)
                             } else {
                                 Sort.Order.desc(attribute)
