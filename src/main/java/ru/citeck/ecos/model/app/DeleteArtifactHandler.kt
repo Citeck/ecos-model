@@ -16,12 +16,16 @@ class DeleteArtifactHandler(
 
     override fun deployArtifact(artifact: DeleteDto) {
         artifact.types.forEach {
-            typeService.delete(it)
+            typeService.deleteWithChildren(it)
         }
     }
 
     override fun getArtifactType(): String {
         return "model/delete"
+    }
+
+    override fun deleteArtifact(artifactId: String) {
+        error("Not supported")
     }
 
     override fun listenChanges(listener: Consumer<DeleteDto>) {

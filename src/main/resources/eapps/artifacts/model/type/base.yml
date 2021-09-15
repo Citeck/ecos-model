@@ -13,7 +13,6 @@ actions:
   - uiserv/action@content-download
   - uiserv/action@record-actions
   - uiserv/action@edit-in-onlyoffice
-  - uiserv/action@save-as-case-template
   - uiserv/action@print
 
 journalRef: uiserv/journal@base
@@ -25,5 +24,5 @@ associations:
       en: Connected with
       ru: Связан с
 
-    target: emodel/type@base
+    target: emodel/type@case
     direction: BOTH

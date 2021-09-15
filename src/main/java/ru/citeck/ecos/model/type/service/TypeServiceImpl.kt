@@ -154,23 +154,23 @@ class TypeServiceImpl(
     override fun getOrCreateByExtId(typeId: String): TypeDef {
 
         val byExtId: TypeEntity? = typeRepoDao.findByExtId(typeId)
+        if (byExtId != null) {
+            return typeConverter.toDto(byExtId)
+        }
 
-        return byExtId?.let { typeConverter.toDto(it) } ?: {
+        check(!("base" == typeId
+            || "user-base" == typeId
+            || "type" == typeId)
+        ) {
+            "Base type doesn't exists: '$typeId'"
+        }
 
-            check(!("base" == typeId
-                || "user-base" == typeId
-                || "type" == typeId)
-            ) {
-                "Base type doesn't exists: '$typeId'"
-            }
+        val typeDef = TypeDef.create()
+        typeDef.withId(typeId)
+        typeDef.withParentRef(TypeUtils.getTypeRef("user-base"))
+        typeDef.withName(MLText(typeId))
 
-            val typeDef = TypeDef.create()
-            typeDef.withId(typeId)
-            typeDef.withParentRef(TypeUtils.getTypeRef("user-base"))
-            typeDef.withName(MLText(typeId))
-
-            save(typeDef.build())
-        }()
+        return save(typeDef.build())
     }
 
     private fun getBaseType(): TypeDef {
@@ -188,6 +188,24 @@ class TypeServiceImpl(
         if (typeRepoDao.getChildrenIds(typeId).isNotEmpty()) {
             error("Type $typeId contains children and can't be deleted")
         }
+        typeRepoDao.delete(typeEntity)
+    }
+
+    override fun deleteWithChildren(typeId: String) {
+
+        if (PROTECTED_TYPES.contains(typeId)) {
+            throw RuntimeException("Type '$typeId' is protected")
+        }
+
+        val typeEntity = typeRepoDao.findByExtId(typeId) ?: return
+        val children = typeRepoDao.getChildrenIds(typeId)
+
+        children.forEach { childId ->
+            typeRepoDao.findByExtId(childId)?.let {
+                typeRepoDao.delete(it)
+            }
+        }
+
         typeRepoDao.delete(typeEntity)
     }
 

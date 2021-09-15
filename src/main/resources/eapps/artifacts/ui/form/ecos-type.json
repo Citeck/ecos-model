@@ -1,6 +1,6 @@
 {
   "id": "ecos-type",
-  "formKey": "module_model/type",
+  "formKey": "",
   "title": {
     "en": "Type form"
   },
@@ -42,7 +42,8 @@
                             "key": "parentRef",
                             "label": "Parent",
                             "presetFilterPredicatesJs": null,
-                            "input": true
+                            "input": true,
+                            "defaultValue": "emodel/type@case"
                           },
                           {
                             "hideLabel": true,
@@ -168,7 +169,8 @@
                             "type": "checkbox",
                             "key": "inheritActions",
                             "label": "Inherit actions",
-                            "input": true
+                            "input": true,
+                            "defaultValue": true
                           },
                           {
                             "label": {
@@ -451,7 +453,9 @@
                         "mlText": {
                           "ru": "",
                           "en": ""
-                        }
+                        },
+                        "selectJournal": "",
+                        "journals": []
                       }
                     ],
                     "validate": {
@@ -492,23 +496,6 @@
                             "key": "name",
                             "type": "mlText",
                             "input": true
-                          }
-                        ],
-                        "row": "0-1",
-                        "input": false
-                      },
-                      {
-                        "key": "panel4",
-                        "type": "panel",
-                        "components": [
-                          {
-                            "label": "Target",
-                            "journalId": "ecos-types",
-                            "key": "target",
-                            "type": "selectJournal",
-                            "customPredicateJs": null,
-                            "presetFilterPredicatesJs": null,
-                            "input": true
                           },
                           {
                             "label": "Direction",
@@ -533,6 +520,52 @@
                             "key": "direction",
                             "type": "ecosSelect",
                             "input": true
+                          },
+                          {
+                            "label": {
+                              "ru": "Загружать список журналов из целевого типа",
+                              "en": "Load journals from target type"
+                            },
+                            "key": "journalsFromTarget",
+                            "labelPosition": "",
+                            "hasThreeStates": true,
+                            "defaultValue": false,
+                            "refreshOn": [],
+                            "type": "checkbox",
+                            "input": true
+                          }
+                        ],
+                        "row": "0-1",
+                        "input": false
+                      },
+                      {
+                        "key": "panel4",
+                        "type": "panel",
+                        "components": [
+                          {
+                            "label": "Target",
+                            "journalId": "ecos-types",
+                            "key": "target",
+                            "type": "selectJournal",
+                            "customPredicateJs": null,
+                            "presetFilterPredicatesJs": null,
+                            "input": true
+                          },
+                          {
+                            "label": {
+                              "ru": "Journals"
+                            },
+                            "tooltip": {
+                              "ru": "Журналы, которые можно использовать для создания новой ассоциации. Можно оставить пустым, чтобы журналы вычислились автоматически из target.",
+                              "en": "Journals which can be used to select records to create association. May be empty to allow automatic journals calculation by target."
+                            },
+                            "multiple": true,
+                            "key": "journals",
+                            "journalId": "ecos-journals",
+                            "refreshOn": [],
+                            "type": "selectJournal",
+                            "input": true,
+                            "reorder": false
                           }
                         ],
                         "row": "0-2",
@@ -647,7 +680,10 @@
                                 "key": "column",
                                 "components": [
                                   {
-                                    "label": "Type            ",
+                                    "label": {
+                                      "ru": "Type            "
+                                    },
+                                    "key": "type",
                                     "dataSrc": "values",
                                     "data": {
                                       "values": [
@@ -694,11 +730,18 @@
                                         {
                                           "label": "Content",
                                           "value": "CONTENT"
+                                        },
+                                        {
+                                          "label": "JSON",
+                                          "value": "JSON"
+                                        },
+                                        {
+                                          "label": "Binary",
+                                          "value": "BINARY"
                                         }
                                       ]
                                     },
                                     "defaultValue": "TEXT",
-                                    "key": "type",
                                     "type": "ecosSelect",
                                     "input": true,
                                     "row": "0-2"

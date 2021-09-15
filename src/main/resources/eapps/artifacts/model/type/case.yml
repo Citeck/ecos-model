@@ -9,5 +9,8 @@ parentRef: emodel/type@user-base
 system: true
 sourceId: alfresco/
 
+actions:
+  - uiserv/action@view-dashboard
+
 properties:
   alfType: ecos:case

@@ -28,6 +28,7 @@ final class TypeInhMixin(
             "inhDashboardType",
             "inhCreateVariants",
             "inhNumTemplateRef",
+            "inhDispNameTemplate",
             "isSystem",
             "inhConfigFormRef",
             "inhAttributes",
@@ -101,6 +102,9 @@ final class TypeInhMixin(
             "inhSourceId" -> {
                 rtypeDef.getSourceId()
             }
+            "inhDispNameTemplate" -> {
+                rtypeDef.getDispNameTemplate()
+            }
             "resolvedModel" -> {
                 rtypeDef.getModel()
             }
@@ -114,7 +118,7 @@ final class TypeInhMixin(
                 typeDef.model.attributes
             }
             "parentModelAttributes" -> {
-                rtypeDef.getParentRef()?.id?.let { parentId ->
+                rtypeDef.getParentRef().id.let { parentId ->
                     resolvedTypeRecordsDao.getResolvedTypeRecord(parentId).getModel().attributes
                 }
             }

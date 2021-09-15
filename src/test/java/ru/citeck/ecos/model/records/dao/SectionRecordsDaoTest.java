@@ -1,6 +1,5 @@
 package ru.citeck.ecos.model.records.dao;
 
-import graphql.language.Field;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +19,6 @@ import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.RecordsService;
 import ru.citeck.ecos.records3.RecordsServiceFactory;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
-import ru.citeck.ecos.records2.graphql.meta.value.field.MetaFieldImpl;
 import ru.citeck.ecos.records2.predicate.RecordElement;
 import ru.citeck.ecos.records2.predicate.RecordElements;
 import ru.citeck.ecos.records2.request.query.RecordsQuery;
@@ -77,8 +75,6 @@ public class SectionRecordsDaoTest {
         sectionDto.setTenant("tenant");
         sectionDto.setDescription("desc");
         sectionDto.setTypes(types);
-
-        metaField = new MetaFieldImpl(new Field(""));
 
         predicate = new ValuePredicate();
     }

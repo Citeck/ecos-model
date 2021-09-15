@@ -1,0 +1,100 @@
+{
+  "id": "file-form",
+  "formKey": "",
+  "title": {
+    "en": "Edit file",
+    "ru": "Редактировать файл"
+  },
+  "description": {},
+  "customModule": null,
+  "typeRef": "",
+  "width": "default",
+  "i18n": {},
+  "definition": {
+    "components": [
+      {
+        "key": "_disp",
+        "label": {
+          "en": "Name",
+          "ru": "Название"
+        },
+        "defaultValue": "",
+        "validate": {
+          "required": "true"
+        },
+        "type": "textfield",
+        "input": true
+      },
+      {
+        "input": true,
+        "key": "_content",
+        "label": {
+          "en": "Content",
+          "ru": "Содержимое"
+        },
+        "storage": "url",
+        "type": "file",
+        "url": "/gateway/alfresco/alfresco/s/eform/file",
+        "validate": {
+          "required": "true"
+        }
+      },
+      {
+        "label": {
+          "ru": "Columns"
+        },
+        "columns": [
+          {
+            "lg": 6,
+            "index": 0,
+            "components": [
+              {
+                "label": {
+                  "en": "Cancel",
+                  "ru": "Отмена"
+                },
+                "removeIndents": true,
+                "action": "event",
+                "state": "",
+                "showValidations": false,
+                "event": "cancel",
+                "key": "submit",
+                "type": "button",
+                "input": true
+              }
+            ],
+            "type": "column",
+            "input": false,
+            "key": "column"
+          },
+          {
+            "lg": 6,
+            "index": 1,
+            "components": [
+              {
+                "label": {
+                  "en": "Save",
+                  "ru": "Сохранить"
+                },
+                "removeIndents": true,
+                "state": "",
+                "theme": "primary",
+                "customClass": "d-flex justify-content-end",
+                "key": "submit",
+                "type": "button",
+                "input": true
+              }
+            ],
+            "type": "column",
+            "input": false,
+            "key": "column"
+          }
+        ],
+        "key": "columns",
+        "type": "columns",
+        "input": false
+      }
+    ]
+  },
+  "attributes": {}
+}

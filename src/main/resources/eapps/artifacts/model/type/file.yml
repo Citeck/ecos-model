@@ -5,6 +5,7 @@ name:
   en: File
 
 parentRef: emodel/type@user-base
+formRef: uiserv/form@file-form
 
 system: true
 

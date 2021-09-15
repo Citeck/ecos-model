@@ -34,6 +34,11 @@ interface TypeService {
 
     fun delete(typeId: String)
 
+    /**
+     * Delete type with it's children
+     */
+    fun deleteWithChildren(typeId: String)
+
     fun save(dto: TypeDef): TypeDef
 
     fun getCount(predicate: Predicate): Long

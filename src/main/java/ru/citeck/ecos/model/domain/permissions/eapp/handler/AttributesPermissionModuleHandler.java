@@ -23,6 +23,11 @@ public class AttributesPermissionModuleHandler implements EcosArtifactHandler<At
         attributesPermissionsService.save(permissions);
     }
 
+    @Override
+    public void deleteArtifact(@NotNull String s) {
+        attributesPermissionsService.delete(s);
+    }
+
     @NotNull
     @Override
     public String getArtifactType() {

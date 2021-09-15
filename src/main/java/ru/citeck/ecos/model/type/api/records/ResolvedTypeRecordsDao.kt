@@ -79,7 +79,18 @@ class ResolvedTypeRecordsDao(
             typeDefById[typeRec.typeDef.id] = typeRec.typeDef
         }
 
-        fun getParentRef(): RecordRef? {
+        fun getDispNameTemplate(): MLText {
+            return getFirstByAscTypes {
+                val dispNameTemplate = it.dispNameTemplate
+                if (MLText.isEmpty(dispNameTemplate)) {
+                    null
+                } else {
+                    dispNameTemplate
+                }
+            } ?: MLText.EMPTY
+        }
+
+        fun getParentRef(): RecordRef {
             var parentRef = typeRec.typeDef.parentRef
             if (parentRef.id.isBlank() && typeRec.typeDef.id != "base") {
                 parentRef = TypeUtils.getTypeRef("base")
@@ -95,7 +106,60 @@ class ResolvedTypeRecordsDao(
             forEachAscInv({ true }) { typeDef ->
                 typeDef.associations.forEach { assocs[it.id] = it }
             }
-            return assocs.values.toList()
+            return assocs.values.mapNotNull {
+                if (RecordRef.isEmpty(it.target)) {
+                    null
+                } else {
+                    val journals = preProcessAssocJournals(it.target, it.journalsFromTarget, it.journals)
+                    if (journals.isEmpty()) {
+                        null
+                    } else {
+                        it.copy()
+                            .withJournals(journals)
+                            .withAttribute(it.attribute.ifBlank { it.id })
+                            .build()
+                    }
+                }
+            }
+        }
+
+        private fun preProcessAssocJournals(target: RecordRef,
+                                            journalsFromTarget: Boolean?,
+                                            journals: List<RecordRef>): List<RecordRef> {
+
+            if (journalsFromTarget == false || journals.isNotEmpty() && journalsFromTarget == null) {
+                return journals
+            }
+
+            val targetTypeDef = getTypeDefById(target.id) ?: return emptyList()
+            if (RecordRef.isNotEmpty(targetTypeDef.journalRef)) {
+                return listOf(targetTypeDef.journalRef)
+            }
+
+            val existingJournals = HashSet(journals)
+            val result = ArrayList(journals)
+            for (childId in getChildrenById(target.id)) {
+
+                val childDef = getTypeDefById(childId) ?: continue
+
+                if (RecordRef.isNotEmpty(childDef.journalRef)) {
+                    if (existingJournals.add(childDef.journalRef)) {
+                        result.add(childDef.journalRef)
+                    }
+                    continue
+                }
+
+                getChildrenById(childId).forEach { childChildId ->
+                    val childChildDef = getTypeDefById(childChildId)
+                    val journalRef = childChildDef?.journalRef
+                    if (journalRef != null && RecordRef.isNotEmpty(journalRef)) {
+                        if (existingJournals.add(journalRef)) {
+                            result.add(journalRef)
+                        }
+                    }
+                }
+            }
+            return result
         }
 
         fun getParents(): List<RecordRef> {
@@ -152,11 +216,7 @@ class ResolvedTypeRecordsDao(
         fun getDashboardType(): String {
             return getFirstByAscTypes {
                 val dashboardType = it.dashboardType
-                if (dashboardType.isNotBlank()) {
-                    dashboardType
-                } else {
-                    null
-                }
+                dashboardType.ifBlank { null }
             } ?: ""
         }
 

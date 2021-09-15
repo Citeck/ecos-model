@@ -21,6 +21,11 @@ public class SectionArtifactHandler implements EcosArtifactHandler<SectionDto> {
     }
 
     @Override
+    public void deleteArtifact(@NotNull String s) {
+        sectionService.delete(s);
+    }
+
+    @Override
     public void listenChanges(@NotNull Consumer<SectionDto> consumer) {
         sectionService.addListener(consumer);
     }

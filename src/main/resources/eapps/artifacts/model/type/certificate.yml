@@ -1,0 +1,12 @@
+---
+id: certificate
+name:
+  ru: Сертификат
+  en: Certificate
+
+parentRef: emodel/type@file
+
+system: true
+
+dashboardType: case-details
+sourceId: alfresco/
