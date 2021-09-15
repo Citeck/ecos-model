@@ -93,7 +93,7 @@ class TypeServiceTest : TypeTestBase() {
             this.withInheritActions(true)
             this.withInheritForm(true)
             this.withInheritNumTemplate(true)
-            this.withJournalRef(RecordRef.valueOf("journal-ref"))
+            this.withJournalRef(RecordRef.valueOf("uiserv/journal@journal-ref"))
             this.withModel(TypeModelDef.create {
                 this.withRoles(listOf(
                     RoleDef.create {
@@ -130,7 +130,7 @@ class TypeServiceTest : TypeTestBase() {
                     }
                 ))
             })
-            this.withNumTemplateRef(RecordRef.valueOf("num-template-ref"))
+            this.withNumTemplateRef(RecordRef.valueOf("emodel/num-template@num-template-ref"))
             this.withProperties(ObjectData.create("""{"aa":"aaa","bb":"bbb"}"""))
             this.withSystem(true)
         }
@@ -225,7 +225,7 @@ class TypeServiceTest : TypeTestBase() {
 
         val custom0 = TypeDef.create {
             withId("custom0")
-            withNumTemplateRef(RecordRef.valueOf("numTemplateRefValue"))
+            withNumTemplateRef(RecordRef.valueOf("emodel/num-template@numTemplateRefValue"))
         };
         artifactHandler.deployArtifact(custom0)
         val custom0Ref = RecordRef.valueOf("emodel/type@custom0")
@@ -240,7 +240,7 @@ class TypeServiceTest : TypeTestBase() {
 
         val custom1 = TypeDef.create {
             withId("custom1")
-            withNumTemplateRef(RecordRef.valueOf("numTemplateRefValue1123"))
+            withNumTemplateRef(RecordRef.valueOf("emodel/num-template@numTemplateRefValue1123"))
             withInheritNumTemplate(false)
         };
         artifactHandler.deployArtifact(custom1)
