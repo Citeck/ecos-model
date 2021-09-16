@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.domain.type.testutils
+package ru.citeck.ecos.model.domain.type
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test
 import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
+import ru.citeck.ecos.model.domain.type.testutils.TypeTestBase
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
 import ru.citeck.ecos.model.lib.role.dto.RoleDef
 import ru.citeck.ecos.model.lib.status.dto.StatusDef
@@ -17,6 +18,8 @@ import ru.citeck.ecos.model.type.dto.AssocDef
 import ru.citeck.ecos.model.type.dto.AssocDirection
 import ru.citeck.ecos.model.type.dto.TypeDef
 import ru.citeck.ecos.records2.RecordRef
+import ru.citeck.ecos.records3.record.atts.computed.ComputedAttDef
+import ru.citeck.ecos.records3.record.atts.computed.ComputedAttType
 import ru.citeck.ecos.records3.record.request.RequestContext
 import java.util.*
 
@@ -117,7 +120,17 @@ class TypeServiceTest : TypeTestBase() {
                         withId("attribute-1")
                         withName(MLText("Attribute 1"))
                         withMandatory(false)
-                    }
+                    },
+                    AttributeDef.create {
+                        withId("attribute-2-computed")
+                        withName(MLText("Attribute 1"))
+                        withComputed(
+                            ComputedAttDef.create()
+                                .withType(ComputedAttType.SCRIPT)
+                                .withConfig(ObjectData.create("""{"fn":"return true;"}"""))
+                                .build()
+                        )
+                    },
                 ))
                 this.withStatuses(listOf(
                     StatusDef.create {
