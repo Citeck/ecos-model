@@ -8,6 +8,8 @@ import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.model.domain.type.testutils.TypeTestBase
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
+import ru.citeck.ecos.model.lib.attributes.dto.computed.ComputedAttDef
+import ru.citeck.ecos.model.lib.attributes.dto.computed.ComputedAttType
 import ru.citeck.ecos.model.lib.role.dto.RoleDef
 import ru.citeck.ecos.model.lib.status.dto.StatusDef
 import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef
@@ -18,8 +20,6 @@ import ru.citeck.ecos.model.type.dto.AssocDef
 import ru.citeck.ecos.model.type.dto.AssocDirection
 import ru.citeck.ecos.model.type.dto.TypeDef
 import ru.citeck.ecos.records2.RecordRef
-import ru.citeck.ecos.records3.record.atts.computed.ComputedAttDef
-import ru.citeck.ecos.records3.record.atts.computed.ComputedAttType
 import ru.citeck.ecos.records3.record.request.RequestContext
 import java.util.*
 

@@ -1,0 +1,30 @@
+---
+id: ecos-comment
+name:
+  ru: Комментарий
+  en: Comment
+
+system: true
+sourceId: emodel/comment
+
+inheritActions: false
+
+model:
+  attributes:
+    - id: record
+      name:
+        ru: Документ
+        en: Document
+      type: ASSOC
+    - id: text
+      name:
+        ru: Текст
+        en: Text
+      type: TEXT
+    - id: tags
+      name:
+        ru: Тэги
+        en: Tags
+      type: JSON
+      multiple: true
+
