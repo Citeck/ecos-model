@@ -1,6 +1,7 @@
 package ru.citeck.ecos.model.type.api.records
 
 import ecos.com.fasterxml.jackson210.annotation.JsonProperty
+import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.commons.json.Json
@@ -21,6 +22,7 @@ class TypeRecordsMutDao(
 
     override fun getId() = "type"
 
+    @Secured("ROLE_ADMIN")
     override fun getRecToMutate(recordId: String): TypeMutRecord {
 
         if (recordId.isEmpty()) {
@@ -30,10 +32,12 @@ class TypeRecordsMutDao(
         return TypeMutRecord(typeDef)
     }
 
+    @Secured("ROLE_ADMIN")
     override fun saveMutatedRec(record: TypeMutRecord): String {
         return typeService.save(record.build()).id
     }
 
+    @Secured("ROLE_ADMIN")
     override fun delete(recordId: String): DelStatus {
         typeService.delete(recordId)
         return DelStatus.OK
