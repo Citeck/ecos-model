@@ -12,3 +12,7 @@ eapps:
     artifacts:
       enabled: true
       locations: './src/main/resources/eapps/artifacts'
+
+ecos:
+  zookeeper:
+    host: localhost
