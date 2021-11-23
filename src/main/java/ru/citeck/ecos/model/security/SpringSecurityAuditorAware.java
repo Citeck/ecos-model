@@ -2,6 +2,7 @@ package ru.citeck.ecos.model.security;
 
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.stereotype.Component;
+import ru.citeck.ecos.context.lib.auth.AuthConstants;
 
 import java.util.Optional;
 
@@ -11,10 +12,8 @@ import java.util.Optional;
 @Component
 public class SpringSecurityAuditorAware implements AuditorAware<String> {
 
-    public static final String SYSTEM_ACCOUNT = "system";
-
     @Override
     public Optional<String> getCurrentAuditor() {
-        return Optional.of(SecurityUtils.getCurrentUserLogin().orElse(SYSTEM_ACCOUNT));
+        return Optional.of(SecurityUtils.getCurrentUserLogin().orElse(AuthConstants.SYSTEM_USER));
     }
 }

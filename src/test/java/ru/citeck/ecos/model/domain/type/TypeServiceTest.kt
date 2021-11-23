@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.domain.type.testutils
+package ru.citeck.ecos.model.domain.type
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test
 import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
+import ru.citeck.ecos.model.domain.type.testutils.TypeTestBase
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
 import ru.citeck.ecos.model.lib.role.dto.RoleDef
 import ru.citeck.ecos.model.lib.status.dto.StatusDef
@@ -17,6 +18,8 @@ import ru.citeck.ecos.model.type.dto.AssocDef
 import ru.citeck.ecos.model.type.dto.AssocDirection
 import ru.citeck.ecos.model.type.dto.TypeDef
 import ru.citeck.ecos.records2.RecordRef
+import ru.citeck.ecos.records3.record.atts.computed.ComputedAttDef
+import ru.citeck.ecos.records3.record.atts.computed.ComputedAttType
 import ru.citeck.ecos.records3.record.request.RequestContext
 import java.util.*
 
@@ -93,7 +96,7 @@ class TypeServiceTest : TypeTestBase() {
             this.withInheritActions(true)
             this.withInheritForm(true)
             this.withInheritNumTemplate(true)
-            this.withJournalRef(RecordRef.valueOf("journal-ref"))
+            this.withJournalRef(RecordRef.valueOf("uiserv/journal@journal-ref"))
             this.withModel(TypeModelDef.create {
                 this.withRoles(listOf(
                     RoleDef.create {
@@ -117,7 +120,17 @@ class TypeServiceTest : TypeTestBase() {
                         withId("attribute-1")
                         withName(MLText("Attribute 1"))
                         withMandatory(false)
-                    }
+                    },
+                    AttributeDef.create {
+                        withId("attribute-2-computed")
+                        withName(MLText("Attribute 1"))
+                        withComputed(
+                            ComputedAttDef.create()
+                                .withType(ComputedAttType.SCRIPT)
+                                .withConfig(ObjectData.create("""{"fn":"return true;"}"""))
+                                .build()
+                        )
+                    },
                 ))
                 this.withStatuses(listOf(
                     StatusDef.create {
@@ -130,7 +143,7 @@ class TypeServiceTest : TypeTestBase() {
                     }
                 ))
             })
-            this.withNumTemplateRef(RecordRef.valueOf("num-template-ref"))
+            this.withNumTemplateRef(RecordRef.valueOf("emodel/num-template@num-template-ref"))
             this.withProperties(ObjectData.create("""{"aa":"aaa","bb":"bbb"}"""))
             this.withSystem(true)
         }
@@ -225,7 +238,7 @@ class TypeServiceTest : TypeTestBase() {
 
         val custom0 = TypeDef.create {
             withId("custom0")
-            withNumTemplateRef(RecordRef.valueOf("numTemplateRefValue"))
+            withNumTemplateRef(RecordRef.valueOf("emodel/num-template@numTemplateRefValue"))
         };
         artifactHandler.deployArtifact(custom0)
         val custom0Ref = RecordRef.valueOf("emodel/type@custom0")
@@ -240,7 +253,7 @@ class TypeServiceTest : TypeTestBase() {
 
         val custom1 = TypeDef.create {
             withId("custom1")
-            withNumTemplateRef(RecordRef.valueOf("numTemplateRefValue1123"))
+            withNumTemplateRef(RecordRef.valueOf("emodel/num-template@numTemplateRefValue1123"))
             withInheritNumTemplate(false)
         };
         artifactHandler.deployArtifact(custom1)

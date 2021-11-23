@@ -10,7 +10,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.zalando.problem.spring.web.advice.security.SecurityProblemSupport;
-import ru.citeck.ecos.model.security.AuthoritiesConstants;
+import ru.citeck.ecos.context.lib.auth.AuthRole;
 import ru.citeck.ecos.model.security.jwt.JWTConfigurer;
 import ru.citeck.ecos.model.security.jwt.TokenProvider;
 
@@ -57,7 +57,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .antMatchers("/api/**").permitAll()
             .antMatchers("/management/health").permitAll()
             .antMatchers("/management/info").permitAll()
-            .antMatchers("/management/**").hasAuthority(AuthoritiesConstants.ADMIN)
+            .antMatchers("/management/**").hasAuthority(AuthRole.ADMIN)
         .and()
             .apply(securityConfigurerAdapter());
 
