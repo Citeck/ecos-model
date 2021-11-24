@@ -9,6 +9,8 @@ import ru.citeck.ecos.data.sql.records.DbRecordsDao
 import ru.citeck.ecos.data.sql.records.DbRecordsDaoConfig
 import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
 import ru.citeck.ecos.data.sql.records.perms.DbRecordPerms
+import ru.citeck.ecos.data.sql.records.refs.DbRecordRefEntity
+import ru.citeck.ecos.data.sql.records.refs.DbRecordRefService
 import ru.citeck.ecos.data.sql.repo.entity.DbEntity
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
 import ru.citeck.ecos.data.sql.service.DbDataServiceImpl
@@ -61,6 +63,17 @@ class CommentsConfiguration(private val typesRepo: TypesRepo) {
             }
         }
 
+        val recordRefService = DbRecordRefService(
+            DbDataServiceImpl(
+                DbRecordRefEntity::class.java,
+                DbDataServiceConfig.create {
+                    withTableRef(tableRef.withTable("ecos_record_ref"))
+                },
+                dbDataSource,
+                pgDataServiceFactory
+            )
+        )
+
         return DbRecordsDao(
             "comment-repo",
             DbRecordsDaoConfig(
@@ -71,7 +84,9 @@ class CommentsConfiguration(private val typesRepo: TypesRepo) {
             ),
             typesRepo,
             dbDataService,
+            recordRefService,
             permsComponent,
+            null,
             null
         )
     }

@@ -31,6 +31,7 @@ class TypesRepoImpl(
         typeTypeInfo = TypeInfo(
             typeDef.id,
             typeDef.name,
+            typeDef.sourceId,
             TypeUtils.getTypeRef("base"),
             typeDef.dispNameTemplate,
             RecordRef.EMPTY,

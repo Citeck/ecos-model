@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = EcosModelApp.class)
-@ActiveProfiles(profiles = "test-type-data")
+@ActiveProfiles(profiles = {"test-type-data", "test"})
 public class TypeRecordsControllerTest {
 
     private static final String PATH_TO_RESPONSE_DATA = "/controller/type/response/";
