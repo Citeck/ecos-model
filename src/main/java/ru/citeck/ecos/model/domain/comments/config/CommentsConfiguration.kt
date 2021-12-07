@@ -2,17 +2,13 @@ package ru.citeck.ecos.model.domain.comments.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import ru.citeck.ecos.data.sql.datasource.DbDataSourceImpl
+import ru.citeck.ecos.data.sql.domain.DbDomainConfig
+import ru.citeck.ecos.data.sql.domain.DbDomainFactory
 import ru.citeck.ecos.data.sql.dto.DbTableRef
-import ru.citeck.ecos.data.sql.pg.PgDataServiceFactory
-import ru.citeck.ecos.data.sql.records.DbRecordsDao
 import ru.citeck.ecos.data.sql.records.DbRecordsDaoConfig
 import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
 import ru.citeck.ecos.data.sql.records.perms.DbRecordPerms
-import ru.citeck.ecos.data.sql.repo.entity.DbEntity
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
-import ru.citeck.ecos.data.sql.service.DbDataServiceImpl
-import ru.citeck.ecos.model.lib.type.repo.TypesRepo
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records3.record.dao.RecordsDao
@@ -20,7 +16,7 @@ import ru.citeck.ecos.records3.record.dao.impl.proxy.RecordsDaoProxy
 import javax.sql.DataSource
 
 @Configuration
-class CommentsConfiguration(private val typesRepo: TypesRepo) {
+class CommentsConfiguration(private val dbDomainFactory: DbDomainFactory) {
 
     @Bean
     fun commentDao(): RecordsDao {
@@ -29,22 +25,6 @@ class CommentsConfiguration(private val typesRepo: TypesRepo) {
 
     @Bean
     fun commentsRepo(dataSource: DataSource): RecordsDao {
-
-        val pgDataServiceFactory = PgDataServiceFactory()
-        val dbDataSource = DbDataSourceImpl(dataSource)
-        val dbDataService = DbDataServiceImpl(
-            DbEntity::class.java,
-            DbDataServiceConfig.create {
-                // comments should be visible for all, but editable only for concrete persons
-                withAuthEnabled(false)
-                withTableRef(DbTableRef("public", "ecos_comments"))
-                withTransactional(true)
-                withStoreTableMeta(true)
-                withMaxItemsToAllowSchemaMigration(1000)
-            },
-            dbDataSource,
-            pgDataServiceFactory
-        )
 
         val fullAccessPerms = object : DbRecordPerms {
             override fun getAuthoritiesWithReadPermission(): Set<String> {
@@ -61,18 +41,21 @@ class CommentsConfiguration(private val typesRepo: TypesRepo) {
             }
         }
 
-        return DbRecordsDao(
-            "comment-repo",
-            DbRecordsDaoConfig(
-                TypeUtils.getTypeRef("ecos-comment"),
-                insertable = true,
-                updatable = true,
-                deletable = true
-            ),
-            typesRepo,
-            dbDataService,
-            permsComponent,
-            null
-        )
+        val typeRef = TypeUtils.getTypeRef("ecos-comment")
+        return dbDomainFactory.create(
+            DbDomainConfig.create()
+                .withRecordsDao(DbRecordsDaoConfig.create {
+                    withId("comment-repo")
+                    withTypeRef(typeRef)
+                })
+                .withDataService(DbDataServiceConfig.create {
+                    // comments should be visible for all, but editable only for concrete persons
+                    withAuthEnabled(false)
+                    withTableRef(DbTableRef("public", "ecos_comments"))
+                    withTransactional(true)
+                    withStoreTableMeta(true)
+                })
+                .build()
+        ).withPermsComponent(permsComponent).build()
     }
 }
