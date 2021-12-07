@@ -87,14 +87,14 @@ class TypeRepoDaoImpl(private val repo: TypeRepository) : TypeRepoDao {
             spec = Specification { root: Root<TypeEntity>,
                                    _: CriteriaQuery<*>?,
                                    builder: CriteriaBuilder ->
-                builder.like(builder.lower(root.get("name")), "%" + predicateDto.name!!.toLowerCase() + "%")
+                builder.like(builder.lower(root.get("name")), "%" + predicateDto.name!!.lowercase() + "%")
             }
         }
         if (StringUtils.isNotBlank(predicateDto.moduleId)) {
             val idSpec = Specification { root: Root<TypeEntity>,
                                          _: CriteriaQuery<*>?,
                                          builder: CriteriaBuilder ->
-                builder.like(builder.lower(root.get("extId")), "%" + predicateDto.moduleId!!.toLowerCase() + "%")
+                builder.like(builder.lower(root.get("extId")), "%" + predicateDto.moduleId!!.lowercase() + "%")
             }
             spec = spec?.or(idSpec) ?: idSpec
         }
