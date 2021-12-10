@@ -90,7 +90,7 @@ class SearchRecordsDao(
             if (taskId.isBlank()) {
                 null
             } else {
-                RecordRef.create("alfresco", "wftask", taskId)
+                RecordRef.create("eproc", "wftask", taskId)
             }
         }
         val tasksAtts = recordsService.getAtts(taskRecords, getAttsToRequest())
