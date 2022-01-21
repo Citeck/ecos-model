@@ -27,6 +27,7 @@ data class TypeDef(
     val parentRef: RecordRef,
     val formRef: RecordRef,
     val journalRef: RecordRef,
+    val boardRef: RecordRef,
 
     val dashboardType: String,
 
@@ -100,6 +101,7 @@ data class TypeDef(
         var parentRef: RecordRef = BASE_TYPE_REF
         var formRef: RecordRef = RecordRef.EMPTY
         var journalRef: RecordRef = RecordRef.EMPTY
+        var boardRef: RecordRef = RecordRef.EMPTY
 
         var dashboardType: String = ""
 
@@ -142,6 +144,7 @@ data class TypeDef(
             withParentRef(base.parentRef)
             withFormRef(base.formRef)
             withJournalRef(base.journalRef)
+            withBoardRef(base.boardRef)
 
             withDashboardType(base.dashboardType)
 
@@ -228,6 +231,11 @@ data class TypeDef(
 
         fun withJournal(journalRef: RecordRef?): Builder {
             return withJournalRef(journalRef)
+        }
+
+        fun withBoardRef(boardRef: RecordRef?): Builder {
+            this.boardRef = RecordRef.valueOf(boardRef)
+            return this
         }
 
         fun withDashboardType(dashboardType: String?): Builder {
@@ -321,31 +329,32 @@ data class TypeDef(
                 parentRef = RecordRef.EMPTY
             }
             return TypeDef(
-                id,
-                name,
-                description,
-                system,
-                sourceId,
-                metaRecord,
-                parentRef,
-                formRef,
-                journalRef,
-                dashboardType,
-                inheritForm,
-                inheritActions,
-                inheritNumTemplate,
-                dispNameTemplate,
-                numTemplateRef,
-                actions,
-                associations,
-                defaultCreateVariant,
-                createVariants,
-                postCreateActionRef,
-                configFormRef,
-                config,
-                model,
-                docLib,
-                properties
+                id = id,
+                name = name,
+                description = description,
+                system = system,
+                sourceId = sourceId,
+                metaRecord = metaRecord,
+                parentRef = parentRef,
+                formRef = formRef,
+                journalRef = journalRef,
+                boardRef = boardRef,
+                dashboardType = dashboardType,
+                inheritForm = inheritForm,
+                inheritActions = inheritActions,
+                inheritNumTemplate = inheritNumTemplate,
+                dispNameTemplate = dispNameTemplate,
+                numTemplateRef = numTemplateRef,
+                actions = actions,
+                associations = associations,
+                defaultCreateVariant = defaultCreateVariant,
+                createVariants = createVariants,
+                postCreateActionRef = postCreateActionRef,
+                configFormRef = configFormRef,
+                config = config,
+                model = model,
+                docLib = docLib,
+                properties = properties
             )
         }
     }

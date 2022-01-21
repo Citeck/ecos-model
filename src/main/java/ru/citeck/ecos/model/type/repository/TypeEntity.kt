@@ -21,6 +21,7 @@ class TypeEntity : AbstractAuditingEntity() {
     var tenant: String? = null
     var form: String? = null
     var journal: String? = null
+    var board: String? = null
     var metaRecord: String? = null
     var attributes: String? = null
     var system: Boolean? = null

@@ -201,6 +201,18 @@
                             "key": "sourceId",
                             "type": "textfield",
                             "input": true
+                          },
+                          {
+                            "label": {
+                              "en": "Kanban board",
+                              "ru": "Канбан доска"
+                            },
+                            "key": "boardRef",
+                            "journalId": "ecos-boards",
+                            "refreshOn": [],
+                            "type": "selectJournal",
+                            "input": true,
+                            "queryData": ""
                           }
                         ],
                         "conditional": {
