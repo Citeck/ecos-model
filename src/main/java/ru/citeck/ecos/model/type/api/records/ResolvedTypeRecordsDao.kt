@@ -307,17 +307,20 @@ class ResolvedTypeRecordsDao(
             val roles = mutableMapOf<String, RoleDef>()
             val statuses = mutableMapOf<String, StatusDef>()
             val attributes = mutableMapOf<String, AttributeDef>()
+            val systemAttributes = mutableMapOf<String, AttributeDef>()
 
             forEachAscInv({ true }) { typeDef ->
                 typeDef.model.roles.forEach { roles[it.id] = it }
                 typeDef.model.statuses.forEach { statuses[it.id] = it }
                 typeDef.model.attributes.forEach { attributes[it.id] = it }
+                typeDef.model.systemAttributes.forEach { systemAttributes[it.id] = it }
             }
 
             return TypeModelDef.create {
                 withRoles(roles.values.toList())
                 withStatuses(statuses.values.toList())
                 withAttributes(attributes.values.toList())
+                withSystemAttributes(systemAttributes.values.toList())
             }
         }
 

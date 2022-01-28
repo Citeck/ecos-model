@@ -4,11 +4,126 @@ name:
   ru: Человек
   en: Person
 
+dispNameTemplate:
+  en: "${firstName}${lastName|presuf(' ')}"
+
+formRef: uiserv/form@person-form
 parentRef: emodel/type@authority
+journalRef: uiserv/journal@persons
 
 system: true
 dashboardType: profile-details
-sourceId: alfresco/
+sourceId: emodel/person
 
 properties:
   alfType: cm:person
+
+model:
+  attributes:
+    - id: firstName
+      name:
+        ru: Имя
+        en: First Name
+    - id: lastName
+      name:
+        ru: Фамилия
+        en: Last Name
+    - id: middleName
+      name:
+        ru: Отчество
+        en: Middle Name
+    - id: email
+      name:
+        ru: EMail
+        en: EMail
+    - id: jobTitle
+      name:
+        ru: Должность
+        en: Job Title
+    #ecos:birthDate
+    - id: birthDate
+      name:
+        ru: Дата рождения
+        en: Birth Date
+      type: DATE
+    - id: birthMonthDay
+      name:
+        en: Birth MonthDay
+      type: NUMBER
+      computed:
+        type: ATTRIBUTE
+        config:
+          attribute: "birthDate|fmt('MMdd')"
+        storingType: ON_MUTATE
+    #ecos:sex
+    - id: sex
+      name:
+        ru: Пол
+        en: Sex
+    - id: photo
+      name:
+        ru: Фото
+        en: Photo
+      type: CONTENT
+    # ecos:city
+    - id: city
+      name:
+        ru: Город
+        en: City
+    # cm:organization
+    - id: organization
+      name:
+        ru: Компания
+        en: Company
+    # idocs
+    - id: nameInGenitiveCase
+      name:
+        ru: ФИО в родительном падеже
+        en: Name in genitive case
+    #ecos:
+    - id: typeOfEmployment
+      name:
+        ru: Employment type
+        en: Employment type
+    #ecos
+    - id: phoneInternal
+      name:
+        ru: Внутренний телефон
+        en: Internal phone
+    - id: phoneWorking
+      name:
+        ru: Рабочий телефон
+        en: Working phone
+    # ecos:isPersonDisabled
+    - id: isPersonDisabled
+      name:
+        ru: Учетная запись отключена
+        en: Account disabled
+      type: BOOLEAN
+    # ecos
+    - id: countryCode
+      name:
+        ru: Код страны
+        en: Country Code
+    # ecos
+    - id: timezone
+      name:
+        ru: Часовой пояс
+        en: Timezone
+    # ecos
+    - id: itn
+      name:
+        ru: ИНН
+        en: ITN
+    # ecos
+    - id: inila
+      name:
+        ru: СНИЛС
+        en: INILA
+
+  systemAttributes:
+    - id: lastLogin
+      type: DATETIME
+      name:
+        ru: Время последнего входа
+        en: Last login time

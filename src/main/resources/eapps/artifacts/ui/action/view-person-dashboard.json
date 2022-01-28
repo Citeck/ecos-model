@@ -1,0 +1,13 @@
+{
+  "id": "view-person-dashboard",
+  "name": {
+    "ru": "Посмотреть",
+    "en": "View"
+  },
+  "icon": "icon-small-eye-show",
+  "type": "open-url",
+  "config": {
+    "withinEcosTab": true,
+    "url": "/v2/dashboard?recordRef=alfresco/people@${?localId}"
+  }
+}

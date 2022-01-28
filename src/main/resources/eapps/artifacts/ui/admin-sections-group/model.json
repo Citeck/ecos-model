@@ -17,6 +17,24 @@
       "config": {
         "journalId": "number-templates"
       }
+    },
+    {
+      "type": "JOURNAL",
+      "config": {
+        "journalId": "persons"
+      }
+    },
+    {
+      "type": "JOURNAL",
+      "config": {
+        "journalId": "authority-groups"
+      }
+    },
+    {
+      "type": "JOURNAL",
+      "config": {
+        "journalId": "authorities-sync"
+      }
     }
   ]
 }

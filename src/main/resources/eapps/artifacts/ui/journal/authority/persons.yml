@@ -1,0 +1,19 @@
+---
+id: persons
+name: { ru: Пользователи, en: Users }
+
+actions:
+  - uiserv/action@view-person-dashboard
+  - uiserv/action@edit
+
+columns:
+  - id: _localId
+    name:
+      ru: Имя пользователя
+      en: User name
+  - id: firstName
+  - id: lastName
+  - id: isPersonDisabled
+  - id: managedBySync
+    name:
+      ru: Управляется синхронизацией

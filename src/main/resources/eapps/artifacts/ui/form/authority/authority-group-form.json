@@ -1,0 +1,214 @@
+{
+  "id": "authority-group-form",
+  "formKey": "",
+  "title": {
+    "en": "Форма для группы"
+  },
+  "description": {},
+  "customModule": null,
+  "typeRef": "",
+  "width": "default",
+  "i18n": {},
+  "definition": {
+    "components": [
+      {
+        "columns": [
+          {
+            "components": [
+              {
+                "label": {
+                  "ru": "Columns"
+                },
+                "key": "columns",
+                "columns": [
+                  {
+                    "components": [
+                      {
+                        "label": {
+                          "en": "Group ID",
+                          "ru": "Идентификатор группы"
+                        },
+                        "disabled": true,
+                        "key": "id",
+                        "validate": {
+                          "pattern": "[\\w-]+",
+                          "minLength": 3,
+                          "maxLength": 100
+                        },
+                        "defaultValue": "",
+                        "refreshOn": [],
+                        "logic": [
+                          {
+                            "name": "enableGroupIdField",
+                            "trigger": {
+                              "type": "javascript",
+                              "javascript": "result = instance.options.formMode == 'CREATE';"
+                            },
+                            "actions": [
+                              {
+                                "name": "Enable id field",
+                                "type": "property",
+                                "property": {
+                                  "label": "Disabled",
+                                  "value": "disabled",
+                                  "type": "boolean"
+                                },
+                                "state": "false"
+                              },
+                              {
+                                "name": "Id field mandatory",
+                                "type": "property",
+                                "property": {
+                                  "label": "Required",
+                                  "value": "validate.required",
+                                  "type": "boolean"
+                                },
+                                "state": "true"
+                              }
+                            ]
+                          }
+                        ],
+                        "type": "textfield",
+                        "input": true
+                      },
+                      {
+                        "label": {
+                          "en": "Group Name",
+                          "ru": "Имя группы"
+                        },
+                        "key": "name",
+                        "validate": {
+                          "required": true
+                        },
+                        "refreshOn": [],
+                        "type": "mlText",
+                        "input": true
+                      }
+                    ],
+                    "type": "column",
+                    "input": false,
+                    "key": "column",
+                    "index": 0
+                  },
+                  {
+                    "index": 1,
+                    "type": "column",
+                    "input": false,
+                    "key": "column",
+                    "components": [
+                      {
+                        "label": {
+                          "ru": "authorityGroups"
+                        },
+                        "multiple": true,
+                        "key": "authorityGroups",
+                        "journalId": "authority-groups",
+                        "queryData": "",
+                        "refreshOn": [],
+                        "type": "selectJournal",
+                        "input": true,
+                        "reorder": false
+                      }
+                    ]
+                  }
+                ],
+                "type": "columns",
+                "input": false
+              },
+              {
+                "label": {
+                  "ru": "Описание",
+                  "en": "Description"
+                },
+                "key": "description",
+                "refreshOn": [],
+                "type": "mlTextarea",
+                "input": true
+              }
+            ],
+            "md": 12,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "label": "Column",
+            "index": 0,
+            "clearOnHide": true,
+            "conditional": {
+              "show": null,
+              "when": null
+            }
+          }
+        ],
+        "key": "columns2",
+        "type": "columns",
+        "input": false
+      },
+      {
+        "columns": [
+          {
+            "components": [
+              {
+                "label": "Cancel",
+                "removeIndents": true,
+                "action": "event",
+                "state": "",
+                "showValidations": false,
+                "event": "cancel",
+                "block": true,
+                "clearOnHide": false,
+                "key": "submit2",
+                "type": "button",
+                "input": true
+              }
+            ],
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 0,
+            "md": 3
+          },
+          {
+            "index": 1,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "components": [],
+            "md": 3
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 2,
+            "components": []
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 3,
+            "components": [
+              {
+                "removeIndents": true,
+                "state": "",
+                "theme": "primary",
+                "block": true,
+                "disableOnInvalid": true,
+                "clearOnHide": false,
+                "key": "submit",
+                "type": "button",
+                "input": true
+              }
+            ]
+          }
+        ],
+        "key": "columns3",
+        "type": "columns",
+        "input": false
+      }
+    ]
+  },
+  "attributes": {}
+}

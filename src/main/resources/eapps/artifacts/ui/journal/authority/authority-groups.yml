@@ -1,0 +1,11 @@
+---
+id: authority-groups
+name: { ru: Группы, en: Groups }
+
+columns:
+  - id: _localId
+    name:
+      ru: Идентификатор
+      en: Identifier
+  - id: name
+  - id: description

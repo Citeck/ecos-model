@@ -1,0 +1,30 @@
+---
+id: authority-group
+name:
+  ru: Группа
+  en: Group
+
+dispNameTemplate:
+  en: "${name.en!_localId}"
+  ru: "${name.ru!_localId}"
+
+formRef: uiserv/form@authority-group-form
+parentRef: emodel/type@authority
+journalRef: uiserv/journal@authority-groups
+
+system: true
+sourceId: emodel/authority-group
+
+model:
+  attributes:
+    - id: name
+      name:
+        ru: Имя
+        en: Name
+      type: MLTEXT
+    - id: description
+      name:
+        ru: Описание
+        en: Description
+      type: MLTEXT
+

@@ -10,7 +10,7 @@
     <parent>
         <groupId>ru.citeck.ecos</groupId>
         <artifactId>ecos-micro-base</artifactId>
-        <version>3.38.0</version>
+        <version>3.41.1</version>
     </parent>
 
     <repositories>
@@ -42,6 +42,7 @@
         <liquibase-hibernate5.version>3.6</liquibase-hibernate5.version>
         <validation-api.version>2.0.1.Final</validation-api.version>
         <mapstruct.version>1.2.0.Final</mapstruct.version>
+        <shed-lock.version>2.4.0</shed-lock.version>
 
         <!-- Plugin versions -->
         <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
@@ -401,6 +402,17 @@
         <dependency>
             <groupId>ru.citeck.ecos.events</groupId>
             <artifactId>ecos-events2-rabbitmq-spring</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.javacrumbs.shedlock</groupId>
+            <artifactId>shedlock-spring</artifactId>
+            <version>${shed-lock.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.javacrumbs.shedlock</groupId>
+            <artifactId>shedlock-provider-jdbc-template</artifactId>
+            <version>${shed-lock.version}</version>
         </dependency>
 
         <dependency>

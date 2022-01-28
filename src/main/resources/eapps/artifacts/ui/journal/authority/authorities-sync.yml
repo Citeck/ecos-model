@@ -1,0 +1,21 @@
+---
+id: authorities-sync
+name: { ru: Синхронизация, en: Synchronization }
+
+actions:
+  - uiserv/action@download-base64-data-yml
+  - uiserv/action@edit-json
+
+columns:
+  - id: _localId
+    name:
+      ru: Идентификатор
+      en: Identifier
+  - id: enabled
+  - id: name
+  - id: repeatDelayDuration
+  - id: lastSync
+    name:
+      ru: Последняя синхронизация
+      en: Last synchronization
+    type: DATETIME

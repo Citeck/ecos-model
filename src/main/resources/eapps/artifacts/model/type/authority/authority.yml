@@ -10,3 +10,21 @@ sourceId: alfresco/
 
 properties:
   alfType: cm:authority
+
+model:
+  attributes:
+    - id: authorityGroups
+      name:
+        ru: Группы
+        en: Groups
+      type: ASSOC
+      multiple: true
+      config:
+        typeRef: emodel/type@group
+      index:
+        enabled: true
+  systemAttributes:
+    - id: managedBySync
+      type: ASSOC
+      name:
+        ru: Управляется синхронизацией

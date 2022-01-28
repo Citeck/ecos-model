@@ -1,0 +1,53 @@
+---
+id: authorities-sync
+name:
+  ru: Синхронизация пользователей и групп
+  en: Users or groups sync
+
+system: true
+sourceId: emodel/authorities-sync
+journalRef: uiserv/journal@authorities-sync
+
+defaultCreateVariant: false
+
+model:
+  attributes:
+    - id: name
+      name:
+        ru: Имя
+        en: Name
+      type: MLTEXT
+    - id: type
+      name:
+        ru: Тип
+        en: Type
+    - id: repeatDelayDuration
+      name:
+        ru: Период (ISO8601)
+        en: Period (ISO8601)
+    - id: enabled
+      name:
+        ru: Включено
+        en: Enabled
+      type: BOOLEAN
+    - id: config
+      name:
+        ru: Конфигурация
+        en: Config
+      type: JSON
+    - id: version
+      type: NUMBER
+    - id: authorityType
+    - id: manageNewAuthorities
+      type: BOOLEAN
+  systemAttributes:
+    - id: state
+      type: JSON
+    - id: lastSync
+      name:
+        ru: Последняя синхронизация
+        en: Last synchronization
+      type: DATETIME
+    - id: stateVersion
+      type: NUMBER
+
