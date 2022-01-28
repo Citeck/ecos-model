@@ -3,6 +3,7 @@ package ru.citeck.ecos.model.type.service
 import mu.KotlinLogging
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
+import org.springframework.core.env.Environment
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.apps.app.service.LocalAppService
 import ru.citeck.ecos.commons.data.MLText
@@ -18,6 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 @Component
 class TypesRepoImpl(
+    private val env: Environment,
     private val typeService: TypeService,
     private val localAppService: LocalAppService,
     private val recordsServiceFactory: RecordsServiceFactory
@@ -36,6 +38,8 @@ class TypesRepoImpl(
     private val typesSyncDao = RemoteSyncRecordsDao("rtype", TypeInfoAtts::class.java)
     private val syncInitialized = AtomicBoolean()
 
+    private val isTestEnv: Boolean by lazy { env.acceptsProfiles("test") }
+
     override fun getChildren(typeRef: RecordRef): List<RecordRef> {
         return typeService.getChildren(typeRef.id).map { TypeUtils.getTypeRef(it) }
     }
@@ -45,7 +49,11 @@ class TypesRepoImpl(
         if (typeRef.id == "type") {
             return typesFromClasspath["type"]
         }
-        val type = typesSyncDao.getRecord(typeRef.id).orElse(TypeInfoAtts.EMPTY)
+        val type = if (!isTestEnv) {
+            typesSyncDao.getRecord(typeRef.id).orElse(TypeInfoAtts.EMPTY)
+        } else {
+            TypeInfoAtts.EMPTY
+        }
         if (type.id.isNullOrBlank()) {
             return typesFromClasspath[typeRef.id]
         }
@@ -89,7 +97,7 @@ class TypesRepoImpl(
     }
 
     private fun initSync() {
-        if (syncInitialized.compareAndSet(false, true)) {
+        if (!isTestEnv && syncInitialized.compareAndSet(false, true)) {
             typesSyncDao.setRecordsServiceFactory(recordsServiceFactory)
             recordsServiceFactory.jobExecutor.addSystemJob(typesSyncDao.jobs[0])
         }
