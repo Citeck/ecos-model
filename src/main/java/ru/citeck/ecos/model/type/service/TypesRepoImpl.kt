@@ -1,6 +1,8 @@
 package ru.citeck.ecos.model.type.service
 
 import mu.KotlinLogging
+import org.springframework.context.event.ContextRefreshedEvent
+import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.apps.app.service.LocalAppService
 import ru.citeck.ecos.commons.data.MLText
@@ -10,30 +12,40 @@ import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.model.lib.type.repo.TypesRepo
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.records2.RecordRef
-import ru.citeck.ecos.records3.RecordsService
+import ru.citeck.ecos.records2.source.dao.local.RemoteSyncRecordsDao
+import ru.citeck.ecos.records3.RecordsServiceFactory
+import java.util.concurrent.atomic.AtomicBoolean
 
 @Component
 class TypesRepoImpl(
     private val typeService: TypeService,
-    private val recordsService: RecordsService,
-    private val localAppService: LocalAppService
+    private val localAppService: LocalAppService,
+    private val recordsServiceFactory: RecordsServiceFactory
 ) : TypesRepo {
 
     companion object {
         private val log = KotlinLogging.logger {}
+
+        private val BASE_TYPE_REF = TypeUtils.getTypeRef("base")
     }
 
-    private val typesFromClasspath: Map<String, TypeInfo> by lazy { evalTypesFromClasspath() }
+    private val typesFromClasspath: Map<String, TypeInfo> by lazy {
+        evalTypesFromClasspath()
+    }
+
+    private val typesSyncDao = RemoteSyncRecordsDao("rtype", TypeInfoAtts::class.java)
+    private val syncInitialized = AtomicBoolean()
 
     override fun getChildren(typeRef: RecordRef): List<RecordRef> {
         return typeService.getChildren(typeRef.id).map { TypeUtils.getTypeRef(it) }
     }
 
     override fun getTypeInfo(typeRef: RecordRef): TypeInfo? {
+        initSync()
         if (typeRef.id == "type") {
             return typesFromClasspath["type"]
         }
-        val type = recordsService.getAtts(typeRef.withSourceId("rtype"), TypeInfoAtts::class.java)
+        val type = typesSyncDao.getRecord(typeRef.id).orElse(TypeInfoAtts.EMPTY)
         if (type.id.isNullOrBlank()) {
             return typesFromClasspath[typeRef.id]
         }
@@ -41,7 +53,7 @@ class TypesRepoImpl(
             withId(type.id)
             withName(type.name ?: MLText.EMPTY)
             withDispNameTemplate(type.dispNameTemplate)
-            withParentRef(type.parentRef)
+            withParentRef(type.parentRef?.withSourceId("type") ?: BASE_TYPE_REF)
             withModel(type.model)
             withNumTemplateRef(type.numTemplateRef)
         }
@@ -62,19 +74,30 @@ class TypesRepoImpl(
             if (id.isBlank()) {
                 continue
             }
-            val baseParentRef = TypeUtils.getTypeRef("base")
             result[id] = TypeInfo.create {
                 withId(id)
                 withName(artifact.get("name").getAs(MLText::class.java) ?: MLText.EMPTY)
                 withSourceId(artifact.get("sourceId").asText())
                 withDispNameTemplate(artifact.get("name").getAs(MLText::class.java) ?: MLText.EMPTY)
-                withParentRef(artifact.get("parentRef").getAs(RecordRef::class.java) ?: baseParentRef)
+                withParentRef(artifact.get("parentRef").getAs(RecordRef::class.java) ?: BASE_TYPE_REF)
                 withNumTemplateRef(artifact.get("numTemplateRef").getAs(RecordRef::class.java))
                 withModel(artifact.get("model").getAs(TypeModelDef::class.java))
             }
         }
         log.info { "Found types from classpath: ${result.size}" }
         return result
+    }
+
+    private fun initSync() {
+        if (syncInitialized.compareAndSet(false, true)) {
+            typesSyncDao.setRecordsServiceFactory(recordsServiceFactory)
+            recordsServiceFactory.jobExecutor.addSystemJob(typesSyncDao.jobs[0])
+        }
+    }
+
+    @EventListener
+    fun onServicesInitialized(event: ContextRefreshedEvent) {
+        initSync()
     }
 
     data class TypeInfoAtts(
@@ -84,5 +107,16 @@ class TypesRepoImpl(
         val dispNameTemplate: MLText?,
         val numTemplateRef: RecordRef?,
         val model: TypeModelDef?
-    )
+    ) {
+        companion object {
+            val EMPTY = TypeInfoAtts(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            )
+        }
+    }
 }

@@ -39,11 +39,15 @@ class ResolvedTypeRecordsDao(
 
     override fun queryRecords(recsQuery: RecordsQuery): RecsQueryRes<ResolvedTypeRecord> {
         val records = typeRecordsDao.queryRecords(recsQuery)
-        return records.withRecords { ResolvedTypeRecord(it, typeService) }
+        return records.withRecords {
+            ResolvedTypeRecord(it, typeService)
+        }
     }
 
     override fun getRecordAtts(recordId: String): ResolvedTypeRecord? {
-        return typeRecordsDao.getRecordAtts(recordId)?.let { ResolvedTypeRecord(it, typeService) }
+        return typeRecordsDao.getRecordAtts(recordId)?.let {
+            ResolvedTypeRecord(it, typeService)
+        }
     }
 
     fun getResolvedTypeRecord(typeId: String) : ResolvedTypeRecord {
