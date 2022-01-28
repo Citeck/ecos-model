@@ -120,6 +120,10 @@ model:
       name:
         ru: СНИЛС
         en: INILA
+    - id: skype
+      name:
+        ru: Скайп
+        en: Skype
 
   systemAttributes:
     - id: lastLogin
