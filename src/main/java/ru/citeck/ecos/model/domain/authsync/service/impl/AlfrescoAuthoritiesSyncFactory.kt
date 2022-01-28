@@ -135,7 +135,7 @@ class AlfrescoAuthoritiesSyncFactory(
             }
             val refToMutate = RecordRef.create("alfresco", targetSourceId, record.id)
             val refToSync = if (refToMutate.id.isEmpty()) {
-                refToMutate.withId(record.attributes.get("id").asText())
+                refToMutate.withId(newAtts.get("id").asText())
             } else {
                 refToMutate
             }
@@ -158,7 +158,7 @@ class AlfrescoAuthoritiesSyncFactory(
             val attsAfterMutation = recordsService.getAtts(refToSync, attsToSync)
             updateAuthorities(context, listOf(attsAfterMutation))
 
-            return record.id
+            return refToSync.id
         }
 
         private fun prepareGroupsUpdateRecords(authorityRef: RecordRef,

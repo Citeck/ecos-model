@@ -12,18 +12,30 @@ import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.delete.DelStatus
 import ru.citeck.ecos.records3.record.dao.impl.proxy.ProxyProcessor
 import ru.citeck.ecos.records3.record.dao.impl.proxy.RecordsDaoProxy
+import ru.citeck.ecos.records3.record.dao.mutate.RecordsMutateWithAnyResDao
 
 class GroupsPersonsRecordsDao(
     id: String,
     private val authorityType: AuthorityType,
     private val syncService: AuthoritiesSyncService,
     proxyProcessor: ProxyProcessor? = null
-) : RecordsDaoProxy(id, "$id-repo", proxyProcessor) {
+) : RecordsDaoProxy(id, "$id-repo", proxyProcessor), RecordsMutateWithAnyResDao {
 
     private val targetSourceId = "$id-repo"
 
     override fun delete(recordsId: List<String>): List<DelStatus> {
         error("Not supported")
+    }
+
+    override fun mutateForAnyRes(records: List<LocalRecordAtts>): List<Any> {
+        val result = mutate(records)
+        if (authorityType == AuthorityType.PERSON) {
+            return result.map {
+                // todo: remove after user dashboard will be migrated to emodel
+                RecordRef.create("alfresco", "people", it)
+            }
+        }
+        return result
     }
 
     override fun mutate(records: List<LocalRecordAtts>): List<String> {
@@ -58,23 +70,25 @@ class GroupsPersonsRecordsDao(
 
             var isManaged = false
 
-            if (!exists) {
+            val authorityId = if (!exists) {
                 if (syncService.isNewAuthoritiesManaged(authorityType)) {
                     isManaged = true
-                    result.add(syncService.create(authorityType, record))
+                    syncService.create(authorityType, record)
                 } else {
-                    result.add(super.mutate(listOf(record))[0])
+                    super.mutate(listOf(record))[0]
                 }
             } else if (RecordRef.isEmpty(currentAtts.managedBySync)
                         || !syncService.isSyncEnabled(currentAtts.managedBySync?.id)) {
 
-                result.add(super.mutate(listOf(record))[0])
+                super.mutate(listOf(record))[0]
             } else {
                 isManaged = true
-                result.add(syncService.update(currentAtts.managedBySync!!.id, record))
+                syncService.update(currentAtts.managedBySync!!.id, record)
             }
+            result.add(authorityId)
 
             if (isManaged) {
+
                 val attsAfterMutation = getTargetAuthorityAtts(id)
                 val syncId = attsAfterMutation.managedBySync?.id
                 val managedAtts = syncService.getManagedAtts(syncId)
@@ -86,7 +100,8 @@ class GroupsPersonsRecordsDao(
                     }
                 }
                 if (newAtts.size() > 0) {
-                    super.mutate(listOf(LocalRecordAtts(id, newAtts)))
+
+                    super.mutate(listOf(LocalRecordAtts(authorityId, newAtts)))
                 }
             }
         }
