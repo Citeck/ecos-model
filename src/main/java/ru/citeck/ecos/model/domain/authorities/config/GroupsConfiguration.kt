@@ -32,7 +32,12 @@ class GroupsConfiguration(
 
     @Bean
     fun groupDao(): RecordsDao {
-        return GroupsPersonsRecordsDao(AuthorityType.GROUP.sourceId, AuthorityType.GROUP, authoritiesSyncService)
+        return GroupsPersonsRecordsDao(
+            AuthorityType.GROUP.sourceId,
+            AuthorityType.GROUP,
+            authoritiesSyncService,
+            authorityService
+        )
     }
 
     @Bean

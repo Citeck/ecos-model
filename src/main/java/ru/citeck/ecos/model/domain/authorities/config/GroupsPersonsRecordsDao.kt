@@ -4,21 +4,33 @@ import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.model.domain.authorities.AuthorityConstants
+import ru.citeck.ecos.model.domain.authorities.AuthorityConstants.ATT_AUTHORITY_GROUPS
+import ru.citeck.ecos.model.domain.authorities.AuthorityConstants.ATT_AUTHORITY_GROUPS_FULL
+import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
 import ru.citeck.ecos.model.domain.authsync.service.AuthorityType
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.RecordRef
+import ru.citeck.ecos.records2.predicate.PredicateService
+import ru.citeck.ecos.records2.predicate.PredicateUtils
+import ru.citeck.ecos.records2.predicate.model.OrPredicate
+import ru.citeck.ecos.records2.predicate.model.Predicate
+import ru.citeck.ecos.records2.predicate.model.Predicates
+import ru.citeck.ecos.records2.predicate.model.ValuePredicate
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.delete.DelStatus
 import ru.citeck.ecos.records3.record.dao.impl.proxy.ProxyProcessor
 import ru.citeck.ecos.records3.record.dao.impl.proxy.RecordsDaoProxy
 import ru.citeck.ecos.records3.record.dao.mutate.RecordsMutateWithAnyResDao
+import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
+import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes
 
 class GroupsPersonsRecordsDao(
     id: String,
     private val authorityType: AuthorityType,
     private val syncService: AuthoritiesSyncService,
+    private val authorityService: AuthorityService,
     proxyProcessor: ProxyProcessor? = null
 ) : RecordsDaoProxy(id, "$id-repo", proxyProcessor), RecordsMutateWithAnyResDao {
 
@@ -26,6 +38,27 @@ class GroupsPersonsRecordsDao(
 
     override fun delete(recordsId: List<String>): List<DelStatus> {
         error("Not supported")
+    }
+
+    override fun queryRecords(recsQuery: RecordsQuery): RecsQueryRes<*>? {
+        if (recsQuery.language != PredicateService.LANGUAGE_PREDICATE) {
+            return super.queryRecords(recsQuery)
+        }
+        val predicate = PredicateUtils.mapValuePredicates(recsQuery.getQuery(Predicate::class.java)) { pred ->
+
+            if (pred.getType() == ValuePredicate.Type.CONTAINS && pred.getAttribute() == ATT_AUTHORITY_GROUPS_FULL) {
+                val values = pred.getValue().toList(RecordRef::class.java)
+                val expandedGroups = authorityService.getExpandedGroups(values.map { it.id }, false)
+                OrPredicate.of(expandedGroups.map {
+                    Predicates.contains(ATT_AUTHORITY_GROUPS, AuthorityType.GROUP.getRef(it).toString())
+                })
+            } else {
+                pred
+            }
+        }
+        return super.queryRecords(recsQuery.copy {
+            withQuery(predicate)
+        })
     }
 
     override fun mutateForAnyRes(records: List<LocalRecordAtts>): List<Any> {

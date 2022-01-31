@@ -28,7 +28,6 @@ import javax.sql.DataSource
 @Configuration
 class PersonsConfiguration(
     private val authorityService: AuthorityService,
-    private val recordsService: RecordsService,
     private val dbDomainFactory: DbDomainFactory,
     private val authoritiesSyncService: AuthoritiesSyncService
 ) {
@@ -39,6 +38,7 @@ class PersonsConfiguration(
             "person",
             AuthorityType.PERSON,
             authoritiesSyncService,
+            authorityService,
             object : MutateProxyProcessor {
 
                 override fun mutatePreProcess(
@@ -100,7 +100,7 @@ class PersonsConfiguration(
                 .build()
         ).withPermsComponent(permsComponent).build()
 
-        recordsDao.addAttributesMixin(PersonsMixin(recordsService, authorityService))
+        recordsDao.addAttributesMixin(PersonsMixin(authorityService))
 
         return recordsDao
     }

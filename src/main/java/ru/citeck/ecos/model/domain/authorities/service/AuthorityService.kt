@@ -16,20 +16,24 @@ import kotlin.random.Random
 @Service
 class AuthorityService(
     hazelcast: HazelcastInstance,
-    val records: RecordsService
+    private val records: RecordsService
 ) {
 
     companion object {
-        private const val EXPANDED_GROUPS_CACHE_KEY = "expanded-authority-groups-cache"
+        private const val ASC_GROUPS_CACHE_KEY = "asc-authority-groups-cache"
+        private const val DESC_GROUPS_CACHE_KEY = "desc-authority-groups-cache"
+
         private const val CTX_UPDATE_GROUPS_CACHE_KEY = "ctx-update-groups-cache-key"
 
         private const val ATT_AUTHORITY_GROUPS = "authorityGroups[]?localId"
     }
 
-    private val expandedGroupsCache: IMap<String, Set<String>>
+    private val ascGroupsCache: IMap<String, Set<String>>
+    private val descGroupsCache: IMap<String, Set<String>>
 
     init {
-        expandedGroupsCache = hazelcast.getMap(EXPANDED_GROUPS_CACHE_KEY)
+        ascGroupsCache = hazelcast.getMap(ASC_GROUPS_CACHE_KEY)
+        descGroupsCache = hazelcast.getMap(DESC_GROUPS_CACHE_KEY)
     }
 
     fun getAuthoritiesForPerson(personId: String): Set<String> {
@@ -40,7 +44,7 @@ class AuthorityService(
         val authorities = LinkedHashSet<String>()
         authorities.add(personId)
         for (group in personGroups) {
-            val expGroups = getExpandedGroups(group)
+            val expGroups = getExpandedGroups(group, true)
             for (expGroup in expGroups) {
                 authorities.add("GROUP_$expGroup")
             }
@@ -50,28 +54,17 @@ class AuthorityService(
         return authorities
     }
 
-    private fun getExpandedGroups(groupId: String): Set<String> {
-
-        val cachedAuthorities = expandedGroupsCache[groupId]
-        if (cachedAuthorities != null) {
-            return cachedAuthorities
-        }
-
+    fun getExpandedGroups(groupsId: List<String>, asc: Boolean): Set<String> {
         val result = LinkedHashSet<String>()
-        result.add(groupId)
-
-        val groupRef = RecordRef.create(AuthorityType.GROUP.sourceId, groupId)
-        val groupGroups = records.getAtt(groupRef, ATT_AUTHORITY_GROUPS).asStrList()
-
-        for (group in groupGroups) {
-            result.addAll(getExpandedGroups(group))
+        val processedGroups = HashSet<String>()
+        for (groupId in groupsId) {
+            forEachGroup(groupId, processedGroups, true, asc) { result.add(it) }
         }
-
-        // random shift to avoid cache massive eviction
-        val ttl = + TimeUnit.MINUTES.toSeconds(30) + (Random.nextFloat() * 30).toLong()
-
-        expandedGroupsCache.put(groupId, result, ttl, TimeUnit.SECONDS)
         return result
+    }
+
+    fun getExpandedGroups(groupId: String, asc: Boolean): Set<String> {
+        return getExpandedGroups(listOf(groupId), asc)
     }
 
     fun resetCache(groupId: String) {
@@ -86,10 +79,14 @@ class AuthorityService(
 
         if (groupsToResetCache.size == 1) {
             ctx.doAfterCommit {
-                val processedGroups = HashSet<String>()
+                val ascProcessedGroups = HashSet<String>()
+                val descProcessedGroups = HashSet<String>()
                 groupsToResetCache.forEach {
-                    forEachDescendentGroup(it, processedGroups) { ref ->
-                        expandedGroupsCache.remove(ref.id)
+                    forEachGroup(it, ascProcessedGroups, withCache = false, asc = true) { groupId ->
+                        descGroupsCache.remove(groupId)
+                    }
+                    forEachGroup(it, descProcessedGroups, withCache = false, asc = false) { groupId ->
+                        ascGroupsCache.remove(groupId)
                     }
                 }
                 groupsToResetCache.clear()
@@ -104,20 +101,66 @@ class AuthorityService(
         }).getRecords()
     }
 
-    private fun forEachDescendentGroup(groupId: String,
-                                       processedGroups: MutableSet<String>,
-                                       action: (RecordRef) -> Unit) {
+    private fun forEachGroup(
+        groupId: String,
+        processedGroups: MutableSet<String>,
+        withCache: Boolean,
+        asc: Boolean,
+        action: (String) -> Unit
+    ) {
 
         if (!processedGroups.add(groupId)) {
             return
         }
-        val groupRef = RecordRef.create(AuthorityType.GROUP.sourceId, groupId)
-        action.invoke(groupRef)
 
-        val children = getGroupMembers(groupRef, AuthorityType.GROUP)
+        action.invoke(groupId)
+        val cache: IMap<String, Set<String>>? = if (withCache) {
+            if (asc) {
+                ascGroupsCache
+            } else {
+                descGroupsCache
+            }
+        } else {
+            null
+        }
 
-        for (child in children) {
-            forEachDescendentGroup(child.id, processedGroups, action)
+        if (cache != null) {
+            val cachedGroups = cache[groupId]
+            if (cachedGroups != null) {
+                for (cachedGroup in cachedGroups) {
+                    if (processedGroups.add(cachedGroup)) {
+                        action(cachedGroup)
+                    }
+                }
+                return
+            }
+        }
+
+        val groupRef = AuthorityType.GROUP.getRef(groupId)
+        val nextGroups: List<String> = if (asc) {
+            records.getAtt(groupRef, ATT_AUTHORITY_GROUPS).asList(RecordRef::class.java).map { it.id }
+        } else {
+            getGroupMembers(groupRef, AuthorityType.GROUP).map { it.id }
+        }
+        if (cache != null) {
+            val groupsToCache = LinkedHashSet<String>()
+            for (nextGroup in nextGroups) {
+                // previous computed groups should not affect on cache of this group.
+                // because of this we should not pass processedGroup for next forEach
+                forEachGroup(nextGroup, HashSet(), withCache, asc) {
+                    groupsToCache.add(it)
+                    if (processedGroups.add(it)) {
+                        action(it)
+                    }
+                }
+            }
+            // random shift to avoid cache massive eviction
+            val ttl = TimeUnit.MINUTES.toSeconds(30) + (Random.nextFloat() * 60).toLong()
+            cache.put(groupId, groupsToCache, ttl, TimeUnit.SECONDS)
+        } else {
+            for (nextGroup in nextGroups) {
+                forEachGroup(nextGroup, processedGroups, withCache, asc, action)
+            }
         }
     }
 }

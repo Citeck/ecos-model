@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.domain.authorities
 
+import com.zaxxer.hikari.HikariDataSource
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -16,7 +17,9 @@ import ru.citeck.ecos.model.EcosModelApp
 import ru.citeck.ecos.model.domain.authsync.service.AuthorityType
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.RecordRef
+import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
+import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 
 @ExtendWith(SpringExtension::class)
 @SpringBootTest(classes = [EcosModelApp::class])
@@ -24,11 +27,15 @@ class AuthoritiesTest {
 
     @Autowired
     lateinit var recordsService: RecordsService
+    @Autowired
+    lateinit var dataSource: HikariDataSource
 
     @Test
     fun test() {
 
-        val testPersonRef = RecordRef.create(AuthorityType.PERSON.sourceId, "test-person")
+        println("JDBC URL: " + dataSource.jdbcUrl)
+
+        val testPersonRef = AuthorityType.PERSON.getRef("test-person")
         val testPersonFirstName = "Test First Name"
 
         val personAtts = ObjectData.create()
@@ -41,7 +48,7 @@ class AuthoritiesTest {
 
         assertThat(personCreateResult.id).isEqualTo(testPersonRef.id)
 
-        val testGroupRef = RecordRef.create(AuthorityType.GROUP.sourceId, "test-group")
+        val testGroupRef = AuthorityType.GROUP.getRef("test-group")
         val groupAtts = ObjectData.create()
         groupAtts.set("id", testGroupRef.id)
         groupAtts.set("name", MLText("Test Group Name"))
@@ -100,6 +107,7 @@ class AuthoritiesTest {
         )
 
         val otherGroupId = "other-group"
+        val otherGroupRef = AuthorityType.GROUP.getRef(otherGroupId)
         addGroup(otherGroupId, "system")
 
         checkAuthorities(
@@ -179,8 +187,7 @@ class AuthoritiesTest {
         )
 
         AuthContext.runAsSystem {
-            val groupRef = RecordRef.create(AuthorityType.GROUP.sourceId, otherGroupId)
-            recordsService.mutateAtt(groupRef, "authorityGroups", emptyList<Any>())
+            recordsService.mutateAtt(otherGroupRef, "authorityGroups", emptyList<Any>())
         }
         checkAuthorities(
             listOf(
@@ -206,6 +213,85 @@ class AuthoritiesTest {
                 "GROUP_${testGroupRef.id}",
                 "GROUP_other-auth-group-admin",
                 "GROUP_other-auth-group-${AuthConstants.SYSTEM_USER}",
+                "GROUP_EVERYONE"
+            )
+        )
+
+        addGroup(otherGroupId, "system")
+
+        val groupsChain = Array(3) {
+            "group-$it"
+        }
+        AuthContext.runAsSystem {
+            groupsChain.forEach {
+                val atts = ObjectData.create()
+                atts.set("id", it)
+                recordsService.create(AuthorityType.GROUP.sourceId, atts)
+            }
+        }
+        AuthContext.runAsSystem {
+            for (idx in groupsChain.indices) {
+                val sourceGroupId = if (idx == 0) {
+                    otherGroupId
+                } else {
+                    groupsChain[idx - 1]
+                }
+                recordsService.mutateAtt(
+                    AuthorityType.GROUP.getRef(sourceGroupId),
+                    "authorityGroups",
+                    AuthorityType.GROUP.getRef(groupsChain[idx])
+                )
+            }
+        }
+        checkAuthorities(
+            listOf(
+                testPersonRef.id,
+                "GROUP_${testGroupRef.id}",
+                "GROUP_other-auth-group-admin",
+                "GROUP_other-auth-group-${AuthConstants.SYSTEM_USER}",
+                "GROUP_${otherGroupId}",
+                "GROUP_group-0",
+                "GROUP_group-1",
+                "GROUP_group-2",
+                "GROUP_EVERYONE"
+            )
+        )
+
+        listOf(
+            *groupsChain,
+            otherGroupId,
+            testGroupRef.id
+        ).forEach { groupId ->
+
+            val query = RecordsQuery.create {
+                withSourceId(AuthorityType.PERSON.sourceId)
+                withQuery(
+                    Predicates.contains(
+                        AuthorityConstants.ATT_AUTHORITY_GROUPS_FULL,
+                        AuthorityType.GROUP.getRef(groupId).toString()
+                    )
+                )
+            }
+
+            val queryRes = recordsService.query(query)
+            assertThat(queryRes.getRecords()).describedAs("query: %s", query.query).hasSize(1)
+            assertThat(queryRes.getRecords()[0]).isEqualTo(testPersonRef)
+        }
+
+        AuthContext.runAsSystem {
+            val ref = AuthorityType.GROUP.getRef("group-1")
+            recordsService.mutateAtt(ref, "authorityGroups", emptyList<Any>())
+        }
+
+        checkAuthorities(
+            listOf(
+                testPersonRef.id,
+                "GROUP_${testGroupRef.id}",
+                "GROUP_other-auth-group-admin",
+                "GROUP_other-auth-group-${AuthConstants.SYSTEM_USER}",
+                "GROUP_${otherGroupId}",
+                "GROUP_group-0",
+                "GROUP_group-1",
                 "GROUP_EVERYONE"
             )
         )
