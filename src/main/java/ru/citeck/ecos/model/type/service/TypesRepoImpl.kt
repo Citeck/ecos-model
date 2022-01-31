@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component
 import ru.citeck.ecos.apps.app.service.LocalAppService
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
+import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
+import ru.citeck.ecos.model.lib.role.dto.RoleDef
+import ru.citeck.ecos.model.lib.status.dto.StatusDef
 import ru.citeck.ecos.model.lib.type.dto.TypeInfo
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.model.lib.type.repo.TypesRepo
@@ -92,8 +95,47 @@ class TypesRepoImpl(
                 withModel(artifact.get("model").getAs(TypeModelDef::class.java))
             }
         }
-        log.info { "Found types from classpath: ${result.size}" }
-        return result
+        val resultWithParents = HashMap<String, TypeInfo>()
+        result.forEach { (id, info) ->
+            resultWithParents[id] = processClasspathParents(info, result)!!
+        }
+        log.info { "Found types from classpath: ${resultWithParents.size}" }
+        return resultWithParents
+    }
+
+    private fun processClasspathParents(typeInfo: TypeInfo?, typesConfig: MutableMap<String, TypeInfo>): TypeInfo? {
+
+        typeInfo ?: return null
+
+        if (typeInfo.parentRef.id.isBlank() || typeInfo.parentRef.id == BASE_TYPE_REF.id) {
+            return typeInfo
+        }
+
+        val parentTypeInfo = processClasspathParents(typesConfig[typeInfo.parentRef.id], typesConfig) ?: return typeInfo
+        val parentModel = parentTypeInfo.model
+
+        val roles = mutableMapOf<String, RoleDef>()
+        val statuses = mutableMapOf<String, StatusDef>()
+        val attributes = mutableMapOf<String, AttributeDef>()
+        val systemAttributes = mutableMapOf<String, AttributeDef>()
+
+        val putAllForModel = { model: TypeModelDef ->
+            roles.putAll(model.roles.associateBy { it.id })
+            statuses.putAll(model.statuses.associateBy { it.id })
+            attributes.putAll(model.attributes.associateBy { it.id })
+            systemAttributes.putAll(model.systemAttributes.associateBy { it.id })
+        }
+        putAllForModel(parentModel)
+        putAllForModel(typeInfo.model)
+
+        return typeInfo.copy {
+            withModel(typeInfo.model.copy {
+                withRoles(roles.values.toList())
+                withStatuses(statuses.values.toList())
+                withAttributes(attributes.values.toList())
+                withSystemAttributes(systemAttributes.values.toList())
+            })
+        }
     }
 
     private fun initSync() {

@@ -11,7 +11,9 @@ import ru.citeck.ecos.data.sql.records.DbRecordsDaoConfig
 import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
 import ru.citeck.ecos.data.sql.records.perms.DbRecordPerms
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
-import ru.citeck.ecos.model.domain.authorities.AuthoritiesConstants
+import ru.citeck.ecos.model.domain.authorities.AuthorityConstants
+import ru.citeck.ecos.model.domain.authorities.api.records.PersonsMixin
+import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
 import ru.citeck.ecos.model.domain.authsync.service.AuthorityType
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
@@ -25,6 +27,7 @@ import javax.sql.DataSource
 
 @Configuration
 class PersonsConfiguration(
+    private val authorityService: AuthorityService,
     private val recordsService: RecordsService,
     private val dbDomainFactory: DbDomainFactory,
     private val authoritiesSyncService: AuthoritiesSyncService
@@ -90,14 +93,14 @@ class PersonsConfiguration(
                 .withDataService(DbDataServiceConfig.create {
                     // persons should be visible for all, but editable only for concrete persons
                     withAuthEnabled(false)
-                    withTableRef(DbTableRef(AuthoritiesConstants.DEFAULT_SCHEMA, "ecos_person"))
+                    withTableRef(DbTableRef(AuthorityConstants.DEFAULT_SCHEMA, "ecos_person"))
                     withTransactional(true)
                     withStoreTableMeta(true)
                 })
                 .build()
         ).withPermsComponent(permsComponent).build()
 
-        recordsDao.addAttributesMixin(PersonsMixin(recordsService))
+        recordsDao.addAttributesMixin(PersonsMixin(recordsService, authorityService))
 
         return recordsDao
     }

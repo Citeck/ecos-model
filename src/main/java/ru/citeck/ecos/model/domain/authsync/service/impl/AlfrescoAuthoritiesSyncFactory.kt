@@ -1,6 +1,8 @@
 package ru.citeck.ecos.model.domain.authsync.service.impl
 
+import com.netflix.discovery.EurekaClient
 import mu.KotlinLogging
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.data.MLText
@@ -47,15 +49,22 @@ class AlfrescoAuthoritiesSyncFactory(
 
         private const val DEFAULT_BATCH_SIZE = 10
 
-        private val SIMPLE_ALF_ATT_REGEX = "^\\w+:\\w+$".toRegex()
+        private val SIMPLE_ALF_ATT_REGEX = "^\\w+:\\w+(\\?[a-zA-Z]+)?$".toRegex()
 
         private val log = KotlinLogging.logger {}
     }
+
+    private var eurekaClient: EurekaClient? = null
 
     override fun createSync(config: Config,
                             authorityType: AuthorityType,
                             context: AuthoritiesSyncContext<State>): AuthoritiesSync<State> {
         return Sync(config, authorityType, context)
+    }
+
+    @Autowired(required = false)
+    fun setEurekaClient(eurekaClient: EurekaClient) {
+        this.eurekaClient = eurekaClient
     }
 
     inner class Sync(
@@ -67,6 +76,7 @@ class AlfrescoAuthoritiesSyncFactory(
         private val config: Config
         private val typePredicate: Predicate
         private val mutationAtts: Map<String, String>
+        private val syncAtts: Map<String, String>
 
         init {
             val batchSize = if (config.batchSize <= 0) {
@@ -82,9 +92,23 @@ class AlfrescoAuthoritiesSyncFactory(
             mutationAtts = config.attributes.entries.filter {
                 it.value.matches(SIMPLE_ALF_ATT_REGEX)
             }.associate { it.key to it.value }
+            syncAtts = config.attributes.entries.associate {
+                val value = if (it.value.contains('.') || it.value.contains("?")) {
+                    it.value
+                } else {
+                    it.value + "?str"
+                }
+                it.key to value
+            }
         }
 
         override fun execute(state: State?): Boolean {
+
+            val eureka = eurekaClient
+            if (eureka != null) {
+                eureka.getApplication("alfresco") ?: return false
+            }
+
             val currentState = state ?: State(
                 // first sync should be based on id because not all authorities has cm:modified field
                 syncById = true,
@@ -153,7 +177,7 @@ class AlfrescoAuthoritiesSyncFactory(
                 recordsService.mutate(recsToMutate)
             }
 
-            val attsToSync = HashMap(config.attributes)
+            val attsToSync = HashMap(syncAtts)
             attsToSync[AUTHORITY_ID_ALIAS] = getAuthorityIdAtt()
             val attsAfterMutation = recordsService.getAtts(refToSync, attsToSync)
             updateAuthorities(context, listOf(attsAfterMutation))
@@ -172,7 +196,7 @@ class AlfrescoAuthoritiesSyncFactory(
 
             val recsToMutate = mutableListOf<RecordAtts>()
 
-            val groupsAtt = config.attributes[ATT_AUTHORITY_GROUPS]
+            val groupsAtt = syncAtts[ATT_AUTHORITY_GROUPS]
             if (groupsAtt.isNullOrBlank()) {
                 return emptyList()
             }
@@ -231,7 +255,7 @@ class AlfrescoAuthoritiesSyncFactory(
 
         private fun updateAuthoritiesByLastModified(state: State, context: AuthoritiesSyncContext<State>): Boolean {
 
-            val atts = HashMap(config.attributes)
+            val atts = HashMap(syncAtts)
             atts[SYS_DBID_ATT_ALIAS] = ALF_NODE_DBID_ATT
             atts[MODIFIED_ATT_ALIAS] = ALF_MODIFIED_ATT
             atts[AUTHORITY_ID_ALIAS] = getAuthorityIdAtt()
@@ -264,7 +288,7 @@ class AlfrescoAuthoritiesSyncFactory(
 
         private fun updateAuthoritiesByDbId(state: State, context: AuthoritiesSyncContext<State>): Boolean {
 
-            val atts = HashMap(config.attributes)
+            val atts = HashMap(syncAtts)
             atts[SYS_DBID_ATT_ALIAS] = ALF_NODE_DBID_ATT
             atts[AUTHORITY_ID_ALIAS] = getAuthorityIdAtt()
 
@@ -311,6 +335,8 @@ class AlfrescoAuthoritiesSyncFactory(
             }
         }
     }
+
+
 
     override fun getType(): String {
         return "alfresco"

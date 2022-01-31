@@ -3,6 +3,7 @@ package ru.citeck.ecos.model.domain.authorities.config
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthRole
+import ru.citeck.ecos.model.domain.authorities.AuthorityConstants
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
 import ru.citeck.ecos.model.domain.authsync.service.AuthorityType
 import ru.citeck.ecos.records2.RecordConstants
@@ -38,16 +39,35 @@ class GroupsPersonsRecordsDao(
         return result
     }
 
+    private fun permissionDenied() {
+        error("Permission denied")
+    }
+
     override fun mutate(records: List<LocalRecordAtts>): List<String> {
         if (syncService.isSyncContext()) {
             return super.mutate(records)
         }
-        if (!AuthContext.getCurrentAuthorities().contains(AuthRole.ADMIN)) {
-            if (records.any {
-                    it.id.isBlank()
-                        || !it.id.contentEquals(AuthContext.getCurrentUser(), true)
-            }) {
-                error("Permission denied")
+        if (!AuthContext.isRunAsSystem() && !AuthContext.getCurrentAuthorities().contains(AuthRole.ADMIN)) {
+            if (records.any { it.id.isBlank() }) {
+                permissionDenied()
+            }
+            if (authorityType == AuthorityType.PERSON) {
+                val currentUser = AuthContext.getCurrentUser()
+                for (record in records) {
+                    if (record.id == currentUser) {
+                        record.attributes.forEach { key, _ ->
+                            if (key.contains(AuthorityConstants.ATT_AUTHORITY_GROUPS)) {
+                                // user can mutate own attributes,
+                                // but groups should be changed only by admin or system
+                                permissionDenied()
+                            }
+                        }
+                    } else {
+                        permissionDenied()
+                    }
+                }
+            } else {
+                permissionDenied()
             }
         }
 

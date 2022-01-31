@@ -259,8 +259,10 @@ class AuthoritiesSyncService(
                 "stateVersion" to sync.config.version
             ))
             null
-        } else {
+        } else if (stateData.state != null && stateData.state.size() > 0) {
             stateData.state
+        } else {
+            null
         }
         val convertedState = Json.mapper.convert(state, sync.stateType)
 

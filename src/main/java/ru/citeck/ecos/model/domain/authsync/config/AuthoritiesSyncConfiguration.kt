@@ -12,7 +12,7 @@ import ru.citeck.ecos.data.sql.records.listener.*
 import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
 import ru.citeck.ecos.data.sql.records.perms.DbRecordPerms
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
-import ru.citeck.ecos.model.domain.authorities.AuthoritiesConstants
+import ru.citeck.ecos.model.domain.authorities.AuthorityConstants
 import ru.citeck.ecos.model.domain.authsync.eapp.AuthoritiesSyncArtifactHandler
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncDef
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
@@ -65,7 +65,7 @@ class AuthoritiesSyncConfiguration(
                 })
                 .withDataService(DbDataServiceConfig.create {
                     withAuthEnabled(true)
-                    withTableRef(DbTableRef(AuthoritiesConstants.DEFAULT_SCHEMA, "ecos_authorities_sync"))
+                    withTableRef(DbTableRef(AuthorityConstants.DEFAULT_SCHEMA, "ecos_authorities_sync"))
                     withStoreTableMeta(true)
                 })
                 .build()
