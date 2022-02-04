@@ -298,7 +298,7 @@ class ResolvedTypeRecordsDao(
                     if (variant.sourceId.isNotEmpty()) {
                         result.add(variant.build());
                     } else {
-                        log.warn("Create variant without sourceId will be ignored: " + variant.build());
+                        log.debug("Create variant without sourceId will be ignored: " + variant.build());
                     }
                 }
             }

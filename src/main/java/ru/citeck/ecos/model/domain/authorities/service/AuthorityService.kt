@@ -3,6 +3,7 @@ package ru.citeck.ecos.model.domain.authorities.service
 import com.hazelcast.core.HazelcastInstance
 import com.hazelcast.core.IMap
 import org.springframework.stereotype.Service
+import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.model.domain.authorities.AuthorityConstants
 import ru.citeck.ecos.model.domain.authsync.service.AuthorityType
 import ru.citeck.ecos.records2.RecordRef
@@ -48,6 +49,9 @@ class AuthorityService(
             for (expGroup in expGroups) {
                 authorities.add("GROUP_$expGroup")
             }
+        }
+        if (authorities.contains("GROUP_ALFRESCO_ADMINISTRATORS")) {
+            authorities.add(AuthRole.ADMIN)
         }
         authorities.add("GROUP_EVERYONE")
 
