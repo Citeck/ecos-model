@@ -20,7 +20,7 @@ model:
       type: ASSOC
       multiple: true
       config:
-        typeRef: emodel/type@group
+        typeRef: emodel/type@authority-group
       index:
         enabled: true
   systemAttributes:

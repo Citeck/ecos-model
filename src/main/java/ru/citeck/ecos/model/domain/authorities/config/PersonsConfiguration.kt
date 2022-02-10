@@ -12,13 +12,13 @@ import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
 import ru.citeck.ecos.data.sql.records.perms.DbRecordPerms
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
 import ru.citeck.ecos.model.domain.authorities.AuthorityConstants
-import ru.citeck.ecos.model.domain.authorities.api.records.PersonsMixin
+import ru.citeck.ecos.model.domain.authorities.api.records.AuthorityMixin
+import ru.citeck.ecos.model.domain.authorities.api.records.PersonMixin
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
 import ru.citeck.ecos.model.domain.authsync.service.AuthorityType
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.records2.RecordRef
-import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
 import ru.citeck.ecos.records3.record.dao.RecordsDao
 import ru.citeck.ecos.records3.record.dao.impl.proxy.MutateProxyProcessor
@@ -100,7 +100,8 @@ class PersonsConfiguration(
                 .build()
         ).withPermsComponent(permsComponent).build()
 
-        recordsDao.addAttributesMixin(PersonsMixin(authorityService))
+        recordsDao.addAttributesMixin(PersonMixin(authorityService))
+        recordsDao.addAttributesMixin(AuthorityMixin(authorityService))
 
         return recordsDao
     }

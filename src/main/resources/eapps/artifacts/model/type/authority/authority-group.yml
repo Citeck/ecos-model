@@ -5,8 +5,8 @@ name:
   en: Group
 
 dispNameTemplate:
-  en: "${name.en!_localId}"
-  ru: "${name.ru!_localId}"
+  en: "${name.closest.en!_localId}"
+  ru: "${name.closest.ru!_localId}"
 
 formRef: uiserv/form@authority-group-form
 parentRef: emodel/type@authority

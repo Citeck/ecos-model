@@ -9,3 +9,37 @@ columns:
       en: Identifier
   - id: name
   - id: description
+  - id: authorityGroups
+    sortable: false
+    visible: false
+  - id: authorityGroupsFull
+    name:
+      ru: Полный список групп
+      en: Full list of groups
+    sortable: false
+    multiple: true
+    visible: false
+    editable: false
+    searchable: true
+    type: ASSOC
+    editor:
+      type: journal
+      config:
+        journalId: authority-groups
+  - id: _created
+    name:
+      ru: Дата создания
+      en: Created Date
+    type: DATETIME
+  - id: _modified
+    name:
+      ru: Дата изменения
+      en: Modified Date
+    type: DATETIME
+    visible: false
+  - id: _creator
+    type: PERSON
+    name:
+      ru: Создатель
+      en: Creator
+    visible: false

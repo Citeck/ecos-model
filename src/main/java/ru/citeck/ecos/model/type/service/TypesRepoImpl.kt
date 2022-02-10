@@ -89,7 +89,7 @@ class TypesRepoImpl(
                 withId(id)
                 withName(artifact.get("name").getAs(MLText::class.java) ?: MLText.EMPTY)
                 withSourceId(artifact.get("sourceId").asText())
-                withDispNameTemplate(artifact.get("name").getAs(MLText::class.java) ?: MLText.EMPTY)
+                withDispNameTemplate(artifact.get("dispNameTemplate").getAs(MLText::class.java) ?: MLText.EMPTY)
                 withParentRef(artifact.get("parentRef").getAs(RecordRef::class.java) ?: BASE_TYPE_REF)
                 withNumTemplateRef(artifact.get("numTemplateRef").getAs(RecordRef::class.java))
                 withModel(artifact.get("model").getAs(TypeModelDef::class.java))

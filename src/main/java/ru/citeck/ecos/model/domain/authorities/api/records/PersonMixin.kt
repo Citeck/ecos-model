@@ -5,7 +5,7 @@ import ru.citeck.ecos.records3.record.atts.value.AttValue
 import ru.citeck.ecos.records3.record.atts.value.AttValueCtx
 import ru.citeck.ecos.records3.record.mixin.AttMixin
 
-class PersonsMixin(
+class PersonMixin(
     private val authorityService: AuthorityService
 ) : AttMixin {
 

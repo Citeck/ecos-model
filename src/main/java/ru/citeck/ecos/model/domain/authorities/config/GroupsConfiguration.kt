@@ -13,6 +13,7 @@ import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
 import ru.citeck.ecos.data.sql.records.perms.DbRecordPerms
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
 import ru.citeck.ecos.model.domain.authorities.AuthorityConstants
+import ru.citeck.ecos.model.domain.authorities.api.records.AuthorityMixin
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
 import ru.citeck.ecos.model.domain.authsync.service.AuthorityType
@@ -93,6 +94,8 @@ class GroupsConfiguration(
             override fun onStatusChanged(event: DbRecordStatusChangedEvent) {
             }
         })
+
+        recordsDao.addAttributesMixin(AuthorityMixin(authorityService))
 
         return recordsDao
     }

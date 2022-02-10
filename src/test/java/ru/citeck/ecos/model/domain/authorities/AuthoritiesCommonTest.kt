@@ -1,39 +1,56 @@
 package ru.citeck.ecos.model.domain.authorities
 
-import com.zaxxer.hikari.HikariDataSource
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.junit.jupiter.SpringExtension
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.context.lib.auth.AuthConstants
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthRole
-import ru.citeck.ecos.model.EcosModelApp
 import ru.citeck.ecos.model.domain.authsync.service.AuthorityType
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records2.predicate.model.Predicates
-import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 
-@ExtendWith(SpringExtension::class)
-@SpringBootTest(classes = [EcosModelApp::class])
-class AuthoritiesTest {
+class AuthoritiesCommonTest : AuthoritiesTestBase() {
 
-    @Autowired
-    lateinit var recordsService: RecordsService
-    @Autowired
-    lateinit var dataSource: HikariDataSource
+    @Test
+    fun authTest() {
+
+        initTest(authAware = true)
+
+        val checkPermissionDenied: (Boolean, () -> Unit) -> Unit = {  errorExpected, action ->
+            if (errorExpected) {
+                val ex = assertThrows<Exception> {
+                    action.invoke()
+                }
+                assertThat(ex.message).contains("Permission denied")
+            } else {
+                action.invoke()
+            }
+        }
+        checkPermissionDenied(true) {
+            createPerson("test-user")
+        }
+        checkPermissionDenied(false) {
+            AuthContext.runAsSystem {
+                createPerson("test-user")
+            }
+        }
+        checkPermissionDenied(true) {
+            createGroup("test-group")
+        }
+        checkPermissionDenied(false) {
+            AuthContext.runAsSystem {
+                createGroup("test-group")
+            }
+        }
+    }
 
     @Test
     fun test() {
-
-        println("JDBC URL: " + dataSource.jdbcUrl)
 
         val testPersonRef = AuthorityType.PERSON.getRef("test-person")
         val testPersonFirstName = "Test First Name"
