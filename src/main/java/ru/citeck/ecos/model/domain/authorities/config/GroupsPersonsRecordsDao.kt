@@ -3,7 +3,6 @@ package ru.citeck.ecos.model.domain.authorities.config
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthRole
-import ru.citeck.ecos.model.domain.authorities.AuthorityConstants
 import ru.citeck.ecos.model.domain.authorities.AuthorityConstants.ATT_AUTHORITY_GROUPS
 import ru.citeck.ecos.model.domain.authorities.AuthorityConstants.ATT_AUTHORITY_GROUPS_FULL
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
@@ -89,7 +88,7 @@ class GroupsPersonsRecordsDao(
                 for (record in records) {
                     if (record.id == currentUser) {
                         record.attributes.forEach { key, _ ->
-                            if (key.contains(AuthorityConstants.ATT_AUTHORITY_GROUPS)) {
+                            if (key.contains(ATT_AUTHORITY_GROUPS)) {
                                 // user can mutate own attributes,
                                 // but groups should be changed only by admin or system
                                 permissionDenied()
@@ -104,11 +103,37 @@ class GroupsPersonsRecordsDao(
             }
         }
 
+        if (authorityType == AuthorityType.GROUP) {
+            for (rec in records) {
+                var currentGroupId = rec.id
+                if (currentGroupId.isBlank()) {
+                    currentGroupId = rec.attributes.get("id").asText()
+                }
+                if (currentGroupId.isEmpty()) {
+                    continue
+                }
+                var newGroups: List<String> = rec.getAtt(ATT_AUTHORITY_GROUPS)
+                    .toList(RecordRef::class.java)
+                    .map { it.id }
+                if (newGroups.isEmpty()) {
+                    newGroups = rec.getAtt("att_add_$ATT_AUTHORITY_GROUPS")
+                        .toList(RecordRef::class.java)
+                        .map { it.id }
+                }
+                for (newGroup in newGroups) {
+                    val expandedGroups = authorityService.getExpandedGroups(newGroup, true)
+                    if (expandedGroups.contains(currentGroupId)) {
+                        error("Cyclic dependency. Group '${currentGroupId}' can't be added to group: $newGroup")
+                    }
+                }
+            }
+        }
+
         val attsWithBlankId = records.filter {
             it.id.isBlank() && it.attributes.get("id").asText().isBlank()
         }
         if (attsWithBlankId.isNotEmpty()) {
-            error("Id field is missing for ${getId()} record")
+            error("Id field is missing for records: ${attsWithBlankId.map { it.id }}")
         }
         val result = ArrayList<String>()
         for (record in records) {

@@ -2,6 +2,7 @@ package ru.citeck.ecos.model.domain.authorities
 
 import com.zaxxer.hikari.HikariDataSource
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -11,7 +12,9 @@ import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.model.EcosModelApp
 import ru.citeck.ecos.model.domain.authsync.service.AuthorityType
 import ru.citeck.ecos.records2.RecordRef
+import ru.citeck.ecos.records2.predicate.model.VoidPredicate
 import ru.citeck.ecos.records3.RecordsService
+import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import javax.annotation.PostConstruct
 
 @ExtendWith(SpringExtension::class)
@@ -37,6 +40,21 @@ class AuthoritiesTestBase {
         println("JDBC URL: " + dataSource.jdbcUrl)
     }
 
+    fun deleteAll(type: AuthorityType) {
+        val allRecords = recordsService.query(RecordsQuery.create {
+            withSourceId(type.sourceId + "-repo")
+            withQuery(VoidPredicate.INSTANCE)
+            withMaxItems(Int.MAX_VALUE)
+        }).getRecords()
+        recordsService.delete(allRecords)
+    }
+
+    @BeforeEach
+    fun beforeEach() {
+        deleteAll(AuthorityType.GROUP)
+        deleteAll(AuthorityType.PERSON)
+    }
+
     fun assertStrListAtt(ref: RecordRef, att: String, expected: List<String>) {
         val list = recordsService.getAtt(ref, att).toStrList()
         Assertions.assertThat(list).containsExactlyInAnyOrderElementsOf(expected)
@@ -59,6 +77,26 @@ class AuthoritiesTestBase {
             recordsService.create(type.sourceId, authorityAtts)
                 .withAppName("emodel")
                 .withSourceId(type.sourceId)
+        }
+    }
+
+    fun addAuthorityToGroup(authorityRef: RecordRef, targetGroup: RecordRef) {
+        runInAuthCtx {
+            recordsService.mutateAtt(
+                authorityRef,
+                "att_add_${AuthorityConstants.ATT_AUTHORITY_GROUPS}",
+                targetGroup
+            )
+        }
+    }
+
+    fun setAuthorityGroups(authorityRef: RecordRef, groups: List<RecordRef>) {
+        runInAuthCtx {
+            recordsService.mutateAtt(
+                authorityRef,
+                AuthorityConstants.ATT_AUTHORITY_GROUPS,
+                groups
+            )
         }
     }
 
