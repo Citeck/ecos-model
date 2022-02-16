@@ -95,7 +95,7 @@ class GroupsConfiguration(
             }
         })
 
-        recordsDao.addAttributesMixin(AuthorityMixin(authorityService))
+        recordsDao.addAttributesMixin(AuthorityMixin(authorityService, AuthorityType.GROUP))
 
         return recordsDao
     }
