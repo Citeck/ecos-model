@@ -4,7 +4,7 @@ import com.hazelcast.core.HazelcastInstance
 import com.hazelcast.core.IMap
 import org.springframework.stereotype.Service
 import ru.citeck.ecos.context.lib.auth.AuthRole
-import ru.citeck.ecos.model.domain.authorities.AuthorityConstants
+import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.authsync.service.AuthorityType
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records2.predicate.model.Predicates
@@ -23,21 +23,38 @@ class AuthorityService(
     companion object {
         private const val ASC_GROUPS_CACHE_KEY = "asc-authority-groups-cache"
         private const val DESC_GROUPS_CACHE_KEY = "desc-authority-groups-cache"
+        private const val PERSON_AUTHORITIES_CACHE_KEY = "person-authorities-cache"
 
         private const val CTX_UPDATE_GROUPS_CACHE_KEY = "ctx-update-groups-cache-key"
 
         private const val ATT_AUTHORITY_GROUPS = "authorityGroups[]?localId"
+
+        private val ADMIN_GROUPS = setOf(
+            "GROUP_ALFRESCO_ADMINISTRATORS"
+        )
     }
 
     private val ascGroupsCache: IMap<String, Set<String>>
     private val descGroupsCache: IMap<String, Set<String>>
+    private val personAuthoritiesCache: IMap<String, Set<String>>
 
     init {
         ascGroupsCache = hazelcast.getMap(ASC_GROUPS_CACHE_KEY)
         descGroupsCache = hazelcast.getMap(DESC_GROUPS_CACHE_KEY)
+        personAuthoritiesCache = hazelcast.getMap(PERSON_AUTHORITIES_CACHE_KEY)
+    }
+
+    fun isAdmin(personId: String): Boolean {
+        return getAuthoritiesForPerson(personId).contains(AuthRole.ADMIN)
     }
 
     fun getAuthoritiesForPerson(personId: String): Set<String> {
+        return personAuthoritiesCache.computeIfAbsent(personId) {
+            getAuthoritiesForPersonImpl(personId)
+        }
+    }
+
+    private fun getAuthoritiesForPersonImpl(personId: String): Set<String> {
 
         val personRef = RecordRef.create("person", personId)
         val personGroups = records.getAtt(personRef, ATT_AUTHORITY_GROUPS).asStrList()
@@ -50,7 +67,7 @@ class AuthorityService(
                 authorities.add("GROUP_$expGroup")
             }
         }
-        if (authorities.contains("GROUP_ALFRESCO_ADMINISTRATORS")) {
+        if (ADMIN_GROUPS.any { authorities.contains(it) }) {
             authorities.add(AuthRole.ADMIN)
         }
         authorities.add("GROUP_EVERYONE")
@@ -71,7 +88,11 @@ class AuthorityService(
         return getExpandedGroups(listOf(groupId), asc)
     }
 
-    fun resetCache(groupId: String) {
+    fun resetPersonCache(personId: String) {
+        personAuthoritiesCache.remove(personId)
+    }
+
+    fun resetGroupCache(groupId: String) {
 
         if (groupId.isEmpty()) {
             return
@@ -94,6 +115,7 @@ class AuthorityService(
                     }
                 }
                 groupsToResetCache.clear()
+                personAuthoritiesCache.clear()
             }
         }
     }

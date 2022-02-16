@@ -12,7 +12,7 @@ import ru.citeck.ecos.data.sql.records.listener.*
 import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
 import ru.citeck.ecos.data.sql.records.perms.DbRecordPerms
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
-import ru.citeck.ecos.model.domain.authorities.AuthorityConstants
+import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.authsync.eapp.AuthoritiesSyncArtifactHandler
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncDef
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService

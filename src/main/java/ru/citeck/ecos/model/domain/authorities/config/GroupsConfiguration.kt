@@ -12,7 +12,7 @@ import ru.citeck.ecos.data.sql.records.listener.*
 import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
 import ru.citeck.ecos.data.sql.records.perms.DbRecordPerms
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
-import ru.citeck.ecos.model.domain.authorities.AuthorityConstants
+import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.authorities.api.records.AuthorityMixin
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
@@ -80,14 +80,14 @@ class GroupsConfiguration(
 
         recordsDao.addListener(object : DbRecordsListener {
             override fun onChanged(event: DbRecordChangedEvent) {
-                authorityService.resetCache(getRecId(event.record))
+                authorityService.resetGroupCache(getRecId(event.record))
             }
             override fun onCreated(event: DbRecordCreatedEvent) {
-                authorityService.resetCache(getRecId(event.record))
+                authorityService.resetGroupCache(getRecId(event.record))
             }
 
             override fun onDeleted(event: DbRecordDeletedEvent) {
-                authorityService.resetCache(getRecId(event.record))
+                authorityService.resetGroupCache(getRecId(event.record))
             }
             override fun onDraftStatusChanged(event: DbRecordDraftStatusChangedEvent) {
             }

@@ -13,7 +13,8 @@ columns:
       en: User name
   - id: firstName
   - id: lastName
-  - id: isPersonDisabled
+  - id: personDisabled
+  - id: lastLoginTime
   - id: managedBySync
     name:
       ru: Управляется синхронизацией

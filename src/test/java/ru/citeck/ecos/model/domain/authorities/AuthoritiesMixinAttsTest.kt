@@ -1,6 +1,7 @@
 package ru.citeck.ecos.model.domain.authorities
 
 import org.junit.jupiter.api.Test
+import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 
 class AuthoritiesMixinAttsTest : AuthoritiesTestBase() {
 
@@ -8,7 +9,7 @@ class AuthoritiesMixinAttsTest : AuthoritiesTestBase() {
     fun test() {
 
         val group0Ref = createGroup("group-0")
-        val group1Ref = createGroup("group-1",AuthorityConstants.ATT_AUTHORITY_GROUPS to group0Ref)
+        val group1Ref = createGroup("group-1", AuthorityConstants.ATT_AUTHORITY_GROUPS to group0Ref)
 
         val user0Ref = createPerson("user-0", AuthorityConstants.ATT_AUTHORITY_GROUPS to listOf(group1Ref))
 

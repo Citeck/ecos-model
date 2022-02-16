@@ -27,4 +27,9 @@ model:
         ru: Описание
         en: Description
       type: MLTEXT
-
+    - id: branchType
+    - id: branchSubType
+    - id: roleType
+    - id: roleSubType
+    - id: roleIsManager
+      type: BOOLEAN

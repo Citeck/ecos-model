@@ -5,10 +5,12 @@ import ru.citeck.ecos.model.domain.type.TypeRepoMock
 import ru.citeck.ecos.model.type.api.records.ResolvedTypeRecordsDao
 import ru.citeck.ecos.model.type.api.records.mixin.TypeInhMixin
 import ru.citeck.ecos.model.type.api.records.TypeRecordsDao
+import ru.citeck.ecos.model.type.api.records.TypeRecordsMutDao
 import ru.citeck.ecos.model.type.api.records.mixin.CreateVariantsByIdMixin
 import ru.citeck.ecos.model.type.config.TypesConfig
 import ru.citeck.ecos.model.type.converter.TypeConverter
 import ru.citeck.ecos.model.type.eapps.handler.TypeArtifactHandler
+import ru.citeck.ecos.model.type.repository.TypeEntity
 import ru.citeck.ecos.model.type.service.TypeService
 import ru.citeck.ecos.model.type.service.TypeServiceImpl
 import ru.citeck.ecos.records3.RecordsProperties
@@ -41,15 +43,20 @@ open class TypeTestBase {
         typeService = TypeServiceImpl(typeConverter, typesRepo)
         artifactHandler = TypeArtifactHandler(typeService)
 
+        records = recordsServices.recordsServiceV1
         val typeRecordsDao = TypeRecordsDao(typeService)
-        recordsServices.recordsServiceV1.register(typeRecordsDao)
+        records.register(typeRecordsDao)
         val resolvedRecordsDao = ResolvedTypeRecordsDao(typeService, typeRecordsDao)
-        recordsServices.recordsServiceV1.register(resolvedRecordsDao)
+        records.register(resolvedRecordsDao)
         TypeInhMixin(resolvedRecordsDao, typeRecordsDao)
         CreateVariantsByIdMixin(resolvedRecordsDao, typeRecordsDao)
 
         TypesConfig().typesMutMetaMixin(typeRecordsDao, typeConverter, resolvedRecordsDao)
 
-        records = recordsServices.recordsServiceV1
+        records.register(TypeRecordsMutDao(typeService))
+
+        val baseType = TypeEntity()
+        baseType.extId = "base"
+        typesRepo.save(baseType)
     }
 }

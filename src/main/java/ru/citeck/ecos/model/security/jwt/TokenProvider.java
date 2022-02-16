@@ -35,44 +35,48 @@ public class TokenProvider {
 
     private long tokenValidityInMillisecondsForRememberMe;
 
-    private final JHipsterProperties jHipsterProperties;
+    private final JHipsterProperties ecosRegistryProperties;
 
-    public TokenProvider(JHipsterProperties jHipsterProperties) {
-        this.jHipsterProperties = jHipsterProperties;
+    public TokenProvider(JHipsterProperties ecosRegistryProperties) {
+        this.ecosRegistryProperties = ecosRegistryProperties;
     }
 
     @PostConstruct
     public void init() {
         byte[] keyBytes;
-        String secret = jHipsterProperties.getSecurity().getAuthentication().getJwt().getSecret();
+        String secret = ecosRegistryProperties.getSecurity().getAuthentication().getJwt().getSecret();
         if (!StringUtils.isEmpty(secret)) {
             log.warn("Warning: the JWT key used is not Base64-encoded. " +
                 "We recommend using the `jhipster.security.authentication.jwt.base64-secret` key for optimum security.");
             keyBytes = secret.getBytes(StandardCharsets.UTF_8);
         } else {
             log.debug("Using a Base64-encoded JWT secret key");
-            keyBytes = Decoders.BASE64.decode(jHipsterProperties.getSecurity().getAuthentication().getJwt().getBase64Secret());
+            keyBytes = Decoders.BASE64.decode(ecosRegistryProperties.getSecurity().getAuthentication().getJwt().getBase64Secret());
         }
         this.key = Keys.hmacShaKeyFor(keyBytes);
         this.tokenValidityInMilliseconds =
-            1000 * jHipsterProperties.getSecurity().getAuthentication().getJwt().getTokenValidityInSeconds();
+            1000 * ecosRegistryProperties.getSecurity().getAuthentication().getJwt().getTokenValidityInSeconds();
         this.tokenValidityInMillisecondsForRememberMe =
-            1000 * jHipsterProperties.getSecurity().getAuthentication().getJwt()
+            1000 * ecosRegistryProperties.getSecurity().getAuthentication().getJwt()
                 .getTokenValidityInSecondsForRememberMe();
     }
 
+    public long getTokenValidityMs(boolean rememberMe) {
+        if (rememberMe) {
+            return this.tokenValidityInMillisecondsForRememberMe;
+        } else {
+            return this.tokenValidityInMilliseconds;
+        }
+    }
+
     public String createToken(Authentication authentication, boolean rememberMe) {
+
         String authorities = authentication.getAuthorities().stream()
             .map(GrantedAuthority::getAuthority)
             .collect(Collectors.joining(","));
 
         long now = (new Date()).getTime();
-        Date validity;
-        if (rememberMe) {
-            validity = new Date(now + this.tokenValidityInMillisecondsForRememberMe);
-        } else {
-            validity = new Date(now + this.tokenValidityInMilliseconds);
-        }
+        Date validity = new Date(now + getTokenValidityMs(rememberMe));
 
         return Jwts.builder()
             .setSubject(authentication.getName())
@@ -96,17 +100,15 @@ public class TokenProvider {
     }
 
     public Authentication getAuthentication(String token) {
-        Claims claims = Jwts.parser()
-            .setSigningKey(key)
-            .parseClaimsJws(token)
-            .getBody();
 
-        Collection<? extends GrantedAuthority> authorities =
-            Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+        TokenAuthData data = getAuthData(token);
 
-        User principal = new User(claims.getSubject(), "", authorities);
+        Collection<? extends GrantedAuthority> authorities = data.getAuthorities()
+            .stream()
+            .map(SimpleGrantedAuthority::new)
+            .collect(Collectors.toList());
+
+        User principal = new User(data.getUser(), "", authorities);
 
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }

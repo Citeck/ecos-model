@@ -110,3 +110,5 @@ jhipster:
 # ===================================================================
 
 # application:
+
+ecos.idp.default-realm: ecos-app

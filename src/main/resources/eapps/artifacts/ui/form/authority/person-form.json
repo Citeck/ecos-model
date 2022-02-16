@@ -121,9 +121,9 @@
                       },
                       {
                         "label": {
-                          "en": "isPersonDisabled"
+                          "en": "personDisabled"
                         },
-                        "key": "isPersonDisabled",
+                        "key": "personDisabled",
                         "labelPosition": "",
                         "defaultValue": false,
                         "refreshOn": [],

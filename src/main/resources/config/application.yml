@@ -180,3 +180,5 @@ spring.rabbitmq:
   host: rabbitmq
   username: admin
   password: admin
+
+ecos.idp.default-realm: ecos-app

@@ -3,8 +3,8 @@ package ru.citeck.ecos.model.domain.authorities.config
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthRole
-import ru.citeck.ecos.model.domain.authorities.AuthorityConstants.ATT_AUTHORITY_GROUPS
-import ru.citeck.ecos.model.domain.authorities.AuthorityConstants.ATT_AUTHORITY_GROUPS_FULL
+import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants.ATT_AUTHORITY_GROUPS
+import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants.ATT_AUTHORITY_GROUPS_FULL
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
 import ru.citeck.ecos.model.domain.authsync.service.AuthorityType
@@ -37,6 +37,19 @@ class GroupsPersonsRecordsDao(
 
     override fun delete(recordsId: List<String>): List<DelStatus> {
         error("Not supported")
+    }
+
+    override fun getRecordsAtts(recordsId: List<String>): List<*>? {
+        if (authorityType == AuthorityType.PERSON) {
+            return super.getRecordsAtts(recordsId.map {
+                if (it == "CURRENT") {
+                    AuthContext.getCurrentUser()
+                } else {
+                    it
+                }
+            })
+        }
+        return super.getRecordsAtts(recordsId)
     }
 
     override fun queryRecords(recsQuery: RecordsQuery): RecsQueryRes<*>? {

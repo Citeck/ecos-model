@@ -40,7 +40,6 @@ model:
       name:
         ru: Должность
         en: Job Title
-    #ecos:birthDate
     - id: birthDate
       name:
         ru: Дата рождения
@@ -55,7 +54,6 @@ model:
         config:
           attribute: "birthDate|fmt('MMdd')"
         storingType: ON_MUTATE
-    #ecos:sex
     - id: sex
       name:
         ru: Пол
@@ -65,27 +63,22 @@ model:
         ru: Фото
         en: Photo
       type: CONTENT
-    # ecos:city
     - id: city
       name:
         ru: Город
         en: City
-    # cm:organization
     - id: organization
       name:
         ru: Компания
         en: Company
-    # idocs
     - id: nameInGenitiveCase
       name:
         ru: ФИО в родительном падеже
         en: Name in genitive case
-    #ecos:
     - id: typeOfEmployment
       name:
         ru: Employment type
         en: Employment type
-    #ecos
     - id: phoneInternal
       name:
         ru: Внутренний телефон
@@ -94,28 +87,23 @@ model:
       name:
         ru: Рабочий телефон
         en: Working phone
-    # ecos:isPersonDisabled
-    - id: isPersonDisabled
+    - id: personDisabled
       name:
         ru: Учетная запись отключена
         en: Account disabled
       type: BOOLEAN
-    # ecos
     - id: countryCode
       name:
         ru: Код страны
         en: Country Code
-    # ecos
     - id: timezone
       name:
         ru: Часовой пояс
         en: Timezone
-    # ecos
     - id: itn
       name:
         ru: ИНН
         en: ITN
-    # ecos
     - id: inila
       name:
         ru: СНИЛС
@@ -124,10 +112,18 @@ model:
       name:
         ru: Скайп
         en: Skype
-
+    - id: atWorkplace
+      name:
+        ru: На рабочем месте
+        en: At workplace
+      type: BOOLEAN
   systemAttributes:
-    - id: lastLogin
+    - id: lastLoginTime
       type: DATETIME
       name:
         ru: Время последнего входа
         en: Last login time
+      index:
+        enabled: true
+    - id: photoCacheKey
+      type: TEXT

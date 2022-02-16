@@ -8,6 +8,8 @@ import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.context.lib.auth.AuthContext
+import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
+import ru.citeck.ecos.model.domain.authorities.constant.PersonConstants
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSync
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncContext
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncFactory
@@ -19,6 +21,7 @@ import ru.citeck.ecos.records2.predicate.model.ValuePredicate
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
 import ru.citeck.ecos.records3.record.atts.dto.RecordAtts
+import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.query.dto.query.Consistency
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy
@@ -44,8 +47,6 @@ class AlfrescoAuthoritiesSyncFactory(
         private const val ALF_NODE_DBID_ATT = "sys:node-dbid"
         private const val ALF_TYPE_PERSON = "cm:person"
         private const val ALF_TYPE_GROUP = "cm:authorityContainer"
-
-        private const val ATT_AUTHORITY_GROUPS = "authorityGroups"
 
         private const val DEFAULT_BATCH_SIZE = 10
 
@@ -189,14 +190,14 @@ class AlfrescoAuthoritiesSyncFactory(
                                                atts: ObjectData,
                                                withRemove: Boolean): List<RecordAtts> {
 
-            if (!atts.has(ATT_AUTHORITY_GROUPS)) {
+            if (!atts.has(AuthorityConstants.ATT_AUTHORITY_GROUPS)) {
                 return emptyList()
             }
-            val newGroups = atts.get(ATT_AUTHORITY_GROUPS).asList(RecordRef::class.java)
+            val newGroups = atts.get(AuthorityConstants.ATT_AUTHORITY_GROUPS).asList(RecordRef::class.java)
 
             val recsToMutate = mutableListOf<RecordAtts>()
 
-            val groupsAtt = syncAtts[ATT_AUTHORITY_GROUPS]
+            val groupsAtt = syncAtts[AuthorityConstants.ATT_AUTHORITY_GROUPS]
             if (groupsAtt.isNullOrBlank()) {
                 return emptyList()
             }
@@ -317,15 +318,48 @@ class AlfrescoAuthoritiesSyncFactory(
             if (authorities.isEmpty()) {
                 return false
             }
-            val authoritiesToUpdate = authorities.map {
-                val atts = it.getAtts().deepCopy()
-                atts.set("id", it.getAtt(AUTHORITY_ID_ALIAS))
-                atts
-            }
             AuthContext.runAsSystem {
+                val authoritiesToUpdate = authorities.map {
+                    val atts = it.getAtts().deepCopy()
+                    atts.set("id", it.getAtt(AUTHORITY_ID_ALIAS))
+                    if (authorityType == AuthorityType.PERSON) {
+                        preparePersonUpdating(atts)
+                    } else {
+                        atts
+                    }
+                }
                 context.updateAuthorities(authorityType, authoritiesToUpdate)
             }
             return true
+        }
+
+        private fun preparePersonUpdating(personAtts: ObjectData): ObjectData {
+
+            val id = personAtts.get("id", "")
+
+            val newPhotoCacheKey = personAtts.get(PersonConstants.ATT_PHOTO_CACHE_KEY, "")
+            val currPhotoCacheKey = recordsService.getAtt(
+                AuthorityType.PERSON.getRef(id),
+                PersonConstants.ATT_PHOTO_CACHE_KEY
+            ).asText()
+
+            if (newPhotoCacheKey != currPhotoCacheKey) {
+                val alfRef = RecordRef.create("alfresco", "people", id)
+                val photoAtts = recordsService.getAtts(alfRef, PhotoAtts::class.java)
+                if (photoAtts.bytes.isNotBlank()) {
+                    val mimeType = photoAtts.mimeType.ifBlank { "image/jpeg" }
+                    val contentUrl = "data:$mimeType;base64,${photoAtts.bytes}"
+                    personAtts.set(PersonConstants.ATT_PHOTO, Collections.singletonMap("url", contentUrl))
+                }
+            }
+
+            if (personAtts.has(PersonConstants.ATT_AT_WORKPLACE)
+                    && personAtts.get(PersonConstants.ATT_AT_WORKPLACE).asText().isBlank()) {
+
+                personAtts.set(PersonConstants.ATT_AT_WORKPLACE, true)
+            }
+
+            return personAtts
         }
 
         private fun getAuthorityIdAtt(): String {
@@ -335,8 +369,6 @@ class AlfrescoAuthoritiesSyncFactory(
             }
         }
     }
-
-
 
     override fun getType(): String {
         return "alfresco"
@@ -351,5 +383,12 @@ class AlfrescoAuthoritiesSyncFactory(
         val syncById: Boolean,
         val lastId: Long,
         val lastModified: Instant
+    )
+
+    data class PhotoAtts(
+        @AttName("ecos:photo.bytes")
+        val bytes: String,
+        @AttName("ecos:photo.mimetype")
+        val mimeType: String
     )
 }
