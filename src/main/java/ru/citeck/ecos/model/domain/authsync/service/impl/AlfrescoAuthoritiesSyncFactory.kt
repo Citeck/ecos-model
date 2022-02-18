@@ -146,6 +146,10 @@ class AlfrescoAuthoritiesSyncFactory(
                     newAtts.set(v, value)
                 }
             }
+            if (record.id.isNotBlank() && newAtts.size() == 0) {
+                return record.id
+            }
+
             if (record.attributes.has("id")) {
                 var recId = record.attributes.get("id").asText()
                 if (authorityType == AuthorityType.PERSON) {

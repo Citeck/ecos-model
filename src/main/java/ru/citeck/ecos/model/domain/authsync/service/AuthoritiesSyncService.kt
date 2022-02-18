@@ -20,6 +20,7 @@ import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
 import ru.citeck.ecos.records3.record.atts.dto.RecordAtts
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
+import ru.citeck.ecos.records3.record.request.RequestContext
 import java.time.Duration
 import java.time.Instant
 import java.time.format.DateTimeParseException
@@ -173,7 +174,9 @@ class AuthoritiesSyncService(
                             scheduledTasks[syncId] = taskScheduler.scheduleWithFixedDelay(
                                 {
                                     AuthContext.runAsSystem {
-                                        run(newInstance, true)
+                                        RequestContext.doWithTxn {
+                                            run(newInstance, true)
+                                        }
                                     }
                                 },
                                 repeatDelayDuration

@@ -13,4 +13,8 @@ object PersonConstants {
     const val ATT_PHOTO = "photo"
     const val ATT_IS_MUTABLE = "isMutable"
     const val ATT_AT_WORKPLACE = "atWorkplace"
+
+    const val ATT_FIRST_NAME = "firstName"
+    const val ATT_LAST_NAME = "lastName"
+    const val ATT_EMAIL = "email"
 }

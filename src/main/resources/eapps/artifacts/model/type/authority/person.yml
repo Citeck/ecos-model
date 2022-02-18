@@ -92,6 +92,8 @@ model:
         ru: Учетная запись отключена
         en: Account disabled
       type: BOOLEAN
+      index:
+        enabled: true
     - id: countryCode
       name:
         ru: Код страны
