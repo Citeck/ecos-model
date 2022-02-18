@@ -1,0 +1,8 @@
+
+id: inactivity-duration-before-user-disabling
+name:
+  ru: Время неактивности пользователей перед отключением (ISO8601 Duration)
+  en: Inactivity duration before user disabling (ISO8601 Duration)
+
+version: 10
+value: ''

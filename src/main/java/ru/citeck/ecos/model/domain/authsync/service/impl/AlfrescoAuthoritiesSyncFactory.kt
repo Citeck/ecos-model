@@ -336,8 +336,8 @@ class AlfrescoAuthoritiesSyncFactory(
             if (newPhotoCacheKey != currPhotoCacheKey) {
                 val alfRef = RecordRef.create("alfresco", "people", id)
                 val photoAtts = recordsService.getAtts(alfRef, PhotoAtts::class.java)
-                if (photoAtts.bytes.isNotBlank()) {
-                    val mimeType = photoAtts.mimeType.ifBlank { "image/jpeg" }
+                if (!photoAtts.bytes.isNullOrBlank()) {
+                    val mimeType = photoAtts.mimeType?.ifBlank { "image/jpeg" } ?: "image/jpeg"
                     val contentUrl = "data:$mimeType;base64,${photoAtts.bytes}"
                     personAtts.set(PersonConstants.ATT_PHOTO, Collections.singletonMap("url", contentUrl))
                 }
@@ -377,8 +377,8 @@ class AlfrescoAuthoritiesSyncFactory(
 
     data class PhotoAtts(
         @AttName("ecos:photo.bytes")
-        val bytes: String,
+        val bytes: String?,
         @AttName("ecos:photo.mimetype")
-        val mimeType: String
+        val mimeType: String?
     )
 }

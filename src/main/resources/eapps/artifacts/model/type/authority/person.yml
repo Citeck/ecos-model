@@ -127,5 +127,12 @@ model:
         en: Last login time
       index:
         enabled: true
+    - id: lastEnabledTime
+      type: DATETIME
+      name:
+        ru: Время последнего включения
+        en: Last enabled time
+      index:
+        enabled: true
     - id: photoCacheKey
       type: TEXT

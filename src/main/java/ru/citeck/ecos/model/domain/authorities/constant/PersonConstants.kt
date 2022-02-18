@@ -3,6 +3,7 @@ package ru.citeck.ecos.model.domain.authorities.constant
 object PersonConstants {
 
     const val ATT_LAST_LOGIN_TIME = "lastLoginTime"
+    const val ATT_LAST_ENABLED_TIME = "lastEnabledTime"
     const val ATT_PERSON_DISABLED = "personDisabled"
     const val ATT_AUTHORITIES = "authorities"
     const val ATT_IS_ADMIN = "isAdmin"

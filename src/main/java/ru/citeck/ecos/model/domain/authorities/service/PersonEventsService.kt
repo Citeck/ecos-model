@@ -2,12 +2,15 @@ package ru.citeck.ecos.model.domain.authorities.service
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.data.sql.records.listener.DbRecordChangedEvent
 import ru.citeck.ecos.data.sql.records.listener.DbRecordCreatedEvent
 import ru.citeck.ecos.events2.EventsService
 import ru.citeck.ecos.events2.emitter.EventsEmitter
 import ru.citeck.ecos.model.domain.authorities.constant.PersonConstants
+import ru.citeck.ecos.model.domain.authsync.service.AuthorityType
 import ru.citeck.ecos.records3.RecordsService
+import java.time.Instant
 import javax.annotation.PostConstruct
 
 @Service
@@ -45,11 +48,27 @@ class PersonEventsService(
             disabledStatusChangedEmitter.emit(
                 PersonDisabledStatusChangedEvent(event.record, afterDisabled, defaultRealm)
             )
+            AuthContext.runAsSystem {
+                val userId = recordsService.getAtt(event.record, "?localId").asText()
+                recordsService.mutateAtt(
+                    AuthorityType.PERSON.getRef(userId),
+                    PersonConstants.ATT_LAST_ENABLED_TIME,
+                    Instant.now()
+                )
+            }
         }
     }
 
     fun onPersonCreated(event: DbRecordCreatedEvent) {
         createdEmitter.emit(PersonCreatedEvent(event.record, defaultRealm))
+        AuthContext.runAsSystem {
+            val userId = recordsService.getAtt(event.record, "?localId").asText()
+            recordsService.mutateAtt(
+                AuthorityType.PERSON.getRef(userId),
+                PersonConstants.ATT_LAST_ENABLED_TIME,
+                Instant.now()
+            )
+        }
     }
 
     class PersonDisabledStatusChangedEvent(
