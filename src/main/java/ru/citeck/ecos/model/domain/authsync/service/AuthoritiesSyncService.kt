@@ -24,6 +24,7 @@ import ru.citeck.ecos.records3.record.request.RequestContext
 import java.time.Duration
 import java.time.Instant
 import java.time.format.DateTimeParseException
+import java.time.temporal.ChronoUnit
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ScheduledFuture
 
@@ -179,6 +180,7 @@ class AuthoritiesSyncService(
                                         }
                                     }
                                 },
+                                Instant.now().plus(1, ChronoUnit.MINUTES),
                                 repeatDelayDuration
                             )
                         }

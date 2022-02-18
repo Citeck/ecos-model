@@ -1,8 +1,6 @@
 package ru.citeck.ecos.model.domain.authsync.service.impl
 
-import com.netflix.discovery.EurekaClient
 import mu.KotlinLogging
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.data.MLText
@@ -55,17 +53,10 @@ class AlfrescoAuthoritiesSyncFactory(
         private val log = KotlinLogging.logger {}
     }
 
-    private var eurekaClient: EurekaClient? = null
-
     override fun createSync(config: Config,
                             authorityType: AuthorityType,
                             context: AuthoritiesSyncContext<State>): AuthoritiesSync<State> {
         return Sync(config, authorityType, context)
-    }
-
-    @Autowired(required = false)
-    fun setEurekaClient(eurekaClient: EurekaClient) {
-        this.eurekaClient = eurekaClient
     }
 
     inner class Sync(
@@ -104,11 +95,6 @@ class AlfrescoAuthoritiesSyncFactory(
         }
 
         override fun execute(state: State?): Boolean {
-
-            val eureka = eurekaClient
-            if (eureka != null) {
-                eureka.getApplication("alfresco") ?: return false
-            }
 
             val currentState = state ?: State(
                 // first sync should be based on id because not all authorities has cm:modified field
