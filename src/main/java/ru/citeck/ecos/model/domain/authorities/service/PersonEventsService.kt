@@ -10,6 +10,7 @@ import ru.citeck.ecos.events2.emitter.EventsEmitter
 import ru.citeck.ecos.model.domain.authorities.constant.PersonConstants
 import ru.citeck.ecos.model.domain.authsync.service.AuthorityType
 import ru.citeck.ecos.records3.RecordsService
+import ru.citeck.ecos.records3.record.atts.schema.ScalarType
 import java.time.Instant
 import javax.annotation.PostConstruct
 
@@ -48,25 +49,28 @@ class PersonEventsService(
             disabledStatusChangedEmitter.emit(
                 PersonDisabledStatusChangedEvent(event.record, afterDisabled, defaultRealm)
             )
-            AuthContext.runAsSystem {
-                val userId = recordsService.getAtt(event.record, "?localId").asText()
-                recordsService.mutateAtt(
-                    AuthorityType.PERSON.getRef(userId),
-                    PersonConstants.ATT_LAST_ENABLED_TIME,
-                    Instant.now()
-                )
+            if (!afterDisabled) {
+                updatePersonEnabledTime(event.record)
             }
         }
     }
 
     fun onPersonCreated(event: DbRecordCreatedEvent) {
         createdEmitter.emit(PersonCreatedEvent(event.record, defaultRealm))
+        updatePersonEnabledTime(event.record)
+    }
+
+    private fun updatePersonEnabledTime(record: Any) {
         AuthContext.runAsSystem {
-            val userId = recordsService.getAtt(event.record, "?localId").asText()
-            recordsService.mutateAtt(
+            val userId = recordsService.getAtt(record, ScalarType.LOCAL_ID.schema).asText()
+            val now = Instant.now()
+            recordsService.mutate(
                 AuthorityType.PERSON.getRef(userId),
-                PersonConstants.ATT_LAST_ENABLED_TIME,
-                Instant.now()
+                mapOf(
+                    PersonConstants.ATT_LAST_ACTIVITY_TIME to now,
+                    PersonConstants.ATT_LAST_ENABLED_TIME to now,
+                    PersonConstants.ATT_PERSON_DISABLE_REASON to ""
+                )
             )
         }
     }

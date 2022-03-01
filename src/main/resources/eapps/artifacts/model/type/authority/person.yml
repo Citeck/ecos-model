@@ -94,6 +94,10 @@ model:
       type: BOOLEAN
       index:
         enabled: true
+    - id: personDisableReason
+      name:
+        ru: Причина отключения учетной записи
+        en: Account disable reason
     - id: countryCode
       name:
         ru: Код страны
@@ -125,13 +129,16 @@ model:
       name:
         ru: Время последнего входа
         en: Last login time
-      index:
-        enabled: true
     - id: lastEnabledTime
       type: DATETIME
       name:
         ru: Время последнего включения
         en: Last enabled time
+    - id: lastActivityTime
+      type: DATETIME
+      name:
+        ru: Время последней активности
+        en: Last activity time
       index:
         enabled: true
     - id: photoCacheKey

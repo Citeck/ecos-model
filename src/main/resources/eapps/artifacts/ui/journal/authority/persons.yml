@@ -14,7 +14,14 @@ columns:
   - id: firstName
   - id: lastName
   - id: personDisabled
-  - id: lastLoginTime
+  - id: lastActivityTime
+    visible: false
+  - id: inactivityDays
+    name:
+      ru: Дней неактивности
+      en: Inactivity days
+    type: NUMBER
+    visible: false
   - id: managedBySync
     name:
       ru: Управляется синхронизацией
@@ -41,6 +48,7 @@ columns:
       ru: Дата создания
       en: Created Date
     type: DATETIME
+    visible: false
   - id: _modified
     name:
       ru: Дата изменения

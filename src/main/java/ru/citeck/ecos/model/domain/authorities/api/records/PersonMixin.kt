@@ -7,6 +7,8 @@ import ru.citeck.ecos.records3.record.atts.schema.ScalarType
 import ru.citeck.ecos.records3.record.atts.value.AttValue
 import ru.citeck.ecos.records3.record.atts.value.AttValueCtx
 import ru.citeck.ecos.records3.record.mixin.AttMixin
+import java.time.Instant
+import java.util.concurrent.TimeUnit
 
 class PersonMixin(
     private val authorityService: AuthorityService
@@ -20,7 +22,8 @@ class PersonMixin(
             PersonConstants.ATT_IS_AUTHENTICATION_MUTABLE,
             PersonConstants.ATT_FULL_NAME,
             PersonConstants.ATT_AVATAR,
-            PersonConstants.ATT_IS_MUTABLE
+            PersonConstants.ATT_IS_MUTABLE,
+            PersonConstants.ATT_INACTIVITY_DAYS,
         )
     }
 
@@ -40,8 +43,15 @@ class PersonMixin(
                     null
                 }
             }
-            PersonConstants.ATT_IS_MUTABLE -> {
-                return false
+            PersonConstants.ATT_IS_MUTABLE -> false
+            PersonConstants.ATT_INACTIVITY_DAYS -> {
+
+                val lastActivity = value.getAtt(PersonConstants.ATT_LAST_ACTIVITY_TIME).getAs(Instant::class.java)
+                if (lastActivity == null || lastActivity == Instant.EPOCH) {
+                    return 0
+                }
+                val inactivityMs = Instant.now().toEpochMilli() - lastActivity.toEpochMilli()
+                return inactivityMs / TimeUnit.DAYS.toMillis(1)
             }
             else -> null
         }

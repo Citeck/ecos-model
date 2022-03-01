@@ -181,4 +181,9 @@ spring.rabbitmq:
   username: admin
   password: admin
 
-ecos.idp.default-realm: ecos-app
+ecos:
+  idp:
+    default-realm: ecos-app
+  job:
+    inactiveUsersDisabling:
+      cron: '0 0 0/6 ? * * *'

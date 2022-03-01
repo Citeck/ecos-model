@@ -5,6 +5,7 @@ import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants.ATT_AUTHORITY_GROUPS
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants.ATT_AUTHORITY_GROUPS_FULL
+import ru.citeck.ecos.model.domain.authorities.constant.PersonConstants
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
 import ru.citeck.ecos.model.domain.authsync.service.AuthorityType
@@ -12,10 +13,7 @@ import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records2.predicate.PredicateService
 import ru.citeck.ecos.records2.predicate.PredicateUtils
-import ru.citeck.ecos.records2.predicate.model.OrPredicate
-import ru.citeck.ecos.records2.predicate.model.Predicate
-import ru.citeck.ecos.records2.predicate.model.Predicates
-import ru.citeck.ecos.records2.predicate.model.ValuePredicate
+import ru.citeck.ecos.records2.predicate.model.*
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.delete.DelStatus
@@ -23,7 +21,10 @@ import ru.citeck.ecos.records3.record.dao.impl.proxy.ProxyProcessor
 import ru.citeck.ecos.records3.record.dao.impl.proxy.RecordsDaoProxy
 import ru.citeck.ecos.records3.record.dao.mutate.RecordsMutateWithAnyResDao
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
+import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 class GroupsPersonsRecordsDao(
     id: String,
@@ -53,12 +54,18 @@ class GroupsPersonsRecordsDao(
     }
 
     override fun queryRecords(recsQuery: RecordsQuery): RecsQueryRes<*>? {
+        var newSortBy = recsQuery.sortBy
+        if (authorityType == AuthorityType.PERSON && recsQuery.sortBy.isNotEmpty()) {
+            newSortBy = newSortBy.mapNotNull { preProcessPersonSortBy(it) }
+        }
         if (recsQuery.language != PredicateService.LANGUAGE_PREDICATE) {
             return super.queryRecords(recsQuery)
         }
         val predicate = PredicateUtils.mapValuePredicates(recsQuery.getQuery(Predicate::class.java)) { pred ->
 
-            if (pred.getType() == ValuePredicate.Type.CONTAINS && pred.getAttribute() == ATT_AUTHORITY_GROUPS_FULL) {
+            var result: Predicate? = if (pred.getType() == ValuePredicate.Type.CONTAINS
+                    && pred.getAttribute() == ATT_AUTHORITY_GROUPS_FULL) {
+
                 val values = pred.getValue().toList(RecordRef::class.java)
                 val expandedGroups = authorityService.getExpandedGroups(values.map { it.id }, false)
                 OrPredicate.of(expandedGroups.map {
@@ -67,10 +74,55 @@ class GroupsPersonsRecordsDao(
             } else {
                 pred
             }
+
+            if (authorityType == AuthorityType.PERSON && result is ValuePredicate) {
+                result = preProcessPersonValuePredicate(result)
+            }
+
+            result
         }
         return super.queryRecords(recsQuery.copy {
             withQuery(predicate)
+            withSortBy(newSortBy)
         })
+    }
+
+    private fun preProcessPersonSortBy(sortBy: SortBy): SortBy {
+        if (sortBy.attribute == PersonConstants.ATT_INACTIVITY_DAYS) {
+            return SortBy(PersonConstants.ATT_LAST_ACTIVITY_TIME, !sortBy.ascending)
+        }
+        return sortBy
+    }
+
+    private fun preProcessPersonValuePredicate(pred: ValuePredicate): Predicate? {
+        if (pred.getAttribute() == PersonConstants.ATT_INACTIVITY_DAYS) {
+            return preProcessInactivityDaysPredicate(pred)
+        }
+        return pred
+    }
+
+    private fun preProcessInactivityDaysPredicate(pred: ValuePredicate) : Predicate? {
+
+        val daysCount = pred.getValue().asLong()
+        val inactivityTime = Instant.now().minus(daysCount, ChronoUnit.DAYS)
+        val inactivityTimeMinusDay = inactivityTime.minus(1, ChronoUnit.DAYS)
+
+        val lastActivityTimeAtt = PersonConstants.ATT_LAST_ACTIVITY_TIME
+
+        if (pred.getType() == ValuePredicate.Type.EQ) {
+            return Predicates.and(
+                Predicates.gt(lastActivityTimeAtt, inactivityTimeMinusDay),
+                Predicates.lt(lastActivityTimeAtt, inactivityTime)
+            )
+        }
+
+        return when (pred.getType()) {
+            ValuePredicate.Type.GE -> Predicates.le(lastActivityTimeAtt, inactivityTime)
+            ValuePredicate.Type.GT -> Predicates.le(lastActivityTimeAtt, inactivityTimeMinusDay)
+            ValuePredicate.Type.LE -> Predicates.ge(lastActivityTimeAtt, inactivityTimeMinusDay)
+            ValuePredicate.Type.LT -> Predicates.ge(lastActivityTimeAtt, inactivityTime)
+            else -> null
+        }
     }
 
     override fun mutateForAnyRes(records: List<LocalRecordAtts>): List<Any> {

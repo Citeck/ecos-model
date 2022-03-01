@@ -59,7 +59,8 @@ class KeycloakEventsListener(
     private fun processLoginEvent(event: LoginEventAtts) {
         log.info { "LOGIN: $event" }
         val mutAtts = mapOf(
-            PersonConstants.ATT_LAST_LOGIN_TIME to event.time
+            PersonConstants.ATT_LAST_LOGIN_TIME to event.time,
+            PersonConstants.ATT_LAST_ACTIVITY_TIME to event.time
         )
         recordsService.mutate(AuthorityType.PERSON.getRef(event.userName.lowercase()), mutAtts)
     }

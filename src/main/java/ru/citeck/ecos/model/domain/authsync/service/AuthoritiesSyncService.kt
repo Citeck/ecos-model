@@ -49,6 +49,8 @@ class AuthoritiesSyncService(
 
     private val syncContext = ThreadLocal<Boolean>()
 
+    private var initialized: Boolean = false
+
     fun isSyncContext(): Boolean {
         return syncContext.get() == true
     }
@@ -324,7 +326,10 @@ class AuthoritiesSyncService(
 
     @EventListener
     fun onServicesInitialized(event: ContextRefreshedEvent) {
-        updateSynchronizations()
+        if (!initialized) {
+            initialized = true
+            updateSynchronizations()
+        }
     }
 
     private class SyncInstance(

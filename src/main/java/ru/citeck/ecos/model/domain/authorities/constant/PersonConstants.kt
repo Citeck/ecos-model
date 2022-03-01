@@ -2,8 +2,10 @@ package ru.citeck.ecos.model.domain.authorities.constant
 
 object PersonConstants {
 
+    const val ATT_PERSON_DISABLE_REASON = "personDisableReason"
     const val ATT_LAST_LOGIN_TIME = "lastLoginTime"
     const val ATT_LAST_ENABLED_TIME = "lastEnabledTime"
+    const val ATT_LAST_ACTIVITY_TIME = "lastActivityTime"
     const val ATT_PERSON_DISABLED = "personDisabled"
     const val ATT_AUTHORITIES = "authorities"
     const val ATT_IS_ADMIN = "isAdmin"
@@ -14,6 +16,7 @@ object PersonConstants {
     const val ATT_PHOTO = "photo"
     const val ATT_IS_MUTABLE = "isMutable"
     const val ATT_AT_WORKPLACE = "atWorkplace"
+    const val ATT_INACTIVITY_DAYS = "inactivityDays"
 
     const val ATT_FIRST_NAME = "firstName"
     const val ATT_LAST_NAME = "lastName"

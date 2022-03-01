@@ -64,6 +64,7 @@
     <logger name="ru.citeck.ecos.records3" level="WARN"/>
     <logger name="ru.citeck.ecos.data" level="INFO"/>
     <logger name="ru.citeck.ecos.model.domain.authsync" level="INFO"/>
+    <logger name="ecos.curator" level="INFO"/>
 
     <!-- https://logback.qos.ch/manual/configuration.html#shutdownHook and https://jira.qos.ch/browse/LOGBACK-1090 -->
     <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook"/>
