@@ -18,7 +18,8 @@ import java.util.function.Consumer
 @Service
 class TypeServiceImpl(
     private val typeConverter: TypeConverter,
-    private val typeRepoDao: TypeRepoDao
+    private val typeRepoDao: TypeRepoDao,
+    private val typeEventsService: TypeEventsService? = null
 ) : TypeService {
 
     companion object {
@@ -212,13 +213,25 @@ class TypeServiceImpl(
     @Transactional
     override fun save(dto: TypeDef): TypeDef {
 
+        var typeDefBefore: TypeDef? = null
+        if (typeEventsService != null) {
+            typeDefBefore = typeRepoDao.findByExtId(dto.id)?.let { typeConverter.toDto(it) }
+        }
+
         var entity = typeConverter.toEntity(dto)
+
         entity = typeRepoDao.save(entity)
 
         updateModifiedTimeForLinkedTypes(dto.id)
 
         val typeDef = typeConverter.toDto(entity)
         onTypeChangedListener.invoke(typeDef)
+
+        if (typeDefBefore == null) {
+            typeEventsService?.onTypeCreated(typeDef)
+        } else {
+            typeEventsService?.onTypeChanged(typeDefBefore, typeDef)
+        }
 
         return typeDef
     }

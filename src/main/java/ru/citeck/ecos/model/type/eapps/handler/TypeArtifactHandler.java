@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.apps.app.domain.handler.EcosArtifactHandler;
+import ru.citeck.ecos.context.lib.auth.AuthContext;
 import ru.citeck.ecos.model.type.dto.TypeDef;
 import ru.citeck.ecos.model.type.service.TypeService;
 
@@ -19,7 +20,9 @@ public class TypeArtifactHandler implements EcosArtifactHandler<TypeDef> {
 
     @Override
     public void deployArtifact(@NotNull TypeDef artifact) {
-        typeService.save(artifact);
+        AuthContext.runAsSystemJ(() -> {
+            typeService.save(artifact);
+        });
     }
 
     @Override

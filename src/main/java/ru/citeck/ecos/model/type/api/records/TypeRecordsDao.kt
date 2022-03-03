@@ -103,6 +103,10 @@ class TypeRecordsDao(
         return result
     }
 
+    fun getRecord(typeDef: TypeDef): TypeRecord {
+        return TypeRecord(typeDef, typeService)
+    }
+
     override fun getRecordAtts(recordId: String): TypeRecord? {
         return typeService.getByIdOrNull(recordId)?.let { TypeRecord(it, typeService) }
     }

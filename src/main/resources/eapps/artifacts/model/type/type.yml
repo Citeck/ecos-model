@@ -20,3 +20,42 @@ createVariants:
   - id: upload-template
     name: { ru: Загрузить тип, en: Upload type }
     formRef: uiserv/form@ecos-module-upload
+
+model:
+  attributes:
+    - id: name
+      name:
+        ru: Имя
+        en: Name
+      type: MLTEXT
+    - id: description
+      name:
+        ru: Описание
+        en: Description
+      type: MLTEXT
+    - id: sourceId
+      name:
+        ru: Идентификатор источника данных
+        en: Data Source ID
+    - id: parentRef
+      name:
+        ru: Родительский тип
+        en: Parent type
+    - id: formRef
+      name:
+        ru: Форма
+        en: Form
+    - id: journalRef
+      name:
+        ru: Журнал
+        en: Journal
+    - id: boardRef
+      name:
+        ru: Канбан доска
+        en: Kanban Board
+    - id: actions
+      multiple: true
+      name:
+        ru: Действия
+        en: Actions
+
