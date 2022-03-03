@@ -19,6 +19,10 @@ class KeycloakEventsListener(
     val recordsService: RecordsService
 ) {
     companion object {
+
+        private const val EVENT_TYPE_USER = "keycloak-user"
+        private const val EVENT_TYPE_ADMIN = "keycloak-admin"
+
         private const val EVENT_TYPE_LOGIN = "LOGIN"
         private const val RESOURCE_TYPE_USER = "USER"
         private const val RESOURCE_OP_TYPE_CREATE = "CREATE"
@@ -31,8 +35,12 @@ class KeycloakEventsListener(
 
     @PostConstruct
     fun init() {
+
+        addKkEventsLogging(EVENT_TYPE_USER)
+        addKkEventsLogging(EVENT_TYPE_ADMIN)
+
         eventsService.addListener<LoginEventAtts> {
-            withEventType("keycloak-user")
+            withEventType(EVENT_TYPE_USER)
             withDataClass(LoginEventAtts::class.java)
             withAction {
                 processLoginEvent(it)
@@ -43,7 +51,7 @@ class KeycloakEventsListener(
             ))
         }
         eventsService.addListener<UserCreatedEventAtts> {
-            withEventType("keycloak-admin")
+            withEventType(EVENT_TYPE_ADMIN)
             withDataClass(UserCreatedEventAtts::class.java)
             withAction {
                 processUserCreatedEvent(UserCreatedEvent(it))
@@ -56,8 +64,18 @@ class KeycloakEventsListener(
         }
     }
 
+    private fun addKkEventsLogging(type: String) {
+        eventsService.addListener<ObjectData> {
+            withEventType(type)
+            withAttributes(mapOf("data" to "?json"))
+            withDataClass(ObjectData::class.java)
+            withAction { data ->
+                log.info { data.get("data").toString() }
+            }
+        }
+    }
+
     private fun processLoginEvent(event: LoginEventAtts) {
-        log.info { "LOGIN: $event" }
         val mutAtts = mapOf(
             PersonConstants.ATT_LAST_LOGIN_TIME to event.time,
             PersonConstants.ATT_LAST_ACTIVITY_TIME to event.time
