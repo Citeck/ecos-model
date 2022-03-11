@@ -38,6 +38,6 @@ public class TypeArtifactHandler implements EcosArtifactHandler<TypeDef> {
 
     @Override
     public void listenChanges(@NotNull Consumer<TypeDef> consumer) {
-        typeService.addListener(consumer);
+        typeService.addListener((before, after) -> consumer.accept(after));
     }
 }

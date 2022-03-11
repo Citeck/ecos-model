@@ -3,12 +3,11 @@ package ru.citeck.ecos.model.type.service
 import org.springframework.data.domain.Sort
 import ru.citeck.ecos.model.type.dto.TypeDef
 import ru.citeck.ecos.records2.predicate.model.Predicate
-import ru.citeck.ecos.records3.record.mixin.impl.mutmeta.MutMeta
-import java.util.function.Consumer
+import java.util.function.BiConsumer
 
 interface TypeService {
 
-    fun addListener(onTypeChangedListener: Consumer<TypeDef>)
+    fun addListener(onTypeChangedListener: BiConsumer<TypeDef?, TypeDef>)
 
     fun getAll(max: Int, skip: Int): List<TypeDef>
 

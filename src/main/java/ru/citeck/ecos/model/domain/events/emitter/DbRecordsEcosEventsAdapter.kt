@@ -5,7 +5,7 @@ import ru.citeck.ecos.data.sql.records.listener.*
 import ru.citeck.ecos.events2.type.*
 
 @Component
-class DbRecordsEcosEventsAdapter(val emitter: RecordEventsEmitter) : DbRecordsListener {
+class DbRecordsEcosEventsAdapter(val emitter: RecordEventsService) : DbRecordsListener {
 
     override fun onChanged(event: DbRecordChangedEvent) {
         emitter.emitRecChanged(RecordChangedEvent(
@@ -17,7 +17,7 @@ class DbRecordsEcosEventsAdapter(val emitter: RecordEventsEmitter) : DbRecordsLi
     }
 
     override fun onCreated(event: DbRecordCreatedEvent) {
-        emitter.emitRecCreatedEvent(RecordCreatedEvent(
+        emitter.emitRecCreated(RecordCreatedEvent(
             event.record,
             event.typeDef
         ))

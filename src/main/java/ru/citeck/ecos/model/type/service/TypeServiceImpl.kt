@@ -13,13 +13,13 @@ import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records2.predicate.model.VoidPredicate
 import java.time.Instant
 import java.util.*
-import java.util.function.Consumer
+import java.util.concurrent.CopyOnWriteArrayList
+import java.util.function.BiConsumer
 
 @Service
 class TypeServiceImpl(
     private val typeConverter: TypeConverter,
-    private val typeRepoDao: TypeRepoDao,
-    private val typeEventsService: TypeEventsService? = null
+    private val typeRepoDao: TypeRepoDao
 ) : TypeService {
 
     companion object {
@@ -35,7 +35,7 @@ class TypeServiceImpl(
         )
     }
 
-    private var onTypeChangedListener: (TypeDef) -> Unit = {}
+    private var onTypeChangedListeners: MutableList<(TypeDef?, TypeDef) -> Unit> = CopyOnWriteArrayList()
 
     override fun getChildren(typeId: String): List<String> {
         return typeRepoDao.getChildrenIds(typeId).toList()
@@ -71,8 +71,8 @@ class TypeServiceImpl(
         return typeRepoDao.count(predicate)
     }
 
-    override fun addListener(onTypeChangedListener: Consumer<TypeDef>) {
-        this.onTypeChangedListener = { onTypeChangedListener.accept(it) }
+    override fun addListener(onTypeChangedListener: BiConsumer<TypeDef?, TypeDef>) {
+        onTypeChangedListeners.add { before, after -> onTypeChangedListener.accept(before, after) }
     }
 
     override fun getAll(): List<TypeDef> {
@@ -213,9 +213,8 @@ class TypeServiceImpl(
     @Transactional
     override fun save(dto: TypeDef): TypeDef {
 
-        var typeDefBefore: TypeDef? = null
-        if (typeEventsService != null) {
-            typeDefBefore = typeRepoDao.findByExtId(dto.id)?.let { typeConverter.toDto(it) }
+        val typeDefBefore: TypeDef? = typeRepoDao.findByExtId(dto.id)?.let {
+            typeConverter.toDto(it)
         }
 
         var entity = typeConverter.toEntity(dto)
@@ -224,16 +223,12 @@ class TypeServiceImpl(
 
         updateModifiedTimeForLinkedTypes(dto.id)
 
-        val typeDef = typeConverter.toDto(entity)
-        onTypeChangedListener.invoke(typeDef)
-
-        if (typeDefBefore == null) {
-            typeEventsService?.onTypeCreated(typeDef)
-        } else {
-            typeEventsService?.onTypeChanged(typeDefBefore, typeDef)
+        val typeDefAfter = typeConverter.toDto(entity)
+        onTypeChangedListeners.forEach {
+            it.invoke(typeDefBefore, typeDefAfter)
         }
 
-        return typeDef
+        return typeDefAfter
     }
 
     private fun updateModifiedTimeForLinkedTypes(typeId: String) {
