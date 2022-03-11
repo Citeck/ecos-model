@@ -13,7 +13,8 @@ import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records2.predicate.model.VoidPredicate
 import java.time.Instant
 import java.util.*
-import java.util.function.Consumer
+import java.util.concurrent.CopyOnWriteArrayList
+import java.util.function.BiConsumer
 
 @Service
 class TypeServiceImpl(
@@ -34,7 +35,7 @@ class TypeServiceImpl(
         )
     }
 
-    private var onTypeChangedListener: (TypeDef) -> Unit = {}
+    private var onTypeChangedListeners: MutableList<(TypeDef?, TypeDef) -> Unit> = CopyOnWriteArrayList()
 
     override fun getChildren(typeId: String): List<String> {
         return typeRepoDao.getChildrenIds(typeId).toList()
@@ -70,8 +71,8 @@ class TypeServiceImpl(
         return typeRepoDao.count(predicate)
     }
 
-    override fun addListener(onTypeChangedListener: Consumer<TypeDef>) {
-        this.onTypeChangedListener = { onTypeChangedListener.accept(it) }
+    override fun addListener(onTypeChangedListener: BiConsumer<TypeDef?, TypeDef>) {
+        onTypeChangedListeners.add { before, after -> onTypeChangedListener.accept(before, after) }
     }
 
     override fun getAll(): List<TypeDef> {
@@ -212,15 +213,22 @@ class TypeServiceImpl(
     @Transactional
     override fun save(dto: TypeDef): TypeDef {
 
+        val typeDefBefore: TypeDef? = typeRepoDao.findByExtId(dto.id)?.let {
+            typeConverter.toDto(it)
+        }
+
         var entity = typeConverter.toEntity(dto)
+
         entity = typeRepoDao.save(entity)
 
         updateModifiedTimeForLinkedTypes(dto.id)
 
-        val typeDef = typeConverter.toDto(entity)
-        onTypeChangedListener.invoke(typeDef)
+        val typeDefAfter = typeConverter.toDto(entity)
+        onTypeChangedListeners.forEach {
+            it.invoke(typeDefBefore, typeDefAfter)
+        }
 
-        return typeDef
+        return typeDefAfter
     }
 
     private fun updateModifiedTimeForLinkedTypes(typeId: String) {

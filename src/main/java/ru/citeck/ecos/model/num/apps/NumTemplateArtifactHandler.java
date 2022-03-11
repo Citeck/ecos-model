@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class NumTemplateModuleHandler implements EcosArtifactHandler<NumTemplateDto> {
+public class NumTemplateArtifactHandler implements EcosArtifactHandler<NumTemplateDto> {
 
     private final NumTemplateService numTemplateService;
 
@@ -35,6 +35,6 @@ public class NumTemplateModuleHandler implements EcosArtifactHandler<NumTemplate
 
     @Override
     public void listenChanges(@NotNull Consumer<NumTemplateDto> consumer) {
-        numTemplateService.addListener(consumer);
+        numTemplateService.addListener((before, after) -> consumer.accept(after));
     }
 }

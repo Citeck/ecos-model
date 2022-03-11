@@ -12,6 +12,7 @@ import ru.citeck.ecos.data.sql.records.listener.*
 import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
 import ru.citeck.ecos.data.sql.records.perms.DbRecordPerms
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
+import ru.citeck.ecos.model.domain.authorities.api.records.AuthorityGroupMixin
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.authorities.api.records.AuthorityMixin
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
@@ -98,6 +99,7 @@ class GroupsConfiguration(
         recordsDao.addListener(dbRecordsEcosEventsAdapter)
 
         recordsDao.addAttributesMixin(AuthorityMixin(authorityService, AuthorityType.GROUP))
+        recordsDao.addAttributesMixin(AuthorityGroupMixin())
 
         return recordsDao
     }

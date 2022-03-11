@@ -2,16 +2,19 @@ package ru.citeck.ecos.model.num.records;
 
 import ecos.com.fasterxml.jackson210.annotation.JsonProperty;
 import ecos.com.fasterxml.jackson210.annotation.JsonValue;
+import kotlin.Unit;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.commons.json.YamlUtils;
 import ru.citeck.ecos.commons.utils.TmplUtils;
+import ru.citeck.ecos.events2.type.RecordEventsService;
 import ru.citeck.ecos.model.num.dto.NumTemplateDto;
 import ru.citeck.ecos.model.num.dto.NumTemplateWithMetaDto;
 import ru.citeck.ecos.model.num.service.NumTemplateService;
@@ -30,6 +33,8 @@ import ru.citeck.ecos.records2.source.dao.local.LocalRecordsDao;
 import ru.citeck.ecos.records2.source.dao.local.MutableRecordsLocalDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsMetaDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsQueryWithMetaDao;
+import ru.citeck.ecos.records3.record.atts.schema.resolver.AttSchemaResolver;
+import ru.citeck.ecos.records3.record.request.RequestContext;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -43,10 +48,14 @@ public class NumTemplateRecordsDao extends LocalRecordsDao
 
     private static final String ID = "num-template";
     private final NumTemplateService numTemplateService;
+    private final RecordEventsService recordEventsService;
 
-    public NumTemplateRecordsDao(NumTemplateService numTemplateService) {
+    public NumTemplateRecordsDao(NumTemplateService numTemplateService, RecordEventsService recordEventsService) {
         setId(ID);
         this.numTemplateService = numTemplateService;
+        this.recordEventsService = recordEventsService;
+
+        numTemplateService.addListener(this::onTemplateChanged);
     }
 
     @Override
@@ -144,6 +153,21 @@ public class NumTemplateRecordsDao extends LocalRecordsDao
                 .orElseGet(() -> new NumTemplateWithMetaDto(id)))
             .map(NumTemplateRecord::new)
             .collect(Collectors.toList());
+    }
+
+    private void onTemplateChanged(@Nullable NumTemplateDto before, NumTemplateDto after) {
+        RequestContext.doWithCtxJ(context -> {
+            context.doWithVar(AttSchemaResolver.CTX_SOURCE_ID_KEY, getId(), () -> {
+                NumTemplateRecord beforeRec = null;
+                if (before != null) {
+                    beforeRec = new NumTemplateRecord(new NumTemplateWithMetaDto(before));
+                }
+                NumTemplateRecord afterRec = new NumTemplateRecord(new NumTemplateWithMetaDto(after));
+                recordEventsService.emitRecChanged(beforeRec, afterRec);
+                return Unit.INSTANCE;
+            });
+            return Unit.INSTANCE;
+        });
     }
 
     @NoArgsConstructor

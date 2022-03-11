@@ -12,6 +12,8 @@ import ru.citeck.ecos.data.sql.records.listener.*
 import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
 import ru.citeck.ecos.data.sql.records.perms.DbRecordPerms
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
+import ru.citeck.ecos.events2.type.RecordChangedEvent
+import ru.citeck.ecos.events2.type.RecordEventsService
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.authsync.eapp.AuthoritiesSyncArtifactHandler
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncDef
@@ -27,6 +29,7 @@ class AuthoritiesSyncConfiguration(
     private val recordsService: RecordsService,
     private val dbDomainFactory: DbDomainFactory,
     private val authoritiesSyncService: AuthoritiesSyncService,
+    private val recordEventsService: RecordEventsService,
     private val authoritiesSyncArtifactHandler: AuthoritiesSyncArtifactHandler
 ) {
 
@@ -74,9 +77,11 @@ class AuthoritiesSyncConfiguration(
         dao.addListener(object : DbRecordsListener {
             override fun onChanged(event: DbRecordChangedEvent) {
                 recordWasUpdated(event.record)
+                recordEventsService.emitRecChanged(event.record, event.before, event.after)
             }
             override fun onCreated(event: DbRecordCreatedEvent) {
                 recordWasUpdated(event.record)
+                recordEventsService.emitRecCreated(event.record)
             }
             override fun onDeleted(event: DbRecordDeletedEvent) {
                 authoritiesSyncService.updateSynchronizations()

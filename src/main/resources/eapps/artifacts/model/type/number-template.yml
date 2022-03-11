@@ -21,3 +21,14 @@ createVariants:
   - id: upload-template
     name: { ru: Загрузить шаблон, en: Upload template }
     formRef: uiserv/form@ecos-module-upload
+
+model:
+  attributes:
+    - id: name
+      name:
+        ru: Имя
+        en: Name
+    - id: counterKey
+      name:
+        ru: Ключ счетчика
+        en: Counter key

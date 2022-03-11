@@ -1,11 +1,13 @@
 package ru.citeck.ecos.model.type.api.records
 
 import ecos.com.fasterxml.jackson210.databind.JsonNode
+import ru.citeck.ecos.records3.record.request.RequestContext
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.json.Json.mapper
 import ru.citeck.ecos.commons.json.YamlUtils
+import ru.citeck.ecos.events2.type.RecordEventsService
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.model.type.dto.TypeDef
 import ru.citeck.ecos.model.type.service.TypeService
@@ -14,6 +16,7 @@ import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records2.predicate.PredicateService
 import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
+import ru.citeck.ecos.records3.record.atts.schema.resolver.AttSchemaResolver
 import ru.citeck.ecos.records3.record.dao.AbstractRecordsDao
 import ru.citeck.ecos.records3.record.dao.atts.RecordAttsDao
 import ru.citeck.ecos.records3.record.dao.query.RecordsQueryDao
@@ -23,13 +26,18 @@ import java.nio.charset.StandardCharsets
 
 @Component
 class TypeRecordsDao(
-    val typeService: TypeService
+    private val typeService: TypeService,
+    private val recordEventsService: RecordEventsService? = null
 ) : AbstractRecordsDao(), RecordsQueryDao, RecordAttsDao {
 
     companion object {
         const val ID = "type"
 
         private const val LANG_EXPAND_TYPES = "expand-types";
+    }
+
+    init {
+        typeService.addListener { before, after -> onTypeDefChanged(before, after) }
     }
 
     override fun getId() = ID
@@ -105,6 +113,17 @@ class TypeRecordsDao(
 
     override fun getRecordAtts(recordId: String): TypeRecord? {
         return typeService.getByIdOrNull(recordId)?.let { TypeRecord(it, typeService) }
+    }
+
+    private fun onTypeDefChanged(before: TypeDef?, after: TypeDef) {
+        RequestContext.doWithCtx { context ->
+            context.doWithVar(AttSchemaResolver.CTX_SOURCE_ID_KEY, getId()) {
+                recordEventsService?.emitRecChanged(
+                    before?.let { TypeRecord(it, typeService) },
+                    TypeRecord(after, typeService)
+                )
+            }
+        }
     }
 
     class TypeRecord(

@@ -20,3 +20,121 @@ createVariants:
   - id: upload-template
     name: { ru: Загрузить тип, en: Upload type }
     formRef: uiserv/form@ecos-module-upload
+
+model:
+  attributes:
+    - id: name
+      name:
+        ru: Имя
+        en: Name
+      type: MLTEXT
+    - id: description
+      name:
+        ru: Описание
+        en: Description
+      type: MLTEXT
+    - id: dispNameTemplate
+      name:
+        ru: Шаблон отображаемого имени
+        en: Display name template
+    - id: sourceId
+      name:
+        ru: Идентификатор источника данных
+        en: Data Source ID
+    - id: metaRecord
+      name:
+        ru: Запись для получения метаданных
+        en: Meta Record
+    - id: dashboardType
+      name:
+        ru: Тип дашборда
+        en: Dashboard type
+    - id: inheritForm
+      name:
+        ru: Наследовать форму
+        en: Inherit form
+      type: BOOLEAN
+    - id: inheritActions
+      name:
+        ru: Наследовать действия
+        en: Inherit actions
+      type: BOOLEAN
+    - id: inheritNumTemplate
+      name:
+        ru: Наследовать шаблон нумерации
+        en: Inherit num template
+      type: BOOLEAN
+    - id: parentRef
+      name:
+        ru: Родительский тип
+        en: Parent type
+    - id: formRef
+      name:
+        ru: Форма
+        en: Form
+    - id: journalRef
+      name:
+        ru: Журнал
+        en: Journal
+    - id: boardRef
+      name:
+        ru: Канбан доска
+        en: Kanban Board
+    - id: numTemplateRef
+      name:
+        ru: Шаблон нумерации
+        en: Number template
+    - id: actions
+      multiple: true
+      name:
+        ru: Действия
+        en: Actions
+    - id: associations
+      multiple: true
+      name:
+        ru: Ассоциации
+        en: Associations
+      type: JSON
+    - id: defaultCreateVariant
+      name:
+        ru: Вариант создания по умолчанию
+        en: Default create variant
+      type: BOOLEAN
+    - id: createVariants
+      multiple: true
+      name:
+        ru: Варианты создания
+        en: Create variants
+      type: JSON
+    - id: postCreateActionRef
+      name:
+        ru: Действие после создания
+        en: Action after creation
+    - id: configFormRef
+      name:
+        ru: Форма конфигурации
+        en: Config form
+    - id: config
+      name:
+        ru: Конфигурация
+        en: Config
+      type: JSON
+    - id: model
+      name:
+        ru: Модель
+        en: Model
+      type: JSON
+    - id: docLib
+      name:
+        ru: DocLib
+        en: DocLib
+      type: JSON
+    - id: properties
+      name:
+        ru: Свойства
+        en: Properties
+      type: JSON
+  systemAttributes:
+    - id: system
+      type: BOOLEAN
+

@@ -31,6 +31,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -45,7 +46,7 @@ public class NumTemplateService {
     private final EntityManager entityManager;
     private final TransactionTemplate transactionTemplate;
 
-    private final List<Consumer<NumTemplateDto>> listeners = new CopyOnWriteArrayList<>();
+    private final List<BiConsumer<NumTemplateDto, NumTemplateDto>> listeners = new CopyOnWriteArrayList<>();
 
     public List<NumTemplateWithMetaDto> getAll(int max, int skip) {
 
@@ -83,11 +84,13 @@ public class NumTemplateService {
 
     public NumTemplateWithMetaDto save(NumTemplateDto dto) {
 
+        NumTemplateWithMetaDto before = getByIdOrNull(dto.getId());
+
         NumTemplateEntity entity = toEntity(dto);
         entity = templateRepo.save(entity);
         NumTemplateWithMetaDto changedDto = toDto(entity);
 
-        listeners.forEach(l -> l.accept(changedDto));
+        listeners.forEach(l -> l.accept(before, changedDto));
         return changedDto;
     }
 
@@ -188,7 +191,7 @@ public class NumTemplateService {
         templateRepo.delete(template);
     }
 
-    public void addListener(Consumer<NumTemplateDto> listener) {
+    public void addListener(BiConsumer<NumTemplateDto, NumTemplateDto> listener) {
         this.listeners.add(listener);
     }
 
