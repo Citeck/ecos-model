@@ -116,13 +116,8 @@ class TypeRecordsDao(
     }
 
     private fun onTypeDefChanged(before: TypeDef?, after: TypeDef) {
-        RequestContext.doWithCtx { context ->
-            context.doWithVar(AttSchemaResolver.CTX_SOURCE_ID_KEY, getId()) {
-                recordEventsService?.emitRecChanged(
-                    before?.let { TypeRecord(it, typeService) },
-                    TypeRecord(after, typeService)
-                )
-            }
+        recordEventsService?.emitRecChanged(before, after, getId()) {
+            TypeRecord(it, typeService)
         }
     }
 
