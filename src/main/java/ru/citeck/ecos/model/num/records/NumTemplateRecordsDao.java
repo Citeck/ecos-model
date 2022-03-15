@@ -156,18 +156,12 @@ public class NumTemplateRecordsDao extends LocalRecordsDao
     }
 
     private void onTemplateChanged(@Nullable NumTemplateDto before, NumTemplateDto after) {
-        RequestContext.doWithCtxJ(context -> {
-            context.doWithVar(AttSchemaResolver.CTX_SOURCE_ID_KEY, getId(), () -> {
-                NumTemplateRecord beforeRec = null;
-                if (before != null) {
-                    beforeRec = new NumTemplateRecord(new NumTemplateWithMetaDto(before));
-                }
-                NumTemplateRecord afterRec = new NumTemplateRecord(new NumTemplateWithMetaDto(after));
-                recordEventsService.emitRecChanged(beforeRec, afterRec);
-                return Unit.INSTANCE;
-            });
-            return Unit.INSTANCE;
-        });
+        recordEventsService.emitRecChanged(
+            before,
+            after,
+            getId(),
+            dto -> new NumTemplateRecord(new NumTemplateWithMetaDto(dto))
+        );
     }
 
     @NoArgsConstructor
