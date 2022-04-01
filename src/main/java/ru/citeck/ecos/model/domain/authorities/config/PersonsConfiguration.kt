@@ -151,18 +151,21 @@ class PersonsConfiguration(
         }
         initialized = true
 
-        val isAdminNotExists = recordsService.getAtt(
-            RecordRef.create(AuthorityType.PERSON.sourceId, "admin"),
-            RecordConstants.ATT_NOT_EXISTS + "?bool"
-        ).asBoolean()
+        AuthContext.runAsSystem {
 
-        if (isAdminNotExists) {
-            val userAtts = ObjectData.create()
-            userAtts.set("id", "admin")
-            userAtts.set(PersonConstants.ATT_FIRST_NAME, "admin")
-            userAtts.set(PersonConstants.ATT_LAST_NAME, "admin")
-            userAtts.set(PersonConstants.ATT_EMAIL, "admin@admin.ru")
-            recordsService.create(AuthorityType.PERSON.sourceId, userAtts)
+            val isAdminNotExists = recordsService.getAtt(
+                RecordRef.create(AuthorityType.PERSON.sourceId, "admin"),
+                RecordConstants.ATT_NOT_EXISTS + "?bool"
+            ).asBoolean()
+
+            if (isAdminNotExists) {
+                val userAtts = ObjectData.create()
+                userAtts.set("id", "admin")
+                userAtts.set(PersonConstants.ATT_FIRST_NAME, "admin")
+                userAtts.set(PersonConstants.ATT_LAST_NAME, "admin")
+                userAtts.set(PersonConstants.ATT_EMAIL, "admin@admin.ru")
+                recordsService.create(AuthorityType.PERSON.sourceId, userAtts)
+            }
         }
     }
 }
