@@ -1,8 +1,10 @@
 package ru.citeck.ecos.model.domain.authorities.config
 
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.event.ContextRefreshedEvent
+import org.springframework.context.event.EventListener
+import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.data.sql.domain.DbDomainConfig
@@ -13,7 +15,6 @@ import ru.citeck.ecos.data.sql.records.listener.*
 import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
 import ru.citeck.ecos.data.sql.records.perms.DbRecordPerms
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
-import ru.citeck.ecos.events2.EventsService
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.authorities.api.records.AuthorityMixin
 import ru.citeck.ecos.model.domain.authorities.api.records.PersonMixin
@@ -24,6 +25,7 @@ import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
 import ru.citeck.ecos.model.domain.authsync.service.AuthorityType
 import ru.citeck.ecos.model.domain.events.emitter.DbRecordsEcosEventsAdapter
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
+import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
@@ -41,6 +43,8 @@ class PersonsConfiguration(
     private val authoritiesSyncService: AuthoritiesSyncService,
     private val dbRecordsEcosEventsAdapter: DbRecordsEcosEventsAdapter
 ) {
+
+    private var initialized = false
 
     @Bean
     fun personDao(): RecordsDao {
@@ -137,5 +141,28 @@ class PersonsConfiguration(
         recordsDao.addListener(dbRecordsEcosEventsAdapter)
 
         return recordsDao
+    }
+
+    @EventListener
+    fun onServicesInitialized(event: ContextRefreshedEvent) {
+
+        if (initialized) {
+            return
+        }
+        initialized = true
+
+        val isAdminNotExists = recordsService.getAtt(
+            RecordRef.create(AuthorityType.PERSON.sourceId, "admin"),
+            RecordConstants.ATT_NOT_EXISTS + "?bool"
+        ).asBoolean()
+
+        if (isAdminNotExists) {
+            val userAtts = ObjectData.create()
+            userAtts.set("id", "admin")
+            userAtts.set(PersonConstants.ATT_FIRST_NAME, "admin")
+            userAtts.set(PersonConstants.ATT_LAST_NAME, "admin")
+            userAtts.set(PersonConstants.ATT_EMAIL, "admin@admin.ru")
+            recordsService.create(AuthorityType.PERSON.sourceId, userAtts)
+        }
     }
 }
