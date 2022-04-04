@@ -4,4 +4,5 @@ object AuthorityGroupConstants {
 
     const val ATT_BRANCH_TYPE = "branchType"
     const val ATT_ROLE_TYPE = "roleType"
+    const val ADMIN_GROUP = "ECOS_ADMINISTRATORS"
 }

@@ -4,6 +4,8 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
+import org.springframework.scheduling.TaskScheduler
+import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthRole
@@ -18,6 +20,7 @@ import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.authorities.api.records.AuthorityMixin
 import ru.citeck.ecos.model.domain.authorities.api.records.PersonMixin
+import ru.citeck.ecos.model.domain.authorities.constant.AuthorityGroupConstants
 import ru.citeck.ecos.model.domain.authorities.constant.PersonConstants
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
 import ru.citeck.ecos.model.domain.authorities.service.PersonEventsService
@@ -29,9 +32,13 @@ import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
+import ru.citeck.ecos.records3.record.atts.dto.RecordAtts
+import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.RecordsDao
 import ru.citeck.ecos.records3.record.dao.impl.proxy.MutateProxyProcessor
 import ru.citeck.ecos.records3.record.dao.impl.proxy.ProxyProcContext
+import java.time.Instant
+import java.util.*
 import javax.sql.DataSource
 
 @Configuration
@@ -41,7 +48,8 @@ class PersonsConfiguration(
     private val authorityService: AuthorityService,
     private val dbDomainFactory: DbDomainFactory,
     private val authoritiesSyncService: AuthoritiesSyncService,
-    private val dbRecordsEcosEventsAdapter: DbRecordsEcosEventsAdapter
+    private val dbRecordsEcosEventsAdapter: DbRecordsEcosEventsAdapter,
+    private val taskScheduler: TaskScheduler
 ) {
 
     private var initialized = false
@@ -151,21 +159,63 @@ class PersonsConfiguration(
         }
         initialized = true
 
-        AuthContext.runAsSystem {
+        taskScheduler.schedule({
+            AuthContext.runAsSystem {
 
-            val isAdminNotExists = recordsService.getAtt(
-                RecordRef.create(AuthorityType.PERSON.sourceId, "admin"),
-                RecordConstants.ATT_NOT_EXISTS + "?bool"
-            ).asBoolean()
+                updateAlfAdminsGroup()
 
-            if (isAdminNotExists) {
-                val userAtts = ObjectData.create()
-                userAtts.set("id", "admin")
-                userAtts.set(PersonConstants.ATT_FIRST_NAME, "admin")
-                userAtts.set(PersonConstants.ATT_LAST_NAME, "admin")
-                userAtts.set(PersonConstants.ATT_EMAIL, "admin@admin.ru")
-                recordsService.create(AuthorityType.PERSON.sourceId, userAtts)
+                val adminGroupAtts = ObjectData.create()
+                adminGroupAtts.set("name", MLText(
+                    Locale.ENGLISH to "ECOS Administrators",
+                    Locale("ru") to "Администраторы ECOS"
+                ))
+
+                createIfNotExists(AuthorityType.GROUP, AuthorityGroupConstants.ADMIN_GROUP, adminGroupAtts)
+
+                val adminAtts = ObjectData.create()
+                adminAtts.set(PersonConstants.ATT_FIRST_NAME, "admin")
+                adminAtts.set(PersonConstants.ATT_LAST_NAME, "admin")
+                adminAtts.set(PersonConstants.ATT_EMAIL, "admin@admin.ru")
+                adminAtts.set(AuthorityConstants.ATT_AUTHORITY_GROUPS, listOf(
+                    AuthorityType.GROUP.getRef(AuthorityGroupConstants.ADMIN_GROUP)
+                ))
+
+                createIfNotExists(AuthorityType.PERSON, "admin", adminAtts)
             }
+        }, Instant.now().plusMillis(10_000))
+    }
+
+    private fun updateAlfAdminsGroup() {
+
+        val alfAdminsGroupRef = AuthorityType.GROUP.getRef("ALFRESCO_ADMINISTRATORS")
+        val alfAdminsAtts = recordsService.getAtts(alfAdminsGroupRef, AdminGroupAtts::class.java)
+
+        if (!alfAdminsAtts.notExists && !alfAdminsAtts.isInEcosAdmins) {
+            val ecosAdminsGroupRef = AuthorityType.GROUP.getRef(AuthorityGroupConstants.ADMIN_GROUP)
+            val updAtts = ObjectData.create()
+            updAtts.set("att_add_${AuthorityConstants.ATT_AUTHORITY_GROUPS}", ecosAdminsGroupRef)
+            recordsService.mutate(RecordAtts(alfAdminsGroupRef, updAtts))
         }
     }
+
+    private fun createIfNotExists(type: AuthorityType, id: String, atts: ObjectData) {
+
+        val isNotExists = recordsService.getAtt(
+            type.getRef(id),
+            RecordConstants.ATT_NOT_EXISTS + "?bool"
+        ).asBoolean()
+
+        if (isNotExists) {
+            val attsToCreate = atts.deepCopy()
+            attsToCreate.set("id", id)
+            recordsService.create(type.sourceId, attsToCreate)
+        }
+    }
+
+    private class AdminGroupAtts(
+        @AttName(RecordConstants.ATT_NOT_EXISTS + "?bool")
+        val notExists: Boolean,
+        @AttName("authorities._has.GROUP_${AuthorityGroupConstants.ADMIN_GROUP}?bool")
+        val isInEcosAdmins: Boolean
+    )
 }

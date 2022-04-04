@@ -5,6 +5,7 @@ import com.hazelcast.core.IMap
 import org.springframework.stereotype.Service
 import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
+import ru.citeck.ecos.model.domain.authorities.constant.AuthorityGroupConstants
 import ru.citeck.ecos.model.domain.authsync.service.AuthorityType
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records2.predicate.model.Predicates
@@ -30,6 +31,7 @@ class AuthorityService(
         private const val ATT_AUTHORITY_GROUPS = "authorityGroups[]?localId"
 
         private val ADMIN_GROUPS = setOf(
+            "GROUP_" + AuthorityGroupConstants.ADMIN_GROUP,
             "GROUP_ALFRESCO_ADMINISTRATORS"
         )
     }
