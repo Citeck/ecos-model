@@ -108,7 +108,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
         checkAuthorities(
             listOf(
                 testPersonRef.id,
-                "GROUP_EVERYONE"
+                AuthRole.USER
             )
         )
 
@@ -120,7 +120,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
             listOf(
                 testPersonRef.id,
                 "GROUP_${testGroupRef.id}",
-                "GROUP_EVERYONE"
+                AuthRole.USER
             )
         )
 
@@ -133,7 +133,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
                 testPersonRef.id,
                 "GROUP_${testGroupRef.id}",
                 "GROUP_${otherGroupId}",
-                "GROUP_EVERYONE"
+                AuthRole.USER
             )
         )
 
@@ -174,7 +174,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
                 "GROUP_${otherGroupId}",
                 "GROUP_other-auth-group-admin",
                 "GROUP_other-auth-group-${AuthConstants.SYSTEM_USER}",
-                "GROUP_EVERYONE"
+                AuthRole.USER
             )
         )
 
@@ -200,7 +200,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
                 "GROUP_${newParentGroupRef.id}",
                 "GROUP_other-auth-group-admin",
                 "GROUP_other-auth-group-${AuthConstants.SYSTEM_USER}",
-                "GROUP_EVERYONE"
+                AuthRole.USER
             )
         )
 
@@ -214,7 +214,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
                 "GROUP_${otherGroupId}",
                 "GROUP_other-auth-group-admin",
                 "GROUP_other-auth-group-${AuthConstants.SYSTEM_USER}",
-                "GROUP_EVERYONE"
+                AuthRole.USER
             )
         )
 
@@ -231,7 +231,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
                 "GROUP_${testGroupRef.id}",
                 "GROUP_other-auth-group-admin",
                 "GROUP_other-auth-group-${AuthConstants.SYSTEM_USER}",
-                "GROUP_EVERYONE"
+                AuthRole.USER
             )
         )
 
@@ -271,7 +271,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
                 "GROUP_group-0",
                 "GROUP_group-1",
                 "GROUP_group-2",
-                "GROUP_EVERYONE"
+                AuthRole.USER
             )
         )
 
@@ -310,7 +310,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
                 "GROUP_${otherGroupId}",
                 "GROUP_group-0",
                 "GROUP_group-1",
-                "GROUP_EVERYONE"
+                AuthRole.USER
             )
         )
     }

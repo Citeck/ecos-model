@@ -1,6 +1,7 @@
 package ru.citeck.ecos.model.domain.authorities
 
 import org.junit.jupiter.api.Test
+import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 
 class AuthoritiesMixinAttsTest : AuthoritiesTestBase() {
@@ -16,7 +17,7 @@ class AuthoritiesMixinAttsTest : AuthoritiesTestBase() {
         assertStrListAtt(user0Ref, "authorities.list[]", listOf(
             user0Ref.id,
             *listOf(group0Ref, group1Ref).map { "GROUP_" + it.id }.toTypedArray(),
-            "GROUP_EVERYONE"
+            AuthRole.USER
         ))
 
         assertStrListAtt(user0Ref, "${AuthorityConstants.ATT_AUTHORITY_GROUPS}[]?id", listOf(
