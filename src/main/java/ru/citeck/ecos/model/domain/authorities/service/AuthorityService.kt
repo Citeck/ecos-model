@@ -72,6 +72,7 @@ class AuthorityService(
         if (ADMIN_GROUPS.any { authorities.contains(it) }) {
             authorities.add(AuthRole.ADMIN)
         }
+        authorities.add(AuthRole.USER)
         authorities.add("GROUP_EVERYONE")
 
         return authorities
