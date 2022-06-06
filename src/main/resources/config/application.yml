@@ -7,13 +7,13 @@ ecos-app:
   version: 1.2.0
   name: ECOS Model
 
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5441/emodel
+    username: emodel
+    password:
+
 ecos:
-  webapp:
-    dataSources:
-      main:
-        url: jdbc:postgresql://localhost:5441/emodel
-        username: emodel
-        password:
   idp:
     default-realm: ecos-app
   job:
