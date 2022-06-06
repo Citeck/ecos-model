@@ -48,19 +48,14 @@ class TypeRepoDaoImpl(private val repo: TypeRepository) : TypeRepoDao {
         val querySort = sort ?: Sort.by(Sort.Direction.DESC, "id")
         val page = PageRequest.of(skip / max, max, querySort)
 
-        val spec = toSpec(predicate)
-        return if (spec != null) {
-            repo.findAll(spec, page)
-        } else {
-            repo.findAll(page)
-        }.toList()
+        return repo.findAll(toSpec(predicate), page).toList()
     }
 
     override fun count(predicate: Predicate): Long {
         return repo.count(toSpec(predicate))
     }
 
-    private fun toSpec(predicate: Predicate): Specification<TypeEntity>? {
+    private fun toSpec(predicate: Predicate): Specification<TypeEntity> {
 
         if (predicate is ValuePredicate) {
 
@@ -114,7 +109,13 @@ class TypeRepoDaoImpl(private val repo: TypeRepository) : TypeRepoDao {
             }
             spec = spec?.and(systemSpec) ?: systemSpec
         }
-        return spec
+
+        return spec ?: Specification { _: Root<TypeEntity>,
+            _: CriteriaQuery<*>?,
+            builder: CriteriaBuilder ->
+            // always true
+            builder.and()
+        }
     }
 
     @Data

@@ -49,4 +49,15 @@ class TypeEntity : AbstractAuditingEntity() {
     var model: String? = null
 
     var docLib: String? = null
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is TypeEntity) {
+            return false
+        }
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
 }

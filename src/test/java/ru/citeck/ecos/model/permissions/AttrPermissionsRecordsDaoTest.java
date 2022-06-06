@@ -4,7 +4,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import ru.citeck.ecos.model.EcosModelApp;
+import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
+import ru.citeck.ecos.records2.predicate.PredicateService;
 import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension;
 import ru.citeck.ecos.model.domain.permissions.dto.AttributeDto;
 import ru.citeck.ecos.model.domain.permissions.dto.AttributesPermissionWithMetaDto;
@@ -13,14 +18,8 @@ import ru.citeck.ecos.model.domain.permissions.dto.RuleDto;
 import ru.citeck.ecos.model.domain.permissions.api.records.AttributesPermissionRecordsDao;
 import ru.citeck.ecos.model.domain.permissions.service.AttributesPermissionsService;
 import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records2.RecordsService;
 import ru.citeck.ecos.records3.RecordsServiceFactory;
-import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaValue;
-import ru.citeck.ecos.records2.predicate.PredicateServiceImpl;
-import ru.citeck.ecos.records2.predicate.RecordElement;
-import ru.citeck.ecos.records2.predicate.RecordElements;
-import ru.citeck.ecos.records2.predicate.model.Predicate;
 import ru.citeck.ecos.records2.predicate.model.ValuePredicate;
 import ru.citeck.ecos.records2.request.query.RecordsQuery;
 import ru.citeck.ecos.records2.request.query.RecordsQueryResult;
@@ -34,16 +33,13 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(EcosSpringExtension.class)
+@SpringBootTest(classes = EcosModelApp.class)
 public class AttrPermissionsRecordsDaoTest {
 
     @MockBean
     private AttributesPermissionsService service;
-
-    @MockBean
-    private PredicateServiceImpl predicateService;
-
-    @MockBean
-    private RecordsService recordsService;
+    @Autowired
+    private PredicateService predicateService;
 
     private AttributesPermissionRecordsDao recordsDao;
 
@@ -51,7 +47,6 @@ public class AttrPermissionsRecordsDaoTest {
     private RecordsQuery recordsQuery;
     private AttributesPermissionWithMetaDto metaDto;
     private MetaField metaField;
-    private Predicate predicate;
 
     @BeforeEach
     void setUp() {
@@ -75,9 +70,6 @@ public class AttrPermissionsRecordsDaoTest {
         metaDto.setId("test_attrs_permission");
         metaDto.setTypeRef(RecordRef.create("type", "type"));
         metaDto.setRules(Collections.singletonList(rule));
-
-        predicate = new ValuePredicate();
-
     }
 
     @Test
@@ -119,9 +111,6 @@ public class AttrPermissionsRecordsDaoTest {
     @Test
     void testQueryLocalRecords() {
 
-        when(predicateService.filter(Mockito.any(RecordElements.class), Mockito.eq(predicate)))
-                .thenReturn(Collections.singletonList(new RecordElement(recordsService,
-                        RecordRef.create("attrs_permission", "test_attrs_permission"))));
         when(service.getAll(Collections.singleton(metaDto.getId()))).thenReturn(Collections.singleton(metaDto));
         when(service.getAll(Mockito.anyInt(), Mockito.anyInt())).thenReturn(Collections.singletonList(metaDto));
 

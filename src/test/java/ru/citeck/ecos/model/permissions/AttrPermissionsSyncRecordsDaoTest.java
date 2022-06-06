@@ -1,6 +1,5 @@
 package ru.citeck.ecos.model.permissions;
 
-import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
