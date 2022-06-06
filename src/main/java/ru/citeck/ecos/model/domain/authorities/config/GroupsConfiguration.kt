@@ -13,8 +13,8 @@ import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
 import ru.citeck.ecos.data.sql.records.perms.DbRecordPerms
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
 import ru.citeck.ecos.model.domain.authorities.api.records.AuthorityGroupMixin
-import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.authorities.api.records.AuthorityMixin
+import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
 import ru.citeck.ecos.model.domain.authsync.service.AuthorityType
@@ -64,16 +64,20 @@ class GroupsConfiguration(
         val typeRef = TypeUtils.getTypeRef("authority-group")
         val recordsDao = dbDomainFactory.create(
             DbDomainConfig.create()
-                .withRecordsDao(DbRecordsDaoConfig.create {
-                    withId("authority-group-repo")
-                    withTypeRef(typeRef)
-                })
-                .withDataService(DbDataServiceConfig.create {
-                    withAuthEnabled(false)
-                    withTableRef(DbTableRef(AuthorityConstants.DEFAULT_SCHEMA, "ecos_authority_group"))
-                    withTransactional(true)
-                    withStoreTableMeta(true)
-                })
+                .withRecordsDao(
+                    DbRecordsDaoConfig.create {
+                        withId("authority-group-repo")
+                        withTypeRef(typeRef)
+                    }
+                )
+                .withDataService(
+                    DbDataServiceConfig.create {
+                        withAuthEnabled(false)
+                        withTableRef(DbTableRef(AuthorityConstants.DEFAULT_SCHEMA, "ecos_authority_group"))
+                        withTransactional(true)
+                        withStoreTableMeta(true)
+                    }
+                )
                 .build()
         ).withPermsComponent(permsComponent).build()
 

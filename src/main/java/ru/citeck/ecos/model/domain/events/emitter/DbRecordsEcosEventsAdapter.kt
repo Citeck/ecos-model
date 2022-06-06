@@ -8,43 +8,53 @@ import ru.citeck.ecos.events2.type.*
 class DbRecordsEcosEventsAdapter(val emitter: RecordEventsService) : DbRecordsListener {
 
     override fun onChanged(event: DbRecordChangedEvent) {
-        emitter.emitRecChanged(RecordChangedEvent(
-            event.record,
-            event.typeDef,
-            event.before,
-            event.after
-        ))
+        emitter.emitRecChanged(
+            RecordChangedEvent(
+                event.record,
+                event.typeDef,
+                event.before,
+                event.after
+            )
+        )
     }
 
     override fun onCreated(event: DbRecordCreatedEvent) {
-        emitter.emitRecCreated(RecordCreatedEvent(
-            event.record,
-            event.typeDef
-        ))
+        emitter.emitRecCreated(
+            RecordCreatedEvent(
+                event.record,
+                event.typeDef
+            )
+        )
     }
 
     override fun onDeleted(event: DbRecordDeletedEvent) {
-        emitter.emitRecDeleted(RecordDeletedEvent(
-            event.record,
-            event.typeDef
-        ))
+        emitter.emitRecDeleted(
+            RecordDeletedEvent(
+                event.record,
+                event.typeDef
+            )
+        )
     }
 
     override fun onDraftStatusChanged(event: DbRecordDraftStatusChangedEvent) {
-        emitter.emitRecDraftStatusChanged(RecordDraftStatusChangedEvent(
-            event.record,
-            event.typeDef,
-            event.before,
-            event.after
-        ))
+        emitter.emitRecDraftStatusChanged(
+            RecordDraftStatusChangedEvent(
+                event.record,
+                event.typeDef,
+                event.before,
+                event.after
+            )
+        )
     }
 
     override fun onStatusChanged(event: DbRecordStatusChangedEvent) {
-        emitter.emitRecStatusChanged(RecordStatusChangedEvent(
-            event.record,
-            event.typeDef,
-            event.before,
-            event.after
-        ))
+        emitter.emitRecStatusChanged(
+            RecordStatusChangedEvent(
+                event.record,
+                event.typeDef,
+                event.before,
+                event.after
+            )
+        )
     }
 }

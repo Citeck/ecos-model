@@ -11,13 +11,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import ru.citeck.ecos.commons.data.ObjectData;
+import ru.citeck.ecos.commons.data.entity.EntityMeta;
+import ru.citeck.ecos.commons.data.entity.EntityWithMeta;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.commons.utils.ExceptionUtils;
 import ru.citeck.ecos.commons.utils.TmplUtils;
+import ru.citeck.ecos.model.lib.num.dto.NumTemplateDef;
 import ru.citeck.ecos.model.num.domain.NumCounterEntity;
 import ru.citeck.ecos.model.num.domain.NumTemplateEntity;
 import ru.citeck.ecos.model.num.dto.NumTemplateDto;
-import ru.citeck.ecos.model.num.dto.NumTemplateWithMetaDto;
 import ru.citeck.ecos.model.num.repository.EcosNumCounterRepository;
 import ru.citeck.ecos.model.num.repository.NumTemplateRepository;
 import ru.citeck.ecos.records2.RecordConstants;
@@ -28,11 +30,11 @@ import ru.citeck.ecos.records2.predicate.model.ValuePredicate;
 
 import javax.persistence.EntityManager;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -46,9 +48,17 @@ public class NumTemplateService {
     private final EntityManager entityManager;
     private final TransactionTemplate transactionTemplate;
 
-    private final List<BiConsumer<NumTemplateDto, NumTemplateDto>> listeners = new CopyOnWriteArrayList<>();
+    private final List<BiConsumer<EntityWithMeta<NumTemplateDef>, EntityWithMeta<NumTemplateDef>>> listeners =
+        new CopyOnWriteArrayList<>();
 
-    public List<NumTemplateWithMetaDto> getAll(int max, int skip) {
+    public List<EntityWithMeta<NumTemplateDef>> getAll() {
+        return templateRepo.findAll()
+            .stream()
+            .map(this::toDto)
+            .collect(Collectors.toList());
+    }
+
+    public List<EntityWithMeta<NumTemplateDef>> getAll(int max, int skip) {
 
         Sort sort = Sort.by(Sort.Direction.DESC, "id");
         PageRequest page = PageRequest.of(skip / max, max, sort);
@@ -59,7 +69,7 @@ public class NumTemplateService {
             .collect(Collectors.toList());
     }
 
-    public List<NumTemplateWithMetaDto> getAll(int max, int skip, Predicate predicate, Sort sort) {
+    public List<EntityWithMeta<NumTemplateDef>> getAll(int max, int skip, Predicate predicate, Sort sort) {
 
         if (sort == null) {
             sort = Sort.by(Sort.Direction.DESC, "id");
@@ -82,23 +92,23 @@ public class NumTemplateService {
         return (int) templateRepo.count();
     }
 
-    public NumTemplateWithMetaDto save(NumTemplateDto dto) {
+    public EntityWithMeta<NumTemplateDef> save(NumTemplateDto dto) {
 
-        NumTemplateWithMetaDto before = getByIdOrNull(dto.getId());
+        EntityWithMeta<NumTemplateDef> before = getByIdOrNull(dto.getId());
 
         NumTemplateEntity entity = toEntity(dto);
         entity = templateRepo.save(entity);
-        NumTemplateWithMetaDto changedDto = toDto(entity);
+        EntityWithMeta<NumTemplateDef> changedDto = toDto(entity);
 
         listeners.forEach(l -> l.accept(before, changedDto));
         return changedDto;
     }
 
-    public Optional<NumTemplateWithMetaDto> getById(String id) {
+    public Optional<EntityWithMeta<NumTemplateDef>> getById(String id) {
         return Optional.ofNullable(getByIdOrNull(id));
     }
 
-    public NumTemplateWithMetaDto getByIdOrNull(String id) {
+    public EntityWithMeta<NumTemplateDef> getByIdOrNull(String id) {
         NumTemplateEntity entity = templateRepo.findByExtId(id);
         if (entity == null) {
             return null;
@@ -142,7 +152,7 @@ public class NumTemplateService {
 
             if (updatedCount == 0) {
                 try {
-                    Thread.sleep(i * 5);
+                    Thread.sleep(i * 5L);
                 } catch (InterruptedException e) {
                     ExceptionUtils.throwException(e);
                 }
@@ -191,7 +201,7 @@ public class NumTemplateService {
         templateRepo.delete(template);
     }
 
-    public void addListener(BiConsumer<NumTemplateDto, NumTemplateDto> listener) {
+    public void addListener(BiConsumer<EntityWithMeta<NumTemplateDef>, EntityWithMeta<NumTemplateDef>> listener) {
         this.listeners.add(listener);
     }
 
@@ -209,18 +219,23 @@ public class NumTemplateService {
         return entity;
     }
 
-    private NumTemplateWithMetaDto toDto(NumTemplateEntity entity) {
+    private EntityWithMeta<NumTemplateDef> toDto(NumTemplateEntity entity) {
 
-        NumTemplateWithMetaDto dto = new NumTemplateWithMetaDto();
-        dto.setCounterKey(entity.getCounterKey());
-        dto.setId(entity.getExtId());
-        dto.setName(entity.getName());
-        dto.setCreated(entity.getCreatedDate());
-        dto.setCreator(entity.getCreatedBy());
-        dto.setModified(entity.getLastModifiedDate());
-        dto.setModifier(entity.getLastModifiedBy());
+        NumTemplateDef numTemplateDef = NumTemplateDef.create()
+            .withId(entity.getExtId())
+            .withCounterKey(entity.getCounterKey())
+            .withName(entity.getName())
+            .withModelAttributes(new ArrayList<>(TmplUtils.getAtts(entity.getCounterKey())))
+            .build();
 
-        return dto;
+        EntityMeta meta = EntityMeta.create()
+            .withCreated(entity.getCreatedDate())
+            .withCreator(entity.getCreatedBy())
+            .withModified(entity.getLastModifiedDate())
+            .withModifier(entity.getLastModifiedBy())
+            .build();
+
+        return new EntityWithMeta<>(numTemplateDef, meta);
     }
 
     private Specification<NumTemplateEntity> toSpec(Predicate predicate) {

@@ -44,17 +44,21 @@ class CommentsConfiguration(private val dbDomainFactory: DbDomainFactory) {
         val typeRef = TypeUtils.getTypeRef("ecos-comment")
         return dbDomainFactory.create(
             DbDomainConfig.create()
-                .withRecordsDao(DbRecordsDaoConfig.create {
-                    withId("comment-repo")
-                    withTypeRef(typeRef)
-                })
-                .withDataService(DbDataServiceConfig.create {
-                    // comments should be visible for all, but editable only for concrete persons
-                    withAuthEnabled(false)
-                    withTableRef(DbTableRef("public", "ecos_comments"))
-                    withTransactional(true)
-                    withStoreTableMeta(true)
-                })
+                .withRecordsDao(
+                    DbRecordsDaoConfig.create {
+                        withId("comment-repo")
+                        withTypeRef(typeRef)
+                    }
+                )
+                .withDataService(
+                    DbDataServiceConfig.create {
+                        // comments should be visible for all, but editable only for concrete persons
+                        withAuthEnabled(false)
+                        withTableRef(DbTableRef("public", "ecos_comments"))
+                        withTransactional(true)
+                        withStoreTableMeta(true)
+                    }
+                )
                 .build()
         ).withPermsComponent(permsComponent).build()
     }

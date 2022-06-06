@@ -42,13 +42,15 @@ class GroupsPersonsRecordsDao(
 
     override fun getRecordsAtts(recordsId: List<String>): List<*>? {
         if (authorityType == AuthorityType.PERSON) {
-            return super.getRecordsAtts(recordsId.map {
-                if (it == "CURRENT") {
-                    AuthContext.getCurrentUser()
-                } else {
-                    it
+            return super.getRecordsAtts(
+                recordsId.map {
+                    if (it == "CURRENT") {
+                        AuthContext.getCurrentUser()
+                    } else {
+                        it
+                    }
                 }
-            })
+            )
         }
         return super.getRecordsAtts(recordsId)
     }
@@ -63,14 +65,17 @@ class GroupsPersonsRecordsDao(
         }
         val predicate = PredicateUtils.mapValuePredicates(recsQuery.getQuery(Predicate::class.java)) { pred ->
 
-            var result: Predicate? = if (pred.getType() == ValuePredicate.Type.CONTAINS
-                    && pred.getAttribute() == ATT_AUTHORITY_GROUPS_FULL) {
+            var result: Predicate? = if (pred.getType() == ValuePredicate.Type.CONTAINS &&
+                pred.getAttribute() == ATT_AUTHORITY_GROUPS_FULL
+            ) {
 
                 val values = pred.getValue().toList(RecordRef::class.java)
                 val expandedGroups = authorityService.getExpandedGroups(values.map { it.id }, false)
-                OrPredicate.of(expandedGroups.map {
-                    Predicates.contains(ATT_AUTHORITY_GROUPS, AuthorityType.GROUP.getRef(it).toString())
-                })
+                OrPredicate.of(
+                    expandedGroups.map {
+                        Predicates.contains(ATT_AUTHORITY_GROUPS, AuthorityType.GROUP.getRef(it).toString())
+                    }
+                )
             } else {
                 pred
             }
@@ -81,10 +86,12 @@ class GroupsPersonsRecordsDao(
 
             result
         }
-        return super.queryRecords(recsQuery.copy {
-            withQuery(predicate)
-            withSortBy(newSortBy)
-        })
+        return super.queryRecords(
+            recsQuery.copy {
+                withQuery(predicate)
+                withSortBy(newSortBy)
+            }
+        )
     }
 
     private fun preProcessPersonSortBy(sortBy: SortBy): SortBy {
@@ -101,7 +108,7 @@ class GroupsPersonsRecordsDao(
         return pred
     }
 
-    private fun preProcessInactivityDaysPredicate(pred: ValuePredicate) : Predicate? {
+    private fun preProcessInactivityDaysPredicate(pred: ValuePredicate): Predicate? {
 
         val daysCount = pred.getValue().asLong()
         val inactivityTime = Instant.now().minus(daysCount, ChronoUnit.DAYS)
@@ -188,7 +195,7 @@ class GroupsPersonsRecordsDao(
                 for (newGroup in newGroups) {
                     val expandedGroups = authorityService.getExpandedGroups(newGroup, true)
                     if (expandedGroups.contains(currentGroupId)) {
-                        error("Cyclic dependency. Group '${currentGroupId}' can't be added to group: $newGroup")
+                        error("Cyclic dependency. Group '$currentGroupId' can't be added to group: $newGroup")
                     }
                 }
             }
@@ -220,8 +227,9 @@ class GroupsPersonsRecordsDao(
                 } else {
                     super.mutate(listOf(record))[0]
                 }
-            } else if (RecordRef.isEmpty(currentAtts.managedBySync)
-                        || !syncService.isSyncEnabled(currentAtts.managedBySync?.id)) {
+            } else if (RecordRef.isEmpty(currentAtts.managedBySync) ||
+                !syncService.isSyncEnabled(currentAtts.managedBySync?.id)
+            ) {
 
                 super.mutate(listOf(record))[0]
             } else {

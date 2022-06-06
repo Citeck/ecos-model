@@ -14,30 +14,35 @@ class TypeEventsTest : TypeTestBase() {
     @Test
     fun test() {
 
-        val rec = records.create("type", mapOf(
-            "id" to "test",
-            "name" to "test-name",
-            "model" to TypeModelDef.create {
-                withAttributes(
-                    listOf(
-                        AttributeDef.create {
-                            this.withId("test")
-                            this.withName(MLText("abc"))
-                        }
+        val rec = records.create(
+            "types-repo",
+            mapOf(
+                "id" to "test",
+                "name" to "test-name",
+                "model" to TypeModelDef.create {
+                    withAttributes(
+                        listOf(
+                            AttributeDef.create {
+                                this.withId("test")
+                                this.withName(MLText("abc"))
+                            }
+                        )
                     )
-                )
-            }
-        ))
+                }
+            )
+        )
 
         val events = mutableListOf<ObjectData>()
         eventsService.addListener<ObjectData> {
             withEventType(RecordChangedEvent.TYPE)
             withDataClass(ObjectData::class.java)
-            withAttributes(mapOf(
-                "id" to "diff.list.def.id",
-                "before" to "diff.list.before?disp",
-                "after" to "diff.list.after?disp"
-            ))
+            withAttributes(
+                mapOf(
+                    "id" to "diff.list.def.id",
+                    "before" to "diff.list.before?disp",
+                    "after" to "diff.list.after?disp"
+                )
+            )
             withAction {
                 events.add(it)
             }
@@ -82,6 +87,6 @@ class TypeEventsTest : TypeTestBase() {
             println(msg)
         }*/
 
-        //println(events)
+        // println(events)
     }
 }

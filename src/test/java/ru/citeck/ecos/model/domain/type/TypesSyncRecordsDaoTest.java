@@ -1,19 +1,20 @@
 package ru.citeck.ecos.model.domain.type;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 import ru.citeck.ecos.commons.data.DataValue;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
-import ru.citeck.ecos.commons.json.Json;
+import ru.citeck.ecos.commons.test.EcosWebAppContextMock;
 import ru.citeck.ecos.model.EcosModelApp;
 import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef;
-import ru.citeck.ecos.model.type.dto.TypeDef;
+import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.model.type.service.TypeService;
 import ru.citeck.ecos.records2.RecordRef;
@@ -23,19 +24,20 @@ import ru.citeck.ecos.records2.predicate.PredicateService;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
 import ru.citeck.ecos.records2.predicate.model.Predicates;
 import ru.citeck.ecos.records2.predicate.model.VoidPredicate;
-import ru.citeck.ecos.records2.rest.RemoteRecordsRestApi;
 import ru.citeck.ecos.records2.source.dao.local.RemoteSyncRecordsDao;
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery;
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes;
 import ru.citeck.ecos.records3.record.request.RequestContext;
-import ru.citeck.ecos.records3.record.resolver.RemoteRecordsResolver;
+import ru.citeck.ecos.webapp.api.context.EcosWebAppContext;
+import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef;
+import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(EcosSpringExtension.class)
 @SpringBootTest(classes = EcosModelApp.class)
 public class TypesSyncRecordsDaoTest {
 
@@ -56,24 +58,18 @@ public class TypesSyncRecordsDaoTest {
 
     private final List<TypeDef> types = new ArrayList<>();
 
-    @Before
+    @BeforeEach
     public void setup() {
 
         typeRepository.deleteAll();
 
+        EcosWebAppContextMock webAppCtxMock = new EcosWebAppContextMock();
+        webAppCtxMock.setWebClientExecuteImpl((targetApp, path, request) ->
+            remoteServiceFactory.getRestHandlerAdapter().queryRecords(request)
+        );
         localServiceFactory = new RecordsServiceFactory() {
-            @Override
-            protected RemoteRecordsResolver createRemoteRecordsResolver() {
-                return new RemoteRecordsResolver(this, new RemoteRecordsRestApi() {
-                    @Override
-                    public <T> T jsonPost(String url, Object request, Class<T> respType) {
-                        @SuppressWarnings("unchecked")
-                        T res = (T) remoteServiceFactory.getRestHandlerAdapter().queryRecords(
-                            Objects.requireNonNull(request)
-                        );
-                        return Json.getMapper().convert(res, respType);
-                    }
-                });
+            public EcosWebAppContext getEcosWebAppContext() {
+                return webAppCtxMock;
             }
         };
 
@@ -85,7 +81,7 @@ public class TypesSyncRecordsDaoTest {
         generateData();
     }
 
-    @After
+    @AfterEach
     public void afterTest() {
         typeRepository.deleteAll();
     }
@@ -107,7 +103,7 @@ public class TypesSyncRecordsDaoTest {
         TypeDef dto = localRecordsService.getAtts(RecordRef.valueOf(TYPES_SOURCE_ID + "@type-id-100"), TypeDef.class);
         TypeDef origDto = types.stream().filter(v -> v.getId().equals("type-id-100")).findFirst().orElse(null);
 
-        assertEquals(origDto, normalize(dto));
+        assertEquals(normalizeSrc(origDto), normalizeRes(dto));
 
         assert origDto != null;
         Predicate predicate = Predicates.eq("properties.attKey?str", origDto.getProperties().get("attKey").asText());
@@ -133,7 +129,7 @@ public class TypesSyncRecordsDaoTest {
         });
         assertEquals(1, resultWithMeta.getRecords().size());
 
-        assertEquals(origDto, normalize(resultWithMeta.getRecords().get(0)));
+        assertEquals(normalizeSrc(origDto), normalizeRes(resultWithMeta.getRecords().get(0)));
 
         Set<TypeDef> expectedSet = new TreeSet<>(Comparator.comparing(TypeDef::getId));
         expectedSet.addAll(types);
@@ -141,14 +137,61 @@ public class TypesSyncRecordsDaoTest {
         Set<TypeDef> actualSet = new TreeSet<>(Comparator.comparing(TypeDef::getId));
         actualSet.addAll(remoteSyncRecordsDao.getRecords().values());
 
-        assertEquals(expectedSet, new HashSet<>(actualSet
+        assertEquals(
+            new HashSet<>(expectedSet
                 .stream()
-                .map(this::normalize)
+                .map(this::normalizeSrc)
+                .collect(Collectors.toList())
+            ),
+            new HashSet<>(actualSet
+                .stream()
+                .map(this::normalizeRes)
                 .collect(Collectors.toList())
         ));
     }
 
-    TypeDef normalize(TypeDef dto) {
+    @Nullable
+    TypeDef normalizeSrc(@Nullable TypeDef dto) {
+        if (dto == null) {
+            return null;
+        }
+        if (dto.getId().equals("base")) {
+            return dto;
+        }
+        TypeDef.Builder res = dto.copy();
+        if (RecordRef.isEmpty(res.getMetaRecord()) && StringUtils.isNotBlank(dto.getSourceId())) {
+            String sourceId = res.getSourceId();
+            if (!sourceId.contains("/")) {
+                sourceId = "emodel/" + sourceId;
+            }
+            res.withMetaRecord(RecordRef.valueOf(sourceId + "@"));
+        }
+        res.withCreateVariants(res.getCreateVariants().stream().map(cv -> {
+            CreateVariantDef.Builder cvRes = cv.copy();
+            if (RecordRef.isEmpty(cvRes.getTypeRef())) {
+                cvRes.withTypeRef(TypeUtils.getTypeRef(res.getId()));
+            }
+            if (cv.getSourceId().isEmpty()) {
+                cvRes.withSourceId(res.getSourceId());
+            }
+            if (RecordRef.isEmpty(cv.getTypeRef())) {
+                cvRes.withFormRef(res.getFormRef());
+            }
+            if (RecordRef.isEmpty(cv.getPostActionRef())) {
+                cvRes.withPostActionRef(res.getPostCreateActionRef());
+            }
+            return cvRes.build();
+        }).collect(Collectors.toList()));
+
+        return res.build();
+    }
+
+    TypeDef normalizeRes(TypeDef dto) {
+
+        TypeDef.Builder res = dto.copy();
+/*        if (RecordRef.isEmpty(res.getMetaRecord())) {
+            res.withMetaRecord(RecordRef.valueOf(res.getSourceId() + "@"));
+        }*/
 
      /*   List<AssociationDto> assocs = DataValue.create(dto.getAssociations()).toList(AssociationDto.class);
         assocs.sort(Comparator.comparing(AssociationDto::getId));
@@ -158,7 +201,7 @@ public class TypesSyncRecordsDaoTest {
             dto.setDefaultCreateVariant(null);
         }
 */
-        return dto;
+        return res.build();
     }
 
     void generateData() {

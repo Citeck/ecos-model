@@ -45,10 +45,12 @@ class KeycloakEventsListener(
             withAction {
                 processLoginEvent(it)
             }
-            withFilter(Predicates.and(
-                Predicates.eq("type", EVENT_TYPE_LOGIN),
-                Predicates.eq("realmId", defaultRealm),
-            ))
+            withFilter(
+                Predicates.and(
+                    Predicates.eq("type", EVENT_TYPE_LOGIN),
+                    Predicates.eq("realmId", defaultRealm),
+                )
+            )
         }
         eventsService.addListener<UserCreatedEventAtts> {
             withEventType(EVENT_TYPE_ADMIN)
@@ -56,11 +58,13 @@ class KeycloakEventsListener(
             withAction {
                 processUserCreatedEvent(UserCreatedEvent(it))
             }
-            withFilter(Predicates.and(
-                Predicates.eq("resourceType", RESOURCE_TYPE_USER),
-                Predicates.eq("realmId", defaultRealm),
-                Predicates.eq("operationType", RESOURCE_OP_TYPE_CREATE)
-            ))
+            withFilter(
+                Predicates.and(
+                    Predicates.eq("resourceType", RESOURCE_TYPE_USER),
+                    Predicates.eq("realmId", defaultRealm),
+                    Predicates.eq("operationType", RESOURCE_OP_TYPE_CREATE)
+                )
+            )
         }
     }
 
@@ -145,7 +149,7 @@ class KeycloakEventsListener(
         val lastName: String?,
         val email: String?
     ) {
-        constructor(atts: UserRepresentationAtts): this(
+        constructor(atts: UserRepresentationAtts) : this(
             atts.username,
             atts.enabled,
             atts.firstName,

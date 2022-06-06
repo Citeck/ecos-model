@@ -1,17 +1,15 @@
 package ru.citeck.ecos.model.domain.authsync.service
 
 import mu.KotlinLogging
-import net.javacrumbs.shedlock.core.LockConfiguration
-import net.javacrumbs.shedlock.core.LockProvider
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
-import org.springframework.scheduling.TaskScheduler
 import org.springframework.stereotype.Service
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.commons.utils.ReflectUtils
 import ru.citeck.ecos.context.lib.auth.AuthContext
+import ru.citeck.ecos.model.EcosModelApp
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records2.predicate.model.VoidPredicate
@@ -21,18 +19,19 @@ import ru.citeck.ecos.records3.record.atts.dto.RecordAtts
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.request.RequestContext
+import ru.citeck.ecos.webapp.api.lock.EcosLockService
+import ru.citeck.ecos.webapp.api.task.EcosTasksApi
+import ru.citeck.ecos.webapp.api.task.scheduler.EcosScheduledTask
 import java.time.Duration
 import java.time.Instant
 import java.time.format.DateTimeParseException
-import java.time.temporal.ChronoUnit
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ScheduledFuture
 
 @Service
 class AuthoritiesSyncService(
     private val recordsService: RecordsService,
-    private val taskScheduler: TaskScheduler,
-    private val lockProvider: LockProvider
+    private val tasksApi: EcosTasksApi,
+    private val appLockService: EcosLockService
 ) {
 
     companion object {
@@ -44,7 +43,7 @@ class AuthoritiesSyncService(
 
     private val syncFactories = ConcurrentHashMap<String, AuthoritiesSyncFactory<Any, Any>>()
     private val syncInstances = ConcurrentHashMap<String, SyncInstance>()
-    private val scheduledTasks = ConcurrentHashMap<String, ScheduledFuture<*>>()
+    private val scheduledTasks = ConcurrentHashMap<String, EcosScheduledTask>()
     private var newAuthoritiesManagers: Map<AuthorityType, String> = emptyMap()
 
     private val syncContext = ThreadLocal<Boolean>()
@@ -77,7 +76,7 @@ class AuthoritiesSyncService(
             ?: error("Sync instance is not found by id $newAuthorityManagerId")
 
         val attributes = record.attributes.deepCopy()
-        attributes.set("managedBySync", RecordRef.create("emodel", SOURCE_ID, syncInstance.id))
+        attributes["managedBySync"] = RecordRef.create(EcosModelApp.NAME, SOURCE_ID, syncInstance.id)
 
         return syncInstance.sync.mutate(LocalRecordAtts(record.id, attributes), true)
     }
@@ -92,10 +91,13 @@ class AuthoritiesSyncService(
 
         log.info { "Update synchronizations started" }
 
-        val allSyncs = recordsService.query(RecordsQuery.create {
-            withSourceId(SOURCE_ID)
-            withQuery(VoidPredicate.INSTANCE)
-        }, AuthoritiesSyncDef::class.java)
+        val allSyncs = recordsService.query(
+            RecordsQuery.create {
+                withSourceId(SOURCE_ID)
+                withQuery(VoidPredicate.INSTANCE)
+            },
+            AuthoritiesSyncDef::class.java
+        )
 
         log.info { "Found ${allSyncs.getRecords().size} synchronizations" }
 
@@ -112,7 +114,7 @@ class AuthoritiesSyncService(
         }.forEach {
             log.info { "Remove $it synchronization" }
             syncInstances.remove(it)?.sync?.stop()
-            scheduledTasks[it]?.cancel(false)
+            scheduledTasks[it]?.cancel()
             removedSyncCount++
         }
 
@@ -138,8 +140,7 @@ class AuthoritiesSyncService(
                     log.error { "Factory with type ${v.type} is not found" }
                     current?.sync?.stop()
                     syncInstances.remove(syncId)
-                    scheduledTasks.remove(syncId)?.cancel(false)
-
+                    scheduledTasks.remove(syncId)?.cancel()
                 } else {
 
                     val configAndStateTypes = ReflectUtils.getGenericArgs(
@@ -163,7 +164,7 @@ class AuthoritiesSyncService(
                     )
                     current?.sync?.stop()
                     syncInstances[syncId] = newInstance
-                    scheduledTasks.remove(syncId)?.cancel(false)
+                    scheduledTasks.remove(syncId)?.cancel()
 
                     if (v.enabled && v.repeatDelayDuration.isNotBlank()) {
                         log.info { "Start synchronization '$syncId' with period ${v.repeatDelayDuration} " }
@@ -174,16 +175,17 @@ class AuthoritiesSyncService(
                             null
                         }
                         if (repeatDelayDuration != null) {
-                            scheduledTasks[syncId] = taskScheduler.scheduleWithFixedDelay(
+                            scheduledTasks[syncId] = tasksApi.getMainScheduler().scheduleWithFixedDelay(
+                                { "authorities sync with id: " + v.id },
+                                Duration.ofMinutes(1),
+                                repeatDelayDuration,
                                 {
                                     AuthContext.runAsSystem {
                                         RequestContext.doWithTxn {
                                             run(newInstance, true)
                                         }
                                     }
-                                },
-                                Instant.now().plus(1, ChronoUnit.MINUTES),
-                                repeatDelayDuration
+                                }
                             )
                         }
                     }
@@ -201,7 +203,7 @@ class AuthoritiesSyncService(
                 if (currentManagerId != null) {
                     log.warn {
                         "Found two synchronizations which manage one authority " +
-                        "type ${v.config.authorityType}. Current: $currentManagerId New: ${v.id}"
+                            "type ${v.config.authorityType}. Current: $currentManagerId New: ${v.id}"
                     }
                 } else {
                     newAuthoritiesManagers[v.config.authorityType] = k
@@ -210,8 +212,10 @@ class AuthoritiesSyncService(
         }
         this.newAuthoritiesManagers = newAuthoritiesManagers
 
-        log.info { "Synchronizations initialization completed. " +
-            "Removed: $removedSyncCount Registered: $registeredSyncCount" }
+        log.info {
+            "Synchronizations initialization completed. " +
+                "Removed: $removedSyncCount Registered: $registeredSyncCount"
+        }
     }
 
     fun runById(id: String) {
@@ -220,34 +224,19 @@ class AuthoritiesSyncService(
 
     private fun run(sync: SyncInstance, runByJob: Boolean) {
         synchronized(sync) {
-            val lockConfig = LockConfiguration(
-                "ecos-authorities-sync-" + sync.id,
-                Instant.now().plus(Duration.ofMinutes(1))
-            )
-            var lock = lockProvider.lock(lockConfig)
-            if (!lock.isPresent) {
-                if (runByJob) {
-                    log.debug { "Authorities sync ${sync.id} is performed by another app instance. Skip it" }
-                    return
-                }
-                for (i in 0..3) {
-                    Thread.sleep(1000)
-                    lock = lockProvider.lock(lockConfig)
-                    if (lock.isPresent) {
-                        break
-                    }
-                }
-                if (!lock.isPresent) {
-                    error("Authorities sync is locked and can't be started")
-                }
+            val lockWaitingDuration = if (runByJob) {
+                Duration.ZERO
+            } else {
+                Duration.ofSeconds(5)
             }
-            try {
+            val executed = appLockService.doInSyncOrSkip("ecos-authorities-sync-" + sync.id, lockWaitingDuration) {
                 runInSync(sync)
-            } finally {
-                try {
-                    lock.get().unlock()
-                } catch (e: Exception) {
-                    log.warn(e) { "Exception while lock releasing for syn ${sync.id}" }
+            }
+            if (!executed) {
+                if (!runByJob) {
+                    error("Authorities sync is locked and can't be started")
+                } else {
+                    log.debug { "Authorities sync ${sync.id} is performed by another app instance. Skip it" }
                 }
             }
         }
@@ -257,14 +246,17 @@ class AuthoritiesSyncService(
 
         log.debug { "==== Run synchronization ${sync.id} ====" }
 
-        val ref = RecordRef.create("emodel", SOURCE_ID, sync.id)
+        val ref = RecordRef.create(EcosModelApp.NAME, SOURCE_ID, sync.id)
 
         val stateData = recordsService.getAtts(ref, SyncStateAtts::class.java)
         val state = if (stateData.stateVersion < sync.config.version) {
-            recordsService.mutate(ref, mapOf(
-                "state" to ObjectData.create(),
-                "stateVersion" to sync.config.version
-            ))
+            recordsService.mutate(
+                ref,
+                mapOf(
+                    "state" to ObjectData.create(),
+                    "stateVersion" to sync.config.version
+                )
+            )
             null
         } else if (stateData.state != null && stateData.state.size() > 0) {
             stateData.state
@@ -280,7 +272,7 @@ class AuthoritiesSyncService(
 
     private fun createContext(syncId: String): AuthoritiesSyncContext<Any> {
 
-        val ref = RecordRef.create("emodel", SOURCE_ID, syncId)
+        val ref = RecordRef.create(EcosModelApp.NAME, SOURCE_ID, syncId)
 
         return object : AuthoritiesSyncContext<Any> {
             override fun setState(state: Any?) {

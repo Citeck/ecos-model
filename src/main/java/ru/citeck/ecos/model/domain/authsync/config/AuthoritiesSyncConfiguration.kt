@@ -12,7 +12,6 @@ import ru.citeck.ecos.data.sql.records.listener.*
 import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
 import ru.citeck.ecos.data.sql.records.perms.DbRecordPerms
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
-import ru.citeck.ecos.events2.type.RecordChangedEvent
 import ru.citeck.ecos.events2.type.RecordEventsService
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.authsync.eapp.AuthoritiesSyncArtifactHandler
@@ -62,15 +61,19 @@ class AuthoritiesSyncConfiguration(
 
         val dao = dbDomainFactory.create(
             DbDomainConfig.create()
-                .withRecordsDao(DbRecordsDaoConfig.create {
-                    withId("${AuthoritiesSyncService.SOURCE_ID}-repo")
-                    withTypeRef(AuthoritiesSyncService.TYPE_REF)
-                })
-                .withDataService(DbDataServiceConfig.create {
-                    withAuthEnabled(true)
-                    withTableRef(DbTableRef(AuthorityConstants.DEFAULT_SCHEMA, "ecos_authorities_sync"))
-                    withStoreTableMeta(true)
-                })
+                .withRecordsDao(
+                    DbRecordsDaoConfig.create {
+                        withId("${AuthoritiesSyncService.SOURCE_ID}-repo")
+                        withTypeRef(AuthoritiesSyncService.TYPE_REF)
+                    }
+                )
+                .withDataService(
+                    DbDataServiceConfig.create {
+                        withAuthEnabled(true)
+                        withTableRef(DbTableRef(AuthorityConstants.DEFAULT_SCHEMA, "ecos_authorities_sync"))
+                        withStoreTableMeta(true)
+                    }
+                )
                 .build()
         ).withPermsComponent(permsComponent).build()
 

@@ -123,10 +123,12 @@ class AuthorityService(
     }
 
     fun getGroupMembers(groupRef: RecordRef, membersType: AuthorityType): List<RecordRef> {
-        return records.query(RecordsQuery.create {
-            withSourceId(membersType.sourceId)
-            withQuery(Predicates.contains(AuthorityConstants.ATT_AUTHORITY_GROUPS, groupRef.toString()))
-        }).getRecords()
+        return records.query(
+            RecordsQuery.create {
+                withSourceId(membersType.sourceId)
+                withQuery(Predicates.contains(AuthorityConstants.ATT_AUTHORITY_GROUPS, groupRef.toString()))
+            }
+        ).getRecords()
     }
 
     private fun forEachGroup(

@@ -43,7 +43,7 @@ class RecordImageController(
         }
 
         if (width != null && width > 0) {
-            image = Scalr.resize(image, Scalr.Mode.FIT_TO_WIDTH, width);
+            image = Scalr.resize(image, Scalr.Mode.FIT_TO_WIDTH, width)
         }
 
         val out = ByteArrayOutputStream()

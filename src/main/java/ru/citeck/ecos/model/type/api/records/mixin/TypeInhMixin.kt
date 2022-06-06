@@ -1,39 +1,26 @@
 package ru.citeck.ecos.model.type.api.records.mixin
 
 import org.springframework.stereotype.Component
-import ru.citeck.ecos.model.type.api.records.ResolvedTypeRecordsDao
-import ru.citeck.ecos.model.type.api.records.TypeRecordsDao
-import ru.citeck.ecos.records2.RecordConstants
+import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef
+import ru.citeck.ecos.model.type.api.records.TypesRepoRecordsDao
+import ru.citeck.ecos.records3.record.atts.value.AttValue
 import ru.citeck.ecos.records3.record.atts.value.AttValueCtx
 import ru.citeck.ecos.records3.record.mixin.AttMixin
+import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
+import ru.citeck.ecos.webapp.lib.registry.EcosRegistry
 
 @Component
 final class TypeInhMixin(
-    private val resolvedTypeRecordsDao: ResolvedTypeRecordsDao,
-    typeRecordsDao: TypeRecordsDao
+    private val typesRegistry: EcosRegistry<TypeDef>,
+    private val typesRepoRecordsDao: TypesRepoRecordsDao
 ) : AttMixin {
 
     companion object {
         private val ATTRIBUTES = setOf(
+            "localId",
             "moduleId",
             "extId",
             "parent",
-            RecordConstants.ATT_PARENT,
-            RecordConstants.ATT_ACTIONS,
-            "assocsFull",
-            "form",
-            "inhFormRef",
-            "journal",
-            "attributes",
-            "inhDashboardType",
-            "inhCreateVariants",
-            "inhNumTemplateRef",
-            "inhDispNameTemplate",
-            "isSystem",
-            "inhConfigFormRef",
-            "inhAttributes",
-            "inhSourceId",
-            "resolvedModel",
             "modelRoles",
             "modelStatuses",
             "modelAttributes",
@@ -41,72 +28,25 @@ final class TypeInhMixin(
             "docLibEnabled",
             "docLibFileTypeRefs",
             "docLibDirTypeRef",
-            "resolvedDocLib"
+            "createVariantsById"
         )
     }
 
     init {
-        typeRecordsDao.addAttributesMixin(this)
-        resolvedTypeRecordsDao.addAttributesMixin(this)
+        typesRepoRecordsDao.addAttributesMixin(this)
     }
 
     override fun getAtt(path: String, value: AttValueCtx): Any? {
 
-        val rtypeDef = resolvedTypeRecordsDao.getResolvedTypeRecord(value.getLocalId())
-        val typeDef = rtypeDef.typeRec.typeDef
+        val registryTypeDef = typesRegistry.getValue(value.getLocalId())
+            ?: error("Type doesn't found in registry: '${value.getLocalId()}'")
+        val typeDef = typesRepoRecordsDao.getRecordAtts(value.getLocalId())?.typeDef
+            ?: error("Type doesn't found in repo: '${value.getLocalId()}'")
 
         return when (path) {
+            "parent" -> typeDef.parentRef
             "moduleId", "extId", "localId" -> {
-                typeDef.id
-            }
-            "parent",
-            RecordConstants.ATT_PARENT -> {
-                typeDef.parentRef
-            }
-            RecordConstants.ATT_ACTIONS -> {
-                rtypeDef.getActions()
-            }
-            "assocsFull" -> {
-                rtypeDef.getAssociations()
-            }
-            "form" -> {
-                typeDef.formRef
-            }
-            "inhFormRef" -> {
-                rtypeDef.getFormRef()
-            }
-            "journal" -> {
-                typeDef.journalRef
-            }
-            "attributes" -> {
-                typeDef.properties
-            }
-            "inhDashboardType" -> {
-                rtypeDef.getDashboardType()
-            }
-            "inhCreateVariants" -> {
-                rtypeDef.getCreateVariants()
-            }
-            "inhNumTemplateRef" -> {
-                rtypeDef.getNumTemplateRef()
-            }
-            "isSystem" -> {
-                typeDef.system
-            }
-            "inhConfigFormRef" -> {
-                rtypeDef.getConfigFormRef()
-            }
-            "inhAttributes" -> {
-                rtypeDef.getProperties()
-            }
-            "inhSourceId" -> {
-                rtypeDef.getSourceId()
-            }
-            "inhDispNameTemplate" -> {
-                rtypeDef.getDispNameTemplate()
-            }
-            "resolvedModel" -> {
-                rtypeDef.getModel()
+                registryTypeDef.id
             }
             "modelRoles" -> {
                 typeDef.model.roles
@@ -118,8 +58,8 @@ final class TypeInhMixin(
                 typeDef.model.attributes
             }
             "parentModelAttributes" -> {
-                rtypeDef.getParentRef().id.let { parentId ->
-                    resolvedTypeRecordsDao.getResolvedTypeRecord(parentId).getModel().attributes
+                registryTypeDef.parentRef.id.let { parentId ->
+                    typesRegistry.getValue(parentId)?.model?.attributes ?: emptyList()
                 }
             }
             "docLibEnabled" -> {
@@ -131,8 +71,8 @@ final class TypeInhMixin(
             "docLibDirTypeRef" -> {
                 typeDef.docLib.dirTypeRef
             }
-            "resolvedDocLib" -> {
-                rtypeDef.getDocLib()
+            "createVariantsById" -> {
+                CvByIdValue(typeDef.createVariants)
             }
             else -> {
                 null
@@ -142,5 +82,11 @@ final class TypeInhMixin(
 
     override fun getProvidedAtts(): Collection<String> {
         return ATTRIBUTES
+    }
+
+    private class CvByIdValue(val variants: List<CreateVariantDef>) : AttValue {
+        override fun getAtt(name: String): Any? {
+            return variants.find { it.id == name }
+        }
     }
 }

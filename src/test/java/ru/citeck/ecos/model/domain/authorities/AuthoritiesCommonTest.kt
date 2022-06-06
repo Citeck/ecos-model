@@ -22,7 +22,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
 
         initTest(authAware = true)
 
-        val checkPermissionDenied: (Boolean, () -> Unit) -> Unit = {  errorExpected, action ->
+        val checkPermissionDenied: (Boolean, () -> Unit) -> Unit = { errorExpected, action ->
             if (errorExpected) {
                 val ex = assertThrows<Exception> {
                     action.invoke()
@@ -132,7 +132,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
             listOf(
                 testPersonRef.id,
                 "GROUP_${testGroupRef.id}",
-                "GROUP_${otherGroupId}",
+                "GROUP_$otherGroupId",
                 AuthRole.USER
             )
         )
@@ -171,7 +171,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
             listOf(
                 testPersonRef.id,
                 "GROUP_${testGroupRef.id}",
-                "GROUP_${otherGroupId}",
+                "GROUP_$otherGroupId",
                 "GROUP_other-auth-group-admin",
                 "GROUP_other-auth-group-${AuthConstants.SYSTEM_USER}",
                 AuthRole.USER
@@ -179,7 +179,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
         )
 
         assertThrows<Exception> {
-            recordsService.mutateAtt(testPersonRef,"email", "test@test.ru")
+            recordsService.mutateAtt(testPersonRef, "email", "test@test.ru")
         }
         AuthContext.runAs(testPersonRef.id) {
             recordsService.mutateAtt(testPersonRef, "email", "test@test.ru")
@@ -196,7 +196,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
             listOf(
                 testPersonRef.id,
                 "GROUP_${testGroupRef.id}",
-                "GROUP_${otherGroupId}",
+                "GROUP_$otherGroupId",
                 "GROUP_${newParentGroupRef.id}",
                 "GROUP_other-auth-group-admin",
                 "GROUP_other-auth-group-${AuthConstants.SYSTEM_USER}",
@@ -211,7 +211,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
             listOf(
                 testPersonRef.id,
                 "GROUP_${testGroupRef.id}",
-                "GROUP_${otherGroupId}",
+                "GROUP_$otherGroupId",
                 "GROUP_other-auth-group-admin",
                 "GROUP_other-auth-group-${AuthConstants.SYSTEM_USER}",
                 AuthRole.USER
@@ -267,7 +267,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
                 "GROUP_${testGroupRef.id}",
                 "GROUP_other-auth-group-admin",
                 "GROUP_other-auth-group-${AuthConstants.SYSTEM_USER}",
-                "GROUP_${otherGroupId}",
+                "GROUP_$otherGroupId",
                 "GROUP_group-0",
                 "GROUP_group-1",
                 "GROUP_group-2",
@@ -307,7 +307,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
                 "GROUP_${testGroupRef.id}",
                 "GROUP_other-auth-group-admin",
                 "GROUP_other-auth-group-${AuthConstants.SYSTEM_USER}",
-                "GROUP_${otherGroupId}",
+                "GROUP_$otherGroupId",
                 "GROUP_group-0",
                 "GROUP_group-1",
                 AuthRole.USER

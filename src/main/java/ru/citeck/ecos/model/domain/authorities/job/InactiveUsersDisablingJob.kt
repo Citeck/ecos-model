@@ -2,8 +2,6 @@ package ru.citeck.ecos.model.domain.authorities.job
 
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.scheduling.TaskScheduler
-import org.springframework.scheduling.support.CronTrigger
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.config.lib.consumer.bean.EcosConfig
 import ru.citeck.ecos.context.lib.auth.AuthContext
@@ -13,16 +11,17 @@ import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.request.RequestContext
+import ru.citeck.ecos.webapp.api.task.scheduler.EcosScheduledTask
+import ru.citeck.ecos.webapp.api.task.scheduler.EcosTaskScheduler
 import java.time.Duration
 import java.time.Instant
 import java.time.format.DateTimeParseException
-import java.util.concurrent.ScheduledFuture
 import javax.annotation.PostConstruct
 
 @Component
 class InactiveUsersDisablingJob(
     private val recordsService: RecordsService,
-    private val taskScheduler: TaskScheduler
+    private val taskScheduler: EcosTaskScheduler
 ) {
 
     companion object {
@@ -34,7 +33,7 @@ class InactiveUsersDisablingJob(
     @Value("\${ecos.job.inactiveUsersDisabling.cron}")
     private lateinit var cron: String
 
-    private var job: ScheduledFuture<*>? = null
+    private var job: EcosScheduledTask? = null
 
     private var initialized = false
     private var duration: Duration? = null
@@ -47,7 +46,7 @@ class InactiveUsersDisablingJob(
     }
 
     private fun updateScheduling() {
-        if (!initialized)  {
+        if (!initialized) {
             return
         }
         val duration = this.duration
@@ -58,11 +57,15 @@ class InactiveUsersDisablingJob(
                 "Duration is not set"
             }
             log.info { "$reason. Job will be disabled." }
-            job?.cancel(true)
+            job?.cancel()
             job = null
         } else if (job == null) {
             log.info { "Schedule job with duration $duration" }
-            job = taskScheduler.schedule(
+            job = taskScheduler.scheduleByCron(
+                {
+                    "inactive-users-disabling"
+                },
+                cron,
                 {
                     log.info { "Users updating started..." }
                     AuthContext.runAsSystem {
@@ -73,8 +76,7 @@ class InactiveUsersDisablingJob(
                         }
                     }
                     log.info { "Users updating completed." }
-                },
-                CronTrigger(cron)
+                }
             )
         }
     }
@@ -113,10 +115,13 @@ class InactiveUsersDisablingJob(
         for (person in personsToDisable) {
             log.info { "Disable person '${person.id}'" }
             RequestContext.doWithTxn {
-                recordsService.mutate(person, mapOf(
-                    PersonConstants.ATT_PERSON_DISABLE_REASON to reason,
-                    PersonConstants.ATT_PERSON_DISABLED to true
-                ))
+                recordsService.mutate(
+                    person,
+                    mapOf(
+                        PersonConstants.ATT_PERSON_DISABLE_REASON to reason,
+                        PersonConstants.ATT_PERSON_DISABLED to true
+                    )
+                )
             }
         }
 

@@ -42,11 +42,13 @@ class AuthoritiesTestBase {
     }
 
     fun deleteAll(type: AuthorityType) {
-        val allRecords = recordsService.query(RecordsQuery.create {
-            withSourceId(type.sourceId + "-repo")
-            withQuery(VoidPredicate.INSTANCE)
-            withMaxItems(Int.MAX_VALUE)
-        }).getRecords()
+        val allRecords = recordsService.query(
+            RecordsQuery.create {
+                withSourceId(type.sourceId + "-repo")
+                withQuery(VoidPredicate.INSTANCE)
+                withMaxItems(Int.MAX_VALUE)
+            }
+        ).getRecords()
         recordsService.delete(allRecords)
     }
 
@@ -76,7 +78,7 @@ class AuthoritiesTestBase {
         }
         return runInAuthCtx {
             recordsService.create(type.sourceId, authorityAtts)
-                .withAppName("emodel")
+                .withAppName(EcosModelApp.NAME)
                 .withSourceId(type.sourceId)
         }
     }

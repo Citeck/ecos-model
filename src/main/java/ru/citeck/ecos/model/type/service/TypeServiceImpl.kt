@@ -4,17 +4,20 @@ import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import ru.citeck.ecos.commons.data.MLText
+import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.model.type.converter.TypeConverter
 import ru.citeck.ecos.model.type.repository.TypeEntity
-import ru.citeck.ecos.model.type.dto.TypeDef
 import ru.citeck.ecos.model.type.service.dao.TypeRepoDao
 import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records2.predicate.model.VoidPredicate
+import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import java.time.Instant
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.function.BiConsumer
+import java.util.function.Consumer
+import kotlin.collections.HashSet
 
 @Service
 class TypeServiceImpl(
@@ -35,7 +38,12 @@ class TypeServiceImpl(
         )
     }
 
-    private var onTypeChangedListeners: MutableList<(TypeDef?, TypeDef) -> Unit> = CopyOnWriteArrayList()
+    private var onTypeChangedListeners: MutableList<(
+            EntityWithMeta<TypeDef>?,
+            EntityWithMeta<TypeDef>?
+        ) -> Unit> = CopyOnWriteArrayList()
+
+    private var onTypeHierarchyChangedListeners: MutableList<(Set<String>) -> Unit> = CopyOnWriteArrayList()
 
     override fun getChildren(typeId: String): List<String> {
         return typeRepoDao.getChildrenIds(typeId).toList()
@@ -71,13 +79,30 @@ class TypeServiceImpl(
         return typeRepoDao.count(predicate)
     }
 
-    override fun addListener(onTypeChangedListener: BiConsumer<TypeDef?, TypeDef>) {
+    override fun addListenerTypeHierarchyChangedListener(onTypeChangedListener: Consumer<Set<String>>) {
+        onTypeHierarchyChangedListeners.add { onTypeChangedListener.accept(it) }
+    }
+
+    override fun addListener(onTypeChangedListener: BiConsumer<TypeDef?, TypeDef?>) {
+        onTypeChangedListeners.add { before, after ->
+            onTypeChangedListener.accept(before?.entity, after?.entity)
+        }
+    }
+
+    override fun addListenerWithMeta(
+        onTypeChangedListener: BiConsumer<EntityWithMeta<TypeDef>?, EntityWithMeta<TypeDef>?>
+    ) {
         onTypeChangedListeners.add { before, after -> onTypeChangedListener.accept(before, after) }
     }
 
     override fun getAll(): List<TypeDef> {
-        return typeRepoDao.findAll(VoidPredicate.INSTANCE, 0, 10000, null)
+        return typeRepoDao.findAll(VoidPredicate.INSTANCE, 10000, 0, null)
             .map { typeConverter.toDto(it) }
+    }
+
+    override fun getAllWithMeta(): List<EntityWithMeta<TypeDef>> {
+        return typeRepoDao.findAll(VoidPredicate.INSTANCE, 10000, 0, null)
+            .map { typeConverter.toDtoWithMeta(it) }
     }
 
     override fun getParentIds(id: String): List<String> {
@@ -111,7 +136,7 @@ class TypeServiceImpl(
     }
 
     private fun forEachTypeInDescHierarchy(id: String, action: (TypeEntity) -> Unit) {
-        forEachTypeInDescHierarchy(typeRepoDao.findByExtId(id), action);
+        forEachTypeInDescHierarchy(typeRepoDao.findByExtId(id), action)
     }
 
     private fun forEachTypeInDescHierarchy(type: TypeEntity?, action: (TypeEntity) -> Unit) {
@@ -137,6 +162,12 @@ class TypeServiceImpl(
         return null
     }
 
+    override fun getAllWithMeta(typeIds: Collection<String>): List<EntityWithMeta<TypeDef>> {
+        return typeRepoDao.findAllByExtIds(HashSet(typeIds)).map {
+            typeConverter.toDtoWithMeta(it)
+        }.toList()
+    }
+
     override fun getAll(typeIds: Collection<String>): List<TypeDef> {
         return typeRepoDao.findAllByExtIds(HashSet(typeIds)).map {
             typeConverter.toDto(it)
@@ -146,6 +177,10 @@ class TypeServiceImpl(
     override fun getById(typeId: String): TypeDef {
         return typeRepoDao.findByExtId(typeId)?.let { typeConverter.toDto(it) }
             ?: error("Type is not found: '$typeId'")
+    }
+
+    override fun getByIdWithMetaOrNull(typeId: String): EntityWithMeta<TypeDef>? {
+        return typeRepoDao.findByExtId(typeId)?.let { typeConverter.toDtoWithMeta(it) }
     }
 
     override fun getByIdOrNull(typeId: String): TypeDef? {
@@ -159,9 +194,12 @@ class TypeServiceImpl(
             return typeConverter.toDto(byExtId)
         }
 
-        check(!("base" == typeId
-            || "user-base" == typeId
-            || "type" == typeId)
+        check(
+            !(
+                "base" == typeId ||
+                    "user-base" == typeId ||
+                    "type" == typeId
+                )
         ) {
             "Base type doesn't exists: '$typeId'"
         }
@@ -213,8 +251,8 @@ class TypeServiceImpl(
     @Transactional
     override fun save(dto: TypeDef): TypeDef {
 
-        val typeDefBefore: TypeDef? = typeRepoDao.findByExtId(dto.id)?.let {
-            typeConverter.toDto(it)
+        val typeDefBefore: EntityWithMeta<TypeDef>? = typeRepoDao.findByExtId(dto.id)?.let {
+            typeConverter.toDtoWithMeta(it)
         }
 
         var entity = typeConverter.toEntity(dto)
@@ -223,22 +261,27 @@ class TypeServiceImpl(
 
         updateModifiedTimeForLinkedTypes(dto.id)
 
-        val typeDefAfter = typeConverter.toDto(entity)
+        val typeDefAfter = typeConverter.toDtoWithMeta(entity)
         onTypeChangedListeners.forEach {
             it.invoke(typeDefBefore, typeDefAfter)
         }
 
-        return typeDefAfter
+        return typeDefAfter.entity
     }
 
     private fun updateModifiedTimeForLinkedTypes(typeId: String) {
+        val types = HashSet<String>()
         val action: (TypeEntity) -> Unit = { typeEntity ->
             if (typeEntity.extId != typeId) {
                 typeEntity.lastModifiedDate = Instant.now()
                 typeRepoDao.save(typeEntity)
             }
+            types.add(typeEntity.extId)
         }
         forEachTypeInDescHierarchy(typeId, action)
         forEachTypeInAscHierarchy(typeId, action)
+        onTypeHierarchyChangedListeners.forEach {
+            it.invoke(types)
+        }
     }
 }

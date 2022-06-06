@@ -9,8 +9,8 @@ import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.converter.AbstractDtoConverter;
+import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils;
 import ru.citeck.ecos.model.section.domain.SectionEntity;
-import ru.citeck.ecos.model.type.api.records.TypeRecordsDao;
 import ru.citeck.ecos.model.type.repository.TypeEntity;
 import ru.citeck.ecos.model.section.dto.SectionDto;
 import ru.citeck.ecos.model.section.repository.SectionRepository;
@@ -77,7 +77,7 @@ public class SectionConverter extends AbstractDtoConverter<SectionDto, SectionEn
         Set<RecordRef> typesRefs = null;
         if (entity.getTypes() != null) {
             typesRefs = entity.getTypes().stream()
-                .map(e -> RecordRef.create(TypeRecordsDao.ID, e.getExtId()))
+                .map(e -> TypeUtils.getTypeRef(e.getExtId()))
                 .collect(Collectors.toSet());
         }
 

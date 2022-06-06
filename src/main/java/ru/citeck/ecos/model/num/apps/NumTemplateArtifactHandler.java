@@ -35,6 +35,10 @@ public class NumTemplateArtifactHandler implements EcosArtifactHandler<NumTempla
 
     @Override
     public void listenChanges(@NotNull Consumer<NumTemplateDto> consumer) {
-        numTemplateService.addListener((before, after) -> consumer.accept(after));
+        numTemplateService.addListener((before, after) -> {
+            if (after != null) {
+                consumer.accept(new NumTemplateDto(after.getEntity()));
+            }
+        });
     }
 }

@@ -24,7 +24,7 @@ class EcosDataController(
         "/run-assocs-migration",
         produces = [MediaType.APPLICATION_JSON_UTF8_VALUE]
     )
-    fun runAssocsMigration() : Map<String, String> {
+    fun runAssocsMigration(): Map<String, String> {
 
         val commentsDao = recordsService.getRecordsDao("comment-repo", DbRecordsDao::class.java)
             ?: error("CommentsDao doesn't found")

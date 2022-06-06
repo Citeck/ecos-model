@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.model.type.repository.TypeEntity
 import ru.citeck.ecos.model.type.repository.TypeRepository
-import ru.citeck.ecos.model.type.service.TypeServiceImpl
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.predicate.PredicateUtils
 import ru.citeck.ecos.records2.predicate.model.Predicate
@@ -73,8 +72,8 @@ class TypeRepoDaoImpl(private val repo: TypeRepository) : TypeRepoDao {
                 val instant = Json.mapper.convert(value, Instant::class.java)
                 if (instant != null) {
                     return Specification { root: Root<TypeEntity>,
-                                           _: CriteriaQuery<*>?,
-                                           builder: CriteriaBuilder ->
+                        _: CriteriaQuery<*>?,
+                        builder: CriteriaBuilder ->
                         builder.greaterThan(root.get<Any>("lastModifiedDate").`as`(Instant::class.java), instant)
                     }
                 }
@@ -85,15 +84,15 @@ class TypeRepoDaoImpl(private val repo: TypeRepository) : TypeRepoDao {
         var spec: Specification<TypeEntity>? = null
         if (StringUtils.isNotBlank(predicateDto.name)) {
             spec = Specification { root: Root<TypeEntity>,
-                                   _: CriteriaQuery<*>?,
-                                   builder: CriteriaBuilder ->
+                _: CriteriaQuery<*>?,
+                builder: CriteriaBuilder ->
                 builder.like(builder.lower(root.get("name")), "%" + predicateDto.name!!.lowercase() + "%")
             }
         }
         if (StringUtils.isNotBlank(predicateDto.moduleId)) {
             val idSpec = Specification { root: Root<TypeEntity>,
-                                         _: CriteriaQuery<*>?,
-                                         builder: CriteriaBuilder ->
+                _: CriteriaQuery<*>?,
+                builder: CriteriaBuilder ->
                 builder.like(builder.lower(root.get("extId")), "%" + predicateDto.moduleId!!.lowercase() + "%")
             }
             spec = spec?.or(idSpec) ?: idSpec
@@ -102,14 +101,14 @@ class TypeRepoDaoImpl(private val repo: TypeRepository) : TypeRepoDao {
             val systemSpec: Specification<TypeEntity>
             systemSpec = if (!predicateDto.system) {
                 Specification { root: Root<TypeEntity>,
-                                _: CriteriaQuery<*>?,
-                                builder: CriteriaBuilder ->
+                    _: CriteriaQuery<*>?,
+                    builder: CriteriaBuilder ->
                     builder.not(builder.equal(root.get<Any>("system"), true))
                 }
             } else {
                 Specification { root: Root<TypeEntity>,
-                                _: CriteriaQuery<*>?,
-                                builder: CriteriaBuilder ->
+                    _: CriteriaQuery<*>?,
+                    builder: CriteriaBuilder ->
                     builder.equal(root.get<Any>("system"), true)
                 }
             }

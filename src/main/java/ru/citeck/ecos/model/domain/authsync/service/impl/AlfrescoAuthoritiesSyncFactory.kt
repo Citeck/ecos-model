@@ -53,9 +53,11 @@ class AlfrescoAuthoritiesSyncFactory(
         private val log = KotlinLogging.logger {}
     }
 
-    override fun createSync(config: Config,
-                            authorityType: AuthorityType,
-                            context: AuthoritiesSyncContext<State>): AuthoritiesSync<State> {
+    override fun createSync(
+        config: Config,
+        authorityType: AuthorityType,
+        context: AuthoritiesSyncContext<State>
+    ): AuthoritiesSync<State> {
         return Sync(config, authorityType, context)
     }
 
@@ -77,10 +79,13 @@ class AlfrescoAuthoritiesSyncFactory(
                 config.batchSize
             }
             this.config = config.copy(batchSize = batchSize)
-            this.typePredicate = Predicates.eq("TYPE", when (authorityType) {
-                AuthorityType.PERSON -> ALF_TYPE_PERSON
-                AuthorityType.GROUP -> ALF_TYPE_GROUP
-            })
+            this.typePredicate = Predicates.eq(
+                "TYPE",
+                when (authorityType) {
+                    AuthorityType.PERSON -> ALF_TYPE_PERSON
+                    AuthorityType.GROUP -> ALF_TYPE_GROUP
+                }
+            )
             mutationAtts = config.attributes.entries.filter {
                 it.value.matches(SIMPLE_ALF_ATT_REGEX)
             }.associate { it.key to it.value }
@@ -104,10 +109,12 @@ class AlfrescoAuthoritiesSyncFactory(
             )
             return if (currentState.syncById) {
                 if (!updateAuthoritiesByDbId(currentState, context)) {
-                    context.setState(currentState.copy(
-                        syncById = false,
-                        lastModified = Instant.now().minus(2, ChronoUnit.DAYS)
-                    ))
+                    context.setState(
+                        currentState.copy(
+                            syncById = false,
+                            lastModified = Instant.now().minus(2, ChronoUnit.DAYS)
+                        )
+                    )
                     return true
                 }
                 return false
@@ -176,9 +183,11 @@ class AlfrescoAuthoritiesSyncFactory(
             return refToSync.id
         }
 
-        private fun prepareGroupsUpdateRecords(authorityRef: RecordRef,
-                                               atts: ObjectData,
-                                               withRemove: Boolean): List<RecordAtts> {
+        private fun prepareGroupsUpdateRecords(
+            authorityRef: RecordRef,
+            atts: ObjectData,
+            withRemove: Boolean
+        ): List<RecordAtts> {
 
             if (!atts.has(AuthorityConstants.ATT_AUTHORITY_GROUPS)) {
                 return emptyList()
@@ -227,10 +236,13 @@ class AlfrescoAuthoritiesSyncFactory(
             val groupsNodeRefs = recordsService.getAtts(groupsAlfAuthRefs, listOf("nodeRef")).map {
                 it.getAtt("nodeRef").asText()
             }.toList()
-            val refAlfAuthRef = RecordRef.create("alfresco", "authority", when (authorityType) {
-                AuthorityType.PERSON -> recRef.id
-                AuthorityType.GROUP -> "GROUP_${recRef.id}"
-            })
+            val refAlfAuthRef = RecordRef.create(
+                "alfresco", "authority",
+                when (authorityType) {
+                    AuthorityType.PERSON -> recRef.id
+                    AuthorityType.GROUP -> "GROUP_${recRef.id}"
+                }
+            )
             val recRefNodeRef = recordsService.getAtt(refAlfAuthRef, "nodeRef").asText()
 
             return groupsNodeRefs.map {
@@ -251,16 +263,21 @@ class AlfrescoAuthoritiesSyncFactory(
             atts[MODIFIED_ATT_ALIAS] = ALF_MODIFIED_ATT
             atts[AUTHORITY_ID_ALIAS] = getAuthorityIdAtt()
 
-            val records = recordsService.query(RecordsQuery.create {
-                withSourceId("alfresco/")
-                withQuery(Predicates.and(
-                    typePredicate,
-                    ValuePredicate.gt(ALF_MODIFIED_ATT, state.lastModified.toString())
-                ))
-                withMaxItems(config.batchSize)
-                withSortBy(SortBy(ALF_MODIFIED_ATT, true))
-                withConsistency(Consistency.EVENTUAL)
-            }, atts)
+            val records = recordsService.query(
+                RecordsQuery.create {
+                    withSourceId("alfresco/")
+                    withQuery(
+                        Predicates.and(
+                            typePredicate,
+                            ValuePredicate.gt(ALF_MODIFIED_ATT, state.lastModified.toString())
+                        )
+                    )
+                    withMaxItems(config.batchSize)
+                    withSortBy(SortBy(ALF_MODIFIED_ATT, true))
+                    withConsistency(Consistency.EVENTUAL)
+                },
+                atts
+            )
 
             if (updateAuthorities(context, records.getRecords())) {
 
@@ -268,8 +285,10 @@ class AlfrescoAuthoritiesSyncFactory(
                 val lastModified = lastRec
                     .getAtt(MODIFIED_ATT_ALIAS)
                     .getAs(Instant::class.java)
-                    ?: error("Last modified date is not valid for record ${lastRec.getId()}. " +
-                        "Date: ${lastRec.getAtt(MODIFIED_ATT_ALIAS)}")
+                    ?: error(
+                        "Last modified date is not valid for record ${lastRec.getId()}. " +
+                            "Date: ${lastRec.getAtt(MODIFIED_ATT_ALIAS)}"
+                    )
 
                 context.setState(state.copy(lastModified = lastModified))
                 return true
@@ -283,16 +302,21 @@ class AlfrescoAuthoritiesSyncFactory(
             atts[SYS_DBID_ATT_ALIAS] = ALF_NODE_DBID_ATT
             atts[AUTHORITY_ID_ALIAS] = getAuthorityIdAtt()
 
-            val records = recordsService.query(RecordsQuery.create {
-                withSourceId("alfresco/")
-                withQuery(Predicates.and(
-                    typePredicate,
-                    Predicates.gt(ALF_NODE_DBID_ATT, state.lastId)
-                ))
-                withMaxItems(config.batchSize)
-                withSortBy(SortBy(ALF_NODE_DBID_ATT, true))
-                withConsistency(Consistency.EVENTUAL)
-            }, atts)
+            val records = recordsService.query(
+                RecordsQuery.create {
+                    withSourceId("alfresco/")
+                    withQuery(
+                        Predicates.and(
+                            typePredicate,
+                            Predicates.gt(ALF_NODE_DBID_ATT, state.lastId)
+                        )
+                    )
+                    withMaxItems(config.batchSize)
+                    withSortBy(SortBy(ALF_NODE_DBID_ATT, true))
+                    withConsistency(Consistency.EVENTUAL)
+                },
+                atts
+            )
 
             if (updateAuthorities(context, records.getRecords())) {
                 val dbId = records.getRecords().last().getAtt(SYS_DBID_ATT_ALIAS).asLong()
@@ -302,8 +326,10 @@ class AlfrescoAuthoritiesSyncFactory(
             return false
         }
 
-        private fun updateAuthorities(context: AuthoritiesSyncContext<State>,
-                                      authorities: List<RecordAtts>): Boolean {
+        private fun updateAuthorities(
+            context: AuthoritiesSyncContext<State>,
+            authorities: List<RecordAtts>
+        ): Boolean {
 
             if (authorities.isEmpty()) {
                 return false
@@ -343,8 +369,9 @@ class AlfrescoAuthoritiesSyncFactory(
                 }
             }
 
-            if (personAtts.has(PersonConstants.ATT_AT_WORKPLACE)
-                    && personAtts.get(PersonConstants.ATT_AT_WORKPLACE).asText().isBlank()) {
+            if (personAtts.has(PersonConstants.ATT_AT_WORKPLACE) &&
+                personAtts.get(PersonConstants.ATT_AT_WORKPLACE).asText().isBlank()
+            ) {
 
                 personAtts.set(PersonConstants.ATT_AT_WORKPLACE, true)
             }

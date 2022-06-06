@@ -1,22 +1,22 @@
 package ru.citeck.ecos.model.domain.type;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.model.EcosModelApp;
-import ru.citeck.ecos.model.type.dto.TypeDef;
 import ru.citeck.ecos.model.type.service.TypeService;
 import ru.citeck.ecos.model.web.rest.TestUtil;
 import ru.citeck.ecos.records2.request.rest.RestHandler;
 import ru.citeck.ecos.records3.RecordsServiceFactory;
-import ru.citeck.ecos.records3.spring.web.rest.RecordsRestApi;
+import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef;
+import ru.citeck.ecos.webapp.lib.spring.context.api.rest.RecordsRestApi;
+import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Roman Makarskiy
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(EcosSpringExtension.class)
 @SpringBootTest(classes = EcosModelApp.class)
 @ActiveProfiles(profiles = {"test-type-data", "test"})
 public class TypeRecordsControllerTest {
@@ -45,7 +45,7 @@ public class TypeRecordsControllerTest {
     @Autowired
     private RecordsServiceFactory recordsServiceFactory;
 
-    @Before
+    @BeforeEach
     public void setup() {
 
         RecordsRestApi recordsApi = new RecordsRestApi(recordsServiceFactory);
@@ -67,7 +67,7 @@ public class TypeRecordsControllerTest {
     @Test
     public void inheritActionsWithActionsAtt() throws Exception {
         performQueryAndCheckResponse("type-second", CURRENT_TYPE_ACTION_ATT,
-            "second-type-action-inherit-response-with-non-inherited-actions.json");
+            "second-type-action-inherit-response-with-non-inherited-actions.json", false);
     }
 
     @Test
@@ -101,8 +101,16 @@ public class TypeRecordsControllerTest {
     }
 
     private void performQueryAndCheckResponse(String recordId, String actionAtt, String responseFile) throws Exception {
+        performQueryAndCheckResponse(recordId, actionAtt, responseFile, true);
+    }
+
+    private void performQueryAndCheckResponse(String recordId, String actionAtt, String responseFile, boolean resolved) throws Exception {
+        String recRef = "type@" + recordId;
+        if (!resolved) {
+            recRef = "types-repo@" + recordId;
+        }
         String request = "{\n" +
-            "    \"record\": \"type@" + recordId + "\",\n" +
+            "    \"record\": \"" + recRef + "\",\n" +
             "    \"attributes\": {\n" +
             "        \"name\": \"name\",\n" +
             "        \"parent\": \"parent?id\",\n" +

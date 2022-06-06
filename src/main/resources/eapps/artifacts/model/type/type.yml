@@ -5,7 +5,7 @@ name:
   en: Case type
 
 system: true
-sourceId: emodel/type
+sourceId: emodel/types-repo
 
 formRef: uiserv/form@ecos-type
 journalRef: uiserv/journal@ecos-types

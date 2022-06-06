@@ -6,8 +6,8 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.apps.app.domain.handler.EcosArtifactHandler;
 import ru.citeck.ecos.context.lib.auth.AuthContext;
-import ru.citeck.ecos.model.type.dto.TypeDef;
 import ru.citeck.ecos.model.type.service.TypeService;
+import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef;
 
 import java.util.function.Consumer;
 

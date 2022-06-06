@@ -1,16 +1,6 @@
 package ru.citeck.ecos.model.app
 
-import org.springframework.stereotype.Component
-import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
-import ru.citeck.ecos.data.sql.records.perms.DbRecordPerms
-import ru.citeck.ecos.data.sql.records.perms.DefaultDbPermsComponent
-import ru.citeck.ecos.model.lib.permissions.service.RecordPermsService
-import ru.citeck.ecos.model.lib.permissions.service.roles.RolesPermissions
-import ru.citeck.ecos.model.lib.role.service.RoleService
-import ru.citeck.ecos.records2.RecordRef
-import ru.citeck.ecos.records3.RecordsService
-
-@Component
+/*@Component
 class ModelDbPermsComponent(
     val roleService: RoleService,
     val permsService: RecordPermsService,
@@ -50,4 +40,4 @@ class ModelDbPermsComponent(
             return true
         }
     }
-}
+}*/
