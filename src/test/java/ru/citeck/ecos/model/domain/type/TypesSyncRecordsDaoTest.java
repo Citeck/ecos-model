@@ -40,7 +40,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(EcosSpringExtension.class)
 @SpringBootTest(classes = EcosModelApp.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public class TypesSyncRecordsDaoTest {
 
     private static final String TYPES_SOURCE_ID = "emodel/type";
@@ -77,10 +76,10 @@ public class TypesSyncRecordsDaoTest {
 
         this.localRecordsService = localServiceFactory.getRecordsServiceV1();
 
+        generateData();
+
         remoteSyncRecordsDao = new RemoteSyncRecordsDao<>(TYPES_SOURCE_ID, TypeDef.class);
         localRecordsService.register(remoteSyncRecordsDao);
-
-        generateData();
     }
 
     @AfterEach
