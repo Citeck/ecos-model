@@ -8,7 +8,7 @@ system: true
 sourceId: emodel/types-repo
 
 formRef: uiserv/form@ecos-type
-journalRef: uiserv/journal@ecos-types-repo
+journalRef: uiserv/journal@ecos-types-def
 
 defaultCreateVariant: false
 
