@@ -8,7 +8,7 @@
   "description": {},
   "customModule": null,
   "typeRef": "",
-  "width": "default",
+  "width": "lg",
   "i18n": {},
   "definition": {
     "components": [
@@ -27,17 +27,19 @@
                       {
                         "label": {
                           "en": "User Name",
-                          "ru": "Имя пользователя"
+                          "ru": "Системное имя"
                         },
-                        "disabled": true,
                         "key": "id",
+                        "disabled": true,
                         "validate": {
                           "pattern": "[\\w-@.]+",
+                          "custom": "valid = (new RegExp(/[\\w-@.]+/).test(input)) ? true : 'You cannot use Cyrillic'",
                           "minLength": 3,
                           "maxLength": 100
                         },
                         "defaultValue": "",
                         "refreshOn": [],
+                        "optionalWhenDisabled": false,
                         "logic": [
                           {
                             "name": "enableUserNameField",
@@ -114,6 +116,7 @@
                             }
                           ]
                         },
+                        "searchEnabled": false,
                         "defaultValue": "",
                         "key": "sex",
                         "type": "ecosSelect",
@@ -125,7 +128,6 @@
                         },
                         "key": "personDisabled",
                         "labelPosition": "",
-                        "defaultValue": false,
                         "refreshOn": [],
                         "type": "checkbox",
                         "input": true
