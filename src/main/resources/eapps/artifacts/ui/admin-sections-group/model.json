@@ -9,7 +9,7 @@
     {
       "type": "JOURNAL",
       "config": {
-        "journalId": "ecos-types-repo"
+        "journalId": "ecos-types-def"
       }
     },
     {
