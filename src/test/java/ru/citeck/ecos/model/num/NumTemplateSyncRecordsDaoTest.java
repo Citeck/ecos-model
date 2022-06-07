@@ -70,10 +70,10 @@ public class NumTemplateSyncRecordsDaoTest {
 
         this.localRecordsService = localServiceFactory.getRecordsServiceV1();
 
+        generateData();
+
         remoteSyncRecordsDAO = new RemoteSyncRecordsDao<>(SOURCE_ID, NumTemplateDto.class);
         localRecordsService.register(remoteSyncRecordsDAO);
-
-        generateData();
     }
 
     @Test
