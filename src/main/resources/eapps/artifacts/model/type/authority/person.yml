@@ -126,6 +126,10 @@ model:
       name:
         ru: Местоположение
         en: Location
+    - id: userStatus
+      name:
+        ru: Статус
+        en: Status
     - id: workingCalendar
       name:
         ru: Рабочий календарь
