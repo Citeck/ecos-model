@@ -118,6 +118,19 @@ model:
       name:
         ru: Скайп
         en: Skype
+    - id: mobile
+      name:
+        ru: Телефон мобильный
+        en: Mobile phone
+    - id: location
+      name:
+        ru: Местоположение
+        en: Location
+    - id: workingCalendar
+      name:
+        ru: Рабочий календарь
+        en: Working calendar
+      type: ASSOC
     - id: atWorkplace
       name:
         ru: На рабочем месте

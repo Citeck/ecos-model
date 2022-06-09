@@ -1,0 +1,136 @@
+{
+  "id": "person_contacts",
+  "title": {
+    "en": "Contacts",
+    "ru": "Контакты"
+  },
+  "description": {},
+  "customModule": null,
+  "typeRef": "emodel/type@person",
+  "width": "lg",
+  "i18n": {
+    "ru": {
+      "phoneWorking": "Телефон рабочий",
+      "phoneInternal": "Телефон внутренний",
+      "mobile": "Мобильный",
+      "location": "Местоположение",
+      "skype": "Skype",
+      "email": "Электронная почта"
+    },
+    "en": {
+      "phoneWorking": "Work phone",
+      "phoneInternal": "Internal phone",
+      "mobile": "Mobile",
+      "location": "Location",
+      "skype": "Skype",
+      "email": "E-mail Address"
+    }
+  },
+  "definition": {
+    "components": [
+      {
+        "title": "Contacts",
+        "key": "panel2",
+        "type": "panel",
+        "input": false,
+        "components": [
+          {
+            "label": {
+              "ru": "phoneWorking"
+            },
+            "key": "ecos_phoneWorking",
+            "clearOnHide": false,
+            "defaultValue": "",
+            "refreshOn": [],
+            "optionalWhenDisabled": false,
+            "properties": {
+              "attribute": "phoneWorking"
+            },
+            "type": "textfield",
+            "input": true
+          },
+          {
+            "label": {
+              "ru": "phoneInternal"
+            },
+            "key": "ecos_phoneInternal",
+            "clearOnHide": false,
+            "defaultValue": "",
+            "refreshOn": [],
+            "optionalWhenDisabled": false,
+            "properties": {
+              "attribute": "phoneInternal"
+            },
+            "type": "textfield",
+            "input": true
+          },
+          {
+            "label": {
+              "ru": "mobile"
+            },
+            "key": "cm_mobile2",
+            "clearOnHide": false,
+            "defaultValue": "",
+            "refreshOn": [],
+            "optionalWhenDisabled": false,
+            "properties": {
+              "attribute": "mobile"
+            },
+            "type": "textfield",
+            "input": true
+          },
+          {
+            "label": {
+              "ru": "location"
+            },
+            "key": "cm_location",
+            "defaultValue": "",
+            "refreshOn": [],
+            "optionalWhenDisabled": false,
+            "properties": {
+              "attribute": "location"
+            },
+            "type": "textfield",
+            "input": true
+          },
+          {
+            "label": {
+              "ru": "skype"
+            },
+            "key": "cm_skype",
+            "defaultValue": "",
+            "refreshOn": [],
+            "optionalWhenDisabled": false,
+            "properties": {
+              "attribute": "skype"
+            },
+            "type": "textfield",
+            "input": true
+          },
+          {
+            "label": {
+              "ru": "email"
+            },
+            "key": "cm_email",
+            "defaultValue": "",
+            "refreshOn": [],
+            "optionalWhenDisabled": false,
+            "properties": {
+              "attribute": "email"
+            },
+            "type": "textfield",
+            "input": true
+          },
+          {
+            "state": "",
+            "theme": "primary",
+            "key": "submit",
+            "type": "button",
+            "input": true
+          }
+        ]
+      }
+    ]
+  },
+  "attributes": {}
+}

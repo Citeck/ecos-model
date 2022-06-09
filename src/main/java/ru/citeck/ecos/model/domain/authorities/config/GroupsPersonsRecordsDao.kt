@@ -133,14 +133,7 @@ class GroupsPersonsRecordsDao(
     }
 
     override fun mutateForAnyRes(records: List<LocalRecordAtts>): List<Any> {
-        val result = mutate(records)
-        if (authorityType == AuthorityType.PERSON) {
-            return result.map {
-                // todo: remove after user dashboard will be migrated to emodel
-                RecordRef.create("alfresco", "people", it)
-            }
-        }
-        return result
+        return mutate(records)
     }
 
     private fun permissionDenied() {
