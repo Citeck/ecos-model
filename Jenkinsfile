@@ -4,7 +4,7 @@ properties([
 timestamps {
   node {
 
-    def repoUrl = "git@gitlab.citeck.ru:citeck-projects/ecos-model.git"
+    def repoUrl = scm.getUserRemoteConfigs()[0].url
 
     stage('Checkout Script Tools SCM') {
       dir('jenkins-script-tools') {
