@@ -1,1 +1,1 @@
-ecosBuild('webapp', 0, [:])
+ecosBuild('maven-webapp', 0, [:])
