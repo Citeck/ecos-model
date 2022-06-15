@@ -1,1 +1,1 @@
-ecosBuild('webapp', [])
+ecosBuild('webapp', [:])
