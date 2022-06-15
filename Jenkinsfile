@@ -4,6 +4,8 @@ properties([
 timestamps {
   node {
 
+    ecosBuild 'webapp'
+
     def repoUrl = scm.getUserRemoteConfigs()[0].url
 
     stage('Checkout Script Tools SCM') {
