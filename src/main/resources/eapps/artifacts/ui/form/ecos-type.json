@@ -55,7 +55,8 @@
                                     "journalId": "ecos-forms",
                                     "key": "formRef",
                                     "label": "Form",
-                                    "input": true
+                                    "input": true,
+                                    "defaultValue": "uiserv/form@DEFAULT_FORM"
                                   }
                                 ],
                                 "type": "column",
@@ -90,7 +91,8 @@
                             "journalId": "ecos-journals",
                             "key": "journalRef",
                             "type": "selectJournal",
-                            "input": true
+                            "input": true,
+                            "defaultValue": "uiserv/form@DEFAULT_JOURNAL"
                           },
                           {
                             "label": "Number template",
