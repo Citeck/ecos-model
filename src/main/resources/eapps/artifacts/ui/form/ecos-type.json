@@ -92,7 +92,7 @@
                             "key": "journalRef",
                             "type": "selectJournal",
                             "input": true,
-                            "defaultValue": "uiserv/form@DEFAULT_JOURNAL"
+                            "defaultValue": "uiserv/journal@DEFAULT_JOURNAL"
                           },
                           {
                             "label": "Number template",

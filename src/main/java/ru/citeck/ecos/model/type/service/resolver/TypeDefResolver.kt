@@ -101,9 +101,9 @@ class TypeDefResolver {
         }
         if (RecordRef.isEmpty(resTypeDef.formRef) && resTypeDef.inheritForm) {
             resTypeDef.withFormRef(resolvedParentDef.formRef)
-            if (resTypeDef.formRef.id == "DEFAULT_FORM") {
-                resTypeDef.withFormRef(resTypeDef.formRef.withId("type$" + resTypeDef.id))
-            }
+        }
+        if (resTypeDef.formRef.id == "DEFAULT_FORM") {
+            resTypeDef.withFormRef(resTypeDef.formRef.withId("type$" + resTypeDef.id))
         }
         if (resTypeDef.journalRef.id == "DEFAULT_JOURNAL") {
             resTypeDef.withJournalRef(resTypeDef.journalRef.withId("type$" + resTypeDef.id))
