@@ -17,7 +17,6 @@ import ru.citeck.ecos.model.type.service.utils.EcosModelTypeUtils
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.webapp.lib.model.type.dto.AssocDef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
-import java.util.zip.CRC32
 
 @Component
 class TypeDefResolver {
@@ -111,11 +110,9 @@ class TypeDefResolver {
                     if (sourceType.isNotBlank() && sourceType != EcosModelTypeUtils.SOURCE_TYPE_CUSTOM_ID) {
 
                         log.error { "Unknown sourceType '" + resTypeDef.sourceType + "' for type " + resTypeDef.id }
-
                     } else if (resTypeDef.sourceId.isBlank()) {
 
                         resTypeDef.withSourceId(resolvedParentDef.sourceId)
-
                     } else if (!resTypeDef.sourceId.contains(RecordRef.APP_NAME_DELIMITER)) {
 
                         resTypeDef.withSourceId(

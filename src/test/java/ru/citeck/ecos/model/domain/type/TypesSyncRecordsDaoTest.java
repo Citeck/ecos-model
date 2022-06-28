@@ -229,6 +229,8 @@ public class TypesSyncRecordsDaoTest {
             ));
 
             //typeDto.setAssociations(generateAssocs(i));
+            typeDto.withSourceType("CUSTOM_ID");
+            typeDto.withSourceRef(RecordRef.EMPTY);
             typeDto.withProperties(ObjectData.create("{\"attKey\":\"attValue-" + i + "\"}"));
             typeDto.setConfig(ObjectData.create("{\"configKey\":\"configValue-" + i + "\"}"));
             typeDto.withConfigFormRef(RecordRef.create("uiserv", "eform", "config-form-" + i));
@@ -237,7 +239,7 @@ public class TypesSyncRecordsDaoTest {
             typeDto.withDescription(new MLText("Description-" + i));
             typeDto.withFormRef(RecordRef.valueOf("uiserv/form@form-" + i));
             typeDto.withJournalRef(RecordRef.valueOf("uiserv/journal@journal-" + i));
-            typeDto.withSourceId("source-" + i);
+            typeDto.withSourceId("emodel/source-" + i);
             typeDto.withName(new MLText("name-" + i));
             typeDto.withParentRef(RecordRef.valueOf("emodel/type@base"));
             typeDto.withDispNameTemplate(DataValue.create("{\"ru\": \"Тест\"}").getAs(MLText.class));

@@ -35,7 +35,6 @@ class TypesRegistryInitializer(
         }
         typesService.addOnDeletedListener {
             registry.setValue(it, null)
-
         }
         typesService.addListenerTypeHierarchyChangedListener { changedTypes ->
             resolver.getResolvedTypesWithMeta(typesService.getAllWithMeta(changedTypes), rawProv, resProv).forEach {

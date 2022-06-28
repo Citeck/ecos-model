@@ -37,8 +37,9 @@ class TypesConfig {
         val typesRegistry = typesRegistry ?: return
 
         typesRegistry.getAllValues().values.forEach { typeDef ->
-            if (typeDef.entity.sourceType == EcosModelTypeUtils.SOURCE_TYPE_EMODEL
-                    && typeDef.entity.sourceId.isNotBlank()) {
+            if (typeDef.entity.sourceType == EcosModelTypeUtils.SOURCE_TYPE_EMODEL &&
+                typeDef.entity.sourceId.isNotBlank()
+            ) {
 
                 recordsService.register(createRecordsDao(dbDomainFactory, typeDef.entity))
             }
@@ -47,11 +48,20 @@ class TypesConfig {
         typesRegistry.listenEvents { _, before, after ->
 
             val sourceIdBefore = before?.sourceId ?: ""
-            if (sourceIdBefore.isNotBlank() && (after == null || sourceIdBefore != after.sourceId)) {
+
+            val isSourceTypeBeforeEmodel = before?.sourceType == EcosModelTypeUtils.SOURCE_TYPE_EMODEL
+            val isSourceTypeAfterEmodel = after?.sourceType == EcosModelTypeUtils.SOURCE_TYPE_EMODEL
+
+            if (isSourceTypeBeforeEmodel
+                && sourceIdBefore.isNotBlank()
+                && (after == null || sourceIdBefore != after.sourceId)
+            ) {
                 log.info { "Unregister records DAO with sourceId '$sourceIdBefore'" }
                 recordsService.unregister(sourceIdBefore)
             }
-            if (after != null && (before?.sourceId != after.sourceId || before.sourceType != after.sourceType)) {
+            if (isSourceTypeAfterEmodel && after != null
+                    && (before?.sourceId != after.sourceId || before.sourceType != after.sourceType)
+            ) {
                 val sourceId = after.sourceId
                 val parentId = typesRegistry.getValue(after.parentRef.id)?.sourceId
                 if (sourceId != parentId) {
