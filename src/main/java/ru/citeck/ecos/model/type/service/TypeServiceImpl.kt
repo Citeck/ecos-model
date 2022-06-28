@@ -43,6 +43,8 @@ class TypeServiceImpl(
             EntityWithMeta<TypeDef>?
         ) -> Unit> = CopyOnWriteArrayList()
 
+    private var onDeletedListeners: MutableList<(String) -> Unit> = CopyOnWriteArrayList()
+
     private var onTypeHierarchyChangedListeners: MutableList<(Set<String>) -> Unit> = CopyOnWriteArrayList()
 
     override fun getChildren(typeId: String): List<String> {
@@ -93,6 +95,10 @@ class TypeServiceImpl(
         onTypeChangedListener: BiConsumer<EntityWithMeta<TypeDef>?, EntityWithMeta<TypeDef>?>
     ) {
         onTypeChangedListeners.add { before, after -> onTypeChangedListener.accept(before, after) }
+    }
+
+    override fun addOnDeletedListener(listener: (String) -> Unit) {
+        onDeletedListeners.add(listener)
     }
 
     override fun getAll(): List<TypeDef> {
@@ -220,32 +226,30 @@ class TypeServiceImpl(
 
     @Transactional
     override fun delete(typeId: String) {
+        updateModifiedTimeForLinkedTypes(deleteImpl(typeId), asc = true, desc = false)
+    }
+
+    @Transactional
+    override fun deleteWithChildren(typeId: String) {
+        val children = typeRepoDao.getChildrenIds(typeId)
+        children.forEach { childId ->
+            deleteWithChildren(childId)
+        }
+        updateModifiedTimeForLinkedTypes(deleteImpl(typeId), asc = true, desc = false)
+    }
+
+    private fun deleteImpl(typeId: String): String {
         if (PROTECTED_TYPES.contains(typeId)) {
             throw RuntimeException("Type '$typeId' is protected")
         }
-        val typeEntity = typeRepoDao.findByExtId(typeId) ?: return
+        val typeEntity = typeRepoDao.findByExtId(typeId) ?: return ""
         if (typeRepoDao.getChildrenIds(typeId).isNotEmpty()) {
             error("Type $typeId contains children and can't be deleted")
         }
+        val parentId = typeEntity.parent?.extId ?: ""
         typeRepoDao.delete(typeEntity)
-    }
-
-    override fun deleteWithChildren(typeId: String) {
-
-        if (PROTECTED_TYPES.contains(typeId)) {
-            throw RuntimeException("Type '$typeId' is protected")
-        }
-
-        val typeEntity = typeRepoDao.findByExtId(typeId) ?: return
-        val children = typeRepoDao.getChildrenIds(typeId)
-
-        children.forEach { childId ->
-            typeRepoDao.findByExtId(childId)?.let {
-                typeRepoDao.delete(it)
-            }
-        }
-
-        typeRepoDao.delete(typeEntity)
+        onDeletedListeners.forEach { it(typeId) }
+        return parentId
     }
 
     @Transactional
@@ -259,7 +263,7 @@ class TypeServiceImpl(
 
         entity = typeRepoDao.save(entity)
 
-        updateModifiedTimeForLinkedTypes(dto.id)
+        updateModifiedTimeForLinkedTypes(dto.id, asc = true, desc = true)
 
         val typeDefAfter = typeConverter.toDtoWithMeta(entity)
         onTypeChangedListeners.forEach {
@@ -269,17 +273,25 @@ class TypeServiceImpl(
         return typeDefAfter.entity
     }
 
-    private fun updateModifiedTimeForLinkedTypes(typeId: String) {
+    private fun updateModifiedTimeForLinkedTypes(typeId: String, asc: Boolean, desc: Boolean) {
+        if (typeId.isBlank()) {
+            return
+        }
         val types = HashSet<String>()
         val action: (TypeEntity) -> Unit = { typeEntity ->
             if (typeEntity.extId != typeId) {
                 typeEntity.lastModifiedDate = Instant.now()
                 typeRepoDao.save(typeEntity)
+                types.add(typeEntity.extId)
             }
             types.add(typeEntity.extId)
         }
-        forEachTypeInDescHierarchy(typeId, action)
-        forEachTypeInAscHierarchy(typeId, action)
+        if (desc) {
+            forEachTypeInDescHierarchy(typeId, action)
+        }
+        if (asc) {
+            forEachTypeInAscHierarchy(typeId, action)
+        }
         onTypeHierarchyChangedListeners.forEach {
             it.invoke(types)
         }

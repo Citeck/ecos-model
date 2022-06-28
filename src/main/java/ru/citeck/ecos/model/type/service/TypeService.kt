@@ -9,6 +9,8 @@ import java.util.function.Consumer
 
 interface TypeService {
 
+    fun addOnDeletedListener(listener: (String) -> Unit)
+
     fun addListenerWithMeta(onTypeChangedListener: BiConsumer<EntityWithMeta<TypeDef>?, EntityWithMeta<TypeDef>?>)
 
     fun addListenerTypeHierarchyChangedListener(onTypeChangedListener: Consumer<Set<String>>)

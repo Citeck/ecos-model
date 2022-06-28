@@ -5,8 +5,8 @@ import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.commons.promise.Promises
 import ru.citeck.ecos.model.lib.num.dto.NumTemplateDef
 import ru.citeck.ecos.webapp.api.promise.Promise
-import ru.citeck.ecos.webapp.lib.registry.EcosRegistryInitializer
 import ru.citeck.ecos.webapp.lib.registry.MutableEcosRegistry
+import ru.citeck.ecos.webapp.lib.registry.init.EcosRegistryInitializer
 
 @Component
 class NumRegistryInitializer(

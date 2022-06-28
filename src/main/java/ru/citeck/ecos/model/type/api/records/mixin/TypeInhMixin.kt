@@ -38,6 +38,11 @@ final class TypeInhMixin(
 
     override fun getAtt(path: String, value: AttValueCtx): Any? {
 
+        val localId = value.getLocalId()
+        if (localId.isEmpty()) {
+            return null
+        }
+
         val registryTypeDef = typesRegistry.getValue(value.getLocalId())
             ?: error("Type doesn't found in registry: '${value.getLocalId()}'")
         val typeDef = typesRepoRecordsDao.getRecordAtts(value.getLocalId())?.typeDef

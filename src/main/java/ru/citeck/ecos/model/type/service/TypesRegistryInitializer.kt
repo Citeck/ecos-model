@@ -7,8 +7,8 @@ import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
 import ru.citeck.ecos.model.type.service.resolver.TypesProvider
 import ru.citeck.ecos.webapp.api.promise.Promise
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
-import ru.citeck.ecos.webapp.lib.registry.EcosRegistryInitializer
 import ru.citeck.ecos.webapp.lib.registry.MutableEcosRegistry
+import ru.citeck.ecos.webapp.lib.registry.init.EcosRegistryInitializer
 
 @Component
 class TypesRegistryInitializer(
@@ -32,6 +32,10 @@ class TypesRegistryInitializer(
 
         resolver.getResolvedTypesWithMeta(types, rawProv, EmptyProv()).forEach {
             registry.setValue(it.entity.id, it)
+        }
+        typesService.addOnDeletedListener {
+            registry.setValue(it, null)
+
         }
         typesService.addListenerTypeHierarchyChangedListener { changedTypes ->
             resolver.getResolvedTypesWithMeta(typesService.getAllWithMeta(changedTypes), rawProv, resProv).forEach {
