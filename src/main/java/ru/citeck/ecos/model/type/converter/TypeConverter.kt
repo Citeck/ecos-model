@@ -52,7 +52,9 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
         entity.name = Json.mapper.toString(typeDef.name)
         entity.description = Json.mapper.toString(typeDef.description)
         entity.system = typeDef.system
+        entity.sourceType = typeDef.sourceType
         entity.sourceId = typeDef.sourceId
+        entity.sourceRef = typeDef.sourceRef.toString()
         entity.metaRecord = typeDef.metaRecord.toString()
         entity.form = typeDef.formRef.toString()
         entity.journal = typeDef.journalRef.toString()
@@ -113,7 +115,9 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
             .withName(Json.mapper.read(entity.name, MLText::class.java))
             .withDescription(Json.mapper.read(entity.description, MLText::class.java))
             .withSystem(entity.system)
+            .withSourceType(entity.sourceType)
             .withSourceId(entity.sourceId)
+            .withSourceRef(RecordRef.valueOf(entity.sourceRef))
             .withMetaRecord(RecordRef.valueOf(entity.metaRecord))
             .withParentRef(RecordRef.valueOf(TypeUtils.getTypeRef(entity.parent?.extId ?: "")))
             .withFormRef(RecordRef.valueOf(entity.form))

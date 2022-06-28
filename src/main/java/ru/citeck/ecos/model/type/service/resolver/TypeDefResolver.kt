@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta
+import ru.citeck.ecos.model.EcosModelApp
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
 import ru.citeck.ecos.model.lib.role.dto.RoleDef
 import ru.citeck.ecos.model.lib.status.dto.StatusDef
@@ -12,9 +13,11 @@ import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef
 import ru.citeck.ecos.model.lib.type.dto.DocLibDef
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
+import ru.citeck.ecos.model.type.service.utils.EcosModelTypeUtils
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.webapp.lib.model.type.dto.AssocDef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
+import java.util.zip.CRC32
 
 @Component
 class TypeDefResolver {
@@ -87,9 +90,44 @@ class TypeDefResolver {
         if (resTypeDef.dashboardType.isBlank()) {
             resTypeDef.withDashboardType(resolvedParentDef.dashboardType)
         }
-        if (resTypeDef.sourceId.isBlank()) {
-            resTypeDef.withSourceId(resolvedParentDef.sourceId)
+
+        if (resTypeDef.sourceType == EcosModelTypeUtils.SOURCE_TYPE_INHERIT) {
+            resTypeDef.sourceType = resolvedParentDef.sourceType
+            resTypeDef.sourceId = resolvedParentDef.sourceId
+        } else {
+            when (val sourceType = resTypeDef.sourceType ?: "") {
+                EcosModelTypeUtils.SOURCE_TYPE_EMODEL -> {
+                    resTypeDef.withSourceId(
+                        EcosModelApp.NAME +
+                            RecordRef.APP_NAME_DELIMITER +
+                            EcosModelTypeUtils.generateEmodelSourceId(resTypeDef.id)
+                    )
+                }
+                EcosModelTypeUtils.SOURCE_TYPE_ALFRESCO -> {
+                    resTypeDef.withSourceId("alfresco/")
+                }
+                else -> {
+
+                    if (sourceType.isNotBlank() && sourceType != EcosModelTypeUtils.SOURCE_TYPE_CUSTOM_ID) {
+
+                        log.error { "Unknown sourceType '" + resTypeDef.sourceType + "' for type " + resTypeDef.id }
+
+                    } else if (resTypeDef.sourceId.isBlank()) {
+
+                        resTypeDef.withSourceId(resolvedParentDef.sourceId)
+
+                    } else if (!resTypeDef.sourceId.contains(RecordRef.APP_NAME_DELIMITER)) {
+
+                        resTypeDef.withSourceId(
+                            EcosModelApp.NAME +
+                                RecordRef.APP_NAME_DELIMITER +
+                                resTypeDef.sourceId
+                        )
+                    }
+                }
+            }
         }
+
         if (RecordRef.isEmpty(resTypeDef.metaRecord)) {
             resTypeDef.withMetaRecord(RecordRef.valueOf(resTypeDef.sourceId + "@"))
         }
