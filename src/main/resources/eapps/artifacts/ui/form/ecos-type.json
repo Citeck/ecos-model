@@ -198,9 +198,46 @@
                             "input": true
                           },
                           {
-                            "label": "Source ID",
-                            "defaultValue": "",
+                            "label": {
+                              "ru": "Тип источника данных",
+                              "en": "Source Type"
+                            },
+                            "key": "sourceType",
+                            "dataSrc": "values",
+                            "data": {
+                              "values": [
+                                {
+                                  "label": "ECOS Model",
+                                  "value": "ECOS_MODEL"
+                                },
+                                {
+                                  "label": "Alfresco",
+                                  "value": "ALFRESCO"
+                                },
+                                {
+                                  "label": "Custom Id",
+                                  "value": "CUSTOM_ID"
+                                },
+                                {
+                                  "label": "Inherit",
+                                  "value": "INHERIT"
+                                }
+                              ]
+                            },
+                            "optionalWhenDisabled": false,
+                            "type": "ecosSelect",
+                            "input": true,
+                            "defaultValue": "ECOS_MODEL"
+                          },
+                          {
+                            "label": {
+                              "ru": "Source ID"
+                            },
                             "key": "sourceId",
+                            "defaultValue": "",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "customConditional": "show = !data['sourceType'] || data['sourceType'] === 'CUSTOM_ID'; ",
                             "type": "textfield",
                             "input": true
                           },
@@ -543,7 +580,6 @@
                             "key": "journalsFromTarget",
                             "labelPosition": "",
                             "hasThreeStates": true,
-                            "defaultValue": false,
                             "refreshOn": [],
                             "type": "checkbox",
                             "input": true
@@ -800,7 +836,6 @@
                                       "ru": "Множественный",
                                       "en": "Multiple"
                                     },
-                                    "labelPosition": "left-left",
                                     "key": "multiple",
                                     "type": "checkbox",
                                     "input": true,
@@ -811,7 +846,6 @@
                                       "ru": "Обязательный",
                                       "en": "Mandatory"
                                     },
-                                    "labelPosition": "left-left",
                                     "key": "mandatory",
                                     "type": "checkbox",
                                     "input": true,
@@ -1146,7 +1180,9 @@
                         "name": {},
                         "submit3": false,
                         "submit4": false,
-                        "assignees": []
+                        "assignees": [],
+                        "attributes": [],
+                        "submit9": false
                       }
                     ],
                     "validate": {
@@ -1169,7 +1205,7 @@
                         "row": "0-0"
                       },
                       {
-                        "label": "Name",
+                        "label": "Название для логики",
                         "key": "name",
                         "type": "mlText",
                         "input": true,
@@ -1187,6 +1223,7 @@
                       },
                       {
                         "label": {
+                          "ru": "Атрибуты",
                           "en": "Attributes"
                         },
                         "multiple": true,
@@ -1293,7 +1330,7 @@
                         "row": "0-0"
                       },
                       {
-                        "label": "Name",
+                        "label": "Название для логики",
                         "key": "name",
                         "type": "mlText",
                         "input": true,
