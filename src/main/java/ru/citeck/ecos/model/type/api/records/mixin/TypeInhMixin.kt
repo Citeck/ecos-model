@@ -51,7 +51,7 @@ final class TypeInhMixin(
         return when (path) {
             "parent" -> typeDef.parentRef
             "moduleId", "extId", "localId" -> {
-                registryTypeDef.id
+                localId
             }
             "modelRoles" -> {
                 typeDef.model.roles

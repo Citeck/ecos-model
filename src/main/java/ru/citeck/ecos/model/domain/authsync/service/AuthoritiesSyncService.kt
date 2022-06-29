@@ -5,11 +5,14 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
+import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.commons.utils.ReflectUtils
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.model.EcosModelApp
+import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
+import ru.citeck.ecos.model.domain.authorities.constant.AuthorityGroupConstants
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records2.predicate.model.VoidPredicate
@@ -37,6 +40,13 @@ class AuthoritiesSyncService(
     companion object {
         const val SOURCE_ID = "authorities-sync"
         val TYPE_REF = TypeUtils.getTypeRef(SOURCE_ID)
+
+        val PROTECTED_FROM_SYNC_GROUPS = setOf(
+            AuthorityGroupConstants.ADMIN_GROUP,
+            AuthorityGroupConstants.EVERYONE_GROUP,
+        )
+
+        private const val ALF_ADMINS = "ALFRESCO_ADMINISTRATORS"
 
         private val log = KotlinLogging.logger {}
     }
@@ -77,7 +87,14 @@ class AuthoritiesSyncService(
 
         val attributes = record.attributes.deepCopy()
         attributes["managedBySync"] = RecordRef.create(EcosModelApp.NAME, SOURCE_ID, syncInstance.id)
-
+        if (authorityType == AuthorityType.GROUP && record.id == AuthorityGroupConstants.ADMIN_GROUP) {
+            var authorityGroups = attributes[AuthorityConstants.ATT_AUTHORITY_GROUPS]
+            if (authorityGroups.isNull()) {
+                authorityGroups = DataValue.createArr()
+            }
+            authorityGroups.add(AuthorityType.GROUP.getRef(ALF_ADMINS))
+            attributes[AuthorityConstants.ATT_AUTHORITY_GROUPS] = authorityGroups
+        }
         return syncInstance.sync.mutate(LocalRecordAtts(record.id, attributes), true)
     }
 
@@ -280,19 +297,34 @@ class AuthoritiesSyncService(
             }
             override fun updateAuthorities(type: AuthorityType, authorities: List<ObjectData>) {
                 for (authorityAtts in authorities) {
-                    val idValue = authorityAtts.get("id").asText()
+                    val idValue = authorityAtts["id"].asText()
                     if (idValue.isBlank()) {
                         error("Empty id")
                     }
-                    val userRef = RecordRef.create(type.sourceId, idValue)
-                    val currentAuthorityAtts = recordsService.getAtts(userRef, CurrentAuthorityAtts::class.java)
+                    if (type == AuthorityType.GROUP && PROTECTED_FROM_SYNC_GROUPS.contains(idValue)) {
+                        continue
+                    }
+                    val authorityRef = RecordRef.create(type.sourceId, idValue)
+                    val currentAuthorityAtts = recordsService.getAtts(authorityRef, CurrentAuthorityAtts::class.java)
 
                     val attsCopy = authorityAtts.deepCopy()
+                    if (type == AuthorityType.GROUP && idValue == ALF_ADMINS) {
+                        val authorityGroups = attsCopy[AuthorityConstants.ATT_AUTHORITY_GROUPS]
+                        if (!authorityGroups.isArray()) {
+                            log.error { "Alfresco admin group without authorityGroups. Atts: $attsCopy" }
+                        } else {
+                            if (authorityGroups.none {
+                                RecordRef.valueOf(it.asText()).id == AuthorityGroupConstants.ADMIN_GROUP
+                            }) {
+                                authorityGroups.add(AuthorityGroupConstants.ADMIN_GROUP)
+                            }
+                        }
+                    }
                     syncContext.set(true)
                     try {
                         val isEmptyManagedBySync = RecordRef.isEmpty(currentAuthorityAtts.managedBySync)
                         if (currentAuthorityAtts.notExists == true || isEmptyManagedBySync) {
-                            attsCopy.set("managedBySync", ref)
+                            attsCopy["managedBySync"] = ref
                         }
                         if (currentAuthorityAtts.notExists == true) {
                             recordsService.create(type.sourceId, attsCopy)

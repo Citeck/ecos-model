@@ -337,7 +337,7 @@ class AlfrescoAuthoritiesSyncFactory(
             AuthContext.runAsSystem {
                 val authoritiesToUpdate = authorities.map {
                     val atts = it.getAtts().deepCopy()
-                    atts.set("id", it.getAtt(AUTHORITY_ID_ALIAS))
+                    atts["id"] = it.getAtt(AUTHORITY_ID_ALIAS)
                     if (authorityType == AuthorityType.PERSON) {
                         preparePersonUpdating(atts)
                     } else {

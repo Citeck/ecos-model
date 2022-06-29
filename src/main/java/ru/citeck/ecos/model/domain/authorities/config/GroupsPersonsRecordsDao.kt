@@ -5,6 +5,7 @@ import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants.ATT_AUTHORITY_GROUPS
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants.ATT_AUTHORITY_GROUPS_FULL
+import ru.citeck.ecos.model.domain.authorities.constant.AuthorityGroupConstants
 import ru.citeck.ecos.model.domain.authorities.constant.PersonConstants
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
@@ -172,7 +173,7 @@ class GroupsPersonsRecordsDao(
             for (rec in records) {
                 var currentGroupId = rec.id
                 if (currentGroupId.isBlank()) {
-                    currentGroupId = rec.attributes.get("id").asText()
+                    currentGroupId = rec.attributes["id"].asText()
                 }
                 if (currentGroupId.isEmpty()) {
                     continue
@@ -214,7 +215,9 @@ class GroupsPersonsRecordsDao(
             var isManaged = false
 
             val authorityId = if (!exists) {
-                if (syncService.isNewAuthoritiesManaged(authorityType)) {
+                if (id != AuthorityGroupConstants.EVERYONE_GROUP
+                        && syncService.isNewAuthoritiesManaged(authorityType)) {
+
                     isManaged = true
                     syncService.create(authorityType, record)
                 } else {
