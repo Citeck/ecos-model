@@ -52,15 +52,15 @@ class TypesConfig {
             val isSourceTypeBeforeEmodel = before?.sourceType == EcosModelTypeUtils.SOURCE_TYPE_EMODEL
             val isSourceTypeAfterEmodel = after?.sourceType == EcosModelTypeUtils.SOURCE_TYPE_EMODEL
 
-            if (isSourceTypeBeforeEmodel
-                && sourceIdBefore.isNotBlank()
-                && (after == null || sourceIdBefore != after.sourceId)
+            if (isSourceTypeBeforeEmodel &&
+                sourceIdBefore.isNotBlank() &&
+                (after == null || sourceIdBefore != after.sourceId)
             ) {
                 log.info { "Unregister records DAO with sourceId '$sourceIdBefore'" }
                 recordsService.unregister(sourceIdBefore)
             }
-            if (isSourceTypeAfterEmodel && after != null
-                    && (before?.sourceId != after.sourceId || before.sourceType != after.sourceType)
+            if (isSourceTypeAfterEmodel && after != null &&
+                (before?.sourceId != after.sourceId || before.sourceType != after.sourceType)
             ) {
                 val sourceId = after.sourceId
                 val parentId = typesRegistry.getValue(after.parentRef.id)?.sourceId

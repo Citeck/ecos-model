@@ -313,9 +313,10 @@ class AuthoritiesSyncService(
                         if (!authorityGroups.isArray()) {
                             log.error { "Alfresco admin group without authorityGroups. Atts: $attsCopy" }
                         } else {
-                            if (authorityGroups.none {
+                            val hasEcosAdminGroup = authorityGroups.any {
                                 RecordRef.valueOf(it.asText()).id == AuthorityGroupConstants.ADMIN_GROUP
-                            }) {
+                            }
+                            if (!hasEcosAdminGroup) {
                                 authorityGroups.add(AuthorityGroupConstants.ADMIN_GROUP)
                             }
                         }

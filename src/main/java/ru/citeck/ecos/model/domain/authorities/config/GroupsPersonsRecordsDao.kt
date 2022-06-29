@@ -215,8 +215,9 @@ class GroupsPersonsRecordsDao(
             var isManaged = false
 
             val authorityId = if (!exists) {
-                if (id != AuthorityGroupConstants.EVERYONE_GROUP
-                        && syncService.isNewAuthoritiesManaged(authorityType)) {
+                if (id != AuthorityGroupConstants.EVERYONE_GROUP &&
+                    syncService.isNewAuthoritiesManaged(authorityType)
+                ) {
 
                     isManaged = true
                     syncService.create(authorityType, record)

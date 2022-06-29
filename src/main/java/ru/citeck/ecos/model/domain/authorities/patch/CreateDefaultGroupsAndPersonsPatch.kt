@@ -1,6 +1,5 @@
 package ru.citeck.ecos.model.domain.authorities.patch
 
-import com.sun.org.apache.xml.internal.security.utils.I18n
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.data.MLText
@@ -24,14 +23,20 @@ class CreateDefaultGroupsAndPersonsPatch(
     companion object {
 
         val DEFAULT_GROUPS = listOf(
-            SystemGroupInfo(AuthorityGroupConstants.EVERYONE_GROUP, MLText(
-                I18nContext.ENGLISH to "All persons in system",
-                I18nContext.RUSSIAN to "Все пользователи в системе"
-            )),
-            SystemGroupInfo(AuthorityGroupConstants.ADMIN_GROUP, MLText(
-                I18nContext.ENGLISH to "ECOS Administrators",
-                I18nContext.RUSSIAN to "Администраторы ECOS"
-            ))
+            SystemGroupInfo(
+                AuthorityGroupConstants.EVERYONE_GROUP,
+                MLText(
+                    I18nContext.ENGLISH to "All persons in system",
+                    I18nContext.RUSSIAN to "Все пользователи в системе"
+                )
+            ),
+            SystemGroupInfo(
+                AuthorityGroupConstants.ADMIN_GROUP,
+                MLText(
+                    I18nContext.ENGLISH to "ECOS Administrators",
+                    I18nContext.RUSSIAN to "Администраторы ECOS"
+                )
+            )
         )
 
         val DEFAULT_USERS = listOf(
@@ -53,17 +58,25 @@ class CreateDefaultGroupsAndPersonsPatch(
             log.info { it }
         }
         DEFAULT_GROUPS.forEach {
-            createIfNotExists(AuthorityType.GROUP, it.id, mapOf(
-                AuthorityGroupConstants.ATT_NAME to it.name
-            ), logMsg)
+            createIfNotExists(
+                AuthorityType.GROUP, it.id,
+                mapOf(
+                    AuthorityGroupConstants.ATT_NAME to it.name
+                ),
+                logMsg
+            )
         }
         DEFAULT_USERS.forEach {
-            createIfNotExists(AuthorityType.PERSON, it.id, mapOf(
-                PersonConstants.ATT_FIRST_NAME to it.firstName,
-                PersonConstants.ATT_LAST_NAME to it.lastName,
-                PersonConstants.ATT_EMAIL to it.email,
-                AuthorityConstants.ATT_AUTHORITY_GROUPS to it.groups.map { AuthorityType.GROUP.getRef(it) },
-            ), logMsg)
+            createIfNotExists(
+                AuthorityType.PERSON, it.id,
+                mapOf(
+                    PersonConstants.ATT_FIRST_NAME to it.firstName,
+                    PersonConstants.ATT_LAST_NAME to it.lastName,
+                    PersonConstants.ATT_EMAIL to it.email,
+                    AuthorityConstants.ATT_AUTHORITY_GROUPS to it.groups.map { AuthorityType.GROUP.getRef(it) },
+                ),
+                logMsg
+            )
         }
         return messages
     }
