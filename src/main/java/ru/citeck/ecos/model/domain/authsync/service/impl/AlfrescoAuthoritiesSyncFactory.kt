@@ -136,7 +136,7 @@ class AlfrescoAuthoritiesSyncFactory(
                     if (authorityType == AuthorityType.GROUP && k == "name") {
                         value = DataValue.create(value.getAs(MLText::class.java)?.getClosest(Locale.ENGLISH))
                     }
-                    newAtts.set(v, value)
+                    newAtts[v] = value
                 }
             }
             if (record.id.isNotBlank() && newAtts.size() == 0) {
@@ -148,7 +148,7 @@ class AlfrescoAuthoritiesSyncFactory(
                 if (authorityType == AuthorityType.PERSON) {
                     recId = recId.lowercase()
                 }
-                newAtts.set("id", recId)
+                newAtts["id"] = recId
             }
 
             val targetSourceId = when (authorityType) {
@@ -157,7 +157,7 @@ class AlfrescoAuthoritiesSyncFactory(
             }
             val refToMutate = RecordRef.create("alfresco", targetSourceId, record.id)
             val refToSync = if (refToMutate.id.isEmpty()) {
-                refToMutate.withId(newAtts.get("id").asText())
+                refToMutate.withId(newAtts["id"].asText())
             } else {
                 refToMutate
             }
@@ -192,7 +192,7 @@ class AlfrescoAuthoritiesSyncFactory(
             if (!atts.has(AuthorityConstants.ATT_AUTHORITY_GROUPS)) {
                 return emptyList()
             }
-            val newGroups = atts.get(AuthorityConstants.ATT_AUTHORITY_GROUPS).asList(RecordRef::class.java)
+            val newGroups = atts[AuthorityConstants.ATT_AUTHORITY_GROUPS].asList(RecordRef::class.java)
 
             val recsToMutate = mutableListOf<RecordAtts>()
 
@@ -248,10 +248,10 @@ class AlfrescoAuthoritiesSyncFactory(
             return groupsNodeRefs.map {
                 val groupAlfRef = RecordRef.create("alfresco", "assoc-actions", "")
                 val groupAtts = ObjectData.create()
-                groupAtts.set("action", if (add) { "CREATE" } else { "REMOVE" })
-                groupAtts.set("sourceRef", it)
-                groupAtts.set("targetRef", recRefNodeRef)
-                groupAtts.set("association", "cm:member")
+                groupAtts["action"] = if (add) { "CREATE" } else { "REMOVE" }
+                groupAtts["sourceRef"] = it
+                groupAtts["targetRef"] = recRefNodeRef
+                groupAtts["association"] = "cm:member"
                 RecordAtts(groupAlfRef, groupAtts)
             }
         }
@@ -370,10 +370,10 @@ class AlfrescoAuthoritiesSyncFactory(
             }
 
             if (personAtts.has(PersonConstants.ATT_AT_WORKPLACE) &&
-                personAtts.get(PersonConstants.ATT_AT_WORKPLACE).asText().isBlank()
+                personAtts[PersonConstants.ATT_AT_WORKPLACE].asText().isBlank()
             ) {
 
-                personAtts.set(PersonConstants.ATT_AT_WORKPLACE, true)
+                personAtts[PersonConstants.ATT_AT_WORKPLACE] = true
             }
 
             return personAtts

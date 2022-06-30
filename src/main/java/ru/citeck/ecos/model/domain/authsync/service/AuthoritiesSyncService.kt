@@ -317,7 +317,7 @@ class AuthoritiesSyncService(
                                 RecordRef.valueOf(it.asText()).id == AuthorityGroupConstants.ADMIN_GROUP
                             }
                             if (!hasEcosAdminGroup) {
-                                authorityGroups.add(AuthorityGroupConstants.ADMIN_GROUP)
+                                authorityGroups.add(AuthorityType.GROUP.getRef(AuthorityGroupConstants.ADMIN_GROUP))
                             }
                         }
                     }
