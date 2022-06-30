@@ -83,7 +83,6 @@ class TypeDefResolver {
         }
 
         resTypeDef.withDocLib(getDocLib(typeDef))
-            .withProperties(getProperties(typeDef, resolvedParentDef))
             .withModel(getModel(typeDef, resolvedParentDef))
 
         if (resTypeDef.dashboardType.isBlank()) {
@@ -175,12 +174,6 @@ class TypeDefResolver {
         typeDef.associations.forEach { assocs[it.id] = it }
 
         return assocs.values.toList()
-    }
-
-    private fun getProperties(typeDef: TypeDef, parentTypeDef: TypeDef.Builder): ObjectData {
-        val props = parentTypeDef.properties.deepCopy()
-        typeDef.properties.forEach { k, v -> props[k] = v }
-        return props
     }
 
     private fun getModel(typeDef: TypeDef, parentTypeDef: TypeDef.Builder): TypeModelDef {
