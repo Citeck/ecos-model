@@ -95,11 +95,10 @@ class TypeDefResolver {
         } else {
             when (val sourceType = resTypeDef.sourceType ?: "") {
                 EcosModelTypeUtils.SOURCE_TYPE_EMODEL -> {
-                    resTypeDef.withSourceId(
-                        EcosModelApp.NAME +
-                            RecordRef.APP_NAME_DELIMITER +
-                            EcosModelTypeUtils.generateEmodelSourceId(resTypeDef.id)
-                    )
+                    val sourceId = resTypeDef.sourceId.ifBlank {
+                        EcosModelTypeUtils.generateEmodelSourceId(resTypeDef.id)
+                    }
+                    resTypeDef.withSourceId(EcosModelApp.NAME + RecordRef.APP_NAME_DELIMITER + sourceId)
                 }
                 EcosModelTypeUtils.SOURCE_TYPE_ALFRESCO -> {
                     resTypeDef.withSourceId("alfresco/")

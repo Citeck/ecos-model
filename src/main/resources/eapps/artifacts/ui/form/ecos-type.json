@@ -237,7 +237,7 @@
                             "defaultValue": "",
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
-                            "customConditional": "show = !data['sourceType'] || data['sourceType'] === 'CUSTOM_ID'; ",
+                            "customConditional": "show = !data['sourceType'] || data['sourceType'] === 'CUSTOM_ID' || data['sourceType'] === 'ECOS_MODEL'; ",
                             "type": "textfield",
                             "input": true
                           },
