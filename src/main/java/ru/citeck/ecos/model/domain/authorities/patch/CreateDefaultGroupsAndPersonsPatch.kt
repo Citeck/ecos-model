@@ -42,8 +42,8 @@ class CreateDefaultGroupsAndPersonsPatch(
         val DEFAULT_USERS = listOf(
             SystemUserInfo(
                 "admin",
-                "admin",
-                "admin",
+                "",
+                "",
                 "admin@admin.ru",
                 listOf(AuthorityGroupConstants.ADMIN_GROUP)
             )

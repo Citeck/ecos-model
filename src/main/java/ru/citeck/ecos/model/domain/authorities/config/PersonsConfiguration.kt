@@ -2,8 +2,11 @@ package ru.citeck.ecos.model.domain.authorities.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import ru.citeck.ecos.commons.data.MLText
+import ru.citeck.ecos.context.lib.auth.AuthConstants
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthRole
+import ru.citeck.ecos.context.lib.i18n.I18nContext
 import ru.citeck.ecos.data.sql.domain.DbDomainConfig
 import ru.citeck.ecos.data.sql.domain.DbDomainFactory
 import ru.citeck.ecos.data.sql.dto.DbTableRef
@@ -23,12 +26,11 @@ import ru.citeck.ecos.model.domain.events.emitter.DbRecordsEcosEventsAdapter
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records3.RecordsService
+import ru.citeck.ecos.records3.RecordsServiceFactory
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
 import ru.citeck.ecos.records3.record.dao.RecordsDao
 import ru.citeck.ecos.records3.record.dao.impl.proxy.MutateProxyProcessor
 import ru.citeck.ecos.records3.record.dao.impl.proxy.ProxyProcContext
-import ru.citeck.ecos.webapp.api.task.scheduler.EcosTaskScheduler
-import java.util.*
 import javax.sql.DataSource
 
 @Configuration
@@ -38,15 +40,12 @@ class PersonsConfiguration(
     private val authorityService: AuthorityService,
     private val dbDomainFactory: DbDomainFactory,
     private val authoritiesSyncService: AuthoritiesSyncService,
-    private val dbRecordsEcosEventsAdapter: DbRecordsEcosEventsAdapter,
-    private val taskScheduler: EcosTaskScheduler
+    private val dbRecordsEcosEventsAdapter: DbRecordsEcosEventsAdapter
 ) {
-
-    private var initialized = false
 
     @Bean
     fun personDao(): RecordsDao {
-        val recordsDao = GroupsPersonsRecordsDao(
+        val recordsDao = object : GroupsPersonsRecordsDao(
             "person",
             AuthorityType.PERSON,
             authoritiesSyncService,
@@ -58,10 +57,10 @@ class PersonsConfiguration(
                     context: ProxyProcContext
                 ): List<LocalRecordAtts> {
                     return atts.map {
-                        val id = it.attributes.get("id").asText()
+                        val id = it.attributes["id"].asText()
                         if (id != id.lowercase()) {
                             val newAtts = it.attributes.deepCopy()
-                            newAtts.set("id", id.lowercase())
+                            newAtts["id"] = id.lowercase()
                             LocalRecordAtts(it.id, newAtts)
                         } else {
                             it
@@ -72,7 +71,15 @@ class PersonsConfiguration(
                     return records
                 }
             }
-        )
+        ) {
+            override fun setRecordsServiceFactory(serviceFactory: RecordsServiceFactory) {
+                serviceFactory.localRecordsResolver.registerVirtualRecord(
+                    RecordRef.create(AuthorityType.PERSON.sourceId, AuthConstants.SYSTEM_USER),
+                    SystemUserRecord()
+                )
+                super.setRecordsServiceFactory(serviceFactory)
+            }
+        }
 
         return recordsDao
     }
@@ -144,5 +151,13 @@ class PersonsConfiguration(
         recordsDao.addListener(dbRecordsEcosEventsAdapter)
 
         return recordsDao
+    }
+
+    private class SystemUserRecord {
+        val name = MLText(
+            I18nContext.ENGLISH to "System",
+            I18nContext.RUSSIAN to "Система"
+        )
+        val userName = AuthConstants.SYSTEM_USER
     }
 }

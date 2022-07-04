@@ -5,7 +5,7 @@ name:
   en: Person
 
 dispNameTemplate:
-  en: "${firstName}${lastName|presuf(' ')}"
+  en: "${firstName!_localId}${lastName|presuf(' ')}"
 
 formRef: uiserv/form@person-form
 parentRef: emodel/type@authority

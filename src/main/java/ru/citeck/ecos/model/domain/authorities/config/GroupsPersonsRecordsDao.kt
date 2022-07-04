@@ -27,7 +27,7 @@ import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-class GroupsPersonsRecordsDao(
+open class GroupsPersonsRecordsDao(
     id: String,
     private val authorityType: AuthorityType,
     private val syncService: AuthoritiesSyncService,
@@ -59,7 +59,7 @@ class GroupsPersonsRecordsDao(
     override fun queryRecords(recsQuery: RecordsQuery): RecsQueryRes<*>? {
         var newSortBy = recsQuery.sortBy
         if (authorityType == AuthorityType.PERSON && recsQuery.sortBy.isNotEmpty()) {
-            newSortBy = newSortBy.mapNotNull { preProcessPersonSortBy(it) }
+            newSortBy = newSortBy.map { preProcessPersonSortBy(it) }
         }
         if (recsQuery.language != PredicateService.LANGUAGE_PREDICATE) {
             return super.queryRecords(recsQuery)
@@ -196,7 +196,7 @@ class GroupsPersonsRecordsDao(
         }
 
         val attsWithBlankId = records.filter {
-            it.id.isBlank() && it.attributes.get("id").asText().isBlank()
+            it.id.isBlank() && it.attributes["id"].asText().isBlank()
         }
         if (attsWithBlankId.isNotEmpty()) {
             error("Id field is missing for records: ${attsWithBlankId.map { it.id }}")
@@ -206,7 +206,7 @@ class GroupsPersonsRecordsDao(
 
             var id = record.id
             if (id.isBlank()) {
-                id = record.attributes.get("id").asText()
+                id = record.attributes["id"].asText()
             }
 
             val currentAtts = getTargetAuthorityAtts(id)
