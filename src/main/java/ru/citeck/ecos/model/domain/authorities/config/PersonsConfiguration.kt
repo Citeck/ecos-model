@@ -125,7 +125,7 @@ class PersonsConfiguration(
         ).withPermsComponent(permsComponent).build()
 
         recordsDao.addAttributesMixin(PersonMixin(authorityService))
-        recordsDao.addAttributesMixin(AuthorityMixin(authorityService, AuthorityType.PERSON))
+        recordsDao.addAttributesMixin(AuthorityMixin(recordsService, authorityService, AuthorityType.PERSON))
 
         val getRecId = { rec: Any ->
             recordsService.getAtt(rec, "?localId").asText()

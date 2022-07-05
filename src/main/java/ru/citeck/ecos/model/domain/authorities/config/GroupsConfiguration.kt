@@ -102,7 +102,7 @@ class GroupsConfiguration(
         })
         recordsDao.addListener(dbRecordsEcosEventsAdapter)
 
-        recordsDao.addAttributesMixin(AuthorityMixin(authorityService, AuthorityType.GROUP))
+        recordsDao.addAttributesMixin(AuthorityMixin(recordsService, authorityService, AuthorityType.GROUP))
         recordsDao.addAttributesMixin(AuthorityGroupMixin())
 
         return recordsDao
