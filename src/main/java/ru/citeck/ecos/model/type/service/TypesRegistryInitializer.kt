@@ -12,7 +12,7 @@ import ru.citeck.ecos.webapp.lib.registry.init.EcosRegistryInitializer
 
 @Component
 class TypesRegistryInitializer(
-    private val typesService: TypeService
+    private val typesService: TypesService
 ) : EcosRegistryInitializer<TypeDef> {
 
     companion object {
@@ -65,7 +65,7 @@ class TypesRegistryInitializer(
         }
     }
 
-    private class TypesServiceBasedProv(val typesService: TypeService) : TypesProvider {
+    private class TypesServiceBasedProv(val typesService: TypesService) : TypesProvider {
         override fun get(id: String): TypeDef? {
             return typesService.getByIdOrNull(id)
         }

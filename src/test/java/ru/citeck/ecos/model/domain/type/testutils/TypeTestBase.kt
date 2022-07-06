@@ -22,8 +22,8 @@ import ru.citeck.ecos.model.type.config.TypesConfig
 import ru.citeck.ecos.model.type.converter.TypeConverter
 import ru.citeck.ecos.model.type.eapps.handler.TypeArtifactHandler
 import ru.citeck.ecos.model.type.repository.TypeEntity
-import ru.citeck.ecos.model.type.service.TypeService
-import ru.citeck.ecos.model.type.service.TypeServiceImpl
+import ru.citeck.ecos.model.type.service.TypesService
+import ru.citeck.ecos.model.type.service.TypesServiceImpl
 import ru.citeck.ecos.model.type.service.TypesRegistryInitializer
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.RecordsServiceFactory
@@ -38,7 +38,7 @@ open class TypeTestBase {
 
     lateinit var recordsServices: RecordsServiceFactory
     lateinit var typesRepo: TypeRepoMock
-    lateinit var typeService: TypeService
+    lateinit var typeService: TypesService
     lateinit var artifactHandler: TypeArtifactHandler
 
     lateinit var records: RecordsService
@@ -75,7 +75,7 @@ open class TypeTestBase {
 
         typesRepo = TypeRepoMock(recordsServices)
         val typeConverter = TypeConverter(typesRepo)
-        typeService = TypeServiceImpl(typeConverter, typesRepo)
+        typeService = TypesServiceImpl(typeConverter, typesRepo)
         artifactHandler = TypeArtifactHandler(typeService)
 
         val typesRegistry = EcosTypesRegistry(
@@ -106,7 +106,7 @@ open class TypeTestBase {
 /*        val resolvedRecordsDao = ResolvedTypeRecordsDao(typeService, typeRepoRecordsDao)
         records.register(resolvedRecordsDao)*/
 
-        TypeInhMixin(typesRegistry, typesRepoRecordsDao)
+        TypeInhMixin(typeService, typesRepoRecordsDao)
         TypesConfig().typesMutMetaMixin(typesRepoRecordsDao, typeConverter)
 
         records.register(TypesRepoRecordsMutDao(typeService))

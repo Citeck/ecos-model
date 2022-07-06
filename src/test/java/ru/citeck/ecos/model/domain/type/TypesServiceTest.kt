@@ -23,7 +23,7 @@ import ru.citeck.ecos.webapp.lib.model.type.dto.AssocDef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import java.util.*
 
-class TypeServiceTest : TypeTestBase() {
+class TypesServiceTest : TypeTestBase() {
 
     @Test
     fun test() {

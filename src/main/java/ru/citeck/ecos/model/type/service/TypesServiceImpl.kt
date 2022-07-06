@@ -5,6 +5,9 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta
+import ru.citeck.ecos.commons.json.Json
+import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
+import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.model.type.converter.TypeConverter
 import ru.citeck.ecos.model.type.repository.TypeEntity
@@ -20,10 +23,10 @@ import java.util.function.Consumer
 import kotlin.collections.HashSet
 
 @Service
-class TypeServiceImpl(
+class TypesServiceImpl(
     private val typeConverter: TypeConverter,
     private val typeRepoDao: TypeRepoDao
-) : TypeService {
+) : TypesService {
 
     companion object {
         private val PROTECTED_TYPES: Set<String> = setOf(
@@ -139,6 +142,26 @@ class TypeServiceImpl(
             }
         }
         return result
+    }
+
+    override fun getInhAttributes(typeId: String): List<AttributeDef> {
+        if (typeId.isBlank()) {
+            return emptyList()
+        }
+        val attributesHierarchy = mutableListOf<List<AttributeDef>>()
+        forEachTypeInAscHierarchy(typeId) { typeEntity ->
+            val model = Json.mapper.read(typeEntity.model, TypeModelDef::class.java)
+            if (model != null) {
+                attributesHierarchy.add(model.attributes)
+            }
+        }
+        val attributes = mutableMapOf<String, AttributeDef>()
+        for (i in attributesHierarchy.lastIndex downTo 0) {
+            attributesHierarchy[i].forEach {
+                attributes[it.id] = it
+            }
+        }
+        return attributes.values.toList()
     }
 
     private fun forEachTypeInDescHierarchy(id: String, action: (TypeEntity) -> Unit) {

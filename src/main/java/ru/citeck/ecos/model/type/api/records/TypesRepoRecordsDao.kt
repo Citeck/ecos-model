@@ -8,7 +8,7 @@ import ru.citeck.ecos.commons.json.Json.mapper
 import ru.citeck.ecos.commons.json.YamlUtils
 import ru.citeck.ecos.events2.type.RecordEventsService
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
-import ru.citeck.ecos.model.type.service.TypeService
+import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records2.predicate.PredicateService
@@ -24,7 +24,7 @@ import java.nio.charset.StandardCharsets
 
 @Component
 class TypesRepoRecordsDao(
-    private val typeService: TypeService,
+    private val typeService: TypesService,
     private val recordEventsService: RecordEventsService? = null
 ) : AbstractRecordsDao(), RecordsQueryDao, RecordAttsDao {
 
@@ -117,7 +117,7 @@ class TypesRepoRecordsDao(
     class TypeRecord(
         @AttName("...")
         val typeDef: TypeDef,
-        val typeService: TypeService
+        val typeService: TypesService
     ) {
 
         fun getData(): ByteArray {

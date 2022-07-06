@@ -10,7 +10,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.model.EcosModelApp;
-import ru.citeck.ecos.model.type.service.TypeService;
+import ru.citeck.ecos.model.type.service.TypesService;
 import ru.citeck.ecos.model.web.rest.TestUtil;
 import ru.citeck.ecos.records2.request.rest.RestHandler;
 import ru.citeck.ecos.records3.RecordsServiceFactory;
@@ -40,7 +40,7 @@ public class TypeRecordsControllerTest {
     private RestHandler restHandler;
 
     @Autowired
-    private TypeService typeService;
+    private TypesService typeService;
 
     @Autowired
     private RecordsServiceFactory recordsServiceFactory;

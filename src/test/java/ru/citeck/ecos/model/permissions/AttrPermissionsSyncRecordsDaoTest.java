@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.test.EcosWebAppContextMock;
@@ -15,7 +14,7 @@ import ru.citeck.ecos.model.domain.permissions.dto.*;
 import ru.citeck.ecos.model.domain.permissions.repo.AttributesPermissionsRepository;
 import ru.citeck.ecos.model.domain.permissions.service.AttributesPermissionsService;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
-import ru.citeck.ecos.model.type.service.TypeService;
+import ru.citeck.ecos.model.type.service.TypesService;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records3.RecordsService;
 import ru.citeck.ecos.records3.RecordsServiceFactory;
@@ -47,7 +46,7 @@ public class AttrPermissionsSyncRecordsDaoTest {
     @Autowired
     private AttributesPermissionsService service;
     @Autowired
-    private TypeService typeService;
+    private TypesService typeService;
     @Autowired
     private AttributesPermissionsRepository repository;
     @Autowired

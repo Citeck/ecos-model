@@ -2,12 +2,13 @@ package ru.citeck.ecos.model.type.service
 
 import org.springframework.data.domain.Sort
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta
+import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
 import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import java.util.function.BiConsumer
 import java.util.function.Consumer
 
-interface TypeService {
+interface TypesService {
 
     fun addOnDeletedListener(listener: (String) -> Unit)
 
@@ -44,6 +45,8 @@ interface TypeService {
     fun getChildren(typeId: String): List<String>
 
     fun expandTypes(typeIds: Collection<String>): List<TypeDef>
+
+    fun getInhAttributes(typeId: String): List<AttributeDef>
 
     fun delete(typeId: String)
 

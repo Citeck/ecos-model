@@ -12,7 +12,7 @@ import ru.citeck.ecos.model.EcosModelApp;
 import ru.citeck.ecos.model.num.dto.NumTemplateDto;
 import ru.citeck.ecos.model.num.repository.NumTemplateRepository;
 import ru.citeck.ecos.model.num.service.NumTemplateService;
-import ru.citeck.ecos.model.type.service.TypeService;
+import ru.citeck.ecos.model.type.service.TypesService;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records3.RecordsService;
 import ru.citeck.ecos.records3.RecordsServiceFactory;
@@ -51,7 +51,7 @@ public class NumTemplateSyncRecordsDaoTest {
     private final List<NumTemplateDto> templates = new ArrayList<>();
 
     @Autowired
-    private TypeService typeService;
+    private TypesService typeService;
 
     @BeforeEach
     public void setup() {

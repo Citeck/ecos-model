@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import ru.citeck.ecos.commons.data.DataValue;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
@@ -17,7 +16,7 @@ import ru.citeck.ecos.model.EcosModelApp;
 import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef;
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
-import ru.citeck.ecos.model.type.service.TypeService;
+import ru.citeck.ecos.model.type.service.TypesService;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records3.RecordsService;
 import ru.citeck.ecos.records3.RecordsServiceFactory;
@@ -48,7 +47,7 @@ public class TypesSyncRecordsDaoTest {
     @Autowired
     private RecordsServiceFactory remoteServiceFactory;
     @Autowired
-    private TypeService typeService;
+    private TypesService typeService;
     @Autowired
     private TypeRepository typeRepository;
 

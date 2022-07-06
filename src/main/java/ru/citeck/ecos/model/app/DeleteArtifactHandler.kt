@@ -4,14 +4,14 @@ import lombok.RequiredArgsConstructor
 import lombok.extern.slf4j.Slf4j
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.apps.app.domain.handler.EcosArtifactHandler
-import ru.citeck.ecos.model.type.service.TypeService
+import ru.citeck.ecos.model.type.service.TypesService
 import java.util.function.Consumer
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 class DeleteArtifactHandler(
-    private val typeService: TypeService
+    private val typeService: TypesService
 ) : EcosArtifactHandler<DeleteArtifactHandler.DeleteDto> {
 
     override fun deployArtifact(artifact: DeleteDto) {

@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.apps.app.domain.handler.EcosArtifactHandler;
 import ru.citeck.ecos.context.lib.auth.AuthContext;
-import ru.citeck.ecos.model.type.service.TypeService;
+import ru.citeck.ecos.model.type.service.TypesService;
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef;
 
 import java.util.function.Consumer;
@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 @RequiredArgsConstructor
 public class TypeArtifactHandler implements EcosArtifactHandler<TypeDef> {
 
-    private final TypeService typeService;
+    private final TypesService typeService;
 
     @Override
     public void deployArtifact(@NotNull TypeDef artifact) {

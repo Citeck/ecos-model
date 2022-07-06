@@ -8,7 +8,7 @@ import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
 import ru.citeck.ecos.model.lib.role.dto.RoleDef
 import ru.citeck.ecos.model.lib.status.dto.StatusDef
-import ru.citeck.ecos.model.type.service.TypeService
+import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records3.record.dao.delete.DelStatus
 import ru.citeck.ecos.records3.record.dao.delete.RecordDeleteDao
@@ -17,7 +17,7 @@ import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 
 @Component
 class TypesRepoRecordsMutDao(
-    private val typeService: TypeService
+    private val typeService: TypesService
 ) : RecordMutateDtoDao<TypesRepoRecordsMutDao.TypeMutRecord>, RecordDeleteDao {
 
     override fun getId() = "types-repo"
