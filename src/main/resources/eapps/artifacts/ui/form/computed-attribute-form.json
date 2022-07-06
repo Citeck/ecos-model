@@ -5,12 +5,10 @@
   "title": {
     "en": "computed-attribute-form"
   },
-  "description": {
-    "en": ""
-  },
+  "description": {},
   "customModule": null,
   "typeRef": "",
-  "width": "default",
+  "width": null,
   "i18n": {},
   "definition": {
     "components": [
@@ -102,14 +100,6 @@
                             },
                             "NONE"
                           ]
-                        },
-                        {
-                          "==": [
-                            {
-                              "var": "data.type"
-                            },
-                            "COUNTER"
-                          ]
                         }
                       ]
                     }
@@ -117,6 +107,21 @@
                 },
                 "type": "ecosSelect",
                 "input": true
+              },
+              {
+                "label": {
+                  "en": "HTML"
+                },
+                "key": "html",
+                "className": "",
+                "content": "<h6>Storing type should be \"On create\" for counters</h6>",
+                "refreshOnChange": false,
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
+                "customConditional": "show = data.type === 'COUNTER' && data.storingType != 'ON_CREATE';",
+                "type": "htmlelement",
+                "input": false,
+                "addAnother": "ecos.forms.btn.add-another"
               }
             ]
           }
