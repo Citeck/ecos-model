@@ -6,3 +6,5 @@ internal: true
 
 controller:
   type: json
+  config:
+    format: yaml

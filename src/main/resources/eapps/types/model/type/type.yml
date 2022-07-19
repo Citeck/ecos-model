@@ -9,6 +9,7 @@ name:
 controller:
   type: json
   config:
+    format: yaml
     metaFields:
       dependencies:
         - parent?str!"emodel/type@base"
