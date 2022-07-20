@@ -74,10 +74,6 @@ class TypeRecordsMutDao(
             withDocLib(docLib.copy().withDirTypeRef(typeRef).build());
         }
 
-        fun setEcosTypeContentConfig(contentConfig: EcosTypeContentConfig) {
-            withContentConfig(contentConfig)
-        }
-
         @JsonProperty("_content")
         fun setContent(content: List<ObjectData>) {
 

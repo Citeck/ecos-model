@@ -41,8 +41,7 @@ final class TypeInhMixin(
             "docLibEnabled",
             "docLibFileTypeRefs",
             "docLibDirTypeRef",
-            "resolvedDocLib",
-            "ecosTypeContentConfig"
+            "resolvedDocLib"
         )
     }
 
@@ -134,9 +133,6 @@ final class TypeInhMixin(
             }
             "resolvedDocLib" -> {
                 rtypeDef.getDocLib()
-            }
-            "ecosTypeContentConfig" -> {
-                typeDef.contentConfig
             }
             else -> {
                 null

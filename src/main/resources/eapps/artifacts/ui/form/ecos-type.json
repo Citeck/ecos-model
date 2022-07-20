@@ -1338,14 +1338,14 @@
               },
               {
                 "label": "Content config",
-                "key": "contentConfig",
+                "key": "contentConfigTab",
                 "components": [
                   {
                     "label": {
                       "en": " "
                     },
                     "hideLabel": true,
-                    "key": "ecosTypeContentConfig",
+                    "key": "contentConfig",
                     "refreshOn": [],
                     "type": "container",
                     "input": true,
@@ -1400,7 +1400,8 @@
                         "input": false,
                         "tab": 6
                       }
-                    ]
+                    ],
+                    "tab": 7
                   }
                 ]
               }
