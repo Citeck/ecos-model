@@ -48,4 +48,6 @@ class TypeEntity : AbstractAuditingEntity() {
     var model: String? = null
 
     var docLib: String? = null
+
+    var contentConfig: String? = null
 }

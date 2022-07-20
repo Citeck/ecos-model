@@ -7,6 +7,7 @@ import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
 import ru.citeck.ecos.model.lib.role.dto.RoleDef
 import ru.citeck.ecos.model.lib.status.dto.StatusDef
+import ru.citeck.ecos.model.type.dto.EcosTypeContentConfig
 import ru.citeck.ecos.model.type.dto.TypeDef
 import ru.citeck.ecos.model.type.service.TypeService
 import ru.citeck.ecos.records2.RecordRef
@@ -71,6 +72,10 @@ class TypeRecordsMutDao(
 
         fun setDocLibDirTypeRef(typeRef: RecordRef) {
             withDocLib(docLib.copy().withDirTypeRef(typeRef).build());
+        }
+
+        fun setEcosTypeContentConfig(contentConfig: EcosTypeContentConfig) {
+            withContentConfig(contentConfig)
         }
 
         @JsonProperty("_content")

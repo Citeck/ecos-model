@@ -10,6 +10,7 @@ import ru.citeck.ecos.model.lib.type.dto.DocLibDef
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.model.type.dto.AssocDef
+import ru.citeck.ecos.model.type.dto.EcosTypeContentConfig
 import ru.citeck.ecos.model.type.repository.TypeEntity
 import ru.citeck.ecos.model.type.dto.TypeDef
 import ru.citeck.ecos.model.type.repository.TypeRepository
@@ -74,6 +75,7 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
         entity.model = Json.mapper.toString(typeDef.model)
         entity.docLib = Json.mapper.toString(typeDef.docLib)
         entity.attributes = Json.mapper.toString(typeDef.properties)
+        entity.contentConfig = Json.mapper.toString(typeDef.contentConfig)
 
         checkCyclicDependencies(entity)
 
@@ -127,6 +129,7 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
             .withConfig(ObjectData.create(entity.config))
             .withModel(Json.mapper.read(entity.model, TypeModelDef::class.java))
             .withDocLib(Json.mapper.read(entity.docLib, DocLibDef::class.java))
+            .withContentConfig(Json.mapper.read(entity.contentConfig, EcosTypeContentConfig::class.java))
             .withProperties(ObjectData.create(entity.attributes))
             .build()
     }

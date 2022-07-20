@@ -40,6 +40,7 @@
     <include file="config/liquibase/changelog/20210212000000_ecos_type_meta_rec.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20210301000000_ecos_type_assocs.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20210504000000_clean_assocs_and_actions.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20220713000000_ecos_type_content_config.xml" relativeToChangelogFile="false"/>
 
     <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
     <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->
