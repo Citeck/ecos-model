@@ -15,6 +15,7 @@ import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.model.type.dto.AssocDef
 import ru.citeck.ecos.model.type.dto.AssocDirection
+import ru.citeck.ecos.model.type.dto.EcosTypeContentConfig
 import ru.citeck.ecos.model.type.dto.TypeDef
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records3.record.request.RequestContext
@@ -89,6 +90,10 @@ class TypeServiceTest : TypeTestBase() {
                     TypeUtils.getTypeRef("type")
                 ))
                 withEnabled(true)
+            })
+            this.withContentConfig(EcosTypeContentConfig.create {
+                withPath("test-content-main-path")
+                withPreviewPath("test-content-preview-path")
             })
             this.withInheritActions(true)
             this.withInheritForm(true)

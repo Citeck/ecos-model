@@ -52,6 +52,7 @@ data class TypeDef(
 
     val model: TypeModelDef,
     val docLib: DocLibDef,
+    val contentConfig: EcosTypeContentConfig,
 
     val properties: ObjectData
 ) {
@@ -126,6 +127,8 @@ data class TypeDef(
         var model: TypeModelDef = TypeModelDef.EMPTY
         var docLib: DocLibDef = DocLibDef.EMPTY
 
+        var contentConfig: EcosTypeContentConfig = EcosTypeContentConfig.EMPTY
+
         var properties: ObjectData = ObjectData.create()
 
         constructor(base: TypeDef) : this() {
@@ -166,6 +169,8 @@ data class TypeDef(
 
             withModel(base.model)
             withDocLib(base.docLib)
+
+            withContentConfig(base.contentConfig)
 
             withProperties(ObjectData.deepCopyOrNew(base.properties))
         }
@@ -311,6 +316,11 @@ data class TypeDef(
             return this
         }
 
+        fun withContentConfig(contentConfig: EcosTypeContentConfig?): Builder {
+            this.contentConfig = contentConfig ?: EcosTypeContentConfig.EMPTY
+            return this
+        }
+
         fun withProperties(properties: ObjectData?): Builder {
             this.properties = properties ?: ObjectData.create()
             return this
@@ -345,6 +355,7 @@ data class TypeDef(
                 config,
                 model,
                 docLib,
+                contentConfig,
                 properties
             )
         }

@@ -17,6 +17,10 @@
         "type": "panel",
         "components": [
           {
+            "label": {
+              "en": "Tabs"
+            },
+            "key": "tabs",
             "components": [
               {
                 "label": "Main",
@@ -231,7 +235,8 @@
                     "defaultValue": true,
                     "hasThreeStates": true,
                     "type": "checkbox",
-                    "input": true
+                    "input": true,
+                    "tab": 1
                   },
                   {
                     "label": "Create",
@@ -269,7 +274,7 @@
                         "submit4": false,
                         "submit8": false,
                         "selectOrgstruct": "",
-                        "allowedFor": ""
+                        "allowedFor": []
                       }
                     ],
                     "validate": {
@@ -311,13 +316,7 @@
                             "type": "selectJournal",
                             "customPredicateJs": null,
                             "presetFilterPredicatesJs": null,
-                            "input": true,
-                            "source": {
-                              "custom": {
-                                "columns": []
-                              },
-                              "type": "journal"
-                            }
+                            "input": true
                           }
                         ],
                         "row": "0-1",
@@ -455,7 +454,8 @@
                           "en": ""
                         },
                         "selectJournal": "",
-                        "journals": []
+                        "journals": [],
+                        "journalsFromTarget": false
                       }
                     ],
                     "validate": {
@@ -1104,7 +1104,8 @@
                     },
                     "key": "ecosEdition",
                     "type": "asyncData",
-                    "input": true
+                    "input": true,
+                    "tab": 3
                   }
                 ]
               },
@@ -1300,13 +1301,7 @@
                               "eq": "true"
                             },
                             "type": "selectJournal",
-                            "input": true,
-                            "source": {
-                              "custom": {
-                                "columns": []
-                              },
-                              "type": "journal"
-                            }
+                            "input": true
                           }
                         ]
                       },
@@ -1321,12 +1316,6 @@
                             "label": "File Types",
                             "multiple": true,
                             "journalId": "ecos-types",
-                            "source": {
-                              "type": "journal",
-                              "custom": {
-                                "columns": []
-                              }
-                            },
                             "key": "docLibFileTypeRefs",
                             "conditional": {
                               "show": "true",
@@ -1342,12 +1331,81 @@
                     ],
                     "key": "columns3",
                     "type": "columns",
-                    "input": false
+                    "input": false,
+                    "tab": 6
+                  }
+                ]
+              },
+              {
+                "label": "Content config",
+                "key": "contentConfigTab",
+                "components": [
+                  {
+                    "label": {
+                      "en": " "
+                    },
+                    "hideLabel": true,
+                    "key": "contentConfig",
+                    "refreshOn": [],
+                    "type": "container",
+                    "input": true,
+                    "components": [
+                      {
+                        "label": {
+                          "en": "Columns"
+                        },
+                        "hideLabel": true,
+                        "key": "columns8",
+                        "columns": [
+                          {
+                            "components": [
+                              {
+                                "label": {
+                                  "en": "Path"
+                                },
+                                "key": "path",
+                                "clearOnHide": false,
+                                "defaultValue": "",
+                                "refreshOn": [],
+                                "type": "textfield",
+                                "input": true
+                              }
+                            ],
+                            "type": "column",
+                            "input": false,
+                            "key": "column",
+                            "index": 0
+                          },
+                          {
+                            "type": "column",
+                            "input": false,
+                            "key": "column",
+                            "index": 1,
+                            "components": [
+                              {
+                                "label": {
+                                  "en": "Preview path"
+                                },
+                                "key": "previewPath",
+                                "clearOnHide": false,
+                                "defaultValue": "",
+                                "refreshOn": [],
+                                "type": "textfield",
+                                "input": true
+                              }
+                            ]
+                          }
+                        ],
+                        "type": "columns",
+                        "input": false,
+                        "tab": 6
+                      }
+                    ],
+                    "tab": 7
                   }
                 ]
               }
             ],
-            "key": "tabs",
             "type": "tabs",
             "input": false
           }
