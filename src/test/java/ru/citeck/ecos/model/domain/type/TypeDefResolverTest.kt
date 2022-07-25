@@ -9,7 +9,6 @@ import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
 import ru.citeck.ecos.model.type.service.resolver.TypesProvider
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
-import java.io.File
 import java.nio.file.Path
 import java.util.concurrent.ConcurrentHashMap
 
@@ -25,7 +24,7 @@ class TypeDefResolverTest {
         val resolver = TypeDefResolver()
 
         val tests = getTests()
-        log.info { "Found tests: \n${tests.joinToString("\n")}"  }
+        log.info { "Found tests: \n${tests.joinToString("\n")}" }
 
         for (test in tests) {
 

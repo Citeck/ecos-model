@@ -22,9 +22,9 @@ import ru.citeck.ecos.model.type.config.TypesConfig
 import ru.citeck.ecos.model.type.converter.TypeConverter
 import ru.citeck.ecos.model.type.eapps.handler.TypeArtifactHandler
 import ru.citeck.ecos.model.type.repository.TypeEntity
+import ru.citeck.ecos.model.type.service.TypesRegistryInitializer
 import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.model.type.service.TypesServiceImpl
-import ru.citeck.ecos.model.type.service.TypesRegistryInitializer
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.RecordsServiceFactory
 import ru.citeck.ecos.webapp.api.context.EcosWebAppContext

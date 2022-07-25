@@ -3,7 +3,6 @@ package ru.citeck.ecos.model.type.service.resolver
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.data.MLText
-import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.model.EcosModelApp
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef

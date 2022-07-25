@@ -8,7 +8,6 @@ import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.value.AttValueCtx
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.mixin.AttMixin
-import ru.citeck.ecos.webapp.api.entity.EntityRef
 
 class AuthorityMixin(
     private val recordsService: RecordsService,
@@ -42,11 +41,13 @@ class AuthorityMixin(
                     emptyList()
                 } else {
                     val groupRef = AuthorityType.GROUP.getRef(ref.getLocalId()).toString()
-                    recordsService.query(RecordsQuery.create {
-                        withSourceId(AuthorityType.PERSON.sourceId)
-                        withQuery(Predicates.contains(AuthorityConstants.ATT_AUTHORITY_GROUPS_FULL, groupRef))
-                        withMaxItems(1000)
-                    }).getRecords()
+                    recordsService.query(
+                        RecordsQuery.create {
+                            withSourceId(AuthorityType.PERSON.sourceId)
+                            withQuery(Predicates.contains(AuthorityConstants.ATT_AUTHORITY_GROUPS_FULL, groupRef))
+                            withMaxItems(1000)
+                        }
+                    ).getRecords()
                 }
             }
             else -> null

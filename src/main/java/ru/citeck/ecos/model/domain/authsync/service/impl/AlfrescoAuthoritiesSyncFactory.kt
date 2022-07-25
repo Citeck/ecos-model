@@ -6,6 +6,7 @@ import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.context.lib.auth.AuthContext
+import ru.citeck.ecos.context.lib.auth.AuthGroup
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.authorities.constant.PersonConstants
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSync
@@ -230,7 +231,7 @@ class AlfrescoAuthoritiesSyncFactory(
                 log.info { "Remove groups for $recRef. Groups: $groups" }
             }
             val groupsAlfAuthRefs = groups.map {
-                RecordRef.create("alfresco", "authority", "GROUP_${it.id}")
+                RecordRef.create("alfresco", "authority", "${AuthGroup.PREFIX}${it.id}")
             }.toList()
 
             val groupsNodeRefs = recordsService.getAtts(groupsAlfAuthRefs, listOf("nodeRef")).map {
@@ -240,7 +241,7 @@ class AlfrescoAuthoritiesSyncFactory(
                 "alfresco", "authority",
                 when (authorityType) {
                     AuthorityType.PERSON -> recRef.id
-                    AuthorityType.GROUP -> "GROUP_${recRef.id}"
+                    AuthorityType.GROUP -> "${AuthGroup.PREFIX}${recRef.id}"
                 }
             )
             val recRefNodeRef = recordsService.getAtt(refAlfAuthRef, "nodeRef").asText()

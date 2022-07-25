@@ -32,8 +32,8 @@ class AuthorityService(
         private const val ATT_AUTHORITY_GROUPS = "authorityGroups[]?localId"
 
         private val ADMIN_GROUPS = setOf(
-            "GROUP_" + AuthorityGroupConstants.ADMIN_GROUP,
-            "GROUP_ALFRESCO_ADMINISTRATORS"
+            AuthGroup.PREFIX + AuthorityGroupConstants.ADMIN_GROUP,
+            AuthGroup.PREFIX + "ALFRESCO_ADMINISTRATORS"
         )
     }
 
