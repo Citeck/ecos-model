@@ -2,6 +2,7 @@ package ru.citeck.ecos.model.domain.comments.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import ru.citeck.ecos.context.lib.auth.AuthGroup
 import ru.citeck.ecos.data.sql.domain.DbDomainConfig
 import ru.citeck.ecos.data.sql.domain.DbDomainFactory
 import ru.citeck.ecos.data.sql.dto.DbTableRef
@@ -28,10 +29,15 @@ class CommentsConfiguration(private val dbDomainFactory: DbDomainFactory) {
 
         val fullAccessPerms = object : DbRecordPerms {
             override fun getAuthoritiesWithReadPermission(): Set<String> {
-                return setOf("EVERYONE")
+                return setOf(AuthGroup.EVERYONE)
             }
-
             override fun isCurrentUserHasWritePerms(): Boolean {
+                return true
+            }
+            override fun isCurrentUserHasAttReadPerms(name: String): Boolean {
+                return true
+            }
+            override fun isCurrentUserHasAttWritePerms(name: String): Boolean {
                 return true
             }
         }

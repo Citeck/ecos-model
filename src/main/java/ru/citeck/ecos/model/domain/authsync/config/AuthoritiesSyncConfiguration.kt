@@ -3,6 +3,7 @@ package ru.citeck.ecos.model.domain.authsync.config
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import ru.citeck.ecos.context.lib.auth.AuthContext
+import ru.citeck.ecos.context.lib.auth.AuthGroup
 import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.data.sql.domain.DbDomainConfig
 import ru.citeck.ecos.data.sql.domain.DbDomainFactory
@@ -46,11 +47,16 @@ class AuthoritiesSyncConfiguration(
 
         val adminAccessPerms = object : DbRecordPerms {
             override fun getAuthoritiesWithReadPermission(): Set<String> {
-                return setOf("EVERYONE")
+                return setOf(AuthGroup.EVERYONE)
             }
-
             override fun isCurrentUserHasWritePerms(): Boolean {
                 return AuthContext.getCurrentRunAsAuthorities().contains(AuthRole.ADMIN)
+            }
+            override fun isCurrentUserHasAttReadPerms(name: String): Boolean {
+                return true
+            }
+            override fun isCurrentUserHasAttWritePerms(name: String): Boolean {
+                return isCurrentUserHasWritePerms()
             }
         }
         val permsComponent = object : DbPermsComponent {

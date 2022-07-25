@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.context.lib.auth.AuthConstants
 import ru.citeck.ecos.context.lib.auth.AuthContext
+import ru.citeck.ecos.context.lib.auth.AuthGroup
 import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.context.lib.i18n.I18nContext
 import ru.citeck.ecos.data.sql.domain.DbDomainConfig
@@ -92,12 +93,17 @@ class PersonsConfiguration(
 
                 return object : DbRecordPerms {
                     override fun getAuthoritiesWithReadPermission(): Set<String> {
-                        return setOf("EVERYONE")
+                        return setOf(AuthGroup.EVERYONE)
                     }
-
                     override fun isCurrentUserHasWritePerms(): Boolean {
                         val auth = AuthContext.getCurrentFullAuth()
                         return recordRef.id == auth.getUser() || auth.getAuthorities().contains(AuthRole.ADMIN)
+                    }
+                    override fun isCurrentUserHasAttReadPerms(name: String): Boolean {
+                        return true
+                    }
+                    override fun isCurrentUserHasAttWritePerms(name: String): Boolean {
+                        return isCurrentUserHasWritePerms()
                     }
                 }
             }
