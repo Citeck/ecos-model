@@ -140,6 +140,19 @@ class TypeDefResolver {
         if (resTypeDef.journalRef.id == "DEFAULT_JOURNAL") {
             resTypeDef.withJournalRef(resTypeDef.journalRef.withId("type$" + resTypeDef.id))
         }
+        val contentConfig = resTypeDef.contentConfig.copy()
+        if (contentConfig.path.isBlank()) {
+            contentConfig.withPath(resolvedParentDef.contentConfig.path)
+        }
+        if (contentConfig.previewPath.isBlank()) {
+            val parentPreviewPath = resolvedParentDef.contentConfig.previewPath
+            if (parentPreviewPath.isNotBlank()) {
+                contentConfig.withPreviewPath(parentPreviewPath)
+            } else {
+                contentConfig.withPath(contentConfig.path)
+            }
+        }
+        resTypeDef.withContentConfig(contentConfig.build())
 
         if (resTypeDef.inheritActions && resolvedParentDef.actions.isNotEmpty()) {
             val actions = ArrayList(resolvedParentDef.actions)

@@ -11,14 +11,13 @@ import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef
 import ru.citeck.ecos.model.lib.type.dto.DocLibDef
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
-import ru.citeck.ecos.model.type.dto.AssocDef
-import ru.citeck.ecos.model.type.dto.EcosTypeContentConfig
 import ru.citeck.ecos.model.type.repository.TypeEntity
 import ru.citeck.ecos.model.type.service.dao.TypeRepoDao
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records3.record.mixin.impl.mutmeta.MutMeta
 import ru.citeck.ecos.records3.record.mixin.impl.mutmeta.MutMetaMixin
 import ru.citeck.ecos.webapp.lib.model.type.dto.AssocDef
+import ru.citeck.ecos.webapp.lib.model.type.dto.TypeContentConfig
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import java.time.Instant
 import java.util.*
@@ -141,7 +140,7 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
             .withConfig(ObjectData.create(entity.config))
             .withModel(Json.mapper.read(entity.model, TypeModelDef::class.java))
             .withDocLib(Json.mapper.read(entity.docLib, DocLibDef::class.java))
-            .withContentConfig(Json.mapper.read(entity.contentConfig, EcosTypeContentConfig::class.java))
+            .withContentConfig(Json.mapper.read(entity.contentConfig, TypeContentConfig::class.java))
             .withProperties(ObjectData.create(entity.attributes))
             .build()
 

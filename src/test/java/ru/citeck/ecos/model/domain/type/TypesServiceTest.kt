@@ -20,6 +20,7 @@ import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records3.record.request.RequestContext
 import ru.citeck.ecos.webapp.lib.model.type.dto.AssocDef
+import ru.citeck.ecos.webapp.lib.model.type.dto.TypeContentConfig
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import java.util.*
 
@@ -106,10 +107,12 @@ class TypesServiceTest : TypeTestBase() {
                     withEnabled(true)
                 }
             )
-            this.withContentConfig(EcosTypeContentConfig.create {
-                withPath("test-content-main-path")
-                withPreviewPath("test-content-preview-path")
-            })
+            this.withContentConfig(
+                TypeContentConfig.create {
+                    withPath("test-content-main-path")
+                    withPreviewPath("test-content-preview-path")
+                }
+            )
             this.withInheritActions(true)
             this.withInheritForm(true)
             this.withInheritNumTemplate(true)
