@@ -106,6 +106,10 @@ class TypesServiceTest : TypeTestBase() {
                     withEnabled(true)
                 }
             )
+            this.withContentConfig(EcosTypeContentConfig.create {
+                withPath("test-content-main-path")
+                withPreviewPath("test-content-preview-path")
+            })
             this.withInheritActions(true)
             this.withInheritForm(true)
             this.withInheritNumTemplate(true)

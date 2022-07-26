@@ -54,6 +54,8 @@ class TypeEntity : AbstractAuditingEntity() {
 
     var docLib: String? = null
 
+    var contentConfig: String? = null
+
     override fun equals(other: Any?): Boolean {
         if (other !is TypeEntity) {
             return false
