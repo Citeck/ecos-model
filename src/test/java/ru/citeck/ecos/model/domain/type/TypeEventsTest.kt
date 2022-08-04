@@ -51,9 +51,9 @@ class TypeEventsTest : TypeTestBase() {
         records.mutate(rec, mapOf("name" to "new-name"))
 
         assertThat(events).hasSize(1)
-        assertThat(events[0].get("id").asText()).isEqualTo("name")
-        assertThat(events[0].get("before").getAs(MLText::class.java)).isEqualTo(MLText("test-name"))
-        assertThat(events[0].get("after").getAs(MLText::class.java)).isEqualTo(MLText("new-name"))
+        assertThat(events[0]["id"].asText()).isEqualTo("name")
+        assertThat(events[0]["before"].getAs(MLText::class.java)).isEqualTo(MLText("test-name"))
+        assertThat(events[0]["after"].getAs(MLText::class.java)).isEqualTo(MLText("new-name"))
 
         /*
         events.clear()

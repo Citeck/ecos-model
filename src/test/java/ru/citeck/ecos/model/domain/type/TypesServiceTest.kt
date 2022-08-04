@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test
 import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
+import ru.citeck.ecos.context.lib.i18n.I18nContext
 import ru.citeck.ecos.model.EcosModelApp
 import ru.citeck.ecos.model.domain.type.testutils.TypeTestBase
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
@@ -18,7 +19,6 @@ import ru.citeck.ecos.model.lib.type.dto.DocLibDef
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.records2.RecordRef
-import ru.citeck.ecos.records3.record.request.RequestContext
 import ru.citeck.ecos.webapp.lib.model.type.dto.AssocDef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeContentConfig
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
@@ -221,7 +221,7 @@ class TypesServiceTest : TypeTestBase() {
 
         assertEquals("emodel/type@type", records.getAtt(typeRef, "_type?id").asText())
 
-        val displayName = MLText.getClosestValue(typeDef.name, RequestContext.getLocale())
+        val displayName = MLText.getClosestValue(typeDef.name, I18nContext.getLocale())
         assertEquals(displayName, records.getAtt(typeRef, "?disp").asText())
         assertEquals(displayName, records.getAtt(typeRef, "_disp").asText())
 

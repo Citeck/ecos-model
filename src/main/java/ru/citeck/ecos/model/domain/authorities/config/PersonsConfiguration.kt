@@ -3,10 +3,7 @@ package ru.citeck.ecos.model.domain.authorities.config
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import ru.citeck.ecos.commons.data.MLText
-import ru.citeck.ecos.context.lib.auth.AuthConstants
-import ru.citeck.ecos.context.lib.auth.AuthContext
-import ru.citeck.ecos.context.lib.auth.AuthGroup
-import ru.citeck.ecos.context.lib.auth.AuthRole
+import ru.citeck.ecos.context.lib.auth.*
 import ru.citeck.ecos.context.lib.i18n.I18nContext
 import ru.citeck.ecos.data.sql.domain.DbDomainConfig
 import ru.citeck.ecos.data.sql.domain.DbDomainFactory
@@ -75,7 +72,7 @@ class PersonsConfiguration(
         ) {
             override fun setRecordsServiceFactory(serviceFactory: RecordsServiceFactory) {
                 serviceFactory.localRecordsResolver.registerVirtualRecord(
-                    RecordRef.create(AuthorityType.PERSON.sourceId, AuthConstants.SYSTEM_USER),
+                    RecordRef.create(AuthorityType.PERSON.sourceId, AuthUser.SYSTEM),
                     SystemUserRecord()
                 )
                 super.setRecordsServiceFactory(serviceFactory)
