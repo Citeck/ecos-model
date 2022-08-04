@@ -4,7 +4,6 @@ import com.google.common.primitives.Longs
 import org.apache.commons.codec.binary.Base32
 import org.junit.jupiter.api.Test
 import ru.citeck.ecos.model.type.service.utils.EcosModelTypeUtils
-import java.util.*
 import java.util.zip.CRC32
 
 class AbcTest {
@@ -43,17 +42,17 @@ class AbcTest {
 
         val base32 = Base32()
         println(encode("contract"))
-        println(EcosModelTypeUtils.generateEmodelSourceId("contract"))
+        println(EcosModelTypeUtils.getEmodelSourceId("contract"))
         println(encode("agreement"))
-        println(EcosModelTypeUtils.generateEmodelSourceId("agreement"))
+        println(EcosModelTypeUtils.getEmodelSourceId("agreement"))
         println(encode("currency"))
-        println(EcosModelTypeUtils.generateEmodelSourceId("currency"))
+        println(EcosModelTypeUtils.getEmodelSourceId("currency"))
         println(encode("counterparty"))
-        println(EcosModelTypeUtils.generateEmodelSourceId("counterparty"))
+        println(EcosModelTypeUtils.getEmodelSourceId("counterparty"))
         println(encode("schet_na_oplatu"))
-        println(EcosModelTypeUtils.generateEmodelSourceId("schet_na_oplatu"))
+        println(EcosModelTypeUtils.getEmodelSourceId("schet_na_oplatu"))
         println(encode("counterparty-with-long-value/and-some-kind-with-it"))
-        println(EcosModelTypeUtils.generateEmodelSourceId("counterparty-with-long-value/and-some-kind-with-it"))
+        println(EcosModelTypeUtils.getEmodelSourceId("counterparty-with-long-value/and-some-kind-with-it"))
 
         // val crc = CRC32()
         // crc.update("contracts".toByteArray())

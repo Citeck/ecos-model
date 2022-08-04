@@ -193,17 +193,16 @@ class AuthoritiesSyncService(
                         }
                         if (repeatDelayDuration != null) {
                             scheduledTasks[syncId] = tasksApi.getMainScheduler().scheduleWithFixedDelay(
-                                { "authorities sync with id: " + v.id },
+                                "authorities sync with id: " + v.id,
                                 Duration.ofMinutes(1),
-                                repeatDelayDuration,
-                                {
-                                    AuthContext.runAsSystem {
-                                        RequestContext.doWithTxn {
-                                            run(newInstance, true)
-                                        }
+                                repeatDelayDuration
+                            ) {
+                                AuthContext.runAsSystem {
+                                    RequestContext.doWithTxn {
+                                        run(newInstance, true)
                                     }
                                 }
-                            )
+                            }
                         }
                     }
                     if (v.enabled) {

@@ -62,22 +62,19 @@ class InactiveUsersDisablingJob(
         } else if (job == null) {
             log.info { "Schedule job with duration $duration" }
             job = taskScheduler.scheduleByCron(
-                {
-                    "inactive-users-disabling"
-                },
-                cron,
-                {
-                    log.info { "Users updating started..." }
-                    AuthContext.runAsSystem {
-                        for (i in 1..10) {
-                            if (!updateUsers()) {
-                                break
-                            }
+                "inactive-users-disabling",
+                cron
+            ) {
+                log.info { "Users updating started..." }
+                AuthContext.runAsSystem {
+                    for (i in 1..10) {
+                        if (!updateUsers()) {
+                            break
                         }
                     }
-                    log.info { "Users updating completed." }
                 }
-            )
+                log.info { "Users updating completed." }
+            }
         }
     }
 

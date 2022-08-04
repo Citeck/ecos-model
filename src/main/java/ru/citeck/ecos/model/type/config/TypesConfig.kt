@@ -86,7 +86,7 @@ class TypesConfig {
 
         log.info { "Create new Records DAO for type '${typeDef.id}' with sourceId: '${typeDef.sourceId}'" }
 
-        val tableId = EcosModelTypeUtils.emodelSourceTableId(typeDef.id)
+        val tableId = EcosModelTypeUtils.getEmodelSourceTableId(typeDef.id)
         val localSourceId = typeDef.sourceId.substringAfter('/')
 
         val typeRef = TypeUtils.getTypeRef(typeDef.id)
