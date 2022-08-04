@@ -122,7 +122,7 @@ class EcosDataController(
         dataSource.connection.use { conn ->
             conn.createStatement().use { statement ->
                 val res = statement.executeQuery(
-                    "SELECT * FROM \"ecos_data\".\"ecos_record_ref\" WHERE \"__ext_id\" LIKE 'emodel/emodel/';"
+                    "SELECT * FROM \"ecos_data\".\"ecos_record_ref\" WHERE \"__ext_id\" LIKE 'emodel/emodel/%';"
                 )
                 while (res.next()) {
                     result.add(res.getString("__ext_id"))
