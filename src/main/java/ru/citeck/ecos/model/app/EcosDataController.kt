@@ -59,26 +59,50 @@ class EcosDataController(
     fun runRefsMigration(): List<String> {
 
         val messages = mutableListOf<String>()
-
+        val emodelSrcIdPrefix = AppName.EMODEL + "/"
         typesRegistry.getAllValues().values.map {
             it.entity
         }.filter {
-            it.sourceType == EcosModelTypeUtils.SOURCE_TYPE_EMODEL
+            it.sourceType == EcosModelTypeUtils.SOURCE_TYPE_EMODEL && it.sourceId.startsWith(emodelSrcIdPrefix)
         }.forEach {
             val legacyId = generateLegacyEmodelSourceId(it.id)
-            val newSrcId = it.sourceId
+            val newSrcId = it.sourceId.substring(it.sourceId.indexOf('/') + 1)
             val refsToMigrate = getRefsWithLegacySrcId(legacyId)
             if (refsToMigrate.isNotEmpty()) {
                 val msg = "Migrate from " + legacyId + " to " + newSrcId + ". Refs count: " + refsToMigrate.size
                 log.info { msg }
                 messages.add(msg)
-                updateRefs(refsToMigrate, newSrcId)
+                updateRefsWithLegacySrcId(refsToMigrate, newSrcId)
             }
         }
+
+        val refsWithDoubleEmodelSrcId = getRefsWithDoubleEmodelSrcId()
+        if (refsWithDoubleEmodelSrcId.isNotEmpty()) {
+            val msg = "Migrate refs with double emodel prefix. Count: " + refsWithDoubleEmodelSrcId.size
+            log.info { msg }
+            messages.add(msg)
+            updateRefsWithDoubleEmodelSrc(refsWithDoubleEmodelSrcId)
+        }
+
         return messages
     }
 
-    private fun updateRefs(refs: Set<String>, newSrcId: String) {
+    private fun updateRefsWithDoubleEmodelSrc(refs: Set<String>) {
+        dataSource.connection.use { conn ->
+            for (ref in refs) {
+                val newRef = ref.replace("emodel/emodel/", "emodel/")
+                conn.createStatement().use { statement ->
+                    statement.executeUpdate(
+                        "UPDATE \"ecos_data\".\"ecos_record_ref\" " +
+                            "SET \"__ext_id\"='$newRef' WHERE \"__ext_id\"='$ref'"
+                    )
+                }
+            }
+            conn.commit()
+        }
+    }
+
+    private fun updateRefsWithLegacySrcId(refs: Set<String>, newSrcId: String) {
         dataSource.connection.use { conn ->
             for (ref in refs) {
                 val newRef = AppName.EMODEL + "/" + newSrcId + "@" + ref.substring(ref.indexOf('@') + 1)
@@ -91,6 +115,21 @@ class EcosDataController(
             }
             conn.commit()
         }
+    }
+
+    private fun getRefsWithDoubleEmodelSrcId(): Set<String> {
+        val result = mutableSetOf<String>()
+        dataSource.connection.use { conn ->
+            conn.createStatement().use { statement ->
+                val res = statement.executeQuery(
+                    "SELECT * FROM \"ecos_data\".\"ecos_record_ref\" WHERE \"__ext_id\" LIKE 'emodel/emodel/';"
+                )
+                while (res.next()) {
+                    result.add(res.getString("__ext_id"))
+                }
+            }
+        }
+        return result
     }
 
     private fun getRefsWithLegacySrcId(sourceId: String): Set<String> {
