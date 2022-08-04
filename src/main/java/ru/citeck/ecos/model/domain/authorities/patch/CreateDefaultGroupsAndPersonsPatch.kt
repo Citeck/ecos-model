@@ -11,6 +11,7 @@ import ru.citeck.ecos.model.domain.authorities.constant.PersonConstants
 import ru.citeck.ecos.model.domain.authsync.service.AuthorityType
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records3.RecordsService
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.patch.annotaion.EcosPatch
 import java.util.concurrent.Callable
 
@@ -94,7 +95,29 @@ class CreateDefaultGroupsAndPersonsPatch(
             attsToCreate["id"] = id
             recordsService.create(type.sourceId, attsToCreate)
         } else {
-            logMsg("authority '$id' with type '$type' found. Skip it")
+            logMsg("authority '$id' with type '$type' found")
+            @Suppress("UNCHECKED_CAST")
+            val expectedGroups =
+                atts[AuthorityConstants.ATT_AUTHORITY_GROUPS] as? Collection<EntityRef> ?: emptyList()
+            if (expectedGroups.isEmpty()) {
+                logMsg("nothing to do with $id")
+            } else {
+                val authorityRef = type.getRef(id)
+                val actualGroups = recordsService.getAtt(
+                    authorityRef,
+                    AuthorityConstants.ATT_AUTHORITY_GROUPS + "[]?id"
+                ).asList(EntityRef::class.java)
+                expectedGroups.forEach {
+                    if (!actualGroups.contains(it)) {
+                        logMsg("Add group for authority '$id'. Group: $it")
+                        recordsService.mutateAtt(
+                            authorityRef,
+                            "att_add_${AuthorityConstants.ATT_AUTHORITY_GROUPS}",
+                            it
+                        )
+                    }
+                }
+            }
         }
     }
 
