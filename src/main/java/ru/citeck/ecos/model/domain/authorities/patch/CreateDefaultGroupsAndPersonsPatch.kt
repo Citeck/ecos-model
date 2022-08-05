@@ -23,6 +23,8 @@ class CreateDefaultGroupsAndPersonsPatch(
 
     companion object {
 
+        private const val ORGSTRUCT_HOME_GROUP = "_orgstruct_home_"
+
         val DEFAULT_GROUPS = listOf(
             SystemGroupInfo(
                 AuthorityGroupConstants.EVERYONE_GROUP,
@@ -37,6 +39,13 @@ class CreateDefaultGroupsAndPersonsPatch(
                     I18nContext.ENGLISH to "ECOS Administrators",
                     I18nContext.RUSSIAN to "Администраторы ECOS"
                 )
+            ),
+            SystemGroupInfo(
+                ORGSTRUCT_HOME_GROUP,
+                MLText(
+                    I18nContext.ENGLISH to "Orgstruct",
+                    I18nContext.RUSSIAN to "Оргструктура"
+                )
             )
         )
 
@@ -46,7 +55,7 @@ class CreateDefaultGroupsAndPersonsPatch(
                 "",
                 "",
                 "admin@admin.ru",
-                listOf(AuthorityGroupConstants.ADMIN_GROUP)
+                listOf(AuthorityGroupConstants.ADMIN_GROUP, ORGSTRUCT_HOME_GROUP)
             )
         )
         val log = KotlinLogging.logger {}
