@@ -1,22 +1,20 @@
 package ru.citeck.ecos.model.permissions;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
-import ru.citeck.ecos.commons.json.Json;
+import ru.citeck.ecos.commons.test.EcosWebAppContextMock;
 import ru.citeck.ecos.model.EcosModelApp;
 import ru.citeck.ecos.model.domain.permissions.dto.*;
 import ru.citeck.ecos.model.domain.permissions.repo.AttributesPermissionsRepository;
 import ru.citeck.ecos.model.domain.permissions.service.AttributesPermissionsService;
-import ru.citeck.ecos.model.type.dto.TypeDef;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
-import ru.citeck.ecos.model.type.service.TypeService;
+import ru.citeck.ecos.model.type.service.TypesService;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records3.RecordsService;
 import ru.citeck.ecos.records3.RecordsServiceFactory;
@@ -24,18 +22,19 @@ import ru.citeck.ecos.records2.predicate.PredicateService;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
 import ru.citeck.ecos.records2.predicate.model.Predicates;
 import ru.citeck.ecos.records2.predicate.model.VoidPredicate;
-import ru.citeck.ecos.records2.rest.RemoteRecordsRestApi;
 import ru.citeck.ecos.records2.source.dao.local.RemoteSyncRecordsDao;
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery;
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes;
 import ru.citeck.ecos.records3.record.request.RequestContext;
-import ru.citeck.ecos.records3.record.resolver.RemoteRecordsResolver;
+import ru.citeck.ecos.webapp.api.context.EcosWebAppContext;
+import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef;
+import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(EcosSpringExtension.class)
 @SpringBootTest(classes = EcosModelApp.class)
 public class AttrPermissionsSyncRecordsDaoTest {
 
@@ -47,7 +46,7 @@ public class AttrPermissionsSyncRecordsDaoTest {
     @Autowired
     private AttributesPermissionsService service;
     @Autowired
-    private TypeService typeService;
+    private TypesService typeService;
     @Autowired
     private AttributesPermissionsRepository repository;
     @Autowired
@@ -59,35 +58,31 @@ public class AttrPermissionsSyncRecordsDaoTest {
 
     private final List<AttributesPermissionDto> permissions = new ArrayList<>();
 
-    @Before
+    @BeforeEach
     public void setup() {
 
         repository.deleteAll();
         typeRepository.deleteAll();
 
+        EcosWebAppContextMock webAppCtxMock = new EcosWebAppContextMock();
+        webAppCtxMock.setWebClientExecuteImpl((targetApp, path, request) ->
+            remoteServiceFactory.getRestHandlerAdapter().queryRecords(request)
+        );
         localServiceFactory = new RecordsServiceFactory() {
-            @Override
-            protected RemoteRecordsResolver createRemoteRecordsResolver() {
-                return new RemoteRecordsResolver(this, new RemoteRecordsRestApi() {
-                    @Override
-                    public <T> T jsonPost(String url, Object request, Class<T> respType) {
-                        @SuppressWarnings("unchecked")
-                        T res = (T) remoteServiceFactory.getRestHandlerAdapter().queryRecords(request);
-                        return Json.getMapper().convert(res, respType);
-                    }
-                });
+            public EcosWebAppContext getEcosWebAppContext() {
+                return webAppCtxMock;
             }
         };
 
         this.localRecordsService = localServiceFactory.getRecordsServiceV1();
 
+        generateData();
+
         remoteSyncRecordsDao = new RemoteSyncRecordsDao<>(SOURCE_ID, AttributesPermissionDto.class);
         localRecordsService.register(remoteSyncRecordsDao);
-
-        generateData();
     }
 
-    @After
+    @AfterEach
     public void afterTest() {
         repository.deleteAll();
         typeRepository.deleteAll();

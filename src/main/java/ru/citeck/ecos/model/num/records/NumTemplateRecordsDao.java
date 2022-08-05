@@ -2,7 +2,6 @@ package ru.citeck.ecos.model.num.records;
 
 import ecos.com.fasterxml.jackson210.annotation.JsonProperty;
 import ecos.com.fasterxml.jackson210.annotation.JsonValue;
-import kotlin.Unit;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,10 +10,13 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.commons.data.ObjectData;
+import ru.citeck.ecos.commons.data.entity.EntityWithMeta;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.commons.json.YamlUtils;
 import ru.citeck.ecos.commons.utils.TmplUtils;
 import ru.citeck.ecos.events2.type.RecordEventsService;
+import ru.citeck.ecos.model.EcosModelApp;
+import ru.citeck.ecos.model.lib.num.dto.NumTemplateDef;
 import ru.citeck.ecos.model.num.dto.NumTemplateDto;
 import ru.citeck.ecos.model.num.dto.NumTemplateWithMetaDto;
 import ru.citeck.ecos.model.num.service.NumTemplateService;
@@ -33,8 +35,6 @@ import ru.citeck.ecos.records2.source.dao.local.LocalRecordsDao;
 import ru.citeck.ecos.records2.source.dao.local.MutableRecordsLocalDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsMetaDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsQueryWithMetaDao;
-import ru.citeck.ecos.records3.record.atts.schema.resolver.AttSchemaResolver;
-import ru.citeck.ecos.records3.record.request.RequestContext;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -89,7 +89,7 @@ public class NumTemplateRecordsDao extends LocalRecordsDao
                 })
                 .collect(Collectors.toList());
 
-            Collection<NumTemplateWithMetaDto> types = numTemplateService.getAll(
+            Collection<EntityWithMeta<NumTemplateDef>> types = numTemplateService.getAll(
                 max,
                 recordsQuery.getSkipCount(),
                 predicate,
@@ -126,8 +126,8 @@ public class NumTemplateRecordsDao extends LocalRecordsDao
             if (StringUtils.isBlank(dto.getId())) {
                 throw new IllegalArgumentException("Parameter 'id' is mandatory for menu record");
             }
-            NumTemplateDto saved = numTemplateService.save(dto);
-            result.addRecord(new RecordMeta(saved.getId()));
+            String id = numTemplateService.save(dto).getEntity().getId();
+            result.addRecord(new RecordMeta(id));
         });
 
         return result;
@@ -149,19 +149,22 @@ public class NumTemplateRecordsDao extends LocalRecordsDao
     public List<NumTemplateRecord> getLocalRecordsMeta(List<RecordRef> records, MetaField metaField) {
         return records.stream()
             .map(RecordRef::getId)
-            .map(id -> numTemplateService.getById(id)
+            .map(id -> numTemplateService.getById(id).map(NumTemplateWithMetaDto::new)
                 .orElseGet(() -> new NumTemplateWithMetaDto(id)))
             .map(NumTemplateRecord::new)
             .collect(Collectors.toList());
     }
 
-    private void onTemplateChanged(@Nullable NumTemplateDto before, NumTemplateDto after) {
-        recordEventsService.emitRecChanged(
-            before,
-            after,
-            getId(),
-            dto -> new NumTemplateRecord(new NumTemplateWithMetaDto(dto))
-        );
+    private void onTemplateChanged(@Nullable EntityWithMeta<NumTemplateDef> before,
+                                   @Nullable EntityWithMeta<NumTemplateDef> after) {
+        if (after != null) {
+            recordEventsService.emitRecChanged(
+                before,
+                after,
+                getId(),
+                dto -> new NumTemplateRecord(new NumTemplateWithMetaDto(dto))
+            );
+        }
     }
 
     @NoArgsConstructor
@@ -175,9 +178,14 @@ public class NumTemplateRecordsDao extends LocalRecordsDao
             modelAttributes = new ArrayList<>(TmplUtils.getAtts(this.getCounterKey()));
         }
 
+        public NumTemplateRecord(EntityWithMeta<NumTemplateDef> model) {
+            super(model);
+            modelAttributes = model.getEntity().getModelAttributes();
+        }
+
         @MetaAtt(".type")
         public RecordRef getEcosType() {
-            return RecordRef.create("emodel", "type", "number-template");
+            return RecordRef.create(EcosModelApp.NAME, "type", "number-template");
         }
 
         public String getModuleId() {

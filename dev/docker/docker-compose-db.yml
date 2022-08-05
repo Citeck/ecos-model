@@ -1,0 +1,14 @@
+version: '3'
+services:
+    emodel-psql:
+      image: postgres:10.4
+      ports:
+        - 5441:5432
+      environment:
+        - POSTGRES_USER=emodel
+        - POSTGRES_PASSWORD=
+      volumes:
+        - psql_emodel_temp:/var/lib/postgresql/data
+volumes:
+  psql_emodel_temp:
+    external: true

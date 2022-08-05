@@ -1,5 +1,7 @@
 package ru.citeck.ecos.model.domain.perms.service;
 
+import kotlin.Unit;
+import kotlin.jvm.functions.Function2;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +13,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import ru.citeck.ecos.commons.data.DataValue;
+import ru.citeck.ecos.commons.data.entity.EntityMeta;
+import ru.citeck.ecos.commons.data.entity.EntityWithMeta;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.commons.json.JsonMapper;
 import ru.citeck.ecos.model.domain.perms.dto.TypePermsMeta;
@@ -27,6 +31,7 @@ import ru.citeck.ecos.records2.predicate.model.ValuePredicate;
 import javax.annotation.PostConstruct;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -41,6 +46,9 @@ public class TypePermsService {
 
     private Consumer<TypePermsDef> listener;
 
+    private List<Function2<EntityWithMeta<TypePermsDef>, EntityWithMeta<TypePermsDef>, Unit>> listeners
+        = new CopyOnWriteArrayList<>();
+
     @PostConstruct
     public void init() {
         List<TypePermsEntity> typePermsEntities = repository.findAll();
@@ -53,7 +61,6 @@ public class TypePermsService {
             }
         }
     }
-
 
     @Nullable
     public TypePermsMeta getPermsMeta(String id) {
@@ -72,6 +79,13 @@ public class TypePermsService {
     @Nullable
     public TypePermsDef getPermsById(String id) {
         return toDto(repository.findByExtId(id));
+    }
+
+    public List<EntityWithMeta<TypePermsDef>> getAllWithMeta() {
+        return repository.findAll()
+            .stream()
+            .map(this::toDtoWithMeta)
+            .collect(Collectors.toList());
     }
 
     public List<TypePermsDef> getAll(int max, int skip, Predicate predicate, Sort sort) {
@@ -105,18 +119,26 @@ public class TypePermsService {
         }
 
         TypePermsEntity entity = toEntity(permissions);
+        EntityWithMeta<TypePermsDef> entityBefore = null;
+        if (entity.getId() != null) {
+            entityBefore = toDtoWithMeta(entity);
+        }
         entity = repository.save(entity);
 
-        TypePermsDef resultPermissions = toDto(entity);
+        EntityWithMeta<TypePermsDef> resultPermissions = toDtoWithMeta(entity);
         if (resultPermissions == null) {
             throw new IllegalStateException("Record permissions conversion error. Permissions: " + entity);
         }
 
         if (listener != null) {
-            listener.accept(resultPermissions);
+            listener.accept(resultPermissions.getEntity());
         }
 
-        return resultPermissions;
+        for (Function2<EntityWithMeta<TypePermsDef>, EntityWithMeta<TypePermsDef>, Unit> listener : listeners) {
+            listener.invoke(entityBefore, resultPermissions);
+        }
+
+        return resultPermissions.getEntity();
     }
 
     public void delete(String id) {
@@ -134,8 +156,19 @@ public class TypePermsService {
         this.listener = listener;
     }
 
+    public void addListener(Function2<EntityWithMeta<TypePermsDef>, EntityWithMeta<TypePermsDef>, Unit> listener) {
+        this.listeners.add(listener);
+    }
+
     @Nullable
     private TypePermsDef toDto(@Nullable TypePermsEntity entity) {
+        return Optional.ofNullable(toDtoWithMeta(entity))
+            .map(EntityWithMeta::getEntity)
+            .orElse(null);
+    }
+
+    @Nullable
+    private EntityWithMeta<TypePermsDef> toDtoWithMeta(@Nullable TypePermsEntity entity) {
 
         if (entity == null) {
             return null;
@@ -146,12 +179,21 @@ public class TypePermsService {
             permissionsDef = PermissionsDef.EMPTY;
         }
 
-        return TypePermsDef.create()
+        TypePermsDef typePermsDef = TypePermsDef.create()
             .withId(entity.getExtId())
             .withTypeRef(RecordRef.valueOf(entity.getTypeRef()))
             .withAttributes(DataValue.create(entity.getAttributes()).asMap(String.class, PermissionsDef.class))
             .withPermissions(permissionsDef)
             .build();
+
+        EntityMeta meta = EntityMeta.create()
+            .withCreated(entity.getCreatedDate())
+            .withCreator(entity.getCreatedBy())
+            .withModified(entity.getLastModifiedDate())
+            .withModifier(entity.getLastModifiedBy())
+            .build();
+
+        return new EntityWithMeta<>(typePermsDef, meta);
     }
 
     private TypePermsEntity toEntity(TypePermsDef dto) {

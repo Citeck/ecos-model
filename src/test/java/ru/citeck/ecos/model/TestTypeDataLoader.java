@@ -1,14 +1,14 @@
 package ru.citeck.ecos.model;
 
-import ecos.com.fasterxml.jackson210.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import ru.citeck.ecos.model.type.dto.TypeDef;
-import ru.citeck.ecos.model.type.service.TypeService;
+import ru.citeck.ecos.commons.json.Json;
+import ru.citeck.ecos.model.type.service.TypesService;
 import ru.citeck.ecos.model.web.rest.TestUtil;
+import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef;
 
 /**
  * @author Roman Makarskiy
@@ -19,11 +19,11 @@ import ru.citeck.ecos.model.web.rest.TestUtil;
 public class TestTypeDataLoader {
 
     @Bean
-    public CommandLineRunner dataLoader(TypeService typeService, ObjectMapper objectMapper) {
+    public CommandLineRunner dataLoader(TypesService typeService) {
         return args -> {
             String dataToLoad = TestUtil.getFromResource("/controller/type/ecos-type-controller-test-data.json");
 
-            TypeDef[] types = objectMapper.readValue(dataToLoad, TypeDef[].class);
+            TypeDef[] types = Json.getMapper().readNotNull(dataToLoad, TypeDef[].class);
 
             log.info("================ CREATE TEST TYPE DATA ================");
 

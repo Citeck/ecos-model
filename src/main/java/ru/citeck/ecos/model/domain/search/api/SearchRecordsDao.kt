@@ -68,23 +68,28 @@ class SearchRecordsDao(
 
         val query = RecordsQuery.create()
             .withSourceId("alfresco/")
-            .withQuery(Predicates.and(
-                Predicates.eq("TYPE", "bpm:task"),
-                Predicates.eq("_actors", "\$CURRENT"),
-                Predicates.empty("bpm:completionDate"),
-                Predicates.not(
-                    Predicates.eq("samwf:processingStatus", "FULLY_PROCESSED")
-                ),
-                Predicates.contains("cm:title", text)
-            ))
+            .withQuery(
+                Predicates.and(
+                    Predicates.eq("TYPE", "bpm:task"),
+                    Predicates.eq("_actors", "\$CURRENT"),
+                    Predicates.empty("bpm:completionDate"),
+                    Predicates.not(
+                        Predicates.eq("samwf:processingStatus", "FULLY_PROCESSED")
+                    ),
+                    Predicates.contains("cm:title", text)
+                )
+            )
             .withMaxItems(maxItems)
             .withConsistency(Consistency.EVENTUAL)
             .build()
 
         val taskIdAlias = "taskId"
-        val tasks = recordsService.query(query, mapOf(
-            taskIdAlias to "cm:name"
-        ))
+        val tasks = recordsService.query(
+            query,
+            mapOf(
+                taskIdAlias to "cm:name"
+            )
+        )
         val taskRecords = tasks.getRecords().mapNotNull {
             val taskId = it.getAtt(taskIdAlias).asText()
             if (taskId.isBlank()) {
@@ -116,16 +121,19 @@ class SearchRecordsDao(
                 "@cm:userName:\"*$text*\" " +
                 "OR @cm:firstName:\"*$text*\" " +
                 "OR @cm:lastName:\"*$text*\"" +
-            ")",
+                ")",
             maxItems,
             GROUP_TYPE_PEOPLE
         )
     }
 
-    private fun queryImpl(sourceId: String,
-                          language: String,
-                          query: Any, maxItems: Int,
-                          groupType: String): List<SearchRecord> {
+    private fun queryImpl(
+        sourceId: String,
+        language: String,
+        query: Any,
+        maxItems: Int,
+        groupType: String
+    ): List<SearchRecord> {
 
         val recsQuery = RecordsQuery.create()
             .withQuery(query)

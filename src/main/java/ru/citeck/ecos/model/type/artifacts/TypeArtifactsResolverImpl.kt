@@ -3,12 +3,12 @@ package ru.citeck.ecos.model.type.artifacts
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.apps.app.domain.ecostype.service.ModelTypeArtifactResolver
-import ru.citeck.ecos.model.type.service.TypeService
+import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.records2.RecordRef
 
 @Component
 class TypeArtifactsResolverImpl(
-    private val typeService: TypeService
+    private val typeService: TypesService
 ) : ModelTypeArtifactResolver {
 
     companion object {

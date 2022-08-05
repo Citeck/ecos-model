@@ -8,3 +8,5 @@ name:
 
 controller:
   type: json
+  config:
+    format: yaml

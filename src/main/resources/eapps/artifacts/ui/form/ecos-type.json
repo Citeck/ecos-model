@@ -17,6 +17,10 @@
         "type": "panel",
         "components": [
           {
+            "label": {
+              "en": "Tabs"
+            },
+            "key": "tabs",
             "components": [
               {
                 "label": "Main",
@@ -55,7 +59,8 @@
                                     "journalId": "ecos-forms",
                                     "key": "formRef",
                                     "label": "Form",
-                                    "input": true
+                                    "input": true,
+                                    "defaultValue": "uiserv/form@DEFAULT_FORM"
                                   }
                                 ],
                                 "type": "column",
@@ -90,7 +95,8 @@
                             "journalId": "ecos-journals",
                             "key": "journalRef",
                             "type": "selectJournal",
-                            "input": true
+                            "input": true,
+                            "defaultValue": "uiserv/journal@DEFAULT_JOURNAL"
                           },
                           {
                             "label": "Number template",
@@ -196,9 +202,46 @@
                             "input": true
                           },
                           {
-                            "label": "Source ID",
-                            "defaultValue": "",
+                            "label": {
+                              "ru": "Тип источника данных",
+                              "en": "Source Type"
+                            },
+                            "key": "sourceType",
+                            "dataSrc": "values",
+                            "data": {
+                              "values": [
+                                {
+                                  "label": "ECOS Model",
+                                  "value": "ECOS_MODEL"
+                                },
+                                {
+                                  "label": "Alfresco",
+                                  "value": "ALFRESCO"
+                                },
+                                {
+                                  "label": "Custom Id",
+                                  "value": "CUSTOM_ID"
+                                },
+                                {
+                                  "label": "Inherit",
+                                  "value": "INHERIT"
+                                }
+                              ]
+                            },
+                            "optionalWhenDisabled": false,
+                            "type": "ecosSelect",
+                            "input": true,
+                            "defaultValue": "ECOS_MODEL"
+                          },
+                          {
+                            "label": {
+                              "ru": "Source ID"
+                            },
                             "key": "sourceId",
+                            "defaultValue": "",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "customConditional": "show = !data['sourceType'] || data['sourceType'] === 'CUSTOM_ID' || data['sourceType'] === 'ECOS_MODEL'; ",
                             "type": "textfield",
                             "input": true
                           },
@@ -243,7 +286,8 @@
                     "defaultValue": true,
                     "hasThreeStates": true,
                     "type": "checkbox",
-                    "input": true
+                    "input": true,
+                    "tab": 1
                   },
                   {
                     "label": "Create",
@@ -281,7 +325,7 @@
                         "submit4": false,
                         "submit8": false,
                         "selectOrgstruct": "",
-                        "allowedFor": ""
+                        "allowedFor": []
                       }
                     ],
                     "validate": {
@@ -323,13 +367,7 @@
                             "type": "selectJournal",
                             "customPredicateJs": null,
                             "presetFilterPredicatesJs": null,
-                            "input": true,
-                            "source": {
-                              "custom": {
-                                "columns": []
-                              },
-                              "type": "journal"
-                            }
+                            "input": true
                           }
                         ],
                         "row": "0-1",
@@ -467,7 +505,8 @@
                           "en": ""
                         },
                         "selectJournal": "",
-                        "journals": []
+                        "journals": [],
+                        "journalsFromTarget": false
                       }
                     ],
                     "validate": {
@@ -541,7 +580,6 @@
                             "key": "journalsFromTarget",
                             "labelPosition": "",
                             "hasThreeStates": true,
-                            "defaultValue": false,
                             "refreshOn": [],
                             "type": "checkbox",
                             "input": true
@@ -798,7 +836,6 @@
                                       "ru": "Множественный",
                                       "en": "Multiple"
                                     },
-                                    "labelPosition": "left-left",
                                     "key": "multiple",
                                     "type": "checkbox",
                                     "input": true,
@@ -809,7 +846,6 @@
                                       "ru": "Обязательный",
                                       "en": "Mandatory"
                                     },
-                                    "labelPosition": "left-left",
                                     "key": "mandatory",
                                     "type": "checkbox",
                                     "input": true,
@@ -1116,7 +1152,8 @@
                     },
                     "key": "ecosEdition",
                     "type": "asyncData",
-                    "input": true
+                    "input": true,
+                    "tab": 3
                   }
                 ]
               },
@@ -1144,7 +1181,9 @@
                         "name": {},
                         "submit3": false,
                         "submit4": false,
-                        "assignees": []
+                        "assignees": [],
+                        "attributes": [],
+                        "submit9": false
                       }
                     ],
                     "validate": {
@@ -1167,7 +1206,7 @@
                         "row": "0-0"
                       },
                       {
-                        "label": "Name",
+                        "label": "Название для логики",
                         "key": "name",
                         "type": "mlText",
                         "input": true,
@@ -1185,6 +1224,7 @@
                       },
                       {
                         "label": {
+                          "ru": "Атрибуты",
                           "en": "Attributes"
                         },
                         "multiple": true,
@@ -1291,7 +1331,7 @@
                         "row": "0-0"
                       },
                       {
-                        "label": "Name",
+                        "label": "Название для логики",
                         "key": "name",
                         "type": "mlText",
                         "input": true,
@@ -1353,13 +1393,7 @@
                               "eq": "true"
                             },
                             "type": "selectJournal",
-                            "input": true,
-                            "source": {
-                              "custom": {
-                                "columns": []
-                              },
-                              "type": "journal"
-                            }
+                            "input": true
                           }
                         ]
                       },
@@ -1374,12 +1408,6 @@
                             "label": "File Types",
                             "multiple": true,
                             "journalId": "ecos-types",
-                            "source": {
-                              "type": "journal",
-                              "custom": {
-                                "columns": []
-                              }
-                            },
                             "key": "docLibFileTypeRefs",
                             "conditional": {
                               "show": "true",
@@ -1395,12 +1423,81 @@
                     ],
                     "key": "columns3",
                     "type": "columns",
-                    "input": false
+                    "input": false,
+                    "tab": 6
+                  }
+                ]
+              },
+              {
+                "label": "Content config",
+                "key": "contentConfigTab",
+                "components": [
+                  {
+                    "label": {
+                      "en": " "
+                    },
+                    "hideLabel": true,
+                    "key": "contentConfig",
+                    "refreshOn": [],
+                    "type": "container",
+                    "input": true,
+                    "components": [
+                      {
+                        "label": {
+                          "en": "Columns"
+                        },
+                        "hideLabel": true,
+                        "key": "columns8",
+                        "columns": [
+                          {
+                            "components": [
+                              {
+                                "label": {
+                                  "en": "Path"
+                                },
+                                "key": "path",
+                                "clearOnHide": false,
+                                "defaultValue": "",
+                                "refreshOn": [],
+                                "type": "textfield",
+                                "input": true
+                              }
+                            ],
+                            "type": "column",
+                            "input": false,
+                            "key": "column",
+                            "index": 0
+                          },
+                          {
+                            "type": "column",
+                            "input": false,
+                            "key": "column",
+                            "index": 1,
+                            "components": [
+                              {
+                                "label": {
+                                  "en": "Preview path"
+                                },
+                                "key": "previewPath",
+                                "clearOnHide": false,
+                                "defaultValue": "",
+                                "refreshOn": [],
+                                "type": "textfield",
+                                "input": true
+                              }
+                            ]
+                          }
+                        ],
+                        "type": "columns",
+                        "input": false,
+                        "tab": 6
+                      }
+                    ],
+                    "tab": 7
                   }
                 ]
               }
             ],
-            "key": "tabs",
             "type": "tabs",
             "input": false
           }

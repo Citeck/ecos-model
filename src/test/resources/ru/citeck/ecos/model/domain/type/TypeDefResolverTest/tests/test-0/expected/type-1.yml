@@ -1,0 +1,10 @@
+---
+id: type-1
+name:
+  en: type-1
+
+parentRef: emodel/type@type-0
+formRef: uiserv/form@form-0
+
+properties:
+  type-1-prop: value-1

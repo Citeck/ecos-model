@@ -1,10 +1,10 @@
 package ru.citeck.ecos.model.domain.authorities.config
 
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import ru.citeck.ecos.context.lib.auth.AuthContext
-import ru.citeck.ecos.context.lib.auth.AuthRole
+import ru.citeck.ecos.commons.data.MLText
+import ru.citeck.ecos.context.lib.auth.*
+import ru.citeck.ecos.context.lib.i18n.I18nContext
 import ru.citeck.ecos.data.sql.domain.DbDomainConfig
 import ru.citeck.ecos.data.sql.domain.DbDomainFactory
 import ru.citeck.ecos.data.sql.dto.DbTableRef
@@ -13,11 +13,9 @@ import ru.citeck.ecos.data.sql.records.listener.*
 import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
 import ru.citeck.ecos.data.sql.records.perms.DbRecordPerms
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
-import ru.citeck.ecos.events2.EventsService
-import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.authorities.api.records.AuthorityMixin
 import ru.citeck.ecos.model.domain.authorities.api.records.PersonMixin
-import ru.citeck.ecos.model.domain.authorities.constant.PersonConstants
+import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
 import ru.citeck.ecos.model.domain.authorities.service.PersonEventsService
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
@@ -26,6 +24,7 @@ import ru.citeck.ecos.model.domain.events.emitter.DbRecordsEcosEventsAdapter
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records3.RecordsService
+import ru.citeck.ecos.records3.RecordsServiceFactory
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
 import ru.citeck.ecos.records3.record.dao.RecordsDao
 import ru.citeck.ecos.records3.record.dao.impl.proxy.MutateProxyProcessor
@@ -44,7 +43,7 @@ class PersonsConfiguration(
 
     @Bean
     fun personDao(): RecordsDao {
-        val recordsDao = GroupsPersonsRecordsDao(
+        val recordsDao = object : GroupsPersonsRecordsDao(
             "person",
             AuthorityType.PERSON,
             authoritiesSyncService,
@@ -56,10 +55,10 @@ class PersonsConfiguration(
                     context: ProxyProcContext
                 ): List<LocalRecordAtts> {
                     return atts.map {
-                        val id = it.attributes.get("id").asText()
+                        val id = it.attributes["id"].asText()
                         if (id != id.lowercase()) {
                             val newAtts = it.attributes.deepCopy()
-                            newAtts.set("id", id.lowercase())
+                            newAtts["id"] = id.lowercase()
                             LocalRecordAtts(it.id, newAtts)
                         } else {
                             it
@@ -69,7 +68,16 @@ class PersonsConfiguration(
                 override fun mutatePostProcess(records: List<RecordRef>, context: ProxyProcContext): List<RecordRef> {
                     return records
                 }
-            })
+            }
+        ) {
+            override fun setRecordsServiceFactory(serviceFactory: RecordsServiceFactory) {
+                serviceFactory.localRecordsResolver.registerVirtualRecord(
+                    RecordRef.create(AuthorityType.PERSON.sourceId, AuthUser.SYSTEM),
+                    SystemUserRecord()
+                )
+                super.setRecordsServiceFactory(serviceFactory)
+            }
+        }
 
         return recordsDao
     }
@@ -82,12 +90,17 @@ class PersonsConfiguration(
 
                 return object : DbRecordPerms {
                     override fun getAuthoritiesWithReadPermission(): Set<String> {
-                        return setOf("EVERYONE")
+                        return setOf(AuthGroup.EVERYONE)
                     }
-
                     override fun isCurrentUserHasWritePerms(): Boolean {
                         val auth = AuthContext.getCurrentFullAuth()
                         return recordRef.id == auth.getUser() || auth.getAuthorities().contains(AuthRole.ADMIN)
+                    }
+                    override fun isCurrentUserHasAttReadPerms(name: String): Boolean {
+                        return true
+                    }
+                    override fun isCurrentUserHasAttWritePerms(name: String): Boolean {
+                        return isCurrentUserHasWritePerms()
                     }
                 }
             }
@@ -96,22 +109,26 @@ class PersonsConfiguration(
         val typeRef = TypeUtils.getTypeRef("person")
         val recordsDao = dbDomainFactory.create(
             DbDomainConfig.create()
-                .withRecordsDao(DbRecordsDaoConfig.create {
-                    withId("person-repo")
-                    withTypeRef(typeRef)
-                })
-                .withDataService(DbDataServiceConfig.create {
-                    // persons should be visible for all, but editable only for concrete persons
-                    withAuthEnabled(false)
-                    withTableRef(DbTableRef(AuthorityConstants.DEFAULT_SCHEMA, "ecos_person"))
-                    withTransactional(true)
-                    withStoreTableMeta(true)
-                })
+                .withRecordsDao(
+                    DbRecordsDaoConfig.create {
+                        withId("person-repo")
+                        withTypeRef(typeRef)
+                    }
+                )
+                .withDataService(
+                    DbDataServiceConfig.create {
+                        // persons should be visible for all, but editable only for concrete persons
+                        withAuthEnabled(false)
+                        withTableRef(DbTableRef(AuthorityConstants.DEFAULT_SCHEMA, "ecos_person"))
+                        withTransactional(true)
+                        withStoreTableMeta(true)
+                    }
+                )
                 .build()
         ).withPermsComponent(permsComponent).build()
 
         recordsDao.addAttributesMixin(PersonMixin(authorityService))
-        recordsDao.addAttributesMixin(AuthorityMixin(authorityService, AuthorityType.PERSON))
+        recordsDao.addAttributesMixin(AuthorityMixin(recordsService, authorityService, AuthorityType.PERSON))
 
         val getRecId = { rec: Any ->
             recordsService.getAtt(rec, "?localId").asText()
@@ -137,5 +154,13 @@ class PersonsConfiguration(
         recordsDao.addListener(dbRecordsEcosEventsAdapter)
 
         return recordsDao
+    }
+
+    private class SystemUserRecord {
+        val name = MLText(
+            I18nContext.ENGLISH to "System",
+            I18nContext.RUSSIAN to "Система"
+        )
+        val userName = AuthConstants.SYSTEM_USER
     }
 }

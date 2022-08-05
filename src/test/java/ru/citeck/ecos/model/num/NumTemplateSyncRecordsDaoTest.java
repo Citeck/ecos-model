@@ -1,37 +1,36 @@
 package ru.citeck.ecos.model.num;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 import ru.citeck.ecos.commons.data.DataValue;
 import ru.citeck.ecos.commons.data.MLText;
-import ru.citeck.ecos.commons.json.Json;
+import ru.citeck.ecos.commons.test.EcosWebAppContextMock;
 import ru.citeck.ecos.model.EcosModelApp;
 import ru.citeck.ecos.model.num.dto.NumTemplateDto;
 import ru.citeck.ecos.model.num.repository.NumTemplateRepository;
 import ru.citeck.ecos.model.num.service.NumTemplateService;
-import ru.citeck.ecos.model.type.dto.TypeDef;
-import ru.citeck.ecos.model.type.service.TypeService;
+import ru.citeck.ecos.model.type.service.TypesService;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records3.RecordsService;
 import ru.citeck.ecos.records3.RecordsServiceFactory;
 import ru.citeck.ecos.records2.predicate.PredicateService;
 import ru.citeck.ecos.records2.predicate.model.VoidPredicate;
-import ru.citeck.ecos.records2.rest.RemoteRecordsRestApi;
 import ru.citeck.ecos.records2.source.dao.local.RemoteSyncRecordsDao;
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery;
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes;
-import ru.citeck.ecos.records3.record.resolver.RemoteRecordsResolver;
+import ru.citeck.ecos.webapp.api.context.EcosWebAppContext;
+import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef;
+import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(EcosSpringExtension.class)
 @SpringBootTest(classes = EcosModelApp.class)
 public class NumTemplateSyncRecordsDaoTest {
 
@@ -52,33 +51,29 @@ public class NumTemplateSyncRecordsDaoTest {
     private final List<NumTemplateDto> templates = new ArrayList<>();
 
     @Autowired
-    private TypeService typeService;
+    private TypesService typeService;
 
-    @Before
+    @BeforeEach
     public void setup() {
 
         numTemplateRepository.deleteAll();
 
+        EcosWebAppContextMock webAppCtx = new EcosWebAppContextMock();
+        webAppCtx.setWebClientExecuteImpl((app, path, req) ->
+            remoteServiceFactory.getRestHandlerAdapter().queryRecords(req));
+
         localServiceFactory = new RecordsServiceFactory() {
-            @Override
-            protected RemoteRecordsResolver createRemoteRecordsResolver() {
-                return new RemoteRecordsResolver(this, new RemoteRecordsRestApi() {
-                    @Override
-                    public <T> T jsonPost(String url, Object request, Class<T> respType) {
-                        @SuppressWarnings("unchecked")
-                        T res = (T) remoteServiceFactory.getRestHandlerAdapter().queryRecords(request);
-                        return Json.getMapper().convert(res, respType);
-                    }
-                });
+            public EcosWebAppContext getEcosWebAppContext() {
+                return webAppCtx;
             }
         };
 
         this.localRecordsService = localServiceFactory.getRecordsServiceV1();
 
+        generateData();
+
         remoteSyncRecordsDAO = new RemoteSyncRecordsDao<>(SOURCE_ID, NumTemplateDto.class);
         localRecordsService.register(remoteSyncRecordsDAO);
-
-        generateData();
     }
 
     @Test

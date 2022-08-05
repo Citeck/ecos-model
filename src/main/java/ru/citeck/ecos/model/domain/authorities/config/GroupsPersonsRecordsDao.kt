@@ -5,6 +5,7 @@ import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants.ATT_AUTHORITY_GROUPS
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants.ATT_AUTHORITY_GROUPS_FULL
+import ru.citeck.ecos.model.domain.authorities.constant.AuthorityGroupConstants
 import ru.citeck.ecos.model.domain.authorities.constant.PersonConstants
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
@@ -26,7 +27,7 @@ import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-class GroupsPersonsRecordsDao(
+open class GroupsPersonsRecordsDao(
     id: String,
     private val authorityType: AuthorityType,
     private val syncService: AuthoritiesSyncService,
@@ -42,13 +43,15 @@ class GroupsPersonsRecordsDao(
 
     override fun getRecordsAtts(recordsId: List<String>): List<*>? {
         if (authorityType == AuthorityType.PERSON) {
-            return super.getRecordsAtts(recordsId.map {
-                if (it == "CURRENT") {
-                    AuthContext.getCurrentUser()
-                } else {
-                    it
+            return super.getRecordsAtts(
+                recordsId.map {
+                    if (it == "CURRENT") {
+                        AuthContext.getCurrentUser()
+                    } else {
+                        it
+                    }
                 }
-            })
+            )
         }
         return super.getRecordsAtts(recordsId)
     }
@@ -56,21 +59,24 @@ class GroupsPersonsRecordsDao(
     override fun queryRecords(recsQuery: RecordsQuery): RecsQueryRes<*>? {
         var newSortBy = recsQuery.sortBy
         if (authorityType == AuthorityType.PERSON && recsQuery.sortBy.isNotEmpty()) {
-            newSortBy = newSortBy.mapNotNull { preProcessPersonSortBy(it) }
+            newSortBy = newSortBy.map { preProcessPersonSortBy(it) }
         }
         if (recsQuery.language != PredicateService.LANGUAGE_PREDICATE) {
             return super.queryRecords(recsQuery)
         }
         val predicate = PredicateUtils.mapValuePredicates(recsQuery.getQuery(Predicate::class.java)) { pred ->
 
-            var result: Predicate? = if (pred.getType() == ValuePredicate.Type.CONTAINS
-                    && pred.getAttribute() == ATT_AUTHORITY_GROUPS_FULL) {
+            var result: Predicate? = if (pred.getType() == ValuePredicate.Type.CONTAINS &&
+                pred.getAttribute() == ATT_AUTHORITY_GROUPS_FULL
+            ) {
 
                 val values = pred.getValue().toList(RecordRef::class.java)
                 val expandedGroups = authorityService.getExpandedGroups(values.map { it.id }, false)
-                OrPredicate.of(expandedGroups.map {
-                    Predicates.contains(ATT_AUTHORITY_GROUPS, AuthorityType.GROUP.getRef(it).toString())
-                })
+                OrPredicate.of(
+                    expandedGroups.map {
+                        Predicates.contains(ATT_AUTHORITY_GROUPS, AuthorityType.GROUP.getRef(it).toString())
+                    }
+                )
             } else {
                 pred
             }
@@ -81,10 +87,12 @@ class GroupsPersonsRecordsDao(
 
             result
         }
-        return super.queryRecords(recsQuery.copy {
-            withQuery(predicate)
-            withSortBy(newSortBy)
-        })
+        return super.queryRecords(
+            recsQuery.copy {
+                withQuery(predicate)
+                withSortBy(newSortBy)
+            }
+        )
     }
 
     private fun preProcessPersonSortBy(sortBy: SortBy): SortBy {
@@ -101,7 +109,7 @@ class GroupsPersonsRecordsDao(
         return pred
     }
 
-    private fun preProcessInactivityDaysPredicate(pred: ValuePredicate) : Predicate? {
+    private fun preProcessInactivityDaysPredicate(pred: ValuePredicate): Predicate? {
 
         val daysCount = pred.getValue().asLong()
         val inactivityTime = Instant.now().minus(daysCount, ChronoUnit.DAYS)
@@ -126,14 +134,7 @@ class GroupsPersonsRecordsDao(
     }
 
     override fun mutateForAnyRes(records: List<LocalRecordAtts>): List<Any> {
-        val result = mutate(records)
-        if (authorityType == AuthorityType.PERSON) {
-            return result.map {
-                // todo: remove after user dashboard will be migrated to emodel
-                RecordRef.create("alfresco", "people", it)
-            }
-        }
-        return result
+        return mutate(records)
     }
 
     private fun permissionDenied() {
@@ -172,7 +173,7 @@ class GroupsPersonsRecordsDao(
             for (rec in records) {
                 var currentGroupId = rec.id
                 if (currentGroupId.isBlank()) {
-                    currentGroupId = rec.attributes.get("id").asText()
+                    currentGroupId = rec.attributes["id"].asText()
                 }
                 if (currentGroupId.isEmpty()) {
                     continue
@@ -188,14 +189,14 @@ class GroupsPersonsRecordsDao(
                 for (newGroup in newGroups) {
                     val expandedGroups = authorityService.getExpandedGroups(newGroup, true)
                     if (expandedGroups.contains(currentGroupId)) {
-                        error("Cyclic dependency. Group '${currentGroupId}' can't be added to group: $newGroup")
+                        error("Cyclic dependency. Group '$currentGroupId' can't be added to group: $newGroup")
                     }
                 }
             }
         }
 
         val attsWithBlankId = records.filter {
-            it.id.isBlank() && it.attributes.get("id").asText().isBlank()
+            it.id.isBlank() && it.attributes["id"].asText().isBlank()
         }
         if (attsWithBlankId.isNotEmpty()) {
             error("Id field is missing for records: ${attsWithBlankId.map { it.id }}")
@@ -205,7 +206,7 @@ class GroupsPersonsRecordsDao(
 
             var id = record.id
             if (id.isBlank()) {
-                id = record.attributes.get("id").asText()
+                id = record.attributes["id"].asText()
             }
 
             val currentAtts = getTargetAuthorityAtts(id)
@@ -214,14 +215,18 @@ class GroupsPersonsRecordsDao(
             var isManaged = false
 
             val authorityId = if (!exists) {
-                if (syncService.isNewAuthoritiesManaged(authorityType)) {
+                if (id != AuthorityGroupConstants.EVERYONE_GROUP &&
+                    syncService.isNewAuthoritiesManaged(authorityType)
+                ) {
+
                     isManaged = true
                     syncService.create(authorityType, record)
                 } else {
                     super.mutate(listOf(record))[0]
                 }
-            } else if (RecordRef.isEmpty(currentAtts.managedBySync)
-                        || !syncService.isSyncEnabled(currentAtts.managedBySync?.id)) {
+            } else if (RecordRef.isEmpty(currentAtts.managedBySync) ||
+                !syncService.isSyncEnabled(currentAtts.managedBySync?.id)
+            ) {
 
                 super.mutate(listOf(record))[0]
             } else {

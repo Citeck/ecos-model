@@ -7,6 +7,7 @@ import ru.citeck.ecos.data.sql.records.listener.DbRecordChangedEvent
 import ru.citeck.ecos.data.sql.records.listener.DbRecordCreatedEvent
 import ru.citeck.ecos.events2.EventsService
 import ru.citeck.ecos.events2.emitter.EventsEmitter
+import ru.citeck.ecos.model.EcosModelApp
 import ru.citeck.ecos.model.domain.authorities.constant.PersonConstants
 import ru.citeck.ecos.model.domain.authsync.service.AuthorityType
 import ru.citeck.ecos.records3.RecordsService
@@ -31,12 +32,12 @@ class PersonEventsService(
         disabledStatusChangedEmitter = eventsService.getEmitter {
             withEventType(PersonDisabledStatusChangedEvent.ID)
             withEventClass(PersonDisabledStatusChangedEvent::class.java)
-            withSource("emodel")
+            withSource(EcosModelApp.NAME)
         }
         createdEmitter = eventsService.getEmitter {
             withEventType(PersonCreatedEvent.ID)
             withEventClass(PersonCreatedEvent::class.java)
-            withSource("emodel")
+            withSource(EcosModelApp.NAME)
         }
     }
 

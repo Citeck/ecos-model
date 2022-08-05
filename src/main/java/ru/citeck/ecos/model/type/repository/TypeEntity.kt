@@ -32,7 +32,11 @@ class TypeEntity : AbstractAuditingEntity() {
     var numTemplateRef: String? = null
     var inheritNumTemplate: Boolean? = null
     var inheritForm: Boolean? = null
+
+    var sourceType: String? = null
     var sourceId: String? = null
+    var sourceRef: String? = null
+
     var createVariants: String? = null
     var inheritActions = false
     var defaultCreateVariant: Boolean? = null
@@ -49,4 +53,17 @@ class TypeEntity : AbstractAuditingEntity() {
     var model: String? = null
 
     var docLib: String? = null
+
+    var contentConfig: String? = null
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is TypeEntity) {
+            return false
+        }
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
 }

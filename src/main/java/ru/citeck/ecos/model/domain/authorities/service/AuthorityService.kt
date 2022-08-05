@@ -3,8 +3,10 @@ package ru.citeck.ecos.model.domain.authorities.service
 import com.hazelcast.core.HazelcastInstance
 import com.hazelcast.core.IMap
 import org.springframework.stereotype.Service
+import ru.citeck.ecos.context.lib.auth.AuthGroup
 import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
+import ru.citeck.ecos.model.domain.authorities.constant.AuthorityGroupConstants
 import ru.citeck.ecos.model.domain.authsync.service.AuthorityType
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records2.predicate.model.Predicates
@@ -30,7 +32,8 @@ class AuthorityService(
         private const val ATT_AUTHORITY_GROUPS = "authorityGroups[]?localId"
 
         private val ADMIN_GROUPS = setOf(
-            "GROUP_ALFRESCO_ADMINISTRATORS"
+            AuthGroup.PREFIX + AuthorityGroupConstants.ADMIN_GROUP,
+            AuthGroup.PREFIX + "ALFRESCO_ADMINISTRATORS"
         )
     }
 
@@ -70,7 +73,8 @@ class AuthorityService(
         if (ADMIN_GROUPS.any { authorities.contains(it) }) {
             authorities.add(AuthRole.ADMIN)
         }
-        authorities.add("GROUP_EVERYONE")
+        authorities.add(AuthGroup.EVERYONE)
+        authorities.add(AuthRole.USER)
 
         return authorities
     }
@@ -121,10 +125,12 @@ class AuthorityService(
     }
 
     fun getGroupMembers(groupRef: RecordRef, membersType: AuthorityType): List<RecordRef> {
-        return records.query(RecordsQuery.create {
-            withSourceId(membersType.sourceId)
-            withQuery(Predicates.contains(AuthorityConstants.ATT_AUTHORITY_GROUPS, groupRef.toString()))
-        }).getRecords()
+        return records.query(
+            RecordsQuery.create {
+                withSourceId(membersType.sourceId)
+                withQuery(Predicates.contains(AuthorityConstants.ATT_AUTHORITY_GROUPS, groupRef.toString()))
+            }
+        ).getRecords()
     }
 
     private fun forEachGroup(

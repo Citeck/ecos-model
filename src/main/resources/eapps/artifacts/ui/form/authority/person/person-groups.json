@@ -1,0 +1,88 @@
+{
+  "id": "cm_person_user_groups",
+  "title": {
+    "en": "Groups",
+    "ru": "Группы"
+  },
+  "description": {
+    "en": ""
+  },
+  "customModule": null,
+  "typeRef": "emodel/type@person",
+  "width": "lg",
+  "i18n": {
+    "ru": {
+      "loading": "Загрузка..."
+    },
+    "en": {
+      "loading": "Loading..."
+    }
+  },
+  "definition": {
+    "components": [
+      {
+        "labelPosition": "bottom",
+        "scrollableContent": true,
+        "disableInlineEdit": true,
+        "customClass": "p-0 m-0",
+        "key": "panel2",
+        "type": "panel",
+        "input": false,
+        "components": [
+          {
+            "hideLabel": true,
+            "noColHeaders": true,
+            "disableInlineEdit": true,
+            "customClass": "p-0",
+            "persistent": false,
+            "disabled": true,
+            "source": {
+              "type": "custom",
+              "custom": {
+                "columns": [
+                  {
+                    "name": "id",
+                    "formatter": "value = {\r\n\tname: 'AssocFormatter'\r\n};",
+                    "setAttributesManually": false
+                  }
+                ],
+                "record": null,
+                "attribute": null
+              }
+            },
+            "refreshOn": "groupData",
+            "calculateValue": "value = _.get(data, 'groupData.groups') || [];",
+            "key": "tableForm2",
+            "displayElementsJS": "value = {view: false, edit: false, delete: false, clone: false, preview: false}",
+            "type": "tableForm",
+            "input": true
+          }
+        ]
+      },
+      {
+        "label": "groupData",
+        "source": {
+          "type": "record",
+          "record": {
+            "id": "{{recordId}}",
+            "attributes": {
+              "groups": "authorityGroups[]?disp"
+            }
+          },
+          "forceLoad": false
+        },
+        "update": {
+          "type": "once"
+        },
+        "key": "groupData",
+        "type": "asyncData",
+        "input": true,
+        "conditional": {
+          "show": null,
+          "when": null
+        }
+      }
+    ]
+  },
+  "attributes": {}
+}

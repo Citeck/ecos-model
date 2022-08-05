@@ -4,13 +4,6 @@ name: { ru: Типы данных, en: Data types }
 
 system: true
 
-actions:
-  - uiserv/action@download-base64-data-yml
-  - uiserv/action@delete
-  - uiserv/action@edit
-  - uiserv/action@edit-json
-  - uiserv/action@module-copy
-
 columns:
 
   - id: moduleId

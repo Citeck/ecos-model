@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.json.Json;
+import ru.citeck.ecos.model.EcosModelApp;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.graphql.meta.value.EmptyValue;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
@@ -35,7 +36,7 @@ public class StatusRecordsDao extends LocalRecordsDao implements LocalRecordsMet
     @Override
     public RecordsQueryResult<RecordRef> queryLocalRecords(@NotNull RecordsQuery recordsQuery) {
         return new RecordsQueryResult<>(statuses.keySet().stream()
-            .map(s -> RecordRef.create("emodel", getId(), s))
+            .map(s -> RecordRef.create(EcosModelApp.NAME, getId(), s))
             .collect(Collectors.toList()));
     }
 

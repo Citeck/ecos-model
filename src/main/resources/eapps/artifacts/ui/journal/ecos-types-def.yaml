@@ -1,0 +1,32 @@
+---
+id: ecos-types-def
+name: { ru: Типы данных, en: Data types }
+
+system: true
+
+actions:
+  - uiserv/action@download-base64-data-yml
+  - uiserv/action@delete
+  - uiserv/action@edit
+  - uiserv/action@edit-json
+  - uiserv/action@module-copy
+
+columns:
+
+  - id: moduleId
+    name: { ru: Идентификатор, en: Id }
+    type: text
+
+  - id: name
+    name: { ru: Имя, en: Name }
+    type: text
+
+  - id: description
+    name: { ru: Описание, en: Description }
+    type: text
+
+  - id: _modified
+    name: { ru: Изменен, en: Modified }
+
+  - id: _modifier
+    name: { ru: Кем изменен, en: Modified by }

@@ -5,9 +5,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
-import ru.citeck.ecos.context.lib.auth.AuthConstants
-import ru.citeck.ecos.context.lib.auth.AuthContext
-import ru.citeck.ecos.context.lib.auth.AuthRole
+import ru.citeck.ecos.context.lib.auth.*
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.authsync.service.AuthorityType
 import ru.citeck.ecos.records2.RecordConstants
@@ -22,7 +20,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
 
         initTest(authAware = true)
 
-        val checkPermissionDenied: (Boolean, () -> Unit) -> Unit = {  errorExpected, action ->
+        val checkPermissionDenied: (Boolean, () -> Unit) -> Unit = { errorExpected, action ->
             if (errorExpected) {
                 val ex = assertThrows<Exception> {
                     action.invoke()
@@ -57,8 +55,8 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
         val testPersonFirstName = "Test First Name"
 
         val personAtts = ObjectData.create()
-        personAtts.set("id", testPersonRef.id)
-        personAtts.set("firstName", testPersonFirstName)
+        personAtts["id"] = testPersonRef.id
+        personAtts["firstName"] = testPersonFirstName
 
         val personCreateResult = AuthContext.runAsSystem {
             recordsService.create(testPersonRef.sourceId, personAtts)
@@ -68,8 +66,8 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
 
         val testGroupRef = AuthorityType.GROUP.getRef("test-group")
         val groupAtts = ObjectData.create()
-        groupAtts.set("id", testGroupRef.id)
-        groupAtts.set("name", MLText("Test Group Name"))
+        groupAtts["id"] = testGroupRef.id
+        groupAtts["name"] = MLText("Test Group Name")
 
         val groupCreateResult = AuthContext.runAsSystem {
             recordsService.create(testGroupRef.sourceId, groupAtts)
@@ -108,7 +106,8 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
         checkAuthorities(
             listOf(
                 testPersonRef.id,
-                "GROUP_EVERYONE"
+                AuthGroup.EVERYONE,
+                AuthRole.USER
             )
         )
 
@@ -120,7 +119,8 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
             listOf(
                 testPersonRef.id,
                 "GROUP_${testGroupRef.id}",
-                "GROUP_EVERYONE"
+                AuthGroup.EVERYONE,
+                AuthRole.USER
             )
         )
 
@@ -132,8 +132,9 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
             listOf(
                 testPersonRef.id,
                 "GROUP_${testGroupRef.id}",
-                "GROUP_${otherGroupId}",
-                "GROUP_EVERYONE"
+                "GROUP_$otherGroupId",
+                AuthGroup.EVERYONE,
+                AuthRole.USER
             )
         )
 
@@ -141,7 +142,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
             "" to true,
             testPersonRef.id to true,
             "admin" to false,
-            AuthConstants.SYSTEM_USER to false
+            AuthUser.SYSTEM to false
         ).forEach {
             println("Check user '${it.first}' exception expected: ${it.second}")
             val runAs = if (it.first.isEmpty()) {
@@ -171,15 +172,16 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
             listOf(
                 testPersonRef.id,
                 "GROUP_${testGroupRef.id}",
-                "GROUP_${otherGroupId}",
+                "GROUP_$otherGroupId",
                 "GROUP_other-auth-group-admin",
-                "GROUP_other-auth-group-${AuthConstants.SYSTEM_USER}",
-                "GROUP_EVERYONE"
+                "GROUP_other-auth-group-${AuthUser.SYSTEM}",
+                AuthGroup.EVERYONE,
+                AuthRole.USER
             )
         )
 
         assertThrows<Exception> {
-            recordsService.mutateAtt(testPersonRef,"email", "test@test.ru")
+            recordsService.mutateAtt(testPersonRef, "email", "test@test.ru")
         }
         AuthContext.runAs(testPersonRef.id) {
             recordsService.mutateAtt(testPersonRef, "email", "test@test.ru")
@@ -196,11 +198,12 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
             listOf(
                 testPersonRef.id,
                 "GROUP_${testGroupRef.id}",
-                "GROUP_${otherGroupId}",
+                "GROUP_$otherGroupId",
                 "GROUP_${newParentGroupRef.id}",
                 "GROUP_other-auth-group-admin",
-                "GROUP_other-auth-group-${AuthConstants.SYSTEM_USER}",
-                "GROUP_EVERYONE"
+                "GROUP_other-auth-group-${AuthUser.SYSTEM}",
+                AuthGroup.EVERYONE,
+                AuthRole.USER
             )
         )
 
@@ -211,10 +214,11 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
             listOf(
                 testPersonRef.id,
                 "GROUP_${testGroupRef.id}",
-                "GROUP_${otherGroupId}",
+                "GROUP_$otherGroupId",
                 "GROUP_other-auth-group-admin",
-                "GROUP_other-auth-group-${AuthConstants.SYSTEM_USER}",
-                "GROUP_EVERYONE"
+                "GROUP_other-auth-group-${AuthUser.SYSTEM}",
+                AuthGroup.EVERYONE,
+                AuthRole.USER
             )
         )
 
@@ -231,7 +235,8 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
                 "GROUP_${testGroupRef.id}",
                 "GROUP_other-auth-group-admin",
                 "GROUP_other-auth-group-${AuthConstants.SYSTEM_USER}",
-                "GROUP_EVERYONE"
+                AuthGroup.EVERYONE,
+                AuthRole.USER
             )
         )
 
@@ -243,7 +248,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
         AuthContext.runAsSystem {
             groupsChain.forEach {
                 val atts = ObjectData.create()
-                atts.set("id", it)
+                atts["id"] = it
                 recordsService.create(AuthorityType.GROUP.sourceId, atts)
             }
         }
@@ -266,12 +271,13 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
                 testPersonRef.id,
                 "GROUP_${testGroupRef.id}",
                 "GROUP_other-auth-group-admin",
-                "GROUP_other-auth-group-${AuthConstants.SYSTEM_USER}",
-                "GROUP_${otherGroupId}",
+                "GROUP_other-auth-group-${AuthUser.SYSTEM}",
+                "GROUP_$otherGroupId",
                 "GROUP_group-0",
                 "GROUP_group-1",
                 "GROUP_group-2",
-                "GROUP_EVERYONE"
+                AuthGroup.EVERYONE,
+                AuthRole.USER
             )
         )
 
@@ -307,10 +313,11 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
                 "GROUP_${testGroupRef.id}",
                 "GROUP_other-auth-group-admin",
                 "GROUP_other-auth-group-${AuthConstants.SYSTEM_USER}",
-                "GROUP_${otherGroupId}",
+                "GROUP_$otherGroupId",
                 "GROUP_group-0",
                 "GROUP_group-1",
-                "GROUP_EVERYONE"
+                AuthGroup.EVERYONE,
+                AuthRole.USER
             )
         )
     }

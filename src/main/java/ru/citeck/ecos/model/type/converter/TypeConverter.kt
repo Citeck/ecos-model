@@ -4,19 +4,21 @@ import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
+import ru.citeck.ecos.commons.data.entity.EntityMeta
+import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef
 import ru.citeck.ecos.model.lib.type.dto.DocLibDef
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
-import ru.citeck.ecos.model.type.dto.AssocDef
 import ru.citeck.ecos.model.type.repository.TypeEntity
-import ru.citeck.ecos.model.type.dto.TypeDef
-import ru.citeck.ecos.model.type.repository.TypeRepository
 import ru.citeck.ecos.model.type.service.dao.TypeRepoDao
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records3.record.mixin.impl.mutmeta.MutMeta
 import ru.citeck.ecos.records3.record.mixin.impl.mutmeta.MutMetaMixin
+import ru.citeck.ecos.webapp.lib.model.type.dto.AssocDef
+import ru.citeck.ecos.webapp.lib.model.type.dto.TypeContentConfig
+import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import java.time.Instant
 import java.util.*
 import kotlin.collections.LinkedHashSet
@@ -31,10 +33,8 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
         var entity = typeRepoDao.findByExtId(dto.id)
         if (entity == null) {
             entity = TypeEntity()
-            entity.extId = if (dto.id.isBlank()) {
+            entity.extId = dto.id.ifBlank {
                 UUID.randomUUID().toString()
-            } else {
-                dto.id
             }
         }
 
@@ -43,18 +43,19 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
         if (RecordRef.isEmpty(typeDef.parentRef)) {
 
             entity.parent = null
-
         } else {
 
             val parentEntity = typeRepoDao.findByExtId(typeDef.parentRef.id)
-                    ?: error("Parent type is not found: ${typeDef.parentRef.id}")
+                ?: error("Parent type is not found: ${typeDef.parentRef.id}")
             entity.parent = parentEntity
         }
 
         entity.name = Json.mapper.toString(typeDef.name)
         entity.description = Json.mapper.toString(typeDef.description)
         entity.system = typeDef.system
+        entity.sourceType = typeDef.sourceType
         entity.sourceId = typeDef.sourceId
+        entity.sourceRef = typeDef.sourceRef.toString()
         entity.metaRecord = typeDef.metaRecord.toString()
         entity.form = typeDef.formRef.toString()
         entity.journal = typeDef.journalRef.toString()
@@ -75,6 +76,7 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
         entity.model = Json.mapper.toString(typeDef.model)
         entity.docLib = Json.mapper.toString(typeDef.docLib)
         entity.attributes = Json.mapper.toString(typeDef.properties)
+        entity.contentConfig = Json.mapper.toString(typeDef.contentConfig)
 
         checkCyclicDependencies(entity)
 
@@ -95,20 +97,29 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
     }
 
     fun toDto(entity: TypeEntity): TypeDef {
+        return toDtoWithMeta(entity).entity
+    }
 
-        mutMetaMixin?.addCtxMeta(entity.extId, MutMeta(
-            entity.createdBy ?: "anonymous",
-            entity.createdDate ?: Instant.EPOCH,
-            entity.lastModifiedBy ?: "anonymous",
-            entity.lastModifiedDate ?: Instant.EPOCH
-        ))
+    fun toDtoWithMeta(entity: TypeEntity): EntityWithMeta<TypeDef> {
 
-        return TypeDef.create()
+        mutMetaMixin?.addCtxMeta(
+            entity.extId,
+            MutMeta(
+                entity.createdBy ?: "anonymous",
+                entity.createdDate ?: Instant.EPOCH,
+                entity.lastModifiedBy ?: "anonymous",
+                entity.lastModifiedDate ?: Instant.EPOCH
+            )
+        )
+
+        val typeDef = TypeDef.create()
             .withId(entity.extId)
             .withName(Json.mapper.read(entity.name, MLText::class.java))
             .withDescription(Json.mapper.read(entity.description, MLText::class.java))
             .withSystem(entity.system)
+            .withSourceType(entity.sourceType)
             .withSourceId(entity.sourceId)
+            .withSourceRef(RecordRef.valueOf(entity.sourceRef))
             .withMetaRecord(RecordRef.valueOf(entity.metaRecord))
             .withParentRef(RecordRef.valueOf(TypeUtils.getTypeRef(entity.parent?.extId ?: "")))
             .withFormRef(RecordRef.valueOf(entity.form))
@@ -129,7 +140,18 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
             .withConfig(ObjectData.create(entity.config))
             .withModel(Json.mapper.read(entity.model, TypeModelDef::class.java))
             .withDocLib(Json.mapper.read(entity.docLib, DocLibDef::class.java))
+            .withContentConfig(Json.mapper.read(entity.contentConfig, TypeContentConfig::class.java))
             .withProperties(ObjectData.create(entity.attributes))
             .build()
+
+        return EntityWithMeta(
+            typeDef,
+            EntityMeta.create {
+                withCreated(entity.createdDate)
+                withCreator(entity.createdBy ?: "anonymous")
+                withModified(entity.lastModifiedDate)
+                withModifier(entity.lastModifiedBy)
+            }
+        )
     }
 }

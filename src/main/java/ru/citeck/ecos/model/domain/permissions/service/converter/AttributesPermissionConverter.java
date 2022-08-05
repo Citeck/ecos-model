@@ -12,8 +12,9 @@ import ru.citeck.ecos.model.domain.permissions.repo.AttributesPermissionEntity;
 import ru.citeck.ecos.model.domain.permissions.dto.AttributesPermissionWithMetaDto;
 import ru.citeck.ecos.model.domain.permissions.dto.RuleDto;
 import ru.citeck.ecos.model.domain.permissions.repo.AttributesPermissionsRepository;
+import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils;
 import ru.citeck.ecos.model.service.exception.TypeNotFoundException;
-import ru.citeck.ecos.model.type.api.records.TypeRecordsDao;
+import ru.citeck.ecos.model.type.api.records.TypesRepoRecordsDao;
 import ru.citeck.ecos.model.type.repository.TypeEntity;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
@@ -68,7 +69,7 @@ public class AttributesPermissionConverter extends AbstractDtoConverter<Attribut
 
         if (entity.getType() != null) {
             String typeId = entity.getType().getExtId();
-            RecordRef typeRecordRef = RecordRef.create("emodel", TypeRecordsDao.ID, typeId);
+            RecordRef typeRecordRef = TypeUtils.getTypeRef(typeId);
             dto.setTypeRef(typeRecordRef);
         } else {
             log.warn("Target type for permission attr matrix with id " + dto.getId() + " is null");
