@@ -1206,18 +1206,25 @@
                         "row": "0-0"
                       },
                       {
-                        "label": "Название для логики",
+                        "label": "Название логики",
                         "key": "name",
                         "type": "mlText",
                         "input": true,
                         "row": "0-1"
                       },
                       {
-                        "label": "Assignees",
+                        "label": {
+                          "ru": "Assignees"
+                        },
+                        "key": "assignees",
                         "multiple": true,
                         "reorder": false,
+                        "allowedGroupType": "ROLE, BRANCH, GROUP",
+                        "rootGroupName": "",
                         "dataType": "authority",
-                        "key": "assignees",
+                        "defaultValue": [],
+                        "refreshOn": [],
+                        "optionalWhenDisabled": false,
                         "type": "selectOrgstruct",
                         "input": true,
                         "row": "0-2"
@@ -1331,7 +1338,7 @@
                         "row": "0-0"
                       },
                       {
-                        "label": "Название для логики",
+                        "label": "Название логики",
                         "key": "name",
                         "type": "mlText",
                         "input": true,

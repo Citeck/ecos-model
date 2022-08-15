@@ -103,7 +103,7 @@ class AlfrescoAuthoritiesSyncFactory(
         override fun execute(state: State?): Boolean {
 
             val currentState = state ?: State(
-                // first sync should be based on id because not all authorities has cm:modified field
+                // first sync should be based on id because not all authorities have cm:modified field
                 syncById = true,
                 lastId = -1,
                 lastModified = Instant.EPOCH
@@ -366,7 +366,7 @@ class AlfrescoAuthoritiesSyncFactory(
                 if (!photoAtts.bytes.isNullOrBlank()) {
                     val mimeType = photoAtts.mimeType?.ifBlank { "image/jpeg" } ?: "image/jpeg"
                     val contentUrl = "data:$mimeType;base64,${photoAtts.bytes}"
-                    personAtts.set(PersonConstants.ATT_PHOTO, Collections.singletonMap("url", contentUrl))
+                    personAtts[PersonConstants.ATT_PHOTO] = Collections.singletonMap("url", contentUrl)
                 }
             }
 
