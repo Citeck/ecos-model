@@ -17,18 +17,11 @@ To ensure everything worked, run:
 
     mvn spring-boot:run -Pprod
 
-
 ### Testing
 
 To launch your application's tests, run:
 
     mvn test
-
-
-### Code quality
-
-Description in progress... 
-
 
 ### Using docker-compose
 
