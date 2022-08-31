@@ -3,24 +3,21 @@ package ru.citeck.ecos.model.domain.permissions.service;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.converter.DtoConverter;
 import ru.citeck.ecos.model.domain.permissions.repo.AttributesPermissionEntity;
 import ru.citeck.ecos.model.domain.permissions.dto.AttributesPermissionDto;
 import ru.citeck.ecos.model.domain.permissions.dto.AttributesPermissionWithMetaDto;
 import ru.citeck.ecos.model.domain.permissions.repo.AttributesPermissionsRepository;
-import ru.citeck.ecos.records2.RecordConstants;
-import ru.citeck.ecos.records2.predicate.PredicateUtils;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
-import ru.citeck.ecos.records2.predicate.model.ValuePredicate;
+import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy;
+import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverter;
+import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverterFactory;
 
-import java.time.Instant;
+import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
@@ -34,6 +31,14 @@ public class AttributesPermissionsService {
     private final AttributesPermissionsRepository attributesPermissionsRepository;
     private final DtoConverter<AttributesPermissionWithMetaDto, AttributesPermissionEntity> attrsPermissionConverter;
     private final List<Consumer<AttributesPermissionDto>> listeners = new CopyOnWriteArrayList<>();
+    private final JpaSearchConverterFactory predicateJpaService;
+
+    private JpaSearchConverter<AttributesPermissionEntity> searchConv;
+
+    @PostConstruct
+    public void init() {
+        searchConv = predicateJpaService.createConverter(AttributesPermissionEntity.class).build();
+    }
 
     public List<AttributesPermissionWithMetaDto> getAll(int max, int skip) {
 
@@ -46,15 +51,9 @@ public class AttributesPermissionsService {
             .collect(Collectors.toList());
     }
 
-    public List<AttributesPermissionWithMetaDto> getAll(int max, int skip, Predicate predicate, Sort sort) {
+    public List<AttributesPermissionWithMetaDto> getAll(int max, int skip, Predicate predicate, List<SortBy> sort) {
 
-        if (sort == null) {
-            sort = Sort.by(Sort.Direction.DESC, "id");
-        }
-
-        PageRequest page = PageRequest.of(skip / max, max, sort);
-
-        return attributesPermissionsRepository.findAll(toSpec(predicate), page)
+        return searchConv.findAll(attributesPermissionsRepository, predicate, max, skip, sort)
             .stream()
             .map(attrsPermissionConverter::entityToDto)
             .collect(Collectors.toList());
@@ -67,8 +66,7 @@ public class AttributesPermissionsService {
     }
 
     public int getCount(Predicate predicate) {
-        Specification<AttributesPermissionEntity> spec = toSpec(predicate);
-        return spec != null ? (int) attributesPermissionsRepository.count(spec) : getCount();
+        return (int) searchConv.getCount(attributesPermissionsRepository, predicate);
     }
 
     public int getCount() {
@@ -118,39 +116,6 @@ public class AttributesPermissionsService {
         }
 
         return entity;
-    }
-
-    private Specification<AttributesPermissionEntity> toSpec(Predicate predicate) {
-
-        if (predicate instanceof ValuePredicate) {
-
-            ValuePredicate valuePred = (ValuePredicate) predicate;
-
-            ValuePredicate.Type type = valuePred.getType();
-            Object value = valuePred.getValue();
-            String attribute = valuePred.getAttribute();
-
-            if (RecordConstants.ATT_MODIFIED.equals(attribute)
-                    && ValuePredicate.Type.GT.equals(type)) {
-
-                Instant instant = Json.getMapper().convert(value, Instant.class);
-                if (instant != null) {
-                    return (root, query, builder) ->
-                            builder.greaterThan(root.get("lastModifiedDate").as(Instant.class), instant);
-                }
-            }
-        }
-
-        PredicateDto predicateDto = PredicateUtils.convertToDto(predicate, PredicateDto.class);
-        Specification<AttributesPermissionEntity> spec = null;
-
-        if (StringUtils.isNotBlank(predicateDto.moduleId)) {
-            Specification<AttributesPermissionEntity> idSpec = (root, query, builder) ->
-                builder.like(builder.lower(root.get("extId")), "%" + predicateDto.moduleId.toLowerCase() + "%");
-            spec = spec != null ? spec.or(idSpec) : idSpec;
-        }
-
-        return spec;
     }
 
     @Data

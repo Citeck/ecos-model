@@ -1,8 +1,8 @@
 package ru.citeck.ecos.model.type.service.dao
 
-import org.springframework.data.domain.Sort
 import ru.citeck.ecos.model.type.repository.TypeEntity
 import ru.citeck.ecos.records2.predicate.model.Predicate
+import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy
 
 interface TypeRepoDao {
 
@@ -16,7 +16,7 @@ interface TypeRepoDao {
 
     fun getChildrenIds(parentId: String): Set<String>
 
-    fun findAll(predicate: Predicate, max: Int, skip: Int, sort: Sort?): List<TypeEntity>
+    fun findAll(predicate: Predicate, max: Int, skip: Int, sort: List<SortBy>): List<TypeEntity>
 
     fun count(predicate: Predicate): Long
 }

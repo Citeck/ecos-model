@@ -4,6 +4,7 @@ import org.springframework.data.domain.Sort
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
 import ru.citeck.ecos.records2.predicate.model.Predicate
+import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import java.util.function.BiConsumer
 import java.util.function.Consumer
@@ -30,7 +31,7 @@ interface TypesService {
 
     fun getAllWithMeta(typeIds: Collection<String>): List<EntityWithMeta<TypeDef>>
 
-    fun getAll(max: Int, skip: Int, predicate: Predicate, sort: Sort?): List<TypeDef>
+    fun getAll(max: Int, skip: Int, predicate: Predicate, sort: List<SortBy>): List<TypeDef>
 
     fun getById(typeId: String): TypeDef
 

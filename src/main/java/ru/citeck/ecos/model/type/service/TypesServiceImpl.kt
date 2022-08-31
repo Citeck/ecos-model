@@ -1,6 +1,5 @@
 package ru.citeck.ecos.model.type.service
 
-import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import ru.citeck.ecos.commons.data.MLText
@@ -14,13 +13,12 @@ import ru.citeck.ecos.model.type.repository.TypeEntity
 import ru.citeck.ecos.model.type.service.dao.TypeRepoDao
 import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records2.predicate.model.VoidPredicate
+import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import java.time.Instant
-import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.function.BiConsumer
 import java.util.function.Consumer
-import kotlin.collections.HashSet
 
 @Service
 class TypesServiceImpl(
@@ -55,10 +53,10 @@ class TypesServiceImpl(
     }
 
     override fun getAll(max: Int, skip: Int, predicate: Predicate): List<TypeDef> {
-        return getAll(max, skip, predicate, null)
+        return getAll(max, skip, predicate, emptyList())
     }
 
-    override fun getAll(max: Int, skip: Int, predicate: Predicate, sort: Sort?): List<TypeDef> {
+    override fun getAll(max: Int, skip: Int, predicate: Predicate, sort: List<SortBy>): List<TypeDef> {
         if (max <= 0) {
             return emptyList()
         }
@@ -71,7 +69,7 @@ class TypesServiceImpl(
         if (max <= 0) {
             return emptyList()
         }
-        return typeRepoDao.findAll(VoidPredicate.INSTANCE, max, skip, null)
+        return typeRepoDao.findAll(VoidPredicate.INSTANCE, max, skip, emptyList())
             .map { typeConverter.toDto(it) }
             .toList()
     }
@@ -105,12 +103,12 @@ class TypesServiceImpl(
     }
 
     override fun getAll(): List<TypeDef> {
-        return typeRepoDao.findAll(VoidPredicate.INSTANCE, 10000, 0, null)
+        return typeRepoDao.findAll(VoidPredicate.INSTANCE, 10000, 0, emptyList())
             .map { typeConverter.toDto(it) }
     }
 
     override fun getAllWithMeta(): List<EntityWithMeta<TypeDef>> {
-        return typeRepoDao.findAll(VoidPredicate.INSTANCE, 10000, 0, null)
+        return typeRepoDao.findAll(VoidPredicate.INSTANCE, 10000, 0, emptyList())
             .map { typeConverter.toDtoWithMeta(it) }
     }
 

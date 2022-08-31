@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta;
 import ru.citeck.ecos.model.lib.num.dto.NumTemplateDef;
 import ru.citeck.ecos.records2.RecordConstants;
-import ru.citeck.ecos.records2.graphql.meta.annotation.MetaAtt;
+import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName;
 
 import java.time.Instant;
 
@@ -15,16 +15,16 @@ import java.time.Instant;
 public class NumTemplateWithMetaDto extends NumTemplateDto {
 
     @JsonIgnore
-    @MetaAtt(RecordConstants.ATT_MODIFIER)
+    @AttName(RecordConstants.ATT_MODIFIER)
     private String modifier;
     @JsonIgnore
-    @MetaAtt(RecordConstants.ATT_MODIFIED)
+    @AttName(RecordConstants.ATT_MODIFIED)
     private Instant modified;
     @JsonIgnore
-    @MetaAtt(RecordConstants.ATT_CREATOR)
+    @AttName(RecordConstants.ATT_CREATOR)
     private String creator;
     @JsonIgnore
-    @MetaAtt(RecordConstants.ATT_CREATED)
+    @AttName(RecordConstants.ATT_CREATED)
     private Instant created;
 
     public NumTemplateWithMetaDto() {

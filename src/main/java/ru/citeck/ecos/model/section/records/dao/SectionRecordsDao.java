@@ -13,7 +13,6 @@ import ru.citeck.ecos.model.section.dto.SectionDto;
 import ru.citeck.ecos.model.section.service.SectionService;
 import ru.citeck.ecos.records2.RecordMeta;
 import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records2.graphql.meta.annotation.MetaAtt;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
 import ru.citeck.ecos.records2.predicate.PredicateService;
 import ru.citeck.ecos.records2.predicate.RecordElement;
@@ -29,6 +28,7 @@ import ru.citeck.ecos.records2.source.dao.local.LocalRecordsDao;
 import ru.citeck.ecos.records2.source.dao.local.MutableRecordsLocalDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsMetaDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsQueryWithMetaDao;
+import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -159,7 +159,7 @@ public class SectionRecordsDao extends LocalRecordsDao
         }
 
         @JsonIgnore
-        @MetaAtt(".disp")
+        @AttName("?disp")
         public String getDisplayName() {
             String result = getId();
             return result != null ? result : "Section";

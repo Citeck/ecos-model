@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta;
@@ -20,10 +19,9 @@ import ru.citeck.ecos.model.lib.num.dto.NumTemplateDef;
 import ru.citeck.ecos.model.num.dto.NumTemplateDto;
 import ru.citeck.ecos.model.num.dto.NumTemplateWithMetaDto;
 import ru.citeck.ecos.model.num.service.NumTemplateService;
-import ru.citeck.ecos.records2.RecordConstants;
+import ru.citeck.ecos.model.utils.LegacyRecordsUtils;
 import ru.citeck.ecos.records2.RecordMeta;
 import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records2.graphql.meta.annotation.MetaAtt;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
 import ru.citeck.ecos.records2.request.delete.RecordsDelResult;
@@ -35,6 +33,7 @@ import ru.citeck.ecos.records2.source.dao.local.LocalRecordsDao;
 import ru.citeck.ecos.records2.source.dao.local.MutableRecordsLocalDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsMetaDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsQueryWithMetaDao;
+import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -67,33 +66,16 @@ public class NumTemplateRecordsDao extends LocalRecordsDao
     public RecordsQueryResult<NumTemplateRecord> queryLocalRecords(RecordsQuery recordsQuery, MetaField metaField) {
 
         RecordsQueryResult<NumTemplateRecord> result = new RecordsQueryResult<>();
-        int max = recordsQuery.getMaxItems();
-        if (max <= 0) {
-            max = 10000;
-        }
-        int skip = recordsQuery.getSkipCount();
 
         if ("predicate".equals(recordsQuery.getLanguage())) {
 
             Predicate predicate = recordsQuery.getQuery(Predicate.class);
 
-            List<Sort.Order> order = recordsQuery.getSortBy()
-                .stream()
-                .filter(s -> RecordConstants.ATT_MODIFIED.equals(s.getAttribute()))
-                .map(s -> {
-                    String attribute = s.getAttribute();
-                    if (RecordConstants.ATT_MODIFIED.equals(attribute)) {
-                        attribute = "lastModifiedDate";
-                    }
-                    return s.isAscending() ? Sort.Order.asc(attribute) : Sort.Order.desc(attribute);
-                })
-                .collect(Collectors.toList());
-
             Collection<EntityWithMeta<NumTemplateDef>> types = numTemplateService.getAll(
-                max,
+                recordsQuery.getMaxItems(),
                 recordsQuery.getSkipCount(),
                 predicate,
-                !order.isEmpty() ? Sort.by(order) : null
+                LegacyRecordsUtils.mapLegacySortBy(recordsQuery.getSortBy())
             );
 
             result.setRecords(types.stream()
@@ -105,7 +87,7 @@ public class NumTemplateRecordsDao extends LocalRecordsDao
 
         if ("criteria".equals(recordsQuery.getLanguage())) {
 
-            result.setRecords(numTemplateService.getAll(max, skip)
+            result.setRecords(numTemplateService.getAll(recordsQuery.getMaxItems(), recordsQuery.getSkipCount())
                 .stream()
                 .map(NumTemplateRecord::new)
                 .collect(Collectors.toList())
@@ -183,7 +165,7 @@ public class NumTemplateRecordsDao extends LocalRecordsDao
             modelAttributes = model.getEntity().getModelAttributes();
         }
 
-        @MetaAtt(".type")
+        @AttName("_type")
         public RecordRef getEcosType() {
             return RecordRef.create(EcosModelApp.NAME, "type", "number-template");
         }
@@ -196,7 +178,7 @@ public class NumTemplateRecordsDao extends LocalRecordsDao
             setId(value);
         }
 
-        @MetaAtt(".disp")
+        @AttName("?disp")
         public String getDisplayName() {
             return getId();
         }

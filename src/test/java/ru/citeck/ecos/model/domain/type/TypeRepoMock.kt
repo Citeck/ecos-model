@@ -1,10 +1,10 @@
 package ru.citeck.ecos.model.domain.type
 
-import org.springframework.data.domain.Sort
 import ru.citeck.ecos.model.type.repository.TypeEntity
 import ru.citeck.ecos.model.type.service.dao.TypeRepoDao
 import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records3.RecordsServiceFactory
+import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy
 import java.util.concurrent.ConcurrentHashMap
 
 class TypeRepoMock(recordsServiceFactory: RecordsServiceFactory) : TypeRepoDao {
@@ -33,11 +33,11 @@ class TypeRepoMock(recordsServiceFactory: RecordsServiceFactory) : TypeRepoDao {
         return data.values.filter { it.parent?.extId == parentId }.map { it.extId }.toSet()
     }
 
-    override fun findAll(predicate: Predicate, max: Int, skip: Int, sort: Sort?): List<TypeEntity> {
+    override fun findAll(predicate: Predicate, max: Int, skip: Int, sort: List<SortBy>): List<TypeEntity> {
         return predicateService.filter(data.values, predicate)
     }
 
     override fun count(predicate: Predicate): Long {
-        return findAll(predicate, 0, Int.MAX_VALUE, null).size.toLong()
+        return findAll(predicate, 0, Int.MAX_VALUE, emptyList()).size.toLong()
     }
 }

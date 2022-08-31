@@ -3,11 +3,11 @@ package ru.citeck.ecos.model.domain.perms.api.records;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.model.domain.perms.dto.TypePermsMeta;
 import ru.citeck.ecos.model.domain.perms.service.TypePermsService;
 import ru.citeck.ecos.model.lib.type.dto.TypePermsDef;
+import ru.citeck.ecos.model.utils.LegacyRecordsUtils;
 import ru.citeck.ecos.records2.RecordConstants;
 import ru.citeck.ecos.records2.RecordMeta;
 import ru.citeck.ecos.records2.RecordRef;
@@ -60,31 +60,11 @@ public class TypePermsRecords extends LocalRecordsDao
 
             Predicate predicate = query.getQuery(Predicate.class);
 
-            int max = query.getMaxItems();
-            if (max <= 0) {
-                max = 10000;
-            }
-
-            List<Sort.Order> order = query.getSortBy()
-                .stream()
-                .map(s -> {
-                    String attribute = s.getAttribute();
-                    if (RecordConstants.ATT_MODIFIED.equals(attribute)) {
-                        attribute = "lastModifiedDate";
-                    } else {
-                        return Optional.<Sort.Order>empty();
-                    }
-                    return Optional.of(s.isAscending() ? Sort.Order.asc(attribute) : Sort.Order.desc(attribute));
-                })
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toList());
-
             Collection<PermsRecord> perms = permsService.getAll(
-                max,
+                query.getMaxItems(),
                 query.getSkipCount(),
                 predicate,
-                !order.isEmpty() ? Sort.by(order) : null
+                LegacyRecordsUtils.mapLegacySortBy(query.getSortBy())
             ).stream().map(this::toRecord).collect(Collectors.toList());
 
             RecordsQueryResult<Object> permissions =  new RecordsQueryResult<>();

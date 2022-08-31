@@ -5,17 +5,16 @@ import ecos.com.fasterxml.jackson210.annotation.JsonProperty;
 import ecos.com.fasterxml.jackson210.annotation.JsonValue;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.domain.permissions.dto.AttributesPermissionDto;
 import ru.citeck.ecos.model.domain.permissions.dto.AttributesPermissionWithMetaDto;
 import ru.citeck.ecos.model.domain.permissions.service.AttributesPermissionsService;
+import ru.citeck.ecos.model.utils.LegacyRecordsUtils;
 import ru.citeck.ecos.records2.RecordConstants;
 import ru.citeck.ecos.records2.RecordMeta;
 import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records2.graphql.meta.annotation.MetaAtt;
 import ru.citeck.ecos.records2.graphql.meta.value.EmptyValue;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaValue;
@@ -30,20 +29,20 @@ import ru.citeck.ecos.records2.source.dao.local.LocalRecordsDao;
 import ru.citeck.ecos.records2.source.dao.local.MutableRecordsLocalDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsMetaDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsQueryWithMetaDao;
+import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
 public class AttributesPermissionRecordsDao extends LocalRecordsDao
-        implements LocalRecordsQueryWithMetaDao<AttributesPermissionRecordsDao.AttributesPermissionRecord>,
-        LocalRecordsMetaDao<MetaValue>,
-        MutableRecordsLocalDao<AttributesPermissionRecordsDao.AttrPermissionsMutRecord> {
+    implements LocalRecordsQueryWithMetaDao<AttributesPermissionRecordsDao.AttributesPermissionRecord>,
+    LocalRecordsMetaDao<MetaValue>,
+    MutableRecordsLocalDao<AttributesPermissionRecordsDao.AttrPermissionsMutRecord> {
 
     private static final String ID = "attrs_permission";
 
     private final AttributesPermissionsService attributesPermissionsService;
-    private final PredicateService predicateService;
 
     private final AttributesPermissionRecord EMPTY_RECORD = new AttributesPermissionRecord(new AttributesPermissionWithMetaDto());
 
@@ -88,15 +87,15 @@ public class AttributesPermissionRecordsDao extends LocalRecordsDao
     @Override
     public List<AttrPermissionsMutRecord> getValuesToMutate(List<RecordRef> list) {
         return list.stream()
-                .map(RecordRef::getId)
-                .map(id -> {
-                    if (StringUtils.isBlank(id)) {
-                        return new AttrPermissionsMutRecord();
-                    } else {
-                        return new AttrPermissionsMutRecord(attributesPermissionsService.getById(id).orElse(null));
-                    }
-                })
-                .collect(Collectors.toList());
+            .map(RecordRef::getId)
+            .map(id -> {
+                if (StringUtils.isBlank(id)) {
+                    return new AttrPermissionsMutRecord();
+                } else {
+                    return new AttrPermissionsMutRecord(attributesPermissionsService.getById(id).orElse(null));
+                }
+            })
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -120,43 +119,22 @@ public class AttributesPermissionRecordsDao extends LocalRecordsDao
         if (recordsQuery.getLanguage().equals(PredicateService.LANGUAGE_PREDICATE)) {
             Predicate predicate = recordsQuery.getQuery(Predicate.class);
 
-            int max = recordsQuery.getMaxItems();
-            if (max <= 0) {
-                max = 1000;
-            }
-
-            List<Sort.Order> order = recordsQuery.getSortBy()
-                    .stream()
-                    .filter(s -> RecordConstants.ATT_MODIFIED.equals(s.getAttribute()))
-                    .map(s -> {
-                        String attribute = s.getAttribute();
-                        if (RecordConstants.ATT_MODIFIED.equals(attribute)) {
-                            attribute = "lastModifiedDate";
-                        } else {
-                            return Optional.<Sort.Order>empty();
-                        }
-                        return Optional.of(s.isAscending() ? Sort.Order.asc(attribute) : Sort.Order.desc(attribute));
-                    })
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .collect(Collectors.toList());
-
             Collection<AttributesPermissionWithMetaDto> attrsPermWithMetas = attributesPermissionsService.getAll(
-                    max,
-                    recordsQuery.getSkipCount(),
-                    predicate,
-                    !order.isEmpty() ? Sort.by(order) : null
+                recordsQuery.getMaxItems(),
+                recordsQuery.getSkipCount(),
+                predicate,
+                LegacyRecordsUtils.mapLegacySortBy(recordsQuery.getSortBy())
             );
 
             result.setRecords(attrsPermWithMetas.stream()
-                    .map(AttributesPermissionRecord::new)
-                    .collect(Collectors.toList()));
+                .map(AttributesPermissionRecord::new)
+                .collect(Collectors.toList()));
 
             result.setTotalCount(attributesPermissionsService.getCount(predicate));
 
         } else {
             result.setRecords(attributesPermissionsService.getAll(recordsQuery.getMaxItems(), recordsQuery.getSkipCount())
-                    .stream()
+                .stream()
                 .map(AttributesPermissionRecord::new)
                 .collect(Collectors.toList()));
             result.setTotalCount(attributesPermissionsService.getCount());
@@ -165,7 +143,7 @@ public class AttributesPermissionRecordsDao extends LocalRecordsDao
         return result;
     }
 
-    public class AttributesPermissionRecord implements MetaValue {
+    public static class AttributesPermissionRecord implements MetaValue {
 
         private final AttributesPermissionWithMetaDto dto;
 
@@ -184,7 +162,7 @@ public class AttributesPermissionRecordsDao extends LocalRecordsDao
         }
 
         @Override
-        @MetaAtt(".disp")
+        @AttName("?disp")
         public String getDisplayName() {
             String dispName = dto.getId();
             if (dispName == null) {
@@ -240,7 +218,7 @@ public class AttributesPermissionRecordsDao extends LocalRecordsDao
         }
 
         @JsonIgnore
-        @MetaAtt(".disp")
+        @AttName("?disp")
         public String getDisplayName() {
             String result = getId();
             return result != null ? result : "default_attrs_permission";
@@ -260,5 +238,4 @@ public class AttributesPermissionRecordsDao extends LocalRecordsDao
             return new AttributesPermissionDto(this);
         }
     }
-
 }

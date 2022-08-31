@@ -3,17 +3,14 @@ package ru.citeck.ecos.model.num.service;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.data.entity.EntityMeta;
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta;
-import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.commons.utils.ExceptionUtils;
 import ru.citeck.ecos.commons.utils.TmplUtils;
 import ru.citeck.ecos.model.lib.num.dto.NumTemplateDef;
@@ -22,14 +19,14 @@ import ru.citeck.ecos.model.num.domain.NumTemplateEntity;
 import ru.citeck.ecos.model.num.dto.NumTemplateDto;
 import ru.citeck.ecos.model.num.repository.EcosNumCounterRepository;
 import ru.citeck.ecos.model.num.repository.NumTemplateRepository;
-import ru.citeck.ecos.records2.RecordConstants;
 import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records2.predicate.PredicateUtils;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
-import ru.citeck.ecos.records2.predicate.model.ValuePredicate;
+import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy;
+import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverter;
+import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverterFactory;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -48,8 +45,18 @@ public class NumTemplateService {
     private final EntityManager entityManager;
     private final TransactionTemplate transactionTemplate;
 
+    private final JpaSearchConverterFactory predicateToJpaConvFactory;
+    private JpaSearchConverter<NumTemplateEntity> searchConverter;
+
     private final List<BiConsumer<EntityWithMeta<NumTemplateDef>, EntityWithMeta<NumTemplateDef>>> listeners =
         new CopyOnWriteArrayList<>();
+
+    @PostConstruct
+    public void init() {
+        searchConverter = predicateToJpaConvFactory.createConverter(NumTemplateEntity.class)
+            .withDefaultPageSize(10000)
+            .build();
+    }
 
     public List<EntityWithMeta<NumTemplateDef>> getAll() {
         return templateRepo.findAll()
@@ -69,23 +76,14 @@ public class NumTemplateService {
             .collect(Collectors.toList());
     }
 
-    public List<EntityWithMeta<NumTemplateDef>> getAll(int max, int skip, Predicate predicate, Sort sort) {
-
-        if (sort == null) {
-            sort = Sort.by(Sort.Direction.DESC, "id");
-        }
-
-        PageRequest page = PageRequest.of(skip / max, max, sort);
-
-        return templateRepo.findAll(toSpec(predicate), page)
-            .stream()
+    public List<EntityWithMeta<NumTemplateDef>> getAll(int max, int skip, Predicate predicate, List<SortBy> sort) {
+        return searchConverter.findAll(templateRepo, predicate, max, skip, sort).stream()
             .map(this::toDto)
             .collect(Collectors.toList());
     }
 
     public int getCount(Predicate predicate) {
-        Specification<NumTemplateEntity> spec = toSpec(predicate);
-        return spec != null ? (int) templateRepo.count(spec) : getCount();
+        return (int) searchConverter.getCount(templateRepo, predicate);
     }
 
     public int getCount() {
@@ -236,43 +234,6 @@ public class NumTemplateService {
             .build();
 
         return new EntityWithMeta<>(numTemplateDef, meta);
-    }
-
-    private Specification<NumTemplateEntity> toSpec(Predicate predicate) {
-
-        if (predicate instanceof ValuePredicate) {
-
-            ValuePredicate valuePred = (ValuePredicate) predicate;
-
-            ValuePredicate.Type type = valuePred.getType();
-            Object value = valuePred.getValue();
-            String attribute = valuePred.getAttribute();
-
-            if (RecordConstants.ATT_MODIFIED.equals(attribute)
-                && ValuePredicate.Type.GT.equals(type)) {
-
-                Instant instant = Json.getMapper().convert(value, Instant.class);
-                if (instant != null) {
-                    return (root, query, builder) ->
-                        builder.greaterThan(root.get("lastModifiedDate").as(Instant.class), instant);
-                }
-            }
-        }
-
-        PredicateDto predicateDto = PredicateUtils.convertToDto(predicate, PredicateDto.class);
-        Specification<NumTemplateEntity> spec = null;
-
-        if (StringUtils.isNotBlank(predicateDto.name)) {
-            spec = (root, query, builder) ->
-                builder.like(builder.lower(root.get("name")), "%" + predicateDto.name.toLowerCase() + "%");
-        }
-        if (StringUtils.isNotBlank(predicateDto.moduleId)) {
-            Specification<NumTemplateEntity> idSpec = (root, query, builder) ->
-                builder.like(builder.lower(root.get("extId")), "%" + predicateDto.moduleId.toLowerCase() + "%");
-            spec = spec != null ? spec.or(idSpec) : idSpec;
-        }
-
-        return spec;
     }
 
     @Data

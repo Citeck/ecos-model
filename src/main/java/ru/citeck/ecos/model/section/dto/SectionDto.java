@@ -6,7 +6,7 @@ import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.records2.QueryContext;
 import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records2.graphql.meta.annotation.MetaAtt;
+import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -35,7 +35,7 @@ public class SectionDto {
         }
     }
 
-    @MetaAtt(".disp")
+    @AttName("?disp")
     @JsonIgnore
     public String getDisplayName() {
         return MLText.getClosestValue(name, QueryContext.getCurrent().getLocale());

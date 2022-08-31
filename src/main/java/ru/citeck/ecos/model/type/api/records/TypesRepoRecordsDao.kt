@@ -52,38 +52,11 @@ class TypesRepoRecordsDao(
 
                 val predicate = recsQuery.getQuery(Predicate::class.java)
 
-                var max: Int = recsQuery.page.maxItems
-                if (max <= 0) {
-                    max = 10000
-                }
-                val order: List<Sort.Order> = recsQuery.sortBy
-                    .mapNotNull { sortBy ->
-                        var attribute = sortBy.attribute
-                        attribute = if (RecordConstants.ATT_MODIFIED == attribute) {
-                            "lastModifiedDate"
-                        } else {
-                            ""
-                        }
-                        if (attribute.isNotBlank()) {
-                            if (sortBy.ascending) {
-                                Sort.Order.asc(attribute)
-                            } else {
-                                Sort.Order.desc(attribute)
-                            }
-                        } else {
-                            null
-                        }
-                    }
-
                 val types = typeService.getAll(
-                    max,
+                    recsQuery.page.maxItems,
                     recsQuery.page.skipCount,
                     predicate,
-                    if (order.isNotEmpty()) {
-                        Sort.by(order)
-                    } else {
-                        null
-                    }
+                    recsQuery.sortBy
                 )
 
                 result.setRecords(types.map { TypeRecord(it, typeService) })
