@@ -161,6 +161,6 @@ class PersonsConfiguration(
             I18nContext.ENGLISH to "System",
             I18nContext.RUSSIAN to "Система"
         )
-        val userName = AuthConstants.SYSTEM_USER
+        val userName = AuthUser.SYSTEM
     }
 }

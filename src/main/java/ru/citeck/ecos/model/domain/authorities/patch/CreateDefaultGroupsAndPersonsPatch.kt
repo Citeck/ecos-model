@@ -69,7 +69,8 @@ class CreateDefaultGroupsAndPersonsPatch(
         }
         DEFAULT_GROUPS.forEach {
             createIfNotExists(
-                AuthorityType.GROUP, it.id,
+                AuthorityType.GROUP,
+                it.id,
                 mapOf(
                     AuthorityGroupConstants.ATT_NAME to it.name
                 ),
@@ -78,7 +79,8 @@ class CreateDefaultGroupsAndPersonsPatch(
         }
         DEFAULT_USERS.forEach {
             createIfNotExists(
-                AuthorityType.PERSON, it.id,
+                AuthorityType.PERSON,
+                it.id,
                 mapOf(
                     PersonConstants.ATT_FIRST_NAME to it.firstName,
                     PersonConstants.ATT_LAST_NAME to it.lastName,

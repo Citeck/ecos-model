@@ -109,7 +109,7 @@ class EcosDataController(
                 conn.createStatement().use { statement ->
                     statement.executeUpdate(
                         "UPDATE \"ecos_data\".\"ecos_record_ref\" " +
-                        "SET \"__ext_id\"='$newRef' WHERE \"__ext_id\"='$ref'"
+                            "SET \"__ext_id\"='$newRef' WHERE \"__ext_id\"='$ref'"
                     )
                 }
             }

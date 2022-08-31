@@ -21,3 +21,6 @@ trim_trailing_whitespace = false
 
 [{*.json,*.yaml,*.yml}]
 indent_size = 2
+
+[*.{kt,kts}]
+disabled_rules=no-wildcard-imports,no-empty-first-line-in-method-block,trailing-comma

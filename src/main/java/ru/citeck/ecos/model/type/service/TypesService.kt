@@ -1,6 +1,5 @@
 package ru.citeck.ecos.model.type.service
 
-import org.springframework.data.domain.Sort
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
 import ru.citeck.ecos.records2.predicate.model.Predicate

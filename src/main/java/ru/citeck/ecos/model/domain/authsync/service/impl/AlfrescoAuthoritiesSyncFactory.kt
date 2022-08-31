@@ -238,7 +238,8 @@ class AlfrescoAuthoritiesSyncFactory(
                 it.getAtt("nodeRef").asText()
             }.toList()
             val refAlfAuthRef = RecordRef.create(
-                "alfresco", "authority",
+                "alfresco",
+                "authority",
                 when (authorityType) {
                     AuthorityType.PERSON -> recRef.id
                     AuthorityType.GROUP -> "${AuthGroup.PREFIX}${recRef.id}"

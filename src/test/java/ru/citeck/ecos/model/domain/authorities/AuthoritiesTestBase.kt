@@ -24,6 +24,7 @@ class AuthoritiesTestBase {
 
     @Autowired
     lateinit var recordsService: RecordsService
+
     @Autowired
     lateinit var dataSource: HikariDataSource
 

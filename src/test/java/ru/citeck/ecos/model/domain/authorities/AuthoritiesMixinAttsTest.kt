@@ -16,7 +16,8 @@ class AuthoritiesMixinAttsTest : AuthoritiesTestBase() {
         val user0Ref = createPerson("user-0", AuthorityConstants.ATT_AUTHORITY_GROUPS to listOf(group1Ref))
 
         assertStrListAtt(
-            user0Ref, "authorities.list[]",
+            user0Ref,
+            "authorities.list[]",
             listOf(
                 user0Ref.id,
                 *listOf(group0Ref, group1Ref).map { AuthGroup.PREFIX + it.id }.toTypedArray(),
@@ -26,14 +27,16 @@ class AuthoritiesMixinAttsTest : AuthoritiesTestBase() {
         )
 
         assertStrListAtt(
-            user0Ref, "${AuthorityConstants.ATT_AUTHORITY_GROUPS}[]?id",
+            user0Ref,
+            "${AuthorityConstants.ATT_AUTHORITY_GROUPS}[]?id",
             listOf(
                 group1Ref.toString()
             )
         )
 
         assertStrListAtt(
-            user0Ref, "${AuthorityConstants.ATT_AUTHORITY_GROUPS_FULL}[]?id",
+            user0Ref,
+            "${AuthorityConstants.ATT_AUTHORITY_GROUPS_FULL}[]?id",
             listOf(
                 group0Ref.toString(),
                 group1Ref.toString()
@@ -41,14 +44,16 @@ class AuthoritiesMixinAttsTest : AuthoritiesTestBase() {
         )
 
         assertStrListAtt(
-            user0Ref, "${AuthorityConstants.ATT_AUTHORITY_GROUPS_FULL}[]?localId|join()",
+            user0Ref,
+            "${AuthorityConstants.ATT_AUTHORITY_GROUPS_FULL}[]?localId|join()",
             listOf(
                 group1Ref.id + "," + group0Ref.id
             )
         )
 
         assertStrListAtt(
-            group1Ref, "${AuthorityConstants.ATT_AUTHORITY_GROUPS_FULL}[]?id",
+            group1Ref,
+            "${AuthorityConstants.ATT_AUTHORITY_GROUPS_FULL}[]?id",
             listOf(
                 group0Ref.toString()
             )
