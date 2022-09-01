@@ -7,6 +7,7 @@ system: true
 actions:
   - uiserv/action@download-base64-data-yml
   - uiserv/action@delete
+  - uiserv/action@view-dashboard
   - uiserv/action@edit
   - uiserv/action@edit-json
   - uiserv/action@module-copy
