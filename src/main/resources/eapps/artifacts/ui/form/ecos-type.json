@@ -9,7 +9,7 @@
   "customModule": null,
   "typeRef": "emodel/type@type",
   "width": "extra-lg",
-  "i18n": null,
+  "i18n": {},
   "definition": {
     "components": [
       {
@@ -24,7 +24,10 @@
             "key": "tabs",
             "components": [
               {
-                "label": "Main",
+                "label": {
+                  "ru": "Основной",
+                  "en": "Main"
+                },
                 "key": "main",
                 "components": [
                   {
@@ -32,23 +35,32 @@
                       {
                         "components": [
                           {
-                            "defaultValue": "",
-                            "type": "textfield",
+                            "label": {
+                              "ru": "Id"
+                            },
                             "key": "moduleId",
                             "validate": {
                               "required": true
                             },
-                            "label": "id",
+                            "defaultValue": "",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "textfield",
                             "input": true
                           },
                           {
-                            "type": "selectJournal",
-                            "journalId": "ecos-types",
+                            "label": {
+                              "ru": "Родитель",
+                              "en": "Parent"
+                            },
                             "key": "parentRef",
-                            "label": "Parent",
-                            "presetFilterPredicatesJs": null,
-                            "input": true,
-                            "defaultValue": "emodel/type@case"
+                            "modalTitle": "",
+                            "journalId": "ecos-types",
+                            "defaultValue": "emodel/type@case",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "selectJournal",
+                            "input": true
                           },
                           {
                             "hideLabel": true,
@@ -56,12 +68,19 @@
                               {
                                 "components": [
                                   {
-                                    "type": "selectJournal",
-                                    "journalId": "ecos-forms",
+                                    "label": {
+                                      "ru": "Форма",
+                                      "en": "Form"
+                                    },
                                     "key": "formRef",
-                                    "label": "Form",
+                                    "modalTitle": "",
+                                    "journalId": "ecos-forms",
+                                    "defaultValue": "uiserv/form@DEFAULT_FORM",
+                                    "refreshOn": [],
+                                    "optionalWhenDisabled": false,
+                                    "type": "selectJournal",
                                     "input": true,
-                                    "defaultValue": "uiserv/form@DEFAULT_FORM"
+                                    "queryData": ""
                                   }
                                 ],
                                 "type": "column",
@@ -77,9 +96,14 @@
                                 "index": 1,
                                 "components": [
                                   {
-                                    "label": "Inherit Form",
-                                    "labelPosition": "",
+                                    "label": {
+                                      "ru": "Наследовать форму",
+                                      "en": "Inherit form"
+                                    },
                                     "key": "inheritForm",
+                                    "labelPosition": "top",
+                                    "refreshOn": [],
+                                    "optionalWhenDisabled": false,
                                     "type": "checkbox",
                                     "input": true
                                   }
@@ -92,42 +116,83 @@
                             "input": false
                           },
                           {
-                            "label": "Journal",
-                            "journalId": "ecos-journals",
+                            "label": {
+                              "ru": "Журнал",
+                              "en": "Journal"
+                            },
                             "key": "journalRef",
+                            "modalTitle": "",
+                            "journalId": "ecos-journals",
+                            "defaultValue": "uiserv/journal@DEFAULT_JOURNAL",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
                             "type": "selectJournal",
                             "input": true,
-                            "defaultValue": "uiserv/journal@DEFAULT_JOURNAL"
+                            "queryData": ""
                           },
                           {
-                            "label": "Number template",
-                            "journalId": "number-templates",
+                            "label": {
+                              "ru": "Шаблон нумерации",
+                              "en": "Number template"
+                            },
                             "key": "numTemplateRef",
+                            "modalTitle": "",
+                            "journalId": "number-templates",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
                             "type": "selectJournal",
                             "input": true
                           },
                           {
-                            "label": "Inherit number template",
+                            "label": {
+                              "ru": "Наследовать шаблон нумерации",
+                              "en": "Inherit number template"
+                            },
                             "key": "inheritNumTemplate",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
                             "type": "checkbox",
                             "input": true
                           },
                           {
-                            "label": "Edit config",
+                            "label": {
+                              "ru": "Форма дополнительной конфигурации типа",
+                              "en": "Additional config form"
+                            },
+                            "key": "configFormRef",
+                            "modalTitle": "",
+                            "journalId": "ecos-forms",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "selectJournal",
+                            "input": true
+                          },
+                          {
+                            "label": {
+                              "ru": "Редактировать дополнительную конфигурацию",
+                              "en": "Edit additional config"
+                            },
+                            "key": "editconfig",
                             "action": "custom",
                             "state": "",
                             "showValidations": false,
                             "custom": "var ownerId = Math.random().toString();\nvar currentRecord = Citeck.Records.get(instance.options.recordId);\n\nvar configFormRef = data.configFormRef;\nif (Array.isArray(configFormRef)) {\n    configFormRef = configFormRef[0];\n}\n\nif (!configFormRef && data.parentRef) {\n    configFormRef = Citeck.Records.get(data.parentRef).load('inhConfigFormRef?id', true);\n}\n\nPromise.all([configFormRef, currentRecord.load('config?json')])\n    .then(function(formAndConfig) {\n\n        var formRef = formAndConfig[0];\n        var config = formAndConfig[1];\n\n        if (formRef == null) {\n            throw new Error(\"Config form is not set\");\n        }\n\n        if (!config) {\n            config = {};\n        }\n\n        var configRecord = Citeck.Records.create(config, ownerId);\n\n        Citeck.forms.eform(configRecord.id, {\n            params: {\n                formId: formRef,\n                onSubmit: function (record) {\n                    var data = record.toJson().attributes;\n                    var resData = {};\n                    for (var key in data) {\n                        if (key[0] !== '_' && key !== 'pendingUpdate') {\n                            resData[key] = data[key];\n                        }\n                    }\n                    currentRecord.att(\"config?json\", resData);\n                    Citeck.Records.release(configRecord.id, ownerId);\n                },\n                onCancel: function () {\n                    Citeck.Records.release(configRecord.id, ownerId);\n                },\n                saveOnSubmit: false\n            },\n            class: 'ecos-modal_width-lg',\n            isBigHeader: true\n        });\n    })",
                             "block": true,
-                            "key": "editconfig",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "customConditional": "show = !!data['configFormRef'];",
                             "type": "button",
                             "input": true
                           },
                           {
-                            "label": "Config form",
-                            "journalId": "ecos-forms",
-                            "key": "configFormRef",
-                            "type": "selectJournal",
+                            "label": {
+                              "ru": "Отображать библиотеку документов",
+                              "en": "Show documents library"
+                            },
+                            "key": "docLibEnabled2",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "checkbox",
                             "input": true
                           }
                         ],
@@ -146,59 +211,87 @@
                         "key": "column",
                         "components": [
                           {
-                            "label": "Name",
+                            "label": {
+                              "ru": "Имя",
+                              "en": "Name"
+                            },
                             "key": "name",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
                             "type": "mlText",
                             "input": true
                           },
                           {
-                            "label": "Display Name Template",
+                            "label": {
+                              "ru": "Шаблон отображения имени",
+                              "en": "Display name template"
+                            },
                             "key": "dispNameTemplate",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
                             "type": "mlText",
                             "input": true
                           },
                           {
-                            "label": "Description",
+                            "label": {
+                              "ru": "Описание",
+                              "en": "Description"
+                            },
                             "key": "description",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
                             "type": "mlTextarea",
                             "input": true
                           },
                           {
-                            "type": "selectJournal",
-                            "journalId": "ui-actions",
-                            "reorder": false,
+                            "label": {
+                              "ru": "Действия",
+                              "en": "Actions"
+                            },
                             "key": "actions",
                             "multiple": true,
-                            "label": "Actions",
+                            "reorder": false,
+                            "modalTitle": "",
+                            "journalId": "ui-actions",
+                            "defaultValue": [],
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "selectJournal",
                             "input": true
                           },
                           {
-                            "type": "checkbox",
+                            "label": {
+                              "ru": "Наследовать действия",
+                              "en": "Inherit actions"
+                            },
                             "key": "inheritActions",
-                            "label": "Inherit actions",
-                            "input": true,
-                            "defaultValue": true
+                            "defaultValue": true,
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "checkbox",
+                            "input": true
                           },
                           {
                             "label": {
                               "ru": "Дополнительные свойства",
                               "en": "Additional properties"
                             },
-                            "keyLabel": "",
                             "key": "properties",
+                            "keyLabel": "Ключ",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
                             "type": "datamap",
                             "valueComponent": {
-                              "type": "textfield",
+                              "label": {
+                                "ru": "Значение",
+                                "en": "Value"
+                              },
                               "key": "value",
-                              "label": "Value",
                               "defaultValue": "Value",
-                              "input": true,
-                              "conditional": {
-                                "show": null,
-                                "when": null,
-                                "eq": "",
-                                "json": ""
-                              }
+                              "refreshOn": [],
+                              "optionalWhenDisabled": false,
+                              "type": "textfield",
+                              "input": true
                             },
                             "input": true
                           },
@@ -236,13 +329,24 @@
                           },
                           {
                             "label": {
-                              "ru": "Source ID"
+                              "ru": "ID источника данных",
+                              "en": "Source ID"
                             },
                             "key": "sourceId",
                             "defaultValue": "",
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
-                            "customConditional": "show = !data['sourceType'] || data['sourceType'] === 'CUSTOM_ID' || data['sourceType'] === 'ECOS_MODEL'; ",
+                            "customConditional": "show = data['sourceType'] != 'ECOS_MODEL';",
+                            "logic": [
+                              {
+                                "name": "HideSourceID",
+                                "trigger": {
+                                  "type": "javascript",
+                                  "javascript": "console.log(data);\nresult = false;"
+                                },
+                                "actions": []
+                              }
+                            ],
                             "type": "textfield",
                             "input": true
                           },
@@ -274,366 +378,17 @@
                 ]
               },
               {
-                "label": "Create",
-                "key": "createVariants",
-                "components": [
-                  {
-                    "label": {
-                      "en": "Default create",
-                      "ru": "Создание по умолчанию"
-                    },
-                    "labelPosition": "",
-                    "key": "defaultCreateVariant",
-                    "defaultValue": true,
-                    "hasThreeStates": true,
-                    "type": "checkbox",
-                    "input": true,
-                    "tab": 1
-                  },
-                  {
-                    "label": "Create",
-                    "hideLabel": true,
-                    "disableAddingRemovingRows": false,
-                    "defaultOpen": false,
-                    "layoutFixed": false,
-                    "enableRowGroups": false,
-                    "multiple": true,
-                    "reorder": true,
-                    "defaultValue": [
-                      {
-                        "id": "",
-                        "textField": "",
-                        "container": {},
-                        "attribute": "",
-                        "name": {},
-                        "target": "",
-                        "direction": "TARGET",
-                        "id2": "",
-                        "attribute2": "",
-                        "name3": {
-                          "ru": "",
-                          "en": ""
-                        },
-                        "recordRef": "",
-                        "formRef": "",
-                        "selectJournal": "",
-                        "value": "Value",
-                        "attributes": {},
-                        "mlText": {
-                          "ru": "",
-                          "en": ""
-                        },
-                        "submit4": false,
-                        "submit8": false,
-                        "selectOrgstruct": "",
-                        "allowedFor": []
-                      }
-                    ],
-                    "validate": {
-                      "minLength": "",
-                      "maxLength": ""
-                    },
-                    "key": "createVariants",
-                    "type": "datagrid",
-                    "components": [
-                      {
-                        "key": "panel5",
-                        "type": "panel",
-                        "components": [
-                          {
-                            "label": "Id",
-                            "defaultValue": "",
-                            "key": "id",
-                            "type": "textfield",
-                            "input": true
-                          },
-                          {
-                            "label": "Name",
-                            "key": "name",
-                            "type": "mlText",
-                            "input": true
-                          }
-                        ],
-                        "row": "0-0",
-                        "input": false
-                      },
-                      {
-                        "key": "panel7",
-                        "type": "panel",
-                        "components": [
-                          {
-                            "label": "Form",
-                            "journalId": "ecos-forms",
-                            "key": "formRef",
-                            "type": "selectJournal",
-                            "customPredicateJs": null,
-                            "presetFilterPredicatesJs": null,
-                            "input": true
-                          }
-                        ],
-                        "row": "0-1",
-                        "input": false
-                      },
-                      {
-                        "key": "panel6",
-                        "type": "panel",
-                        "components": [
-                          {
-                            "label": {
-                              "ru": "Allowed For"
-                            },
-                            "multiple": true,
-                            "clearOnHide": false,
-                            "allowedAuthorityType": "GROUP",
-                            "dataType": "authority",
-                            "defaultValue": "",
-                            "key": "allowedFor",
-                            "type": "selectOrgstruct",
-                            "input": true,
-                            "reorder": true
-                          }
-                        ],
-                        "row": "0-2",
-                        "input": false
-                      },
-                      {
-                        "label": {
-                          "ru": "Panel"
-                        },
-                        "key": "panel10",
-                        "type": "panel",
-                        "input": false,
-                        "components": [
-                          {
-                            "label": {
-                              "en": "Additional",
-                              "ru": "Дополнительно"
-                            },
-                            "action": "custom",
-                            "state": "",
-                            "showValidations": false,
-                            "custom": "var currentRow = row;\nvar atts = [\n  ['attributes', {}], \n  ['formOptions', {}], \n  ['postActionRef', ''], \n  ['properties', {}],\n  ['sourceId', []]\n];\nvar formData = {};\nfor (var key of atts) {\n  formData[key[0]] = row[key[0]] || key[1];\n}\nCiteck.EcosFormUtils.getFormById('uiserv/form@create-variant-form', {\n    definition: 'definition?json'\n}).then(function(formConfig) {\n    \n    Citeck.Dialogs.showFormDialog({\n        title: 'Create variant',\n        showDefaultButtons: true,\n        formDefinition: formConfig.definition,\n        formData: formData,\n        onSubmit: submission => {\n            var data = submission.data || {};\n\n\t\t\tfor (var key of atts) {\n\t\t\t  currentRow[key[0]] = data[key[0]] || key[1];\n\t\t\t}\n        }\n    })\n    \n});",
-                            "key": "submit8",
-                            "type": "button",
-                            "input": true,
-                            "row": "0-3"
-                          },
-                          {
-                            "label": {
-                              "ru": "attributes"
-                            },
-                            "key": "attributes",
-                            "properties": {
-                              "dataType": "json"
-                            },
-                            "type": "hidden",
-                            "input": true
-                          },
-                          {
-                            "label": {
-                              "ru": "formOptions"
-                            },
-                            "key": "formOptions",
-                            "properties": {
-                              "dataType": "json"
-                            },
-                            "type": "hidden",
-                            "input": true
-                          },
-                          {
-                            "label": {
-                              "ru": "properties"
-                            },
-                            "key": "properties",
-                            "properties": {
-                              "dataType": "json"
-                            },
-                            "type": "hidden",
-                            "input": true
-                          },
-                          {
-                            "label": {
-                              "ru": "postActionRef"
-                            },
-                            "key": "postActionRef",
-                            "type": "hidden",
-                            "input": true
-                          },
-                          {
-                            "label": {
-                              "ru": "sourceId"
-                            },
-                            "key": "sourceId",
-                            "type": "hidden",
-                            "input": true
-                          }
-                        ],
-                        "row": "0-3"
-                      }
-                    ],
-                    "tab": 1,
-                    "addAnother": "",
-                    "addAnotherPosition": "bottom",
-                    "removePlacement": "col",
-                    "input": true
-                  }
-                ]
-              },
-              {
-                "label": "Associations",
-                "key": "associations",
-                "components": [
-                  {
-                    "label": "Associations",
-                    "hideLabel": true,
-                    "disableAddingRemovingRows": true,
-                    "defaultOpen": false,
-                    "layoutFixed": false,
-                    "enableRowGroups": false,
-                    "multiple": true,
-                    "reorder": true,
-                    "defaultValue": [
-                      {
-                        "id": "",
-                        "textField": "",
-                        "container": {},
-                        "attribute": "",
-                        "name": {},
-                        "target": "",
-                        "direction": "TARGET",
-                        "mlText": {
-                          "ru": "",
-                          "en": ""
-                        },
-                        "selectJournal": "",
-                        "journals": [],
-                        "journalsFromTarget": false
-                      }
-                    ],
-                    "validate": {
-                      "minLength": "",
-                      "maxLength": ""
-                    },
-                    "key": "associations",
-                    "type": "datagrid",
-                    "components": [
-                      {
-                        "key": "panel",
-                        "type": "panel",
-                        "components": [
-                          {
-                            "label": "Id",
-                            "defaultValue": "",
-                            "key": "id",
-                            "type": "textfield",
-                            "input": true
-                          },
-                          {
-                            "label": "Attribute",
-                            "defaultValue": "",
-                            "key": "attribute",
-                            "type": "textfield",
-                            "input": true
-                          }
-                        ],
-                        "row": "0-0",
-                        "input": false
-                      },
-                      {
-                        "key": "panel2",
-                        "type": "panel",
-                        "components": [
-                          {
-                            "label": "Name",
-                            "key": "name",
-                            "type": "mlText",
-                            "input": true
-                          },
-                          {
-                            "label": "Direction",
-                            "dataSrc": "values",
-                            "data": {
-                              "values": [
-                                {
-                                  "label": "Target",
-                                  "value": "TARGET"
-                                },
-                                {
-                                  "label": "Source",
-                                  "value": "SOURCE"
-                                },
-                                {
-                                  "label": "Both",
-                                  "value": "BOTH"
-                                }
-                              ]
-                            },
-                            "defaultValue": "TARGET",
-                            "key": "direction",
-                            "type": "ecosSelect",
-                            "input": true
-                          },
-                          {
-                            "label": {
-                              "ru": "Загружать список журналов из целевого типа",
-                              "en": "Load journals from target type"
-                            },
-                            "key": "journalsFromTarget",
-                            "labelPosition": "",
-                            "hasThreeStates": true,
-                            "refreshOn": [],
-                            "type": "checkbox",
-                            "input": true
-                          }
-                        ],
-                        "row": "0-1",
-                        "input": false
-                      },
-                      {
-                        "key": "panel4",
-                        "type": "panel",
-                        "components": [
-                          {
-                            "label": "Target",
-                            "journalId": "ecos-types",
-                            "key": "target",
-                            "type": "selectJournal",
-                            "customPredicateJs": null,
-                            "presetFilterPredicatesJs": null,
-                            "input": true
-                          },
-                          {
-                            "label": {
-                              "ru": "Journals"
-                            },
-                            "tooltip": {
-                              "ru": "Журналы, которые можно использовать для создания новой ассоциации. Можно оставить пустым, чтобы журналы вычислились автоматически из target.",
-                              "en": "Journals which can be used to select records to create association. May be empty to allow automatic journals calculation by target."
-                            },
-                            "multiple": true,
-                            "key": "journals",
-                            "journalId": "ecos-journals",
-                            "refreshOn": [],
-                            "type": "selectJournal",
-                            "input": true,
-                            "reorder": false
-                          }
-                        ],
-                        "row": "0-2",
-                        "input": false
-                      }
-                    ],
-                    "tab": 2,
-                    "input": true
-                  }
-                ]
-              },
-              {
-                "label": "Attributes",
+                "label": {
+                  "en": "Attributes",
+                  "ru": "Атрибуты"
+                },
                 "key": "attributes",
                 "components": [
                   {
-                    "title": "Attributes",
+                    "title": {
+                      "ru": "Атрибуты",
+                      "en": "Attributes"
+                    },
                     "scrollableContent": true,
                     "collapsible": true,
                     "key": "panel8",
@@ -641,7 +396,11 @@
                     "input": false,
                     "components": [
                       {
-                        "label": "Attributes",
+                        "label": {
+                          "en": "Attributes",
+                          "ru": "Атрибуты"
+                        },
+                        "type": "datagrid",
                         "hideLabel": true,
                         "disableAddingRemovingRows": false,
                         "addAnother": "",
@@ -681,12 +440,12 @@
                           "maxLength": ""
                         },
                         "key": "modelAttributes",
-                        "type": "datagrid",
                         "input": true,
                         "components": [
                           {
                             "label": {
-                              "ru": "Columns"
+                              "ru": "Список атрибутов",
+                              "en": "Attributes list"
                             },
                             "columns": [
                               {
@@ -715,8 +474,13 @@
                                 "key": "column",
                                 "components": [
                                   {
-                                    "label": "Name",
+                                    "label": {
+                                      "ru": "Имя",
+                                      "en": "Name"
+                                    },
                                     "key": "name",
+                                    "refreshOn": [],
+                                    "optionalWhenDisabled": false,
                                     "type": "mlText",
                                     "input": true,
                                     "row": "0-1"
@@ -732,7 +496,8 @@
                                 "components": [
                                   {
                                     "label": {
-                                      "ru": "Type            "
+                                      "ru": "Тип            ",
+                                      "en": "Type"
                                     },
                                     "key": "type",
                                     "dataSrc": "values",
@@ -793,6 +558,7 @@
                                       ]
                                     },
                                     "defaultValue": "TEXT",
+                                    "optionalWhenDisabled": false,
                                     "type": "ecosSelect",
                                     "input": true,
                                     "row": "0-2"
@@ -814,9 +580,12 @@
                                   },
                                   {
                                     "label": {
-                                      "ru": "config"
+                                      "ru": "Конфигурация",
+                                      "en": "Config"
                                     },
                                     "key": "config",
+                                    "refreshOn": [],
+                                    "optionalWhenDisabled": false,
                                     "properties": {
                                       "dataType": "json"
                                     },
@@ -895,9 +664,12 @@
                                   },
                                   {
                                     "label": {
-                                      "ru": "computed"
+                                      "ru": "Вычисляемый атрибут",
+                                      "en": "Computed attribute"
                                     },
                                     "key": "computed",
+                                    "refreshOn": [],
+                                    "optionalWhenDisabled": false,
                                     "properties": {
                                       "dataType": "json"
                                     },
@@ -918,13 +690,23 @@
                       }
                     ],
                     "collapsed": false,
-                    "tab": 3
+                    "tab": 1
                   },
                   {
-                    "title": "Inherited Attributes",
-                    "scrollableContent": true,
-                    "collapsible": true,
+                    "label": {
+                      "ru": "Панель",
+                      "en": "Panel"
+                    },
                     "key": "panel1234",
+                    "title": {
+                      "ru": "Наследуемые атрибуты",
+                      "en": "Inherited Attributes"
+                    },
+                    "collapsible": true,
+                    "collapsed": true,
+                    "scrollableContent": true,
+                    "refreshOn": [],
+                    "optionalWhenDisabled": false,
                     "type": "panel",
                     "input": false,
                     "components": [
@@ -968,7 +750,8 @@
                         "components": [
                           {
                             "label": {
-                              "ru": "Columns"
+                              "ru": "Список атрибутов",
+                              "en": "Attributes list"
                             },
                             "columns": [
                               {
@@ -1051,14 +834,17 @@
                         "tab": 3
                       }
                     ],
-                    "collapsed": false,
-                    "tab": 3
+                    "tab": 1
                   },
                   {
                     "label": {
+                      "ru": "Панель",
                       "en": "Panel"
                     },
-                    "title": "Type Permissions",
+                    "title": {
+                      "ru": "Настройка прав для тип данных",
+                      "en": "Type Permissions"
+                    },
                     "collapsible": true,
                     "collapsed": false,
                     "key": "panel9",
@@ -1071,15 +857,20 @@
                           {
                             "components": [
                               {
-                                "label": "Edit Permissions",
-                                "action": "custom",
-                                "block": true,
+                                "label": {
+                                  "ru": "Редактировать права",
+                                  "en": "Edit permissions"
+                                },
                                 "key": "submit11",
-                                "type": "button",
-                                "input": true,
-                                "showValidations": false,
+                                "action": "custom",
                                 "state": "",
-                                "custom": "var mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = 'emodel/type@' + data.moduleId;\nvar customProps = {\n  roles: (data.modelRoles || []).map(mapToSingleLang),\n  statuses: (data.modelStatuses || []).map(mapToSingleLang)\n};\n\nvar typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypePermissions(\n  typeRef,\n  customProps\n);"
+                                "showValidations": false,
+                                "custom": "var mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = 'emodel/type@' + data.moduleId;\nvar customProps = {\n  roles: (data.modelRoles || []).map(mapToSingleLang),\n  statuses: (data.modelStatuses || []).map(mapToSingleLang)\n};\n\nvar typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypePermissions(\n  typeRef,\n  customProps\n);",
+                                "block": true,
+                                "refreshOn": [],
+                                "optionalWhenDisabled": false,
+                                "type": "button",
+                                "input": true
                               }
                             ],
                             "md": 4,
@@ -1096,13 +887,18 @@
                             "index": 1,
                             "components": [
                               {
-                                "label": "Download Permissions",
+                                "label": {
+                                  "ru": "Скачать матрицу прав",
+                                  "en": "Download permissions"
+                                },
+                                "key": "submit11",
                                 "action": "custom",
                                 "state": "",
                                 "showValidations": false,
                                 "custom": "var mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = 'emodel/type@' + data.moduleId;\nvar roles = (data.modelRoles || []).map(mapToSingleLang);\nvar statuses = (data.modelStatuses || []).map(mapToSingleLang);\nvar attributes = (data.modelAttributes || []).map(mapToSingleLang);\n\nCiteck.TypePermissionsService.downloadPermissionsConfig(typeRef, roles, statuses, attributes);",
                                 "block": true,
-                                "key": "submit11",
+                                "refreshOn": [],
+                                "optionalWhenDisabled": false,
                                 "type": "button",
                                 "input": true
                               }
@@ -1116,13 +912,18 @@
                             "index": 2,
                             "components": [
                               {
-                                "label": "Delete permissions",
+                                "label": {
+                                  "ru": "Удалить матрицу прав",
+                                  "en": "Delete permissions"
+                                },
+                                "key": "submit11",
                                 "action": "custom",
                                 "state": "",
                                 "showValidations": false,
                                 "custom": "var typeRef = 'emodel/type@' + data.moduleId;\nCiteck.TypePermissionsService.deletePermissionsConfig(typeRef);",
                                 "block": true,
-                                "key": "submit11",
+                                "refreshOn": [],
+                                "optionalWhenDisabled": false,
                                 "type": "button",
                                 "input": true
                               }
@@ -1134,7 +935,7 @@
                         "input": false
                       }
                     ],
-                    "tab": 3
+                    "tab": 1
                   },
                   {
                     "label": "ecosEdition",
@@ -1154,12 +955,15 @@
                     "key": "ecosEdition",
                     "type": "asyncData",
                     "input": true,
-                    "tab": 3
+                    "tab": 1
                   }
                 ]
               },
               {
-                "label": "Roles",
+                "label": {
+                  "ru": "Роли",
+                  "en": "Roles"
+                },
                 "key": "roles",
                 "components": [
                   {
@@ -1196,12 +1000,17 @@
                     "input": true,
                     "components": [
                       {
-                        "label": "Id",
-                        "defaultValue": "",
+                        "label": {
+                          "ru": "Id",
+                          "en": "Id"
+                        },
+                        "key": "id",
                         "validate": {
                           "pattern": "(^$|[_a-zA-Z][_\\w-.:]*)"
                         },
-                        "key": "id",
+                        "defaultValue": "",
+                        "refreshOn": [],
+                        "optionalWhenDisabled": false,
                         "type": "textfield",
                         "input": true,
                         "row": "0-0"
@@ -1209,13 +1018,16 @@
                       {
                         "label": "Название логики",
                         "key": "name",
+                        "refreshOn": [],
+                        "optionalWhenDisabled": false,
                         "type": "mlText",
                         "input": true,
                         "row": "0-1"
                       },
                       {
                         "label": {
-                          "ru": "Assignees"
+                          "ru": "Участники роли",
+                          "en": "Assignees"
                         },
                         "key": "assignees",
                         "multiple": true,
@@ -1249,6 +1061,7 @@
                       },
                       {
                         "label": {
+                          "ru": "Панель",
                           "en": "Panel"
                         },
                         "key": "objectObject",
@@ -1260,22 +1073,31 @@
                             "label": {
                               "en": " "
                             },
-                            "removeIndents": true,
+                            "key": "submit9",
                             "action": "custom",
                             "state": "",
                             "showValidations": false,
                             "custom": "var currentRow = row;\nvar computed = row.computed || {}; \nvar computedType = computed.type || 'NONE';\nvar formData = {\n    type: computedType,\n    storingType: computed.storingType || 'NONE'\n};\nformData[computedType + '_config'] = computed.config || {};\n\n\nCiteck.EcosFormUtils.getFormById('uiserv/form@computed-attribute-form', {\n    definition: 'definition?json'\n}).then(function(formConfig) {\n    \n    Citeck.Dialogs.showFormDialog({\n        title: 'Computed attribute',\n        showDefaultButtons: true,\n        formDefinition: formConfig.definition,\n        formData: formData,\n        onSubmit: submission => {\n            var data = submission.data || {};\n\n            currentRow.computed = {\n                type: data.type,\n                storingType: data.storingType,\n                config: data[data.type + '_config']\n            }\n        }\n    })\n    \n});",
+                            "tooltip": {
+                              "ru": "Настройка динамической роли",
+                              "en": "Dynamic role config"
+                            },
+                            "removeIndents": true,
                             "leftIcon": "icon-items",
                             "block": true,
-                            "key": "submit9",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
                             "type": "button",
                             "input": true
                           },
                           {
                             "label": {
-                              "ru": "computed"
+                              "ru": "Настройка динамической роли",
+                              "en": "Dynamic role config"
                             },
                             "key": "computed",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
                             "properties": {
                               "dataType": "json"
                             },
@@ -1286,12 +1108,15 @@
                         "row": "0-4"
                       }
                     ],
-                    "tab": 4
+                    "tab": 2
                   }
                 ]
               },
               {
-                "label": "Statuses",
+                "label": {
+                  "ru": "Статусы",
+                  "en": "Statuses"
+                },
                 "key": "statuses",
                 "components": [
                   {
@@ -1341,20 +1166,11 @@
                       {
                         "label": "Название логики",
                         "key": "name",
+                        "refreshOn": [],
+                        "optionalWhenDisabled": false,
                         "type": "mlText",
                         "input": true,
                         "row": "0-1"
-                      },
-                      {
-                        "label": "Settings",
-                        "action": "custom",
-                        "state": "",
-                        "key": "submit5",
-                        "type": "button",
-                        "input": true,
-                        "showValidations": false,
-                        "custom": "alarm(\"SETTINGS\")",
-                        "row": "0-2"
                       }
                     ],
                     "tab": 5
@@ -1362,82 +1178,440 @@
                 ]
               },
               {
-                "label": "Documents Library",
-                "key": "documentsLibrary",
+                "label": {
+                  "ru": "Варианты создания",
+                  "en": "Create variants"
+                },
+                "key": "createVariants",
                 "components": [
                   {
+                    "label": {
+                      "en": "Default create",
+                      "ru": "Создание по умолчанию"
+                    },
+                    "labelPosition": "",
+                    "key": "defaultCreateVariant",
+                    "defaultValue": true,
+                    "hasThreeStates": true,
+                    "type": "checkbox",
+                    "input": true,
+                    "tab": 4
+                  },
+                  {
+                    "label": {
+                      "ru": "Создать",
+                      "en": "Create"
+                    },
                     "hideLabel": true,
-                    "columns": [
+                    "disableAddingRemovingRows": false,
+                    "defaultOpen": false,
+                    "layoutFixed": false,
+                    "enableRowGroups": false,
+                    "multiple": true,
+                    "reorder": true,
+                    "defaultValue": [
                       {
-                        "components": [
-                          {
-                            "label": "Enabled",
-                            "labelPosition": "",
-                            "key": "docLibEnabled",
-                            "type": "checkbox",
-                            "input": true
-                          }
-                        ],
-                        "md": 4,
-                        "type": "column",
-                        "input": false,
-                        "key": "column",
-                        "index": 0
-                      },
-                      {
-                        "md": 4,
-                        "type": "column",
-                        "input": false,
-                        "key": "column",
-                        "index": 1,
-                        "components": [
-                          {
-                            "label": "Folder Type",
-                            "journalId": "ecos-types",
-                            "key": "docLibDirTypeRef",
-                            "conditional": {
-                              "show": "true",
-                              "when": "docLibEnabled",
-                              "eq": "true"
-                            },
-                            "type": "selectJournal",
-                            "input": true
-                          }
-                        ]
-                      },
-                      {
-                        "md": 4,
-                        "type": "column",
-                        "input": false,
-                        "key": "column",
-                        "index": 2,
-                        "components": [
-                          {
-                            "label": "File Types",
-                            "multiple": true,
-                            "journalId": "ecos-types",
-                            "key": "docLibFileTypeRefs",
-                            "conditional": {
-                              "show": "true",
-                              "when": "docLibEnabled",
-                              "eq": "true"
-                            },
-                            "type": "selectJournal",
-                            "input": true,
-                            "reorder": false
-                          }
+                        "id": "",
+                        "textField": "",
+                        "container": {},
+                        "attribute": "",
+                        "name": {},
+                        "target": "",
+                        "direction": "TARGET",
+                        "id2": "",
+                        "attribute2": "",
+                        "name3": {
+                          "ru": "",
+                          "en": ""
+                        },
+                        "recordRef": "",
+                        "formRef": "",
+                        "selectJournal": "",
+                        "value": "Value",
+                        "attributes": {},
+                        "mlText": {
+                          "ru": "",
+                          "en": ""
+                        },
+                        "submit4": false,
+                        "submit8": false,
+                        "selectOrgstruct": "",
+                        "allowedFor": [
+                          "GROUP_company"
                         ]
                       }
                     ],
-                    "key": "columns3",
-                    "type": "columns",
-                    "input": false,
-                    "tab": 6
+                    "validate": {
+                      "minLength": "",
+                      "maxLength": ""
+                    },
+                    "key": "createVariants",
+                    "type": "datagrid",
+                    "components": [
+                      {
+                        "key": "panel5",
+                        "type": "panel",
+                        "components": [
+                          {
+                            "label": {
+                              "ru": "Id",
+                              "en": "Id"
+                            },
+                            "key": "id",
+                            "defaultValue": "",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "textfield",
+                            "input": true
+                          },
+                          {
+                            "label": {
+                              "ru": "Имя",
+                              "en": "Name"
+                            },
+                            "key": "name",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "mlText",
+                            "input": true
+                          }
+                        ],
+                        "row": "0-0",
+                        "input": false
+                      },
+                      {
+                        "key": "panel7",
+                        "type": "panel",
+                        "components": [
+                          {
+                            "label": {
+                              "ru": "Форма",
+                              "en": "Form"
+                            },
+                            "key": "formRef",
+                            "modalTitle": "",
+                            "journalId": "ecos-forms",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "selectJournal",
+                            "input": true,
+                            "queryData": ""
+                          }
+                        ],
+                        "row": "0-1",
+                        "input": false
+                      },
+                      {
+                        "key": "panel6",
+                        "type": "panel",
+                        "components": [
+                          {
+                            "label": {
+                              "ru": "Разрешен для",
+                              "en": "Allowed for"
+                            },
+                            "key": "allowedFor",
+                            "multiple": true,
+                            "reorder": true,
+                            "clearOnHide": false,
+                            "allowedAuthorityType": "GROUP",
+                            "dataType": "authority",
+                            "defaultValue": [],
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "selectOrgstruct",
+                            "input": true
+                          }
+                        ],
+                        "row": "0-2",
+                        "input": false
+                      },
+                      {
+                        "label": {
+                          "ru": "Панель",
+                          "en": "Panel"
+                        },
+                        "key": "panel10",
+                        "type": "panel",
+                        "input": false,
+                        "components": [
+                          {
+                            "label": {
+                              "en": "Additional",
+                              "ru": "Дополнительно"
+                            },
+                            "action": "custom",
+                            "state": "",
+                            "showValidations": false,
+                            "custom": "var currentRow = row;\nvar atts = [\n  ['attributes', {}], \n  ['formOptions', {}], \n  ['postActionRef', ''], \n  ['properties', {}],\n  ['sourceId', []]\n];\nvar formData = {};\nfor (var key of atts) {\n  formData[key[0]] = row[key[0]] || key[1];\n}\nCiteck.EcosFormUtils.getFormById('uiserv/form@create-variant-form', {\n    definition: 'definition?json'\n}).then(function(formConfig) {\n    \n    Citeck.Dialogs.showFormDialog({\n        title: 'Create variant',\n        showDefaultButtons: true,\n        formDefinition: formConfig.definition,\n        formData: formData,\n        onSubmit: submission => {\n            var data = submission.data || {};\n\n\t\t\tfor (var key of atts) {\n\t\t\t  currentRow[key[0]] = data[key[0]] || key[1];\n\t\t\t}\n        }\n    })\n    \n});",
+                            "key": "submit8",
+                            "type": "button",
+                            "input": true,
+                            "row": "0-3"
+                          },
+                          {
+                            "label": {
+                              "ru": "Атрибуты",
+                              "en": "Attributes"
+                            },
+                            "key": "attributes",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "properties": {
+                              "dataType": "json"
+                            },
+                            "type": "hidden",
+                            "input": true
+                          },
+                          {
+                            "label": {
+                              "ru": "Настройки формы",
+                              "en": "Form options"
+                            },
+                            "key": "formOptions",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "properties": {
+                              "dataType": "json"
+                            },
+                            "type": "hidden",
+                            "input": true
+                          },
+                          {
+                            "label": {
+                              "ru": "Свойства",
+                              "en": "Properties"
+                            },
+                            "key": "properties",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "properties": {
+                              "dataType": "json"
+                            },
+                            "type": "hidden",
+                            "input": true
+                          },
+                          {
+                            "label": {
+                              "ru": "Действие после создания",
+                              "en": "Post creation action"
+                            },
+                            "key": "postActionRef",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "hidden",
+                            "input": true
+                          },
+                          {
+                            "label": {
+                              "ru": "ID источника данных",
+                              "en": "Source ID"
+                            },
+                            "key": "sourceId",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "hidden",
+                            "input": true
+                          }
+                        ],
+                        "row": "0-3"
+                      }
+                    ],
+                    "tab": 4,
+                    "addAnother": "",
+                    "addAnotherPosition": "bottom",
+                    "removePlacement": "col",
+                    "input": true
                   }
                 ]
               },
               {
-                "label": "Content config",
+                "label": {
+                  "ru": "Связи",
+                  "en": "Associations"
+                },
+                "key": "associations",
+                "components": [
+                  {
+                    "label": "Associations",
+                    "hideLabel": true,
+                    "disableAddingRemovingRows": true,
+                    "defaultOpen": false,
+                    "layoutFixed": false,
+                    "enableRowGroups": false,
+                    "multiple": true,
+                    "reorder": true,
+                    "defaultValue": [
+                      {
+                        "id": "",
+                        "textField": "",
+                        "container": {},
+                        "attribute": "",
+                        "name": {},
+                        "target": "",
+                        "direction": "TARGET",
+                        "mlText": {
+                          "ru": "",
+                          "en": ""
+                        },
+                        "selectJournal": "",
+                        "journals": [],
+                        "journalsFromTarget": false
+                      }
+                    ],
+                    "validate": {
+                      "minLength": "",
+                      "maxLength": ""
+                    },
+                    "key": "associations",
+                    "type": "datagrid",
+                    "components": [
+                      {
+                        "key": "panel",
+                        "type": "panel",
+                        "components": [
+                          {
+                            "label": {
+                              "ru": "Id",
+                              "en": "Id"
+                            },
+                            "key": "id",
+                            "defaultValue": "",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "textfield",
+                            "input": true
+                          },
+                          {
+                            "label": {
+                              "ru": "Атрибут",
+                              "en": "Attribute"
+                            },
+                            "key": "attribute",
+                            "defaultValue": "",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "textfield",
+                            "input": true
+                          }
+                        ],
+                        "row": "0-0",
+                        "input": false
+                      },
+                      {
+                        "key": "panel2",
+                        "type": "panel",
+                        "components": [
+                          {
+                            "label": {
+                              "ru": "Имя",
+                              "en": "Name"
+                            },
+                            "key": "name",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "mlText",
+                            "input": true
+                          },
+                          {
+                            "label": {
+                              "en": "Direction",
+                              "ru": "Направление связи"
+                            },
+                            "key": "direction",
+                            "dataSrc": "values",
+                            "data": {
+                              "values": [
+                                {
+                                  "label": "Target",
+                                  "value": "TARGET"
+                                },
+                                {
+                                  "label": "Source",
+                                  "value": "SOURCE"
+                                },
+                                {
+                                  "label": "Both",
+                                  "value": "BOTH"
+                                }
+                              ]
+                            },
+                            "defaultValue": "TARGET",
+                            "optionalWhenDisabled": false,
+                            "type": "ecosSelect",
+                            "input": true
+                          },
+                          {
+                            "label": {
+                              "ru": "Загружать список журналов из целевого типа",
+                              "en": "Load journals from target type"
+                            },
+                            "key": "journalsFromTarget",
+                            "labelPosition": "top",
+                            "hasThreeStates": true,
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "checkbox",
+                            "input": true
+                          }
+                        ],
+                        "row": "0-1",
+                        "input": false
+                      },
+                      {
+                        "key": "panel4",
+                        "type": "panel",
+                        "components": [
+                          {
+                            "label": {
+                              "ru": "Цель",
+                              "en": "Target"
+                            },
+                            "key": "target",
+                            "modalTitle": "",
+                            "journalId": "ecos-types",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "selectJournal",
+                            "input": true,
+                            "queryData": ""
+                          },
+                          {
+                            "label": {
+                              "ru": "Журналы",
+                              "en": "Journals"
+                            },
+                            "key": "journals",
+                            "tooltip": {
+                              "ru": "Журналы, которые можно использовать для создания новой ассоциации. Можно оставить пустым, чтобы журналы вычислились автоматически из target.",
+                              "en": "Journals which can be used to select records to create association. May be empty to allow automatic journals calculation by target."
+                            },
+                            "multiple": true,
+                            "reorder": false,
+                            "modalTitle": "",
+                            "journalId": "ecos-journals",
+                            "defaultValue": [],
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "selectJournal",
+                            "input": true,
+                            "queryData": ""
+                          }
+                        ],
+                        "row": "0-2",
+                        "input": false
+                      }
+                    ],
+                    "tab": 5,
+                    "input": true
+                  }
+                ]
+              },
+              {
+                "label": {
+                  "ru": "Конфигурация контента",
+                  "en": "Content config"
+                },
                 "key": "contentConfigTab",
                 "components": [
                   {
@@ -1461,12 +1635,14 @@
                             "components": [
                               {
                                 "label": {
-                                  "en": "Path"
+                                  "en": "Path",
+                                  "ru": "Путь"
                                 },
                                 "key": "path",
                                 "clearOnHide": false,
                                 "defaultValue": "",
                                 "refreshOn": [],
+                                "optionalWhenDisabled": false,
                                 "type": "textfield",
                                 "input": true
                               }
@@ -1484,12 +1660,14 @@
                             "components": [
                               {
                                 "label": {
-                                  "en": "Preview path"
+                                  "en": "Preview path",
+                                  "ru": "Путь предпросмотра"
                                 },
                                 "key": "previewPath",
                                 "clearOnHide": false,
                                 "defaultValue": "",
                                 "refreshOn": [],
+                                "optionalWhenDisabled": false,
                                 "type": "textfield",
                                 "input": true
                               }
@@ -1501,7 +1679,7 @@
                         "tab": 6
                       }
                     ],
-                    "tab": 7
+                    "tab": 6
                   }
                 ]
               }
@@ -1520,18 +1698,19 @@
             "index": 0,
             "components": [
               {
-                "type": "button",
+                "label": {
+                  "ru": "Отменить",
+                  "en": "Cancel"
+                },
+                "key": "submit2",
                 "action": "event",
-                "block": true,
                 "state": "",
                 "showValidations": false,
                 "event": "cancel",
-                "key": "submit2",
-                "label": "Cancel",
-                "conditional": {
-                  "show": null,
-                  "when": null
-                },
+                "block": true,
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
+                "type": "button",
                 "input": true
               }
             ],
@@ -1574,12 +1753,18 @@
             "index": 3,
             "components": [
               {
-                "type": "button",
-                "disableOnInvalid": true,
-                "block": true,
+                "label": {
+                  "ru": "Сохранить",
+                  "en": "Submit"
+                },
+                "key": "submit",
                 "state": "",
                 "theme": "primary",
-                "key": "submit",
+                "block": true,
+                "disableOnInvalid": true,
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
+                "type": "button",
                 "input": true
               }
             ]
