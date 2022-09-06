@@ -2,6 +2,8 @@
 id: authorities-sync
 name: { ru: Синхронизация, en: Synchronization }
 
+system: true
+
 actions:
   - uiserv/action@download-base64-data-yml
   - uiserv/action@edit-json

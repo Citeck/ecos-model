@@ -3,6 +3,7 @@ id: number-templates
 name: { ru: Шаблоны нумерации, en: Number templates }
 
 system: true
+properties: {}
 
 actions:
   - uiserv/action@download-base64-data-yml

@@ -3,6 +3,7 @@ id: base
 name: { ru: Базовый журнал, en: Base journal }
 
 system: true
+properties: {}
 
 columns:
 

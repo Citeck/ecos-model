@@ -1,5 +1,6 @@
 {
   "id": "person_other",
+  "system": true,
   "title": {
     "en": "Other",
     "ru": "Прочее"

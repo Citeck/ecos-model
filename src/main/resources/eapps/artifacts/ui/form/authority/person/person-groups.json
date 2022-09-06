@@ -1,5 +1,6 @@
 {
   "id": "cm_person_user_groups",
+  "system": true,
   "title": {
     "en": "Groups",
     "ru": "Группы"

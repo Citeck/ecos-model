@@ -1,5 +1,6 @@
 {
   "id": "person_contacts",
+  "system": true,
   "title": {
     "en": "Contacts",
     "ru": "Контакты"

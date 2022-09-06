@@ -3,8 +3,6 @@
   "title": "Type association form",
   "system": true,
   "formKey": "type-assoc-form",
-  "formMode": null,
-  "description": "",
   "customModule": null,
   "i18n": null,
   "definition": {

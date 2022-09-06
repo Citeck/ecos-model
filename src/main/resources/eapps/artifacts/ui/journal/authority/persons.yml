@@ -2,6 +2,8 @@
 id: persons
 name: { ru: Пользователи, en: Users }
 
+system: true
+
 actions:
   - uiserv/action@view-person-dashboard
   - uiserv/action@edit

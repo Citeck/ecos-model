@@ -1,5 +1,6 @@
 {
   "id": "ecos-type",
+  "system": true,
   "formKey": "",
   "title": {
     "en": "Type form"

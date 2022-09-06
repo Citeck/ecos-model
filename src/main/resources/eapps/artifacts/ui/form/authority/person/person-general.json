@@ -1,5 +1,6 @@
 {
   "id": "person_general",
+  "system": true,
   "title": {
     "en": "General",
     "ru": "Основное"

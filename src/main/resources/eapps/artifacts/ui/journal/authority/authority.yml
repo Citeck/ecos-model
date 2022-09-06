@@ -2,6 +2,8 @@
 id: authority
 name: { ru: Группы и люди, en: Authority }
 
+system: true
+
 columns:
   - id: cm:authorityName
   - id: cm:authorityDisplayName

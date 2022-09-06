@@ -1,5 +1,6 @@
 {
   "id": "file-form",
+  "system": true,
   "formKey": "",
   "title": {
     "en": "Edit file",

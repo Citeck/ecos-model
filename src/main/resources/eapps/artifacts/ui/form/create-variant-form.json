@@ -1,5 +1,6 @@
 {
   "id": "create-variant-form",
+  "system": true,
   "formKey": "",
   "title": {
     "en": "create-variant-form"

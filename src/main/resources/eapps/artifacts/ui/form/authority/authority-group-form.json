@@ -1,5 +1,6 @@
 {
   "id": "authority-group-form",
+  "system": true,
   "formKey": "",
   "title": {
     "en": "Форма для группы"

@@ -2,6 +2,8 @@
 id: authority-groups
 name: { ru: Группы, en: Groups }
 
+system: true
+
 columns:
   - id: _localId
     name:

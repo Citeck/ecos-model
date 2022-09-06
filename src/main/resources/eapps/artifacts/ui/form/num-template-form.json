@@ -5,9 +5,6 @@
   "title": {
     "en": "Number template form"
   },
-  "description": {
-    "en": ""
-  },
   "customModule": null,
   "typeRef": "emodel/type@number-template",
   "width": "default",

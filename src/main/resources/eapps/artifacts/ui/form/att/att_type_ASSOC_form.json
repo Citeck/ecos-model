@@ -1,5 +1,6 @@
 {
   "id": "att-type-ASSOC-form",
+  "system": true,
   "formKey": "",
   "title": {
     "en": "Association form"
