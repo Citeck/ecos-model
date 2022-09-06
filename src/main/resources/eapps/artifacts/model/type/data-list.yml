@@ -6,7 +6,7 @@ name:
 
 parentRef: emodel/type@user-base
 
-system: true
+system: false
 sourceId: alfresco/
 
 inheritActions: false
