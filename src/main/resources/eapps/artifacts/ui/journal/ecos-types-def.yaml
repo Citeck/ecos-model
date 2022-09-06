@@ -3,6 +3,8 @@ id: ecos-types-def
 name: { ru: Типы данных, en: Data types }
 
 system: true
+defaultFilters:
+  - { t: eq, att: system, val: false }
 
 actions:
   - uiserv/action@download-base64-data-yml
@@ -33,3 +35,8 @@ columns:
   - id: _modifier
     type: PERSON
     name: { ru: Кем изменен, en: Modified by }
+
+  - id: system
+    type: BOOLEAN
+    name: { ru: Системный тип, en: System type }
+    visible: false
