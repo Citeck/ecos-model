@@ -651,14 +651,16 @@
                                     "label": {
                                       "en": " "
                                     },
-                                    "removeIndents": true,
+                                    "key": "submit7",
                                     "action": "custom",
                                     "state": "",
                                     "showValidations": false,
-                                    "custom": "var currentRow = row;\nvar computed = row.computed || {}; \nvar computedType = computed.type || 'NONE';\nvar formData = {\n    type: computedType,\n    storingType: computed.storingType || 'NONE'\n};\nformData[computedType + '_config'] = computed.config || {};\n\n\nCiteck.EcosFormUtils.getFormById('uiserv/form@computed-attribute-form', {\n    definition: 'definition?json'\n}).then(function(formConfig) {\n    \n    Citeck.Dialogs.showFormDialog({\n        title: 'Computed attribute',\n        showDefaultButtons: true,\n        formDefinition: formConfig.definition,\n        formData: formData,\n        onSubmit: submission => {\n            var data = submission.data || {};\n\n            currentRow.computed = {\n                type: data.type,\n                storingType: data.storingType,\n                config: data[data.type + '_config']\n            }\n        }\n    })\n    \n});",
+                                    "custom": "var currentRow = row;\nvar computed = row.computed || {}; \nvar computedType = computed.type || 'NONE';\nvar formData = {\n    type: computedType,\n    storingType: computed.storingType || 'NONE'\n};\nformData[computedType + '_config'] = computed.config || {};\n\n\nCiteck.EcosFormUtils.getFormById('uiserv/form@computed-attribute-form', {\n    definition: 'definition?json'\n}).then(function(formConfig) {\n    const lang = form && form.i18next && form.i18next.options ? form.i18next.options.lng : 'en';\n    let modalTitle = '';\n    if(lang === 'ru') { \n      modalTitle = 'Вычисляемые атрибуты'; \n    }\n    if(lang === 'en') {\n      modalTitle = 'Computed attribute';\n    }\n    \n    Citeck.Dialogs.showFormDialog({\n        title: modalTitle,\n        showDefaultButtons: true,\n        formDefinition: formConfig.definition,\n        formData: formData,\n        onSubmit: submission => {\n            var data = submission.data || {};\n\n            currentRow.computed = {\n                type: data.type,\n                storingType: data.storingType,\n                config: data[data.type + '_config']\n            }\n        }\n    })\n    \n});",
+                                    "removeIndents": true,
                                     "leftIcon": "icon-items",
                                     "block": true,
-                                    "key": "submit7",
+                                    "refreshOn": [],
+                                    "optionalWhenDisabled": false,
                                     "type": "button",
                                     "input": true
                                   },
@@ -1061,10 +1063,10 @@
                       },
                       {
                         "label": {
-                          "ru": "Панель",
-                          "en": "Panel"
+                          "ru": "Динамическая роль",
+                          "en": "Dynamic role"
                         },
-                        "key": "objectObject",
+                        "key": "dynamic role",
                         "refreshOn": [],
                         "type": "panel",
                         "input": false,
@@ -1077,7 +1079,7 @@
                             "action": "custom",
                             "state": "",
                             "showValidations": false,
-                            "custom": "var currentRow = row;\nvar computed = row.computed || {}; \nvar computedType = computed.type || 'NONE';\nvar formData = {\n    type: computedType,\n    storingType: computed.storingType || 'NONE'\n};\nformData[computedType + '_config'] = computed.config || {};\n\n\nCiteck.EcosFormUtils.getFormById('uiserv/form@computed-attribute-form', {\n    definition: 'definition?json'\n}).then(function(formConfig) {\n    \n    Citeck.Dialogs.showFormDialog({\n        title: 'Computed attribute',\n        showDefaultButtons: true,\n        formDefinition: formConfig.definition,\n        formData: formData,\n        onSubmit: submission => {\n            var data = submission.data || {};\n\n            currentRow.computed = {\n                type: data.type,\n                storingType: data.storingType,\n                config: data[data.type + '_config']\n            }\n        }\n    })\n    \n});",
+                            "custom": "var currentRow = row;\nvar computed = row.computed || {}; \nvar computedType = computed.type || 'NONE';\nvar formData = {\n    type: computedType,\n    storingType: computed.storingType || 'NONE'\n};\nformData[computedType + '_config'] = computed.config || {};\n\n\nCiteck.EcosFormUtils.getFormById('uiserv/form@computed-attribute-form', {\n    definition: 'definition?json'\n}).then(function(formConfig) {\n    const lang = form && form.i18next && form.i18next.options ? form.i18next.options.lng : 'en';\n    let modalTitle = '';\n    if(lang === 'ru') { \n      modalTitle = 'Вычисляемые атрибуты'; \n    }\n    if(lang === 'en') {\n      modalTitle = 'Computed attribute';\n    }\n    Citeck.Dialogs.showFormDialog({\n        title: modalTitle,\n        showDefaultButtons: true,\n        formDefinition: formConfig.definition,\n        formData: formData,\n        onSubmit: submission => {\n            var data = submission.data || {};\n\n            currentRow.computed = {\n                type: data.type,\n                storingType: data.storingType,\n                config: data[data.type + '_config']\n            }\n        }\n    })\n    \n});",
                             "tooltip": {
                               "ru": "Настройка динамической роли",
                               "en": "Dynamic role config"
@@ -1186,13 +1188,15 @@
                 "components": [
                   {
                     "label": {
-                      "en": "Default create",
-                      "ru": "Создание по умолчанию"
+                      "en": "Default create variant",
+                      "ru": "Вариант создания по умолчанию"
                     },
-                    "labelPosition": "",
                     "key": "defaultCreateVariant",
-                    "defaultValue": true,
+                    "labelPosition": "top",
                     "hasThreeStates": true,
+                    "defaultValue": true,
+                    "refreshOn": [],
+                    "optionalWhenDisabled": false,
                     "type": "checkbox",
                     "input": true,
                     "tab": 4
@@ -1327,10 +1331,6 @@
                         "input": false
                       },
                       {
-                        "label": {
-                          "ru": "Панель",
-                          "en": "Panel"
-                        },
                         "key": "panel10",
                         "type": "panel",
                         "input": false,
@@ -1340,11 +1340,13 @@
                               "en": "Additional",
                               "ru": "Дополнительно"
                             },
+                            "key": "submit8",
                             "action": "custom",
                             "state": "",
                             "showValidations": false,
-                            "custom": "var currentRow = row;\nvar atts = [\n  ['attributes', {}], \n  ['formOptions', {}], \n  ['postActionRef', ''], \n  ['properties', {}],\n  ['sourceId', []]\n];\nvar formData = {};\nfor (var key of atts) {\n  formData[key[0]] = row[key[0]] || key[1];\n}\nCiteck.EcosFormUtils.getFormById('uiserv/form@create-variant-form', {\n    definition: 'definition?json'\n}).then(function(formConfig) {\n    \n    Citeck.Dialogs.showFormDialog({\n        title: 'Create variant',\n        showDefaultButtons: true,\n        formDefinition: formConfig.definition,\n        formData: formData,\n        onSubmit: submission => {\n            var data = submission.data || {};\n\n\t\t\tfor (var key of atts) {\n\t\t\t  currentRow[key[0]] = data[key[0]] || key[1];\n\t\t\t}\n        }\n    })\n    \n});",
-                            "key": "submit8",
+                            "custom": "var currentRow = row;\nvar atts = [\n  ['attributes', {}], \n  ['formOptions', {}], \n  ['postActionRef', ''], \n  ['properties', {}],\n  ['sourceId', []]\n];\nvar formData = {};\nfor (var key of atts) {\n  formData[key[0]] = row[key[0]] || key[1];\n}\nCiteck.EcosFormUtils.getFormById('uiserv/form@create-variant-form', {\n    definition: 'definition?json'\n}).then(function(formConfig) {\n    const lang = form && form.i18next && form.i18next.options ? form.i18next.options.lng : 'en';\n    let modalTitle = '';\n    if(lang === 'ru') { \n      modalTitle = 'Вариант создания'; \n    }\n    if(lang === 'en') {\n      modalTitle = 'Create variant';\n    }\n    Citeck.Dialogs.showFormDialog({\n        title: modalTitle,\n        showDefaultButtons: true,\n        formDefinition: formConfig.definition,\n        formData: formData,\n        onSubmit: submission => {\n            var data = submission.data || {};\n\n\t\t\tfor (var key of atts) {\n\t\t\t  currentRow[key[0]] = data[key[0]] || key[1];\n\t\t\t}\n        }\n    })\n    \n});",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
                             "type": "button",
                             "input": true,
                             "row": "0-3"
@@ -1564,17 +1566,17 @@
                         "components": [
                           {
                             "label": {
-                              "ru": "Цель",
-                              "en": "Target"
+                              "ru": "Связанный тип",
+                              "en": "Target type"
                             },
                             "key": "target",
                             "modalTitle": "",
                             "journalId": "ecos-types",
+                            "queryData": "",
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
                             "type": "selectJournal",
-                            "input": true,
-                            "queryData": ""
+                            "input": true
                           },
                           {
                             "label": {
@@ -1590,12 +1592,12 @@
                             "reorder": false,
                             "modalTitle": "",
                             "journalId": "ecos-journals",
+                            "queryData": "",
                             "defaultValue": [],
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
                             "type": "selectJournal",
-                            "input": true,
-                            "queryData": ""
+                            "input": true
                           }
                         ],
                         "row": "0-2",
