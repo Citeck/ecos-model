@@ -89,12 +89,15 @@ class TypeDefResolver {
             resTypeDef.withDashboardType(resolvedParentDef.dashboardType)
         }
 
-        when ((resTypeDef.sourceType ?: "").ifBlank { EModelTypeUtils.STORAGE_TYPE_DEFAULT }) {
-            EModelTypeUtils.STORAGE_TYPE_REFERENCE, //todo: set sourceId based on ref
-            EModelTypeUtils.STORAGE_TYPE_DEFAULT -> {
-                resTypeDef.withSourceType(EModelTypeUtils.STORAGE_TYPE_DEFAULT)
+        when ((resTypeDef.storageType)) {
+            EModelTypeUtils.STORAGE_TYPE_REFERENCE, // todo: set sourceId based on source ref
+            EModelTypeUtils.STORAGE_TYPE_DEFAULT,
+            "" -> {
                 if (resTypeDef.sourceId.isBlank()) {
+                    resTypeDef.withStorageType(EModelTypeUtils.STORAGE_TYPE_DEFAULT)
                     resTypeDef.withSourceId(resolvedParentDef.sourceId)
+                } else if (resTypeDef.sourceId == "alfresco/") {
+                    resTypeDef.withStorageType(EModelTypeUtils.STORAGE_TYPE_ALFRESCO)
                 }
             }
             EModelTypeUtils.STORAGE_TYPE_EMODEL -> {
@@ -106,7 +109,7 @@ class TypeDefResolver {
                 resTypeDef.withSourceId("alfresco/")
             }
         }
-        if (!resTypeDef.sourceId.contains(EntityRef.APP_NAME_DELIMITER)) {
+        if (resTypeDef.sourceId.isNotEmpty() && !resTypeDef.sourceId.contains(EntityRef.APP_NAME_DELIMITER)) {
             resTypeDef.withSourceId(EcosModelApp.NAME + EntityRef.APP_NAME_DELIMITER + resTypeDef.sourceId)
         }
         if (RecordRef.isEmpty(resTypeDef.metaRecord)) {

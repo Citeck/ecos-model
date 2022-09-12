@@ -63,7 +63,7 @@ class EcosDataController(
         typesRegistry.getAllValues().values.map {
             it.entity
         }.filter {
-            it.sourceType == EModelTypeUtils.STORAGE_TYPE_EMODEL && it.sourceId.startsWith(emodelSrcIdPrefix)
+            it.storageType == EModelTypeUtils.STORAGE_TYPE_EMODEL && it.sourceId.startsWith(emodelSrcIdPrefix)
         }.forEach {
             val legacyId = generateLegacyEmodelSourceId(it.id)
             val newSrcId = it.sourceId.substring(it.sourceId.indexOf('/') + 1)

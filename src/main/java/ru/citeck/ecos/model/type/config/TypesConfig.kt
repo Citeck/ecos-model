@@ -82,8 +82,8 @@ class TypesConfig {
         if (tableId.isEmpty() || sourceId.isEmpty()) {
             error(
                 "Table ID or Source ID is empty. " +
-                "TableId: '$tableId' Source ID: '$sourceId'. " +
-                "RecordsDAO can't be created."
+                    "TableId: '$tableId' Source ID: '$sourceId'. " +
+                    "RecordsDAO can't be created."
             )
         }
 
@@ -114,7 +114,7 @@ class TypesConfig {
         if (typeDef == null) {
             return ""
         }
-        return if (typeDef.sourceType == EModelTypeUtils.STORAGE_TYPE_EMODEL) {
+        return if (typeDef.storageType == EModelTypeUtils.STORAGE_TYPE_EMODEL) {
             if (typeDef.sourceId.startsWith(EMODEL_SOURCE_ID_PREFIX)) {
                 return typeDef.sourceId.substring(EMODEL_SOURCE_ID_PREFIX.length)
             } else {

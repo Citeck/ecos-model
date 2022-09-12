@@ -33,6 +33,7 @@ class TypeEntity : AbstractAuditingEntity() {
     var inheritNumTemplate: Boolean? = null
     var inheritForm: Boolean? = null
 
+    // storageType
     var sourceType: String? = null
     var sourceId: String? = null
     var sourceRef: String? = null

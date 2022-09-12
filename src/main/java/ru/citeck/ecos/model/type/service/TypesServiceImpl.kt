@@ -283,7 +283,7 @@ class TypesServiceImpl(
             typeConverter.toDtoWithMeta(it)
         }
 
-        if (dto.sourceType == EModelTypeUtils.STORAGE_TYPE_EMODEL) {
+        if (dto.storageType == EModelTypeUtils.STORAGE_TYPE_EMODEL) {
             var srcId = dto.sourceId
             if (srcId.isNotBlank()) {
                 var appName = EcosModelApp.NAME

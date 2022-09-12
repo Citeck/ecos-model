@@ -300,7 +300,7 @@
                               "ru": "Тип источника данных",
                               "en": "Source Type"
                             },
-                            "key": "sourceType",
+                            "key": "storageType",
                             "dataSrc": "values",
                             "data": {
                               "values": [
@@ -332,7 +332,7 @@
                             "defaultValue": "",
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
-                            "customConditional": "show = data['sourceType'] == 'ECOS_MODEL' || data['sourceType'] == 'DEFAULT' || !data['sourceType'];",
+                            "customConditional": "show = data['storageType'] === 'ECOS_MODEL' || data['storageType'] === 'DEFAULT' || !data['storageType'];",
                             "logic": [],
                             "type": "textfield",
                             "input": true

@@ -234,7 +234,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
                 testPersonRef.id,
                 "GROUP_${testGroupRef.id}",
                 "GROUP_other-auth-group-admin",
-                "GROUP_other-auth-group-${AuthConstants.SYSTEM_USER}",
+                "GROUP_other-auth-group-${AuthUser.SYSTEM}",
                 AuthGroup.EVERYONE,
                 AuthRole.USER
             )
