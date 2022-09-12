@@ -13,7 +13,7 @@ import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.data.sql.records.DbRecordsDao
 import ru.citeck.ecos.data.sql.records.migration.AssocsDbMigration
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
-import ru.citeck.ecos.model.type.service.utils.EcosModelTypeUtils
+import ru.citeck.ecos.model.type.service.utils.EModelTypeUtils
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.webapp.api.constants.AppName
 import ru.citeck.ecos.webapp.lib.model.type.registry.EcosTypesRegistry
@@ -63,7 +63,7 @@ class EcosDataController(
         typesRegistry.getAllValues().values.map {
             it.entity
         }.filter {
-            it.sourceType == EcosModelTypeUtils.SOURCE_TYPE_EMODEL && it.sourceId.startsWith(emodelSrcIdPrefix)
+            it.sourceType == EModelTypeUtils.STORAGE_TYPE_EMODEL && it.sourceId.startsWith(emodelSrcIdPrefix)
         }.forEach {
             val legacyId = generateLegacyEmodelSourceId(it.id)
             val newSrcId = it.sourceId.substring(it.sourceId.indexOf('/') + 1)
@@ -147,6 +147,8 @@ class EcosDataController(
         return result
     }
 
+    // todo: remove in 2.13.0+ version
+    // this method required only for migration for broken types
     private fun generateLegacyEmodelSourceId(typeId: String): String {
 
         val crc = CRC32()

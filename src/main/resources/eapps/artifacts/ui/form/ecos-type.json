@@ -313,12 +313,8 @@
                                   "value": "ALFRESCO"
                                 },
                                 {
-                                  "label": "Custom Id",
-                                  "value": "CUSTOM_ID"
-                                },
-                                {
-                                  "label": "Inherit",
-                                  "value": "INHERIT"
+                                  "label": "Default",
+                                  "value": "DEFAULT"
                                 }
                               ]
                             },
@@ -336,17 +332,8 @@
                             "defaultValue": "",
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
-                            "customConditional": "show = data['sourceType'] != 'ECOS_MODEL';",
-                            "logic": [
-                              {
-                                "name": "HideSourceID",
-                                "trigger": {
-                                  "type": "javascript",
-                                  "javascript": "console.log(data);\nresult = false;"
-                                },
-                                "actions": []
-                              }
-                            ],
+                            "customConditional": "show = data['sourceType'] == 'ECOS_MODEL' || data['sourceType'] == 'DEFAULT' || !data['sourceType'];",
+                            "logic": [],
                             "type": "textfield",
                             "input": true
                           },

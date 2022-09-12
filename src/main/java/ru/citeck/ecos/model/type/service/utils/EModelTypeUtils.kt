@@ -4,14 +4,12 @@ import com.google.common.primitives.Longs
 import org.apache.commons.codec.binary.Base32
 import java.util.zip.CRC32
 
-object EcosModelTypeUtils {
+object EModelTypeUtils {
 
-    const val SOURCE_TYPE_EMODEL = "ECOS_MODEL"
-    const val SOURCE_TYPE_ALFRESCO = "ALFRESCO"
-    const val SOURCE_TYPE_CUSTOM_ID = "CUSTOM_ID"
-    const val SOURCE_TYPE_INHERIT = "INHERIT"
-
-    const val DEFAULT_SOURCE_TYPE = SOURCE_TYPE_CUSTOM_ID
+    const val STORAGE_TYPE_EMODEL = "ECOS_MODEL"
+    const val STORAGE_TYPE_ALFRESCO = "ALFRESCO"
+    const val STORAGE_TYPE_DEFAULT = "DEFAULT"
+    const val STORAGE_TYPE_REFERENCE = "REFERENCE"
 
     private val INVALID_TABLE_SYMBOLS_REGEX = "[^a-z\\d_]+".toRegex()
     private val INVALID_SOURCE_ID_SYMBOLS_REGEX = "[^a-z\\d-]+".toRegex()

@@ -12,8 +12,9 @@ import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef
 import ru.citeck.ecos.model.lib.type.dto.DocLibDef
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
-import ru.citeck.ecos.model.type.service.utils.EcosModelTypeUtils
+import ru.citeck.ecos.model.type.service.utils.EModelTypeUtils
 import ru.citeck.ecos.records2.RecordRef
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.model.type.dto.AssocDef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 
@@ -88,40 +89,26 @@ class TypeDefResolver {
             resTypeDef.withDashboardType(resolvedParentDef.dashboardType)
         }
 
-        if (resTypeDef.sourceType == EcosModelTypeUtils.SOURCE_TYPE_INHERIT) {
-            resTypeDef.sourceType = resolvedParentDef.sourceType
-            resTypeDef.sourceId = resolvedParentDef.sourceId
-        } else {
-            when (val sourceType = resTypeDef.sourceType ?: "") {
-                EcosModelTypeUtils.SOURCE_TYPE_EMODEL -> {
-                    val sourceId = resTypeDef.sourceId.ifBlank {
-                        EcosModelTypeUtils.getEmodelSourceId(resTypeDef.id)
-                    }
-                    resTypeDef.withSourceId(EcosModelApp.NAME + RecordRef.APP_NAME_DELIMITER + sourceId)
-                }
-                EcosModelTypeUtils.SOURCE_TYPE_ALFRESCO -> {
-                    resTypeDef.withSourceId("alfresco/")
-                }
-                else -> {
-
-                    if (sourceType.isNotBlank() && sourceType != EcosModelTypeUtils.SOURCE_TYPE_CUSTOM_ID) {
-
-                        log.error { "Unknown sourceType '" + resTypeDef.sourceType + "' for type " + resTypeDef.id }
-                    } else if (resTypeDef.sourceId.isBlank()) {
-
-                        resTypeDef.withSourceId(resolvedParentDef.sourceId)
-                    } else if (!resTypeDef.sourceId.contains(RecordRef.APP_NAME_DELIMITER)) {
-
-                        resTypeDef.withSourceId(
-                            EcosModelApp.NAME +
-                                RecordRef.APP_NAME_DELIMITER +
-                                resTypeDef.sourceId
-                        )
-                    }
+        when ((resTypeDef.sourceType ?: "").ifBlank { EModelTypeUtils.STORAGE_TYPE_DEFAULT }) {
+            EModelTypeUtils.STORAGE_TYPE_REFERENCE, //todo: set sourceId based on ref
+            EModelTypeUtils.STORAGE_TYPE_DEFAULT -> {
+                resTypeDef.withSourceType(EModelTypeUtils.STORAGE_TYPE_DEFAULT)
+                if (resTypeDef.sourceId.isBlank()) {
+                    resTypeDef.withSourceId(resolvedParentDef.sourceId)
                 }
             }
+            EModelTypeUtils.STORAGE_TYPE_EMODEL -> {
+                if (resTypeDef.sourceId.isBlank()) {
+                    resTypeDef.withSourceId(EModelTypeUtils.getEmodelSourceId(resTypeDef.id))
+                }
+            }
+            EModelTypeUtils.STORAGE_TYPE_ALFRESCO -> {
+                resTypeDef.withSourceId("alfresco/")
+            }
         }
-
+        if (!resTypeDef.sourceId.contains(EntityRef.APP_NAME_DELIMITER)) {
+            resTypeDef.withSourceId(EcosModelApp.NAME + EntityRef.APP_NAME_DELIMITER + resTypeDef.sourceId)
+        }
         if (RecordRef.isEmpty(resTypeDef.metaRecord)) {
             resTypeDef.withMetaRecord(RecordRef.valueOf(resTypeDef.sourceId + "@"))
         }

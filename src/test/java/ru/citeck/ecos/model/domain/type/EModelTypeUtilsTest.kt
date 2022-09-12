@@ -3,9 +3,9 @@ package ru.citeck.ecos.model.domain.type
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
-import ru.citeck.ecos.model.type.service.utils.EcosModelTypeUtils
+import ru.citeck.ecos.model.type.service.utils.EModelTypeUtils
 
-class EcosModelTypeUtilsTest {
+class EModelTypeUtilsTest {
 
     @ParameterizedTest
     @CsvSource(
@@ -23,8 +23,8 @@ class EcosModelTypeUtilsTest {
     )
     fun test(typeId: String, expectedSourceId: String, expectedTableId: String) {
 
-        val srcId = EcosModelTypeUtils.getEmodelSourceId(typeId)
-        val tableId = EcosModelTypeUtils.getEmodelSourceTableId(typeId)
+        val srcId = EModelTypeUtils.getEmodelSourceId(typeId)
+        val tableId = EModelTypeUtils.getEmodelSourceTableId(typeId)
 
         assertThat(srcId).isEqualTo(expectedSourceId)
         assertThat(tableId).isEqualTo(expectedTableId)

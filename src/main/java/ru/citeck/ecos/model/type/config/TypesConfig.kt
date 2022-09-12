@@ -9,13 +9,15 @@ import ru.citeck.ecos.data.sql.domain.DbDomainFactory
 import ru.citeck.ecos.data.sql.dto.DbTableRef
 import ru.citeck.ecos.data.sql.records.DbRecordsDaoConfig
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
+import ru.citeck.ecos.model.EcosModelApp
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.model.type.api.records.TypesRepoRecordsDao
 import ru.citeck.ecos.model.type.converter.TypeConverter
-import ru.citeck.ecos.model.type.service.utils.EcosModelTypeUtils
+import ru.citeck.ecos.model.type.service.utils.EModelTypeUtils
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.dao.RecordsDao
 import ru.citeck.ecos.records3.record.mixin.impl.mutmeta.MutMetaMixin
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import ru.citeck.ecos.webapp.lib.model.type.registry.EcosTypesRegistry
 import javax.annotation.PostConstruct
@@ -25,6 +27,8 @@ class TypesConfig {
 
     companion object {
         private val log = KotlinLogging.logger {}
+
+        private val EMODEL_SOURCE_ID_PREFIX = EcosModelApp.NAME + EntityRef.APP_NAME_DELIMITER
     }
 
     private var dbDomainFactory: DbDomainFactory? = null
@@ -33,40 +37,27 @@ class TypesConfig {
 
     @PostConstruct
     fun init() {
+
         val dbDomainFactory = dbDomainFactory ?: return
         val typesRegistry = typesRegistry ?: return
 
         typesRegistry.getAllValues().values.forEach { typeDef ->
-            if (typeDef.entity.sourceType == EcosModelTypeUtils.SOURCE_TYPE_EMODEL &&
-                typeDef.entity.sourceId.isNotBlank()
-            ) {
-
+            if (getEmodelSrcId(typeDef.entity).isNotBlank()) {
                 recordsService.register(createRecordsDao(dbDomainFactory, typeDef.entity))
             }
         }
 
         typesRegistry.listenEvents { _, before, after ->
 
-            val sourceIdBefore = before?.sourceId ?: ""
+            val emodelSrcIdBefore = getEmodelSrcId(before)
+            val emodelSrcIdAfter = getEmodelSrcId(after)
 
-            val isSourceTypeBeforeEmodel = before?.sourceType == EcosModelTypeUtils.SOURCE_TYPE_EMODEL
-            val isSourceTypeAfterEmodel = after?.sourceType == EcosModelTypeUtils.SOURCE_TYPE_EMODEL
-
-            if (isSourceTypeBeforeEmodel &&
-                sourceIdBefore.isNotBlank() &&
-                (after == null || sourceIdBefore != after.sourceId)
-            ) {
-                log.info { "Unregister records DAO with sourceId '$sourceIdBefore'" }
-                recordsService.unregister(sourceIdBefore)
+            if (emodelSrcIdBefore.isNotBlank() && (after == null || emodelSrcIdBefore != emodelSrcIdAfter)) {
+                log.info { "Unregister records DAO with sourceId '$emodelSrcIdBefore'" }
+                recordsService.unregister(emodelSrcIdBefore)
             }
-            if (isSourceTypeAfterEmodel && after != null &&
-                (before?.sourceId != after.sourceId || before.sourceType != after.sourceType)
-            ) {
-                val sourceId = after.sourceId
-                val parentId = typesRegistry.getValue(after.parentRef.id)?.sourceId
-                if (sourceId != parentId) {
-                    recordsService.register(createRecordsDao(dbDomainFactory, after))
-                }
+            if (after != null && emodelSrcIdAfter.isNotBlank() && (emodelSrcIdBefore != emodelSrcIdAfter)) {
+                recordsService.register(createRecordsDao(dbDomainFactory, after))
             }
         }
     }
@@ -86,15 +77,22 @@ class TypesConfig {
 
         log.info { "Create new Records DAO for type '${typeDef.id}' with sourceId: '${typeDef.sourceId}'" }
 
-        val tableId = EcosModelTypeUtils.getEmodelSourceTableId(typeDef.id)
-        val localSourceId = typeDef.sourceId.substringAfter('/')
+        val tableId = EModelTypeUtils.getEmodelSourceTableId(typeDef.id)
+        val sourceId = getEmodelSrcId(typeDef)
+        if (tableId.isEmpty() || sourceId.isEmpty()) {
+            error(
+                "Table ID or Source ID is empty. " +
+                "TableId: '$tableId' Source ID: '$sourceId'. " +
+                "RecordsDAO can't be created."
+            )
+        }
 
         val typeRef = TypeUtils.getTypeRef(typeDef.id)
         val recordsDao = dbDomainFactory.create(
             DbDomainConfig.create()
                 .withRecordsDao(
                     DbRecordsDaoConfig.create {
-                        withId(localSourceId)
+                        withId(sourceId)
                         withTypeRef(typeRef)
                     }
                 )
@@ -110,6 +108,21 @@ class TypesConfig {
         ).build()
 
         return recordsDao
+    }
+
+    private fun getEmodelSrcId(typeDef: TypeDef?): String {
+        if (typeDef == null) {
+            return ""
+        }
+        return if (typeDef.sourceType == EModelTypeUtils.STORAGE_TYPE_EMODEL) {
+            if (typeDef.sourceId.startsWith(EMODEL_SOURCE_ID_PREFIX)) {
+                return typeDef.sourceId.substring(EMODEL_SOURCE_ID_PREFIX.length)
+            } else {
+                return EModelTypeUtils.getEmodelSourceTableId(typeDef.id)
+            }
+        } else {
+            ""
+        }
     }
 
     @Autowired(required = false)

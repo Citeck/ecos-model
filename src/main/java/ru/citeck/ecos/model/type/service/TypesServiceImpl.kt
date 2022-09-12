@@ -5,15 +5,18 @@ import org.springframework.transaction.annotation.Transactional
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.commons.json.Json
+import ru.citeck.ecos.model.EcosModelApp
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.model.type.converter.TypeConverter
 import ru.citeck.ecos.model.type.repository.TypeEntity
 import ru.citeck.ecos.model.type.service.dao.TypeRepoDao
+import ru.citeck.ecos.model.type.service.utils.EModelTypeUtils
 import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records2.predicate.model.VoidPredicate
 import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import java.time.Instant
 import java.util.concurrent.CopyOnWriteArrayList
@@ -278,6 +281,20 @@ class TypesServiceImpl(
 
         val typeDefBefore: EntityWithMeta<TypeDef>? = typeRepoDao.findByExtId(dto.id)?.let {
             typeConverter.toDtoWithMeta(it)
+        }
+
+        if (dto.sourceType == EModelTypeUtils.STORAGE_TYPE_EMODEL) {
+            var srcId = dto.sourceId
+            if (srcId.isNotBlank()) {
+                var appName = EcosModelApp.NAME
+                if (srcId.contains(EntityRef.APP_NAME_DELIMITER)) {
+                    appName = srcId.substringBefore(EntityRef.APP_NAME_DELIMITER)
+                    srcId = srcId.substringAfter(EntityRef.APP_NAME_DELIMITER)
+                }
+                if (appName == EcosModelApp.NAME && !srcId.startsWith("t-")) {
+                    error("You should use prefix 't-' for custom local source ID. Actual source ID: '$srcId'")
+                }
+            }
         }
 
         var entity = typeConverter.toEntity(dto)
