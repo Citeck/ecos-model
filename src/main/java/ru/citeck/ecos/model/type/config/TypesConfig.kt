@@ -118,7 +118,7 @@ class TypesConfig {
             if (typeDef.sourceId.startsWith(EMODEL_SOURCE_ID_PREFIX)) {
                 return typeDef.sourceId.substring(EMODEL_SOURCE_ID_PREFIX.length)
             } else {
-                return EModelTypeUtils.getEmodelSourceTableId(typeDef.id)
+                return EModelTypeUtils.getEmodelSourceId(typeDef.id)
             }
         } else {
             ""
