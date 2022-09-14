@@ -21,9 +21,9 @@ import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
 import ru.citeck.ecos.model.domain.authsync.service.AuthorityType
 import ru.citeck.ecos.model.domain.events.emitter.DbRecordsEcosEventsAdapter
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
-import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.dao.RecordsDao
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 import javax.sql.DataSource
 
 @Configuration
@@ -63,7 +63,7 @@ class GroupsConfiguration(
             }
         }
         val permsComponent = object : DbPermsComponent {
-            override fun getRecordPerms(recordRef: RecordRef): DbRecordPerms {
+            override fun getRecordPerms(recordRef: EntityRef): DbRecordPerms {
                 return accessPerms
             }
         }

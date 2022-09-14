@@ -11,9 +11,9 @@ import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
 import ru.citeck.ecos.data.sql.records.perms.DbRecordPerms
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
-import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records3.record.dao.RecordsDao
 import ru.citeck.ecos.records3.record.dao.impl.proxy.RecordsDaoProxy
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 import javax.sql.DataSource
 
 @Configuration
@@ -42,7 +42,7 @@ class CommentsConfiguration(private val dbDomainFactory: DbDomainFactory) {
             }
         }
         val permsComponent = object : DbPermsComponent {
-            override fun getRecordPerms(recordRef: RecordRef): DbRecordPerms {
+            override fun getRecordPerms(recordRef: EntityRef): DbRecordPerms {
                 return fullAccessPerms
             }
         }

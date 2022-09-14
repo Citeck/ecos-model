@@ -212,7 +212,7 @@ class TypeDefResolver {
             fileTypeRefs = docLib.fileTypeRefs.ifEmpty {
                 listOf(TypeUtils.getTypeRef(typeDef.id))
             }
-            dirTypeRef = if (RecordRef.isEmpty(docLib.dirTypeRef)) {
+            dirTypeRef = if (EntityRef.isEmpty(docLib.dirTypeRef)) {
                 TypeUtils.DOCLIB_DEFAULT_DIR_TYPE
             } else {
                 docLib.dirTypeRef
@@ -252,20 +252,20 @@ class TypeDefResolver {
         variants.forEach { cv ->
 
             val variant = cv.copy()
-            if (RecordRef.isEmpty(variant.typeRef)) {
+            if (EntityRef.isEmpty(variant.typeRef)) {
                 variant.withTypeRef(TypeUtils.getTypeRef(typeDef.id))
             }
 
             if (MLText.isEmpty(variant.name)) {
                 variant.withName(typeDef.name)
             }
-            if (RecordRef.isEmpty(variant.formRef)) {
+            if (EntityRef.isEmpty(variant.formRef)) {
                 variant.withFormRef(typeDef.formRef)
             }
             if (variant.sourceId.isEmpty()) {
                 variant.withSourceId(typeDef.sourceId)
             }
-            if (RecordRef.isEmpty(variant.postActionRef)) {
+            if (EntityRef.isEmpty(variant.postActionRef)) {
                 variant.withPostActionRef(typeDef.postCreateActionRef)
             }
             if (variant.sourceId.isNotEmpty()) {

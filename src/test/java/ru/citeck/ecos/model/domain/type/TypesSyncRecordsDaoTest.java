@@ -29,6 +29,7 @@ import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery;
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes;
 import ru.citeck.ecos.records3.record.request.RequestContext;
 import ru.citeck.ecos.webapp.api.context.EcosWebAppContext;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef;
 import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension;
 
@@ -168,16 +169,16 @@ public class TypesSyncRecordsDaoTest {
         }
         res.withCreateVariants(res.getCreateVariants().stream().map(cv -> {
             CreateVariantDef.Builder cvRes = cv.copy();
-            if (RecordRef.isEmpty(cvRes.getTypeRef())) {
+            if (EntityRef.isEmpty(cvRes.getTypeRef())) {
                 cvRes.withTypeRef(TypeUtils.getTypeRef(res.getId()));
             }
             if (cv.getSourceId().isEmpty()) {
                 cvRes.withSourceId(res.getSourceId());
             }
-            if (RecordRef.isEmpty(cv.getTypeRef())) {
+            if (EntityRef.isEmpty(cv.getTypeRef())) {
                 cvRes.withFormRef(res.getFormRef());
             }
-            if (RecordRef.isEmpty(cv.getPostActionRef())) {
+            if (EntityRef.isEmpty(cv.getPostActionRef())) {
                 cvRes.withPostActionRef(res.getPostCreateActionRef());
             }
             return cvRes.build();

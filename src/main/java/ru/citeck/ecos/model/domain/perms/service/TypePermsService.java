@@ -22,6 +22,7 @@ import ru.citeck.ecos.model.lib.type.dto.TypePermsDef;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
 import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverter;
 import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverterFactory;
 
@@ -105,7 +106,7 @@ public class TypePermsService {
     @NotNull
     public TypePermsDef save(TypePermsDef permissions) {
 
-        if (RecordRef.isEmpty(permissions.getTypeRef())) {
+        if (EntityRef.isEmpty(permissions.getTypeRef())) {
             throw new IllegalStateException("TypeRef is a mandatory parameter!");
         }
 

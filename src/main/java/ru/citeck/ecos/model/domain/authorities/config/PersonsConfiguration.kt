@@ -29,6 +29,7 @@ import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
 import ru.citeck.ecos.records3.record.dao.RecordsDao
 import ru.citeck.ecos.records3.record.dao.impl.proxy.MutateProxyProcessor
 import ru.citeck.ecos.records3.record.dao.impl.proxy.ProxyProcContext
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 import javax.sql.DataSource
 
 @Configuration
@@ -86,7 +87,7 @@ class PersonsConfiguration(
     fun personRepo(dataSource: DataSource): RecordsDao {
 
         val permsComponent = object : DbPermsComponent {
-            override fun getRecordPerms(recordRef: RecordRef): DbRecordPerms {
+            override fun getRecordPerms(recordRef: EntityRef): DbRecordPerms {
 
                 return object : DbRecordPerms {
                     override fun getAuthoritiesWithReadPermission(): Set<String> {
@@ -94,7 +95,7 @@ class PersonsConfiguration(
                     }
                     override fun isCurrentUserHasWritePerms(): Boolean {
                         val auth = AuthContext.getCurrentFullAuth()
-                        return recordRef.id == auth.getUser() || auth.getAuthorities().contains(AuthRole.ADMIN)
+                        return recordRef.getLocalId() == auth.getUser() || auth.getAuthorities().contains(AuthRole.ADMIN)
                     }
                     override fun isCurrentUserHasAttReadPerms(name: String): Boolean {
                         return true
