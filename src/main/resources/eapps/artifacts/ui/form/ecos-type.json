@@ -1005,7 +1005,10 @@
                         "row": "0-0"
                       },
                       {
-                        "label": "Название логики",
+                        "label": {
+                          "ru": "Имя",
+                          "en": "Name"
+                        },
                         "key": "name",
                         "refreshOn": [],
                         "optionalWhenDisabled": false,
@@ -1153,7 +1156,10 @@
                         "row": "0-0"
                       },
                       {
-                        "label": "Название логики",
+                        "label": {
+                          "ru": "Имя",
+                          "en": "Name"
+                        },
                         "key": "name",
                         "refreshOn": [],
                         "optionalWhenDisabled": false,
