@@ -1,11 +1,35 @@
 package ru.citeck.ecos.model.type.repository
 
 import ru.citeck.ecos.model.domain.AbstractAuditingEntity
+import ru.citeck.ecos.records2.RecordConstants
 import javax.persistence.*
 
 @Entity
 @Table(name = "ecos_type")
 class TypeEntity : AbstractAuditingEntity() {
+    companion object {
+        @JvmStatic
+        fun replaceNameValid(attributeName: String): String {
+            if (RecordConstants.ATT_MODIFIED.equals(attributeName)) {
+                return "lastModifiedDate"
+            }
+            if (RecordConstants.ATT_MODIFIER.equals(attributeName)) {
+                return "lastModifiedBy"
+            }
+            if ("moduleId".equals(attributeName)){
+                return "extId"
+            }
+            return attributeName
+        }
+
+        @JvmStatic
+        fun isAttributeNameValid(attributeName: String): Boolean {
+            if (RecordConstants.ATT_TYPE.equals(attributeName)){
+                return false
+            }
+            return true
+        }
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ecos_types_seq_gen")
