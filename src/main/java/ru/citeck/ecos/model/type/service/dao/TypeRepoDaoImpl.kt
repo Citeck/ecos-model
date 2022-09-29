@@ -12,10 +12,7 @@ import ru.citeck.ecos.model.type.repository.TypeEntity
 import ru.citeck.ecos.model.type.repository.TypeRepository
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.predicate.PredicateUtils
-import ru.citeck.ecos.records2.predicate.model.AndPredicate
-import ru.citeck.ecos.records2.predicate.model.ComposedPredicate
-import ru.citeck.ecos.records2.predicate.model.Predicate
-import ru.citeck.ecos.records2.predicate.model.ValuePredicate
+import ru.citeck.ecos.records2.predicate.model.*
 import java.lang.reflect.Field
 import java.time.DateTimeException
 import java.time.Instant
@@ -32,6 +29,10 @@ class TypeRepoDaoImpl(private val repo: TypeRepository) : TypeRepoDao {
 
     companion object {
         private val log = KotlinLogging.logger {}
+
+        private const val CONFIG_PROP = "config"
+        private const val POINT_SYMBOL = "."
+        private const val QUOTE_SYMBOL = "\""
     }
 
     override fun save(entity: TypeEntity): TypeEntity {
@@ -61,16 +62,42 @@ class TypeRepoDaoImpl(private val repo: TypeRepository) : TypeRepoDao {
         val querySort = sort ?: Sort.by(Sort.Direction.DESC, "id")
         val page = PageRequest.of(skip / max, max, querySort)
 
-        val spec = specificationFromPredicate(predicate)
-        return if (spec != null) {
-            repo.findAll(spec, page)
-        } else {
-            repo.findAll(page)
-        }.toList()
+        return getEntityList(predicate, page)
     }
 
     override fun count(predicate: Predicate): Long {
-        return repo.count(specificationFromPredicate(predicate))
+        return getEntityList(predicate, null).count().toLong()
+    }
+
+    private fun getEntityList(predicate: Predicate, page: PageRequest?): List<TypeEntity> {
+        val specification = specificationFromPredicate(predicate)
+        if (specification != null) {
+            var selectResult =
+                if (page != null) {
+                    repo.findAll(specification, page)
+                } else {
+                    repo.findAll(specification)
+                }
+            val configRegex = getConfigRegexFromPredicate(predicate)
+            return if (configRegex != null) {
+                selectResult.filter { typeEntity ->
+                    if (typeEntity.config != null) {
+                        val configValue = typeEntity.config
+                        configValue!!.matches(Regex(configRegex))
+                    } else {
+                        false
+                    }
+                }.toList()
+            } else {
+                selectResult.toList()
+            }
+        } else {
+            return if (page == null) {
+                repo.findAll().toList()
+            } else {
+                repo.findAll(page).toList()
+            }
+        }
     }
 
     private fun toSpec(predicate: Predicate): Specification<TypeEntity>? {
@@ -153,9 +180,11 @@ class TypeRepoDaoImpl(private val repo: TypeRepository) : TypeRepoDao {
                 if (specifications.size > 1) {
                     for (idx in 1 until specifications.size) {
                         result =
-                            if (predicate is AndPredicate)
+                            if (predicate is AndPredicate) {
                                 result!!.and(specifications[idx])
-                            else result!!.or(specifications[idx])
+                            } else {
+                                result!!.or(specifications[idx])
+                            }
                     }
                 }
             }
@@ -176,29 +205,26 @@ class TypeRepoDaoImpl(private val repo: TypeRepository) : TypeRepoDao {
         if (!TypeEntity.isAttributeNameValid(attributeName)) {
             return null
         }
-        val configProp = "config"
-        if (attributeName.startsWith(configProp)) {
-            val pointSymbol = "."
-            val quoteSymbol = "\""
+        if (attributeName.startsWith(CONFIG_PROP)) {
             var substructure = ""
             var configValue: Any = valuePredicate.getValue().asText()
-            if (attributeName.contains(pointSymbol)) {
+            if (attributeName.contains(POINT_SYMBOL)) {
                 configValue = getConfigValue(valuePredicate.getValue().asText())
-                val innerProps = attributeName.split(pointSymbol)
+                val innerProps = attributeName.split(POINT_SYMBOL)
                 for (idx in 1 until innerProps.size - 1) {
-                    substructure += quoteSymbol + innerProps[idx] + quoteSymbol + "%:%"
+                    substructure += QUOTE_SYMBOL + innerProps[idx] + QUOTE_SYMBOL + "%:%"
                 }
-                substructure += quoteSymbol + innerProps[innerProps.size - 1] + quoteSymbol + ":"
+                substructure += QUOTE_SYMBOL + innerProps[innerProps.size - 1] + QUOTE_SYMBOL + ":"
             }
             if (configValue is String) {
-                substructure += quoteSymbol + configValue + quoteSymbol
+                substructure += QUOTE_SYMBOL + configValue + QUOTE_SYMBOL
             } else {
                 substructure += configValue
             }
             return Specification { root: Root<TypeEntity>,
                                    _: CriteriaQuery<*>?,
                                    builder: CriteriaBuilder ->
-                builder.like(root.get(configProp), "%$substructure%")
+                builder.like(root.get(CONFIG_PROP), "%$substructure%")
             }
         }
 
@@ -312,6 +338,7 @@ class TypeRepoDaoImpl(private val repo: TypeRepository) : TypeRepoDao {
                     }
 
                     Instant::class.java -> {
+
                         return Json.mapper.convert(attributeValue.toLong(), Instant::class.java)
                     }
 
@@ -342,6 +369,83 @@ class TypeRepoDaoImpl(private val repo: TypeRepository) : TypeRepoDao {
             }
         }
         return result
+    }
+
+    private fun getConfigRegexFromPredicate(predicate: Predicate?): String? {
+        if (predicate == null) {
+            return null
+        }
+        if (predicate is ComposedPredicate) {
+            val conditions: ArrayList<String> = ArrayList<String>()
+            predicate.getPredicates().forEach(
+                Consumer { subPredicate: Predicate? ->
+                    var subCondition: String? = null
+                    if (subPredicate is ValuePredicate) {
+                        subCondition = getCondition(subPredicate)
+                    } else if (subPredicate is ComposedPredicate) {
+                        subCondition = getConfigRegexFromPredicate(subPredicate)
+                    }
+                    if (subCondition != null) {
+                        conditions.add(subCondition)
+                    }
+                })
+            if (conditions.isNotEmpty()) {
+                var result: String? = ""
+                if (conditions.size > 1) {
+                    for (idx in 0 until conditions.size) {
+                        result +=
+                            if (predicate is AndPredicate) {
+                                "(?=" + conditions[idx] + ")"
+                            } else {
+                                "|" + conditions[idx]
+                            }
+                    }
+                    if (predicate is OrPredicate) {
+                        result = "($result)"
+                    } else {
+                        result += ".*"
+                    }
+                } else {
+                    result = conditions[0]
+                }
+                return result
+            }
+        } else if (predicate is ValuePredicate) {
+            return getCondition(predicate)
+        }
+        log.warn("Unexpected predicate class: {}", predicate.javaClass)
+        return null
+    }
+
+    private fun getCondition(valuePredicate: ValuePredicate): String? {
+        val attributeName = TypeEntity.replaceNameValid(StringUtils.trim(valuePredicate.getAttribute()))
+        if (!TypeEntity.isAttributeNameValid(attributeName)) {
+            return null
+        }
+        if (attributeName.startsWith(CONFIG_PROP)) {
+            var substructure = ""
+            var configValue: Any = valuePredicate.getValue().asText()
+
+            if (attributeName.contains(POINT_SYMBOL)) {
+                configValue = getConfigValue(valuePredicate.getValue().asText())
+                val innerProps = attributeName.split(POINT_SYMBOL)
+                for (idx in 1 until innerProps.size - 1) {
+                    substructure += QUOTE_SYMBOL + innerProps[idx] + QUOTE_SYMBOL + ".*:.*"
+                }
+                substructure += QUOTE_SYMBOL + innerProps[innerProps.size - 1] + QUOTE_SYMBOL + ":"
+            }
+
+            if (configValue is String) {
+                substructure += QUOTE_SYMBOL + configValue + QUOTE_SYMBOL
+            } else {
+                substructure += configValue
+            }
+            if (valuePredicate.getType() == ValuePredicate.Type.EQ) {
+                substructure += " *(,|})"
+            }
+            return ".*$substructure.*"
+        }
+        return null
     }
 
     @Data
