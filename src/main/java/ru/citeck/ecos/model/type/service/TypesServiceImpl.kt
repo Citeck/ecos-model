@@ -5,18 +5,15 @@ import org.springframework.transaction.annotation.Transactional
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.commons.json.Json
-import ru.citeck.ecos.model.EcosModelApp
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.model.type.converter.TypeConverter
 import ru.citeck.ecos.model.type.repository.TypeEntity
 import ru.citeck.ecos.model.type.service.dao.TypeRepoDao
-import ru.citeck.ecos.model.type.service.utils.EModelTypeUtils
 import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records2.predicate.model.VoidPredicate
 import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy
-import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import java.time.Instant
 import java.util.concurrent.CopyOnWriteArrayList
@@ -42,10 +39,7 @@ class TypesServiceImpl(
         )
     }
 
-    private var onTypeChangedListeners: MutableList<(
-            EntityWithMeta<TypeDef>?,
-            EntityWithMeta<TypeDef>?
-        ) -> Unit> = CopyOnWriteArrayList()
+    private var onTypeChangedListeners = CopyOnWriteArrayList<TypeDefListener>()
 
     private var onDeletedListeners: MutableList<(String) -> Unit> = CopyOnWriteArrayList()
 
@@ -89,16 +83,35 @@ class TypesServiceImpl(
         onTypeHierarchyChangedListeners.add { onTypeChangedListener.accept(it) }
     }
 
+    override fun addListener(order: Float, onTypeChangedListener: BiConsumer<TypeDef?, TypeDef?>) {
+        onTypeChangedListeners.add(
+            TypeDefListener(order) { before, after ->
+                onTypeChangedListener.accept(before?.entity, after?.entity)
+            }
+        )
+        onTypeChangedListeners.sort()
+    }
+
     override fun addListener(onTypeChangedListener: BiConsumer<TypeDef?, TypeDef?>) {
-        onTypeChangedListeners.add { before, after ->
-            onTypeChangedListener.accept(before?.entity, after?.entity)
-        }
+        addListener(0f, onTypeChangedListener)
+    }
+
+    fun addListenerWithMeta(
+        order: Float,
+        onTypeChangedListener: BiConsumer<EntityWithMeta<TypeDef>?, EntityWithMeta<TypeDef>?>
+    ) {
+        onTypeChangedListeners.add(
+            TypeDefListener(order) { before, after ->
+                onTypeChangedListener.accept(before, after)
+            }
+        )
+        onTypeChangedListeners.sort()
     }
 
     override fun addListenerWithMeta(
         onTypeChangedListener: BiConsumer<EntityWithMeta<TypeDef>?, EntityWithMeta<TypeDef>?>
     ) {
-        onTypeChangedListeners.add { before, after -> onTypeChangedListener.accept(before, after) }
+        addListenerWithMeta(0f, onTypeChangedListener)
     }
 
     override fun addOnDeletedListener(listener: (String) -> Unit) {
@@ -276,37 +289,30 @@ class TypesServiceImpl(
         return parentId
     }
 
-    @Transactional
     override fun save(dto: TypeDef): TypeDef {
+        return save(dto, false)
+    }
+
+    @Transactional
+    override fun save(dto: TypeDef, newRecord: Boolean): TypeDef {
 
         val typeDefBefore: EntityWithMeta<TypeDef>? = typeRepoDao.findByExtId(dto.id)?.let {
             typeConverter.toDtoWithMeta(it)
         }
-
-        if (dto.storageType == EModelTypeUtils.STORAGE_TYPE_EMODEL) {
-            var srcId = dto.sourceId
-            if (srcId.isNotBlank()) {
-                var appName = EcosModelApp.NAME
-                if (srcId.contains(EntityRef.APP_NAME_DELIMITER)) {
-                    appName = srcId.substringBefore(EntityRef.APP_NAME_DELIMITER)
-                    srcId = srcId.substringAfter(EntityRef.APP_NAME_DELIMITER)
-                }
-                if (appName == EcosModelApp.NAME && !srcId.startsWith("t-")) {
-                    error("You should use prefix 't-' for custom local source ID. Actual source ID: '$srcId'")
-                }
-            }
+        if (typeDefBefore != null && newRecord) {
+            error("Type with id '${dto.id}' already exists")
         }
 
         var entity = typeConverter.toEntity(dto)
 
         entity = typeRepoDao.save(entity)
 
-        updateModifiedTimeForLinkedTypes(dto.id, asc = true, desc = true)
-
         val typeDefAfter = typeConverter.toDtoWithMeta(entity)
         onTypeChangedListeners.forEach {
-            it.invoke(typeDefBefore, typeDefAfter)
+            it.action.invoke(typeDefBefore, typeDefAfter)
         }
+
+        updateModifiedTimeForLinkedTypes(dto.id, asc = true, desc = true)
 
         return typeDefAfter.entity
     }
@@ -332,6 +338,19 @@ class TypesServiceImpl(
         }
         onTypeHierarchyChangedListeners.forEach {
             it.invoke(types)
+        }
+    }
+
+    private class TypeDefListener(
+        val order: Float,
+        val action: (
+            EntityWithMeta<TypeDef>?,
+            EntityWithMeta<TypeDef>?
+        ) -> Unit
+    ) : Comparable<TypeDefListener> {
+
+        override fun compareTo(other: TypeDefListener): Int {
+            return order.compareTo(other.order)
         }
     }
 }

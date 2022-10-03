@@ -5,6 +5,7 @@ import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.commons.json.Json
+import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
 import ru.citeck.ecos.model.lib.role.dto.RoleDef
 import ru.citeck.ecos.model.lib.status.dto.StatusDef
@@ -22,7 +23,7 @@ class TypesRepoRecordsMutDao(
 
     override fun getId() = "types-repo"
 
-    @Secured("ROLE_ADMIN")
+    @Secured(AuthRole.ADMIN)
     override fun getRecToMutate(recordId: String): TypeMutRecord {
 
         if (recordId.isEmpty()) {
@@ -32,9 +33,11 @@ class TypesRepoRecordsMutDao(
         return TypeMutRecord(typeDef)
     }
 
-    @Secured("ROLE_ADMIN")
+    @Secured(AuthRole.ADMIN)
     override fun saveMutatedRec(record: TypeMutRecord): String {
-        return typeService.save(record.build()).id
+        val newTypeDef = record.build()
+        val isNewRecord = record.baseTypeDef.id != newTypeDef.id
+        return typeService.save(newTypeDef, isNewRecord).id
     }
 
     @Secured("ROLE_ADMIN")
@@ -43,7 +46,7 @@ class TypesRepoRecordsMutDao(
         return DelStatus.OK
     }
 
-    class TypeMutRecord(typeDef: TypeDef) : TypeDef.Builder(typeDef) {
+    class TypeMutRecord(val baseTypeDef: TypeDef) : TypeDef.Builder(baseTypeDef) {
 
         fun setLocalId(localId: String) {
             this.withId(localId)

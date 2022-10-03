@@ -2,6 +2,9 @@ package ru.citeck.ecos.model.type.service.utils
 
 import com.google.common.primitives.Longs
 import org.apache.commons.codec.binary.Base32
+import ru.citeck.ecos.model.EcosModelApp
+import ru.citeck.ecos.webapp.api.entity.EntityRef
+import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import java.util.zip.CRC32
 
 object EModelTypeUtils {
@@ -16,15 +19,45 @@ object EModelTypeUtils {
 
     private val CAMEL_REGEX = "(?<=[a-z])[A-Z]".toRegex()
 
+    private val EMODEL_SOURCE_ID_PREFIX = EcosModelApp.NAME + EntityRef.APP_NAME_DELIMITER
+
+    fun getEmodelSourceId(typeDef: TypeDef?): String {
+        if (typeDef == null) {
+            return ""
+        }
+        val srcId = typeDef.sourceId
+        return if (typeDef.storageType == STORAGE_TYPE_EMODEL) {
+            if (srcId.startsWith(EMODEL_SOURCE_ID_PREFIX)) {
+                srcId.substring(EMODEL_SOURCE_ID_PREFIX.length)
+            } else if (srcId.isNotBlank()) {
+                if (srcId.contains("/")) {
+                    getEmodelSourceId(typeDef.id)
+                } else {
+                    srcId
+                }
+            } else {
+                getEmodelSourceId(typeDef.id)
+            }
+        } else {
+            ""
+        }
+    }
+
     fun getEmodelSourceId(typeId: String): String {
-        return createId(typeId, INVALID_SOURCE_ID_SYMBOLS_REGEX, "-", 42)
+        return createId(typeId, INVALID_SOURCE_ID_SYMBOLS_REGEX, "-", 42, false)
     }
 
     fun getEmodelSourceTableId(typeId: String): String {
-        return createId(typeId, INVALID_TABLE_SYMBOLS_REGEX, "_", 42)
+        return createId(typeId, INVALID_TABLE_SYMBOLS_REGEX, "_", 42, true)
     }
 
-    private fun createId(typeId: String, invalidSymbolsRegex: Regex, delimiter: String, maxLen: Int): String {
+    private fun createId(
+        typeId: String,
+        invalidSymbolsRegex: Regex,
+        delimiter: String,
+        maxLen: Int,
+        addPrefix: Boolean
+    ): String {
         var result = CAMEL_REGEX.replace(typeId) { "_${it.value}" }.lowercase()
         result = result.replace(invalidSymbolsRegex, delimiter)
         if (result.length > maxLen) {
@@ -36,7 +69,17 @@ object EModelTypeUtils {
         while (result.contains(doubleDelim)) {
             result = result.replace(doubleDelim, delimiter)
         }
-        return "t$delimiter$result"
+        if (result.endsWith(delimiter)) {
+            result = result.substring(0, result.length - 1)
+        }
+        if (result.startsWith(delimiter)) {
+            result = result.substring(1)
+        }
+        return if (addPrefix) {
+            "t$delimiter$result"
+        } else {
+            result
+        }
     }
 
     private fun getCrcStr(text: String): String {

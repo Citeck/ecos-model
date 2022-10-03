@@ -16,6 +16,8 @@ interface TypesService {
 
     fun addListenerTypeHierarchyChangedListener(onTypeChangedListener: Consumer<Set<String>>)
 
+    fun addListener(order: Float, onTypeChangedListener: BiConsumer<TypeDef?, TypeDef?>)
+
     fun addListener(onTypeChangedListener: BiConsumer<TypeDef?, TypeDef?>)
 
     fun getAll(max: Int, skip: Int): List<TypeDef>
@@ -51,11 +53,13 @@ interface TypesService {
     fun delete(typeId: String)
 
     /**
-     * Delete type with it's children
+     * Delete type with its children
      */
     fun deleteWithChildren(typeId: String)
 
     fun save(dto: TypeDef): TypeDef
+
+    fun save(dto: TypeDef, newRecord: Boolean): TypeDef
 
     fun getCount(predicate: Predicate): Long
 
