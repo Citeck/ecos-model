@@ -1,6 +1,5 @@
 {
   "id": "ecos-type",
-  "system": true,
   "formKey": "",
   "title": {
     "en": "Type form"
@@ -9,7 +8,15 @@
   "customModule": null,
   "typeRef": "emodel/type@type",
   "width": "extra-lg",
-  "i18n": {},
+  "system": true,
+  "i18n": {
+    "ru": {
+      "Enter the map \"key\" for this value.": "Введите \"ключ\" для соответствующего значения."
+    },
+    "en": {
+      "Enter the map \"key\" for this value.": "Enter the map \"key\" for this value."
+    }
+  },
   "definition": {
     "components": [
       {
@@ -74,13 +81,17 @@
                                     },
                                     "key": "formRef",
                                     "modalTitle": "",
+                                    "customActionRefs": [
+                                      "uiserv/action@edit-form"
+                                    ],
+                                    "enableCreateButton": true,
                                     "journalId": "ecos-forms",
+                                    "queryData": "",
                                     "defaultValue": "uiserv/form@DEFAULT_FORM",
                                     "refreshOn": [],
                                     "optionalWhenDisabled": false,
                                     "type": "selectJournal",
-                                    "input": true,
-                                    "queryData": ""
+                                    "input": true
                                   }
                                 ],
                                 "type": "column",
@@ -122,13 +133,17 @@
                             },
                             "key": "journalRef",
                             "modalTitle": "",
+                            "customActionRefs": [
+                              "uiserv/action@edit"
+                            ],
+                            "enableCreateButton": true,
                             "journalId": "ecos-journals",
+                            "queryData": "",
                             "defaultValue": "uiserv/journal@DEFAULT_JOURNAL",
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
                             "type": "selectJournal",
-                            "input": true,
-                            "queryData": ""
+                            "input": true
                           },
                           {
                             "label": {
@@ -277,7 +292,10 @@
                               "en": "Additional properties"
                             },
                             "key": "properties",
-                            "keyLabel": "Ключ",
+                            "keyLabel": {
+                              "ru": "Ключ",
+                              "en": "Key"
+                            },
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
                             "type": "datamap",
@@ -333,7 +351,6 @@
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
                             "customConditional": "show = data['storageType'] === 'ECOS_MODEL' || data['storageType'] === 'DEFAULT' || !data['storageType'];",
-                            "logic": [],
                             "type": "textfield",
                             "input": true
                           },
@@ -1292,7 +1309,13 @@
                             "optionalWhenDisabled": false,
                             "type": "selectJournal",
                             "input": true,
-                            "queryData": ""
+                            "queryData": "",
+                            "source": {
+                              "custom": {
+                                "columns": []
+                              },
+                              "type": "journal"
+                            }
                           }
                         ],
                         "row": "0-1",
@@ -1337,7 +1360,7 @@
                             "action": "custom",
                             "state": "",
                             "showValidations": false,
-                            "custom": "var currentRow = row;\nvar atts = [\n  ['attributes', {}], \n  ['formOptions', {}], \n  ['postActionRef', ''], \n  ['properties', {}],\n  ['sourceId', []]\n];\nvar formData = {};\nfor (var key of atts) {\n  formData[key[0]] = row[key[0]] || key[1];\n}\nCiteck.EcosFormUtils.getFormById('uiserv/form@create-variant-form', {\n    definition: 'definition?json'\n}).then(function(formConfig) {\n    const lang = form && form.i18next && form.i18next.options ? form.i18next.options.lng : 'en';\n    let modalTitle = '';\n    if(lang === 'ru') { \n      modalTitle = 'Вариант создания'; \n    }\n    if(lang === 'en') {\n      modalTitle = 'Create variant';\n    }\n    Citeck.Dialogs.showFormDialog({\n        title: modalTitle,\n        showDefaultButtons: true,\n        formDefinition: formConfig.definition,\n        formData: formData,\n        onSubmit: submission => {\n            var data = submission.data || {};\n\n\t\t\tfor (var key of atts) {\n\t\t\t  currentRow[key[0]] = data[key[0]] || key[1];\n\t\t\t}\n        }\n    })\n    \n});",
+                            "custom": "var currentRow = row;\nvar atts = [\n  ['attributes', {}], \n  ['formOptions', {}], \n  ['postActionRef', ''], \n  ['properties', {}],\n  ['sourceId', []]\n];\nvar formData = {};\nfor (var key of atts) {\n  formData[key[0]] = row[key[0]] || key[1];\n}\nCiteck.EcosFormUtils.getFormById('uiserv/form@create-variant-form', {\n    definition: 'definition?json'\n}).then(function(formConfig) {\n    const lang = _.get(form, 'i18next.options.lng', 'en');\n    const title = {\n      ru: 'Вариант создания',\n      en: 'Create variant'\n    };\n    \n    Citeck.Dialogs.showFormDialog({\n        title,\n        showDefaultButtons: true,\n        formDefinition: formConfig.definition,\n        formData: formData,\n        onSubmit: submission => {\n            var data = submission.data || {};\n\n      \t\t\tfor (var key of atts) {\n      \t\t\t  currentRow[key[0]] = data[key[0]] || key[1];\n      \t\t\t}\n        }\n    });\n    \n});",
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
                             "type": "button",
@@ -1684,6 +1707,72 @@
           }
         ],
         "input": false
+      },
+      {
+        "label": {
+          "ru": "Columns"
+        },
+        "key": "columns3",
+        "columns": [
+          {
+            "components": [
+              {
+                "label": {
+                  "ru": "Локализация",
+                  "en": "Localization"
+                },
+                "key": "ecos-type-localization",
+                "action": "custom",
+                "state": "",
+                "showValidations": false,
+                "custom": "Citeck.EcosFormBuilderUtils.showLocaleEditorForRecord(instance.options.recordId)",
+                "labelPosition": "left-left",
+                "size": "sm",
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
+                "customConditional": "show = _.get(instance, 'root.options.initiator.type') !== 'modal';\n",
+                "type": "button",
+                "input": true,
+                "addAnother": "ecos.forms.btn.add-another"
+              }
+            ],
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 0
+          },
+          {
+            "index": 1,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "components": [
+              {
+                "label": {
+                  "ru": "Редактировать поле",
+                  "en": "Edit field"
+                },
+                "key": "ecos-type-edit-form",
+                "action": "custom",
+                "state": "",
+                "showValidations": false,
+                "custom": "Citeck.EcosFormBuilderUtils.showBuilderForRecord(instance.options.recordId)",
+                "labelPosition": "right-right",
+                "size": "sm",
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
+                "customConditional": "show = _.get(instance, 'root.options.initiator.type') !== 'modal';\n",
+                "type": "button",
+                "input": true,
+                "addAnother": "ecos.forms.btn.add-another"
+              }
+            ]
+          }
+        ],
+        "oneColumnInViewMode": false,
+        "type": "columns",
+        "input": false,
+        "addAnother": "ecos.forms.btn.add-another"
       },
       {
         "columns": [
