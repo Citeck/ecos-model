@@ -14,48 +14,65 @@
     "components": [
       {
         "label": {
-          "ru": "Attributes"
+          "en": "Attributes",
+          "ru": "Атрибуты"
         },
         "keyLabel": "",
         "key": "attributes",
+        "refreshOn": [],
+        "optionalWhenDisabled": false,
         "type": "datamap",
         "input": true
       },
       {
         "label": {
-          "ru": "Form options"
+          "ru": "Параметры формы",
+          "en": "Form options"
         },
-        "keyLabel": "",
         "key": "formOptions",
-        "type": "datamap",
-        "input": true
-      },
-      {
-        "label": {
-          "ru": "Properties"
-        },
         "keyLabel": "",
-        "key": "properties",
+        "refreshOn": [],
+        "optionalWhenDisabled": false,
         "type": "datamap",
         "input": true
       },
       {
         "label": {
-          "ru": "Source ID"
+          "ru": "Свойства",
+          "en": "Properties"
         },
-        "defaultValue": "",
+        "key": "properties",
+        "keyLabel": "",
+        "refreshOn": [],
+        "optionalWhenDisabled": false,
+        "type": "datamap",
+        "input": true
+      },
+      {
+        "label": {
+          "ru": "ID источника данных",
+          "en": "Source ID"
+        },
         "key": "sourceId",
+        "defaultValue": "",
+        "refreshOn": [],
+        "optionalWhenDisabled": false,
         "type": "textfield",
         "input": true
       },
       {
         "label": {
-          "ru": "Post create action"
+          "ru": "Действие после создания",
+          "en": "Post create action"
         },
-        "journalId": "ui-actions",
         "key": "postActionRef",
+        "modalTitle": "",
+        "journalId": "ui-actions",
+        "refreshOn": [],
+        "optionalWhenDisabled": false,
         "type": "selectJournal",
-        "input": true
+        "input": true,
+        "queryData": ""
       }
     ]
   },
