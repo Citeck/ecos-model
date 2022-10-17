@@ -19,6 +19,7 @@ import java.time.Instant
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.function.BiConsumer
 import java.util.function.Consumer
+import java.util.regex.Pattern
 
 @Service
 class TypesServiceImpl(
@@ -37,6 +38,8 @@ class TypesServiceImpl(
             "file",
             "directory"
         )
+        private const val VALID_ID_PATTERN_TXT = "^[\\w\$/.-]+\\w\$"
+        private val VALID_ID_PATTERN = Pattern.compile(VALID_ID_PATTERN_TXT)
     }
 
     private var onTypeChangedListeners = CopyOnWriteArrayList<TypeDefListener>()
@@ -301,6 +304,11 @@ class TypesServiceImpl(
         }
         if (typeDefBefore != null && newRecord) {
             error("Type with id '${dto.id}' already exists")
+        }
+        if (dto.id.isNotBlank()
+                && typeDefBefore?.entity?.id != dto.id
+                && !VALID_ID_PATTERN.matcher(dto.id).matches()) {
+            error("Invalid type id: '${dto.id}'. Valid name pattern: '$VALID_ID_PATTERN_TXT'")
         }
 
         var entity = typeConverter.toEntity(dto)
