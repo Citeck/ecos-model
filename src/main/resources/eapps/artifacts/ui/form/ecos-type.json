@@ -451,32 +451,22 @@
                               "ru": "Список атрибутов",
                               "en": "Attributes list"
                             },
+                            "key": "columns5",
                             "columns": [
                               {
                                 "components": [
                                   {
-                                    "label": "Id",
-                                    "defaultValue": "",
+                                    "label": {
+                                      "ru": "Id",
+                                      "en": "Id"
+                                    },
+                                    "key": "id",
                                     "validate": {
                                       "pattern": "(^$|[_a-zA-Z][_\\w-.:]*)"
                                     },
-                                    "key": "id",
                                     "type": "textfield",
                                     "input": true
-                                  }
-                                ],
-                                "type": "column",
-                                "input": false,
-                                "key": "column",
-                                "index": 0,
-                                "md": 2
-                              },
-                              {
-                                "index": 1,
-                                "type": "column",
-                                "input": false,
-                                "key": "column",
-                                "components": [
+                                  },
                                   {
                                     "label": {
                                       "ru": "Имя",
@@ -490,10 +480,14 @@
                                     "row": "0-1"
                                   }
                                 ],
+                                "type": "column",
+                                "input": false,
+                                "key": "column",
+                                "index": 0,
                                 "md": 3
                               },
                               {
-                                "index": 2,
+                                "index": 1,
                                 "type": "column",
                                 "input": false,
                                 "key": "column",
@@ -597,10 +591,10 @@
                                     "input": true
                                   }
                                 ],
-                                "md": 2
+                                "md": 3
                               },
                               {
-                                "index": 3,
+                                "index": 2,
                                 "type": "column",
                                 "input": false,
                                 "key": "column",
@@ -629,7 +623,7 @@
                                 "md": 3
                               },
                               {
-                                "index": 4,
+                                "index": 3,
                                 "type": "column",
                                 "input": false,
                                 "key": "column",
@@ -683,10 +677,10 @@
                                     "input": true
                                   }
                                 ],
-                                "md": 2
+                                "md": 3
                               }
                             ],
-                            "key": "columns5",
+                            "oneColumnInViewMode": false,
                             "type": "columns",
                             "input": false,
                             "row": "0-0"
@@ -1730,7 +1724,7 @@
                 "size": "sm",
                 "refreshOn": [],
                 "optionalWhenDisabled": false,
-                "customConditional": "show = _.get(instance, 'root.options.initiator.type') !== 'modal';\n",
+                "customConditional": "show = _.get(instance, 'root.options.initiator.type') === 'widget';\n",
                 "type": "button",
                 "input": true,
                 "addAnother": "ecos.forms.btn.add-another"
@@ -1749,8 +1743,8 @@
             "components": [
               {
                 "label": {
-                  "ru": "Редактировать поле",
-                  "en": "Edit field"
+                  "ru": "Редактировать форму",
+                  "en": "Edit form"
                 },
                 "key": "ecos-type-edit-form",
                 "action": "custom",
@@ -1761,7 +1755,7 @@
                 "size": "sm",
                 "refreshOn": [],
                 "optionalWhenDisabled": false,
-                "customConditional": "show = _.get(instance, 'root.options.initiator.type') !== 'modal';\n",
+                "customConditional": "show = _.get(instance, 'root.options.initiator.type') === 'widget';\n",
                 "type": "button",
                 "input": true,
                 "addAnother": "ecos.forms.btn.add-another"
