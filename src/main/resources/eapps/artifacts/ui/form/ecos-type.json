@@ -1743,8 +1743,8 @@
             "components": [
               {
                 "label": {
-                  "ru": "Редактировать поле",
-                  "en": "Edit field"
+                  "ru": "Редактировать форму",
+                  "en": "Edit form"
                 },
                 "key": "ecos-type-edit-form",
                 "action": "custom",
