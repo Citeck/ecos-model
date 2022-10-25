@@ -202,7 +202,7 @@ class TypeRepoDaoImpl(private val repo: TypeRepository) : TypeRepoDao {
             return null
         }
         val attributeName = TypeEntity.replaceNameValid(StringUtils.trim(valuePredicate.getAttribute()))
-        if (!TypeEntity.isAttributeNameValid(attributeName)) {
+        if (TypeEntity.isAttributeNameNotValid(attributeName)) {
             return null
         }
         if (attributeName.startsWith(CONFIG_PROP)) {
@@ -419,7 +419,7 @@ class TypeRepoDaoImpl(private val repo: TypeRepository) : TypeRepoDao {
 
     private fun getCondition(valuePredicate: ValuePredicate): String? {
         val attributeName = TypeEntity.replaceNameValid(StringUtils.trim(valuePredicate.getAttribute()))
-        if (!TypeEntity.isAttributeNameValid(attributeName)) {
+        if (TypeEntity.isAttributeNameNotValid(attributeName)) {
             return null
         }
         if (attributeName.startsWith(CONFIG_PROP)) {
