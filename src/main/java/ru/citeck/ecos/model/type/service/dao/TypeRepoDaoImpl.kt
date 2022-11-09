@@ -229,8 +229,9 @@ class TypeRepoDaoImpl(private val repo: TypeRepository) : TypeRepoDao {
         }
 
         var specification: Specification<TypeEntity>? = null
-        if (ValuePredicate.Type.CONTAINS == valuePredicate.getType()
-            || ValuePredicate.Type.LIKE == valuePredicate.getType()
+        if ((ValuePredicate.Type.CONTAINS == valuePredicate.getType()
+                || ValuePredicate.Type.LIKE == valuePredicate.getType())
+            && isPropertyCanBeString(attributeName)
         ) {
             val attributeValue = "%" + valuePredicate.getValue().asText().lowercase() + "%"
             specification = Specification { root: Root<TypeEntity>,
@@ -238,6 +239,7 @@ class TypeRepoDaoImpl(private val repo: TypeRepository) : TypeRepoDao {
                                             builder: CriteriaBuilder ->
                 builder.like(builder.lower(root.get(attributeName)), attributeValue)
             }
+
         } else {
             val objectValue: Comparable<*>? = getObjectValue(attributeName, valuePredicate.getValue().asText())
             if (objectValue != null) {
@@ -289,17 +291,32 @@ class TypeRepoDaoImpl(private val repo: TypeRepository) : TypeRepoDao {
         return specification
     }
 
-    private fun getObjectValue(attributeName: String, attributeValue: String): Comparable<*>? {
-        var searchField: Field? = null
+    private fun isPropertyCanBeString(attributeName: String): Boolean {
+        var result = true
+        var searchField = getField(attributeName)
+        if (searchField != null
+            && (searchField.type == java.util.Date::class.java || searchField.type == Instant::class.java)) {
+            result = false
+        }
+        return result
+    }
+
+    private fun getField(attributeName: String):Field?{
+        var field: Field? = null
         try {
-            searchField = TypeEntity::class.java.getDeclaredField(attributeName)
+            field = TypeEntity::class.java.getDeclaredField(attributeName)
         } catch (e: NoSuchFieldException) {
             var superclass: Class<in Nothing> = TypeEntity::class.java.superclass
-            while (searchField == null) {
-                searchField = superclass.getDeclaredField(attributeName)
+            while (field == null) {
+                field = superclass.getDeclaredField(attributeName)
                 superclass = superclass::class.java.superclass
             }
         }
+        return field
+    }
+
+    private fun getObjectValue(attributeName: String, attributeValue: String): Comparable<*>? {
+        var searchField = getField(attributeName)
         if (searchField != null)
             try {
                 when (searchField.type) {
