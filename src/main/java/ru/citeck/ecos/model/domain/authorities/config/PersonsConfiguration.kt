@@ -72,7 +72,7 @@ class PersonsConfiguration(
             }
         ) {
             override fun setRecordsServiceFactory(serviceFactory: RecordsServiceFactory) {
-                serviceFactory.localRecordsResolver.registerVirtualRecord(
+                serviceFactory.recordsResolver.registerVirtualRecord(
                     RecordRef.create(AuthorityType.PERSON.sourceId, AuthUser.SYSTEM),
                     SystemUserRecord()
                 )

@@ -70,5 +70,4 @@ class VersionDiffRecords(
     private data class VersionDiffResult(
         val diff: String
     )
-
 }

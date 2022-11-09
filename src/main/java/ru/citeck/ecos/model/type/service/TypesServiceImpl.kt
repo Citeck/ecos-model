@@ -305,9 +305,10 @@ class TypesServiceImpl(
         if (typeDefBefore != null && newRecord) {
             error("Type with id '${dto.id}' already exists")
         }
-        if (dto.id.isNotBlank()
-                && typeDefBefore?.entity?.id != dto.id
-                && !VALID_ID_PATTERN.matcher(dto.id).matches()) {
+        if (dto.id.isNotBlank() &&
+            typeDefBefore?.entity?.id != dto.id &&
+            !VALID_ID_PATTERN.matcher(dto.id).matches()
+        ) {
             error("Invalid type id: '${dto.id}'. Valid name pattern: '$VALID_ID_PATTERN_TXT'")
         }
 

@@ -39,14 +39,14 @@ class VersionRecords : AbstractRecordsDao(), RecordsQueryDao {
 
     private fun versionDaoIsNotExists(record: EntityRef): Boolean {
         return recordsService.getAtt(
-            "${record.getAppName()}/src@${record.getSourceId()}-$ID", "_notExists?bool"
+            "${record.getAppName()}/src@${record.getSourceId()}-$ID",
+            "_notExists?bool"
         ).asBoolean()
     }
 
     private data class VersionQuery(
         val record: EntityRef
     )
-
 }
 
 fun EntityRef.isAlfRecord(): Boolean {
