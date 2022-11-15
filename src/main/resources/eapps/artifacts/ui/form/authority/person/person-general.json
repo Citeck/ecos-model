@@ -12,6 +12,7 @@
   "i18n": {
     "ru": {
       "userName": "Логин",
+      "employeeId": "Табельный номер",
       "lastName": "Фамилия",
       "firstName": "Имя",
       "middleName": "Отчество",
@@ -29,6 +30,7 @@
     },
     "en": {
       "userName": "Login",
+      "employeeId": "Employee ID",
       "lastName": "Last name",
       "firstName": "First name",
       "middleName": "Middle name",
@@ -68,6 +70,21 @@
                     "optionalWhenDisabled": false,
                     "properties": {
                       "attribute": "_localId"
+                    },
+                    "type": "textfield",
+                    "input": true
+                  },
+                  {
+                    "label": {
+                      "ru": "employeeId"
+                    },
+                    "key": "ecos_employeeId",
+                    "clearOnHide": false,
+                    "defaultValue": "",
+                    "refreshOn": [],
+                    "optionalWhenDisabled": false,
+                    "properties": {
+                      "attribute": "employeeId"
                     },
                     "type": "textfield",
                     "input": true
