@@ -207,6 +207,13 @@
                         "input": true
                       },
                       {
+                        "label": "employeeId",
+                        "defaultValue": "",
+                        "key": "employeeId",
+                        "type": "textfield",
+                        "input": true
+                      },
+                      {
                         "label": "city",
                         "defaultValue": "",
                         "key": "city",
