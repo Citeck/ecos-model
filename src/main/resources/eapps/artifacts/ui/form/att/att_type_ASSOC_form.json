@@ -21,6 +21,17 @@
         "key": "typeRef",
         "type": "selectJournal",
         "input": true
+      },
+      {
+        "label": {
+          "ru": "Дочерняя ассоциация",
+          "en": "Child association"
+        },
+        "key": "child",
+        "refreshOn": [],
+        "optionalWhenDisabled": false,
+        "type": "checkbox",
+        "input": true
       }
     ]
   },
