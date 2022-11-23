@@ -566,12 +566,35 @@
                                       "ru": "Настроить",
                                       "en": "Setup"
                                     },
+                                    "key": "submit6",
                                     "action": "custom",
                                     "state": "",
                                     "showValidations": false,
                                     "custom": "var currentRow = row;\nvar config = row.config || {}; \nvar formData = config;\n\nCiteck.EcosFormUtils.getFormById('uiserv/form@att-type-' + row.type + '-form', {\n    definition: 'definition?json'\n}).then(function(formConfig) {\n    \n    var inputs = Citeck.EcosFormUtils.getFormInputs(formConfig.definition);\n\n    Citeck.Dialogs.showFormDialog({\n        title: 'Attribute type config',\n        showDefaultButtons: true,\n        formDefinition: formConfig.definition,\n        formData: formData,\n        onSubmit: submission => {\n            var data = submission.data || {};\n            var configData = {};\n            for (var i in inputs) {\n                var att = inputs[i].attribute;\n                configData[att] = data[att];\n            }\n            currentRow.config = configData;\n        }\n    })\n    \n});",
                                     "block": true,
-                                    "key": "submit6",
+                                    "refreshOn": [],
+                                    "optionalWhenDisabled": false,
+                                    "logic": [
+                                      {
+                                        "name": "check form",
+                                        "trigger": {
+                                          "type": "javascript",
+                                          "javascript": "result = Citeck.EcosFormUtils.getFormById('uiserv/form@att-type-' + row.type + '-form', {\n    definition: 'definition?json'\n}).then(config => {\n  const isEmptyConfig = _.isEmpty(_.get(config, 'definition'));\n  \n  instance.showElement(!isEmptyConfig);\n  \n  return config;\n});\n"
+                                        },
+                                        "actions": [
+                                          {
+                                            "name": "test",
+                                            "type": "property",
+                                            "property": {
+                                              "label": "Container Custom Class",
+                                              "value": "customClass",
+                                              "type": "string"
+                                            },
+                                            "text": "test-test-test"
+                                          }
+                                        ]
+                                      }
+                                    ],
                                     "type": "button",
                                     "input": true,
                                     "row": "0-3"
@@ -1787,7 +1810,8 @@
         "input": false
       }
     ],
-    "display": "form"
+    "display": "form",
+    "formId": "ecos-type"
   },
   "attributes": {}
 }
