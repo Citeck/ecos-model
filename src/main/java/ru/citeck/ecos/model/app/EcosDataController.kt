@@ -12,7 +12,8 @@ import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.data.sql.records.DbRecordsDao
 import ru.citeck.ecos.data.sql.records.migration.AssocsDbMigration
-import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
+import ru.citeck.ecos.model.domain.comments.config.COMMENT_REPO_DAO_ID
+import ru.citeck.ecos.model.domain.comments.config.ECOS_COMMENT_TYPE_REF
 import ru.citeck.ecos.model.type.service.utils.EModelTypeUtils
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.webapp.api.constants.AppName
@@ -40,12 +41,12 @@ class EcosDataController(
     )
     fun runAssocsMigration(): Map<String, String> {
 
-        val commentsDao = recordsService.getRecordsDao("comment-repo", DbRecordsDao::class.java)
+        val commentsDao = recordsService.getRecordsDao(COMMENT_REPO_DAO_ID, DbRecordsDao::class.java)
             ?: error("CommentsDao doesn't found")
 
         commentsDao.runMigrationByType(
             AssocsDbMigration.TYPE,
-            TypeUtils.getTypeRef("ecos-comment"),
+            ECOS_COMMENT_TYPE_REF,
             false,
             ObjectData.create()
         )
