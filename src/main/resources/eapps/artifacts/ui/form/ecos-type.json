@@ -640,7 +640,7 @@
                                     "leftIcon": "icon-decision-tables",
                                     "block": true,
                                     "key": "submit3",
-                                    "customConditional": "show = _.get(data, 'ecosEdition.edition') === 'enterprise'",
+                                    "customConditional": "show = _.get(data, 'ecosEdition.isEnterprise', false)",
                                     "type": "button",
                                     "input": true,
                                     "row": "0-4"
@@ -816,7 +816,7 @@
                                     "leftIcon": "icon-decision-tables",
                                     "block": true,
                                     "key": "submit3",
-                                    "customConditional": "show = _.get(data, 'ecosEdition.edition') === 'enterprise'",
+                                    "customConditional": "show = _.get(data, 'ecosEdition.isEnterprise', false)",
                                     "type": "button",
                                     "input": true,
                                     "row": "0-4"
