@@ -841,14 +841,16 @@
                       "ru": "Панель",
                       "en": "Panel"
                     },
+                    "key": "panel9",
                     "title": {
                       "ru": "Настройка прав для тип данных",
                       "en": "Type Permissions"
                     },
                     "collapsible": true,
                     "collapsed": false,
-                    "key": "panel9",
-                    "customConditional": "show = _.get(data, 'ecosEdition.edition') === 'enterprise'",
+                    "refreshOn": [],
+                    "optionalWhenDisabled": false,
+                    "customConditional": "show = _.get(data, 'ecosEdition.isEnterprise', false)",
                     "type": "panel",
                     "input": false,
                     "components": [
@@ -941,13 +943,13 @@
                     "label": "ecosEdition",
                     "source": {
                       "type": "record",
+                      "forceLoad": true,
                       "record": {
-                        "id": "alfresco/meta@",
+                        "id": "emodel/meta@",
                         "attributes": {
-                          "edition": "attributes.edition"
+                          "isEnterprise": "$license.enterprise?bool"
                         }
-                      },
-                      "forceLoad": false
+                      }
                     },
                     "update": {
                       "type": "once"
