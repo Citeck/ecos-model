@@ -6,7 +6,7 @@ name:
 
 system: true
 journalRef: uiserv/journal@authority
-sourceId: alfresco/
+storageType: ECOS_MODEL
 
 properties:
   alfType: cm:authority

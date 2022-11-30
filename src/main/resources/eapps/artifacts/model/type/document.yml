@@ -7,7 +7,7 @@ name:
 parentRef: emodel/type@user-base
 
 system: true
-sourceId: alfresco/
+storageType: ECOS_MODEL
 
 properties:
   alfType: ecos:document

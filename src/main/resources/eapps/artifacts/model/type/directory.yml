@@ -9,5 +9,4 @@ formRef: uiserv/form@directory-form
 
 system: true
 dashboardType: case-details
-sourceId: alfresco/
-
+storageType: ECOS_MODEL
