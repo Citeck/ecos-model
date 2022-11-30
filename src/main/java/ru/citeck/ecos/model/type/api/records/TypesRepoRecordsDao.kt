@@ -101,8 +101,11 @@ class TypesRepoRecordsDao(
         }
 
         @AttName("?disp")
-        fun getDisplayName(): MLText {
-            return typeDef.name
+        fun getDisplayName(): Any {
+            if (!MLText.isEmpty(typeDef.name)) {
+                return typeDef.name
+            }
+            return typeDef.id
         }
 
         @AttName("_type")
