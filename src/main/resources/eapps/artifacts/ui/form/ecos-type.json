@@ -1810,8 +1810,7 @@
         "input": false
       }
     ],
-    "display": "form",
-    "formId": "ecos-type"
+    "display": "form"
   },
   "attributes": {}
 }
