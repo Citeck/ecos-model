@@ -82,7 +82,8 @@
                                     "key": "formRef",
                                     "modalTitle": "",
                                     "customActionRefs": [
-                                      "uiserv/action@edit-form"
+                                      "uiserv/action@edit-form",
+                                      "uiserv/action@debug-form"
                                     ],
                                     "enableCreateButton": true,
                                     "journalId": "ecos-forms",
