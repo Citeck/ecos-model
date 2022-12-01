@@ -21,6 +21,10 @@ import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 @Component
 class TypeDefResolver {
     companion object {
+
+        const val DEFAULT_FORM = "DEFAULT_FORM"
+        const val DEFAULT_JOURNAL = "DEFAULT_JOURNAL"
+
         private val log = KotlinLogging.logger {}
 
         private val TYPES_WITHOUT_CREATE_VARIANTS_COMPUTATION = setOf(
@@ -124,10 +128,10 @@ class TypeDefResolver {
         if (RecordRef.isEmpty(resTypeDef.formRef) && resTypeDef.inheritForm) {
             resTypeDef.withFormRef(resolvedParentDef.formRef)
         }
-        if (resTypeDef.formRef.id == "DEFAULT_FORM") {
+        if (resTypeDef.formRef.id == DEFAULT_FORM) {
             resTypeDef.withFormRef(resTypeDef.formRef.withId("type$" + resTypeDef.id))
         }
-        if (resTypeDef.journalRef.id == "DEFAULT_JOURNAL") {
+        if (resTypeDef.journalRef.id == DEFAULT_JOURNAL) {
             resTypeDef.withJournalRef(resTypeDef.journalRef.withId("type$" + resTypeDef.id))
         }
         val contentConfig = resTypeDef.contentConfig.copy()

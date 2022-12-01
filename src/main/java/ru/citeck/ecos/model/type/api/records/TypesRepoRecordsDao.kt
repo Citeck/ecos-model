@@ -8,6 +8,7 @@ import ru.citeck.ecos.commons.json.YamlUtils
 import ru.citeck.ecos.events2.type.RecordEventsService
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.model.type.service.TypesService
+import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records2.predicate.PredicateService
 import ru.citeck.ecos.records2.predicate.model.Predicate
@@ -17,6 +18,7 @@ import ru.citeck.ecos.records3.record.dao.atts.RecordAttsDao
 import ru.citeck.ecos.records3.record.dao.query.RecordsQueryDao
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import java.nio.charset.StandardCharsets
 
@@ -90,6 +92,20 @@ class TypesRepoRecordsDao(
         val typeDef: TypeDef,
         val typeService: TypesService
     ) {
+
+        fun getFormRef(): EntityRef {
+            if (typeDef.id.isNotBlank() && typeDef.formRef.getLocalId() == TypeDefResolver.DEFAULT_FORM) {
+                return typeDef.formRef.withLocalId("type$" + typeDef.id)
+            }
+            return typeDef.formRef
+        }
+
+        fun getJournalRef(): EntityRef {
+            if (typeDef.id.isNotBlank() && typeDef.journalRef.getLocalId() == TypeDefResolver.DEFAULT_JOURNAL) {
+                return typeDef.journalRef.withLocalId("type$" + typeDef.id)
+            }
+            return typeDef.journalRef
+        }
 
         fun getData(): ByteArray {
             return YamlUtils.toNonDefaultString(typeDef).toByteArray(StandardCharsets.UTF_8)
