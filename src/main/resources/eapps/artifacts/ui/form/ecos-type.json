@@ -80,10 +80,16 @@
                                       "en": "Form"
                                     },
                                     "key": "formRef",
+                                    "tooltip": {
+                                      "ru": "Если вы желаете отредактировать форму по умолчанию, то создайте её копию.",
+                                      "en": "If you want to edit default form, create a copy of it."
+                                    },
+                                    "hideEditRowButton": true,
                                     "modalTitle": "",
                                     "customActionRefs": [
                                       "uiserv/action@edit-form",
-                                      "uiserv/action@debug-form"
+                                      "uiserv/action@debug-form",
+                                      "uiserv/action@record-copy"
                                     ],
                                     "enableCreateButton": true,
                                     "journalId": "ecos-forms",
@@ -133,9 +139,15 @@
                               "en": "Journal"
                             },
                             "key": "journalRef",
+                            "tooltip": {
+                              "ru": "Если вы желаете отредактировать журнал по умолчанию, то создайте его копию.",
+                              "en": "If you want to edit default journal, then create a copy of it."
+                            },
+                            "hideEditRowButton": true,
                             "modalTitle": "",
                             "customActionRefs": [
-                              "uiserv/action@edit"
+                              "uiserv/action@edit",
+                              "uiserv/action@record-copy"
                             ],
                             "enableCreateButton": true,
                             "journalId": "ecos-journals",
