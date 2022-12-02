@@ -174,6 +174,9 @@
                                       "uiserv/action@debug-form",
                                       "uiserv/action@record-copy"
                                     ],
+                                    "computed": {
+                                      "valueDisplayName": "let recForDisp = value;\nif (value.id.indexOf('uiserv/form@type$') === 0) {\nrecForDisp = Citeck.Records.get('uiserv/form@DEFAULT_FORM');\n}\ndisp = recForDisp.load('?disp');\n"
+                                    },
                                     "enableCreateButton": true,
                                     "journalId": "ecos-forms",
                                     "queryData": "",
@@ -235,6 +238,9 @@
                             "enableCreateButton": true,
                             "journalId": "ecos-journals",
                             "queryData": "",
+                            "computed": {
+                              "valueDisplayName": "let recForDisp = value;\nif (value.id.indexOf('uiserv/journal@type$') === 0) {\nrecForDisp = Citeck.Records.get('uiserv/journal@DEFAULT_JOURNAL');\n}\ndisp = recForDisp.load('?disp');\n"
+                            },
                             "defaultValue": "uiserv/journal@DEFAULT_JOURNAL",
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
