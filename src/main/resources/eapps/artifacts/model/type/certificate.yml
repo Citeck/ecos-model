@@ -9,4 +9,4 @@ parentRef: emodel/type@file
 system: true
 
 dashboardType: case-details
-sourceId: alfresco/
+storageType: ECOS_MODEL

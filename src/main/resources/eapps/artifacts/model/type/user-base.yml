@@ -5,4 +5,4 @@ name:
   en: Base user type
 
 system: true
-sourceId: alfresco/
+storageType: ECOS_MODEL
