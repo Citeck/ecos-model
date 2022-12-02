@@ -60,13 +60,96 @@
                               "ru": "Родитель",
                               "en": "Parent"
                             },
-                            "key": "parentRef",
+                            "key": "_parentRefSelector",
+                            "disableInlineEdit": true,
+                            "persistent": false,
+                            "clearOnHide": false,
+                            "dataSrc": "custom",
+                            "data": {
+                              "custom": "values = [\n  {\n    label: utils.getTextByLocale({\n      en: 'Case',\n      ru: 'Кейс'\n    }),\n    value: 'emodel/type@case'\n  },  \n  {\n    label: utils.getTextByLocale({\n      en: 'Data List Item',\n      ru: 'Справочник'\n    }),\n    value: 'emodel/type@data-list'\n  },\n  {\n    label: utils.getTextByLocale({\n      en: 'Rest',\n      ru: 'Остальное'\n    }),\n    value: '__rest__'\n  },\n];"
+                            },
+                            "defaultValue": "",
+                            "calculateValue": "const { parentRef, _parentRefJournal, _parentRefSelector } = data;\n\nif (_parentRefSelector === '__rest__') {\n  return;\n}\n\nif (!parentRef) {\n  value = 'emodel/type@case';\n} \n\nif (parentRef && ['emodel/type@data-list', 'emodel/type@case'].includes(parentRef)) {\n  value = parentRef;\n} else { \n  value = '__rest__';\n}",
+                            "allowCalculateOverride": true,
+                            "optionalWhenDisabled": false,
+                            "properties": {
+                              "value": "parentRef"
+                            },
+                            "customConditional": "const isView = _.get(instance, 'currentForm.options.formMode') === 'VIEW';\n\nshow = isView ? ['emodel/type@data-list', 'emodel/type@case'].includes(data.parentRef) : true;",
+                            "type": "ecosSelect",
+                            "input": true
+                          },
+                          {
+                            "label": {
+                              "en": "Parent",
+                              "ru": "Родитель"
+                            },
+                            "key": "_parentRefJournal",
+                            "validate": {
+                              "required": true
+                            },
+                            "disableInlineEdit": true,
+                            "persistent": false,
+                            "mask": true,
                             "modalTitle": "",
                             "journalId": "ecos-types",
-                            "defaultValue": "emodel/type@case",
-                            "refreshOn": [],
+                            "queryData": "",
+                            "refreshOn": [
+                              "_parentRefSelector"
+                            ],
+                            "calculateValue": "const { parentRef, _parentRefSelector } = data;\n\nif (parentRef) {\n  value = parentRef;\n} ",
+                            "allowCalculateOverride": true,
                             "optionalWhenDisabled": false,
+                            "properties": {
+                              "value": "parentRef"
+                            },
+                            "conditional": {
+                              "show": "true",
+                              "when": "_parentRefSelector",
+                              "eq": "__rest__"
+                            },
+                            "logic": [
+                              {
+                                "name": "toggle label",
+                                "trigger": {
+                                  "type": "javascript",
+                                  "javascript": "const isViewMode = _.get(instance, 'currentForm.options.formMode') === 'VIEW';\n\nresult = !isViewMode;"
+                                },
+                                "actions": [
+                                  {
+                                    "name": "hide label",
+                                    "type": "property",
+                                    "property": {
+                                      "label": {
+                                        "ru": "Скрыть надпись",
+                                        "en": "Hide Label"
+                                      },
+                                      "value": "hideLabel",
+                                      "type": "boolean"
+                                    },
+                                    "state": "true"
+                                  }
+                                ]
+                              }
+                            ],
                             "type": "selectJournal",
+                            "input": true
+                          },
+                          {
+                            "label": {
+                              "ru": "parentRef"
+                            },
+                            "key": "parentRef",
+                            "clearOnHide": false,
+                            "refreshOn": [
+                              "_parentRefSelector",
+                              "_parentRefJournal"
+                            ],
+                            "customDefaultValue": "value = 'emodel/type@case';\n",
+                            "calculateValue": "const { _parentRefSelector, _parentRefJournal, parentRef } = data;\n\nvalue = parentRef;\n\nif (_parentRefSelector) {\n  if (_parentRefSelector === '__rest__') {\n    if (_parentRefJournal) {\n      value = _parentRefJournal;\n    }\n  } else {\n    value = _parentRefSelector;\n  }\n}",
+                            "triggerChangeWhenCalculate": true,
+                            "optionalWhenDisabled": false,
+                            "type": "hidden",
                             "input": true
                           },
                           {
