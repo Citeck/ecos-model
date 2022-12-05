@@ -7,7 +7,7 @@ name:
 parentRef: emodel/type@user-base
 
 system: false
-sourceId: alfresco/
+storageType: ECOS_MODEL
 
 actions:
   - uiserv/action@view-dashboard
