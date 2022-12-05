@@ -1,14 +1,17 @@
 package ru.citeck.ecos.model.documents.records;
 
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.commons.data.DataValue;
+import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils;
+import ru.citeck.ecos.records2.RecordConstants;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.predicate.model.Predicates;
 import ru.citeck.ecos.records3.record.atts.dto.RecordAtts;
+import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName;
 import ru.citeck.ecos.records3.record.atts.schema.resolver.AttContext;
 import ru.citeck.ecos.records3.record.atts.value.AttValue;
 import ru.citeck.ecos.records3.record.atts.value.impl.AttValueDelegate;
@@ -24,6 +27,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQueryDao {
 
     private final String DOCUMENT_TYPES_LANGUAGE = "document-types";
@@ -74,7 +78,6 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
         }
     }
 
-
     private Object getTypesDocuments(RecordsQuery recordsQuery) {
 
         RecordRef recordRef = RecordRef.valueOf(recordsQuery.getQuery().get("recordRef").asText());
@@ -90,11 +93,8 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
 
         typeRefsAtts.forEach(type -> {
             String sourceId = type.get("sourceId").asText();
-            if (sortedTypesRefs.containsKey(sourceId)) {
-                sortedTypesRefs.get(sourceId).add("emodel/" + type.getId());
-            } else {
-                sortedTypesRefs.put(sourceId, new ArrayList<>(Collections.singletonList("emodel/" + type.getId())));
-            }
+            sortedTypesRefs.computeIfAbsent(sourceId, srcId -> new ArrayList<>())
+                .add(TypeUtils.getTypeRef(type.getId().getLocalId()).toString());
         });
 
         RecsQueryRes<Object> queryResWithAtts = new RecsQueryRes<>();
@@ -123,35 +123,29 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
         return queryResWithAtts;
     }
 
-
     private List<TypeDocumentsRecord> getRecordsTypes(String sourceId,
                                                       RecordRef recordRef,
                                                       List<String> types) {
-
-        Map<String, String> context = new LinkedHashMap<>();
-        context.put("_type", "_type?id");
-
         RecordsQuery query = RecordsQuery.create()
             .withSourceId(sourceId)
             .withQuery(Predicates.and(
-                Predicates.eq("_parent", recordRef.toString()),
-                Predicates.in("_type", types)
+                Predicates.eq(RecordConstants.ATT_PARENT, recordRef.toString()),
+                Predicates.in(RecordConstants.ATT_TYPE, types)
             ))
             .build();
-        RecsQueryRes<RecordAtts> documents = recordsService.query(query, context, true);
+        RecsQueryRes<DocumentRefWithType> documents = recordsService.query(query, DocumentRefWithType.class);
 
         List<TypeDocumentsRecord> typeDocumentsList = new ArrayList<>();
 
         types.forEach(type -> typeDocumentsList.add(new TypeDocumentsRecord(type, documents.getRecords().stream()
-            .filter(doc -> doc.getAtt("_type").get("?id").asText().equals(type))
-            .map(RecordAtts::getId)
+            .filter(doc -> doc.getType().toString().equals(type))
+            .map(DocumentRefWithType::getRef)
             .collect(Collectors.toList()))));
 
         return typeDocumentsList;
     }
 
     private List<RecVal> getRecordsPostProcess(List<RecordAtts> attsFromTarget) {
-
         List<RecVal> result = new ArrayList<>();
 
         attsFromTarget.forEach(atts -> {
@@ -160,11 +154,6 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
         });
 
         return result;
-    }
-
-    @Autowired
-    public void setEcosWebAppsApi(EcosWebAppsApi ecosWebAppsApi) {
-        this.ecosWebAppsApi = ecosWebAppsApi;
     }
 
     @NotNull
@@ -198,5 +187,13 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
         private final String id = UUID.randomUUID().toString();
         private final String type;
         private final List<RecordRef> documents;
+    }
+
+    @Data
+    static class DocumentRefWithType {
+        @AttName("?id")
+        private RecordRef ref;
+        @AttName("_type?id")
+        private RecordRef type;
     }
 }
