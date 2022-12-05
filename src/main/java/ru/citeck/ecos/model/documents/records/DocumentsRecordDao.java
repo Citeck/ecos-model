@@ -33,7 +33,7 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
     private final String DOCUMENT_TYPES_LANGUAGE = "document-types";
     private final String TYPES_DOCUMENTS_LANGUAGE = "types-documents";
 
-    private EcosWebAppsApi ecosWebAppsApi;
+    private final EcosWebAppsApi ecosWebAppsApi;
 
     @Nullable
     @Override
