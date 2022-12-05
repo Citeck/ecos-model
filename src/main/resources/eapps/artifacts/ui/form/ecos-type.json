@@ -53,7 +53,28 @@
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
                             "type": "textfield",
-                            "input": true
+                            "input": true,
+                            "logic": [
+                              {
+                                "name": "disabled",
+                                "trigger": {
+                                  "type": "javascript",
+                                  "javascript": "result = _.get(instance, 'root.options.formMode') !== 'CREATE';"
+                                },
+                                "actions": [
+                                  {
+                                    "name": "setDisabled",
+                                    "type": "property",
+                                    "property": {
+                                      "label": "Disabled",
+                                      "value": "disabled",
+                                      "type": "boolean"
+                                    },
+                                    "state": "true"
+                                  }
+                                ]
+                              }
+                            ]
                           },
                           {
                             "label": {
