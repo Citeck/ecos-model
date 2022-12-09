@@ -7,6 +7,7 @@ import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
 import ru.citeck.ecos.model.type.service.resolver.TypesProvider
 import ru.citeck.ecos.webapp.api.promise.Promise
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
+import ru.citeck.ecos.webapp.lib.registry.EcosRegistryProps
 import ru.citeck.ecos.webapp.lib.registry.MutableEcosRegistry
 import ru.citeck.ecos.webapp.lib.registry.init.EcosRegistryInitializer
 
@@ -23,7 +24,8 @@ class TypesRegistryInitializer(
 
     override fun init(
         registry: MutableEcosRegistry<TypeDef>,
-        values: Map<String, EntityWithMeta<TypeDef>>
+        values: Map<String, EntityWithMeta<TypeDef>>,
+        props: EcosRegistryProps.Initializer
     ): Promise<*> {
 
         val types = typesService.getAllWithMeta()

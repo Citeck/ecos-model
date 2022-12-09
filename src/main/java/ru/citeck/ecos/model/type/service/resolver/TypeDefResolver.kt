@@ -188,19 +188,24 @@ class TypeDefResolver {
         val attributes = mutableMapOf<String, AttributeDef>()
         val systemAttributes = mutableMapOf<String, AttributeDef>()
 
-        fun apply(model: TypeModelDef) {
-            model.roles.forEach { roles[it.id] = it }
-            model.statuses.forEach { statuses[it.id] = it }
-            model.attributes.forEach { attributes[it.id] = it }
-            model.systemAttributes.forEach { systemAttributes[it.id] = it }
-        }
+        parentTypeDef.model.roles.forEach { roles[it.id] = it }
+        parentTypeDef.model.statuses.forEach { statuses[it.id] = it }
+        parentTypeDef.model.attributes.forEach { attributes[it.id] = it }
+        parentTypeDef.model.systemAttributes.forEach { systemAttributes[it.id] = it }
 
-        apply(parentTypeDef.model)
-        apply(typeDef.model)
+        typeDef.model.roles.forEach { roles[it.id] = it }
+        typeDef.model.statuses.forEach { statuses[it.id] = it }
+        typeDef.model.attributes.forEach { attributes[it.id] = it }
+        typeDef.model.systemAttributes.forEach { systemAttributes[it.id] = it }
+
+        val stages = typeDef.model.stages.ifEmpty {
+            parentTypeDef.model.stages
+        }
 
         return TypeModelDef.create {
             withRoles(roles.values.toList())
             withStatuses(statuses.values.toList())
+            withStages(stages)
             withAttributes(attributes.values.toList())
             withSystemAttributes(systemAttributes.values.toList())
         }

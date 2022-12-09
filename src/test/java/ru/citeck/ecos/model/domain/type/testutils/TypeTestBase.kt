@@ -32,6 +32,7 @@ import ru.citeck.ecos.webapp.lib.model.type.records.TypeRecordsDao
 import ru.citeck.ecos.webapp.lib.model.type.registry.DefaultTypesInitializer
 import ru.citeck.ecos.webapp.lib.model.type.registry.EcosTypesRegistry
 import ru.citeck.ecos.webapp.lib.model.type.registry.TypeArtifactsInitializer
+import ru.citeck.ecos.webapp.lib.registry.EcosRegistryProps
 import java.io.File
 
 open class TypeTestBase {
@@ -79,6 +80,7 @@ open class TypeTestBase {
         artifactHandler = TypeArtifactHandler(typeService)
 
         val typesRegistry = EcosTypesRegistry(
+            EcosRegistryProps.DEFAULT,
             listOf(
                 DefaultTypesInitializer(),
                 TypeArtifactsInitializer(ecosAppsServiceFactory.localAppService),
