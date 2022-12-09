@@ -22,6 +22,7 @@ final class TypeInhMixin(
             "parent",
             "modelRoles",
             "modelStatuses",
+            "modelStages",
             "modelAttributes",
             "parentModelAttributes",
             "docLibEnabled",
@@ -54,6 +55,9 @@ final class TypeInhMixin(
             }
             "modelStatuses" -> {
                 typeDef.model.statuses
+            }
+            "modelStages" -> {
+                typeDef.model.stages
             }
             "modelAttributes" -> {
                 typeDef.model.attributes

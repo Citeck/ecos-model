@@ -7,6 +7,7 @@ import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
+import ru.citeck.ecos.model.lib.procstages.dto.ProcStageDef
 import ru.citeck.ecos.model.lib.role.dto.RoleDef
 import ru.citeck.ecos.model.lib.status.dto.StatusDef
 import ru.citeck.ecos.model.type.service.TypesService
@@ -57,15 +58,19 @@ class TypesRepoRecordsMutDao(
         }
 
         fun setModelRoles(roles: List<RoleDef>) {
-            withModel(model.copy().withRoles(roles).build())
+            model.withRoles(roles)
         }
 
         fun setModelStatuses(statuses: List<StatusDef>) {
-            withModel(model.copy().withStatuses(statuses).build())
+            model.withStatuses(statuses)
+        }
+
+        fun setModelStages(stages: List<ProcStageDef>) {
+            model.withStages(stages)
         }
 
         fun setModelAttributes(attributes: List<AttributeDef>) {
-            withModel(model.copy().withAttributes(attributes).build())
+            model.withAttributes(attributes)
         }
 
         fun setDocLibEnabled(enabled: Boolean) {
