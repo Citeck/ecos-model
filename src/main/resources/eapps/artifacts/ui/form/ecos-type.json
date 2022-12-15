@@ -53,20 +53,124 @@
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
                             "type": "textfield",
-                            "input": true
+                            "input": true,
+                            "logic": [
+                              {
+                                "name": "disabled",
+                                "trigger": {
+                                  "type": "javascript",
+                                  "javascript": "result = _.get(instance, 'root.options.formMode') !== 'CREATE';"
+                                },
+                                "actions": [
+                                  {
+                                    "name": "setDisabled",
+                                    "type": "property",
+                                    "property": {
+                                      "label": "Disabled",
+                                      "value": "disabled",
+                                      "type": "boolean"
+                                    },
+                                    "state": "true"
+                                  }
+                                ]
+                              }
+                            ]
                           },
                           {
                             "label": {
                               "ru": "Родитель",
                               "en": "Parent"
                             },
-                            "key": "parentRef",
+                            "key": "_parentRefSelector",
+                            "disableInlineEdit": true,
+                            "persistent": false,
+                            "clearOnHide": false,
+                            "dataSrc": "custom",
+                            "data": {
+                              "custom": "values = [\n  {\n    label: utils.getTextByLocale({\n      en: 'Case',\n      ru: 'Кейс'\n    }),\n    value: 'emodel/type@case'\n  },  \n  {\n    label: utils.getTextByLocale({\n      en: 'Data List Item',\n      ru: 'Справочник'\n    }),\n    value: 'emodel/type@data-list'\n  },\n  {\n    label: utils.getTextByLocale({\n      en: 'Rest',\n      ru: 'Остальное'\n    }),\n    value: '__rest__'\n  },\n];"
+                            },
+                            "defaultValue": "",
+                            "calculateValue": "const { parentRef, _parentRefJournal, _parentRefSelector } = data;\n\nif (_parentRefSelector === '__rest__') {\n  return;\n}\n\nif (!parentRef) {\n  value = 'emodel/type@case';\n} \n\nif (parentRef && ['emodel/type@data-list', 'emodel/type@case'].includes(parentRef)) {\n  value = parentRef;\n} else { \n  value = '__rest__';\n}",
+                            "allowCalculateOverride": true,
+                            "optionalWhenDisabled": false,
+                            "properties": {
+                              "value": "parentRef"
+                            },
+                            "customConditional": "const isView = _.get(instance, 'currentForm.options.formMode') === 'VIEW';\n\nshow = isView ? ['emodel/type@data-list', 'emodel/type@case'].includes(data.parentRef) : true;",
+                            "type": "ecosSelect",
+                            "input": true
+                          },
+                          {
+                            "label": {
+                              "en": "Parent",
+                              "ru": "Родитель"
+                            },
+                            "key": "_parentRefJournal",
+                            "validate": {
+                              "required": true
+                            },
+                            "disableInlineEdit": true,
+                            "persistent": false,
+                            "mask": true,
                             "modalTitle": "",
                             "journalId": "ecos-types",
-                            "defaultValue": "emodel/type@case",
-                            "refreshOn": [],
+                            "queryData": "",
+                            "refreshOn": [
+                              "_parentRefSelector"
+                            ],
+                            "calculateValue": "const { parentRef, _parentRefSelector } = data;\n\nif (parentRef) {\n  value = parentRef;\n} ",
+                            "allowCalculateOverride": true,
                             "optionalWhenDisabled": false,
+                            "properties": {
+                              "value": "parentRef"
+                            },
+                            "conditional": {
+                              "show": "true",
+                              "when": "_parentRefSelector",
+                              "eq": "__rest__"
+                            },
+                            "logic": [
+                              {
+                                "name": "toggle label",
+                                "trigger": {
+                                  "type": "javascript",
+                                  "javascript": "const isViewMode = _.get(instance, 'currentForm.options.formMode') === 'VIEW';\n\nresult = !isViewMode;"
+                                },
+                                "actions": [
+                                  {
+                                    "name": "hide label",
+                                    "type": "property",
+                                    "property": {
+                                      "label": {
+                                        "ru": "Скрыть надпись",
+                                        "en": "Hide Label"
+                                      },
+                                      "value": "hideLabel",
+                                      "type": "boolean"
+                                    },
+                                    "state": "true"
+                                  }
+                                ]
+                              }
+                            ],
                             "type": "selectJournal",
+                            "input": true
+                          },
+                          {
+                            "label": {
+                              "ru": "parentRef"
+                            },
+                            "key": "parentRef",
+                            "clearOnHide": false,
+                            "refreshOn": [
+                              "_parentRefSelector",
+                              "_parentRefJournal"
+                            ],
+                            "customDefaultValue": "value = 'emodel/type@case';\n",
+                            "calculateValue": "const { _parentRefSelector, _parentRefJournal, parentRef } = data;\n\nvalue = parentRef;\n\nif (_parentRefSelector) {\n  if (_parentRefSelector === '__rest__') {\n    if (_parentRefJournal) {\n      value = _parentRefJournal;\n    }\n  } else {\n    value = _parentRefSelector;\n  }\n}",
+                            "triggerChangeWhenCalculate": true,
+                            "optionalWhenDisabled": false,
+                            "type": "hidden",
                             "input": true
                           },
                           {
@@ -80,10 +184,20 @@
                                       "en": "Form"
                                     },
                                     "key": "formRef",
+                                    "tooltip": {
+                                      "ru": "Если вы желаете отредактировать форму по умолчанию, то создайте её копию.",
+                                      "en": "If you want to edit default form, create a copy of it."
+                                    },
+                                    "hideEditRowButton": true,
                                     "modalTitle": "",
                                     "customActionRefs": [
-                                      "uiserv/action@edit-form"
+                                      "uiserv/action@edit-form",
+                                      "uiserv/action@debug-form",
+                                      "uiserv/action@record-copy"
                                     ],
+                                    "computed": {
+                                      "valueDisplayName": "let recForDisp = value;\nif (value.id.indexOf('uiserv/form@type$') === 0) {\nrecForDisp = Citeck.Records.get('uiserv/form@DEFAULT_FORM');\n}\ndisp = recForDisp.load('?disp');\n"
+                                    },
                                     "enableCreateButton": true,
                                     "journalId": "ecos-forms",
                                     "queryData": "",
@@ -132,13 +246,22 @@
                               "en": "Journal"
                             },
                             "key": "journalRef",
+                            "tooltip": {
+                              "ru": "Если вы желаете отредактировать журнал по умолчанию, то создайте его копию.",
+                              "en": "If you want to edit default journal, then create a copy of it."
+                            },
+                            "hideEditRowButton": true,
                             "modalTitle": "",
                             "customActionRefs": [
-                              "uiserv/action@edit"
+                              "uiserv/action@edit",
+                              "uiserv/action@record-copy"
                             ],
                             "enableCreateButton": true,
                             "journalId": "ecos-journals",
                             "queryData": "",
+                            "computed": {
+                              "valueDisplayName": "let recForDisp = value;\nif (value.id.indexOf('uiserv/journal@type$') === 0) {\nrecForDisp = Citeck.Records.get('uiserv/journal@DEFAULT_JOURNAL');\n}\ndisp = recForDisp.load('?disp');\n"
+                            },
                             "defaultValue": "uiserv/journal@DEFAULT_JOURNAL",
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
@@ -566,12 +689,35 @@
                                       "ru": "Настроить",
                                       "en": "Setup"
                                     },
+                                    "key": "submit6",
                                     "action": "custom",
                                     "state": "",
                                     "showValidations": false,
                                     "custom": "var currentRow = row;\nvar config = row.config || {}; \nvar formData = config;\n\nCiteck.EcosFormUtils.getFormById('uiserv/form@att-type-' + row.type + '-form', {\n    definition: 'definition?json'\n}).then(function(formConfig) {\n    \n    var inputs = Citeck.EcosFormUtils.getFormInputs(formConfig.definition);\n\n    Citeck.Dialogs.showFormDialog({\n        title: 'Attribute type config',\n        showDefaultButtons: true,\n        formDefinition: formConfig.definition,\n        formData: formData,\n        onSubmit: submission => {\n            var data = submission.data || {};\n            var configData = {};\n            for (var i in inputs) {\n                var att = inputs[i].attribute;\n                configData[att] = data[att];\n            }\n            currentRow.config = configData;\n        }\n    })\n    \n});",
                                     "block": true,
-                                    "key": "submit6",
+                                    "refreshOn": [],
+                                    "optionalWhenDisabled": false,
+                                    "logic": [
+                                      {
+                                        "name": "check form",
+                                        "trigger": {
+                                          "type": "javascript",
+                                          "javascript": "result = Citeck.EcosFormUtils.getFormById('uiserv/form@att-type-' + row.type + '-form', {\n    definition: 'definition?json'\n}).then(config => {\n  const isEmptyConfig = _.isEmpty(_.get(config, 'definition'));\n  \n  instance.showElement(!isEmptyConfig);\n  \n  return config;\n});\n"
+                                        },
+                                        "actions": [
+                                          {
+                                            "name": "test",
+                                            "type": "property",
+                                            "property": {
+                                              "label": "Container Custom Class",
+                                              "value": "customClass",
+                                              "type": "string"
+                                            },
+                                            "text": "test-test-test"
+                                          }
+                                        ]
+                                      }
+                                    ],
                                     "type": "button",
                                     "input": true,
                                     "row": "0-3"
@@ -640,7 +786,7 @@
                                     "leftIcon": "icon-decision-tables",
                                     "block": true,
                                     "key": "submit3",
-                                    "customConditional": "show = _.get(data, 'ecosEdition.edition') === 'enterprise'",
+                                    "customConditional": "show = _.get(data, 'ecosEdition.isEnterprise', false)",
                                     "type": "button",
                                     "input": true,
                                     "row": "0-4"
@@ -816,7 +962,7 @@
                                     "leftIcon": "icon-decision-tables",
                                     "block": true,
                                     "key": "submit3",
-                                    "customConditional": "show = _.get(data, 'ecosEdition.edition') === 'enterprise'",
+                                    "customConditional": "show = _.get(data, 'ecosEdition.isEnterprise', false)",
                                     "type": "button",
                                     "input": true,
                                     "row": "0-4"
@@ -841,14 +987,16 @@
                       "ru": "Панель",
                       "en": "Panel"
                     },
+                    "key": "panel9",
                     "title": {
                       "ru": "Настройка прав для тип данных",
                       "en": "Type Permissions"
                     },
                     "collapsible": true,
                     "collapsed": false,
-                    "key": "panel9",
-                    "customConditional": "show = _.get(data, 'ecosEdition.edition') === 'enterprise'",
+                    "refreshOn": [],
+                    "optionalWhenDisabled": false,
+                    "customConditional": "show = _.get(data, 'ecosEdition.isEnterprise', false)",
                     "type": "panel",
                     "input": false,
                     "components": [
@@ -941,13 +1089,13 @@
                     "label": "ecosEdition",
                     "source": {
                       "type": "record",
+                      "forceLoad": true,
                       "record": {
-                        "id": "alfresco/meta@",
+                        "id": "emodel/meta@",
                         "attributes": {
-                          "edition": "attributes.edition"
+                          "isEnterprise": "$license.enterprise?bool"
                         }
-                      },
-                      "forceLoad": false
+                      }
                     },
                     "update": {
                       "type": "once"
@@ -1123,8 +1271,17 @@
                 "key": "statuses",
                 "components": [
                   {
-                    "label": "Statuses",
+                    "label": {
+                      "ru": "Статусы",
+                      "en": "Statuses"
+                    },
+                    "key": "modelStatuses",
                     "hideLabel": true,
+                    "multiple": true,
+                    "validate": {
+                      "minLength": "",
+                      "maxLength": ""
+                    },
                     "disableAddingRemovingRows": false,
                     "addAnother": "",
                     "addAnotherPosition": "bottom",
@@ -1132,7 +1289,6 @@
                     "defaultOpen": false,
                     "layoutFixed": false,
                     "enableRowGroups": false,
-                    "multiple": true,
                     "reorder": true,
                     "defaultValue": [
                       {
@@ -1147,11 +1303,8 @@
                         "submit5": false
                       }
                     ],
-                    "validate": {
-                      "minLength": "",
-                      "maxLength": ""
-                    },
-                    "key": "modelStatuses",
+                    "refreshOn": [],
+                    "optionalWhenDisabled": false,
                     "type": "datagrid",
                     "input": true,
                     "components": [
@@ -1179,9 +1332,126 @@
                         "row": "0-1"
                       }
                     ],
-                    "tab": 5
+                    "tab": 3
                   }
                 ]
+              },
+              {
+                "label": {
+                  "ru": "Стадии",
+                  "en": "Stages"
+                },
+                "key": "stages",
+                "components": [
+                  {
+                    "label": {
+                      "ru": "Panel"
+                    },
+                    "key": "panel11",
+                    "refreshOn": [
+                      "ecosEdition"
+                    ],
+                    "optionalWhenDisabled": false,
+                    "customConditional": "const isEnterprise = _.get(data, 'ecosEdition.isEnterprise', false);\nconst isWebform = _.get(instance, 'root.constructor.name') === 'Webform';\n\nshow = isWebform ? isEnterprise : true;",
+                    "type": "panel",
+                    "input": false,
+                    "components": [
+                      {
+                        "label": {
+                          "ru": "Информационное поле",
+                          "en": "Info field"
+                        },
+                        "key": "isEmptyStatuses",
+                        "hideLabel": true,
+                        "tag": "div",
+                        "className": "alert alert-info mt-4",
+                        "content": {
+                          "ru": "Прежде, чем приступить к работе над стадиями, необходимо заполнить статусы",
+                          "en": "Before you start working on the stages, you need to fill in the statuses"
+                        },
+                        "refreshOnChange": false,
+                        "refreshOn": [
+                          "modelStages.statuses"
+                        ],
+                        "optionalWhenDisabled": false,
+                        "customConditional": "show = _.isEmpty(_.get(data, 'modelStatuses[0].id')) || _.isEmpty(_.get(data, 'modelStatuses[0].name'));",
+                        "type": "htmlelement",
+                        "input": false,
+                        "tab": 4
+                      },
+                      {
+                        "label": {
+                          "en": "Model Stages"
+                        },
+                        "key": "modelStages",
+                        "hideLabel": true,
+                        "multiple": true,
+                        "validate": {
+                          "minLength": "",
+                          "maxLength": ""
+                        },
+                        "disableAddingRemovingRows": false,
+                        "addAnotherPosition": "bottom",
+                        "removePlacement": "col",
+                        "defaultOpen": false,
+                        "layoutFixed": true,
+                        "enableRowGroups": false,
+                        "reorder": true,
+                        "tableView": false,
+                        "refreshOn": [],
+                        "optionalWhenDisabled": false,
+                        "customConditional": "show = !_.isEmpty(_.get(data, 'modelStatuses[0].id')) && !_.isEmpty(_.get(data, 'modelStatuses[0].name'));",
+                        "type": "datagrid",
+                        "input": true,
+                        "components": [
+                          {
+                            "label": {
+                              "ru": "Название стадии",
+                              "en": "Stage name"
+                            },
+                            "key": "name",
+                            "validate": {
+                              "required": true
+                            },
+                            "clearOnHide": false,
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "mlText",
+                            "input": true,
+                            "row": "0-0"
+                          },
+                          {
+                            "label": {
+                              "ru": "Статусы"
+                            },
+                            "key": "statuses",
+                            "multiple": true,
+                            "validate": {
+                              "required": true
+                            },
+                            "reorder": false,
+                            "dataSrc": "custom",
+                            "data": {
+                              "custom": "const { modelStatuses = [] } = data;\nconst statuses = [];\n\nmodelStatuses.forEach(item => {\n  const label = utils.getTextByLocale(item.name);\n  const value = item.id;\n  \n  if (label && value) {\n    statuses.push({ label, value });\n  }\n});\n\nvalues = statuses;\n"
+                            },
+                            "unavailableItems": {
+                              "isActive": true,
+                              "code": "const { modelStages = [] } = data;\nconst result = modelStages.reduce((accum, item) => {\n  accum.push(..._.get(item, 'statuses', []));\n  \n  return accum;\n}, []);\n\nvalue = result;\n"
+                            },
+                            "defaultValue": [],
+                            "optionalWhenDisabled": false,
+                            "type": "ecosSelect",
+                            "input": true,
+                            "row": "0-1"
+                          }
+                        ],
+                        "tab": 4
+                      }
+                    ]
+                  }
+                ],
+                "isNotAvailable": false,
+                "ignored": false
               },
               {
                 "label": {
@@ -1203,7 +1473,7 @@
                     "optionalWhenDisabled": false,
                     "type": "checkbox",
                     "input": true,
-                    "tab": 4
+                    "tab": 5
                   },
                   {
                     "label": {
@@ -1303,13 +1573,7 @@
                             "optionalWhenDisabled": false,
                             "type": "selectJournal",
                             "input": true,
-                            "queryData": "",
-                            "source": {
-                              "custom": {
-                                "columns": []
-                              },
-                              "type": "journal"
-                            }
+                            "queryData": ""
                           }
                         ],
                         "row": "0-1",
@@ -1429,7 +1693,7 @@
                         "row": "0-3"
                       }
                     ],
-                    "tab": 4,
+                    "tab": 5,
                     "addAnother": "",
                     "addAnotherPosition": "bottom",
                     "removePlacement": "col",
@@ -1614,7 +1878,7 @@
                         "input": false
                       }
                     ],
-                    "tab": 5,
+                    "tab": 6,
                     "input": true
                   }
                 ]
@@ -1691,7 +1955,7 @@
                         "tab": 6
                       }
                     ],
-                    "tab": 6
+                    "tab": 7
                   }
                 ]
               }
