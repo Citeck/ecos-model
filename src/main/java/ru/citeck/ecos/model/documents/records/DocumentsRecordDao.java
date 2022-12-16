@@ -20,7 +20,7 @@ import ru.citeck.ecos.records3.record.dao.AbstractRecordsDao;
 import ru.citeck.ecos.records3.record.dao.query.RecordsQueryDao;
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery;
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes;
-import ru.citeck.ecos.webapp.api.apps.EcosWebAppsApi;
+import ru.citeck.ecos.webapp.api.apps.EcosRemoteWebAppsApi;
 import ru.citeck.ecos.webapp.api.constants.AppName;
 
 import java.util.*;
@@ -30,10 +30,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQueryDao {
 
-    private final String DOCUMENT_TYPES_LANGUAGE = "document-types";
-    private final String TYPES_DOCUMENTS_LANGUAGE = "types-documents";
+    private final static String DOCUMENT_TYPES_LANGUAGE = "document-types";
+    private final static String TYPES_DOCUMENTS_LANGUAGE = "types-documents";
 
-    private final EcosWebAppsApi ecosWebAppsApi;
+    private final EcosRemoteWebAppsApi ecosWebAppsApi;
 
     @Nullable
     @Override

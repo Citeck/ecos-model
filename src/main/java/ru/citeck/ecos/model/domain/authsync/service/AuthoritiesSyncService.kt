@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service
 import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.commons.json.Json
+import ru.citeck.ecos.commons.task.schedule.Schedules
 import ru.citeck.ecos.commons.utils.ReflectUtils
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.model.EcosModelApp
@@ -22,7 +23,7 @@ import ru.citeck.ecos.records3.record.atts.dto.RecordAtts
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.request.RequestContext
-import ru.citeck.ecos.webapp.api.lock.EcosLockService
+import ru.citeck.ecos.webapp.api.lock.EcosLockApi
 import ru.citeck.ecos.webapp.api.task.EcosTasksApi
 import ru.citeck.ecos.webapp.api.task.scheduler.EcosScheduledTask
 import java.time.Duration
@@ -34,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap
 class AuthoritiesSyncService(
     private val recordsService: RecordsService,
     private val tasksApi: EcosTasksApi,
-    private val appLockService: EcosLockService
+    private val appLockService: EcosLockApi
 ) {
 
     companion object {
@@ -192,10 +193,9 @@ class AuthoritiesSyncService(
                             null
                         }
                         if (repeatDelayDuration != null) {
-                            scheduledTasks[syncId] = tasksApi.getMainScheduler().scheduleWithFixedDelay(
+                            scheduledTasks[syncId] = tasksApi.getMainScheduler().schedule(
                                 "authorities sync with id: " + v.id,
-                                Duration.ofMinutes(1),
-                                repeatDelayDuration
+                                Schedules.fixedDelay(Duration.ofMinutes(1), repeatDelayDuration)
                             ) {
                                 AuthContext.runAsSystem {
                                     RequestContext.doWithTxn {

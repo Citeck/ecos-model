@@ -9,6 +9,7 @@ import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef
 import ru.citeck.ecos.model.lib.type.dto.DocLibDef
+import ru.citeck.ecos.model.lib.type.dto.TypeContentConfig
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.model.type.repository.TypeEntity
@@ -17,7 +18,6 @@ import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records3.record.mixin.impl.mutmeta.MutMeta
 import ru.citeck.ecos.records3.record.mixin.impl.mutmeta.MutMetaMixin
 import ru.citeck.ecos.webapp.lib.model.type.dto.AssocDef
-import ru.citeck.ecos.webapp.lib.model.type.dto.TypeContentConfig
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import java.time.Instant
 import java.util.*

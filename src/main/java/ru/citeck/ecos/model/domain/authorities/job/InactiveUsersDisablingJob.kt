@@ -3,6 +3,7 @@ package ru.citeck.ecos.model.domain.authorities.job
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import ru.citeck.ecos.commons.task.schedule.Schedules
 import ru.citeck.ecos.config.lib.consumer.bean.EcosConfig
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.model.domain.authorities.constant.PersonConstants
@@ -12,7 +13,7 @@ import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.request.RequestContext
 import ru.citeck.ecos.webapp.api.task.scheduler.EcosScheduledTask
-import ru.citeck.ecos.webapp.api.task.scheduler.EcosTaskScheduler
+import ru.citeck.ecos.webapp.api.task.scheduler.EcosTaskSchedulerApi
 import java.time.Duration
 import java.time.Instant
 import java.time.format.DateTimeParseException
@@ -21,7 +22,7 @@ import javax.annotation.PostConstruct
 @Component
 class InactiveUsersDisablingJob(
     private val recordsService: RecordsService,
-    private val taskScheduler: EcosTaskScheduler
+    private val taskScheduler: EcosTaskSchedulerApi
 ) {
 
     companion object {
@@ -61,9 +62,9 @@ class InactiveUsersDisablingJob(
             job = null
         } else if (job == null) {
             log.info { "Schedule job with duration $duration" }
-            job = taskScheduler.scheduleByCron(
+            job = taskScheduler.schedule(
                 "inactive-users-disabling",
-                cron
+                Schedules.cron(cron)
             ) {
                 log.info { "Users updating started..." }
                 AuthContext.runAsSystem {
@@ -128,11 +129,15 @@ class InactiveUsersDisablingJob(
     @Synchronized
     @EcosConfig("inactivity-duration-before-user-disabling")
     fun setInactivityDuration(duration: String) {
-        val newDuration = try {
-            Duration.parse(duration)
-        } catch (e: DateTimeParseException) {
-            log.error { "Incorrect duration string: '$duration'" }
+        val newDuration = if (duration.isEmpty()) {
             null
+        } else {
+            try {
+                Duration.parse(duration)
+            } catch (e: DateTimeParseException) {
+                log.error { "Incorrect duration string: '$duration'" }
+                null
+            }
         }
         if (newDuration != this.duration) {
             log.info { "Duration was changed. Before: ${this.duration} After: $newDuration" }

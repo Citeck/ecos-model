@@ -16,11 +16,11 @@ import ru.citeck.ecos.model.lib.role.dto.RoleDef
 import ru.citeck.ecos.model.lib.status.dto.StatusDef
 import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef
 import ru.citeck.ecos.model.lib.type.dto.DocLibDef
+import ru.citeck.ecos.model.lib.type.dto.TypeContentConfig
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.webapp.lib.model.type.dto.AssocDef
-import ru.citeck.ecos.webapp.lib.model.type.dto.TypeContentConfig
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import java.util.*
 

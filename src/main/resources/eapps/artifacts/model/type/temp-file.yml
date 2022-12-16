@@ -1,0 +1,23 @@
+---
+id: temp-file
+name:
+  ru: Временный файл
+  en: Temp file
+
+system: true
+storageType: ECOS_MODEL
+
+defaultCreateVariant: false
+
+model:
+  attributes:
+    - id: name
+      name:
+        ru: Имя
+        en: Name
+      type: MLTEXT
+    - id: content
+      name:
+        ru: Содержимое
+        en: Content
+      type: CONTENT
