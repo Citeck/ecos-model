@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
-import ru.citeck.ecos.commons.test.EcosWebAppContextMock;
+import ru.citeck.ecos.commons.test.EcosWebAppApiMock;
 import ru.citeck.ecos.model.EcosModelApp;
 import ru.citeck.ecos.model.domain.permissions.dto.*;
 import ru.citeck.ecos.model.domain.permissions.repo.AttributesPermissionsRepository;
@@ -26,7 +26,7 @@ import ru.citeck.ecos.records2.source.dao.local.RemoteSyncRecordsDao;
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery;
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes;
 import ru.citeck.ecos.records3.record.request.RequestContext;
-import ru.citeck.ecos.webapp.api.context.EcosWebAppContext;
+import ru.citeck.ecos.webapp.api.EcosWebAppApi;
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef;
 import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension;
 
@@ -64,12 +64,12 @@ public class AttrPermissionsSyncRecordsDaoTest {
         repository.deleteAll();
         typeRepository.deleteAll();
 
-        EcosWebAppContextMock webAppCtxMock = new EcosWebAppContextMock();
+        EcosWebAppApiMock webAppCtxMock = new EcosWebAppApiMock();
         webAppCtxMock.setWebClientExecuteImpl((targetApp, path, request) ->
             remoteServiceFactory.getRestHandlerAdapter().queryRecords(request)
         );
         localServiceFactory = new RecordsServiceFactory() {
-            public EcosWebAppContext getEcosWebAppContext() {
+            public EcosWebAppApi getEcosWebAppApi() {
                 return webAppCtxMock;
             }
         };

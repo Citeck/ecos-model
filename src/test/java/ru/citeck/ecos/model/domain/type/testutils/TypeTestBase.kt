@@ -8,7 +8,7 @@ import ru.citeck.ecos.apps.app.domain.artifact.source.ArtifactSourceProvider
 import ru.citeck.ecos.apps.app.domain.artifact.source.DirectorySourceProvider
 import ru.citeck.ecos.commands.CommandsServiceFactory
 import ru.citeck.ecos.commons.io.file.std.EcosStdFile
-import ru.citeck.ecos.commons.test.EcosWebAppContextMock
+import ru.citeck.ecos.commons.test.EcosWebAppApiMock
 import ru.citeck.ecos.events2.EventsService
 import ru.citeck.ecos.events2.EventsServiceFactory
 import ru.citeck.ecos.model.EcosModelApp
@@ -27,7 +27,7 @@ import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.model.type.service.TypesServiceImpl
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.RecordsServiceFactory
-import ru.citeck.ecos.webapp.api.context.EcosWebAppContext
+import ru.citeck.ecos.webapp.api.EcosWebAppApi
 import ru.citeck.ecos.webapp.lib.model.type.records.TypeRecordsDao
 import ru.citeck.ecos.webapp.lib.model.type.registry.DefaultTypesInitializer
 import ru.citeck.ecos.webapp.lib.model.type.registry.EcosTypesRegistry
@@ -53,9 +53,9 @@ open class TypeTestBase {
         val env = Mockito.mock(Environment::class.java)
         Mockito.`when`(env.acceptsProfiles("test")).thenReturn(true)
 
-        val webAppCtxMock = EcosWebAppContextMock(EcosModelApp.NAME, "123456")
+        val webAppCtxMock = EcosWebAppApiMock(EcosModelApp.NAME, "123456")
         recordsServices = object : RecordsServiceFactory() {
-            override fun getEcosWebAppContext(): EcosWebAppContext? {
+            override fun getEcosWebAppApi(): EcosWebAppApi? {
                 return webAppCtxMock
             }
         }

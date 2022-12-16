@@ -177,7 +177,7 @@
         "validate": {
           "customMessage": "",
           "json": "",
-          "required": false,
+          "required": true,
           "custom": "",
           "customPrivate": false,
           "minLength": "",
