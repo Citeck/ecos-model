@@ -1271,8 +1271,17 @@
                 "key": "statuses",
                 "components": [
                   {
-                    "label": "Statuses",
+                    "label": {
+                      "ru": "Статусы",
+                      "en": "Statuses"
+                    },
+                    "key": "modelStatuses",
                     "hideLabel": true,
+                    "multiple": true,
+                    "validate": {
+                      "minLength": "",
+                      "maxLength": ""
+                    },
                     "disableAddingRemovingRows": false,
                     "addAnother": "",
                     "addAnotherPosition": "bottom",
@@ -1280,7 +1289,6 @@
                     "defaultOpen": false,
                     "layoutFixed": false,
                     "enableRowGroups": false,
-                    "multiple": true,
                     "reorder": true,
                     "defaultValue": [
                       {
@@ -1295,11 +1303,8 @@
                         "submit5": false
                       }
                     ],
-                    "validate": {
-                      "minLength": "",
-                      "maxLength": ""
-                    },
-                    "key": "modelStatuses",
+                    "refreshOn": [],
+                    "optionalWhenDisabled": false,
                     "type": "datagrid",
                     "input": true,
                     "components": [
@@ -1327,9 +1332,126 @@
                         "row": "0-1"
                       }
                     ],
-                    "tab": 5
+                    "tab": 3
                   }
                 ]
+              },
+              {
+                "label": {
+                  "ru": "Стадии",
+                  "en": "Stages"
+                },
+                "key": "stages",
+                "components": [
+                  {
+                    "label": {
+                      "ru": "Panel"
+                    },
+                    "key": "panel11",
+                    "refreshOn": [
+                      "ecosEdition"
+                    ],
+                    "optionalWhenDisabled": false,
+                    "customConditional": "const isEnterprise = _.get(data, 'ecosEdition.isEnterprise', false);\nconst isWebform = _.get(instance, 'root.constructor.name') === 'Webform';\n\nshow = isWebform ? isEnterprise : true;",
+                    "type": "panel",
+                    "input": false,
+                    "components": [
+                      {
+                        "label": {
+                          "ru": "Информационное поле",
+                          "en": "Info field"
+                        },
+                        "key": "isEmptyStatuses",
+                        "hideLabel": true,
+                        "tag": "div",
+                        "className": "alert alert-info mt-4",
+                        "content": {
+                          "ru": "Прежде, чем приступить к работе над стадиями, необходимо заполнить статусы",
+                          "en": "Before you start working on the stages, you need to fill in the statuses"
+                        },
+                        "refreshOnChange": false,
+                        "refreshOn": [
+                          "modelStages.statuses"
+                        ],
+                        "optionalWhenDisabled": false,
+                        "customConditional": "show = _.isEmpty(_.get(data, 'modelStatuses[0].id')) || _.isEmpty(_.get(data, 'modelStatuses[0].name'));",
+                        "type": "htmlelement",
+                        "input": false,
+                        "tab": 4
+                      },
+                      {
+                        "label": {
+                          "en": "Model Stages"
+                        },
+                        "key": "modelStages",
+                        "hideLabel": true,
+                        "multiple": true,
+                        "validate": {
+                          "minLength": "",
+                          "maxLength": ""
+                        },
+                        "disableAddingRemovingRows": false,
+                        "addAnotherPosition": "bottom",
+                        "removePlacement": "col",
+                        "defaultOpen": false,
+                        "layoutFixed": true,
+                        "enableRowGroups": false,
+                        "reorder": true,
+                        "tableView": false,
+                        "refreshOn": [],
+                        "optionalWhenDisabled": false,
+                        "customConditional": "show = !_.isEmpty(_.get(data, 'modelStatuses[0].id')) && !_.isEmpty(_.get(data, 'modelStatuses[0].name'));",
+                        "type": "datagrid",
+                        "input": true,
+                        "components": [
+                          {
+                            "label": {
+                              "ru": "Название стадии",
+                              "en": "Stage name"
+                            },
+                            "key": "name",
+                            "validate": {
+                              "required": true
+                            },
+                            "clearOnHide": false,
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "mlText",
+                            "input": true,
+                            "row": "0-0"
+                          },
+                          {
+                            "label": {
+                              "ru": "Статусы"
+                            },
+                            "key": "statuses",
+                            "multiple": true,
+                            "validate": {
+                              "required": true
+                            },
+                            "reorder": false,
+                            "dataSrc": "custom",
+                            "data": {
+                              "custom": "const { modelStatuses = [] } = data;\nconst statuses = [];\n\nmodelStatuses.forEach(item => {\n  const label = utils.getTextByLocale(item.name);\n  const value = item.id;\n  \n  if (label && value) {\n    statuses.push({ label, value });\n  }\n});\n\nvalues = statuses;\n"
+                            },
+                            "unavailableItems": {
+                              "isActive": true,
+                              "code": "const { modelStages = [] } = data;\nconst result = modelStages.reduce((accum, item) => {\n  accum.push(..._.get(item, 'statuses', []));\n  \n  return accum;\n}, []);\n\nvalue = result;\n"
+                            },
+                            "defaultValue": [],
+                            "optionalWhenDisabled": false,
+                            "type": "ecosSelect",
+                            "input": true,
+                            "row": "0-1"
+                          }
+                        ],
+                        "tab": 4
+                      }
+                    ]
+                  }
+                ],
+                "isNotAvailable": false,
+                "ignored": false
               },
               {
                 "label": {
@@ -1351,7 +1473,7 @@
                     "optionalWhenDisabled": false,
                     "type": "checkbox",
                     "input": true,
-                    "tab": 4
+                    "tab": 5
                   },
                   {
                     "label": {
@@ -1451,13 +1573,7 @@
                             "optionalWhenDisabled": false,
                             "type": "selectJournal",
                             "input": true,
-                            "queryData": "",
-                            "source": {
-                              "custom": {
-                                "columns": []
-                              },
-                              "type": "journal"
-                            }
+                            "queryData": ""
                           }
                         ],
                         "row": "0-1",
@@ -1577,7 +1693,7 @@
                         "row": "0-3"
                       }
                     ],
-                    "tab": 4,
+                    "tab": 5,
                     "addAnother": "",
                     "addAnotherPosition": "bottom",
                     "removePlacement": "col",
@@ -1762,7 +1878,7 @@
                         "input": false
                       }
                     ],
-                    "tab": 5,
+                    "tab": 6,
                     "input": true
                   }
                 ]
@@ -1839,7 +1955,7 @@
                         "tab": 6
                       }
                     ],
-                    "tab": 6
+                    "tab": 7
                   }
                 ]
               }
