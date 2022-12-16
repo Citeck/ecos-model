@@ -1,0 +1,23 @@
+---
+id: attachment
+name:
+  ru: Вложение
+  en: Attachment
+
+parentRef: emodel/type@user-base
+storageType: ECOS_MODEL
+
+actions:
+  - uiserv/action@content-preview-modal
+  - uiserv/action@content-download
+  - uiserv/action@delete
+
+model:
+  attributes:
+    - id: name
+      type: TEXT
+    - id: content
+      type: CONTENT
+      name:
+        ru: Содержимое
+        en: Content
