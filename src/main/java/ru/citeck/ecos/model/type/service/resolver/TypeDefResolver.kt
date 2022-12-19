@@ -6,6 +6,7 @@ import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.model.EcosModelApp
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
+import ru.citeck.ecos.model.lib.attributes.dto.AttributeType
 import ru.citeck.ecos.model.lib.role.dto.RoleDef
 import ru.citeck.ecos.model.lib.status.dto.StatusDef
 import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef
@@ -24,6 +25,9 @@ class TypeDefResolver {
 
         const val DEFAULT_FORM = "DEFAULT_FORM"
         const val DEFAULT_JOURNAL = "DEFAULT_JOURNAL"
+
+        const val ATT_ASSOC_TYPE_REF_KEY = "typeRef"
+        const val ATT_ASSOC_CHILD_FLAG_KEY = "child"
 
         private val log = KotlinLogging.logger {}
 
@@ -176,7 +180,47 @@ class TypeDefResolver {
         val assocs = LinkedHashMap<String, AssocDef>()
 
         parentTypeDef.associations.forEach { assocs[it.id] = it }
-        typeDef.associations.forEach { assocs[it.id] = it }
+
+        typeDef.associations.forEach { assocDef ->
+            val parentAssoc = assocs[assocDef.id] ?: AssocDef.EMPTY
+            val newAssoc = assocDef.copy()
+            if (newAssoc.attribute.isBlank()) {
+                if (parentAssoc.attribute.isNotBlank()) {
+                    newAssoc.withAttribute(parentAssoc.attribute)
+                } else {
+                    newAssoc.withAttribute(newAssoc.id)
+                }
+            }
+            val attDef = typeDef.model.attributes.find {
+                it.id == newAssoc.attribute && it.type == AttributeType.ASSOC
+            }
+            if (newAssoc.target.isEmpty()) {
+                if (parentAssoc.target.isNotEmpty()) {
+                    newAssoc.withTarget(parentAssoc.target)
+                } else if (attDef != null) {
+                    newAssoc.withTarget(RecordRef.valueOf(attDef.config[ATT_ASSOC_TYPE_REF_KEY].asText()))
+                }
+            }
+            if (newAssoc.child == null) {
+                if (parentAssoc.child != null) {
+                    newAssoc.withChild(parentAssoc.child)
+                } else if (attDef != null) {
+                    newAssoc.withChild(attDef.config[ATT_ASSOC_CHILD_FLAG_KEY].asBoolean(false))
+                }
+            }
+            if (newAssoc.child == true) {
+                newAssoc.withJournalsFromTarget(false)
+                newAssoc.withJournals(emptyList())
+            }
+            if (MLText.isEmpty(newAssoc.name)) {
+                if (!MLText.isEmpty(parentAssoc.name)) {
+                    newAssoc.withName(parentAssoc.name)
+                } else if (attDef != null) {
+                    newAssoc.withName(attDef.name)
+                }
+            }
+            assocs[newAssoc.id] = newAssoc.build()
+        }
 
         return assocs.values.toList()
     }
@@ -294,29 +338,32 @@ class TypeDefResolver {
     private fun filterAssociations(typeDef: TypeDef.Builder, context: ResolveContext): List<AssocDef> {
 
         return typeDef.associations.mapNotNull {
-            if (RecordRef.isEmpty(it.target)) {
+            if (EntityRef.isEmpty(it.target)) {
                 null
             } else {
-                val journals = preProcessAssocJournals(
-                    it.target,
-                    it.journalsFromTarget,
-                    it.journals,
-                    context
-                )
-                if (journals.isEmpty()) {
-                    null
+                if (it.child == true) {
+                    it
                 } else {
-                    it.copy()
-                        .withJournals(journals)
-                        .withAttribute(it.attribute.ifBlank { it.id })
-                        .build()
+                    val journals = preProcessAssocJournals(
+                        it.target,
+                        it.journalsFromTarget,
+                        it.journals,
+                        context
+                    )
+                    if (journals.isEmpty()) {
+                        null
+                    } else {
+                        it.copy()
+                            .withJournals(journals)
+                            .build()
+                    }
                 }
             }
         }
     }
 
     private fun preProcessAssocJournals(
-        target: RecordRef,
+        target: EntityRef,
         journalsFromTarget: Boolean?,
         journals: List<RecordRef>,
         context: ResolveContext
@@ -326,14 +373,14 @@ class TypeDefResolver {
             return journals
         }
 
-        val targetTypeDef = context.getResolvedType(target.id)
+        val targetTypeDef = context.getResolvedType(target.getLocalId())
         if (RecordRef.isNotEmpty(targetTypeDef.journalRef)) {
             return listOf(targetTypeDef.journalRef)
         }
 
         val existingJournals = HashSet(journals)
         val result = ArrayList(journals)
-        for (childId in context.getChildrenByParentId(target.id)) {
+        for (childId in context.getChildrenByParentId(target.getLocalId())) {
 
             val childDef = context.getResolvedType(childId)
 

@@ -1,0 +1,18 @@
+id: web-url
+
+formRef: uiserv/form@DEFAULT_FORM
+storageType: ECOS_MODEL
+
+name:
+  ru: Веб ссылка
+  en: Web URL
+
+dispNameTemplate:
+  en: "${url}"
+
+model:
+  attributes:
+    - id: url
+      name:
+        ru: Ссылка
+        en: URL
