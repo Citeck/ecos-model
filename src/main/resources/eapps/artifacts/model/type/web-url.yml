@@ -1,5 +1,7 @@
 id: web-url
 
+parentRef: emodel/type@user-base
+
 formRef: uiserv/form@DEFAULT_FORM
 storageType: ECOS_MODEL
 
