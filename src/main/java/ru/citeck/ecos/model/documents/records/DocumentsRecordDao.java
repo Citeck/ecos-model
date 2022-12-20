@@ -81,7 +81,7 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
             RecsQueryRes<Object> queryResWithAtts = new RecsQueryRes<>();
             queryResWithAtts.setHasMore(queryRes.getHasMore());
             queryResWithAtts.setTotalCount(queryRes.getTotalCount());
-            queryResWithAtts.setRecords(getRecordsPostProcess(queryRes.getRecords()));
+            queryResWithAtts.setRecords(getAlfRecordsPostProcess(queryRes.getRecords()));
 
             return queryResWithAtts;
         }
@@ -125,7 +125,7 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
                     true
                 );
 
-                List<RecordAtts> records = queryRes.getRecords();
+                List<RecVal> records = getAlfRecordsPostProcess(queryRes.getRecords());
                 if (typesList.size() != records.size()) {
                     throw new RuntimeException(
                         "Invalid alfresco documents query response. " +
@@ -173,7 +173,7 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
         return typeDocumentsList;
     }
 
-    private List<RecVal> getRecordsPostProcess(List<RecordAtts> attsFromTarget) {
+    private List<RecVal> getAlfRecordsPostProcess(List<RecordAtts> attsFromTarget) {
         List<RecVal> result = new ArrayList<>();
 
         attsFromTarget.forEach(atts -> {
