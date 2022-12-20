@@ -22,6 +22,7 @@ import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery;
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes;
 import ru.citeck.ecos.webapp.api.apps.EcosRemoteWebAppsApi;
 import ru.citeck.ecos.webapp.api.constants.AppName;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -32,6 +33,14 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
 
     private final static String DOCUMENT_TYPES_LANGUAGE = "document-types";
     private final static String TYPES_DOCUMENTS_LANGUAGE = "types-documents";
+
+    private final static String ALF_NODES_SOURCE_ID = AppName.ALFRESCO + EntityRef.APP_NAME_DELIMITER;
+    private final static Map<String, String> SOURCE_ID_MAPPING;
+
+    static {
+        SOURCE_ID_MAPPING = new HashMap<>();
+        SOURCE_ID_MAPPING.put(ALF_NODES_SOURCE_ID + "@", ALF_NODES_SOURCE_ID);
+    }
 
     private final EcosRemoteWebAppsApi ecosWebAppsApi;
 
@@ -87,45 +96,64 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
             return Collections.emptyList();
         }
 
-        Map<String, String> contextAtts = AttContext.getInnerAttsMap();
         Map<String, List<String>> sortedTypesRefs = new HashMap<>();
         List<RecordAtts> typeRefsAtts = recordsService.getAtts(typesRefs, Collections.singletonList("sourceId"));
 
         typeRefsAtts.forEach(type -> {
             String sourceId = type.get("sourceId").asText();
+            sourceId = SOURCE_ID_MAPPING.getOrDefault(sourceId, sourceId);
             sortedTypesRefs.computeIfAbsent(sourceId, srcId -> new ArrayList<>())
                 .add(TypeUtils.getTypeRef(type.getId().getLocalId()).toString());
         });
 
-        RecsQueryRes<Object> queryResWithAtts = new RecsQueryRes<>();
 
-        sortedTypesRefs.forEach((k, v) -> {
-            if ("alfresco/".equals(k)) {
+        Map<String, Object> resultRecordsByType = new HashMap<>();
+
+        sortedTypesRefs.forEach((sourceId, typesList) -> {
+            if (ALF_NODES_SOURCE_ID.equals(sourceId)) {
                 DataValue query = recordsQuery.getQuery();
-                query.set("types", v);
+                query.set("types", typesList);
 
-                RecsQueryRes<RecordAtts> queryRes =
-                    recordsService.query(
-                        recordsQuery.copy()
-                            .withSourceId("alfresco/documents")
-                            .withQuery(query)
-                            .build(),
-                        contextAtts,
-                        true);
+                Map<String, String> contextAtts = AttContext.getInnerAttsMap();
 
-                queryResWithAtts.addRecords(getRecordsPostProcess(queryRes.getRecords()));
+                RecsQueryRes<RecordAtts> queryRes = recordsService.query(
+                    recordsQuery.copy()
+                        .withSourceId(AppName.ALFRESCO + "/documents")
+                        .withQuery(query)
+                        .build(),
+                    contextAtts,
+                    true
+                );
+
+                List<RecordAtts> records = queryRes.getRecords();
+                if (typesList.size() != records.size()) {
+                    throw new RuntimeException(
+                        "Invalid alfresco documents query response. " +
+                        "Expected count: " + typesList.size() + " but received: " + records.size()
+                    );
+                }
+                for (int idx = 0; idx < records.size(); idx++) {
+                    resultRecordsByType.put(typesList.get(idx), records.get(idx));
+                }
             } else {
-                List<TypeDocumentsRecord> queryRes = getRecordsTypes(k, recordRef, v);
-                queryResWithAtts.addRecords(queryRes);
+                List<TypeDocumentsRecord> queryRes = getRecordsForTypes(sourceId, recordRef, typesList);
+                for (int idx = 0; idx < typesList.size(); idx++) {
+                    resultRecordsByType.put(typesList.get(idx), queryRes.get(idx));
+                }
             }
         });
+
+        RecsQueryRes<Object> queryResWithAtts = new RecsQueryRes<>();
+        for (String typeRef : typesRefs) {
+            queryResWithAtts.addRecord(resultRecordsByType.get(typeRef));
+        }
 
         return queryResWithAtts;
     }
 
-    private List<TypeDocumentsRecord> getRecordsTypes(String sourceId,
-                                                      RecordRef recordRef,
-                                                      List<String> types) {
+    private List<TypeDocumentsRecord> getRecordsForTypes(String sourceId,
+                                                         RecordRef recordRef,
+                                                         List<String> types) {
         RecordsQuery query = RecordsQuery.create()
             .withSourceId(sourceId)
             .withQuery(Predicates.and(
@@ -164,7 +192,7 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
 
     private static class RecVal extends AttValueDelegate implements AttValue {
 
-        private RecordRef id;
+        private final RecordRef id;
         AttValue base;
         Map<String, Object> atts;
 
@@ -186,14 +214,14 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
     private static class TypeDocumentsRecord {
         private final String id = UUID.randomUUID().toString();
         private final String type;
-        private final List<RecordRef> documents;
+        private final List<EntityRef> documents;
     }
 
     @Data
     static class DocumentRefWithType {
         @AttName("?id")
-        private RecordRef ref;
+        private EntityRef ref;
         @AttName("_type?id")
-        private RecordRef type;
+        private EntityRef type;
     }
 }
