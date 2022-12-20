@@ -2,6 +2,7 @@ package ru.citeck.ecos.model.documents.records;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
@@ -99,15 +100,16 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
         Map<String, List<String>> sortedTypesRefs = new HashMap<>();
         List<RecordAtts> typeRefsAtts = recordsService.getAtts(typesRefs, Collections.singletonList("sourceId"));
 
+        Map<String, Object> resultRecordsByType = new HashMap<>();
+
         typeRefsAtts.forEach(type -> {
             String sourceId = type.get("sourceId").asText();
             sourceId = SOURCE_ID_MAPPING.getOrDefault(sourceId, sourceId);
-            sortedTypesRefs.computeIfAbsent(sourceId, srcId -> new ArrayList<>())
-                .add(TypeUtils.getTypeRef(type.getId().getLocalId()).toString());
+            if (sourceId.contains("/")) {
+                sortedTypesRefs.computeIfAbsent(sourceId, srcId -> new ArrayList<>())
+                    .add(TypeUtils.getTypeRef(type.getId().getLocalId()).toString());
+            }
         });
-
-
-        Map<String, Object> resultRecordsByType = new HashMap<>();
 
         sortedTypesRefs.forEach((sourceId, typesList) -> {
             if (ALF_NODES_SOURCE_ID.equals(sourceId)) {
@@ -145,7 +147,11 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
 
         RecsQueryRes<Object> queryResWithAtts = new RecsQueryRes<>();
         for (String typeRef : typesRefs) {
-            queryResWithAtts.addRecord(resultRecordsByType.get(typeRef));
+            Object resultRecs = resultRecordsByType.get(typeRef);
+            if (resultRecs == null) {
+                resultRecs = new TypeDocumentsRecord(typeRef, Collections.emptyList());
+            }
+            queryResWithAtts.addRecord(resultRecs);
         }
 
         return queryResWithAtts;
