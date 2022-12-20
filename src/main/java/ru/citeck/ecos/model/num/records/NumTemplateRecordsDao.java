@@ -106,7 +106,7 @@ public class NumTemplateRecordsDao extends LocalRecordsDao
         RecordsMutResult result = new RecordsMutResult();
         values.forEach(dto -> {
             if (StringUtils.isBlank(dto.getId())) {
-                throw new IllegalArgumentException("Parameter 'id' is mandatory for menu record");
+                throw new IllegalArgumentException("Attribute 'id' is mandatory");
             }
             String id = numTemplateService.save(dto).getEntity().getId();
             result.addRecord(new RecordMeta(id));
