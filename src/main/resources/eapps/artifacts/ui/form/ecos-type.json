@@ -5,7 +5,7 @@
     "en": "Type form"
   },
   "description": {},
-  "customModule": null,
+  "customModule": "",
   "typeRef": "emodel/type@type",
   "width": "extra-lg",
   "system": true,
@@ -1911,10 +1911,31 @@
                             "components": [
                               {
                                 "label": {
-                                  "en": "Path",
-                                  "ru": "Путь"
+                                  "en": "Attribute with main content",
+                                  "ru": "Атрибут с основным контентом"
                                 },
                                 "key": "path",
+                                "tooltip": {
+                                  "ru": "По умолчанию \"content\"",
+                                  "en": "By default \"content\""
+                                },
+                                "clearOnHide": false,
+                                "defaultValue": "",
+                                "refreshOn": [],
+                                "optionalWhenDisabled": false,
+                                "type": "textfield",
+                                "input": true
+                              },
+                              {
+                                "label": {
+                                  "ru": "Атрибут с контентом для предпросмотра",
+                                  "en": "Attribute with content for Preview"
+                                },
+                                "key": "previewPath",
+                                "tooltip": {
+                                  "ru": "По умолчанию равен атрибуту с основным контентом ",
+                                  "en": "By default will be equal to attribute with main content"
+                                },
                                 "clearOnHide": false,
                                 "defaultValue": "",
                                 "refreshOn": [],
@@ -1936,11 +1957,14 @@
                             "components": [
                               {
                                 "label": {
-                                  "en": "Preview path",
-                                  "ru": "Путь предпросмотра"
+                                  "en": "Storage type",
+                                  "ru": "Тип хранилища"
                                 },
-                                "key": "previewPath",
-                                "clearOnHide": false,
+                                "key": "storageType",
+                                "tooltip": {
+                                  "ru": "Тип хранилища для атрибутов с типом CONTENT у данного типа. Если значение не задано, то оно наследуется от родителя или берется по умолчанию - \"local\". Локальный тип хранилища означает хранение контента в БД рядом с таблицей сущностей этого типа. Вы можете задать уточненный тип хранилища с подтипом используя символ \"/\".",
+                                  "en": "Storage type for CONTENT attributes in this type. If no value is specified, it is inherited from the parent or taken by default - \"local\". Local storage type means storing content in the DB next to an entities table of that type. You can specify a storage type with a subtype using the \"/\" symbol."
+                                },
                                 "defaultValue": "",
                                 "refreshOn": [],
                                 "optionalWhenDisabled": false,
