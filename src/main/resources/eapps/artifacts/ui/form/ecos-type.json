@@ -1309,12 +1309,17 @@
                     "input": true,
                     "components": [
                       {
-                        "label": "Id",
-                        "defaultValue": "",
-                        "validate": {
-                          "pattern": "(^$|[_a-zA-Z][_\\w-.:]*)"
+                        "label": {
+                          "ru": "Id"
                         },
                         "key": "id",
+                        "validate": {
+                          "required": true,
+                          "pattern": "(^$|[_a-zA-Z][_\\w-.:]*)"
+                        },
+                        "defaultValue": "",
+                        "refreshOn": [],
+                        "optionalWhenDisabled": false,
                         "type": "textfield",
                         "input": true,
                         "row": "0-0"
@@ -1365,6 +1370,12 @@
                         "hideLabel": true,
                         "tag": "div",
                         "className": "alert alert-info mt-4",
+                        "attrs": [
+                          {
+                            "attr": "",
+                            "value": ""
+                          }
+                        ],
                         "content": {
                           "ru": "Прежде, чем приступить к работе над стадиями, необходимо заполнить статусы",
                           "en": "Before you start working on the stages, you need to fill in the statuses"
@@ -1374,7 +1385,7 @@
                           "modelStages.statuses"
                         ],
                         "optionalWhenDisabled": false,
-                        "customConditional": "show = _.isEmpty(_.get(data, 'modelStatuses[0].id')) || _.isEmpty(_.get(data, 'modelStatuses[0].name'));",
+                        "customConditional": "show = _.isEmpty(_.get(data, 'modelStatuses[0].id'));",
                         "type": "htmlelement",
                         "input": false,
                         "tab": 4
@@ -1400,7 +1411,7 @@
                         "tableView": false,
                         "refreshOn": [],
                         "optionalWhenDisabled": false,
-                        "customConditional": "show = !_.isEmpty(_.get(data, 'modelStatuses[0].id')) && !_.isEmpty(_.get(data, 'modelStatuses[0].name'));",
+                        "customConditional": "show = !_.isEmpty(_.get(data, 'modelStatuses[0].id'));",
                         "type": "datagrid",
                         "input": true,
                         "components": [
@@ -1432,7 +1443,7 @@
                             "reorder": false,
                             "dataSrc": "custom",
                             "data": {
-                              "custom": "const { modelStatuses = [] } = data;\nconst statuses = [];\n\nmodelStatuses.forEach(item => {\n  const label = utils.getTextByLocale(item.name);\n  const value = item.id;\n  \n  if (label && value) {\n    statuses.push({ label, value });\n  }\n});\n\nvalues = statuses;\n"
+                              "custom": "const { modelStatuses = [] } = data;\nconst statuses = [];\n\nmodelStatuses.forEach(item => {\n  const value = item.id;\n  const label = utils.getTextByLocale(item.name) || value;\n  \n  if (value) {\n    statuses.push({ label, value });\n  }\n});\n\nvalues = statuses;\n"
                             },
                             "unavailableItems": {
                               "isActive": true,
@@ -2075,7 +2086,8 @@
         "input": false
       }
     ],
-    "display": "form"
+    "display": "form",
+    "formId": "ecos-type"
   },
   "attributes": {}
 }
