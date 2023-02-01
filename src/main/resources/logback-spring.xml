@@ -3,4 +3,6 @@
 
 <configuration>
     <include resource="ecos/logback-base.xml" />
+
+    <!-- <logger name="ecos" level="DEBUG" /> -->
 </configuration>

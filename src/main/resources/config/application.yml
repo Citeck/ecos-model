@@ -9,9 +9,9 @@ ecos-app:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5441/emodel
-    username: emodel
-    password:
+    url: jdbc:postgresql://localhost:14523/ecos_model
+    username: model
+    password: modelpassword
 
 ecos:
   idp:
@@ -19,3 +19,7 @@ ecos:
   job:
     inactiveUsersDisabling:
       cron: '0 0 0/6 ? * *'
+  webapp:
+    dataSources:
+      main:
+        xa: true
