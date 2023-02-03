@@ -9,7 +9,7 @@ import ru.citeck.ecos.events2.EventsService
 import ru.citeck.ecos.events2.emitter.EventsEmitter
 import ru.citeck.ecos.model.EcosModelApp
 import ru.citeck.ecos.model.domain.authorities.constant.PersonConstants
-import ru.citeck.ecos.model.domain.authsync.service.AuthorityType
+import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.ScalarType
 import java.time.Instant

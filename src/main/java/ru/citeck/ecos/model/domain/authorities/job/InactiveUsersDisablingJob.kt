@@ -7,7 +7,7 @@ import ru.citeck.ecos.commons.task.schedule.Schedules
 import ru.citeck.ecos.config.lib.consumer.bean.EcosConfig
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.model.domain.authorities.constant.PersonConstants
-import ru.citeck.ecos.model.domain.authsync.service.AuthorityType
+import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery

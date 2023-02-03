@@ -2,7 +2,7 @@ package ru.citeck.ecos.model.domain.authorities.api.records
 
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
-import ru.citeck.ecos.model.domain.authsync.service.AuthorityType
+import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.value.AttValueCtx

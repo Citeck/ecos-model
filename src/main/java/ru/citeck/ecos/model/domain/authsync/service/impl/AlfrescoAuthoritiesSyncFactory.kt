@@ -9,10 +9,10 @@ import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthGroup
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.authorities.constant.PersonConstants
-import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSync
-import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncContext
-import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncFactory
-import ru.citeck.ecos.model.domain.authsync.service.AuthorityType
+import ru.citeck.ecos.model.lib.authorities.AuthorityType
+import ru.citeck.ecos.model.lib.authorities.sync.AuthoritiesSync
+import ru.citeck.ecos.model.lib.authorities.sync.AuthoritiesSyncContext
+import ru.citeck.ecos.model.lib.authorities.sync.AuthoritiesSyncFactory
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records2.predicate.model.Predicates

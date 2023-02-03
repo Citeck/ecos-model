@@ -7,7 +7,7 @@ import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.context.lib.auth.*
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
-import ru.citeck.ecos.model.domain.authsync.service.AuthorityType
+import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records2.predicate.model.Predicates

@@ -18,8 +18,8 @@ import ru.citeck.ecos.model.domain.authorities.api.records.AuthorityMixin
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
-import ru.citeck.ecos.model.domain.authsync.service.AuthorityType
 import ru.citeck.ecos.model.domain.events.emitter.DbRecordsEcosEventsAdapter
+import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.dao.RecordsDao

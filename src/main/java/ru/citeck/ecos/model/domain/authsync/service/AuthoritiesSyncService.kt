@@ -14,6 +14,10 @@ import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.model.EcosModelApp
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityGroupConstants
+import ru.citeck.ecos.model.lib.authorities.AuthorityType
+import ru.citeck.ecos.model.lib.authorities.sync.AuthoritiesSync
+import ru.citeck.ecos.model.lib.authorities.sync.AuthoritiesSyncContext
+import ru.citeck.ecos.model.lib.authorities.sync.AuthoritiesSyncFactory
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records2.predicate.model.VoidPredicate

@@ -7,7 +7,7 @@ import ru.citeck.ecos.context.lib.auth.AuthGroup
 import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityGroupConstants
-import ru.citeck.ecos.model.domain.authsync.service.AuthorityType
+import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService

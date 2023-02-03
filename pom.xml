@@ -20,6 +20,11 @@
             <artifactId>imgscalr-lib</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>ru.citeck.ecos.ent.model</groupId>
+            <artifactId>ecos-model-enterprise</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 
     <repositories>

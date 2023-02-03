@@ -12,6 +12,10 @@ spring:
     url: jdbc:postgresql://localhost:14523/ecos_model
     username: model
     password: modelpassword
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.ldap.LdapAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.ldap.LdapDataAutoConfiguration
 
 ecos:
   idp:

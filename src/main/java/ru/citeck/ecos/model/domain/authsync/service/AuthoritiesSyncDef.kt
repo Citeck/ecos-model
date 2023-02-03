@@ -4,6 +4,7 @@ import ecos.com.fasterxml.jackson210.databind.annotation.JsonDeserialize
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.commons.json.serialization.annotation.IncludeNonDefault
+import ru.citeck.ecos.model.lib.authorities.AuthorityType
 
 @IncludeNonDefault
 @JsonDeserialize(builder = AuthoritiesSyncDef.Builder::class)
