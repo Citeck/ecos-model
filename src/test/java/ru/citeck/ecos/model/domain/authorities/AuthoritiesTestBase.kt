@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.junit.jupiter.SpringExtension
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.model.EcosModelApp
@@ -16,9 +15,10 @@ import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records2.predicate.model.VoidPredicate
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
+import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension
 import javax.annotation.PostConstruct
 
-@ExtendWith(SpringExtension::class)
+@ExtendWith(EcosSpringExtension::class)
 @SpringBootTest(classes = [EcosModelApp::class])
 class AuthoritiesTestBase {
 
