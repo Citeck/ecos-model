@@ -1,0 +1,16 @@
+---
+id: edit-ecos-type
+name:
+  ru: Редактировать Ecos-тип
+  en: Edit ecos-type
+type: edit
+config:
+  recordId: emodel/types-repo@${?localId}
+  recordsToReset:
+    - emodel/type@${?localId}
+evaluator:
+  id: null
+  type: has-permission
+  inverse: false
+  config:
+    permission: Write
