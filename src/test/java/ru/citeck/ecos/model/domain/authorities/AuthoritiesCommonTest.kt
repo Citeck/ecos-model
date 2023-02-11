@@ -6,6 +6,7 @@ import org.junit.jupiter.api.assertThrows
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.context.lib.auth.*
+import ru.citeck.ecos.context.lib.auth.data.EmptyAuth
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.records2.RecordConstants
@@ -30,17 +31,25 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
                 action.invoke()
             }
         }
+
         checkPermissionDenied(true) {
-            createPerson("test-user")
+            AuthContext.runAs(EmptyAuth) {
+                createPerson("test-user")
+            }
         }
+
         checkPermissionDenied(false) {
             AuthContext.runAsSystem {
                 createPerson("test-user")
             }
         }
+
         checkPermissionDenied(true) {
-            createGroup("test-group")
+            AuthContext.runAs(EmptyAuth) {
+                createGroup("test-group")
+            }
         }
+
         checkPermissionDenied(false) {
             AuthContext.runAsSystem {
                 createGroup("test-group")
@@ -158,8 +167,10 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
             }
             runAs {
                 if (it.second) {
-                    val ex = assertThrows<Exception> {
-                        addGroup("other-auth-group-${it.first}", it.first)
+                    val ex = AuthContext.runAs(EmptyAuth) {
+                        assertThrows<Exception> {
+                            addGroup("other-auth-group-${it.first}", it.first)
+                        }
                     }
                     assertThat(ex.message).contains("Permission denied")
                 } else {
@@ -181,7 +192,9 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
         )
 
         assertThrows<Exception> {
-            recordsService.mutateAtt(testPersonRef, "email", "test@test.ru")
+            AuthContext.runAs(EmptyAuth) {
+                recordsService.mutateAtt(testPersonRef, "email", "test@test.ru")
+            }
         }
         AuthContext.runAs(testPersonRef.id) {
             recordsService.mutateAtt(testPersonRef, "email", "test@test.ru")
