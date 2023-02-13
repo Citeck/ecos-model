@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.citeck.ecos.commons.data.DataValue;
 import ru.citeck.ecos.commons.data.MLText;
-import ru.citeck.ecos.commons.test.EcosWebAppApiMock;
+import ru.citeck.ecos.test.commons.EcosWebAppApiMock;
 import ru.citeck.ecos.model.EcosModelApp;
 import ru.citeck.ecos.model.num.dto.NumTemplateDto;
 import ru.citeck.ecos.model.num.repository.NumTemplateRepository;
