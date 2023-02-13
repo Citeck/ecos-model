@@ -1,6 +1,5 @@
 package ru.citeck.ecos.model.type.service.dao
 
-import lombok.Data
 import mu.KotlinLogging
 import org.apache.commons.lang3.StringUtils
 import org.springframework.data.domain.PageRequest
@@ -10,8 +9,6 @@ import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.model.type.repository.TypeEntity
 import ru.citeck.ecos.model.type.repository.TypeRepository
-import ru.citeck.ecos.records2.RecordConstants
-import ru.citeck.ecos.records2.predicate.PredicateUtils
 import ru.citeck.ecos.records2.predicate.model.*
 import java.lang.reflect.Field
 import java.time.DateTimeException
@@ -33,6 +30,7 @@ class TypeRepoDaoImpl(private val repo: TypeRepository) : TypeRepoDao {
         private const val CONFIG_PROP = "config"
         private const val POINT_SYMBOL = "."
         private const val QUOTE_SYMBOL = "\""
+        private const val LIKE_SYMBOL = "%"
     }
 
     override fun save(entity: TypeEntity): TypeEntity {
@@ -78,19 +76,7 @@ class TypeRepoDaoImpl(private val repo: TypeRepository) : TypeRepoDao {
                 } else {
                     repo.findAll(specification)
                 }
-            val configRegex = getConfigRegexFromPredicate(predicate)
-            return if (configRegex != null) {
-                selectResult.filter { typeEntity ->
-                    if (typeEntity.config != null) {
-                        val configValue = typeEntity.config
-                        configValue!!.matches(Regex(configRegex))
-                    } else {
-                        false
-                    }
-                }.toList()
-            } else {
-                selectResult.toList()
-            }
+               return selectResult.toList()
         } else {
             return if (page == null) {
                 repo.findAll().toList()
@@ -98,62 +84,6 @@ class TypeRepoDaoImpl(private val repo: TypeRepository) : TypeRepoDao {
                 repo.findAll(page).toList()
             }
         }
-    }
-
-    private fun toSpec(predicate: Predicate): Specification<TypeEntity>? {
-        if (predicate is ValuePredicate) {
-
-            val type = predicate.getType()
-            val value: Any = predicate.getValue()
-            val attribute = predicate.getAttribute()
-
-            if (RecordConstants.ATT_MODIFIED == attribute && ValuePredicate.Type.GT == type) {
-                val instant = Json.mapper.convert(value, Instant::class.java)
-                if (instant != null) {
-                    return Specification { root: Root<TypeEntity>,
-                                           _: CriteriaQuery<*>?,
-                                           builder: CriteriaBuilder ->
-                        builder.greaterThan(root.get<Any>("lastModifiedDate").`as`(Instant::class.java), instant)
-                    }
-                }
-            }
-        }
-        val predicateDto = PredicateUtils.convertToDto(predicate, PredicateDto::class.java)
-
-        var spec: Specification<TypeEntity>? = null
-        if (StringUtils.isNotBlank(predicateDto.name)) {
-            spec = Specification { root: Root<TypeEntity>,
-                                   _: CriteriaQuery<*>?,
-                                   builder: CriteriaBuilder ->
-                builder.like(builder.lower(root.get("name")), "%" + predicateDto.name!!.lowercase() + "%")
-            }
-        }
-        if (StringUtils.isNotBlank(predicateDto.moduleId)) {
-            val idSpec = Specification { root: Root<TypeEntity>,
-                                         _: CriteriaQuery<*>?,
-                                         builder: CriteriaBuilder ->
-                builder.like(builder.lower(root.get("extId")), "%" + predicateDto.moduleId!!.lowercase() + "%")
-            }
-            spec = spec?.or(idSpec) ?: idSpec
-        }
-        if (predicateDto.system != null) {
-            val systemSpec: Specification<TypeEntity> =
-                if (!predicateDto.system) {
-                    Specification { root: Root<TypeEntity>,
-                                    _: CriteriaQuery<*>?,
-                                    builder: CriteriaBuilder ->
-                        builder.not(builder.equal(root.get<Any>("system"), true))
-                    }
-                } else {
-                    Specification { root: Root<TypeEntity>,
-                                    _: CriteriaQuery<*>?,
-                                    builder: CriteriaBuilder ->
-                        builder.equal(root.get<Any>("system"), true)
-                    }
-                }
-            spec = spec?.and(systemSpec) ?: systemSpec
-        }
-        return spec
     }
 
     private fun specificationFromPredicate(predicate: Predicate?): Specification<TypeEntity>? {
@@ -216,16 +146,27 @@ class TypeRepoDaoImpl(private val repo: TypeRepository) : TypeRepoDao {
                 }
                 substructure += QUOTE_SYMBOL + innerProps[innerProps.size - 1] + QUOTE_SYMBOL + ":"
             }
-            if (configValue is String) {
-                substructure += QUOTE_SYMBOL + configValue + QUOTE_SYMBOL
-            } else {
-                substructure += configValue
+
+            var unquotedSubstructure: String? = null
+            var quotedSubstructure = LIKE_SYMBOL + substructure + QUOTE_SYMBOL + LIKE_SYMBOL +
+                configValue + LIKE_SYMBOL + QUOTE_SYMBOL + LIKE_SYMBOL
+            if (!(configValue is String)) {
+                unquotedSubstructure = LIKE_SYMBOL + substructure + LIKE_SYMBOL + configValue + LIKE_SYMBOL
             }
-            return Specification { root: Root<TypeEntity>,
-                                   _: CriteriaQuery<*>?,
-                                   builder: CriteriaBuilder ->
-                builder.like(root.get(CONFIG_PROP), "%$substructure%")
+            var configSpecification = Specification { root: Root<TypeEntity>,
+                                                      _: CriteriaQuery<*>?,
+                                                      builder: CriteriaBuilder ->
+                builder.like(root.get(CONFIG_PROP), quotedSubstructure)
             }
+            if (unquotedSubstructure != null) {
+                configSpecification = configSpecification.or(
+                    Specification { root: Root<TypeEntity>,
+                                    _: CriteriaQuery<*>?,
+                                    builder: CriteriaBuilder ->
+                        builder.like(root.get(CONFIG_PROP), unquotedSubstructure)
+                    })
+            }
+            return configSpecification
         }
 
         var specification: Specification<TypeEntity>? = null
@@ -301,7 +242,7 @@ class TypeRepoDaoImpl(private val repo: TypeRepository) : TypeRepoDao {
         return result
     }
 
-    private fun getField(attributeName: String):Field?{
+    private fun getField(attributeName: String): Field? {
         var field: Field? = null
         try {
             field = TypeEntity::class.java.getDeclaredField(attributeName)
@@ -386,90 +327,5 @@ class TypeRepoDaoImpl(private val repo: TypeRepository) : TypeRepoDao {
             }
         }
         return result
-    }
-
-    private fun getConfigRegexFromPredicate(predicate: Predicate?): String? {
-        if (predicate == null) {
-            return null
-        }
-        if (predicate is ComposedPredicate) {
-            val conditions: ArrayList<String> = ArrayList<String>()
-            predicate.getPredicates().forEach(
-                Consumer { subPredicate: Predicate? ->
-                    var subCondition: String? = null
-                    if (subPredicate is ValuePredicate) {
-                        subCondition = getCondition(subPredicate)
-                    } else if (subPredicate is ComposedPredicate) {
-                        subCondition = getConfigRegexFromPredicate(subPredicate)
-                    }
-                    if (subCondition != null) {
-                        conditions.add(subCondition)
-                    }
-                })
-            if (conditions.isNotEmpty()) {
-                var result: String? = ""
-                if (conditions.size > 1) {
-                    for (idx in 0 until conditions.size) {
-                        result +=
-                            if (predicate is AndPredicate) {
-                                "(?=" + conditions[idx] + ")"
-                            } else {
-                                "|" + conditions[idx]
-                            }
-                    }
-                    if (predicate is OrPredicate) {
-                        result = "($result)"
-                    } else {
-                        result += ".*"
-                    }
-                } else {
-                    result = conditions[0]
-                }
-                return result
-            }
-        } else if (predicate is ValuePredicate) {
-            return getCondition(predicate)
-        }
-        log.warn("Unexpected predicate class: {}", predicate.javaClass)
-        return null
-    }
-
-    private fun getCondition(valuePredicate: ValuePredicate): String? {
-        val attributeName = TypeEntity.replaceNameValid(StringUtils.trim(valuePredicate.getAttribute()))
-        if (TypeEntity.isAttributeNameNotValid(attributeName)) {
-            return null
-        }
-        if (attributeName.startsWith(CONFIG_PROP)) {
-            var substructure = ""
-            var configValue: Any = valuePredicate.getValue().asText()
-
-            if (attributeName.contains(POINT_SYMBOL)) {
-                configValue = getConfigValue(valuePredicate.getValue().asText())
-                val innerProps = attributeName.split(POINT_SYMBOL)
-                for (idx in 1 until innerProps.size - 1) {
-                    substructure += QUOTE_SYMBOL + innerProps[idx] + QUOTE_SYMBOL + ".*:.*"
-                }
-                substructure += QUOTE_SYMBOL + innerProps[innerProps.size - 1] + QUOTE_SYMBOL + ":"
-            }
-
-            if (configValue is String) {
-                substructure += QUOTE_SYMBOL + configValue + QUOTE_SYMBOL
-            } else {
-                substructure += configValue
-            }
-            if (valuePredicate.getType() == ValuePredicate.Type.EQ) {
-                substructure += " *(,|})"
-            }
-            return ".*$substructure.*"
-        }
-        return null
-    }
-
-    @Data
-    class PredicateDto {
-        val name: String? = null
-        val moduleId: String? = null
-        val system: Boolean? = null
-        val config: String? = null
     }
 }
