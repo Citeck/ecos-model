@@ -49,7 +49,7 @@ class AlfrescoAuthoritiesSyncFactory(
 
         private const val DEFAULT_BATCH_SIZE = 10
 
-        private val SIMPLE_ALF_ATT_REGEX = "^\\w+:\\w+(\\?[a-zA-Z]+)?$".toRegex()
+        private val SIMPLE_ALF_ATT_REGEX = "^\\w+:\\w+(\\[])?(\\?[a-zA-Z]+)?$".toRegex()
 
         private val log = KotlinLogging.logger {}
     }
