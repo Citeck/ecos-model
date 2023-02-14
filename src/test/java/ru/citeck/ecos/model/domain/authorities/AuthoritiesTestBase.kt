@@ -1,6 +1,5 @@
 package ru.citeck.ecos.model.domain.authorities
 
-import com.zaxxer.hikari.HikariDataSource
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
@@ -16,7 +15,7 @@ import ru.citeck.ecos.records2.predicate.model.VoidPredicate
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension
-import javax.annotation.PostConstruct
+import javax.sql.DataSource
 
 @ExtendWith(EcosSpringExtension::class)
 @SpringBootTest(classes = [EcosModelApp::class])
@@ -26,7 +25,7 @@ class AuthoritiesTestBase {
     lateinit var recordsService: RecordsService
 
     @Autowired
-    lateinit var dataSource: HikariDataSource
+    lateinit var dataSource: DataSource
 
     private var authAware: Boolean = false
 
@@ -35,11 +34,6 @@ class AuthoritiesTestBase {
      */
     fun initTest(authAware: Boolean = false) {
         this.authAware = authAware
-    }
-
-    @PostConstruct
-    fun postConstruct() {
-        println("JDBC URL: " + dataSource.jdbcUrl)
     }
 
     fun deleteAll(type: AuthorityType) {
