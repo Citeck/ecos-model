@@ -18,6 +18,7 @@ import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records3.record.mixin.impl.mutmeta.MutMeta
 import ru.citeck.ecos.records3.record.mixin.impl.mutmeta.MutMetaMixin
 import ru.citeck.ecos.webapp.lib.model.type.dto.AssocDef
+import ru.citeck.ecos.webapp.lib.model.type.dto.TypeAspectDef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import java.time.Instant
 import java.util.*
@@ -77,6 +78,7 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
         entity.docLib = Json.mapper.toString(typeDef.docLib)
         entity.attributes = Json.mapper.toString(typeDef.properties)
         entity.contentConfig = Json.mapper.toString(typeDef.contentConfig)
+        entity.aspects = Json.mapper.toString(typeDef.aspects)
 
         checkCyclicDependencies(entity)
 
@@ -142,6 +144,7 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
             .withDocLib(Json.mapper.read(entity.docLib, DocLibDef::class.java))
             .withContentConfig(Json.mapper.read(entity.contentConfig, TypeContentConfig::class.java))
             .withProperties(ObjectData.create(entity.attributes))
+            .withAspects(DataValue.create(entity.aspects).asList(TypeAspectDef::class.java))
             .build()
 
         return EntityWithMeta(

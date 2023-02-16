@@ -1,0 +1,31 @@
+---
+id: ecos-aspect
+name:
+  ru: Аспект
+  en: Aspect
+storageType: ECOS_MODEL
+sourceId: emodel/aspect
+formRef: uiserv/form@aspect-form
+journalRef: uiserv/journal@aspect-journal
+inheritForm: false
+defaultCreateVariant: true
+model:
+  attributes:
+    - id: name
+      name:
+        en: name
+      type: MLTEXT
+    - id: prefix
+      name:
+        en: prefix
+        type: TEXT
+    - id: aspectAttributes
+      name:
+        en: attributes
+      type: JSON
+      multiple: true
+    - id: aspectSystemAttributes
+      name:
+        en: systemAttributes
+      type: JSON
+      multiple: true

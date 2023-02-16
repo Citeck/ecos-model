@@ -77,6 +77,9 @@ class TypeEntity : AbstractAuditingEntity() {
 
     var contentConfig: String? = null
 
+    @Column(name = "aspects")
+    var aspects: String? = null
+
     override fun equals(other: Any?): Boolean {
         if (other !is TypeEntity) {
             return false

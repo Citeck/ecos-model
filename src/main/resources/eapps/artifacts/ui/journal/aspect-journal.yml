@@ -1,0 +1,23 @@
+---
+id: aspect-journal
+name:
+  ru: Аспекты
+  en: Aspects
+typeRef: emodel/type@ecos-aspect
+actions:
+  - uiserv/action@delete
+  - uiserv/action@edit
+editable: false
+columns:
+  - id: name
+    name:
+      ru: Название
+  - id: prefix
+    name:
+      ru: Префикс
+  - id: id
+    name:
+      ru: Идентификатор
+  - id: _modifier
+    name:
+      ru: Кем изменен

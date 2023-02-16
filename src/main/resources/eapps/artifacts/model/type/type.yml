@@ -76,27 +76,27 @@ model:
         ru: Шаблон нумерации
         en: Number template
     - id: actions
-      multiple: true
       name:
         ru: Действия
         en: Actions
-    - id: associations
       multiple: true
+    - id: associations
       name:
         ru: Ассоциации
         en: Associations
       type: JSON
+      multiple: true
     - id: defaultCreateVariant
       name:
         ru: Вариант создания по умолчанию
         en: Default create variant
       type: BOOLEAN
     - id: createVariants
-      multiple: true
       name:
         ru: Варианты создания
         en: Create variants
       type: JSON
+      multiple: true
     - id: postCreateActionRef
       name:
         ru: Действие после создания
@@ -125,7 +125,12 @@ model:
         ru: Свойства
         en: Properties
       type: JSON
+    - id: aspects
+      name:
+        ru: Аспекты
+        en: Aspects
+      type: JSON
+      multiple: true
   systemAttributes:
     - id: system
       type: BOOLEAN
-

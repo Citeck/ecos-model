@@ -134,6 +134,12 @@ model:
         ru: Свойства
         en: Properties
       type: JSON
+    - id: aspects
+      name:
+        ru: Аспекты
+        en: Aspects
+      type: JSON
+      multiple: true
   systemAttributes:
     - id: system
       type: BOOLEAN

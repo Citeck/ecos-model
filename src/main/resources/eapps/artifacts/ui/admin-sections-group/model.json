@@ -15,6 +15,12 @@
     {
       "type": "JOURNAL",
       "config": {
+        "journalId": "aspect-journal"
+      }
+    },
+    {
+      "type": "JOURNAL",
+      "config": {
         "journalId": "number-templates"
       }
     },
