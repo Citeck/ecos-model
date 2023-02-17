@@ -12,7 +12,6 @@ import ru.citeck.ecos.data.sql.records.perms.DbRecordPerms
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.records3.record.dao.RecordsDao
-import ru.citeck.ecos.records3.record.dao.impl.proxy.RecordsDaoProxy
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import javax.sql.DataSource
 
@@ -24,7 +23,7 @@ class AspectsConfiguration(private val dbDomainFactory: DbDomainFactory) {
 
     @Bean
     fun aspectDao(): RecordsDao {
-        return RecordsDaoProxy("aspect", ASPECT_REPO_DAO_ID, null)
+        return AspectsRecordsDao("aspect", ASPECT_REPO_DAO_ID, null)
     }
 
     @Bean

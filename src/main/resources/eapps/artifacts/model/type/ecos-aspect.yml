@@ -19,6 +19,10 @@ model:
       name:
         en: prefix
         type: TEXT
+    - id: aspectFormRef
+      name:
+        ru: Форма
+        en: Form
     - id: aspectAttributes
       name:
         en: attributes

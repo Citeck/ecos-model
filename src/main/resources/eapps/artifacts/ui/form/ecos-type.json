@@ -314,7 +314,13 @@
                             "action": "custom",
                             "state": "",
                             "showValidations": false,
-                            "custom": "var ownerId = Math.random().toString();\nvar currentRecord = Citeck.Records.get(instance.options.recordId);\n\nvar configFormRef = data.configFormRef;\nif (Array.isArray(configFormRef)) {\n    configFormRef = configFormRef[0];\n}\n\nif (!configFormRef && data.parentRef) {\n    configFormRef = Citeck.Records.get(data.parentRef).load('inhConfigFormRef?id', true);\n}\n\nPromise.all([configFormRef, currentRecord.load('config?json')])\n    .then(function(formAndConfig) {\n\n        var formRef = formAndConfig[0];\n        var config = formAndConfig[1];\n\n        if (formRef == null) {\n            throw new Error(\"Config form is not set\");\n        }\n\n        if (!config) {\n            config = {};\n        }\n\n        var configRecord = Citeck.Records.create(config, ownerId);\n\n        Citeck.forms.eform(configRecord.id, {\n            params: {\n                formId: formRef,\n                onSubmit: function (record) {\n                    var data = record.toJson().attributes;\n                    var resData = {};\n                    for (var key in data) {\n                        if (key[0] !== '_' && key !== 'pendingUpdate') {\n                            resData[key] = data[key];\n                        }\n                    }\n                    currentRecord.att(\"config?json\", resData);\n                    Citeck.Records.release(configRecord.id, ownerId);\n                },\n                onCancel: function () {\n                    Citeck.Records.release(configRecord.id, ownerId);\n                },\n                saveOnSubmit: false\n            },\n            class: 'ecos-modal_width-lg',\n            isBigHeader: true\n        });\n    })",
+                            "custom": "var currentRow = row;\r\nvar config = row.aspectConfig || {};\r\nvar formData = config;\r\nvar aspectRef = row.aspectRef;\r\nvar formRef = Citeck.Records.get(aspectRef).load('aspectFormRef?id', true);\r\nconsole.log(aspectRef);\r\n\r\nPromise.all([formRef, Citeck.EcosFormUtils.getFormById(formRef, {\r\n                          definition: 'definition?json'\r\n                      })]).then(function(formConfig) {\r\n\r\n    var inputs = Citeck.EcosFormUtils.getFormInputs(formConfig[1].definition);\r\n\r\n    Citeck.Dialogs.showFormDialog({\r\n        title: 'Aspect type config',\r\n        showDefaultButtons: false,\r\n        formDefinition: formConfig[1].definition,\r\n        formData: formData,\r\n        onSubmit: submission => {\r\n            var data = submission.data || {};\r\n            var configData = {};\r\n            for (var i in inputs) {\r\n                var att = inputs[i].attribute;\r\n                configData[att] = data[att];\r\n            }\r\n            \r\n            currentRow.aspectConfig = configData;\r\n        }\r\n    })\r\n});\r\n",
+                            "headers": [
+                              {
+                                "header": "",
+                                "value": ""
+                              }
+                            ],
                             "block": true,
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
@@ -1116,7 +1122,7 @@
                   {
                     "label": {
                       "en": "Attributes",
-                      "ru": "Атрибуты"
+                      "ru": "Аспекты"
                     },
                     "key": "aspects",
                     "hideLabel": true,
@@ -1164,11 +1170,18 @@
                         "type2": "TEXT",
                         "submit10": false,
                         "mandatory2": false,
-                        "aspectRef": "",
+                        "aspectRef": {
+                          "name": ""
+                        },
                         "aspectConfig": {
                           "aspectRef": "emodel/aspect@83287f95-f2f1-4653-9ca3-de3b37016da4",
                           "config": {}
-                        }
+                        },
+                        "textField": "",
+                        "refName": "[object Object]",
+                        "aspectRefPrefix": "",
+                        "submit12": false,
+                        "ref": ""
                       }
                     ],
                     "refreshOn": [],
@@ -1190,13 +1203,50 @@
                                   "ru": "Аспекты",
                                   "en": "Aspects"
                                 },
-                                "key": "aspectRef",
+                                "key": "ref",
+                                "hideEditRowButton": true,
                                 "modalTitle": "",
                                 "journalId": "aspect-journal",
                                 "queryData": "",
                                 "refreshOn": [],
                                 "optionalWhenDisabled": false,
                                 "type": "selectJournal",
+                                "input": true
+                              },
+                              {
+                                "label": {
+                                  "ru": "Конфигурация",
+                                  "en": "Config"
+                                },
+                                "key": "config",
+                                "refreshOn": [],
+                                "customDefaultValue": "//value = {\"aspectRef\":\"emodel/aspect@83287f95-f2f1-4653-9ca3-de3b37016da4\",\"config\":{}};",
+                                "optionalWhenDisabled": false,
+                                "properties": {
+                                  "dataType": "json"
+                                },
+                                "type": "hidden",
+                                "input": true
+                              },
+                              {
+                                "label": {
+                                  "ru": "Настроить",
+                                  "en": "Edit"
+                                },
+                                "key": "submit4",
+                                "action": "custom",
+                                "state": "",
+                                "showValidations": false,
+                                "custom": "var currentRow = row;\r\nvar config = row.config || {};\r\nvar formData = config;\r\nvar aspectRef = row.ref;\r\n\r\nCiteck.Records\r\n  .get(aspectRef)\r\n  .load('aspectFormRef?id', true)\r\n  .then((formRef) => {\r\n    Citeck.EcosFormUtils.getFormById(formRef, {\r\n      definition: 'definition?json'\r\n    }).then(function(formConfig) {\r\n\r\n      var inputs = Citeck.EcosFormUtils.getFormInputs(formConfig.definition);\r\n\r\n      Citeck.Dialogs.showFormDialog({\r\n          title: 'Aspect type config',\r\n          showDefaultButtons: false,\r\n          formDefinition: formConfig.definition,\r\n          formData: formData,\r\n          onSubmit: submission => {\r\n              var data = submission.data || {};\r\n              var configData = {};\r\n              for (var i in inputs) {\r\n                  var att = inputs[i].attribute;\r\n                  configData[att] = data[att];\r\n              }\r\n\r\n              currentRow.config = configData;\r\n          }\r\n      })\r\n  });\r\n});",
+                                "headers": [
+                                  {
+                                    "header": "",
+                                    "value": ""
+                                  }
+                                ],
+                                "refreshOn": [],
+                                "optionalWhenDisabled": false,
+                                "type": "button",
                                 "input": true
                               }
                             ],
@@ -1211,67 +1261,7 @@
                             "type": "column",
                             "input": false,
                             "key": "column",
-                            "components": [
-                              {
-                                "label": {
-                                  "ru": "Настроить",
-                                  "en": "Setup"
-                                },
-                                "key": "submit10",
-                                "action": "custom",
-                                "state": "",
-                                "showValidations": false,
-                                "custom": "\r\nvar currentRow = row;\r\nvar config = row.aspectConfig || {};\r\nvar formData = config;\r\n\r\nCiteck.EcosFormUtils.getFormById('uiserv/form@aspect-form', {\r\n    definition: 'definition?json'\r\n}).then(function(formConfig) {\r\n\r\n    var inputs = Citeck.EcosFormUtils.getFormInputs(formConfig.definition);\r\n\r\n    Citeck.Dialogs.showFormDialog({\r\n        title: 'Aspect type config',\r\n        showDefaultButtons: true,\r\n        formDefinition: formConfig.definition,\r\n        formData: formData,\r\n        onSubmit: submission => {\r\n            var data = submission.data || {};\r\n            var configData = {};\r\n            for (var i in inputs) {\r\n                var att = inputs[i].attribute;\r\n                configData[att] = data[att];\r\n            }\r\n            currentRow.aspectConfig = configData;\r\n        }\r\n    })\r\n\r\n});\r\n",
-                                "headers": [
-                                  {
-                                    "header": "",
-                                    "value": ""
-                                  }
-                                ],
-                                "block": true,
-                                "refreshOn": [],
-                                "optionalWhenDisabled": false,
-                                "logic": [
-                                  {
-                                    "name": "check form",
-                                    "trigger": {
-                                      "type": "javascript",
-                                      "javascript": "result = Citeck.EcosFormUtils.getFormById('uiserv/form@att-type-' + row.type + '-form', {\n    definition: 'definition?json'\n}).then(config => {\n  const isEmptyConfig = _.isEmpty(_.get(config, 'definition'));\n  \n  instance.showElement(!isEmptyConfig);\n  \n  return config;\n});\n"
-                                    },
-                                    "actions": [
-                                      {
-                                        "name": "test",
-                                        "type": "property",
-                                        "property": {
-                                          "label": "Container Custom Class",
-                                          "value": "customClass",
-                                          "type": "string"
-                                        },
-                                        "text": "test-test-test"
-                                      }
-                                    ]
-                                  }
-                                ],
-                                "type": "button",
-                                "input": true,
-                                "row": "0-3"
-                              },
-                              {
-                                "label": {
-                                  "ru": "Конфигурация",
-                                  "en": "Config"
-                                },
-                                "key": "aspectConfig",
-                                "refreshOn": [],
-                                "customDefaultValue": "//value = {\"aspectRef\":\"emodel/aspect@83287f95-f2f1-4653-9ca3-de3b37016da4\",\"config\":{}};",
-                                "optionalWhenDisabled": false,
-                                "properties": {
-                                  "dataType": "json"
-                                },
-                                "type": "hidden",
-                                "input": true
-                              }
-                            ],
+                            "components": [],
                             "md": 3
                           },
                           {
@@ -1279,28 +1269,7 @@
                             "type": "column",
                             "input": false,
                             "key": "column",
-                            "components": [
-                              {
-                                "label": {
-                                  "ru": "Множественный",
-                                  "en": "Multiple"
-                                },
-                                "key": "multiple2",
-                                "type": "checkbox",
-                                "input": true,
-                                "row": "0-5"
-                              },
-                              {
-                                "label": {
-                                  "ru": "Обязательный",
-                                  "en": "Mandatory"
-                                },
-                                "key": "mandatory2",
-                                "type": "checkbox",
-                                "input": true,
-                                "row": "0-5"
-                              }
-                            ],
+                            "components": [],
                             "md": 3
                           },
                           {
@@ -1308,56 +1277,7 @@
                             "type": "column",
                             "input": false,
                             "key": "column",
-                            "components": [
-                              {
-                                "label": {
-                                  "en": "Permissions"
-                                },
-                                "hideLabel": true,
-                                "action": "custom",
-                                "state": "",
-                                "showValidations": false,
-                                "custom": "\nvar mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = 'emodel/type@' + data.moduleId;\nvar customProps = {\n  roles: (data.modelRoles || []).map(mapToSingleLang),\n  statuses: (data.modelStatuses || []).map(mapToSingleLang),\n  attributeName: Citeck.helpers.getMLValue(row.name)\n};\n\nvar typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypeAttPermissions(\n  typeRef, \n  row.id, \n  customProps\n)",
-                                "leftIcon": "icon-decision-tables",
-                                "block": true,
-                                "key": "submit4",
-                                "customConditional": "show = _.get(data, 'ecosEdition.isEnterprise', false)",
-                                "type": "button",
-                                "input": true,
-                                "row": "0-4"
-                              },
-                              {
-                                "label": {
-                                  "en": " "
-                                },
-                                "key": "submit10",
-                                "action": "custom",
-                                "state": "",
-                                "showValidations": false,
-                                "custom": "var currentRow = row;\nvar computed = row.computed || {}; \nvar computedType = computed.type || 'NONE';\nvar formData = {\n    type: computedType,\n    storingType: computed.storingType || 'NONE'\n};\nformData[computedType + '_config'] = computed.config || {};\n\n\nCiteck.EcosFormUtils.getFormById('uiserv/form@computed-attribute-form', {\n    definition: 'definition?json'\n}).then(function(formConfig) {\n    const lang = form && form.i18next && form.i18next.options ? form.i18next.options.lng : 'en';\n    let modalTitle = '';\n    if(lang === 'ru') { \n      modalTitle = 'Вычисляемые атрибуты'; \n    }\n    if(lang === 'en') {\n      modalTitle = 'Computed attribute';\n    }\n    \n    Citeck.Dialogs.showFormDialog({\n        title: modalTitle,\n        showDefaultButtons: true,\n        formDefinition: formConfig.definition,\n        formData: formData,\n        onSubmit: submission => {\n            var data = submission.data || {};\n\n            currentRow.computed = {\n                type: data.type,\n                storingType: data.storingType,\n                config: data[data.type + '_config']\n            }\n        }\n    })\n    \n});",
-                                "removeIndents": true,
-                                "leftIcon": "icon-items",
-                                "block": true,
-                                "refreshOn": [],
-                                "optionalWhenDisabled": false,
-                                "type": "button",
-                                "input": true
-                              },
-                              {
-                                "label": {
-                                  "ru": "Вычисляемый атрибут",
-                                  "en": "Computed attribute"
-                                },
-                                "key": "computed2",
-                                "refreshOn": [],
-                                "optionalWhenDisabled": false,
-                                "properties": {
-                                  "dataType": "json"
-                                },
-                                "type": "hidden",
-                                "input": true
-                              }
-                            ],
+                            "components": [],
                             "md": 3
                           }
                         ],
