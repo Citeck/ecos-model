@@ -5,6 +5,7 @@ import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.commons.promise.Promises
 import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
 import ru.citeck.ecos.model.type.service.resolver.TypesProvider
+import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.webapp.api.promise.Promise
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import ru.citeck.ecos.webapp.lib.registry.EcosRegistryProps
@@ -13,14 +14,15 @@ import ru.citeck.ecos.webapp.lib.registry.init.EcosRegistryInitializer
 
 @Component
 class TypesRegistryInitializer(
-    private val typesService: TypesService
+    private val typesService: TypesService,
+    private val recordsService: RecordsService
 ) : EcosRegistryInitializer<TypeDef> {
 
     companion object {
         const val ORDER = -10f
     }
 
-    private val resolver = TypeDefResolver()
+    private val resolver = TypeDefResolver(recordsService)
 
     override fun init(
         registry: MutableEcosRegistry<TypeDef>,

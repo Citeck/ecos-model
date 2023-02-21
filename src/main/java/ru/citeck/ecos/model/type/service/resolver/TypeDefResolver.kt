@@ -15,12 +15,16 @@ import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.model.type.service.utils.EModelTypeUtils
 import ru.citeck.ecos.records2.RecordRef
+import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.model.type.dto.AssocDef
+import ru.citeck.ecos.webapp.lib.model.type.dto.TypeAspectDef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 
 @Component
-class TypeDefResolver {
+class TypeDefResolver(
+    private val recordsService: RecordsService? = null
+) {
     companion object {
 
         const val DEFAULT_FORM = "DEFAULT_FORM"
@@ -28,6 +32,9 @@ class TypeDefResolver {
 
         const val ATT_ASSOC_TYPE_REF_KEY = "typeRef"
         const val ATT_ASSOC_CHILD_FLAG_KEY = "child"
+
+        const val ASPECT_ATTS = "aspectAttributes[]?json"
+        const val ASPECT_SYSTEM_ATTS = "aspectSystemAttributes[]?json"
 
         private val log = KotlinLogging.logger {}
 
@@ -170,6 +177,11 @@ class TypeDefResolver {
         if (MLText.isEmpty(resTypeDef.dispNameTemplate)) {
             resTypeDef.withDispNameTemplate(resolvedParentDef.dispNameTemplate)
         }
+
+        if (resTypeDef.aspects.isEmpty()) {
+            resTypeDef.withAspects(resolvedParentDef.aspects)
+        }
+
         resTypeDef.withAssociations(getAssocs(typeDef, resolvedParentDef))
 
         return resTypeDef
@@ -229,8 +241,8 @@ class TypeDefResolver {
 
         val roles = mutableMapOf<String, RoleDef>()
         val statuses = mutableMapOf<String, StatusDef>()
-        val attributes = mutableMapOf<String, AttributeDef>()
-        val systemAttributes = mutableMapOf<String, AttributeDef>()
+        var attributes = mutableMapOf<String, AttributeDef>()
+        var systemAttributes = mutableMapOf<String, AttributeDef>()
 
         parentTypeDef.model.roles.forEach { roles[it.id] = it }
         parentTypeDef.model.statuses.forEach { statuses[it.id] = it }
@@ -246,6 +258,11 @@ class TypeDefResolver {
             parentTypeDef.model.stages
         }
 
+        if (typeDef.aspects.isNotEmpty()) {
+            attributes = addAspectsAttributes(typeDef.aspects, attributes, false)
+            systemAttributes = addAspectsAttributes(typeDef.aspects, systemAttributes, true)
+        }
+
         return TypeModelDef.create {
             withRoles(roles.values.toList())
             withStatuses(statuses.values.toList())
@@ -253,6 +270,47 @@ class TypeDefResolver {
             withAttributes(attributes.values.toList())
             withSystemAttributes(systemAttributes.values.toList())
         }
+    }
+
+    private fun addAspectsAttributes(
+        aspects: List<TypeAspectDef>,
+        attributes: MutableMap<String, AttributeDef>,
+        isSystem: Boolean
+    ): MutableMap<String, AttributeDef> {
+
+        for (aspect in aspects) {
+            val prefix = recordsService?.getAtt(aspect.ref, "prefix")?.asText()
+            val aspectAttributes = if (isSystem) {
+                recordsService?.getAtt(aspect.ref, ASPECT_SYSTEM_ATTS)?.asList(AttributeDef::class.java)
+            } else {
+                recordsService?.getAtt(aspect.ref, ASPECT_ATTS)?.asList(AttributeDef::class.java)
+            }
+
+            if (aspectAttributes != null) {
+                for (attribute in aspectAttributes) {
+
+                    if (attribute.id.isBlank()) {
+                        continue
+                    }
+
+                    val resolvedId: String = prefix + "_" + attribute.id
+                    val resolvedAttribute = AttributeDef(
+                        resolvedId,
+                        attribute.name,
+                        attribute.type,
+                        attribute.config,
+                        attribute.multiple,
+                        attribute.mandatory,
+                        attribute.computed,
+                        attribute.constraint,
+                        attribute.index
+                    )
+
+                    attributes[resolvedAttribute.id] = resolvedAttribute
+                }
+            }
+        }
+        return attributes
     }
 
     private fun getDocLib(typeDef: TypeDef): DocLibDef {

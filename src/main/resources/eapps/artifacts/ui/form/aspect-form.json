@@ -75,6 +75,7 @@
                     "defaultValue": "",
                     "refreshOn": [],
                     "optionalWhenDisabled": false,
+                    "unique": true,
                     "type": "textfield",
                     "input": true
                   }
@@ -201,10 +202,19 @@
                               "ru": "Id",
                               "en": "Id"
                             },
-                            "key": "id3",
+                            "key": "id",
                             "validate": {
                               "pattern": "(^$|[_a-zA-Z][_\\w-.:]*)"
                             },
+                            "inputMasks": [
+                              {
+                                "label": "",
+                                "mask": ""
+                              }
+                            ],
+                            "defaultValue": "",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
                             "type": "textfield",
                             "input": true
                           },
@@ -213,7 +223,7 @@
                               "ru": "Имя",
                               "en": "Name"
                             },
-                            "key": "name3",
+                            "key": "name",
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
                             "type": "mlText",
@@ -238,7 +248,7 @@
                               "ru": "Тип            ",
                               "en": "Type"
                             },
-                            "key": "type3",
+                            "key": "type",
                             "dataSrc": "values",
                             "data": {
                               "values": [
@@ -294,6 +304,12 @@
                                   "label": "Binary",
                                   "value": "BINARY"
                                 }
+                              ],
+                              "headers": [
+                                {
+                                  "key": "",
+                                  "value": ""
+                                }
                               ]
                             },
                             "defaultValue": "TEXT",
@@ -345,7 +361,7 @@
                               "ru": "Конфигурация",
                               "en": "Config"
                             },
-                            "key": "config3",
+                            "key": "config",
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
                             "properties": {
@@ -368,7 +384,9 @@
                               "ru": "Множественный",
                               "en": "Multiple"
                             },
-                            "key": "multiple3",
+                            "key": "multiple",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
                             "type": "checkbox",
                             "input": true,
                             "row": "0-5"
@@ -378,7 +396,9 @@
                               "ru": "Обязательный",
                               "en": "Mandatory"
                             },
-                            "key": "mandatory3",
+                            "key": "mandatory",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
                             "type": "checkbox",
                             "input": true,
                             "row": "0-5"
@@ -431,7 +451,7 @@
                               "ru": "Вычисляемый атрибут",
                               "en": "Computed attribute"
                             },
-                            "key": "computed3",
+                            "key": "computed",
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
                             "properties": {
