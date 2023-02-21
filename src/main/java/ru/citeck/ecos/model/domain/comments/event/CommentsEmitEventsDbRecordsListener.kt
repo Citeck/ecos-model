@@ -12,7 +12,7 @@ private const val RECORD_ATT = "record"
 @Component
 class CommentsEmitEventsDbRecordsListener(
     private val commentEventEmitter: CommentEventEmitter
-) : DbRecordsListener {
+) : DbRecordsListenerAdapter() {
 
     override fun onChanged(event: DbRecordChangedEvent) {
         val comment = event.toCommentEvent()
@@ -27,14 +27,6 @@ class CommentsEmitEventsDbRecordsListener(
     override fun onDeleted(event: DbRecordDeletedEvent) {
         val comment = event.toCommentEvent()
         commentEventEmitter.emitCommentDelete(comment)
-    }
-
-    override fun onDraftStatusChanged(event: DbRecordDraftStatusChangedEvent) {
-        // do nothing
-    }
-
-    override fun onStatusChanged(event: DbRecordStatusChangedEvent) {
-        // do nothing
     }
 
     private fun DbRecordCreatedEvent.toCommentEvent(): CommentCreateEvent {

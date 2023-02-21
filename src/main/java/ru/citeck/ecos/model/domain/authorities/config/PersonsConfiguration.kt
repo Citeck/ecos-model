@@ -19,7 +19,6 @@ import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
 import ru.citeck.ecos.model.domain.authorities.service.PersonEventsService
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
-import ru.citeck.ecos.model.domain.events.emitter.DbRecordsEcosEventsAdapter
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.records2.RecordRef
@@ -38,8 +37,7 @@ class PersonsConfiguration(
     private val recordsService: RecordsService,
     private val authorityService: AuthorityService,
     private val dbDomainFactory: DbDomainFactory,
-    private val authoritiesSyncService: AuthoritiesSyncService,
-    private val dbRecordsEcosEventsAdapter: DbRecordsEcosEventsAdapter
+    private val authoritiesSyncService: AuthoritiesSyncService
 ) {
 
     @Bean
@@ -135,7 +133,7 @@ class PersonsConfiguration(
             recordsService.getAtt(rec, "?localId").asText()
         }
 
-        recordsDao.addListener(object : DbRecordsListener {
+        recordsDao.addListener(object : DbRecordsListenerAdapter() {
             override fun onChanged(event: DbRecordChangedEvent) {
                 authorityService.resetPersonCache(getRecId(event.record))
                 eventsService.onPersonChanged(event)
@@ -147,12 +145,7 @@ class PersonsConfiguration(
             override fun onDeleted(event: DbRecordDeletedEvent) {
                 authorityService.resetPersonCache(getRecId(event.record))
             }
-            override fun onDraftStatusChanged(event: DbRecordDraftStatusChangedEvent) {
-            }
-            override fun onStatusChanged(event: DbRecordStatusChangedEvent) {
-            }
         })
-        recordsDao.addListener(dbRecordsEcosEventsAdapter)
 
         return recordsDao
     }

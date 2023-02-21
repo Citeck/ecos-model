@@ -18,7 +18,6 @@ import ru.citeck.ecos.model.domain.authorities.api.records.AuthorityMixin
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
-import ru.citeck.ecos.model.domain.events.emitter.DbRecordsEcosEventsAdapter
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.records3.RecordsService
@@ -31,8 +30,7 @@ class GroupsConfiguration(
     private val dbDomainFactory: DbDomainFactory,
     private val authoritiesSyncService: AuthoritiesSyncService,
     private val authorityService: AuthorityService,
-    private val recordsService: RecordsService,
-    private val dbRecordsEcosEventsAdapter: DbRecordsEcosEventsAdapter
+    private val recordsService: RecordsService
 ) {
 
     @Bean
@@ -92,7 +90,7 @@ class GroupsConfiguration(
             recordsService.getAtt(rec, "?localId").asText()
         }
 
-        recordsDao.addListener(object : DbRecordsListener {
+        recordsDao.addListener(object : DbRecordsListenerAdapter() {
             override fun onChanged(event: DbRecordChangedEvent) {
                 authorityService.resetGroupCache(getRecId(event.record))
             }
@@ -102,12 +100,7 @@ class GroupsConfiguration(
             override fun onDeleted(event: DbRecordDeletedEvent) {
                 authorityService.resetGroupCache(getRecId(event.record))
             }
-            override fun onDraftStatusChanged(event: DbRecordDraftStatusChangedEvent) {
-            }
-            override fun onStatusChanged(event: DbRecordStatusChangedEvent) {
-            }
         })
-        recordsDao.addListener(dbRecordsEcosEventsAdapter)
 
         recordsDao.addAttributesMixin(AuthorityMixin(recordsService, authorityService, AuthorityType.GROUP))
         recordsDao.addAttributesMixin(AuthorityGroupMixin())
