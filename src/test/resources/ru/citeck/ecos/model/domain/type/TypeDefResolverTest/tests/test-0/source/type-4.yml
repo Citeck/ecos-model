@@ -1,0 +1,6 @@
+---
+id: type-4
+parentRef: emodel/type@type-3
+
+properties:
+  type-4-prop: value-4

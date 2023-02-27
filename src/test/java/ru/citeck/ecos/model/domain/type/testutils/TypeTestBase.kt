@@ -78,13 +78,14 @@ open class TypeTestBase {
         val typeConverter = TypeConverter(typesRepo)
         typeService = TypesServiceImpl(typeConverter, typesRepo)
         artifactHandler = TypeArtifactHandler(typeService)
+        records = recordsServices.recordsServiceV1
 
         val typesRegistry = EcosTypesRegistry(
             EcosRegistryProps.DEFAULT,
             listOf(
                 DefaultTypesInitializer(),
                 TypeArtifactsInitializer(ecosAppsServiceFactory.localAppService),
-                TypesRegistryInitializer(typeService)
+                TypesRegistryInitializer(typeService, records)
             )
         )
 
@@ -100,7 +101,6 @@ open class TypeTestBase {
         eventsServiceFactory.modelServices = modelLibServices
         this.eventsService = eventsServiceFactory.eventsService
 
-        records = recordsServices.recordsServiceV1
         val typesRepoRecordsDao = TypesRepoRecordsDao(typeService, eventsServiceFactory.recordEventsService)
         records.register(typesRepoRecordsDao)
         records.register(TypeRecordsDao(typesRegistry, modelLibServices))

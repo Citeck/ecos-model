@@ -288,7 +288,6 @@ class TypeDefResolver(
 
             if (aspectAttributes != null) {
                 for (attribute in aspectAttributes) {
-
                     if (attribute.id.isBlank()) {
                         continue
                     }

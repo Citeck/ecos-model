@@ -1,0 +1,13 @@
+---
+id: type-3
+name:
+  en: type-3
+
+formRef: uiserv/form@form-3
+parentRef: emodel/type@base
+
+properties:
+  type-3-prop: value-3
+
+aspects:
+  - ref: emodel/aspect@e112ff4a-db75-499e-b33c-e3809ac067a2
