@@ -6,10 +6,19 @@ name:
 
 parentRef: emodel/type@user-base
 
-system: true
 storageType: ECOS_MODEL
 
 properties:
   alfType: ecos:document
 
-
+model:
+  attributes:
+    - id: name
+      name:
+        ru: Имя
+        en: Name
+    - id: content
+      name:
+        ru: Содержимое
+        en: Content
+      type: CONTENT

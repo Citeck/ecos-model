@@ -1,0 +1,50 @@
+---
+id: thumbnail
+name:
+  ru: Превью
+  en: Preview
+
+system: true
+storageType: ECOS_MODEL
+
+model:
+  attributes:
+    - id: content
+      name:
+        ru: Содержимое
+        en: Content
+      type: CONTENT
+    - id: mimeType
+      name:
+        ru: Mime-тип
+        en: Mime type
+    - id: srcSha256
+      name:
+        ru: Sha256 исходного контента
+        en: Sha256 of source content
+    - id: srcAttribute
+      name:
+        ru: Атрибут с исходным контентом
+        en: Attribute with source content
+    - id: status
+      index:
+        enabled: true
+      name:
+        ru: Статус
+        en: Status
+    - id: nextTryTime
+      index:
+        enabled: true
+      type: DATETIME
+      name:
+        ru: Время следующей попытки генерации
+        en: Time of next generation try
+    - id: failsCount
+      type: NUMBER
+      name:
+        ru: Количество неуспешных попыток
+        en: Fails count
+    - id: failDescription
+      name:
+        ru: Описание последней ошибки
+        en: Last fail description

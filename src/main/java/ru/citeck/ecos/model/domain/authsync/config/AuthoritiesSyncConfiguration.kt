@@ -83,7 +83,7 @@ class AuthoritiesSyncConfiguration(
                 .build()
         ).withPermsComponent(permsComponent).build()
 
-        dao.addListener(object : DbRecordsListener {
+        dao.addListener(object : DbRecordsListenerAdapter() {
             override fun onChanged(event: DbRecordChangedEvent) {
                 recordWasUpdated(event.record)
                 recordEventsService.emitRecChanged(event.record, event.before, event.after)
@@ -95,8 +95,6 @@ class AuthoritiesSyncConfiguration(
             override fun onDeleted(event: DbRecordDeletedEvent) {
                 authoritiesSyncService.updateSynchronizations()
             }
-            override fun onDraftStatusChanged(event: DbRecordDraftStatusChangedEvent) {}
-            override fun onStatusChanged(event: DbRecordStatusChangedEvent) {}
         })
 
         return dao
