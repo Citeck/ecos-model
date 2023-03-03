@@ -1,14 +1,15 @@
 {
   "id": "person_general",
-  "system": true,
+  "formKey": "",
   "title": {
     "en": "General",
     "ru": "Основное"
   },
   "description": {},
-  "customModule": null,
+  "customModule": "",
   "typeRef": "emodel/type@person",
-  "width": null,
+  "width": "",
+  "system": true,
   "i18n": {
     "ru": {
       "userName": "Логин",
@@ -64,6 +65,9 @@
                       "ru": "userName"
                     },
                     "key": "cm_userName",
+                    "validate": {
+                      "required": true
+                    },
                     "clearOnHide": false,
                     "defaultValue": "",
                     "refreshOn": [],
@@ -94,6 +98,9 @@
                       "ru": "lastName"
                     },
                     "key": "cm_lastName",
+                    "validate": {
+                      "required": true
+                    },
                     "clearOnHide": false,
                     "defaultValue": "",
                     "refreshOn": [],
@@ -109,6 +116,15 @@
                       "ru": "firstName"
                     },
                     "key": "cm_firstName",
+                    "validate": {
+                      "required": true
+                    },
+                    "inputMasks": [
+                      {
+                        "label": "",
+                        "mask": ""
+                      }
+                    ],
                     "defaultValue": "",
                     "refreshOn": [],
                     "optionalWhenDisabled": false,
@@ -123,6 +139,15 @@
                       "ru": "middleName"
                     },
                     "key": "cm_middleName",
+                    "validate": {
+                      "required": true
+                    },
+                    "inputMasks": [
+                      {
+                        "label": "",
+                        "mask": ""
+                      }
+                    ],
                     "defaultValue": "",
                     "refreshOn": [],
                     "optionalWhenDisabled": false,
@@ -151,6 +176,9 @@
                       "ru": "birthDate"
                     },
                     "key": "ecos_birthDate",
+                    "validate": {
+                      "required": true
+                    },
                     "format": "dd-MM-yyyy",
                     "datePicker": {
                       "minDate": "",
@@ -171,6 +199,9 @@
                       "ru": "sex"
                     },
                     "key": "ecos_sex",
+                    "validate": {
+                      "required": true
+                    },
                     "dataSrc": "values",
                     "data": {
                       "values": [
@@ -181,6 +212,12 @@
                         {
                           "label": "Female",
                           "value": "female"
+                        }
+                      ],
+                      "headers": [
+                        {
+                          "key": "",
+                          "value": ""
                         }
                       ]
                     },
@@ -197,6 +234,15 @@
                       "ru": "city"
                     },
                     "key": "ecos_city",
+                    "validate": {
+                      "required": true
+                    },
+                    "inputMasks": [
+                      {
+                        "label": "",
+                        "mask": ""
+                      }
+                    ],
                     "defaultValue": "",
                     "refreshOn": [],
                     "optionalWhenDisabled": false,
@@ -211,6 +257,15 @@
                       "ru": "organization"
                     },
                     "key": "cm_organization",
+                    "validate": {
+                      "required": true
+                    },
+                    "inputMasks": [
+                      {
+                        "label": "",
+                        "mask": ""
+                      }
+                    ],
                     "clearOnHide": false,
                     "defaultValue": "",
                     "refreshOn": [],
@@ -236,6 +291,21 @@
                     "input": true
                   }
                 ]
+              },
+              {
+                "label": {
+                  "ru": "Аватар",
+                  "en": "Avatar"
+                },
+                "key": "photo",
+                "validate": {
+                  "required": true
+                },
+                "storage": "base64",
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
+                "type": "file",
+                "input": true
               }
             ],
             "md": 12,
@@ -320,7 +390,9 @@
         "type": "columns",
         "input": false
       }
-    ]
+    ],
+    "formId": "person_general"
   },
-  "attributes": {}
+  "attributes": {},
+  "notExists": false
 }
