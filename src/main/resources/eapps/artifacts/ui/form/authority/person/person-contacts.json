@@ -1,14 +1,15 @@
 {
   "id": "person_contacts",
-  "system": true,
+  "formKey": "",
   "title": {
     "en": "Contacts",
     "ru": "Контакты"
   },
   "description": {},
-  "customModule": null,
+  "customModule": "",
   "typeRef": "emodel/type@person",
   "width": "lg",
+  "system": true,
   "i18n": {
     "ru": {
       "phoneWorking": "Телефон рабочий",
@@ -70,6 +71,15 @@
               "ru": "mobile"
             },
             "key": "cm_mobile2",
+            "validate": {
+              "required": true
+            },
+            "inputMasks": [
+              {
+                "label": "",
+                "mask": ""
+              }
+            ],
             "clearOnHide": false,
             "defaultValue": "",
             "refreshOn": [],
@@ -85,6 +95,15 @@
               "ru": "location"
             },
             "key": "cm_location",
+            "validate": {
+              "required": true
+            },
+            "inputMasks": [
+              {
+                "label": "",
+                "mask": ""
+              }
+            ],
             "defaultValue": "",
             "refreshOn": [],
             "optionalWhenDisabled": false,
@@ -113,6 +132,15 @@
               "ru": "email"
             },
             "key": "cm_email",
+            "validate": {
+              "required": true
+            },
+            "inputMasks": [
+              {
+                "label": "",
+                "mask": ""
+              }
+            ],
             "defaultValue": "",
             "refreshOn": [],
             "optionalWhenDisabled": false,
@@ -131,7 +159,9 @@
           }
         ]
       }
-    ]
+    ],
+    "formId": "person_contacts"
   },
-  "attributes": {}
+  "attributes": {},
+  "notExists": false
 }
