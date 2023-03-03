@@ -3,8 +3,8 @@ modelVersion: "1.0"
 source-id: "aspect"
 
 name:
-  ru: Тип данных
-  en: Data type
+  ru: Аспект
+  en: Aspect
 
 controller:
   type: json

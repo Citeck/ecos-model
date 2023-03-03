@@ -6,7 +6,6 @@ name:
 
 actions:
   - uiserv/action@edit-json
-  - uiserv/action@module-copy
   - uiserv/action@edit
   - uiserv/action@download-text-yml
   - uiserv/action@delete

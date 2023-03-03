@@ -1195,6 +1195,17 @@
                             "components": [
                               {
                                 "label": {
+                                  "en": "Inherit aspect config",
+                                  "ru": "Наследовать конфигурацию аспекта"
+                                },
+                                "key": "inheritConfig",
+                                "refreshOn": [],
+                                "optionalWhenDisabled": false,
+                                "type": "checkbox",
+                                "input": true
+                              },
+                              {
+                                "label": {
                                   "ru": "Настроить",
                                   "en": "Edit"
                                 },
