@@ -18,9 +18,9 @@ import ru.citeck.ecos.webapp.lib.registry.MutableEcosRegistry
 import ru.citeck.ecos.webapp.lib.registry.init.EcosRegistryInitializer
 
 @Component
-@DependsOn("aspectsConfiguration")
 class AspectsRegistryInitializer(
-    private val recordsService: RecordsService
+    private val recordsService: RecordsService,
+    private val aspectsConfiguration: AspectsConfiguration
 ) : EcosRegistryInitializer<AspectDef> {
 
     companion object {
@@ -29,11 +29,23 @@ class AspectsRegistryInitializer(
         private val log = KotlinLogging.logger {}
     }
 
+    private lateinit var registry: MutableEcosRegistry<AspectDef>
+
+    fun updateAspect(aspectDef: AspectDef) {
+        registry.setValue(aspectDef.id, aspectDef)
+    }
+
+    fun removeAspect(aspectId: String) {
+        registry.setValue(aspectId, null)
+    }
+
     override fun init(
         registry: MutableEcosRegistry<AspectDef>,
         values: Map<String, EntityWithMeta<AspectDef>>,
         props: EcosRegistryProps.Initializer
     ): Promise<*> {
+
+        this.registry = registry
 
         val query = RecordsQuery.create {
             withSourceId(AspectsConfiguration.ASPECTS_DAO_ID)
@@ -52,6 +64,8 @@ class AspectsRegistryInitializer(
                 registry.setValue(it.id, it)
             }
         }
+        aspectsConfiguration.register(this)
+
         return Promises.resolve(Unit)
     }
 

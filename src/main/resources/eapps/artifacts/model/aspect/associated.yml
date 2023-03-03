@@ -1,0 +1,14 @@
+---
+id: associated
+name:
+  ru: Связан с другим документом
+  en: Associated with other document
+
+prefix: assoc
+
+attributes:
+  - id: associatedWith
+    type: ASSOC
+    config:
+      typeRef: emodel/type@case
+    multiple: true

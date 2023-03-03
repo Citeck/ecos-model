@@ -10,11 +10,13 @@ import ru.citeck.ecos.data.sql.records.DbRecordsDao
 import ru.citeck.ecos.data.sql.records.DbRecordsDaoConfig
 import ru.citeck.ecos.data.sql.records.listener.DbRecordChangedEvent
 import ru.citeck.ecos.data.sql.records.listener.DbRecordCreatedEvent
+import ru.citeck.ecos.data.sql.records.listener.DbRecordDeletedEvent
 import ru.citeck.ecos.data.sql.records.listener.DbRecordsListenerAdapter
 import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
 import ru.citeck.ecos.data.sql.records.perms.DbRecordPerms
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
 import ru.citeck.ecos.model.domain.aspects.eapp.AspectArtifactHandler
+import ru.citeck.ecos.model.domain.aspects.service.AspectsRegistryInitializer
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.webapp.api.entity.EntityRef
@@ -37,6 +39,12 @@ class AspectsConfiguration(
         val ASPECT_TYPE_REF = ModelUtils.getTypeRef(ASPECT_TYPE_ID)
     }
 
+    private var aspectsConfig: AspectsRegistryInitializer? = null
+
+    internal fun register(aspectsConfig: AspectsRegistryInitializer) {
+        this.aspectsConfig = aspectsConfig
+    }
+
     @PostConstruct
     fun init() {
 
@@ -49,10 +57,18 @@ class AspectsConfiguration(
             override fun onCreated(event: DbRecordCreatedEvent) {
                 val aspectDef = recordsService.getAtts(event.record, AspectDef::class.java)
                 aspectArtifactHandler.aspectWasChanged(aspectDef)
+                aspectsConfig?.updateAspect(aspectDef)
             }
             override fun onChanged(event: DbRecordChangedEvent) {
                 val aspectDef = recordsService.getAtts(event.record, AspectDef::class.java)
                 aspectArtifactHandler.aspectWasChanged(aspectDef)
+                aspectsConfig?.updateAspect(aspectDef)
+            }
+            override fun onDeleted(event: DbRecordDeletedEvent) {
+                val aspectId = recordsService.getAtt(event.record, "id").asText()
+                if (aspectId.isNotBlank()) {
+                    aspectsConfig?.removeAspect(aspectId)
+                }
             }
         })
     }
