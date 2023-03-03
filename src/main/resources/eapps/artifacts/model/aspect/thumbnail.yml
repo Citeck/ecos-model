@@ -1,0 +1,13 @@
+---
+id: thumbnail
+name:
+  ru: Превью
+  en: Preview
+
+systemAttributes:
+  - id: thumbnails
+    type: ASSOC
+    config:
+      child: true
+      typeRef: emodel/type@thumbnail
+    multiple: true

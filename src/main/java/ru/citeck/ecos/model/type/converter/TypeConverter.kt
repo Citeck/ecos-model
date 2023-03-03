@@ -7,18 +7,14 @@ import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.commons.data.entity.EntityMeta
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.commons.json.Json
-import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef
-import ru.citeck.ecos.model.lib.type.dto.DocLibDef
-import ru.citeck.ecos.model.lib.type.dto.TypeContentConfig
-import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
+import ru.citeck.ecos.model.lib.type.dto.*
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.model.type.repository.TypeEntity
 import ru.citeck.ecos.model.type.service.dao.TypeRepoDao
-import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records3.record.mixin.impl.mutmeta.MutMeta
 import ru.citeck.ecos.records3.record.mixin.impl.mutmeta.MutMetaMixin
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.model.type.dto.AssocDef
-import ru.citeck.ecos.webapp.lib.model.type.dto.TypeAspectDef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import java.time.Instant
 import java.util.*
@@ -41,13 +37,13 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
 
         val typeDef = dto.copy().build()
 
-        if (RecordRef.isEmpty(typeDef.parentRef)) {
+        if (EntityRef.isEmpty(typeDef.parentRef)) {
 
             entity.parent = null
         } else {
 
-            val parentEntity = typeRepoDao.findByExtId(typeDef.parentRef.id)
-                ?: error("Parent type is not found: ${typeDef.parentRef.id}")
+            val parentEntity = typeRepoDao.findByExtId(typeDef.parentRef.getLocalId())
+                ?: error("Parent type is not found: ${typeDef.parentRef.getLocalId()}")
             entity.parent = parentEntity
         }
 
@@ -121,24 +117,24 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
             .withSystem(entity.system)
             .withStorageType(entity.sourceType)
             .withSourceId(entity.sourceId)
-            .withSourceRef(RecordRef.valueOf(entity.sourceRef))
-            .withMetaRecord(RecordRef.valueOf(entity.metaRecord))
-            .withParentRef(RecordRef.valueOf(TypeUtils.getTypeRef(entity.parent?.extId ?: "")))
-            .withFormRef(RecordRef.valueOf(entity.form))
-            .withJournalRef(RecordRef.valueOf(entity.journal))
-            .withBoardRef(RecordRef.valueOf(entity.board))
+            .withSourceRef(EntityRef.valueOf(entity.sourceRef))
+            .withMetaRecord(EntityRef.valueOf(entity.metaRecord))
+            .withParentRef(EntityRef.valueOf(TypeUtils.getTypeRef(entity.parent?.extId ?: "")))
+            .withFormRef(EntityRef.valueOf(entity.form))
+            .withJournalRef(EntityRef.valueOf(entity.journal))
+            .withBoardRef(EntityRef.valueOf(entity.board))
             .withDashboardType(entity.dashboardType)
             .withInheritForm(entity.inheritForm)
             .withInheritActions(entity.inheritActions)
             .withInheritNumTemplate(entity.inheritNumTemplate)
             .withDispNameTemplate(Json.mapper.read(entity.dispNameTemplate, MLText::class.java))
-            .withNumTemplateRef(RecordRef.valueOf(entity.numTemplateRef))
-            .withActions(DataValue.create(entity.actions).asList(RecordRef::class.java))
+            .withNumTemplateRef(EntityRef.valueOf(entity.numTemplateRef))
+            .withActions(DataValue.create(entity.actions).asList(EntityRef::class.java))
             .withAssociations(DataValue.create(entity.associations).asList(AssocDef::class.java))
             .withDefaultCreateVariant(entity.defaultCreateVariant)
             .withCreateVariants(DataValue.create(entity.createVariants).asList(CreateVariantDef::class.java))
-            .withPostCreateActionRef(RecordRef.valueOf(entity.postCreateActionRef))
-            .withConfigFormRef(RecordRef.valueOf(entity.configForm))
+            .withPostCreateActionRef(EntityRef.valueOf(entity.postCreateActionRef))
+            .withConfigFormRef(EntityRef.valueOf(entity.configForm))
             .withConfig(ObjectData.create(entity.config))
             .withModel(Json.mapper.read(entity.model, TypeModelDef::class.java))
             .withDocLib(Json.mapper.read(entity.docLib, DocLibDef::class.java))

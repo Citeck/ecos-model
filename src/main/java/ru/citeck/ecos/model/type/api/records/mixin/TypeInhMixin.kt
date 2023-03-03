@@ -63,7 +63,7 @@ final class TypeInhMixin(
                 typeDef.model.attributes
             }
             "parentModelAttributes" -> {
-                typesService.getInhAttributes(typeDef.parentRef.id)
+                typesService.getInhAttributes(typeDef.parentRef.getLocalId())
             }
             "docLibEnabled" -> {
                 typeDef.docLib.enabled

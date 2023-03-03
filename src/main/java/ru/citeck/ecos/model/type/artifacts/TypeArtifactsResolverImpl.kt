@@ -4,7 +4,7 @@ import mu.KotlinLogging
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.apps.app.domain.ecostype.service.ModelTypeArtifactResolver
 import ru.citeck.ecos.model.type.service.TypesService
-import ru.citeck.ecos.records2.RecordRef
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 
 @Component
 class TypeArtifactsResolverImpl(
@@ -15,33 +15,33 @@ class TypeArtifactsResolverImpl(
         val log = KotlinLogging.logger {}
     }
 
-    override fun getTypeArtifacts(typeRef: RecordRef): List<RecordRef> {
+    override fun getTypeArtifacts(typeRef: EntityRef): List<EntityRef> {
         val artifacts = getTypeArtifactsImpl(typeRef)
         log.info("GetTypeArtifacts result: $artifacts")
         return artifacts
     }
 
-    private fun getTypeArtifactsImpl(typeRef: RecordRef): List<RecordRef> {
+    private fun getTypeArtifactsImpl(typeRef: EntityRef): List<EntityRef> {
 
-        val type = typeService.getByIdOrNull(typeRef.id)
-        val result = mutableListOf<RecordRef>()
+        val type = typeService.getByIdOrNull(typeRef.getLocalId())
+        val result = mutableListOf<EntityRef>()
 
         if (type == null) {
             return result
         }
-        if (RecordRef.isNotEmpty(type.formRef)) {
+        if (EntityRef.isNotEmpty(type.formRef)) {
             result.add(type.formRef)
         }
 
-        result.addAll(type.actions.filter { RecordRef.isNotEmpty(it) })
+        result.addAll(type.actions.filter { EntityRef.isNotEmpty(it) })
 
-        if (RecordRef.isNotEmpty(type.journalRef)) {
+        if (EntityRef.isNotEmpty(type.journalRef)) {
             result.add(type.journalRef)
         }
-        if (RecordRef.isNotEmpty(type.numTemplateRef)) {
+        if (EntityRef.isNotEmpty(type.numTemplateRef)) {
             result.add(type.numTemplateRef)
         }
-        if (RecordRef.isNotEmpty(type.configFormRef)) {
+        if (EntityRef.isNotEmpty(type.configFormRef)) {
             result.add(type.configFormRef)
         }
 

@@ -7,3 +7,12 @@ sourceType: ECOS_MODEL
 sourceId: emodel/type-2
 
 metaRecord: emodel/type-2@
+
+aspects:
+  - ref: emodel/aspect@aspect-1
+
+model:
+  attributes:
+    - id: aspect-1:aspect-1-att
+  systemAttributes:
+    - id: aspect-1:aspect-1-system-att

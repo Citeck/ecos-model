@@ -19,6 +19,7 @@ import ru.citeck.ecos.model.lib.type.dto.DocLibDef
 import ru.citeck.ecos.model.lib.type.dto.TypeContentConfig
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
+import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.webapp.lib.model.type.dto.AssocDef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
@@ -100,8 +101,8 @@ class TypesServiceTest : TypeTestBase() {
                 DocLibDef.create {
                     withFileTypeRefs(
                         listOf(
-                            TypeUtils.getTypeRef("test"),
-                            TypeUtils.getTypeRef("type")
+                            ModelUtils.getTypeRef("test"),
+                            ModelUtils.getTypeRef("type")
                         )
                     )
                     withEnabled(true)
@@ -182,7 +183,7 @@ class TypesServiceTest : TypeTestBase() {
             .withId("child")
             .withInheritForm(true)
             .withName(MLText("child"))
-            .withParentRef(TypeUtils.getTypeRef(fullType.id))
+            .withParentRef(ModelUtils.getTypeRef(fullType.id))
             .withProperties(ObjectData.create("""{"aa":"child_aaa"}"""))
             .build()
 
@@ -197,11 +198,11 @@ class TypesServiceTest : TypeTestBase() {
         val childType2 = TypeDef.create()
             .withId("child2")
             .withName(MLText("child2"))
-            .withParentRef(TypeUtils.getTypeRef(fullType.id))
+            .withParentRef(ModelUtils.getTypeRef(fullType.id))
             .build()
 
         testType(childType2)
-        val child2Ref = TypeUtils.getTypeRef(childType2.id)
+        val child2Ref = ModelUtils.getTypeRef(childType2.id)
 
         assertEquals("", records.getAtt(child2Ref.withSourceId("types-repo"), "formRef?id").asText())
         assertEquals("uiserv/form@test-form", records.getAtt(child2Ref, "inhFormRef?id").asText())
@@ -214,7 +215,7 @@ class TypesServiceTest : TypeTestBase() {
         val typeFromService = typeService.getById(typeDef.id)
         assertEquals(typeDef, typeFromService)
 
-        val typeRef = TypeUtils.getTypeRef(typeDef.id).withSourceId("types-repo")
+        val typeRef = ModelUtils.getTypeRef(typeDef.id).withSourceId("types-repo")
 
         val typeFromRecords = records.getAtts(typeRef, TypeDef::class.java)
         assertEquals(typeDef, typeFromRecords)
@@ -225,7 +226,10 @@ class TypesServiceTest : TypeTestBase() {
         assertEquals(displayName, records.getAtt(typeRef, "?disp").asText())
         assertEquals(displayName, records.getAtt(typeRef, "_disp").asText())
 
-        val assocs = records.getAtt(RecordRef.create(EcosModelApp.NAME, "rtype", typeRef.id), "assocsFull[].name")
+        val assocs = records.getAtt(
+            RecordRef.create(EcosModelApp.NAME, "rtype", typeRef.getLocalId()),
+            "assocsFull[].name"
+        )
 
         var assocsCount = 0
         var assocsTypeDef: TypeDef? = typeDef
@@ -233,7 +237,7 @@ class TypesServiceTest : TypeTestBase() {
         while (assocsTypeDef != null) {
             assocsCount += assocsTypeDef.associations.size
             val currentId = assocsTypeDef.id
-            assocsTypeDef = typeService.getByIdOrNull(assocsTypeDef.parentRef.id)
+            assocsTypeDef = typeService.getByIdOrNull(assocsTypeDef.parentRef.getLocalId())
             if (assocsTypeDef == null && currentId != "base") {
                 assocsTypeDef = typeService.getById("base")
             }

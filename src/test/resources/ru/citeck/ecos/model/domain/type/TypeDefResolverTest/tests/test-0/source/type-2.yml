@@ -2,3 +2,6 @@
 id: type-2
 
 sourceType: ECOS_MODEL
+
+aspects:
+  - ref: emodel/aspect@aspect-1

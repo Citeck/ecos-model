@@ -1,0 +1,37 @@
+---
+id: ecos-aspects
+name:
+  ru: Аспекты
+  en: Aspects
+
+actions:
+  - uiserv/action@edit-json
+  - uiserv/action@module-copy
+  - uiserv/action@edit
+  - uiserv/action@download-text-yml
+  - uiserv/action@delete
+
+editable: false
+
+columns:
+  - id: id
+    name:
+      ru: Идентификатор
+      en: Identifier
+  - id: name
+    name:
+      ru: Название
+      en: Name
+  - id: prefix
+    name:
+      ru: Префикс
+      en: Prefix
+  - id: _modifier
+    name:
+      ru: Кем изменен
+      en: Modified by
+  - id: _modified
+    name:
+      ru: Когда изменен
+      en: Modified time
+    type: DATETIME

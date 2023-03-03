@@ -1,0 +1,10 @@
+---
+id: aspect-1
+
+prefix: aspect-1
+
+attributes:
+  - id: aspect-1-att
+
+systemAttributes:
+  - id: aspect-1-system-att

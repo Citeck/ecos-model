@@ -1,13 +1,18 @@
 ---
 id: type-3
+
 name:
   en: type-3
 
-formRef: uiserv/form@form-3
-parentRef: emodel/type@base
-
-properties:
-  type-3-prop: value-3
+parentRef: emodel/type@type-2
+sourceId: emodel/type-2
+metaRecord: emodel/type-2@
 
 aspects:
-  - ref: emodel/aspect@e112ff4a-db75-499e-b33c-e3809ac067a2
+  - ref: emodel/aspect@aspect-1
+
+model:
+  attributes:
+    - id: aspect-1:aspect-1-att
+  systemAttributes:
+    - id: aspect-1:aspect-1-system-att

@@ -15,7 +15,7 @@
     {
       "type": "JOURNAL",
       "config": {
-        "journalId": "aspect-journal"
+        "journalId": "ecos-aspects"
       }
     },
     {

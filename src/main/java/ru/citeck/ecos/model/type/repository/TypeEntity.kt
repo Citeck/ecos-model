@@ -1,31 +1,11 @@
 package ru.citeck.ecos.model.type.repository
 
 import ru.citeck.ecos.model.domain.AbstractAuditingEntity
-import ru.citeck.ecos.records2.RecordConstants
 import javax.persistence.*
 
 @Entity
 @Table(name = "ecos_type")
 class TypeEntity : AbstractAuditingEntity() {
-    companion object {
-
-        fun replaceNameValid(attributeName: String): String {
-            if (RecordConstants.ATT_MODIFIED.equals(attributeName)) {
-                return "lastModifiedDate"
-            }
-            if (RecordConstants.ATT_MODIFIER.equals(attributeName)) {
-                return "lastModifiedBy"
-            }
-            if ("moduleId".equals(attributeName)) {
-                return "extId"
-            }
-            return attributeName
-        }
-
-        fun isAttributeNameNotValid(attributeName: String): Boolean {
-            return RecordConstants.ATT_TYPE.equals(attributeName)
-        }
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ecos_types_seq_gen")
@@ -77,7 +57,6 @@ class TypeEntity : AbstractAuditingEntity() {
 
     var contentConfig: String? = null
 
-    @Column(name = "aspects")
     var aspects: String? = null
 
     override fun equals(other: Any?): Boolean {

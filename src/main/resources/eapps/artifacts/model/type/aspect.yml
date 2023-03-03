@@ -1,0 +1,50 @@
+---
+id: aspect
+name:
+  ru: Аспект
+  en: Aspect
+
+system: true
+sourceId: emodel/aspect
+
+formRef: uiserv/form@aspect-form
+journalRef: uiserv/journal@ecos-aspects
+
+defaultCreateVariant: false
+
+createVariants:
+
+  - id: create-new-aspect
+    name: { ru: Создать новый аспект, en: Create new aspect }
+
+  - id: upload-aspect
+    name: { ru: Загрузить аспект, en: Upload aspect }
+    formRef: uiserv/form@ecos-artifact-upload
+
+model:
+  attributes:
+    - id: name
+      name:
+        ru: Имя
+        en: name
+      type: MLTEXT
+    - id: prefix
+      name:
+        ru: Префикс аспекта
+        en: Aspect prefix
+    - id: configFormRef
+      name:
+        ru: Форма конфигурации
+        en: Config form
+    - id: attributes
+      name:
+        ru: Атрибуты
+        en: attributes
+      type: JSON
+      multiple: true
+    - id: systemAttributes
+      name:
+        ru: Системные атрибуты
+        en: System attributes
+      type: JSON
+      multiple: true

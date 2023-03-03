@@ -3,6 +3,7 @@ package ru.citeck.ecos.model.type.service.resolver
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.data.MLText
+import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.model.EcosModelApp
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
@@ -11,20 +12,17 @@ import ru.citeck.ecos.model.lib.role.dto.RoleDef
 import ru.citeck.ecos.model.lib.status.dto.StatusDef
 import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef
 import ru.citeck.ecos.model.lib.type.dto.DocLibDef
+import ru.citeck.ecos.model.lib.type.dto.TypeAspectDef
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
-import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
+import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.model.type.service.utils.EModelTypeUtils
-import ru.citeck.ecos.records2.RecordRef
-import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.model.type.dto.AssocDef
-import ru.citeck.ecos.webapp.lib.model.type.dto.TypeAspectDef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 
 @Component
-class TypeDefResolver(
-    private val recordsService: RecordsService? = null
-) {
+class TypeDefResolver {
+
     companion object {
 
         const val DEFAULT_FORM = "DEFAULT_FORM"
@@ -32,9 +30,6 @@ class TypeDefResolver(
 
         const val ATT_ASSOC_TYPE_REF_KEY = "typeRef"
         const val ATT_ASSOC_CHILD_FLAG_KEY = "child"
-
-        const val ASPECT_ATTS = "aspectAttributes[]?json"
-        const val ASPECT_SYSTEM_ATTS = "aspectSystemAttributes[]?json"
 
         private val log = KotlinLogging.logger {}
 
@@ -49,17 +44,19 @@ class TypeDefResolver(
     fun getResolvedTypesWithMeta(
         types: List<EntityWithMeta<TypeDef>>,
         rawProv: TypesProvider,
-        resProv: TypesProvider
+        resProv: TypesProvider,
+        aspectsProv: AspectsProvider
     ): List<EntityWithMeta<TypeDef>> {
-        return doWithMeta(types) { getResolvedTypes(it, rawProv, resProv) }
+        return doWithMeta(types) { getResolvedTypes(it, rawProv, resProv, aspectsProv) }
     }
 
     fun getResolvedTypes(
         types: List<TypeDef>,
         rawProv: TypesProvider,
-        resProv: TypesProvider
+        resProv: TypesProvider,
+        aspectsProv: AspectsProvider
     ): List<TypeDef> {
-        val context = ResolveContext(rawProv, resProv)
+        val context = ResolveContext(rawProv, resProv, aspectsProv)
         val resolvedByParentTypes = types.map {
             getResolvedByParentType(it, context)
         }
@@ -84,11 +81,11 @@ class TypeDefResolver(
 
         val resTypeDef = typeDef.copy()
 
-        if (RecordRef.isEmpty(resTypeDef.parentRef) && resTypeDef.id != "base") {
-            resTypeDef.withParentRef(TypeUtils.getTypeRef("base"))
+        if (EntityRef.isEmpty(resTypeDef.parentRef) && resTypeDef.id != "base") {
+            resTypeDef.withParentRef(ModelUtils.getTypeRef("base"))
         }
 
-        val resolvedParentDef = context.types.computeIfAbsent(resTypeDef.parentRef.id) {
+        val resolvedParentDef = context.types.computeIfAbsent(resTypeDef.parentRef.getLocalId()) {
             val parentTypeDef = if (it.isNotBlank()) {
                 context.rawProv.get(it) ?: TypeDef.EMPTY
             } else {
@@ -98,7 +95,7 @@ class TypeDefResolver(
         }
 
         resTypeDef.withDocLib(getDocLib(typeDef))
-            .withModel(getModel(typeDef, resolvedParentDef))
+            .withModel(getModel(typeDef, resolvedParentDef, context))
 
         if (resTypeDef.dashboardType.isBlank()) {
             resTypeDef.withDashboardType(resolvedParentDef.dashboardType)
@@ -127,23 +124,23 @@ class TypeDefResolver(
         if (resTypeDef.sourceId.isNotEmpty() && !resTypeDef.sourceId.contains(EntityRef.APP_NAME_DELIMITER)) {
             resTypeDef.withSourceId(EcosModelApp.NAME + EntityRef.APP_NAME_DELIMITER + resTypeDef.sourceId)
         }
-        if (RecordRef.isEmpty(resTypeDef.metaRecord)) {
-            resTypeDef.withMetaRecord(RecordRef.valueOf(resTypeDef.sourceId + "@"))
+        if (EntityRef.isEmpty(resTypeDef.metaRecord)) {
+            resTypeDef.withMetaRecord(EntityRef.valueOf(resTypeDef.sourceId + "@"))
         }
         if (MLText.isEmpty(resTypeDef.name)) {
             resTypeDef.withName(MLText(resTypeDef.id))
         }
-        if (RecordRef.isEmpty(resTypeDef.numTemplateRef) && resTypeDef.inheritNumTemplate) {
+        if (EntityRef.isEmpty(resTypeDef.numTemplateRef) && resTypeDef.inheritNumTemplate) {
             resTypeDef.withNumTemplate(resolvedParentDef.numTemplateRef)
         }
-        if (RecordRef.isEmpty(resTypeDef.formRef) && resTypeDef.inheritForm) {
+        if (EntityRef.isEmpty(resTypeDef.formRef) && resTypeDef.inheritForm) {
             resTypeDef.withFormRef(resolvedParentDef.formRef)
         }
-        if (resTypeDef.formRef.id == DEFAULT_FORM) {
-            resTypeDef.withFormRef(resTypeDef.formRef.withId("type$" + resTypeDef.id))
+        if (resTypeDef.formRef.getLocalId() == DEFAULT_FORM) {
+            resTypeDef.withFormRef(resTypeDef.formRef.withLocalId("type$" + resTypeDef.id))
         }
-        if (resTypeDef.journalRef.id == DEFAULT_JOURNAL) {
-            resTypeDef.withJournalRef(resTypeDef.journalRef.withId("type$" + resTypeDef.id))
+        if (resTypeDef.journalRef.getLocalId() == DEFAULT_JOURNAL) {
+            resTypeDef.withJournalRef(resTypeDef.journalRef.withLocalId("type$" + resTypeDef.id))
         }
         val contentConfig = resTypeDef.contentConfig.copy()
         if (contentConfig.path.isBlank()) {
@@ -168,18 +165,31 @@ class TypeDefResolver(
             }
             resTypeDef.withActions(actions)
         }
-        if (RecordRef.isEmpty(resTypeDef.postCreateActionRef)) {
+        if (EntityRef.isEmpty(resTypeDef.postCreateActionRef)) {
             resTypeDef.withPostCreateActionRef(resolvedParentDef.postCreateActionRef)
         }
-        if (RecordRef.isEmpty(resTypeDef.configFormRef)) {
+        if (EntityRef.isEmpty(resTypeDef.configFormRef)) {
             resTypeDef.withConfigFormRef(resolvedParentDef.configFormRef)
         }
         if (MLText.isEmpty(resTypeDef.dispNameTemplate)) {
             resTypeDef.withDispNameTemplate(resolvedParentDef.dispNameTemplate)
         }
 
-        if (resTypeDef.aspects.isEmpty()) {
-            resTypeDef.withAspects(resolvedParentDef.aspects)
+        if (resolvedParentDef.aspects.isNotEmpty()) {
+            val fullAspects = linkedMapOf<EntityRef, TypeAspectDef>()
+            resolvedParentDef.aspects.forEach { fullAspects[it.ref] = it }
+            resTypeDef.aspects.forEach {
+                val newConfig = if (it.inheritConfig && fullAspects.containsKey(it.ref)) {
+                    fullAspects[it.ref]?.config
+                } else {
+                    context.aspectsProv.getAspectInfo(it.ref)?.defaultConfig
+                }?.deepCopy() ?: ObjectData.create()
+                it.config.forEach { key, value ->
+                    newConfig[key] = value
+                }
+                fullAspects[it.ref] = it.copy { withConfig(newConfig) }
+            }
+            resTypeDef.withAspects(fullAspects.values.toList())
         }
 
         resTypeDef.withAssociations(getAssocs(typeDef, resolvedParentDef))
@@ -210,7 +220,7 @@ class TypeDefResolver(
                 if (parentAssoc.target.isNotEmpty()) {
                     newAssoc.withTarget(parentAssoc.target)
                 } else if (attDef != null) {
-                    newAssoc.withTarget(RecordRef.valueOf(attDef.config[ATT_ASSOC_TYPE_REF_KEY].asText()))
+                    newAssoc.withTarget(EntityRef.valueOf(attDef.config[ATT_ASSOC_TYPE_REF_KEY].asText()))
                 }
             }
             if (newAssoc.child == null) {
@@ -237,7 +247,7 @@ class TypeDefResolver(
         return assocs.values.toList()
     }
 
-    private fun getModel(typeDef: TypeDef, parentTypeDef: TypeDef.Builder): TypeModelDef {
+    private fun getModel(typeDef: TypeDef, parentTypeDef: TypeDef.Builder, context: ResolveContext): TypeModelDef {
 
         val roles = mutableMapOf<String, RoleDef>()
         val statuses = mutableMapOf<String, StatusDef>()
@@ -259,8 +269,8 @@ class TypeDefResolver(
         }
 
         if (typeDef.aspects.isNotEmpty()) {
-            attributes = addAspectsAttributes(typeDef.aspects, attributes, false)
-            systemAttributes = addAspectsAttributes(typeDef.aspects, systemAttributes, true)
+            attributes = addAspectsAttributes(typeDef.aspects, attributes, false, context)
+            systemAttributes = addAspectsAttributes(typeDef.aspects, systemAttributes, true, context)
         }
 
         return TypeModelDef.create {
@@ -275,38 +285,24 @@ class TypeDefResolver(
     private fun addAspectsAttributes(
         aspects: List<TypeAspectDef>,
         attributes: MutableMap<String, AttributeDef>,
-        isSystem: Boolean
+        isSystem: Boolean,
+        context: ResolveContext
     ): MutableMap<String, AttributeDef> {
 
         for (aspect in aspects) {
-            val prefix = recordsService?.getAtt(aspect.ref, "prefix")?.asText()
+
+            val aspectInfo = context.aspectsProv.getAspectInfo(aspect.ref) ?: continue
+
             val aspectAttributes = if (isSystem) {
-                recordsService?.getAtt(aspect.ref, ASPECT_SYSTEM_ATTS)?.asList(AttributeDef::class.java)
+                aspectInfo.systemAttributes
             } else {
-                recordsService?.getAtt(aspect.ref, ASPECT_ATTS)?.asList(AttributeDef::class.java)
+                aspectInfo.attributes
             }
-
-            if (aspectAttributes != null) {
-                for (attribute in aspectAttributes) {
-                    if (attribute.id.isBlank()) {
-                        continue
-                    }
-
-                    val resolvedId: String = prefix + "_" + attribute.id
-                    val resolvedAttribute = AttributeDef(
-                        resolvedId,
-                        attribute.name,
-                        attribute.type,
-                        attribute.config,
-                        attribute.multiple,
-                        attribute.mandatory,
-                        attribute.computed,
-                        attribute.constraint,
-                        attribute.index
-                    )
-
-                    attributes[resolvedAttribute.id] = resolvedAttribute
+            for (attribute in aspectAttributes) {
+                if (attribute.id.isBlank()) {
+                    continue
                 }
+                attributes[attribute.id] = attribute
             }
         }
         return attributes
@@ -320,10 +316,10 @@ class TypeDefResolver(
         return DocLibDef.create {
             enabled = true
             fileTypeRefs = docLib.fileTypeRefs.ifEmpty {
-                listOf(TypeUtils.getTypeRef(typeDef.id))
+                listOf(ModelUtils.getTypeRef(typeDef.id))
             }
             dirTypeRef = if (EntityRef.isEmpty(docLib.dirTypeRef)) {
-                TypeUtils.DOCLIB_DEFAULT_DIR_TYPE
+                ModelUtils.DOCLIB_DEFAULT_DIR_TYPE
             } else {
                 docLib.dirTypeRef
             }
@@ -349,7 +345,7 @@ class TypeDefResolver(
 
         val defaultCreateVariant = typeDef.defaultCreateVariant ?: typeDef.createVariants.isEmpty()
 
-        if (defaultCreateVariant && RecordRef.isNotEmpty(typeDef.formRef)) {
+        if (defaultCreateVariant && EntityRef.isNotEmpty(typeDef.formRef)) {
             variants.add(
                 CreateVariantDef.create()
                     .withId("DEFAULT")
@@ -363,7 +359,7 @@ class TypeDefResolver(
 
             val variant = cv.copy()
             if (EntityRef.isEmpty(variant.typeRef)) {
-                variant.withTypeRef(TypeUtils.getTypeRef(typeDef.id))
+                variant.withTypeRef(ModelUtils.getTypeRef(typeDef.id))
             }
 
             if (MLText.isEmpty(variant.name)) {
@@ -422,16 +418,16 @@ class TypeDefResolver(
     private fun preProcessAssocJournals(
         target: EntityRef,
         journalsFromTarget: Boolean?,
-        journals: List<RecordRef>,
+        journals: List<EntityRef>,
         context: ResolveContext
-    ): List<RecordRef> {
+    ): List<EntityRef> {
 
         if (journalsFromTarget == false || journals.isNotEmpty() && journalsFromTarget == null) {
             return journals
         }
 
         val targetTypeDef = context.getResolvedType(target.getLocalId())
-        if (RecordRef.isNotEmpty(targetTypeDef.journalRef)) {
+        if (EntityRef.isNotEmpty(targetTypeDef.journalRef)) {
             return listOf(targetTypeDef.journalRef)
         }
 
@@ -441,7 +437,7 @@ class TypeDefResolver(
 
             val childDef = context.getResolvedType(childId)
 
-            if (RecordRef.isNotEmpty(childDef.journalRef)) {
+            if (EntityRef.isNotEmpty(childDef.journalRef)) {
                 if (existingJournals.add(childDef.journalRef)) {
                     result.add(childDef.journalRef)
                 }
@@ -451,7 +447,7 @@ class TypeDefResolver(
             context.getChildrenByParentId(childId).forEach { childChildId ->
                 val childChildDef = context.getResolvedType(childChildId)
                 val journalRef = childChildDef.journalRef
-                if (RecordRef.isNotEmpty(journalRef)) {
+                if (EntityRef.isNotEmpty(journalRef)) {
                     if (existingJournals.add(journalRef)) {
                         result.add(journalRef)
                     }
@@ -473,6 +469,7 @@ class TypeDefResolver(
     private class ResolveContext(
         val rawProv: TypesProvider,
         val resProv: TypesProvider,
+        val aspectsProv: AspectsProvider
     ) {
         val types: MutableMap<String, TypeDef.Builder> = HashMap()
 
@@ -488,7 +485,7 @@ class TypeDefResolver(
         fun getChildrenByParentId(parentId: String): List<String> {
             return childrenById.computeIfAbsent(parentId) { id ->
                 val result = LinkedHashSet<String>(rawProv.getChildren(id))
-                types.values.filter { it.parentRef.id == id }.forEach { result.add(it.id) }
+                types.values.filter { it.parentRef.getLocalId() == id }.forEach { result.add(it.id) }
                 result.toList()
             }
         }

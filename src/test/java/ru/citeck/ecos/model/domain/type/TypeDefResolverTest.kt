@@ -4,23 +4,17 @@ import mu.KotlinLogging
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.util.ResourceUtils
-import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.commons.io.file.std.EcosStdFile
 import ru.citeck.ecos.commons.json.Json
-import ru.citeck.ecos.commons.test.EcosWebAppApiMock
-import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
-import ru.citeck.ecos.model.lib.attributes.dto.AttributeType
+import ru.citeck.ecos.model.lib.aspect.dto.AspectInfo
+import ru.citeck.ecos.model.type.service.resolver.AspectsProvider
 import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
 import ru.citeck.ecos.model.type.service.resolver.TypesProvider
-import ru.citeck.ecos.records2.source.dao.local.RecordsDaoBuilder
-import ru.citeck.ecos.records3.RecordsServiceFactory
-import ru.citeck.ecos.webapp.api.EcosWebAppApi
 import ru.citeck.ecos.webapp.api.entity.EntityRef
-import ru.citeck.ecos.webapp.lib.model.type.dto.TypeAspectDef
+import ru.citeck.ecos.webapp.lib.model.aspect.dto.AspectDef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import java.nio.file.Path
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.test.assertEquals
 
 class TypeDefResolverTest {
 
@@ -41,7 +35,13 @@ class TypeDefResolverTest {
             log.info { "Run test: ${test.fileName}" }
 
             val source = InMemTypesProvider().loadFrom(test.resolve("source"))
-            val resolvedTypes = resolver.getResolvedTypes(source.getAll(), source, InMemTypesProvider())
+            val aspects = InMemAspectsProvider().loadFrom(test.resolve("aspects"))
+            val resolvedTypes = resolver.getResolvedTypes(
+                source.getAll(),
+                source,
+                InMemTypesProvider(),
+                aspects
+            )
 
             val expected = InMemTypesProvider().loadFrom(test.resolve("expected"))
             expected.getAll().forEach { expectedType ->
@@ -51,73 +51,32 @@ class TypeDefResolverTest {
         }
     }
 
-    @Test
-    fun test2() {
-
-        val prefix = "vv"
-        val att = AttributeDef.create().withId("testAttribute")
-            .withType(AttributeType.MLTEXT)
-            .withMandatory(true)
-            .withMultiple(false)
-            .build()
-        val systAtt = AttributeDef.create().withId("testSystemAttribute")
-            .withType(AttributeType.TEXT)
-            .withMandatory(false)
-            .withMultiple(true)
-            .build()
-
-        val testDto = AspectTestDto(prefix, listOf(att), listOf(systAtt))
-
-        val emodelTestWebApp = EcosWebAppApiMock("emodel")
-        val records = object : RecordsServiceFactory() {
-            override fun getEcosWebAppApi(): EcosWebAppApi {
-                return emodelTestWebApp
-            }
-        }.recordsServiceV1
-
-        records.register(
-            RecordsDaoBuilder.create("aspect")
-                .addRecord(
-                    "aspect-01",
-                    testDto
-                )
-                .build()
-        )
-
-        val aspect = TypeAspectDef.create()
-            .withRef(EntityRef.valueOf("emodel/aspect@aspect-01"))
-            .withConfig(ObjectData.create("{\"id\":\"\",\"name\":\"zzzz\"}"))
-            .build()
-
-        val type = TypeDef.create()
-            .withId("testType")
-            .withAspects(listOf(aspect))
-            .build()
-
-        records.register(
-            RecordsDaoBuilder.create("type")
-                .addRecord(
-                    "type-01",
-                    type
-                ).build()
-        )
-
-        val resolver = TypeDefResolver(records)
-        val resolvedTypes = resolver.getResolvedTypes(listOf(type), InMemTypesProvider(), InMemTypesProvider())
-
-
-        assertEquals(prefix + "_" + (testDto.aspectAttributes[0].id), (resolvedTypes[0].model.attributes[0].id))
-        assertEquals((testDto.aspectAttributes[0].mandatory), (resolvedTypes[0].model.attributes[0].mandatory))
-        assertEquals((testDto.aspectAttributes[0].multiple), (resolvedTypes[0].model.attributes[0].multiple))
-
-        assertEquals(prefix + "_" + (testDto.aspectSystemAttributes[0].id), (resolvedTypes[0].model.systemAttributes[0].id))
-        assertEquals((testDto.aspectSystemAttributes[0].mandatory), (resolvedTypes[0].model.systemAttributes[0].mandatory))
-        assertEquals((testDto.aspectSystemAttributes[0].multiple), (resolvedTypes[0].model.systemAttributes[0].multiple))
-    }
-
     private fun getTests(): List<Path> {
         val fileRes = ResourceUtils.getFile("classpath:" + this::class.qualifiedName!!.replace('.', '/') + "/tests")
         return fileRes.listFiles()!!.map { it.toPath() }
+    }
+
+    class InMemAspectsProvider : AspectsProvider {
+
+        private val data = ConcurrentHashMap<String, AspectDef>()
+
+        fun loadFrom(path: Path): InMemAspectsProvider {
+            val dir = EcosStdFile(path.toFile())
+            dir.findFiles("*.yml").map {
+                Json.mapper.read(it, AspectDef::class.java) ?: error("Invalid aspect file: ${it.getPath()}")
+            }.forEach {
+                add(it)
+            }
+            return this
+        }
+
+        override fun getAspectInfo(aspectRef: EntityRef): AspectInfo? {
+            return data[aspectRef.getLocalId()]?.getAspectInfo()
+        }
+
+        fun add(type: AspectDef) {
+            data[type.id] = type
+        }
     }
 
     class InMemTypesProvider : TypesProvider {
@@ -147,13 +106,7 @@ class TypeDefResolverTest {
         }
 
         override fun getChildren(typeId: String): List<String> {
-            return data.values.filter { it.parentRef.id == typeId }.map { it.id }
+            return data.values.filter { it.parentRef.getLocalId() == typeId }.map { it.id }
         }
     }
-
-    class AspectTestDto(
-        val prefix: String,
-        val aspectAttributes: List<AttributeDef>,
-        val aspectSystemAttributes: List<AttributeDef>
-    )
 }

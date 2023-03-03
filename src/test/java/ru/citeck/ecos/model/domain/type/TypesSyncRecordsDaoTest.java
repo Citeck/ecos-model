@@ -160,7 +160,7 @@ public class TypesSyncRecordsDaoTest {
             return dto;
         }
         TypeDef.Builder res = dto.copy();
-        if (RecordRef.isEmpty(res.getMetaRecord()) && StringUtils.isNotBlank(dto.getSourceId())) {
+        if (EntityRef.isEmpty(res.getMetaRecord()) && StringUtils.isNotBlank(dto.getSourceId())) {
             String sourceId = res.getSourceId();
             if (!sourceId.contains("/")) {
                 sourceId = "emodel/" + sourceId;
