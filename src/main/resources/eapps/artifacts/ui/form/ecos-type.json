@@ -1172,13 +1172,7 @@
                                 "refreshOn": [],
                                 "optionalWhenDisabled": false,
                                 "type": "selectJournal",
-                                "input": true,
-                                "source": {
-                                  "custom": {
-                                    "columns": []
-                                  },
-                                  "type": "journal"
-                                }
+                                "input": true
                               }
                             ],
                             "type": "column",
@@ -1596,7 +1590,8 @@
                           },
                           {
                             "label": {
-                              "ru": "Статусы"
+                              "ru": "Статусы",
+                              "en": "Statuses"
                             },
                             "key": "statuses",
                             "multiple": true,
@@ -1606,6 +1601,12 @@
                             "reorder": false,
                             "dataSrc": "custom",
                             "data": {
+                              "headers": [
+                                {
+                                  "key": "",
+                                  "value": ""
+                                }
+                              ],
                               "custom": "const { modelStatuses = [] } = data;\nconst statuses = [];\n\nmodelStatuses.forEach(item => {\n  const value = item.id;\n  const label = utils.getTextByLocale(item.name) || value;\n  \n  if (value) {\n    statuses.push({ label, value });\n  }\n});\n\nvalues = statuses;\n"
                             },
                             "unavailableItems": {
