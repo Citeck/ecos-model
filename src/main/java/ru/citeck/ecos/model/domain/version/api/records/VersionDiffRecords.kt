@@ -2,6 +2,7 @@ package ru.citeck.ecos.model.domain.version.api.records
 
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.model.domain.version.service.VersionDiffService
+import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.atts.schema.resolver.AttContext
 import ru.citeck.ecos.records3.record.dao.AbstractRecordsDao
 import ru.citeck.ecos.records3.record.dao.query.RecordsQueryDao
@@ -64,6 +65,7 @@ class VersionDiffRecords(
 
     private data class DataDto(
         val data: ByteArray,
+        @AttName("format!")
         val format: String = ""
     )
 

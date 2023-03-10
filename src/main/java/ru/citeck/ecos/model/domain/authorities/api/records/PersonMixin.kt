@@ -22,6 +22,7 @@ class PersonMixin(
             PersonConstants.ATT_IS_AUTHENTICATION_MUTABLE,
             PersonConstants.ATT_FULL_NAME,
             PersonConstants.ATT_AVATAR,
+            PersonConstants.ATT_AVATAR_URL,
             PersonConstants.ATT_IS_MUTABLE,
             PersonConstants.ATT_INACTIVITY_DAYS,
         )
@@ -35,12 +36,18 @@ class PersonMixin(
             PersonConstants.ATT_IS_ADMIN -> authorityService.isAdmin(value.getLocalId())
             PersonConstants.ATT_IS_AUTHENTICATION_MUTABLE -> false
             PersonConstants.ATT_FULL_NAME -> value.getAtt(ScalarType.DISP.schema)
+            PersonConstants.ATT_AVATAR_URL,
             PersonConstants.ATT_AVATAR -> {
                 val hash = value.getAtt(PersonConstants.ATT_PHOTO + ".sha256").asText()
-                if (hash.isNotBlank()) {
+                val avatar = if (hash.isNotBlank()) {
                     Avatar(value.getLocalId(), hash)
                 } else {
                     null
+                }
+                if (path == PersonConstants.ATT_AVATAR_URL) {
+                    return avatar?.getUrl()
+                } else {
+                    return avatar
                 }
             }
             PersonConstants.ATT_IS_MUTABLE -> false

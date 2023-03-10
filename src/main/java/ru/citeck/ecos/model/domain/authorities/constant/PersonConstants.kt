@@ -12,6 +12,7 @@ object PersonConstants {
     const val ATT_IS_AUTHENTICATION_MUTABLE = "isAuthenticationMutable"
     const val ATT_FULL_NAME = "fullName"
     const val ATT_AVATAR = "avatar"
+    const val ATT_AVATAR_URL = "avatarUrl"
     const val ATT_PHOTO_CACHE_KEY = "photoCacheKey"
     const val ATT_PHOTO = "photo"
     const val ATT_IS_MUTABLE = "isMutable"

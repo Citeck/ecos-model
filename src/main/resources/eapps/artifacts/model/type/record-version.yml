@@ -1,0 +1,40 @@
+---
+id: record-version
+name:
+  ru: Версия записи
+  en: Record version
+
+system: true
+
+defaultCreateVariant: false
+
+model:
+  attributes:
+    - id: name
+      name:
+        ru: Имя
+        en: Name
+      type: MLTEXT
+    - id: content
+      name:
+        ru: Содержимое
+        en: Content
+      type: CONTENT
+    - id: comment
+      name:
+        ru: Комментарий
+        en: Comment
+    - id: version
+      name:
+        ru: Версия
+        en: Version
+    - id: versionCreator
+      type: PERSON
+      name:
+        ru: Создатель версии
+        en: Version creator
+    - id: versionCreated
+      type: DATETIME
+      name:
+        ru: Время создания версии
+        en: Version creation time

@@ -9,7 +9,7 @@ import ru.citeck.ecos.data.sql.domain.DbDomainFactory
 import ru.citeck.ecos.data.sql.dto.DbTableRef
 import ru.citeck.ecos.data.sql.records.DbRecordsDaoConfig
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
-import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
+import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.model.type.api.records.TypesRepoRecordsDao
 import ru.citeck.ecos.model.type.converter.TypeConverter
 import ru.citeck.ecos.model.type.service.TypesService
@@ -108,7 +108,7 @@ class TypesConfig {
             )
         }
 
-        val typeRef = TypeUtils.getTypeRef(typeDef.id)
+        val typeRef = ModelUtils.getTypeRef(typeDef.id)
         val recordsDao = dbDomainFactory.create(
             DbDomainConfig.create()
                 .withRecordsDao(
