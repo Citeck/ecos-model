@@ -1,0 +1,18 @@
+---
+id: has-documents
+name:
+  ru: Имеет документы
+  en: Has documents
+
+prefix: docs
+
+attributes:
+  - id: documents
+    name:
+      ru: Документы
+      en: Documents
+    type: ASSOC
+    config:
+      typeRef: emodel/type@user-base
+      child: true
+    multiple: true
