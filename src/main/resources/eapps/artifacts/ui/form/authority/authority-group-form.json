@@ -99,7 +99,8 @@
                     "components": [
                       {
                         "label": {
-                          "ru": "authorityGroups"
+                          "ru": "Родительские группы",
+                          "en": "Parent groups"
                         },
                         "multiple": true,
                         "key": "authorityGroups",
