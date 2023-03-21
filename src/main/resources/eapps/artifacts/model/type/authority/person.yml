@@ -40,10 +40,6 @@ model:
       name:
         ru: Должность
         en: Job Title
-    - id: employeeId
-      name:
-        ru: Табельный номер
-        en: Employee ID
     - id: birthDate
       name:
         ru: Дата рождения
