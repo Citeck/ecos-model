@@ -48,16 +48,16 @@ class TypeDefResolverTest {
             val expected = InMemTypesProvider().loadFrom(test.resolve("expected"))
             expected.getAll().forEach { expectedType ->
                 val resType = resolvedTypes.find { it.id == expectedType.id }
-                assertTypesEqual(expectedType, resType)
+                assertTypesEqual(test.fileName.toString(), expectedType, resType)
             }
         }
     }
 
-    private fun assertTypesEqual(expected: TypeDef, actual: TypeDef?) {
+    private fun assertTypesEqual(testDesc: String, expected: TypeDef, actual: TypeDef?) {
         if (expected == actual) {
             return
         }
-        var failMsg = "Type '${expected.id}' assertion failed: "
+        var failMsg = "Test '$testDesc' for type '${expected.id}' assertion failed: "
         if (actual == null) {
             fail("$failMsg expected not null but actual type is null")
         }
