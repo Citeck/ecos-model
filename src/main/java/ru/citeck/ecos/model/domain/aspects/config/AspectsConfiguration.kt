@@ -5,7 +5,6 @@ import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthGroup
 import ru.citeck.ecos.data.sql.domain.DbDomainConfig
 import ru.citeck.ecos.data.sql.domain.DbDomainFactory
-import ru.citeck.ecos.data.sql.dto.DbTableRef
 import ru.citeck.ecos.data.sql.records.DbRecordsDao
 import ru.citeck.ecos.data.sql.records.DbRecordsDaoConfig
 import ru.citeck.ecos.data.sql.records.listener.DbRecordChangedEvent
@@ -90,7 +89,7 @@ class AspectsConfiguration(
             }
         }
         val permsComponent = object : DbPermsComponent {
-            override fun getRecordPerms(recordRef: EntityRef): DbRecordPerms {
+            override fun getEntityPerms(entityRef: EntityRef): DbRecordPerms {
                 return fullAccessPerms
             }
         }
@@ -105,14 +104,12 @@ class AspectsConfiguration(
                 )
                 .withDataService(
                     DbDataServiceConfig.create {
-                        withAuthEnabled(true)
-                        withTableRef(DbTableRef("public", "ecos_aspects"))
-                        withTransactional(true)
+                        withTable("ecos_aspects")
                         withStoreTableMeta(true)
                     }
                 )
                 .build()
-        ).withPermsComponent(permsComponent).build()
+        ).withSchema("public").withPermsComponent(permsComponent).build()
 
         return dao
     }

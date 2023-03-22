@@ -1,7 +1,6 @@
 package ru.citeck.ecos.model.domain.aspects.service
 
 import mu.KotlinLogging
-import org.springframework.context.annotation.DependsOn
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.commons.promise.Promises

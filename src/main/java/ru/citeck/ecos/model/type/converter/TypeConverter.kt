@@ -75,6 +75,7 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
         entity.attributes = Json.mapper.toString(typeDef.properties)
         entity.contentConfig = Json.mapper.toString(typeDef.contentConfig)
         entity.aspects = Json.mapper.toString(typeDef.aspects)
+        entity.queryPermsPolicy = typeDef.queryPermsPolicy
 
         checkCyclicDependencies(entity)
 
@@ -141,6 +142,7 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
             .withContentConfig(Json.mapper.read(entity.contentConfig, TypeContentConfig::class.java))
             .withProperties(ObjectData.create(entity.attributes))
             .withAspects(DataValue.create(entity.aspects).asList(TypeAspectDef::class.java))
+            .withQueryPermsPolicy(entity.queryPermsPolicy)
             .build()
 
         return EntityWithMeta(

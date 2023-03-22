@@ -6,6 +6,7 @@ name:
 
 system: true
 storageType: ECOS_MODEL
+queryPermsPolicy: PARENT
 
 model:
   attributes:

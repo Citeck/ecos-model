@@ -8,6 +8,8 @@ system: true
 journalRef: uiserv/journal@authority
 storageType: ECOS_MODEL
 
+queryPermsPolicy: PUBLIC
+
 properties:
   alfType: cm:authority
 

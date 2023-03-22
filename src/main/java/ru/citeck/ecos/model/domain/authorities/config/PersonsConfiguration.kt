@@ -7,7 +7,6 @@ import ru.citeck.ecos.context.lib.auth.*
 import ru.citeck.ecos.context.lib.i18n.I18nContext
 import ru.citeck.ecos.data.sql.domain.DbDomainConfig
 import ru.citeck.ecos.data.sql.domain.DbDomainFactory
-import ru.citeck.ecos.data.sql.dto.DbTableRef
 import ru.citeck.ecos.data.sql.records.DbRecordsDaoConfig
 import ru.citeck.ecos.data.sql.records.listener.*
 import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
@@ -85,7 +84,8 @@ class PersonsConfiguration(
     fun personRepo(dataSource: DataSource): RecordsDao {
 
         val permsComponent = object : DbPermsComponent {
-            override fun getRecordPerms(recordRef: EntityRef): DbRecordPerms {
+
+            override fun getEntityPerms(entityRef: EntityRef): DbRecordPerms {
 
                 return object : DbRecordPerms {
                     override fun getAuthoritiesWithReadPermission(): Set<String> {
@@ -93,7 +93,7 @@ class PersonsConfiguration(
                     }
                     override fun isCurrentUserHasWritePerms(): Boolean {
                         val auth = AuthContext.getCurrentFullAuth()
-                        return recordRef.getLocalId() == auth.getUser() || auth.getAuthorities().contains(AuthRole.ADMIN)
+                        return entityRef.getLocalId() == auth.getUser() || auth.getAuthorities().contains(AuthRole.ADMIN)
                     }
                     override fun isCurrentUserHasAttReadPerms(name: String): Boolean {
                         return true
@@ -117,14 +117,12 @@ class PersonsConfiguration(
                 .withDataService(
                     DbDataServiceConfig.create {
                         // persons should be visible for all, but editable only for concrete persons
-                        withAuthEnabled(false)
-                        withTableRef(DbTableRef(AuthorityConstants.DEFAULT_SCHEMA, "ecos_person"))
-                        withTransactional(true)
+                        withTable("ecos_person")
                         withStoreTableMeta(true)
                     }
                 )
                 .build()
-        ).withPermsComponent(permsComponent).build()
+        ).withSchema(AuthorityConstants.DEFAULT_SCHEMA).withPermsComponent(permsComponent).build()
 
         recordsDao.addAttributesMixin(PersonMixin(authorityService))
         recordsDao.addAttributesMixin(AuthorityMixin(recordsService, authorityService, AuthorityType.PERSON))

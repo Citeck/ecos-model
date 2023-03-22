@@ -4,5 +4,7 @@ name:
   ru: Базовый пользовательский тип
   en: Base user type
 
+queryPermsPolicy: OWN
+
 system: true
 storageType: ECOS_MODEL

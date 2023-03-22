@@ -8,5 +8,7 @@ parentRef: emodel/type@file
 
 system: true
 
+queryPermsPolicy: PARENT
+
 dashboardType: case-details
 storageType: ECOS_MODEL

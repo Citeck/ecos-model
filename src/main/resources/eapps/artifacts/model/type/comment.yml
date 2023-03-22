@@ -8,6 +8,7 @@ system: true
 sourceId: emodel/comment
 
 inheritActions: false
+queryPermsPolicy: PUBLIC
 
 model:
   attributes:
@@ -27,4 +28,3 @@ model:
         en: Tags
       type: JSON
       multiple: true
-

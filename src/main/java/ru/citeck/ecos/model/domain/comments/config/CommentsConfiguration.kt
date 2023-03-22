@@ -5,20 +5,19 @@ import org.springframework.context.annotation.Configuration
 import ru.citeck.ecos.context.lib.auth.AuthGroup
 import ru.citeck.ecos.data.sql.domain.DbDomainConfig
 import ru.citeck.ecos.data.sql.domain.DbDomainFactory
-import ru.citeck.ecos.data.sql.dto.DbTableRef
 import ru.citeck.ecos.data.sql.records.DbRecordsDaoConfig
 import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
 import ru.citeck.ecos.data.sql.records.perms.DbRecordPerms
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
 import ru.citeck.ecos.model.domain.comments.event.CommentsEmitEventsDbRecordsListener
-import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
+import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.records3.record.dao.RecordsDao
 import ru.citeck.ecos.records3.record.dao.impl.proxy.RecordsDaoProxy
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import javax.sql.DataSource
 
 const val COMMENT_REPO_DAO_ID = "comment-repo"
-val ECOS_COMMENT_TYPE_REF = TypeUtils.getTypeRef("ecos-comment")
+val ECOS_COMMENT_TYPE_REF = ModelUtils.getTypeRef("ecos-comment")
 
 @Configuration
 class CommentsConfiguration(private val dbDomainFactory: DbDomainFactory) {
@@ -52,7 +51,7 @@ class CommentsConfiguration(private val dbDomainFactory: DbDomainFactory) {
             }
         }
         val permsComponent = object : DbPermsComponent {
-            override fun getRecordPerms(recordRef: EntityRef): DbRecordPerms {
+            override fun getEntityPerms(entityRef: EntityRef): DbRecordPerms {
                 return fullAccessPerms
             }
         }
@@ -68,14 +67,12 @@ class CommentsConfiguration(private val dbDomainFactory: DbDomainFactory) {
                 .withDataService(
                     DbDataServiceConfig.create {
                         // comments should be visible for all, but editable only for concrete persons
-                        withAuthEnabled(false)
-                        withTableRef(DbTableRef("public", "ecos_comments"))
-                        withTransactional(true)
+                        withTable("ecos_comments")
                         withStoreTableMeta(true)
                     }
                 )
                 .build()
-        ).withPermsComponent(permsComponent).build()
+        ).withSchema("public").withPermsComponent(permsComponent).build()
 
         dao.addListener(commentsEmitEventsDbRecordsListener)
 

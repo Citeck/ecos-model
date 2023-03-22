@@ -6,6 +6,7 @@ name:
 
 system: true
 
+queryPermsPolicy: PARENT
 defaultCreateVariant: false
 
 model:

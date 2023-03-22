@@ -7,7 +7,6 @@ import ru.citeck.ecos.context.lib.auth.AuthGroup
 import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.data.sql.domain.DbDomainConfig
 import ru.citeck.ecos.data.sql.domain.DbDomainFactory
-import ru.citeck.ecos.data.sql.dto.DbTableRef
 import ru.citeck.ecos.data.sql.records.DbRecordsDaoConfig
 import ru.citeck.ecos.data.sql.records.listener.*
 import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
@@ -60,7 +59,7 @@ class AuthoritiesSyncConfiguration(
             }
         }
         val permsComponent = object : DbPermsComponent {
-            override fun getRecordPerms(recordRef: EntityRef): DbRecordPerms {
+            override fun getEntityPerms(entityRef: EntityRef): DbRecordPerms {
                 return adminAccessPerms
             }
         }
@@ -75,13 +74,12 @@ class AuthoritiesSyncConfiguration(
                 )
                 .withDataService(
                     DbDataServiceConfig.create {
-                        withAuthEnabled(true)
-                        withTableRef(DbTableRef(AuthorityConstants.DEFAULT_SCHEMA, "ecos_authorities_sync"))
+                        withTable("ecos_authorities_sync")
                         withStoreTableMeta(true)
                     }
                 )
                 .build()
-        ).withPermsComponent(permsComponent).build()
+        ).withSchema(AuthorityConstants.DEFAULT_SCHEMA).withPermsComponent(permsComponent).build()
 
         dao.addListener(object : DbRecordsListenerAdapter() {
             override fun onChanged(event: DbRecordChangedEvent) {

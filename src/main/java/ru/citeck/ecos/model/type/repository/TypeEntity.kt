@@ -1,6 +1,7 @@
 package ru.citeck.ecos.model.type.repository
 
 import ru.citeck.ecos.model.domain.AbstractAuditingEntity
+import ru.citeck.ecos.model.lib.type.dto.QueryPermsPolicy
 import javax.persistence.*
 
 @Entity
@@ -58,6 +59,9 @@ class TypeEntity : AbstractAuditingEntity() {
     var contentConfig: String? = null
 
     var aspects: String? = null
+
+    @Enumerated(EnumType.STRING)
+    var queryPermsPolicy: QueryPermsPolicy? = null
 
     override fun equals(other: Any?): Boolean {
         if (other !is TypeEntity) {

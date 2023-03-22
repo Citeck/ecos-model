@@ -10,10 +10,7 @@ import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeType
 import ru.citeck.ecos.model.lib.role.dto.RoleDef
 import ru.citeck.ecos.model.lib.status.dto.StatusDef
-import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef
-import ru.citeck.ecos.model.lib.type.dto.DocLibDef
-import ru.citeck.ecos.model.lib.type.dto.TypeAspectDef
-import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
+import ru.citeck.ecos.model.lib.type.dto.*
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.model.type.service.utils.EModelTypeUtils
 import ru.citeck.ecos.webapp.api.entity.EntityRef
@@ -193,6 +190,10 @@ class TypeDefResolver {
         }
 
         resTypeDef.withAssociations(getAssocs(typeDef, resolvedParentDef))
+
+        if (resTypeDef.queryPermsPolicy == QueryPermsPolicy.DEFAULT) {
+            resTypeDef.withQueryPermsPolicy(resolvedParentDef.queryPermsPolicy)
+        }
 
         return resTypeDef
     }
