@@ -1,0 +1,7 @@
+---
+id: type-0
+sourceId: emodel/type-0-src
+
+createVariants:
+  - id: type-0-cv
+    formRef: uiserv/form@abc

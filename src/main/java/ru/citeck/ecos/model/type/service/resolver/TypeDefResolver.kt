@@ -30,7 +30,7 @@ class TypeDefResolver {
 
         private val log = KotlinLogging.logger {}
 
-        private val TYPES_WITHOUT_CREATE_VARIANTS_COMPUTATION = setOf(
+        private val TYPES_WITHOUT_CREATE_VARIANTS = setOf(
             "base",
             "user-base",
             "case",
@@ -67,13 +67,15 @@ class TypeDefResolver {
 
     private fun getResolvedByParentType(typeDef: TypeDef, context: ResolveContext): TypeDef.Builder {
 
-        if (typeDef.id.isBlank() || typeDef.id == "base") {
-            return typeDef.copy()
-        }
-
         val resolvedTypeFromContext = context.types[typeDef.id]
         if (resolvedTypeFromContext != null) {
             return resolvedTypeFromContext
+        }
+
+        if (typeDef.id.isBlank() || typeDef.id == "base") {
+            val result = typeDef.copy()
+            context.types[typeDef.id] = result
+            return result
         }
 
         val resTypeDef = typeDef.copy()
@@ -82,9 +84,10 @@ class TypeDefResolver {
             resTypeDef.withParentRef(ModelUtils.getTypeRef("base"))
         }
 
-        val resolvedParentDef = context.types.computeIfAbsent(resTypeDef.parentRef.getLocalId()) {
-            val parentTypeDef = if (it.isNotBlank()) {
-                context.rawProv.get(it) ?: TypeDef.EMPTY
+        val resolvedParentDef = run {
+            val parentTypeId = resTypeDef.parentRef.getLocalId()
+            val parentTypeDef = if (parentTypeId.isNotBlank()) {
+                context.rawProv.get(parentTypeId) ?: TypeDef.EMPTY
             } else {
                 TypeDef.EMPTY
             }
@@ -195,6 +198,7 @@ class TypeDefResolver {
             resTypeDef.withQueryPermsPolicy(resolvedParentDef.queryPermsPolicy)
         }
 
+        context.types[resTypeDef.id] = resTypeDef
         return resTypeDef
     }
 
@@ -330,23 +334,25 @@ class TypeDefResolver {
     /* TYPES POSTPROCESSING */
 
     private fun getCreateVariants(
-        typeDef: TypeDef?,
+        resolvedTypeDef: TypeDef?,
         context: ResolveContext,
-        result: MutableList<CreateVariantDef> = ArrayList()
+        result: MutableList<CreateVariantDef> = ArrayList(),
+        addTypeInId: Boolean = false
     ): List<CreateVariantDef> {
 
-        typeDef ?: return result
+        resolvedTypeDef ?: return result
 
-        val typeId = typeDef.id
-        if (TYPES_WITHOUT_CREATE_VARIANTS_COMPUTATION.contains(typeId)) {
-            return typeDef.createVariants
+        val typeId = resolvedTypeDef.id
+        if (TYPES_WITHOUT_CREATE_VARIANTS.contains(typeId)) {
+            return emptyList()
         }
+        val rawTypeDef = context.rawProv.get(resolvedTypeDef.id) ?: return result
 
         val variants = ArrayList<CreateVariantDef>()
 
-        val defaultCreateVariant = typeDef.defaultCreateVariant ?: typeDef.createVariants.isEmpty()
+        val defaultCreateVariant = resolvedTypeDef.defaultCreateVariant ?: rawTypeDef.createVariants.isEmpty()
 
-        if (defaultCreateVariant && EntityRef.isNotEmpty(typeDef.formRef)) {
+        if (defaultCreateVariant && EntityRef.isNotEmpty(resolvedTypeDef.formRef)) {
             variants.add(
                 CreateVariantDef.create()
                     .withId("DEFAULT")
@@ -354,26 +360,30 @@ class TypeDefResolver {
             )
         }
 
-        variants.addAll(typeDef.createVariants)
+        variants.addAll(rawTypeDef.createVariants)
 
         variants.forEach { cv ->
 
             val variant = cv.copy()
+            if (addTypeInId) {
+                variant.withId(typeId + "__" + variant.id)
+            }
+
             if (EntityRef.isEmpty(variant.typeRef)) {
-                variant.withTypeRef(ModelUtils.getTypeRef(typeDef.id))
+                variant.withTypeRef(ModelUtils.getTypeRef(resolvedTypeDef.id))
             }
 
             if (MLText.isEmpty(variant.name)) {
-                variant.withName(typeDef.name)
+                variant.withName(resolvedTypeDef.name)
             }
             if (EntityRef.isEmpty(variant.formRef)) {
-                variant.withFormRef(typeDef.formRef)
+                variant.withFormRef(resolvedTypeDef.formRef)
             }
             if (variant.sourceId.isEmpty()) {
-                variant.withSourceId(typeDef.sourceId)
+                variant.withSourceId(resolvedTypeDef.sourceId)
             }
             if (EntityRef.isEmpty(variant.postActionRef)) {
-                variant.withPostActionRef(typeDef.postCreateActionRef)
+                variant.withPostActionRef(resolvedTypeDef.postCreateActionRef)
             }
             if (variant.sourceId.isNotEmpty()) {
                 result.add(variant.build())
@@ -382,8 +392,8 @@ class TypeDefResolver {
             }
         }
 
-        context.getChildrenByParentId(typeDef.id).forEach { childId ->
-            getCreateVariants(context.getResolvedType(childId), context, result)
+        context.getChildrenByParentId(resolvedTypeDef.id).forEach { childId ->
+            getCreateVariants(context.getResolvedType(childId), context, result, true)
         }
 
         return result

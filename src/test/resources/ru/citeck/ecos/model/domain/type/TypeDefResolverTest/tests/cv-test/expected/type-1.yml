@@ -1,0 +1,13 @@
+---
+id: type-1
+name: type-1
+sourceId: emodel/type-0-src
+parentRef: emodel/type@type-0
+metaRecord: emodel/type-0-src@
+
+createVariants:
+  - id: type-1-cv
+    formRef: uiserv/form@abcdef
+    name: {"en":"type-1"}
+    sourceId: emodel/type-0-src
+    typeRef: emodel/type@type-1

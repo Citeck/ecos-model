@@ -1,9 +1,10 @@
 package ru.citeck.ecos.model.domain.type
 
 import mu.KotlinLogging
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.fail
 import org.springframework.util.ResourceUtils
+import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.io.file.std.EcosStdFile
 import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.model.lib.aspect.dto.AspectInfo
@@ -15,6 +16,7 @@ import ru.citeck.ecos.webapp.lib.model.aspect.dto.AspectDef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import java.nio.file.Path
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.math.min
 
 class TypeDefResolverTest {
 
@@ -46,9 +48,69 @@ class TypeDefResolverTest {
             val expected = InMemTypesProvider().loadFrom(test.resolve("expected"))
             expected.getAll().forEach { expectedType ->
                 val resType = resolvedTypes.find { it.id == expectedType.id }
-                assertThat(expectedType).describedAs("type: " + expectedType.id).isEqualTo(resType)
+                assertTypesEqual(expectedType, resType)
             }
         }
+    }
+
+    private fun assertTypesEqual(expected: TypeDef, actual: TypeDef?) {
+        if (expected == actual) {
+            return
+        }
+        var failMsg = "Type '${expected.id}' assertion failed: "
+        if (actual == null) {
+            fail("$failMsg expected not null but actual type is null")
+        }
+
+        val expectedData = DataValue.create(expected)
+        val actualData = DataValue.create(actual)
+
+        fun evalDiff(expected: DataValue, actual: DataValue): Pair<DataValue, DataValue> {
+            if (expected.isObject() && actual.isObject()) {
+                val newActualVal = DataValue.createObj()
+                val newExpectedVal = DataValue.createObj()
+                val keys = setOf(
+                    *actual.fieldNamesList().toTypedArray(),
+                    *expected.fieldNamesList().toTypedArray()
+                )
+                keys.forEach { key ->
+                    if (actual[key] != expected[key]) {
+                        newActualVal[key] = actual[key]
+                        newExpectedVal[key] = expected[key]
+                    }
+                }
+                return newExpectedVal to newActualVal
+            }
+            if (expected.isArray() && actual.isArray()) {
+                val minSize = min(expected.size(), actual.size())
+                if (minSize == 0) {
+                    return expected to actual
+                }
+                val newActualVal = DataValue.createArr()
+                val newExpectedVal = DataValue.createArr()
+                for (idx in 0 until minSize) {
+                    val (diffExpected, diffActual) = evalDiff(expected[idx], actual[idx])
+                    newActualVal.add(diffActual)
+                    newExpectedVal.add(diffExpected)
+                }
+                for (idx in minSize until expected.size()) {
+                    newExpectedVal.add(expected[idx])
+                }
+                for (idx in minSize until actual.size()) {
+                    newActualVal.add(actual[idx])
+                }
+                return newExpectedVal to newActualVal
+            }
+            return expected to actual
+        }
+
+        expectedData.forEach { k, v ->
+            if (actualData[k] != v) {
+                val (newExpected, newActual) = evalDiff(v, actualData[k])
+                failMsg += "\n $k expected $newExpected \n but was $newActual"
+            }
+        }
+        fail(failMsg)
     }
 
     private fun getTests(): List<Path> {
