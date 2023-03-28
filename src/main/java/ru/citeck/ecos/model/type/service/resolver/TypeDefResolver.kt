@@ -392,8 +392,10 @@ class TypeDefResolver {
             }
         }
 
-        context.getChildrenByParentId(resolvedTypeDef.id).forEach { childId ->
-            getCreateVariants(context.getResolvedType(childId), context, result, true)
+        if (resolvedTypeDef.createVariantsForChildTypes) {
+            context.getChildrenByParentId(resolvedTypeDef.id).forEach { childId ->
+                getCreateVariants(context.getResolvedType(childId), context, result, true)
+            }
         }
 
         return result
