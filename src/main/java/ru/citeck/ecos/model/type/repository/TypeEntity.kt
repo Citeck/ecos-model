@@ -42,6 +42,7 @@ class TypeEntity : AbstractAuditingEntity() {
     var createVariants: String? = null
     var inheritActions = false
     var defaultCreateVariant: Boolean? = null
+    var createVariantsForChildTypes: Boolean? = null
     var postCreateActionRef: String? = null
     var associations: String? = null
 

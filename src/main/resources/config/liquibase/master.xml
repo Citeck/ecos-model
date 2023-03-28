@@ -46,6 +46,7 @@
     <include file="config/liquibase/changelog/20220720000000_ecos_type_content_config.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20230212000000_ecos_type_aspects.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20230321000000_ecos_query_perms_policy.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20230328000000_cv_for_child_types.xml" relativeToChangelogFile="false"/>
 
     <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
     <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->

@@ -67,6 +67,7 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
         entity.associations = Json.mapper.toString(typeDef.associations)
         entity.defaultCreateVariant = typeDef.defaultCreateVariant
         entity.createVariants = Json.mapper.toString(typeDef.createVariants)
+        entity.createVariantsForChildTypes = typeDef.createVariantsForChildTypes
         entity.postCreateActionRef = typeDef.postCreateActionRef.toString()
         entity.configForm = typeDef.configFormRef.toString()
         entity.config = Json.mapper.toString(typeDef.config)
@@ -134,6 +135,7 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
             .withAssociations(DataValue.create(entity.associations).asList(AssocDef::class.java))
             .withDefaultCreateVariant(entity.defaultCreateVariant)
             .withCreateVariants(DataValue.create(entity.createVariants).asList(CreateVariantDef::class.java))
+            .withCreateVariantsForChildTypes(entity.createVariantsForChildTypes)
             .withPostCreateActionRef(EntityRef.valueOf(entity.postCreateActionRef))
             .withConfigFormRef(EntityRef.valueOf(entity.configForm))
             .withConfig(ObjectData.create(entity.config))

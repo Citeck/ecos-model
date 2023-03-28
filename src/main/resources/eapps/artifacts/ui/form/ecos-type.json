@@ -1638,18 +1638,57 @@
                 "components": [
                   {
                     "label": {
-                      "en": "Default create variant",
-                      "ru": "Вариант создания по умолчанию"
+                      "ru": "Columns"
                     },
-                    "key": "defaultCreateVariant",
-                    "labelPosition": "top",
-                    "hasThreeStates": true,
-                    "defaultValue": true,
-                    "refreshOn": [],
-                    "optionalWhenDisabled": false,
-                    "type": "checkbox",
-                    "input": true,
-                    "tab": 6
+                    "key": "columns3",
+                    "columns": [
+                      {
+                        "components": [
+                          {
+                            "label": {
+                              "en": "Default create variant",
+                              "ru": "Вариант создания по умолчанию"
+                            },
+                            "key": "defaultCreateVariant",
+                            "labelPosition": "top",
+                            "hasThreeStates": true,
+                            "defaultValue": true,
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "checkbox",
+                            "input": true,
+                            "tab": 6
+                          }
+                        ],
+                        "type": "column",
+                        "input": false,
+                        "key": "column",
+                        "index": 0
+                      },
+                      {
+                        "index": 1,
+                        "type": "column",
+                        "input": false,
+                        "key": "column",
+                        "components": [
+                          {
+                            "label": {
+                              "ru": "Добавить варианты создания дочерних типов",
+                              "en": "Add create variants for child types"
+                            },
+                            "key": "createVariantsForChildTypes",
+                            "labelPosition": "top",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "checkbox",
+                            "input": true
+                          }
+                        ]
+                      }
+                    ],
+                    "oneColumnInViewMode": false,
+                    "type": "columns",
+                    "input": false
                   },
                   {
                     "label": {
