@@ -15,3 +15,10 @@ attributes:
     name:
       ru: Комментарий
       en: Comment
+  - id: versions
+    name:
+      ru: Версии
+      en: Versions
+    type: ASSOC
+    config:
+      child: true
