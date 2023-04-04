@@ -56,6 +56,7 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
         entity.metaRecord = typeDef.metaRecord.toString()
         entity.form = typeDef.formRef.toString()
         entity.journal = typeDef.journalRef.toString()
+        entity.defaultStatus = typeDef.defaultStatus
         entity.board = typeDef.boardRef.toString()
         entity.dashboardType = typeDef.dashboardType
         entity.inheritForm = typeDef.inheritForm
@@ -124,6 +125,7 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
             .withParentRef(EntityRef.valueOf(TypeUtils.getTypeRef(entity.parent?.extId ?: "")))
             .withFormRef(EntityRef.valueOf(entity.form))
             .withJournalRef(EntityRef.valueOf(entity.journal))
+            .withDefaultStatus(entity.defaultStatus)
             .withBoardRef(EntityRef.valueOf(entity.board))
             .withDashboardType(entity.dashboardType)
             .withInheritForm(entity.inheritForm)

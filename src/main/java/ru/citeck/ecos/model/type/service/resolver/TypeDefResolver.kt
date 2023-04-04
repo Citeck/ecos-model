@@ -101,6 +101,10 @@ class TypeDefResolver {
             resTypeDef.withDashboardType(resolvedParentDef.dashboardType)
         }
 
+        if (resTypeDef.defaultStatus.isBlank()) {
+            resTypeDef.withDefaultStatus(resolvedParentDef.defaultStatus)
+        }
+
         when ((resTypeDef.storageType)) {
             EModelTypeUtils.STORAGE_TYPE_REFERENCE, // todo: set sourceId based on source ref
             EModelTypeUtils.STORAGE_TYPE_DEFAULT,
