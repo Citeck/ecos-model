@@ -8,3 +8,6 @@ queryPermsPolicy: OWN
 
 system: true
 storageType: ECOS_MODEL
+
+actions:
+  - uiserv/action@edit-in-onlyoffice-tfm

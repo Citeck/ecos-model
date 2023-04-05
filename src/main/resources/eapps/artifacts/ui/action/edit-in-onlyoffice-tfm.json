@@ -1,0 +1,43 @@
+{
+  "id": "edit-in-onlyoffice-tfm",
+  "name": {
+    "ru": "Редактировать Документ",
+    "en": "Edit Document"
+  },
+  "type": "open-url",
+  "config": {
+    "url": "/onlyoffice-editor?ref=${?id}"
+  },
+  "evaluator": {
+    "type": "predicate",
+    "config": {
+      "predicate": {
+        "t": "and",
+        "val": [
+          {
+            "t": "in",
+            "att": "_content.mimeType?str",
+            "val": [
+              "application/msword",
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+              "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+              "text/plain",
+              "text/csv"
+            ]
+          },
+          {
+            "t": "eq",
+            "att": "$license.enterprise?bool",
+            "val": true
+          },
+          {
+            "t": "like",
+            "att": "?id",
+            "val": "emodel/%"
+          }
+        ]
+      }
+    }
+  }
+}
