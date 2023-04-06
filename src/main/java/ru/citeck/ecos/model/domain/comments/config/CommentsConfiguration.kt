@@ -2,6 +2,7 @@ package ru.citeck.ecos.model.domain.comments.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthGroup
 import ru.citeck.ecos.data.sql.domain.DbDomainConfig
 import ru.citeck.ecos.data.sql.domain.DbDomainFactory
@@ -9,50 +10,77 @@ import ru.citeck.ecos.data.sql.records.DbRecordsDaoConfig
 import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
 import ru.citeck.ecos.data.sql.records.perms.DbRecordPerms
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
+import ru.citeck.ecos.model.domain.comments.api.dto.CommentTagType
+import ru.citeck.ecos.model.domain.comments.api.dto.CommentTag
+import ru.citeck.ecos.model.domain.comments.api.records.COMMENT_RECORD_ATT
+import ru.citeck.ecos.model.domain.comments.api.records.COMMENT_REPO_DAO_ID
+import ru.citeck.ecos.model.domain.comments.api.records.CommentsMixin
 import ru.citeck.ecos.model.domain.comments.event.CommentsEmitEventsDbRecordsListener
 import ru.citeck.ecos.model.lib.utils.ModelUtils
+import ru.citeck.ecos.records3.RecordsService
+import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.RecordsDao
-import ru.citeck.ecos.records3.record.dao.impl.proxy.RecordsDaoProxy
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import javax.sql.DataSource
 
-const val COMMENT_REPO_DAO_ID = "comment-repo"
 val ECOS_COMMENT_TYPE_REF = ModelUtils.getTypeRef("ecos-comment")
 
 @Configuration
 class CommentsConfiguration(private val dbDomainFactory: DbDomainFactory) {
 
-    @Bean
-    fun commentDao(): RecordsDao {
-        return RecordsDaoProxy("comment", COMMENT_REPO_DAO_ID, null)
+    companion object {
+        private val TAGS_DISABLED_EDITING = listOf(CommentTagType.TASK, CommentTagType.ACTION, CommentTagType.INTEGRATION)
     }
 
     @Bean
     fun commentsRepo(
         dataSource: DataSource,
-        commentsEmitEventsDbRecordsListener: CommentsEmitEventsDbRecordsListener
+        commentsEmitEventsDbRecordsListener: CommentsEmitEventsDbRecordsListener,
+        recordsService: RecordsService
     ): RecordsDao {
 
-        val fullAccessPerms = object : DbRecordPerms {
-            override fun getAuthoritiesWithReadPermission(): Set<String> {
-                return setOf(AuthGroup.EVERYONE)
-            }
-
-            override fun isCurrentUserHasWritePerms(): Boolean {
-                return true
-            }
-
-            override fun isCurrentUserHasAttReadPerms(name: String): Boolean {
-                return true
-            }
-
-            override fun isCurrentUserHasAttWritePerms(name: String): Boolean {
-                return true
-            }
-        }
         val permsComponent = object : DbPermsComponent {
+
             override fun getEntityPerms(entityRef: EntityRef): DbRecordPerms {
-                return fullAccessPerms
+
+                return object : DbRecordPerms {
+                    override fun getAuthoritiesWithReadPermission(): Set<String> {
+                        return setOf(AuthGroup.EVERYONE)
+                    }
+
+                    override fun isCurrentUserHasWritePerms(): Boolean {
+                        val commentData = AuthContext.runAsSystem {
+                            recordsService.getAtts(entityRef, CommentData::class.java)
+                        }
+
+                        if (commentData.tags.any { it.type in TAGS_DISABLED_EDITING }) {
+                            return false
+                        }
+
+                        return AuthContext.isRunAsAdmin() || commentData.creator == AuthContext.getCurrentUser()
+                    }
+
+                    override fun isCurrentUserHasAttReadPerms(name: String): Boolean {
+                        if (AuthContext.isRunAsAdmin()) {
+                            return true
+                        }
+
+                        return AuthContext.runAsSystem {
+                            recordsService.getAtt(
+                                entityRef,
+                                "$COMMENT_RECORD_ATT.permissions._has.Read?bool"
+                            ).asBoolean()
+                        }
+                    }
+
+                    override fun isCurrentUserHasAttWritePerms(name: String): Boolean {
+                        return when (name) {
+                            COMMENT_RECORD_ATT -> AuthContext.isRunAsAdmin()
+                            "tags" -> AuthContext.isRunAsAdmin()
+                            else -> isCurrentUserHasWritePerms()
+                        }
+                    }
+                }
             }
         }
 
@@ -72,10 +100,22 @@ class CommentsConfiguration(private val dbDomainFactory: DbDomainFactory) {
                     }
                 )
                 .build()
-        ).withSchema("public").withPermsComponent(permsComponent).build()
+        ).withSchema("public")
+            .withPermsComponent(permsComponent)
+            .build()
 
         dao.addListener(commentsEmitEventsDbRecordsListener)
+        dao.addAttributesMixin(CommentsMixin())
 
         return dao
     }
 }
+
+private data class CommentData(
+    @AttName("_creator.id")
+    val creator: String,
+
+    @AttName("tags[]")
+    val tags: List<CommentTag>
+)
+
