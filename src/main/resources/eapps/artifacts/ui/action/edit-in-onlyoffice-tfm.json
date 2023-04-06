@@ -27,14 +27,14 @@
             ]
           },
           {
-            "t": "eq",
-            "att": "$license.enterprise?bool",
-            "val": true
-          },
-          {
             "t": "like",
             "att": "?id",
             "val": "emodel/%"
+          },
+          {
+            "t": "not-eq",
+            "att": "permissions._has.Write?bool",
+            "val": false
           }
         ]
       }
