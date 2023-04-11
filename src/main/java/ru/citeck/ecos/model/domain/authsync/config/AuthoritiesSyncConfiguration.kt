@@ -59,7 +59,7 @@ class AuthoritiesSyncConfiguration(
             }
         }
         val permsComponent = object : DbPermsComponent {
-            override fun getEntityPerms(entityRef: EntityRef): DbRecordPerms {
+            override fun getRecordPerms(record: Any): DbRecordPerms {
                 return adminAccessPerms
             }
         }

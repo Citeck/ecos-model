@@ -3,22 +3,3 @@ id: versionable
 name:
   ru: Версионируемый
   en: Versionable
-
-prefix: version
-
-attributes:
-  - id: version
-    name:
-      ru: Версия
-      en: Version
-  - id: comment
-    name:
-      ru: Комментарий
-      en: Comment
-  - id: versions
-    name:
-      ru: Версии
-      en: Versions
-    type: ASSOC
-    config:
-      child: true

@@ -10,8 +10,8 @@ import ru.citeck.ecos.data.sql.records.DbRecordsDaoConfig
 import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
 import ru.citeck.ecos.data.sql.records.perms.DbRecordPerms
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
-import ru.citeck.ecos.model.domain.comments.api.dto.CommentTagType
 import ru.citeck.ecos.model.domain.comments.api.dto.CommentTag
+import ru.citeck.ecos.model.domain.comments.api.dto.CommentTagType
 import ru.citeck.ecos.model.domain.comments.api.records.COMMENT_RECORD_ATT
 import ru.citeck.ecos.model.domain.comments.api.records.COMMENT_REPO_DAO_ID
 import ru.citeck.ecos.model.domain.comments.api.records.CommentsMixin
@@ -20,7 +20,6 @@ import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.RecordsDao
-import ru.citeck.ecos.webapp.api.entity.EntityRef
 import javax.sql.DataSource
 
 val ECOS_COMMENT_TYPE_REF = ModelUtils.getTypeRef("ecos-comment")
@@ -41,7 +40,7 @@ class CommentsConfiguration(private val dbDomainFactory: DbDomainFactory) {
 
         val permsComponent = object : DbPermsComponent {
 
-            override fun getEntityPerms(entityRef: EntityRef): DbRecordPerms {
+            override fun getRecordPerms(record: Any): DbRecordPerms {
 
                 return object : DbRecordPerms {
                     override fun getAuthoritiesWithReadPermission(): Set<String> {
@@ -50,7 +49,7 @@ class CommentsConfiguration(private val dbDomainFactory: DbDomainFactory) {
 
                     override fun isCurrentUserHasWritePerms(): Boolean {
                         val commentData = AuthContext.runAsSystem {
-                            recordsService.getAtts(entityRef, CommentData::class.java)
+                            recordsService.getAtts(record, CommentData::class.java)
                         }
 
                         if (commentData.tags.any { it.type in TAGS_DISABLED_EDITING }) {
@@ -67,7 +66,7 @@ class CommentsConfiguration(private val dbDomainFactory: DbDomainFactory) {
 
                         return AuthContext.runAsSystem {
                             recordsService.getAtt(
-                                entityRef,
+                                record,
                                 "$COMMENT_RECORD_ATT.permissions._has.Read?bool"
                             ).asBoolean()
                         }
@@ -118,4 +117,3 @@ private data class CommentData(
     @AttName("tags[]")
     val tags: List<CommentTag>
 )
-

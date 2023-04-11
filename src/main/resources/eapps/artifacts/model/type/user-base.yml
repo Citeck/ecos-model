@@ -11,3 +11,6 @@ storageType: ECOS_MODEL
 
 actions:
   - uiserv/action@edit-in-onlyoffice-tfm
+
+aspects:
+  - ref: emodel/aspect@versionable

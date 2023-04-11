@@ -85,7 +85,9 @@ class PersonsConfiguration(
 
         val permsComponent = object : DbPermsComponent {
 
-            override fun getEntityPerms(entityRef: EntityRef): DbRecordPerms {
+            override fun getRecordPerms(record: Any): DbRecordPerms {
+
+                val localId = recordsService.getAtt(record, "?localId").asText()
 
                 return object : DbRecordPerms {
                     override fun getAuthoritiesWithReadPermission(): Set<String> {
@@ -93,7 +95,7 @@ class PersonsConfiguration(
                     }
                     override fun isCurrentUserHasWritePerms(): Boolean {
                         val auth = AuthContext.getCurrentFullAuth()
-                        return entityRef.getLocalId() == auth.getUser() || auth.getAuthorities().contains(AuthRole.ADMIN)
+                        return localId == auth.getUser() || auth.getAuthorities().contains(AuthRole.ADMIN)
                     }
                     override fun isCurrentUserHasAttReadPerms(name: String): Boolean {
                         return true

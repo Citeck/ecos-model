@@ -49,5 +49,4 @@ class CommentsMixin : AttMixin {
         @AttName("tags[]")
         val tags: List<CommentTag>
     )
-
 }
