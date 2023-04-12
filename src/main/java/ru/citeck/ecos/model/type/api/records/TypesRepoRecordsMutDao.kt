@@ -1,10 +1,7 @@
 package ru.citeck.ecos.model.type.api.records
 
-import ecos.com.fasterxml.jackson210.annotation.JsonProperty
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
-import ru.citeck.ecos.commons.data.ObjectData
-import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
 import ru.citeck.ecos.model.lib.procstages.dto.ProcStageDef
@@ -26,19 +23,24 @@ class TypesRepoRecordsMutDao(
 
     @Secured(AuthRole.ADMIN)
     override fun getRecToMutate(recordId: String): TypeMutRecord {
-
         if (recordId.isEmpty()) {
             return TypeMutRecord(TypeDef.EMPTY)
         }
-        val typeDef = typeService.getByIdOrNull(recordId) ?: TypeDef.create { withId(recordId) }
-        return TypeMutRecord(typeDef)
+        return TypeMutRecord(typeService.getById(recordId))
     }
 
     @Secured(AuthRole.ADMIN)
     override fun saveMutatedRec(record: TypeMutRecord): String {
+
         val newTypeDef = record.build()
-        val isNewRecord = record.baseTypeDef.id != newTypeDef.id
-        return typeService.save(newTypeDef, isNewRecord).id
+
+        if (newTypeDef.id.isEmpty()) {
+            error("Type identifier is empty")
+        }
+
+        val baseId = record.baseTypeDef.id
+        val clonedRecord = baseId.isNotEmpty() && baseId != newTypeDef.id
+        return typeService.save(newTypeDef, clonedRecord).id
     }
 
     @Secured("ROLE_ADMIN")
@@ -49,49 +51,40 @@ class TypesRepoRecordsMutDao(
 
     class TypeMutRecord(val baseTypeDef: TypeDef) : TypeDef.Builder(baseTypeDef) {
 
-        fun setLocalId(localId: String) {
+        fun withLocalId(localId: String) {
             this.withId(localId)
         }
 
-        fun setModuleId(moduleId: String) {
+        fun withModuleId(moduleId: String) {
             this.withId(moduleId)
         }
 
-        fun setModelRoles(roles: List<RoleDef>) {
+        fun withModelRoles(roles: List<RoleDef>) {
             model.withRoles(roles)
         }
 
-        fun setModelStatuses(statuses: List<StatusDef>) {
+        fun withModelStatuses(statuses: List<StatusDef>) {
             model.withStatuses(statuses)
         }
 
-        fun setModelStages(stages: List<ProcStageDef>) {
+        fun withModelStages(stages: List<ProcStageDef>) {
             model.withStages(stages)
         }
 
-        fun setModelAttributes(attributes: List<AttributeDef>) {
+        fun withModelAttributes(attributes: List<AttributeDef>) {
             model.withAttributes(attributes)
         }
 
-        fun setDocLibEnabled(enabled: Boolean) {
+        fun withDocLibEnabled(enabled: Boolean) {
             withDocLib(docLib.copy().withEnabled(enabled).build())
         }
 
-        fun setDocLibFileTypeRefs(fileTypeRefs: List<RecordRef>) {
+        fun withDocLibFileTypeRefs(fileTypeRefs: List<RecordRef>) {
             withDocLib(docLib.copy().withFileTypeRefs(fileTypeRefs).build())
         }
 
-        fun setDocLibDirTypeRef(typeRef: RecordRef) {
+        fun withDocLibDirTypeRef(typeRef: RecordRef) {
             withDocLib(docLib.copy().withDirTypeRef(typeRef).build())
-        }
-
-        @JsonProperty("_content")
-        fun setContent(content: List<ObjectData>) {
-
-            val dataUriContent = content[0].get("url", "")
-            val data = Json.mapper.read(dataUriContent, ObjectData::class.java)
-
-            Json.mapper.applyData(this, data)
         }
     }
 }
