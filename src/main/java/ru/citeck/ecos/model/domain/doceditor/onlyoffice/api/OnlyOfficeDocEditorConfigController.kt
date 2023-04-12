@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import ru.citeck.ecos.commons.json.Json
+import ru.citeck.ecos.commons.utils.digest.DigestUtils
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.i18n.I18nContext
 import ru.citeck.ecos.records3.RecordsService
@@ -16,6 +17,7 @@ import ru.citeck.ecos.webapp.api.content.EcosContentData
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.api.entity.toEntityRef
 import ru.citeck.ecos.webapp.api.mime.MimeType
+import ru.citeck.ecos.webapp.api.properties.EcosWebAppProps
 import ru.citeck.ecos.webapp.lib.discovery.WebAppDiscoveryService
 import ru.citeck.ecos.webapp.lib.discovery.instance.PortType
 import ru.citeck.ecos.webapp.lib.remote.callback.RemoteCallbackService
@@ -28,7 +30,8 @@ class OnlyOfficeDocEditorConfigController(
     val discoveryService: WebAppDiscoveryService,
     val recordsService: RecordsService,
     val contentApi: EcosContentApi,
-    val callbackService: RemoteCallbackService
+    val callbackService: RemoteCallbackService,
+    val webAppProps: EcosWebAppProps
 ) {
 
     @GetMapping(
@@ -50,7 +53,7 @@ class OnlyOfficeDocEditorConfigController(
         val docAtts = recordsService.getAtts(entityRef, DocumentAtts::class.java)
 
         val config = OnlyOfficeConfig(
-            getDocumentInfo(jwtData, docAtts, content, extension),
+            getDocumentInfo(jwtData, entityRef, docAtts, content, extension),
             getEditorConfig(jwtData),
             getDocType(extension)
         )
@@ -59,7 +62,7 @@ class OnlyOfficeDocEditorConfigController(
 
     private fun getEditorConfig(
         jwtData: OnlyOfficeDocEditorCallbackJwt,
-    ) : Editor {
+    ): Editor {
 
         val callbackUrl = createCallbackHttpUrl(
             OnlyOfficeDocEditorCallbackController.POST_STATUS_PATH,
@@ -86,6 +89,7 @@ class OnlyOfficeDocEditorConfigController(
 
     private fun getDocumentInfo(
         jwtData: OnlyOfficeDocEditorCallbackJwt,
+        docRef: EntityRef,
         docAtts: DocumentAtts,
         content: EcosContentData,
         extension: String
@@ -96,10 +100,16 @@ class OnlyOfficeDocEditorConfigController(
             Duration.ofSeconds(30),
             jwtData
         )
+        val docKey = DigestUtils.getSha256(
+            webAppProps.appName +
+                webAppProps.appInstanceId +
+                docRef.toString() +
+                content.getSha256()
+        ).hash
 
         return Document(
             fileType = extension,
-            key = content.getSha256(),
+            key = docKey,
             title = docAtts.displayName,
             url = getContentUrl
         )
@@ -120,8 +130,10 @@ class OnlyOfficeDocEditorConfigController(
     }
 
     private fun getDocType(extension: String): String? {
-        return if ((".doc.docx.docm.dot.dotx.dotm.odt.fodt.ott" +
-                ".rtf.txt.html.htm.mht.pdf.djvu.fb2.epub.xps").indexOf(extension) != -1
+        return if ((
+            ".doc.docx.docm.dot.dotx.dotm.odt.fodt.ott" +
+                ".rtf.txt.html.htm.mht.pdf.djvu.fb2.epub.xps"
+            ).indexOf(extension) != -1
         ) {
             "text"
         } else if (".xls.xlsx.xlsm.xlt.xltx.xltm.ods.fods.ots.csv".indexOf(extension) != -1) {
@@ -182,5 +194,4 @@ class OnlyOfficeDocEditorConfigController(
         val lastname: String,
         val name: String
     )
-
 }

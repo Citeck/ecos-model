@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.client.RestTemplate
 import ru.citeck.ecos.commons.json.Json
+import ru.citeck.ecos.model.domain.doceditor.onlyoffice.OnlyOfficeAppProps
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records3.RecordsService
-import ru.citeck.ecos.records3.record.request.RequestContext
 import ru.citeck.ecos.webapp.api.content.EcosContentApi
 import ru.citeck.ecos.webapp.lib.remote.callback.RemoteCallbackService
 import java.net.URI
@@ -23,7 +23,8 @@ import javax.servlet.http.HttpServletResponse
 class OnlyOfficeDocEditorCallbackController(
     val recordsService: RecordsService,
     val callbackService: RemoteCallbackService,
-    val contentApi: EcosContentApi
+    val contentApi: EcosContentApi,
+    val onlyOfficeProps: OnlyOfficeAppProps
 ) {
 
     companion object {
@@ -83,24 +84,36 @@ class OnlyOfficeDocEditorCallbackController(
             val bodyData = Json.mapper.readData(body)
             val status = bodyData[PROP_STATUS].asInt()
             if (status == 2) {
-                val urlToDownload = bodyData[PROP_URL].asText()
+                val uri = URI.create(bodyData[PROP_URL].asText())
+                val fixedPath = if (uri.path.startsWith("/onlyoffice/")) {
+                    uri.path.replaceFirst("/onlyoffice", "")
+                } else {
+                    uri.path
+                }
+                val fixedURI = URI(
+                    uri.scheme,
+                    null,
+                    onlyOfficeProps.host,
+                    onlyOfficeProps.port,
+                    fixedPath,
+                    uri.query,
+                    uri.fragment
+                )
                 val currentContent = contentApi.getContent(jwtData.ref, jwtData.att)
 
                 restTemplate.execute(
-                    URI.create(urlToDownload),
+                    fixedURI,
                     HttpMethod.GET,
                     null
                 ) { resp ->
-                    RequestContext.doWithCtx {
-                        val tempRef = contentApi.uploadTempFile()
-                            .withName(currentContent?.getName())
-                            .withMimeType(currentContent?.getMimeType())
-                            .writeContent {
-                                it.writeStream(resp.body)
-                            }
-                        val contentAtt = jwtData.att.ifBlank { RecordConstants.ATT_CONTENT }
-                        recordsService.mutateAtt(jwtData.ref, contentAtt, tempRef)
-                    }
+                    val tempRef = contentApi.uploadTempFile()
+                        .withName(currentContent?.getName())
+                        .withMimeType(currentContent?.getMimeType())
+                        .writeContent {
+                            it.writeStream(resp.body)
+                        }
+                    val contentAtt = jwtData.att.ifBlank { RecordConstants.ATT_CONTENT }
+                    recordsService.mutateAtt(jwtData.ref, contentAtt, tempRef)
                 }
             }
             Json.mapper.toBytesNotNull(CallbackResponse())
