@@ -91,7 +91,7 @@ class OnlyOfficeDocEditorCallbackController(
                     uri.path
                 }
                 val fixedURI = URI(
-                    uri.scheme,
+                    "http",
                     null,
                     onlyOfficeProps.host,
                     onlyOfficeProps.port,
