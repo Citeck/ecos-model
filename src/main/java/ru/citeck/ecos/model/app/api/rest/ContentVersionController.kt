@@ -40,11 +40,14 @@ class ContentVersionController(
             "+1.0"
         }
 
-        recordsService.mutate(entityRef, mapOf(
-            "version:version" to versionDiff,
-            "version:comment" to (description ?: ""),
-            "_content" to tempFile
-        ))
+        recordsService.mutate(
+            entityRef,
+            mapOf(
+                "version:version" to versionDiff,
+                "version:comment" to (description ?: ""),
+                "_content" to tempFile
+            )
+        )
 
         val displayName = recordsService.getAtt(entityRef, "?disp").asText()
 
@@ -52,10 +55,12 @@ class ContentVersionController(
         return DataValue.createObj()
             .set("nodeRef", entityRef)
             .set("fileName", displayName)
-            .set("status", DataValue.createObj()
-                .set("code", 200)
-                .set("name", "OK")
-                .set("description", "File uploaded successfully")
+            .set(
+                "status",
+                DataValue.createObj()
+                    .set("code", 200)
+                    .set("name", "OK")
+                    .set("description", "File uploaded successfully")
             ).toString()
     }
 }
