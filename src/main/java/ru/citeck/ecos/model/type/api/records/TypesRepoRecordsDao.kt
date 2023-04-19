@@ -7,6 +7,7 @@ import ru.citeck.ecos.commons.json.Json.mapper
 import ru.citeck.ecos.commons.json.YamlUtils
 import ru.citeck.ecos.events2.type.RecordEventsService
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
+import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
 import ru.citeck.ecos.records2.RecordRef
@@ -126,7 +127,7 @@ class TypesRepoRecordsDao(
 
         @AttName("_type")
         fun getEcosType(): RecordRef {
-            return TypeUtils.getTypeRef("type")
+            return ModelUtils.getTypeRef("type")
         }
     }
 }
