@@ -327,7 +327,7 @@
                               "ru": "Отображать библиотеку документов",
                               "en": "Show documents library"
                             },
-                            "key": "docLibEnabled2",
+                            "key": "docLibEnabled",
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
                             "type": "checkbox",
