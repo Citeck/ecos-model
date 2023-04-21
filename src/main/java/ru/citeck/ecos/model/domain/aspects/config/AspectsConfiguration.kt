@@ -18,7 +18,6 @@ import ru.citeck.ecos.model.domain.aspects.eapp.AspectArtifactHandler
 import ru.citeck.ecos.model.domain.aspects.service.AspectsRegistryInitializer
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.records3.RecordsService
-import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.model.aspect.dto.AspectDef
 import javax.annotation.PostConstruct
 
@@ -89,7 +88,7 @@ class AspectsConfiguration(
             }
         }
         val permsComponent = object : DbPermsComponent {
-            override fun getEntityPerms(entityRef: EntityRef): DbRecordPerms {
+            override fun getRecordPerms(record: Any): DbRecordPerms {
                 return fullAccessPerms
             }
         }

@@ -19,7 +19,7 @@ import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
 import ru.citeck.ecos.model.domain.authorities.service.PersonEventsService
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
-import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
+import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.RecordsServiceFactory
@@ -27,7 +27,6 @@ import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
 import ru.citeck.ecos.records3.record.dao.RecordsDao
 import ru.citeck.ecos.records3.record.dao.impl.proxy.MutateProxyProcessor
 import ru.citeck.ecos.records3.record.dao.impl.proxy.ProxyProcContext
-import ru.citeck.ecos.webapp.api.entity.EntityRef
 import javax.sql.DataSource
 
 @Configuration
@@ -85,7 +84,9 @@ class PersonsConfiguration(
 
         val permsComponent = object : DbPermsComponent {
 
-            override fun getEntityPerms(entityRef: EntityRef): DbRecordPerms {
+            override fun getRecordPerms(record: Any): DbRecordPerms {
+
+                val localId = recordsService.getAtt(record, "?localId").asText()
 
                 return object : DbRecordPerms {
                     override fun getAuthoritiesWithReadPermission(): Set<String> {
@@ -93,7 +94,7 @@ class PersonsConfiguration(
                     }
                     override fun isCurrentUserHasWritePerms(): Boolean {
                         val auth = AuthContext.getCurrentFullAuth()
-                        return entityRef.getLocalId() == auth.getUser() || auth.getAuthorities().contains(AuthRole.ADMIN)
+                        return localId == auth.getUser() || auth.getAuthorities().contains(AuthRole.ADMIN)
                     }
                     override fun isCurrentUserHasAttReadPerms(name: String): Boolean {
                         return true
@@ -105,7 +106,7 @@ class PersonsConfiguration(
             }
         }
 
-        val typeRef = TypeUtils.getTypeRef("person")
+        val typeRef = ModelUtils.getTypeRef("person")
         val recordsDao = dbDomainFactory.create(
             DbDomainConfig.create()
                 .withRecordsDao(

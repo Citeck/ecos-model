@@ -1,0 +1,6 @@
+---
+ecos:
+  integrations:
+    onlyoffice:
+      host: localhost
+      port: 8070

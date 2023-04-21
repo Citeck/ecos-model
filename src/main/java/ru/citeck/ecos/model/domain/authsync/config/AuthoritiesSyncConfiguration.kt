@@ -20,7 +20,6 @@ import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.dao.RecordsDao
 import ru.citeck.ecos.records3.record.dao.impl.proxy.RecordsDaoProxy
-import ru.citeck.ecos.webapp.api.entity.EntityRef
 import javax.sql.DataSource
 
 @Configuration
@@ -59,7 +58,7 @@ class AuthoritiesSyncConfiguration(
             }
         }
         val permsComponent = object : DbPermsComponent {
-            override fun getEntityPerms(entityRef: EntityRef): DbRecordPerms {
+            override fun getRecordPerms(record: Any): DbRecordPerms {
                 return adminAccessPerms
             }
         }

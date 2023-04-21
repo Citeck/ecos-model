@@ -327,7 +327,7 @@
                               "ru": "Отображать библиотеку документов",
                               "en": "Show documents library"
                             },
-                            "key": "docLibEnabled2",
+                            "key": "docLibEnabled",
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
                             "type": "checkbox",
@@ -1429,11 +1429,38 @@
                 "components": [
                   {
                     "label": {
+                      "ru": "Статус по умолчанию",
+                      "en": "Default status"
+                    },
+                    "key": "defaultStatus",
+                    "tooltip": {
+                      "ru": "Если выбрано, то объект будет создан с выбранным статусом",
+                      "en": "If selected, the object will be created with the selected status"
+                    },
+                    "dataSrc": "custom",
+                    "data": {
+                      "headers": [
+                        {
+                          "key": "",
+                          "value": ""
+                        }
+                      ],
+                      "custom": "values = (data['modelStatuses'] || []).filter(status => {\n    return !!status.id;\n}).map(function(att) {\n    return {\n        value: att.id,\n        label: Citeck.helpers.getMLValue(att.name)\n    };\n});\n\n"
+                    },
+                    "defaultValue": "",
+                    "refreshOn": [
+                      "modelStatuses"
+                    ],
+                    "optionalWhenDisabled": false,
+                    "type": "ecosSelect",
+                    "input": true
+                  },
+                  {
+                    "label": {
                       "ru": "Статусы",
                       "en": "Statuses"
                     },
                     "key": "modelStatuses",
-                    "hideLabel": true,
                     "multiple": true,
                     "validate": {
                       "minLength": "",
@@ -1446,6 +1473,12 @@
                     "defaultOpen": false,
                     "layoutFixed": false,
                     "enableRowGroups": false,
+                    "rowGroups": [
+                      {
+                        "label": "",
+                        "numberOfRows": ""
+                      }
+                    ],
                     "reorder": true,
                     "defaultValue": [
                       {

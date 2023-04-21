@@ -18,7 +18,7 @@ import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.authorities.sync.AuthoritiesSync
 import ru.citeck.ecos.model.lib.authorities.sync.AuthoritiesSyncContext
 import ru.citeck.ecos.model.lib.authorities.sync.AuthoritiesSyncFactory
-import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
+import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records2.predicate.model.VoidPredicate
 import ru.citeck.ecos.records3.RecordsService
@@ -44,7 +44,7 @@ class AuthoritiesSyncService(
 
     companion object {
         const val SOURCE_ID = "authorities-sync"
-        val TYPE_REF = TypeUtils.getTypeRef(SOURCE_ID)
+        val TYPE_REF = ModelUtils.getTypeRef(SOURCE_ID)
 
         val PROTECTED_FROM_SYNC_GROUPS = setOf(
             AuthorityGroupConstants.ADMIN_GROUP,

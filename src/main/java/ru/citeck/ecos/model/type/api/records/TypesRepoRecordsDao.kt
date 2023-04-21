@@ -6,10 +6,9 @@ import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.json.Json.mapper
 import ru.citeck.ecos.commons.json.YamlUtils
 import ru.citeck.ecos.events2.type.RecordEventsService
-import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
+import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
-import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records2.predicate.PredicateService
 import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
@@ -125,8 +124,8 @@ class TypesRepoRecordsDao(
         }
 
         @AttName("_type")
-        fun getEcosType(): RecordRef {
-            return TypeUtils.getTypeRef("type")
+        fun getEcosType(): EntityRef {
+            return ModelUtils.getTypeRef("type")
         }
     }
 }
