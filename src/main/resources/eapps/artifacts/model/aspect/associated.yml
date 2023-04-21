@@ -8,6 +8,9 @@ prefix: assoc
 
 attributes:
   - id: associatedWith
+    name:
+      ru: Связан с
+      en: Associated with
     type: ASSOC
     config:
       typeRef: emodel/type@case
