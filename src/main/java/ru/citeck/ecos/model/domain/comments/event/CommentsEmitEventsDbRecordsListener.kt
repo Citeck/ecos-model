@@ -1,17 +1,20 @@
 package ru.citeck.ecos.model.domain.comments.event
 
 import org.springframework.stereotype.Component
-import ru.citeck.ecos.data.sql.records.dao.atts.DbRecord
-import ru.citeck.ecos.data.sql.records.listener.*
-import ru.citeck.ecos.model.lib.type.dto.TypeInfo
+import ru.citeck.ecos.data.sql.records.listener.DbRecordChangedEvent
+import ru.citeck.ecos.data.sql.records.listener.DbRecordCreatedEvent
+import ru.citeck.ecos.data.sql.records.listener.DbRecordDeletedEvent
+import ru.citeck.ecos.data.sql.records.listener.DbRecordsListenerAdapter
+import ru.citeck.ecos.records3.RecordsService
+import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 
 private const val TEXT_ATT = "text"
-private const val RECORD_ATT = "record"
 
 @Component
 class CommentsEmitEventsDbRecordsListener(
-    private val commentEventEmitter: CommentEventEmitter
+    private val commentEventEmitter: CommentEventEmitter,
+    private val recordsService: RecordsService
 ) : DbRecordsListenerAdapter() {
 
     override fun onChanged(event: DbRecordChangedEvent) {
@@ -30,51 +33,43 @@ class CommentsEmitEventsDbRecordsListener(
     }
 
     private fun DbRecordCreatedEvent.toCommentEvent(): CommentCreateEvent {
-        val dbRecord = this.record as DbRecord
-        val (record, commentRecord, text) = dbRecord.parseCommentData(typeDef)
+        val commentAtts = recordsService.getAtts(this.record, CommentAtts::class.java)
 
         return CommentCreateEvent(
-            record = record,
-            commentRecord = commentRecord,
-            text = text
+            record = commentAtts.record,
+            commentRecord = commentAtts.commentRecord,
+            text = commentAtts.text
         )
     }
 
     private fun DbRecordDeletedEvent.toCommentEvent(): CommentDeleteEvent {
-        val dbRecord = this.record as DbRecord
-        val (record, commentRecord, text) = dbRecord.parseCommentData(typeDef)
+        val commentAtts = recordsService.getAtts(this.record, CommentAtts::class.java)
 
         return CommentDeleteEvent(
-            record = record,
-            commentRecord = commentRecord,
-            text = text
+            record = commentAtts.record,
+            commentRecord = commentAtts.commentRecord,
+            text = commentAtts.text
         )
     }
 
     private fun DbRecordChangedEvent.toCommentEvent(): CommentUpdateEvent {
-        val dbRecord = this.record as DbRecord
-        val (record, commentRecord) = dbRecord.parseCommentData(typeDef)
+        val commentAtts = recordsService.getAtts(this.record, CommentAtts::class.java)
 
         val textBefore = this.before[TEXT_ATT]
         val textAfter = this.after[TEXT_ATT]
 
         return CommentUpdateEvent(
-            record = record,
-            commentRecord = commentRecord,
+            record = commentAtts.record,
+            commentRecord = commentAtts.commentRecord,
             textBefore = textBefore?.toString(),
             textAfter = textAfter?.toString()
         )
     }
 
-    private fun DbRecord.parseCommentData(typeInfo: TypeInfo): Triple<EntityRef, EntityRef, String?> {
-        val recordAtt = getAtt(RECORD_ATT) ?: error("record attribute not found")
-        val commentRecord = typeInfo.createSourceRefWithId(entity.extId)
-        val text = getAtt(TEXT_ATT)?.toString()
-
-        return Triple(EntityRef.valueOf(recordAtt), commentRecord, text)
-    }
-
-    private fun TypeInfo.createSourceRefWithId(id: String): EntityRef {
-        return EntityRef.valueOf("${this.sourceId}@$id")
-    }
+    private data class CommentAtts(
+        val record: EntityRef,
+        @AttName(".id")
+        val commentRecord: EntityRef,
+        val text: String? = null
+    )
 }
