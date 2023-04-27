@@ -28,7 +28,11 @@ val ECOS_COMMENT_TYPE_REF = ModelUtils.getTypeRef("ecos-comment")
 class CommentsConfiguration(private val dbDomainFactory: DbDomainFactory) {
 
     companion object {
-        private val TAGS_DISABLED_EDITING = listOf(CommentTagType.TASK, CommentTagType.ACTION, CommentTagType.INTEGRATION)
+        private val TAGS_DISABLED_EDITING = listOf(
+            CommentTagType.TASK,
+            CommentTagType.ACTION,
+            CommentTagType.INTEGRATION
+        )
     }
 
     @Bean
@@ -60,16 +64,14 @@ class CommentsConfiguration(private val dbDomainFactory: DbDomainFactory) {
                     }
 
                     override fun isCurrentUserHasAttReadPerms(name: String): Boolean {
-                        if (AuthContext.isRunAsAdmin()) {
+                        if (AuthContext.isRunAsAdmin() || name == COMMENT_RECORD_ATT) {
                             return true
                         }
 
-                        return AuthContext.runAsSystem {
-                            recordsService.getAtt(
-                                record,
-                                "$COMMENT_RECORD_ATT.permissions._has.Read?bool"
-                            ).asBoolean()
-                        }
+                        return recordsService.getAtt(
+                            record,
+                            "$COMMENT_RECORD_ATT.permissions._has.Read?bool"
+                        ).asBoolean()
                     }
 
                     override fun isCurrentUserHasAttWritePerms(name: String): Boolean {
