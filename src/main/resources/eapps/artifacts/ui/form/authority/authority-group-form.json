@@ -106,6 +106,9 @@
                         "key": "authorityGroups",
                         "journalId": "authority-groups",
                         "queryData": "",
+                        "defaultValue": [
+                          "emodel/authority-group@_orgstruct_home_"
+                        ],
                         "refreshOn": [],
                         "type": "selectJournal",
                         "input": true,
@@ -193,6 +196,10 @@
             "index": 3,
             "components": [
               {
+                "label": {
+                  "ru": "Создать",
+                  "en": "Submit"
+                },
                 "removeIndents": true,
                 "state": "",
                 "theme": "primary",
