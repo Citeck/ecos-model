@@ -119,12 +119,99 @@
               },
               {
                 "label": {
-                  "ru": "Описание",
-                  "en": "Description"
+                  "ru": "Columns"
                 },
-                "key": "description",
-                "refreshOn": [],
-                "type": "mlTextarea",
+                "key": "columns4",
+                "columns": [
+                  {
+                    "components": [
+                      {
+                        "label": {
+                          "ru": "Описание",
+                          "en": "Description"
+                        },
+                        "key": "description",
+                        "refreshOn": [],
+                        "type": "mlTextarea",
+                        "input": true
+                      }
+                    ],
+                    "type": "column",
+                    "input": false,
+                    "key": "column",
+                    "index": 0
+                  },
+                  {
+                    "index": 1,
+                    "type": "column",
+                    "input": false,
+                    "key": "column",
+                    "components": [
+                      {
+                        "label": {
+                          "ru": "Panel"
+                        },
+                        "key": "panel",
+                        "scrollableContent": true,
+                        "refreshOn": [],
+                        "optionalWhenDisabled": false,
+                        "type": "panel",
+                        "input": false,
+                        "components": [
+                          {
+                            "label": {
+                              "ru": "TableForm"
+                            },
+                            "key": "tableForm",
+                            "hideLabel": true,
+                            "noColHeaders": true,
+                            "persistent": false,
+                            "source": {
+                              "type": "custom",
+                              "custom": {
+                                "columns": [
+                                  {
+                                    "name": "id",
+                                    "formatter": "",
+                                    "setAttributesManually": false
+                                  }
+                                ],
+                                "record": null,
+                                "attribute": null
+                              }
+                            },
+                            "refreshOn": [
+                              "groupAndUsers"
+                            ],
+                            "calculateValue": "const groupAndUsers = _.get(data, 'groupAndUsers') || [];\nvalue = groupAndUsers.map((item) => item.name)\nconsole.log(data)",
+                            "optionalWhenDisabled": false,
+                            "type": "tableForm",
+                            "input": true
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "oneColumnInViewMode": false,
+                "type": "columns",
+                "input": false
+              },
+              {
+                "label": "groupAndUsers",
+                "source": {
+                  "type": "custom",
+                  "custom": {
+                    "asyncData": "getGroups = async () => {\n  return await  Citeck.Records.query(\n    { sourceId: 'emodel/authority-group',\n      query: {},\n      language: 'predicate',\n      page: { maxItems: 100 } \n    }, { name: '.disp'});\n}\n\ngetUsers = async () => {\n  return await Citeck.Records.query(\n        { sourceId: 'emodel/person',\n          query: {},\n          language: 'predicate', \n          page: { maxItems: 100 } \n        }, { name: '.disp'})\n}\n\ngetUsersAndGroups = async () => {\n  const groups = await getGroups();\n  const users = await getUsers();\n  return [...groups.records, ...users.records];\n}\n  \nvalue = getUsersAndGroups()",
+                    "syncData": {}
+                  },
+                  "forceLoad": false
+                },
+                "update": {
+                  "type": "once"
+                },
+                "key": "groupAndUsers",
+                "type": "asyncData",
                 "input": true
               }
             ],
