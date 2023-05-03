@@ -42,8 +42,8 @@
               "custom": {
                 "columns": [
                   {
-                    "name": "id",
-                    "formatter": "value = {\r\n\tname: 'AssocFormatter'\r\n};",
+                    "name": "_disp",
+                    "formatter": "",
                     "setAttributesManually": false
                   }
                 ],
@@ -51,7 +51,9 @@
                 "attribute": null
               }
             },
-            "refreshOn": "groupData",
+            "refreshOn": [
+              "groupData"
+            ],
             "calculateValue": "value = _.get(data, 'groupData.groups') || [];",
             "key": "tableForm2",
             "displayElementsJS": "value = {view: false, edit: false, delete: false, clone: false, preview: false}",
@@ -67,7 +69,7 @@
           "record": {
             "id": "{{recordId}}",
             "attributes": {
-              "groups": "authorityGroups[]?disp"
+              "groups": "authorityGroups[]?id"
             }
           },
           "forceLoad": false
