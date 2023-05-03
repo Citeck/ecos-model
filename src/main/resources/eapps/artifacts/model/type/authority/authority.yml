@@ -1,7 +1,7 @@
 ---
 id: authority
 name:
-  ru: Человек или группа
+  ru: Пользователь или группа
   en: Person or group
 
 system: true

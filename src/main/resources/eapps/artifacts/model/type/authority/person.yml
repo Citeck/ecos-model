@@ -1,7 +1,7 @@
 ---
 id: person
 name:
-  ru: Человек
+  ru: Пользователь
   en: Person
 
 dispNameTemplate:
