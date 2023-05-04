@@ -174,7 +174,7 @@
                               "custom": {
                                 "columns": [
                                   {
-                                    "name": "id",
+                                    "name": "_disp",
                                     "formatter": "",
                                     "setAttributesManually": false
                                   }
@@ -186,7 +186,7 @@
                             "refreshOn": [
                               "groupAndUsers"
                             ],
-                            "calculateValue": "const groupAndUsers = _.get(data, 'groupAndUsers') || [];\nvalue = groupAndUsers.map((item) => item.name)\nconsole.log(data)",
+                            "calculateValue": "const groupAndUsers = _.get(data, 'groupAndUsers') || [];\nvalue = groupAndUsers",
                             "optionalWhenDisabled": false,
                             "type": "tableForm",
                             "input": true
@@ -205,14 +205,20 @@
                 "source": {
                   "type": "custom",
                   "custom": {
-                    "asyncData": "getGroups = async () => {\n  return await  Citeck.Records.query(\n    { sourceId: 'emodel/authority-group',\n      query: {},\n      language: 'predicate',\n      page: { maxItems: 100 } \n    }, { name: '.disp'});\n}\n\ngetUsers = async () => {\n  return await Citeck.Records.query(\n        { sourceId: 'emodel/person',\n          query: {},\n          language: 'predicate', \n          page: { maxItems: 100 } \n        }, { name: '.disp'})\n}\n\ngetUsersAndGroups = async () => {\n  const groups = await getGroups();\n  const users = await getUsers();\n  return [...groups.records, ...users.records];\n}\n  \nvalue = getUsersAndGroups()",
-                    "syncData": {}
+                    "syncData": "value = {\n  recordRefs: data.authorityGroups\n}",
+                    "asyncData": "const parentGroups = data.recordRefs || [];\n\nconst query = {\n   t: \"or\",\n   v: parentGroups.map(parentGroup => ({\n      t: \"contains\",\n      a: \"authorityGroups\",\n      v: parentGroup\n  }))\n};\n\ngetGroups = async () => {\n  return await  Citeck.Records.query(\n    { sourceId: 'emodel/authority-group',\n      query,\n      language: 'predicate',\n      page: { maxItems: 100 } \n    });\n}\n\ngetUsers = async () => {\n  return await Citeck.Records.query(\n        { sourceId: 'emodel/person',\n          query,\n          language: 'predicate', \n          page: { maxItems: 100 } \n        })\n}\n\ngetUsersAndGroups = async () => {\n  const groups = await getGroups();\n  const users = await getUsers();\n  return [...groups.records, ...users.records];\n}\n  \nvalue = parentGroups.length ? getUsersAndGroups() : [];"
                   },
                   "forceLoad": false
                 },
                 "update": {
                   "type": "once"
                 },
+                "refreshOn": [
+                  {
+                    "label": "authorityGroups",
+                    "value": "authorityGroups"
+                  }
+                ],
                 "key": "groupAndUsers",
                 "type": "asyncData",
                 "input": true
