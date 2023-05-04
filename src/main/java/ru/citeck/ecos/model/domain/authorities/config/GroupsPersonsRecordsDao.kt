@@ -72,10 +72,10 @@ open class GroupsPersonsRecordsDao(
 
                 val values = pred.getValue().toList(RecordRef::class.java)
                 val expandedGroups = authorityService.getExpandedGroups(values.map { it.id }, false)
-                OrPredicate.of(
-                    expandedGroups.map {
-                        Predicates.contains(ATT_AUTHORITY_GROUPS, AuthorityType.GROUP.getRef(it).toString())
-                    }
+                ValuePredicate(
+                    ATT_AUTHORITY_GROUPS,
+                    ValuePredicate.Type.IN,
+                    expandedGroups.map { AuthorityType.GROUP.getRef(it).toString() }
                 )
             } else {
                 pred
