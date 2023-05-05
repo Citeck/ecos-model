@@ -1,0 +1,13 @@
+---
+id: permission-delegated
+name:
+  ru: Права делегированы
+  en: Permission delegated
+
+systemAttributes:
+  - id: permissionDelegates
+    type: ASSOC
+    config:
+      child: true
+      typeRef: emodel/type@permission-delegate
+    multiple: true

@@ -1,0 +1,31 @@
+---
+id: permission-delegate
+name:
+  ru: Делегирование прав
+  en: Permission delegate
+
+parentRef: emodel/type@user-base
+defaultCreateVariant: false
+
+system: true
+
+storageType: ECOS_MODEL
+
+model:
+  systemAttributes:
+    - id: permissionType
+      name:
+        ru: Тип права
+        en: Permission type
+      mandatory: true
+    - id: from
+      name:
+        ru: От
+        en: From
+      mandatory: true
+    - id: to
+      name:
+        ru: Кому
+        en: To
+      multiple: true
+      mandatory: true

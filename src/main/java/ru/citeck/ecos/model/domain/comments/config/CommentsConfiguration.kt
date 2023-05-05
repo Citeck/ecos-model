@@ -70,7 +70,7 @@ class CommentsConfiguration(private val dbDomainFactory: DbDomainFactory) {
 
                         return recordsService.getAtt(
                             record,
-                            "$COMMENT_RECORD_ATT.permissions._has.Read?bool"
+                            "$COMMENT_RECORD_ATT.permissions._has.Read?bool!"
                         ).asBoolean()
                     }
 

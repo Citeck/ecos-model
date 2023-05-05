@@ -45,7 +45,7 @@ class CommentsRecordsProxy : RecordsDaoProxy(
         val innerAttsMap = AttContext.getInnerAttsMap()
 
         val attsWithPermissionReadAtt = innerAttsMap.toMutableMap()
-        attsWithPermissionReadAtt[RECORD_READ_PERM_ATT] = "$COMMENT_RECORD_ATT.permissions._has.Read?bool"
+        attsWithPermissionReadAtt[RECORD_READ_PERM_ATT] = "$COMMENT_RECORD_ATT.permissions._has.Read?bool!"
 
         return recordsService.query(recsQuery.withSourceId(COMMENT_REPO_DAO_ID), attsWithPermissionReadAtt, true)
     }
