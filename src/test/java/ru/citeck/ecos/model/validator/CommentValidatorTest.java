@@ -9,7 +9,6 @@ import ru.citeck.ecos.model.domain.comments.api.validator.CommentValidator;
 @SpringBootTest
 public class CommentValidatorTest {
 
-
     @Test
     public void shouldCleanInlineCSS() {
         String result = CommentValidator.removeVulnerabilities("<h2>Inline CSS Example</h2>\n" +
