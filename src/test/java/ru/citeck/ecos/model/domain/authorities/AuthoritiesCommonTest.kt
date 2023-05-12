@@ -174,7 +174,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
                     }
                     assertThat(ex.message).contains("Permission denied")
                 } else {
-                    addGroup("other-auth-group-${it.first}", it.first)
+                    addGroup("other-auth-group-${it.first}", "")
                 }
             }
         }
