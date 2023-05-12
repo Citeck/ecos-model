@@ -2,7 +2,6 @@ package ru.citeck.ecos.model.domain.authorities.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthGroup
 import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.data.sql.domain.DbDomainConfig
@@ -44,23 +43,9 @@ class GroupsConfiguration(
     @Bean
     fun groupRepo(dataSource: DataSource): RecordsDao {
 
-        val accessPerms = object : DbRecordPerms {
-            override fun getAuthoritiesWithReadPermission(): Set<String> {
-                return setOf(AuthGroup.EVERYONE)
-            }
-            override fun isCurrentUserHasWritePerms(): Boolean {
-                return AuthContext.getCurrentAuthorities().contains(AuthRole.ADMIN)
-            }
-            override fun isCurrentUserHasAttReadPerms(name: String): Boolean {
-                return true
-            }
-            override fun isCurrentUserHasAttWritePerms(name: String): Boolean {
-                return AuthContext.getCurrentAuthorities().contains(AuthRole.ADMIN)
-            }
-        }
         val permsComponent = object : DbPermsComponent {
-            override fun getRecordPerms(record: Any): DbRecordPerms {
-                return accessPerms
+            override fun getRecordPerms(user: String, authorities: Set<String>, record: Any): DbRecordPerms {
+                return PersonGroupsPerms(authorities.contains(AuthRole.ADMIN))
             }
         }
 
@@ -102,5 +87,28 @@ class GroupsConfiguration(
         recordsDao.addAttributesMixin(AuthorityGroupMixin())
 
         return recordsDao
+    }
+
+    private class PersonGroupsPerms(val isAdmin: Boolean) : DbRecordPerms {
+
+        override fun getAuthoritiesWithReadPermission(): Set<String> {
+            return setOf(AuthGroup.EVERYONE)
+        }
+
+        override fun hasAttReadPerms(name: String): Boolean {
+            return true
+        }
+
+        override fun hasAttWritePerms(name: String): Boolean {
+            return isAdmin
+        }
+
+        override fun hasReadPerms(): Boolean {
+            return true
+        }
+
+        override fun hasWritePerms(): Boolean {
+            return isAdmin
+        }
     }
 }

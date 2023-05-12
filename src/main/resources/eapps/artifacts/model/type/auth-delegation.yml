@@ -1,0 +1,53 @@
+---
+id: auth-delegation
+name:
+  ru: Делегирование
+  en: Delegation
+
+sourceId: emodel/auth-delegations
+formRef: uiserv/form@auth-delegation
+journalRef: uiserv/journal@auth-delegations
+
+system: true
+
+actions:
+  - uiserv/action@delete
+
+model:
+  attributes:
+    - id: delegatedAuthorities
+      name:
+        ru: Делегируемые права
+        en: Delegated authorities
+      multiple: true
+      mandatory: true
+    - id: delegates
+      name:
+        ru: Делегаты
+        en: Delegates
+      type: PERSON
+      multiple: true
+      mandatory: true
+      index:
+        enabled: true
+    - id: delegatedTypes
+      name:
+        ru: Типы ECOS
+        en: ECOS Types
+      type: ASSOC
+      multiple: true
+      config:
+        typeRef: emodel/type@type
+    - id: enabled
+      name:
+        ru: Активно
+        en: Active
+      type: BOOLEAN
+      index:
+        enabled: true
+  #    mandatory: true todo: bug
+    - id: delegateWhen
+      name:
+        ru: Когда
+        en: When
+      mandatory: true

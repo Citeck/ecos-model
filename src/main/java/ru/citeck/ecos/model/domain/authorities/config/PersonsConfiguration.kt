@@ -3,6 +3,7 @@ package ru.citeck.ecos.model.domain.authorities.config
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import ru.citeck.ecos.commons.data.MLText
+import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.context.lib.auth.*
 import ru.citeck.ecos.context.lib.i18n.I18nContext
 import ru.citeck.ecos.data.sql.domain.DbDomainConfig
@@ -15,6 +16,7 @@ import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
 import ru.citeck.ecos.model.domain.authorities.api.records.AuthorityMixin
 import ru.citeck.ecos.model.domain.authorities.api.records.PersonMixin
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
+import ru.citeck.ecos.model.domain.authorities.constant.PersonConstants
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
 import ru.citeck.ecos.model.domain.authorities.service.PersonEventsService
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
@@ -24,6 +26,7 @@ import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.RecordsServiceFactory
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
+import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.RecordsDao
 import ru.citeck.ecos.records3.record.dao.impl.proxy.MutateProxyProcessor
 import ru.citeck.ecos.records3.record.dao.impl.proxy.ProxyProcContext
@@ -52,14 +55,14 @@ class PersonsConfiguration(
                     context: ProxyProcContext
                 ): List<LocalRecordAtts> {
                     return atts.map {
-                        val id = it.attributes["id"].asText()
-                        if (id != id.lowercase()) {
-                            val newAtts = it.attributes.deepCopy()
-                            newAtts["id"] = id.lowercase()
-                            LocalRecordAtts(it.id, newAtts)
-                        } else {
-                            it
+                        val newAtts = it.attributes.deepCopy()
+                        val recordId = if (it.id == "CURRENT") {
+                            AuthContext.getCurrentUser()
+                        }  else {
+                            it.id
                         }
+                        preProcessPersonBeforeMutation(recordId.ifBlank { newAtts["id"].asText() }.lowercase(), newAtts)
+                        LocalRecordAtts(recordId, newAtts)
                     }
                 }
                 override fun mutatePostProcess(records: List<RecordRef>, context: ProxyProcContext): List<RecordRef> {
@@ -79,28 +82,53 @@ class PersonsConfiguration(
         return recordsDao
     }
 
+    private fun preProcessPersonBeforeMutation(id: String, attributes: ObjectData) {
+
+        if (attributes.has("id")) {
+            attributes["id"] = attributes["id"].asText().lowercase()
+        }
+        val personRef = AuthorityType.PERSON.getRef(id)
+
+        if (attributes.has(PersonConstants.ATT_AT_WORKPLACE)
+            && !attributes.has(PersonConstants.ATT_AWAY_AUTH_DELEGATION_ENABLED)) {
+
+            val newState = attributes[PersonConstants.ATT_AT_WORKPLACE]
+            if (newState.isBoolean() && !newState.asBoolean()) {
+                val currentState = recordsService.getAtts(personRef, PersonAwayStateAtts::class.java)
+                if (currentState.atWorkplace) {
+                    attributes[PersonConstants.ATT_AWAY_AUTH_DELEGATION_ENABLED] = true
+                }
+            }
+        }
+    }
+
     @Bean
     fun personRepo(dataSource: DataSource): RecordsDao {
 
         val permsComponent = object : DbPermsComponent {
 
-            override fun getRecordPerms(record: Any): DbRecordPerms {
+            override fun getRecordPerms(user: String, authorities: Set<String>, record: Any): DbRecordPerms {
 
                 val localId = recordsService.getAtt(record, "?localId").asText()
 
                 return object : DbRecordPerms {
-                    override fun getAuthoritiesWithReadPermission(): Set<String> {
-                        return setOf(AuthGroup.EVERYONE)
-                    }
-                    override fun isCurrentUserHasWritePerms(): Boolean {
-                        val auth = AuthContext.getCurrentFullAuth()
-                        return localId == auth.getUser() || auth.getAuthorities().contains(AuthRole.ADMIN)
-                    }
-                    override fun isCurrentUserHasAttReadPerms(name: String): Boolean {
+                    override fun hasAttReadPerms(name: String): Boolean {
                         return true
                     }
-                    override fun isCurrentUserHasAttWritePerms(name: String): Boolean {
-                        return isCurrentUserHasWritePerms()
+                    override fun hasAttWritePerms(name: String): Boolean {
+                        return hasWritePerms()
+                    }
+                    override fun hasReadPerms(): Boolean {
+                        return true
+                    }
+                    override fun hasWritePerms(): Boolean {
+                        if (authorities.contains(AuthRole.ADMIN) || localId == user) {
+                            return true
+                        }
+                        return false
+                    }
+                    override fun getAuthoritiesWithReadPermission(): Set<String> {
+                        return setOf(AuthGroup.EVERYONE)
                     }
                 }
             }
@@ -125,7 +153,7 @@ class PersonsConfiguration(
                 .build()
         ).withSchema(AuthorityConstants.DEFAULT_SCHEMA).withPermsComponent(permsComponent).build()
 
-        recordsDao.addAttributesMixin(PersonMixin(authorityService))
+        recordsDao.addAttributesMixin(PersonMixin(recordsService, authorityService))
         recordsDao.addAttributesMixin(AuthorityMixin(recordsService, authorityService, AuthorityType.PERSON))
 
         val getRecId = { rec: Any ->
@@ -156,4 +184,9 @@ class PersonsConfiguration(
         )
         val userName = AuthUser.SYSTEM
     }
+
+    private class PersonAwayStateAtts(
+        @AttName(PersonConstants.ATT_AT_WORKPLACE + "?bool!")
+        val atWorkplace: Boolean
+    )
 }

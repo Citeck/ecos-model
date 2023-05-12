@@ -1,0 +1,41 @@
+---
+id: auth-delegations
+
+name:
+  ru: Делегирование
+  en: Delegation
+
+system: true
+
+columns:
+  - id: _parent
+    name:
+      en: Owner
+      ru: Владелец
+    type: ASSOC
+    visible: false
+  - id: delegatedAuthorities
+    name:
+      ru: Делегируемые права
+      en: Delegated authorities
+    type: TEXT
+  - id: delegates
+    name:
+      ru: Делегаты
+      en: Delegates
+    type: PERSON
+  - id: delegatedTypes
+    name:
+      ru: Типы ECOS
+      en: ECOS Types
+    type: ASSOC
+  - id: enabled
+    name:
+      ru: Активно
+      en: Active
+    type: BOOLEAN
+  - id: delegateWhen
+    name:
+      ru: Когда
+      en: When
+    type: TEXT

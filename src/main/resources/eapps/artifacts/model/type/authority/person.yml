@@ -144,6 +144,11 @@ model:
         ru: На рабочем месте
         en: At workplace
       type: BOOLEAN
+    - id: awayAuthDelegationEnabled
+      name:
+        ru: Делегирование включено при отсутствии пользователя
+        en: Authorities delegation is enabled when user is out of office
+      type: BOOLEAN
   systemAttributes:
     - id: lastLoginTime
       type: DATETIME

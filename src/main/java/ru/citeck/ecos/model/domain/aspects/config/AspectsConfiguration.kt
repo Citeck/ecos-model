@@ -1,8 +1,8 @@
 package ru.citeck.ecos.model.domain.aspects.config
 
 import org.springframework.context.annotation.Configuration
-import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthGroup
+import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.data.sql.domain.DbDomainConfig
 import ru.citeck.ecos.data.sql.domain.DbDomainFactory
 import ru.citeck.ecos.data.sql.records.DbRecordsDao
@@ -73,23 +73,9 @@ class AspectsConfiguration(
 
     private fun createAspectsRepo(): DbRecordsDao {
 
-        val fullAccessPerms = object : DbRecordPerms {
-            override fun getAuthoritiesWithReadPermission(): Set<String> {
-                return setOf(AuthGroup.EVERYONE)
-            }
-            override fun isCurrentUserHasWritePerms(): Boolean {
-                return AuthContext.isRunAsAdmin()
-            }
-            override fun isCurrentUserHasAttReadPerms(name: String): Boolean {
-                return true
-            }
-            override fun isCurrentUserHasAttWritePerms(name: String): Boolean {
-                return true
-            }
-        }
         val permsComponent = object : DbPermsComponent {
-            override fun getRecordPerms(record: Any): DbRecordPerms {
-                return fullAccessPerms
+            override fun getRecordPerms(user: String, authorities: Set<String>, record: Any): DbRecordPerms {
+                return AspectPerms(authorities.contains(AuthRole.ADMIN))
             }
         }
 
@@ -111,5 +97,28 @@ class AspectsConfiguration(
         ).withSchema("public").withPermsComponent(permsComponent).build()
 
         return dao
+    }
+
+    private class AspectPerms(val isAdmin: Boolean) : DbRecordPerms {
+
+        override fun getAuthoritiesWithReadPermission(): Set<String> {
+            return setOf(AuthGroup.EVERYONE)
+        }
+
+        override fun hasAttReadPerms(name: String): Boolean {
+            return true
+        }
+
+        override fun hasAttWritePerms(name: String): Boolean {
+            return isAdmin
+        }
+
+        override fun hasReadPerms(): Boolean {
+            return true
+        }
+
+        override fun hasWritePerms(): Boolean {
+            return isAdmin
+        }
     }
 }

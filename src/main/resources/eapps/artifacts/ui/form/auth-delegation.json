@@ -1,0 +1,263 @@
+{
+  "id": "auth-delegation",
+  "formKey": "",
+  "title": {
+    "ru": "Делегирование",
+    "en": "Delegation"
+  },
+  "description": {},
+  "customModule": "",
+  "typeRef": "",
+  "width": "m",
+  "system": true,
+  "i18n": {},
+  "definition": {
+    "components": [
+      {
+        "label": {
+          "en": "Delegated authorities",
+          "ru": "Делегируемые права"
+        },
+        "key": "delegatedAuthorities",
+        "multiple": true,
+        "reorder": false,
+        "clearOnHide": false,
+        "dataSrc": "custom",
+        "data": {
+          "headers": [
+            {
+              "key": "",
+              "value": ""
+            }
+          ],
+          "custom": "values = _.get(data, 'delegatableAuthoritiesVariants.authorities', []);"
+        },
+        "defaultValue": [
+          "OWN"
+        ],
+        "refreshOn": [
+          "delegatableAuthoritiesVariants"
+        ],
+        "optionalWhenDisabled": false,
+        "type": "ecosSelect",
+        "input": true
+      },
+      {
+        "label": {
+          "en": "Columns"
+        },
+        "key": "columns2",
+        "columns": [
+          {
+            "components": [
+              {
+                "type": "selectOrgstruct",
+                "input": true,
+                "multiple": true,
+                "allowedAuthorityType": "USER",
+                "key": "delegates",
+                "label": {
+                  "ru": "Делегаты",
+                  "en": "Delegates"
+                }
+              }
+            ],
+            "md": 4,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 0
+          },
+          {
+            "md": 4,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 1,
+            "components": [
+              {
+                "label": {
+                  "ru": "Типы ECOS",
+                  "en": "ECOS Types"
+                },
+                "key": "delegatedTypes",
+                "multiple": true,
+                "modalTitle": "",
+                "journalId": "ecos-types",
+                "defaultValue": [],
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
+                "type": "selectJournal",
+                "input": true
+              }
+            ]
+          },
+          {
+            "md": 4,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 2,
+            "components": [
+              {
+                "type": "checkbox",
+                "input": true,
+                "key": "enabled",
+                "label": {
+                  "en": "enabled"
+                }
+              }
+            ]
+          }
+        ],
+        "oneColumnInViewMode": false,
+        "type": "columns",
+        "input": false
+      },
+      {
+        "label": {
+          "en": "delegateWhen"
+        },
+        "key": "delegateWhen",
+        "dataSrc": "values",
+        "data": {
+          "values": [
+            {
+              "label": "Я вне офиса",
+              "value": "OUT_OF_OFFICE"
+            },
+            {
+              "label": "Всегда",
+              "value": "ALWAYS"
+            }
+          ],
+          "headers": [
+            {
+              "key": "",
+              "value": ""
+            }
+          ]
+        },
+        "defaultValue": "OUT_OF_OFFICE",
+        "optionalWhenDisabled": false,
+        "type": "ecosSelect",
+        "input": true
+      },
+      {
+        "label": {
+          "en": "parent"
+        },
+        "key": "_parent",
+        "refreshOn": [],
+        "customDefaultValue": "value = _.get(instance, 'options.initiator.dashboardRecordRef');",
+        "optionalWhenDisabled": false,
+        "type": "hidden",
+        "input": true
+      },
+      {
+        "label": {
+          "en": "parentatt"
+        },
+        "key": "_parentAtt",
+        "refreshOn": [],
+        "calculateValue": "value = \"delegates:delegations\"",
+        "optionalWhenDisabled": false,
+        "type": "hidden",
+        "input": true
+      },
+      {
+        "label": "delegatableAuthoritiesVariants",
+        "source": {
+          "type": "record",
+          "record": {
+            "id": "{{data._parent}}",
+            "attributes": {
+              "authorities": "delegatableAuthorities[]{label:?disp,value:?str}"
+            }
+          },
+          "forceLoad": false
+        },
+        "update": {
+          "type": "once"
+        },
+        "refreshOn": [
+          {
+            "label": "_parent",
+            "value": "_parent"
+          }
+        ],
+        "executionCondition": "value = !!data._parent;",
+        "key": "delegatableAuthoritiesVariants",
+        "type": "asyncData",
+        "input": true
+      },
+      {
+        "type": "columns",
+        "key": "buttons-columns",
+        "columns": [
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 0,
+            "components": [],
+            "key": "column"
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 1,
+            "key": "column",
+            "components": []
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 2,
+            "components": [
+              {
+                "type": "button",
+                "key": "cancel",
+                "label": {
+                  "ru": "Отменить",
+                  "en": "Cancel"
+                },
+                "action": "event",
+                "event": "cancel",
+                "block": true,
+                "input": true
+              }
+            ],
+            "key": "column"
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 3,
+            "components": [
+              {
+                "type": "button",
+                "theme": "primary",
+                "key": "submit",
+                "label": {
+                  "ru": "Сохранить",
+                  "en": "Save"
+                },
+                "block": true,
+                "input": true
+              }
+            ],
+            "key": "column"
+          }
+        ],
+        "input": false
+      }
+    ],
+    "formId": "delegation-form"
+  },
+  "attributes": {},
+  "notExists": false
+}

@@ -47,6 +47,14 @@ class AuthorityService(
         personAuthoritiesCache = hazelcast.getMap(PERSON_AUTHORITIES_CACHE_KEY)
     }
 
+    fun isAdminsGroup(groupId: String): Boolean {
+        if (ADMIN_GROUPS.contains(groupId)) {
+            return true
+        }
+        val expandedGroups = getExpandedGroups(groupId, true)
+        return ADMIN_GROUPS.any { expandedGroups.contains(it) }
+    }
+
     fun isAdmin(personId: String): Boolean {
         return getAuthoritiesForPerson(personId).contains(AuthRole.ADMIN)
     }

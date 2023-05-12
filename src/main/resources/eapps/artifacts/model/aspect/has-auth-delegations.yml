@@ -1,0 +1,18 @@
+---
+id: has-auth-delegations
+name:
+  ru: Имеет делегатов
+  en: Has delegates
+
+prefix: auth-delegations
+
+attributes:
+  - id: delegations
+    name:
+      ru: Делегаты
+      en: Delegates
+    type: ASSOC
+    config:
+      typeRef: emodel/type@auth-delegation
+      child: true
+    multiple: true

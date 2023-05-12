@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthGroup
+import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.data.sql.domain.DbDomainConfig
 import ru.citeck.ecos.data.sql.domain.DbDomainFactory
 import ru.citeck.ecos.data.sql.records.DbRecordsDaoConfig
@@ -20,6 +21,7 @@ import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.RecordsDao
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 import javax.sql.DataSource
 
 val ECOS_COMMENT_TYPE_REF = ModelUtils.getTypeRef("ecos-comment")
@@ -44,42 +46,50 @@ class CommentsConfiguration(private val dbDomainFactory: DbDomainFactory) {
 
         val permsComponent = object : DbPermsComponent {
 
-            override fun getRecordPerms(record: Any): DbRecordPerms {
+            override fun getRecordPerms(user: String, authorities: Set<String>, record: Any): DbRecordPerms {
 
+                val isAdmin = authorities.contains(AuthRole.ADMIN)
                 return object : DbRecordPerms {
                     override fun getAuthoritiesWithReadPermission(): Set<String> {
                         return setOf(AuthGroup.EVERYONE)
                     }
 
-                    override fun isCurrentUserHasWritePerms(): Boolean {
-                        val commentData = AuthContext.runAsSystem {
-                            recordsService.getAtts(record, CommentData::class.java)
-                        }
-
-                        if (commentData.tags.any { it.type in TAGS_DISABLED_EDITING }) {
-                            return false
-                        }
-
-                        return AuthContext.isRunAsAdmin() || commentData.creator == AuthContext.getCurrentUser()
-                    }
-
-                    override fun isCurrentUserHasAttReadPerms(name: String): Boolean {
-                        if (AuthContext.isRunAsAdmin() || name == COMMENT_RECORD_ATT) {
+                    override fun hasAttReadPerms(name: String): Boolean {
+                        if (name == COMMENT_RECORD_ATT) {
                             return true
                         }
+                        return hasReadPerms()
+                    }
 
+                    override fun hasAttWritePerms(name: String): Boolean {
+                        return when (name) {
+                            COMMENT_RECORD_ATT -> isAdmin
+                            "tags" -> isAdmin
+                            else -> hasWritePerms()
+                        }
+                    }
+
+                    override fun hasReadPerms(): Boolean {
+                        if (isAdmin) {
+                            return true
+                        }
                         return recordsService.getAtt(
                             record,
                             "$COMMENT_RECORD_ATT.permissions._has.Read?bool!"
                         ).asBoolean()
                     }
 
-                    override fun isCurrentUserHasAttWritePerms(name: String): Boolean {
-                        return when (name) {
-                            COMMENT_RECORD_ATT -> AuthContext.isRunAsAdmin()
-                            "tags" -> AuthContext.isRunAsAdmin()
-                            else -> isCurrentUserHasWritePerms()
+                    override fun hasWritePerms(): Boolean {
+                        if (isAdmin) {
+                            return true
                         }
+                        val commentData = AuthContext.runAsSystem {
+                            recordsService.getAtts(record, CommentData::class.java)
+                        }
+                        if (commentData.tags.any { it.type in TAGS_DISABLED_EDITING }) {
+                            return false
+                        }
+                        return commentData.creator == user
                     }
                 }
             }
@@ -111,6 +121,10 @@ class CommentsConfiguration(private val dbDomainFactory: DbDomainFactory) {
         return dao
     }
 }
+
+private data class CommentAtts(
+    val record: EntityRef
+)
 
 private data class CommentData(
     @AttName("_creator.id")
