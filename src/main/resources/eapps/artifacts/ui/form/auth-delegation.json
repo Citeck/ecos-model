@@ -77,8 +77,7 @@
             "components": [
               {
                 "label": {
-                  "ru": "Типы ECOS",
-                  "en": "ECOS Types"
+                  "en": "delegatedTypes"
                 },
                 "key": "delegatedTypes",
                 "multiple": true,
@@ -160,7 +159,7 @@
         },
         "key": "_parentAtt",
         "refreshOn": [],
-        "calculateValue": "value = \"delegates:delegations\"",
+        "calculateValue": "value = \"auth-delegations:delegations\"",
         "optionalWhenDisabled": false,
         "type": "hidden",
         "input": true

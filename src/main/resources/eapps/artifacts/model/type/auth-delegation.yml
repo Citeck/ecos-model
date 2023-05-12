@@ -32,8 +32,8 @@ model:
         enabled: true
     - id: delegatedTypes
       name:
-        ru: Типы ECOS
-        en: ECOS Types
+        ru: Типы данных
+        en: Data types
       type: ASSOC
       multiple: true
       config:
