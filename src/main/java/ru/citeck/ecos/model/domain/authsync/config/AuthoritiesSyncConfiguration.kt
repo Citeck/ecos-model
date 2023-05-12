@@ -43,23 +43,26 @@ class AuthoritiesSyncConfiguration(
     @Bean
     fun authoritiesSyncRepo(dataSource: DataSource): RecordsDao {
 
-        val adminAccessPerms = object : DbRecordPerms {
-            override fun getAuthoritiesWithReadPermission(): Set<String> {
-                return setOf(AuthGroup.EVERYONE)
-            }
-            override fun isCurrentUserHasWritePerms(): Boolean {
-                return AuthContext.getCurrentRunAsAuthorities().contains(AuthRole.ADMIN)
-            }
-            override fun isCurrentUserHasAttReadPerms(name: String): Boolean {
-                return true
-            }
-            override fun isCurrentUserHasAttWritePerms(name: String): Boolean {
-                return isCurrentUserHasWritePerms()
-            }
-        }
         val permsComponent = object : DbPermsComponent {
-            override fun getRecordPerms(record: Any): DbRecordPerms {
-                return adminAccessPerms
+            override fun getRecordPerms(user: String, authorities: Set<String>, record: Any): DbRecordPerms {
+                val isAdmin = authorities.contains(AuthRole.ADMIN)
+                return object : DbRecordPerms {
+                    override fun getAuthoritiesWithReadPermission(): Set<String> {
+                        return setOf(AuthGroup.EVERYONE)
+                    }
+                    override fun hasAttReadPerms(name: String): Boolean {
+                        return true
+                    }
+                    override fun hasAttWritePerms(name: String): Boolean {
+                        return isAdmin
+                    }
+                    override fun hasReadPerms(): Boolean {
+                        return true
+                    }
+                    override fun hasWritePerms(): Boolean {
+                        return isAdmin
+                    }
+                }
             }
         }
 
