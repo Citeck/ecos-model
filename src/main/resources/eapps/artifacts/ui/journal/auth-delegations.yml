@@ -25,9 +25,6 @@ columns:
       en: Delegates
     type: PERSON
   - id: delegatedTypes
-    name:
-      ru: Типы ECOS
-      en: ECOS Types
     type: ASSOC
   - id: enabled
     name:
