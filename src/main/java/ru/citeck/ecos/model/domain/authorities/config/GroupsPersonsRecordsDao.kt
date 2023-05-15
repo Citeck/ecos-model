@@ -37,15 +37,15 @@ open class GroupsPersonsRecordsDao(
 
     private val targetSourceId = "$id-repo"
 
-    override fun delete(recordsId: List<String>): List<DelStatus> {
+    override fun delete(recordIds: List<String>): List<DelStatus> {
         error("Not supported")
     }
 
-    override fun getRecordsAtts(recordsId: List<String>): List<*>? {
+    override fun getRecordsAtts(recordIds: List<String>): List<*>? {
         if (authorityType == AuthorityType.PERSON) {
             return super.getRecordsAtts(
-                recordsId.map {
-                    if (it == "CURRENT") {
+                recordIds.map {
+                    if (it == PersonConstants.CURRENT_USER_ID) {
                         AuthContext.getCurrentUser()
                     } else {
                         it
@@ -53,7 +53,7 @@ open class GroupsPersonsRecordsDao(
                 }
             )
         }
-        return super.getRecordsAtts(recordsId)
+        return super.getRecordsAtts(recordIds)
     }
 
     override fun queryRecords(recsQuery: RecordsQuery): RecsQueryRes<*>? {
@@ -152,7 +152,7 @@ open class GroupsPersonsRecordsDao(
             if (authorityType == AuthorityType.PERSON) {
                 val currentUser = AuthContext.getCurrentUser()
                 for (record in records) {
-                    if (record.id == currentUser) {
+                    if (record.id == currentUser || record.id == PersonConstants.CURRENT_USER_ID) {
                         record.attributes.forEach { key, _ ->
                             if (key.contains(ATT_AUTHORITY_GROUPS)) {
                                 // user can mutate own attributes,
@@ -244,11 +244,10 @@ open class GroupsPersonsRecordsDao(
                 val newAtts = ObjectData.create()
                 record.attributes.forEach { k, v ->
                     if (!managedAtts.contains(k)) {
-                        newAtts.set(k, v)
+                        newAtts[k] = v
                     }
                 }
                 if (newAtts.size() > 0) {
-
                     super.mutate(listOf(LocalRecordAtts(authorityId, newAtts)))
                 }
             }
