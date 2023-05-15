@@ -56,7 +56,7 @@ class PersonsConfiguration(
                 ): List<LocalRecordAtts> {
                     return atts.map {
                         val newAtts = it.attributes.deepCopy()
-                        val recordId = if (it.id == "CURRENT") {
+                        val recordId = if (it.id == PersonConstants.CURRENT_USER_ID) {
                             AuthContext.getCurrentUser()
                         }  else {
                             it.id
