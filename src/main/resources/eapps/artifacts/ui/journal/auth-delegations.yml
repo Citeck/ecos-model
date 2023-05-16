@@ -19,6 +19,22 @@ columns:
       ru: Делегируемые права
       en: Delegated authorities
     type: TEXT
+    formatter:
+      type: script
+      config:
+        vars:
+          options: "${_parent.delegatableAuthorities[]{value:?str,label:?disp}}"
+        fn: |
+          if (!vars.options || !vars.options.length) {
+            return cell;
+          }
+          for (option of vars.options) {
+            if (option.value === cell) {
+              return option.label || cell;
+            }
+          }
+          return cell;
+
   - id: delegates
     name:
       ru: Делегаты
@@ -36,3 +52,12 @@ columns:
       ru: Когда
       en: When
     type: TEXT
+    formatter:
+      type: script
+      config:
+        fn: |
+          const variants = {
+            "OUT_OF_OFFICE": { "ru": "Я вне офиса", "en": "I'm out of office" },
+            "ALWAYS": { "ru": "Всегда", "en": "Always" }
+          }
+          return Citeck.helpers.getMLValue(variants[cell] || cell);

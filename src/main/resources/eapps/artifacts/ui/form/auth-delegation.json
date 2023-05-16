@@ -10,7 +10,16 @@
   "typeRef": "",
   "width": "m",
   "system": true,
-  "i18n": {},
+  "i18n": {
+    "ru": {
+      "delegateWhen_OUT_OF_OFFICE": "Я вне офиса",
+      "delegateWhen_ALWAYS": "Всегда"
+    },
+    "en": {
+      "delegateWhen_OUT_OF_OFFICE": "I'm out of office",
+      "delegateWhen_ALWAYS": "Always"
+    }
+  },
   "definition": {
     "components": [
       {
@@ -122,11 +131,11 @@
         "data": {
           "values": [
             {
-              "label": "Я вне офиса",
+              "label": "delegateWhen_OUT_OF_OFFICE",
               "value": "OUT_OF_OFFICE"
             },
             {
-              "label": "Всегда",
+              "label": "delegateWhen_ALWAYS",
               "value": "ALWAYS"
             }
           ],
