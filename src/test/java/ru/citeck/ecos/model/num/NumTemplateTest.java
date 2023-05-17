@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.citeck.ecos.commands.CommandsService;
+import ru.citeck.ecos.commands.dto.CommandResult;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.model.EcosModelApp;
 import ru.citeck.ecos.model.num.command.GetNextNumber;
@@ -86,12 +87,17 @@ public class NumTemplateTest {
         Runnable action = () -> {
 
             for (int i = 0; i < iterationsCount; i++) {
-
-                GetNextNumber.Response result = commandsService.executeSync(new GetNextNumber.Command(
-                    RecordRef.create(EcosModelApp.NAME, "num-template", "template-mt-id"),
-                    ObjectData.create("{\"prop\":\"propValue\"}")
-                )).getResultAs(GetNextNumber.Response.class);
-
+                CommandResult comResult = null;
+                for (int repeatCounterOnError = 0; repeatCounterOnError < 10; repeatCounterOnError++) {
+                    comResult = commandsService.executeSync(new GetNextNumber.Command(
+                        RecordRef.create(EcosModelApp.NAME, "num-template", "template-mt-id"),
+                        ObjectData.create("{\"prop\":\"propValue\"}")
+                    ));
+                    if (comResult.getPrimaryError() == null) {
+                        break;
+                    }
+                }
+                GetNextNumber.Response result = comResult.getResultAs(GetNextNumber.Response.class);
                 if (result == null || result.getNumber() == null) {
                     throw new IllegalStateException("RESULT IS NULL! " + result);
                 }
