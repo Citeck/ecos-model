@@ -105,7 +105,7 @@
               "ru": "deputy:available"
             },
             "key": "deputy_available",
-            "disabled": true,
+            "disabled": false,
             "clearOnHide": false,
             "refreshOn": [],
             "optionalWhenDisabled": false,
