@@ -199,10 +199,7 @@ class TypesServiceImpl(
     private fun <T : Any> forEachTypeInAscHierarchy(typeId: String, action: (TypeEntity) -> T?): T? {
         var typeEntity = typeRepoDao.findByExtId(typeId)
         while (typeEntity != null) {
-            val res = action.invoke(typeEntity)
-            if (res != null) {
-                return res
-            }
+            action.invoke(typeEntity)
             typeEntity = typeEntity.parent
         }
         return null
