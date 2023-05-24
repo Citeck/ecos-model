@@ -1,0 +1,7 @@
+---
+id: counterparty-document
+name:
+  ru: Документ контрагента
+  en: Counterparty Document
+
+parentRef: emodel/type@document
