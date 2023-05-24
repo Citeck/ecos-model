@@ -9,9 +9,6 @@ parentRef: emodel/type@user-base
 storageType: ECOS_MODEL
 queryPermsPolicy: PARENT
 
-properties:
-  alfType: ecos:document
-
 model:
   attributes:
     - id: name
