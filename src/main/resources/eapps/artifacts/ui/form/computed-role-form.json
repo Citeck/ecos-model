@@ -1,0 +1,227 @@
+{
+  "id": "computed-role-form",
+  "formKey": "",
+  "title": {
+    "en": "computed-role-form"
+  },
+  "description": {},
+  "customModule": "",
+  "typeRef": "",
+  "width": "",
+  "system": true,
+  "i18n": {},
+  "definition": {
+    "components": [
+      {
+        "columns": [
+          {
+            "components": [
+              {
+                "label": {
+                  "ru": "Type"
+                },
+                "key": "type",
+                "dataSrc": "values",
+                "data": {
+                  "values": [
+                    {
+                      "label": "None",
+                      "value": "NONE"
+                    },
+                    {
+                      "label": "Script",
+                      "value": "SCRIPT"
+                    },
+                    {
+                      "label": "Attribute",
+                      "value": "ATTRIBUTE"
+                    },
+                    {
+                      "label": "Value",
+                      "value": "VALUE"
+                    },
+                    {
+                      "label": "DMN",
+                      "value": "DMN"
+                    }
+                  ],
+                  "headers": [
+                    {
+                      "key": "",
+                      "value": ""
+                    }
+                  ]
+                },
+                "defaultValue": "NONE",
+                "optionalWhenDisabled": false,
+                "type": "ecosSelect",
+                "input": true
+              }
+            ],
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 0
+          },
+          {
+            "index": 1,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "components": []
+          }
+        ],
+        "key": "columns2",
+        "type": "columns",
+        "input": false
+      },
+      {
+        "title": "Script",
+        "key": "script-panel",
+        "conditional": {
+          "show": "true",
+          "when": "type",
+          "eq": "SCRIPT"
+        },
+        "type": "panel",
+        "input": false,
+        "components": [
+          {
+            "label": "Config",
+            "hideLabel": true,
+            "key": "SCRIPT_config",
+            "type": "container",
+            "input": true,
+            "components": [
+              {
+                "label": "Script",
+                "defaultValue": "",
+                "key": "fn",
+                "type": "textarea",
+                "input": true,
+                "editor": "ace"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Attribute",
+        "key": "attribute-panel",
+        "conditional": {
+          "show": "true",
+          "when": "type",
+          "eq": "ATTRIBUTE"
+        },
+        "type": "panel",
+        "input": false,
+        "components": [
+          {
+            "label": "Config",
+            "hideLabel": true,
+            "key": "ATTRIBUTE_config",
+            "type": "container",
+            "input": true,
+            "components": [
+              {
+                "label": "Attribute",
+                "defaultValue": "",
+                "key": "attribute",
+                "type": "textfield",
+                "input": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Value",
+        "key": "value-panel",
+        "conditional": {
+          "show": "true",
+          "when": "type",
+          "eq": "VALUE"
+        },
+        "type": "panel",
+        "input": false,
+        "components": [
+          {
+            "label": "Config",
+            "hideLabel": true,
+            "key": "VALUE_config",
+            "type": "container",
+            "input": true,
+            "components": [
+              {
+                "label": "Value",
+                "defaultValue": "",
+                "key": "value",
+                "type": "textfield",
+                "input": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": {
+          "ru": "Panel"
+        },
+        "key": "dmn-panel",
+        "title": {
+          "ru": "DMN"
+        },
+        "refreshOn": [],
+        "optionalWhenDisabled": false,
+        "conditional": {
+          "show": "true",
+          "when": "type",
+          "eq": "DMN"
+        },
+        "type": "panel",
+        "input": false,
+        "components": [
+          {
+            "label": {
+              "ru": "Config"
+            },
+            "key": "DMN_config",
+            "hideLabel": true,
+            "refreshOn": [],
+            "optionalWhenDisabled": false,
+            "type": "container",
+            "input": true,
+            "components": [
+              {
+                "label": {
+                  "ru": "Решение",
+                  "en": "Decision"
+                },
+                "key": "decisionRef",
+                "validate": {
+                  "required": true
+                },
+                "modalTitle": "",
+                "journalId": "dmn-decision",
+                "queryData": "",
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
+                "type": "selectJournal",
+                "input": true,
+                "source": {
+                  "custom": {
+                    "columns": []
+                  },
+                  "type": "journal"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "formId": "computed-role-form"
+  },
+  "attributes": {},
+  "notExists": false
+}
