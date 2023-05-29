@@ -172,7 +172,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
                             addGroup("other-auth-group-${it.first}", it.first)
                         }
                     }
-                    assertThat(ex.message).contains("Permission denied")
+                    assertThat(ex.message).containsAnyOf("Permission denied", "Permissions Denied")
                 } else {
                     addGroup("other-auth-group-${it.first}", "")
                 }

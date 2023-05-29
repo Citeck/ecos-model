@@ -53,9 +53,9 @@ class PersonMixin(
 
                 val authorities = authorityService.getAuthoritiesForPerson(value.getLocalId())
                     .filter {
-                        it.startsWith(AuthGroup.PREFIX)
-                            && !NON_DELEGATABLE_AUTHORITIES.contains(it)
-                            && !authorityService.isAdminsGroup(it)
+                        it.startsWith(AuthGroup.PREFIX) &&
+                            !NON_DELEGATABLE_AUTHORITIES.contains(it) &&
+                            !authorityService.isAdminsGroup(it)
                     }
 
                 val displayNames = recordsService.getAtts(

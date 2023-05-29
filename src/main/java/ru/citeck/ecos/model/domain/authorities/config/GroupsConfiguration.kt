@@ -2,14 +2,10 @@ package ru.citeck.ecos.model.domain.authorities.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import ru.citeck.ecos.context.lib.auth.AuthGroup
-import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.data.sql.domain.DbDomainConfig
 import ru.citeck.ecos.data.sql.domain.DbDomainFactory
 import ru.citeck.ecos.data.sql.records.DbRecordsDaoConfig
 import ru.citeck.ecos.data.sql.records.listener.*
-import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
-import ru.citeck.ecos.data.sql.records.perms.DbRecordPerms
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
 import ru.citeck.ecos.model.domain.authorities.api.records.AuthorityGroupMixin
 import ru.citeck.ecos.model.domain.authorities.api.records.AuthorityMixin
@@ -19,6 +15,7 @@ import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.records3.RecordsService
+import ru.citeck.ecos.records3.record.atts.schema.ScalarType
 import ru.citeck.ecos.records3.record.dao.RecordsDao
 import javax.sql.DataSource
 
@@ -41,13 +38,11 @@ class GroupsConfiguration(
     }
 
     @Bean
-    fun groupRepo(dataSource: DataSource): RecordsDao {
+    fun groupRepo(
+        dataSource: DataSource
+    ): RecordsDao {
 
-        val permsComponent = object : DbPermsComponent {
-            override fun getRecordPerms(user: String, authorities: Set<String>, record: Any): DbRecordPerms {
-                return PersonGroupsPerms(authorities.contains(AuthRole.ADMIN))
-            }
-        }
+        val permsComponent = GroupDbPermsComponent(recordsService, authorityService)
 
         val typeRef = ModelUtils.getTypeRef("authority-group")
         val recordsDao = dbDomainFactory.create(
@@ -65,10 +60,12 @@ class GroupsConfiguration(
                     }
                 )
                 .build()
-        ).withSchema(AuthorityConstants.DEFAULT_SCHEMA).withPermsComponent(permsComponent).build()
+        ).withSchema(AuthorityConstants.DEFAULT_SCHEMA)
+            .withPermsComponent(permsComponent)
+            .build()
 
         val getRecId = { rec: Any ->
-            recordsService.getAtt(rec, "?localId").asText()
+            recordsService.getAtt(rec, ScalarType.LOCAL_ID_SCHEMA).asText()
         }
 
         recordsDao.addListener(object : DbRecordsListenerAdapter() {
@@ -82,33 +79,17 @@ class GroupsConfiguration(
                 authorityService.resetGroupCache(getRecId(event.record))
             }
         })
+        recordsDao.addListener(
+            AuthorityGroupsManagementCheckListener(
+                recordsService,
+                permsComponent,
+                AuthorityType.GROUP
+            )
+        )
 
         recordsDao.addAttributesMixin(AuthorityMixin(recordsService, authorityService, AuthorityType.GROUP))
         recordsDao.addAttributesMixin(AuthorityGroupMixin())
 
         return recordsDao
-    }
-
-    private class PersonGroupsPerms(val isAdmin: Boolean) : DbRecordPerms {
-
-        override fun getAuthoritiesWithReadPermission(): Set<String> {
-            return setOf(AuthGroup.EVERYONE)
-        }
-
-        override fun hasAttReadPerms(name: String): Boolean {
-            return true
-        }
-
-        override fun hasAttWritePerms(name: String): Boolean {
-            return isAdmin
-        }
-
-        override fun hasReadPerms(): Boolean {
-            return true
-        }
-
-        override fun hasWritePerms(): Boolean {
-            return isAdmin
-        }
     }
 }

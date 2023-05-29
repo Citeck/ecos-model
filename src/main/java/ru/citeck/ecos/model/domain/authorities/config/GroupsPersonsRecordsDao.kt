@@ -2,7 +2,6 @@ package ru.citeck.ecos.model.domain.authorities.config
 
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.context.lib.auth.AuthContext
-import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants.ATT_AUTHORITY_GROUPS
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants.ATT_AUTHORITY_GROUPS_FULL
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityGroupConstants
@@ -137,36 +136,9 @@ open class GroupsPersonsRecordsDao(
         return mutate(records)
     }
 
-    private fun permissionDenied() {
-        error("Permission denied")
-    }
-
     override fun mutate(records: List<LocalRecordAtts>): List<String> {
         if (syncService.isSyncContext()) {
             return super.mutate(records)
-        }
-        if (!AuthContext.isRunAsSystem() && !AuthContext.getCurrentAuthorities().contains(AuthRole.ADMIN)) {
-            if (records.any { it.id.isBlank() }) {
-                permissionDenied()
-            }
-            if (authorityType == AuthorityType.PERSON) {
-                val currentUser = AuthContext.getCurrentUser()
-                for (record in records) {
-                    if (record.id == currentUser || record.id == PersonConstants.CURRENT_USER_ID) {
-                        record.attributes.forEach { key, _ ->
-                            if (key.contains(ATT_AUTHORITY_GROUPS)) {
-                                // user can mutate own attributes,
-                                // but groups should be changed only by admin or system
-                                permissionDenied()
-                            }
-                        }
-                    } else {
-                        permissionDenied()
-                    }
-                }
-            } else {
-                permissionDenied()
-            }
         }
 
         if (authorityType == AuthorityType.GROUP) {

@@ -16,6 +16,7 @@ import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
 import ru.citeck.ecos.model.domain.authorities.api.records.AuthorityMixin
 import ru.citeck.ecos.model.domain.authorities.api.records.PersonMixin
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
+import ru.citeck.ecos.model.domain.authorities.constant.AuthorityGroupConstants
 import ru.citeck.ecos.model.domain.authorities.constant.PersonConstants
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
 import ru.citeck.ecos.model.domain.authorities.service.PersonEventsService
@@ -26,6 +27,7 @@ import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.RecordsServiceFactory
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
+import ru.citeck.ecos.records3.record.atts.schema.ScalarType
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.RecordsDao
 import ru.citeck.ecos.records3.record.dao.impl.proxy.MutateProxyProcessor
@@ -40,6 +42,13 @@ class PersonsConfiguration(
     private val dbDomainFactory: DbDomainFactory,
     private val authoritiesSyncService: AuthoritiesSyncService
 ) {
+
+    companion object {
+        const val USERS_PROFILE_ADMIN_WITH_PREFIX = AuthGroup.PREFIX + AuthorityGroupConstants.USERS_PROFILE_ADMIN_GROUP
+
+        // users with this group can edit authorityGroups
+        const val GROUPS_MANAGERS_GROUP_WITH_PREFIX = AuthGroup.PREFIX + AuthorityGroupConstants.GROUPS_MANAGERS_GROUP
+    }
 
     @Bean
     fun personDao(): RecordsDao {
@@ -58,7 +67,7 @@ class PersonsConfiguration(
                         val newAtts = it.attributes.deepCopy()
                         val recordId = if (it.id == PersonConstants.CURRENT_USER_ID) {
                             AuthContext.getCurrentUser()
-                        }  else {
+                        } else {
                             it.id
                         }
                         preProcessPersonBeforeMutation(recordId.ifBlank { newAtts["id"].asText() }.lowercase(), newAtts)
@@ -89,8 +98,9 @@ class PersonsConfiguration(
         }
         val personRef = AuthorityType.PERSON.getRef(id)
 
-        if (attributes.has(PersonConstants.ATT_AT_WORKPLACE)
-            && !attributes.has(PersonConstants.ATT_AWAY_AUTH_DELEGATION_ENABLED)) {
+        if (attributes.has(PersonConstants.ATT_AT_WORKPLACE) &&
+            !attributes.has(PersonConstants.ATT_AWAY_AUTH_DELEGATION_ENABLED)
+        ) {
 
             val newState = attributes[PersonConstants.ATT_AT_WORKPLACE]
             if (newState.isBoolean() && !newState.asBoolean()) {
@@ -103,13 +113,15 @@ class PersonsConfiguration(
     }
 
     @Bean
-    fun personRepo(dataSource: DataSource): RecordsDao {
+    fun personRepo(
+        dataSource: DataSource
+    ): RecordsDao {
 
         val permsComponent = object : DbPermsComponent {
 
             override fun getRecordPerms(user: String, authorities: Set<String>, record: Any): DbRecordPerms {
 
-                val localId = recordsService.getAtt(record, "?localId").asText()
+                val userName = recordsService.getAtt(record, ScalarType.LOCAL_ID_SCHEMA).asText()
 
                 return object : DbRecordPerms {
                     override fun hasAttReadPerms(name: String): Boolean {
@@ -122,10 +134,11 @@ class PersonsConfiguration(
                         return true
                     }
                     override fun hasWritePerms(): Boolean {
-                        if (authorities.contains(AuthRole.ADMIN) || localId == user) {
-                            return true
-                        }
-                        return false
+                        return authorities.contains(AuthRole.SYSTEM) ||
+                            authorities.contains(AuthRole.ADMIN) ||
+                            userName == user ||
+                            authorities.contains(USERS_PROFILE_ADMIN_WITH_PREFIX) ||
+                            authorities.contains(GROUPS_MANAGERS_GROUP_WITH_PREFIX)
                     }
                     override fun getAuthoritiesWithReadPermission(): Set<String> {
                         return setOf(AuthGroup.EVERYONE)
@@ -173,7 +186,13 @@ class PersonsConfiguration(
                 authorityService.resetPersonCache(getRecId(event.record))
             }
         })
-
+        recordsDao.addListener(
+            AuthorityGroupsManagementCheckListener(
+                recordsService,
+                GroupDbPermsComponent(recordsService, authorityService),
+                AuthorityType.PERSON
+            )
+        )
         return recordsDao
     }
 

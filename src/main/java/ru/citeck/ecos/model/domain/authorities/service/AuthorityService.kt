@@ -31,10 +31,12 @@ class AuthorityService(
 
         private const val ATT_AUTHORITY_GROUPS = "authorityGroups[]?localId"
 
-        private val ADMIN_GROUPS = setOf(
-            AuthGroup.PREFIX + AuthorityGroupConstants.ADMIN_GROUP,
-            AuthGroup.PREFIX + "ALFRESCO_ADMINISTRATORS"
+        val ADMIN_GROUPS = setOf(
+            AuthorityGroupConstants.ADMIN_GROUP,
+            "ALFRESCO_ADMINISTRATORS"
         )
+
+        val ADMIN_GROUPS_AUTH_NAME = ADMIN_GROUPS.mapTo(LinkedHashSet()) { AuthGroup.PREFIX + it }
     }
 
     private val ascGroupsCache: IMap<String, Set<String>>
@@ -48,10 +50,15 @@ class AuthorityService(
     }
 
     fun isAdminsGroup(groupId: String): Boolean {
-        if (ADMIN_GROUPS.contains(groupId)) {
+        val groupIdWithoutPrefix = if (groupId.startsWith(AuthGroup.PREFIX)) {
+            groupId.substring(AuthGroup.PREFIX.length)
+        } else {
+            groupId
+        }
+        if (ADMIN_GROUPS.contains(groupIdWithoutPrefix)) {
             return true
         }
-        val expandedGroups = getExpandedGroups(groupId, true)
+        val expandedGroups = getExpandedGroups(groupIdWithoutPrefix, true)
         return ADMIN_GROUPS.any { expandedGroups.contains(it) }
     }
 
@@ -75,10 +82,10 @@ class AuthorityService(
         for (group in personGroups) {
             val expGroups = getExpandedGroups(group, true)
             for (expGroup in expGroups) {
-                authorities.add("GROUP_$expGroup")
+                authorities.add(AuthGroup.PREFIX + expGroup)
             }
         }
-        if (ADMIN_GROUPS.any { authorities.contains(it) }) {
+        if (ADMIN_GROUPS_AUTH_NAME.any { authorities.contains(it) }) {
             authorities.add(AuthRole.ADMIN)
         }
         authorities.add(AuthGroup.EVERYONE)
@@ -87,17 +94,22 @@ class AuthorityService(
         return authorities
     }
 
+    fun getExpandedGroups(groupId: String, asc: Boolean): Set<String> {
+        return getExpandedGroups(listOf(groupId), asc)
+    }
+
     fun getExpandedGroups(groupsId: List<String>, asc: Boolean): Set<String> {
         val result = LinkedHashSet<String>()
         val processedGroups = HashSet<String>()
         for (groupId in groupsId) {
-            forEachGroup(groupId, processedGroups, true, asc) { result.add(it) }
+            val groupIdWithoutPrefix = if (groupId.startsWith(AuthGroup.PREFIX)) {
+                groupId.substring(AuthGroup.PREFIX.length)
+            } else {
+                groupId
+            }
+            forEachGroup(groupIdWithoutPrefix, processedGroups, true, asc) { result.add(it) }
         }
         return result
-    }
-
-    fun getExpandedGroups(groupId: String, asc: Boolean): Set<String> {
-        return getExpandedGroups(listOf(groupId), asc)
     }
 
     fun resetPersonCache(personId: String) {

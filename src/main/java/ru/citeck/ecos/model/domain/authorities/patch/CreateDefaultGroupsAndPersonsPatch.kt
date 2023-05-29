@@ -16,7 +16,7 @@ import ru.citeck.ecos.webapp.lib.patch.annotaion.EcosPatch
 import java.util.concurrent.Callable
 
 @Component
-@EcosPatch("default-authorities", "2022-06-29T00:00:00Z")
+@EcosPatch("default-authorities", "2022-06-29T00:00:01Z")
 class CreateDefaultGroupsAndPersonsPatch(
     val recordsService: RecordsService
 ) : Callable<List<String>> {
@@ -46,6 +46,27 @@ class CreateDefaultGroupsAndPersonsPatch(
                     I18nContext.ENGLISH to "Orgstruct",
                     I18nContext.RUSSIAN to "Оргструктура"
                 )
+            ),
+            SystemGroupInfo(
+                AuthorityGroupConstants.USERS_PROFILE_ADMIN_GROUP,
+                MLText(
+                    I18nContext.ENGLISH to "Users profile admins",
+                    I18nContext.RUSSIAN to "Администраторы профиля пользователей"
+                )
+            ),
+            SystemGroupInfo(
+                AuthorityGroupConstants.MANAGED_GROUPS_GROUP,
+                MLText(
+                    I18nContext.ENGLISH to "Managed groups",
+                    I18nContext.RUSSIAN to "Группы управляемые менеджером"
+                )
+            ),
+            SystemGroupInfo(
+                AuthorityGroupConstants.GROUPS_MANAGERS_GROUP,
+                MLText(
+                    I18nContext.ENGLISH to "Groups managers",
+                    I18nContext.RUSSIAN to "Менеджеры групп"
+                )
             )
         )
 
@@ -67,25 +88,26 @@ class CreateDefaultGroupsAndPersonsPatch(
             messages.add(it)
             log.info { it }
         }
-        DEFAULT_GROUPS.forEach {
+        DEFAULT_GROUPS.forEach { groupInfo ->
             createIfNotExists(
                 AuthorityType.GROUP,
-                it.id,
+                groupInfo.id,
                 mapOf(
-                    AuthorityGroupConstants.ATT_NAME to it.name
+                    AuthorityGroupConstants.ATT_NAME to groupInfo.name,
+                    AuthorityConstants.ATT_AUTHORITY_GROUPS to groupInfo.groups.map { AuthorityType.GROUP.getRef(it) }
                 ),
                 logMsg
             )
         }
-        DEFAULT_USERS.forEach {
+        DEFAULT_USERS.forEach { user ->
             createIfNotExists(
                 AuthorityType.PERSON,
-                it.id,
+                user.id,
                 mapOf(
-                    PersonConstants.ATT_FIRST_NAME to it.firstName,
-                    PersonConstants.ATT_LAST_NAME to it.lastName,
-                    PersonConstants.ATT_EMAIL to it.email,
-                    AuthorityConstants.ATT_AUTHORITY_GROUPS to it.groups.map { AuthorityType.GROUP.getRef(it) },
+                    PersonConstants.ATT_FIRST_NAME to user.firstName,
+                    PersonConstants.ATT_LAST_NAME to user.lastName,
+                    PersonConstants.ATT_EMAIL to user.email,
+                    AuthorityConstants.ATT_AUTHORITY_GROUPS to user.groups.map { AuthorityType.GROUP.getRef(it) }
                 ),
                 logMsg
             )
@@ -134,7 +156,8 @@ class CreateDefaultGroupsAndPersonsPatch(
 
     data class SystemGroupInfo(
         val id: String,
-        val name: MLText
+        val name: MLText,
+        val groups: List<String> = emptyList()
     )
 
     data class SystemUserInfo(
