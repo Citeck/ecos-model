@@ -73,10 +73,11 @@ class CommentsConfiguration(private val dbDomainFactory: DbDomainFactory) {
                         if (isAdmin) {
                             return true
                         }
-                        return recordsService.getAtt(
-                            record,
-                            "$COMMENT_RECORD_ATT.permissions._has.Read?bool!"
-                        ).asBoolean()
+                        return AuthContext.runAs(user, authorities.toList()) {
+                            recordsService.getAtt(
+                                record, "$COMMENT_RECORD_ATT.permissions._has.Read?bool!"
+                            ).asBoolean()
+                        }
                     }
 
                     override fun hasWritePerms(): Boolean {
