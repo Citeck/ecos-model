@@ -55,6 +55,9 @@ class GroupDbPermsComponent(
     }
 
     private class GroupsPerms(val writeAllowed: Boolean) : DbRecordPerms {
+        override fun getAllowedPermissions(): Set<String> {
+            return emptySet()
+        }
 
         override fun getAuthoritiesWithReadPermission(): Set<String> {
             return setOf(AuthGroup.EVERYONE)
@@ -74,6 +77,10 @@ class GroupDbPermsComponent(
 
         override fun hasWritePerms(): Boolean {
             return writeAllowed
+        }
+
+        override fun isAllowed(permission: String): Boolean {
+            return false
         }
     }
 }

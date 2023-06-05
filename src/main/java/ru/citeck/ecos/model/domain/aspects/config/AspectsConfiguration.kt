@@ -57,11 +57,13 @@ class AspectsConfiguration(
                 aspectArtifactHandler.aspectWasChanged(aspectDef)
                 aspectsConfig?.updateAspect(aspectDef)
             }
+
             override fun onChanged(event: DbRecordChangedEvent) {
                 val aspectDef = recordsService.getAtts(event.record, AspectDef::class.java)
                 aspectArtifactHandler.aspectWasChanged(aspectDef)
                 aspectsConfig?.updateAspect(aspectDef)
             }
+
             override fun onDeleted(event: DbRecordDeletedEvent) {
                 val aspectId = recordsService.getAtt(event.record, "id").asText()
                 if (aspectId.isNotBlank()) {
@@ -100,6 +102,9 @@ class AspectsConfiguration(
     }
 
     private class AspectPerms(val isAdmin: Boolean) : DbRecordPerms {
+        override fun getAllowedPermissions(): Set<String> {
+            return emptySet()
+        }
 
         override fun getAuthoritiesWithReadPermission(): Set<String> {
             return setOf(AuthGroup.EVERYONE)
@@ -119,6 +124,10 @@ class AspectsConfiguration(
 
         override fun hasWritePerms(): Boolean {
             return isAdmin
+        }
+
+        override fun isAllowed(permission: String): Boolean {
+            return false
         }
     }
 }

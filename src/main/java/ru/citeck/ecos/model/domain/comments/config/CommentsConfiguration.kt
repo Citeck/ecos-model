@@ -50,6 +50,10 @@ class CommentsConfiguration(private val dbDomainFactory: DbDomainFactory) {
 
                 val isAdmin = authorities.contains(AuthRole.ADMIN)
                 return object : DbRecordPerms {
+                    override fun getAllowedPermissions(): Set<String> {
+                        return emptySet()
+                    }
+
                     override fun getAuthoritiesWithReadPermission(): Set<String> {
                         return setOf(AuthGroup.EVERYONE)
                     }
@@ -91,6 +95,10 @@ class CommentsConfiguration(private val dbDomainFactory: DbDomainFactory) {
                             return false
                         }
                         return commentData.creator == user
+                    }
+
+                    override fun isAllowed(permission: String): Boolean {
+                        return false
                     }
                 }
             }

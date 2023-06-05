@@ -140,6 +140,15 @@ class PersonsConfiguration(
                             authorities.contains(USERS_PROFILE_ADMIN_WITH_PREFIX) ||
                             authorities.contains(GROUPS_MANAGERS_GROUP_WITH_PREFIX)
                     }
+
+                    override fun isAllowed(permission: String): Boolean {
+                        return false
+                    }
+
+                    override fun getAllowedPermissions(): Set<String> {
+                        return emptySet()
+                    }
+
                     override fun getAuthoritiesWithReadPermission(): Set<String> {
                         return setOf(AuthGroup.EVERYONE)
                     }
