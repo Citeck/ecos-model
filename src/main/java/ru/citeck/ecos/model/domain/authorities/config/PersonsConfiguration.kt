@@ -23,6 +23,7 @@ import ru.citeck.ecos.model.domain.authorities.service.PersonEventsService
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.utils.ModelUtils
+import ru.citeck.ecos.model.service.keycloak.KeycloakUserService
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.RecordsServiceFactory
@@ -40,7 +41,8 @@ class PersonsConfiguration(
     private val recordsService: RecordsService,
     private val authorityService: AuthorityService,
     private val dbDomainFactory: DbDomainFactory,
-    private val authoritiesSyncService: AuthoritiesSyncService
+    private val authoritiesSyncService: AuthoritiesSyncService,
+    private val keycloakUserService: KeycloakUserService
 ) {
 
     companion object {
@@ -186,13 +188,16 @@ class PersonsConfiguration(
             override fun onChanged(event: DbRecordChangedEvent) {
                 authorityService.resetPersonCache(getRecId(event.record))
                 eventsService.onPersonChanged(event)
+                keycloakUserService.updateUser(event)
             }
             override fun onCreated(event: DbRecordCreatedEvent) {
                 authorityService.resetPersonCache(getRecId(event.record))
                 eventsService.onPersonCreated(event)
+                keycloakUserService.createUser(event)
             }
             override fun onDeleted(event: DbRecordDeletedEvent) {
                 authorityService.resetPersonCache(getRecId(event.record))
+                keycloakUserService.deleteUser(event)
             }
         })
         recordsDao.addListener(
