@@ -34,10 +34,6 @@ class KeycloakUserService(
     @Value("\${ecos.idp.keycloakAdminPassword}")
     lateinit var keycloakAdminPassword: String
 
-    @Value("\${ecos.idp.keycloakDefaultUserPassword}")
-    lateinit var keycloakDefaultUserPassword: String
-
-
     @PostConstruct
     fun init() {
         keycloak = Keycloak.getInstance(
@@ -62,8 +58,12 @@ class KeycloakUserService(
 
         val credential = CredentialRepresentation()
         credential.type = CredentialRepresentation.PASSWORD
-        credential.value = keycloakDefaultUserPassword
+        credential.value = userAtts.getAtt("id").asText()
         user.credentials = Arrays.asList(credential)
+
+        val requiredActions = ArrayList<String>()
+        requiredActions.add("UPDATE_PASSWORD")
+        user.setRequiredActions(requiredActions)
 
         realmResource.users().create(user);
     }
