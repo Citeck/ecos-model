@@ -10,7 +10,6 @@ import ru.citeck.ecos.model.service.keycloak.KeycloakUserService;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records3.RecordsService;
 import ru.citeck.ecos.records3.record.dao.mutate.ValueMutateDao;
-import ru.citeck.ecos.webapp.api.content.EcosContentApi;
 
 
 @Component
@@ -22,7 +21,7 @@ public class ChangePassAction implements ValueMutateDao<ChangeInfoDto> {
 
 
     @Autowired
-    public ChangePassAction(RecordsService recordsService, EcosContentApi contentApi, KeycloakUserService keycloakUserService) {
+    public ChangePassAction(RecordsService recordsService, KeycloakUserService keycloakUserService) {
         this.recordsService = recordsService;
         this.keycloakUserService = keycloakUserService;
     }
