@@ -1,6 +1,7 @@
 package ru.citeck.ecos.model.service.keycloak
 
 import lombok.extern.slf4j.Slf4j
+import mu.KotlinLogging
 import org.keycloak.admin.client.Keycloak
 import org.keycloak.admin.client.resource.RealmResource
 import org.keycloak.representations.idm.CredentialRepresentation
@@ -20,6 +21,9 @@ import javax.annotation.PostConstruct
 class KeycloakUserService(
     private val recordsService: RecordsService
 ) {
+    companion object {
+        private val log = KotlinLogging.logger {}
+    }
 
     private val keycloakUserAttributesList = listOf("id", "firstName", "lastName", "email", "personDisabled" )
     private lateinit var keycloak: Keycloak
@@ -90,6 +94,21 @@ class KeycloakUserService(
         if (!users.isEmpty()) {
             val userId = users[0].id
             realmResource.users().delete(userId)
+        }
+    }
+
+    fun updateUserPassword(username: String, newpass: String) {
+
+        val users = realmResource.users().search(username)
+        if (users.isNotEmpty()) {
+            val userToUpdate = users[0]
+            val credential = CredentialRepresentation()
+            credential.type = CredentialRepresentation.PASSWORD
+            credential.value = newpass
+
+            realmResource.users().get(userToUpdate.id).resetPassword(credential)
+        } else {
+            log.warn("User with username '$username' not found.")
         }
     }
 }
