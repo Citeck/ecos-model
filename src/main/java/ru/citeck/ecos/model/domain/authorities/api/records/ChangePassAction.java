@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.action;
+package ru.citeck.ecos.model.domain.authorities.api.records;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
