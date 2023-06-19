@@ -21,7 +21,7 @@ class TypesRepoRecordsMutDao(
 
     override fun getId() = "types-repo"
 
-    @Secured(AuthRole.ADMIN)
+    @Secured(AuthRole.ADMIN, AuthRole.SYSTEM)
     override fun getRecToMutate(recordId: String): TypeMutRecord {
         if (recordId.isEmpty()) {
             return TypeMutRecord(TypeDef.EMPTY)
@@ -29,7 +29,7 @@ class TypesRepoRecordsMutDao(
         return TypeMutRecord(typeService.getById(recordId))
     }
 
-    @Secured(AuthRole.ADMIN)
+    @Secured(AuthRole.ADMIN, AuthRole.SYSTEM)
     override fun saveMutatedRec(record: TypeMutRecord): String {
 
         val newTypeDef = record.build()
