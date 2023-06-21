@@ -585,6 +585,7 @@
                                     },
                                     "key": "id",
                                     "validate": {
+                                      "required": true,
                                       "pattern": "(^$|[_a-zA-Z][_\\w-.:]*)"
                                     },
                                     "type": "textfield",
@@ -1311,6 +1312,7 @@
                         },
                         "key": "id",
                         "validate": {
+                          "required": true,
                           "pattern": "(^$|[_a-zA-Z][_\\w-.:]*)"
                         },
                         "defaultValue": "",
@@ -1790,6 +1792,9 @@
                               "en": "Id"
                             },
                             "key": "id",
+                            "validate": {
+                              "required": true
+                            },
                             "defaultValue": "",
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
@@ -2006,6 +2011,9 @@
                               "en": "Id"
                             },
                             "key": "id",
+                            "validate": {
+                              "required": true
+                            },
                             "defaultValue": "",
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
