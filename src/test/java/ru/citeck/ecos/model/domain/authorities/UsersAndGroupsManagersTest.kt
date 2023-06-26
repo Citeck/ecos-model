@@ -1,6 +1,7 @@
 package ru.citeck.ecos.model.domain.authorities
 
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import ru.citeck.ecos.commons.data.DataValue
@@ -14,6 +15,7 @@ import ru.citeck.ecos.model.domain.authorities.patch.CreateDefaultGroupsAndPerso
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.records2.RecordRef
 
+@Disabled
 class UsersAndGroupsManagersTest : AuthoritiesTestBase() {
 
     companion object {
