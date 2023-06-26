@@ -194,6 +194,7 @@ class PersonsConfiguration(
         recordsDao.addListener(
             AuthorityGroupsManagementCheckListener(
                 recordsService,
+                authorityService,
                 GroupDbPermsComponent(recordsService, authorityService),
                 AuthorityType.PERSON
             )

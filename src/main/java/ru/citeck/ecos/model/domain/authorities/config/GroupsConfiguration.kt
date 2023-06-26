@@ -82,6 +82,7 @@ class GroupsConfiguration(
         recordsDao.addListener(
             AuthorityGroupsManagementCheckListener(
                 recordsService,
+                authorityService,
                 permsComponent,
                 AuthorityType.GROUP
             )
