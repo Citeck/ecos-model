@@ -1,9 +1,15 @@
 package ru.citeck.ecos.model.validator;
 
+import com.google.common.base.CharMatcher;
+import lombok.SneakyThrows;
+import org.apache.commons.codec.net.URLCodec;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.citeck.ecos.model.domain.comments.api.validator.CommentValidator;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 @SpringBootTest
@@ -63,5 +69,17 @@ public class CommentValidatorTest {
             result.contains("<u>") &&
             result.contains("<li>") &&
             result.contains("<ul>"));
+    }
+
+    @Test
+    public void shouldCleanNonPrintableElementsInTheBeginning(){
+        String result = CommentValidator.removeVulnerabilities("<script\\x0C>javascript:alert(1)</script> text message");
+        Assertions.assertEquals(result, "text message");
+    }
+
+    @Test
+    public void shouldCleanNonPrintableElementsInEnd(){
+        String result = CommentValidator.removeVulnerabilities("<script>javascript:alert(1)<\\x00/script> text message");
+        Assertions.assertEquals(result, "text message");
     }
 }
