@@ -12,6 +12,8 @@ import ru.citeck.ecos.data.sql.records.listener.DbRecordChangedEvent
 import ru.citeck.ecos.data.sql.records.listener.DbRecordCreatedEvent
 import ru.citeck.ecos.data.sql.records.listener.DbRecordDeletedEvent
 import ru.citeck.ecos.records3.RecordsService
+import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
+import ru.citeck.ecos.webapp.lib.env.EcosWebAppEnvironment
 import java.util.*
 import javax.annotation.PostConstruct
 
@@ -19,50 +21,46 @@ import javax.annotation.PostConstruct
 @Slf4j
 @Service
 class KeycloakUserService(
-    private val recordsService: RecordsService
+    private val recordsService: RecordsService,
+    private val ecosEnv: EcosWebAppEnvironment
 ) {
     companion object {
         private val log = KotlinLogging.logger {}
     }
 
-    private val keycloakUserAttributesList = listOf("id", "firstName", "lastName", "email", "personDisabled" )
     private lateinit var keycloak: Keycloak
     private lateinit var realmResource: RealmResource
 
     @Value("\${ecos.idp.default-realm}")
     lateinit var defaultRealm: String
 
-    @Value("\${ecos.idp.keycloakServerUrl}")
-    lateinit var keycloakServerUrl: String
-
-    @Value("\${ecos.idp.keycloakAdminPassword}")
-    lateinit var keycloakAdminPassword: String
+    private var props = ecosEnv.getValue("ecos.integrations.keycloakAdmin", KeycloakAdminProps::class.java)
 
     @PostConstruct
     fun init() {
         keycloak = Keycloak.getInstance(
-            keycloakServerUrl,
+            props.url,
             "master",
-            "admin",
-            keycloakAdminPassword,
+            props.user,
+            props.password,
             "admin-cli"
         )
         realmResource = keycloak.realm(defaultRealm)
     }
 
     fun createUser(event: DbRecordCreatedEvent) {
-        val userAtts = recordsService.getAtts(event.record, keycloakUserAttributesList)
+        val userAtts = recordsService.getAtts(event.record, KeycloakUserAttributes::class.java)
 
         val user = UserRepresentation()
-        user.setUsername(userAtts.getAtt("id").asText())
-        user.setFirstName(userAtts.getAtt("firstName").asText())
-        user.setLastName(userAtts.getAtt("lastName").asText())
-        user.setEmail(userAtts.getAtt("email").asText())
-        user.setEnabled(!userAtts.getAtt("personDisabled").asBoolean())
+        user.setUsername(userAtts.id)
+        user.setFirstName(userAtts.firstName)
+        user.setLastName(userAtts.lastName)
+        user.setEmail(userAtts.email)
+        user.setEnabled(!userAtts.personDisabled)
 
         val credential = CredentialRepresentation()
         credential.type = CredentialRepresentation.PASSWORD
-        credential.value = userAtts.getAtt("id").asText()
+        credential.value = userAtts.id
         user.credentials = Arrays.asList(credential)
 
         val requiredActions = ArrayList<String>()
@@ -73,22 +71,23 @@ class KeycloakUserService(
     }
 
     fun updateUser(event: DbRecordChangedEvent) {
-        val updatedUserAtts = recordsService.getAtts(event.record, keycloakUserAttributesList)
+        val updatedUserAtts = recordsService.getAtts(event.record, KeycloakUserAttributes::class.java)
 
-        val users = realmResource.users().search(updatedUserAtts.getAtt("id").asText())
+        val users = realmResource.users().search(updatedUserAtts.id)
         if (!users.isEmpty()) {
             val userToUpdate = users[0]
-            userToUpdate.setFirstName(updatedUserAtts.getAtt("firstName").asText())
-            userToUpdate.setLastName(updatedUserAtts.getAtt("lastName").asText())
-            userToUpdate.setEmail(updatedUserAtts.getAtt("email").asText())
-            userToUpdate.setEnabled(!updatedUserAtts.getAtt("personDisabled").asBoolean())
+            userToUpdate.setFirstName(updatedUserAtts.firstName)
+            userToUpdate.setLastName(updatedUserAtts.lastName)
+            userToUpdate.setEmail(updatedUserAtts.email)
+            userToUpdate.setEnabled(!updatedUserAtts.personDisabled)
 
             realmResource.users().get(userToUpdate.getId()).update(userToUpdate);
         }
     }
 
     fun deleteUser(event: DbRecordDeletedEvent) {
-        val userName = recordsService.getAtt(event.record, "id").asText()
+        val userAtts = recordsService.getAtts(event.record, KeycloakUserAttributes::class.java)
+        val userName = userAtts.id
 
         val users = realmResource.users().search(userName)
         if (!users.isEmpty()) {
@@ -112,3 +111,21 @@ class KeycloakUserService(
         }
     }
 }
+
+data class KeycloakUserAttributes(
+    val id: String,
+    @AttName("firstName!")
+    val firstName: String,
+    @AttName("lastName!")
+    val lastName: String,
+    @AttName("email!")
+    val email: String,
+    @AttName("personDisabled!")
+    val personDisabled: Boolean
+)
+
+data class KeycloakAdminProps(
+    val url: String,
+    val user: String,
+    val password: String
+)

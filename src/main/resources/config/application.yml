@@ -20,9 +20,6 @@ spring:
 ecos:
   idp:
     default-realm: ecos-app
-    keycloakServerUrl: http://localhost/ecos-idp/auth
-    keycloakAdminPassword: VeryStrongPassword
-    keycloakDefaultUserPassword: 123
   job:
     inactiveUsersDisabling:
       cron: '0 0 0/6 ? * *'
@@ -34,3 +31,8 @@ ecos:
   integrations:
     onlyoffice:
       host: only-office-app
+    keycloakAdmin:
+      url: http://localhost/ecos-idp/auth
+      user: admin
+      password: VeryStrongPassword
+      enabled: false

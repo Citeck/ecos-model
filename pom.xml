@@ -9,6 +9,7 @@
 
     <properties>
         <jsoup.version>1.16.1</jsoup.version>
+        <keycloak.admin.client.version>12.0.4</keycloak.admin.client.version>
     </properties>
 
     <parent>
@@ -49,7 +50,7 @@
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-admin-client</artifactId>
-            <version>12.0.4</version>
+            <version>${keycloak.admin.client.version}</version>
         </dependency>
 
     </dependencies>
