@@ -35,10 +35,9 @@ class UsersAndGroupsManagersTest : AuthoritiesTestBase() {
     fun usersProfileAdminsTest() {
 
         initTest(authAware = true)
+        CreateDefaultGroupsAndPersonsPatch(recordsService).call()
 
-        val profileAdminGroup = AuthContext.runAsSystem {
-            createGroup("USERS_PROFILE_ADMIN")
-        }
+        val profileAdminGroup = AuthorityType.GROUP.getRef(AuthorityGroupConstants.USERS_PROFILE_ADMIN_GROUP)
 
         val testGroup = AuthContext.runAsSystem {
             createGroup("TEST_GROUP")
@@ -68,6 +67,8 @@ class UsersAndGroupsManagersTest : AuthoritiesTestBase() {
         Assertions.assertThat(recordsService.getAtt(testUser, "email").asText())
             .isEqualTo("test@example.com")
 
+        /* Mutate by regular user */
+
         checkPermissionDenied(true) {
             AuthContext.runAsFull(regularUser.id, getPersonAuthorities(regularUser.id)) {
                 recordsService.mutateAtt(testUser, "firstName", "TesterNewName")
@@ -87,6 +88,15 @@ class UsersAndGroupsManagersTest : AuthoritiesTestBase() {
         checkPermissionDenied(true) {
             AuthContext.runAsFull(managerRef.id, getPersonAuthorities(managerRef.id)) {
                 recordsService.mutate(regularUser, mapOf(AuthorityConstants.ATT_AUTHORITY_GROUPS to listOf(testGroup)))
+            }
+        }
+
+        /* Edit admin users by manager is not allowed */
+
+        val admin = AuthorityType.PERSON.getRef("admin")
+        checkPermissionDenied(true) {
+            AuthContext.runAsFull(managerRef.id, getPersonAuthorities(managerRef.id)) {
+                recordsService.mutateAtt(admin, "firstName", "NewAdminName")
             }
         }
     }

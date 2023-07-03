@@ -143,11 +143,7 @@ class PersonsConfiguration(
                             authorities.contains(GROUPS_MANAGERS_GROUP_WITH_PREFIX)
                     }
 
-                    override fun isAllowed(permission: String): Boolean {
-                        return false
-                    }
-
-                    override fun getAllowedPermissions(): Set<String> {
+                    override fun getAdditionalPerms(): Set<String> {
                         return emptySet()
                     }
 
@@ -203,6 +199,7 @@ class PersonsConfiguration(
         recordsDao.addListener(
             AuthorityGroupsManagementCheckListener(
                 recordsService,
+                authorityService,
                 GroupDbPermsComponent(recordsService, authorityService),
                 AuthorityType.PERSON
             )

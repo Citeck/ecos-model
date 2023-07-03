@@ -102,7 +102,8 @@ class AspectsConfiguration(
     }
 
     private class AspectPerms(val isAdmin: Boolean) : DbRecordPerms {
-        override fun getAllowedPermissions(): Set<String> {
+
+        override fun getAdditionalPerms(): Set<String> {
             return emptySet()
         }
 
@@ -124,10 +125,6 @@ class AspectsConfiguration(
 
         override fun hasWritePerms(): Boolean {
             return isAdmin
-        }
-
-        override fun isAllowed(permission: String): Boolean {
-            return false
         }
     }
 }

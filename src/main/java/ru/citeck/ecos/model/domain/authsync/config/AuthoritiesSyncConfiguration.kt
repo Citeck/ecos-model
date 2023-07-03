@@ -46,10 +46,9 @@ class AuthoritiesSyncConfiguration(
             override fun getRecordPerms(user: String, authorities: Set<String>, record: Any): DbRecordPerms {
                 val isAdmin = authorities.contains(AuthRole.ADMIN)
                 return object : DbRecordPerms {
-                    override fun getAllowedPermissions(): Set<String> {
+                    override fun getAdditionalPerms(): Set<String> {
                         return emptySet()
                     }
-
                     override fun getAuthoritiesWithReadPermission(): Set<String> {
                         return setOf(AuthGroup.EVERYONE)
                     }
@@ -64,10 +63,6 @@ class AuthoritiesSyncConfiguration(
                     }
                     override fun hasWritePerms(): Boolean {
                         return isAdmin
-                    }
-
-                    override fun isAllowed(permission: String): Boolean {
-                        return false
                     }
                 }
             }

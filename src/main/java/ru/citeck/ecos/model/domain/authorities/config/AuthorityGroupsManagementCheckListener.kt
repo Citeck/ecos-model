@@ -7,6 +7,7 @@ import ru.citeck.ecos.data.sql.records.listener.DbRecordCreatedEvent
 import ru.citeck.ecos.data.sql.records.listener.DbRecordsListenerAdapter
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityGroupConstants
+import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.ScalarType
@@ -14,6 +15,7 @@ import ru.citeck.ecos.webapp.api.entity.EntityRef
 
 class AuthorityGroupsManagementCheckListener(
     private val recordsService: RecordsService,
+    private val authorityService: AuthorityService,
     private val groupDbPermsComponent: GroupDbPermsComponent,
     private val authorityType: AuthorityType
 ) : DbRecordsListenerAdapter() {
@@ -104,7 +106,7 @@ class AuthorityGroupsManagementCheckListener(
         val isProfileManager = authorities.contains(
             AuthGroup.PREFIX + AuthorityGroupConstants.USERS_PROFILE_ADMIN_GROUP
         )
-        if (!isProfileManager) {
+        if (!isProfileManager || authorityService.isAdmin(userName)) {
             permissionDenied(event.record)
         }
     }
