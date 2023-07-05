@@ -33,6 +33,7 @@ import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.RecordsDao
 import ru.citeck.ecos.records3.record.dao.impl.proxy.MutateProxyProcessor
 import ru.citeck.ecos.records3.record.dao.impl.proxy.ProxyProcContext
+import ru.citeck.ecos.txn.lib.TxnContext
 import javax.sql.DataSource
 
 @Configuration
@@ -184,16 +185,16 @@ class PersonsConfiguration(
             override fun onChanged(event: DbRecordChangedEvent) {
                 authorityService.resetPersonCache(getRecId(event.record))
                 eventsService.onPersonChanged(event)
-                keycloakUserService.updateUser(event)
+                TxnContext.doBeforeCommit(100f) { keycloakUserService.updateUser(event) }
             }
             override fun onCreated(event: DbRecordCreatedEvent) {
                 authorityService.resetPersonCache(getRecId(event.record))
                 eventsService.onPersonCreated(event)
-                keycloakUserService.createUser(event)
+                TxnContext.doBeforeCommit(100f) {keycloakUserService.createUser(event)}
             }
             override fun onDeleted(event: DbRecordDeletedEvent) {
                 authorityService.resetPersonCache(getRecId(event.record))
-                keycloakUserService.deleteUser(event)
+                TxnContext.doBeforeCommit(100f) {keycloakUserService.deleteUser(event)}
             }
         })
         recordsDao.addListener(

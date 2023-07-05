@@ -8,6 +8,7 @@ import org.keycloak.representations.idm.CredentialRepresentation
 import org.keycloak.representations.idm.UserRepresentation
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.data.sql.records.listener.DbRecordChangedEvent
 import ru.citeck.ecos.data.sql.records.listener.DbRecordCreatedEvent
 import ru.citeck.ecos.data.sql.records.listener.DbRecordDeletedEvent
@@ -38,17 +39,24 @@ class KeycloakUserService(
 
     @PostConstruct
     fun init() {
-        keycloak = Keycloak.getInstance(
-            props.url,
-            "master",
-            props.user,
-            props.password,
-            "admin-cli"
-        )
-        realmResource = keycloak.realm(defaultRealm)
+        if (props.enabled) {
+            keycloak = Keycloak.getInstance(
+                props.url,
+                "master",
+                props.user,
+                props.password,
+                "admin-cli"
+            )
+            realmResource = keycloak.realm(defaultRealm)
+        } else {
+            log.warn("Keycloak integration is disabled. Skipping Keycloak initialization.")
+        }
     }
 
     fun createUser(event: DbRecordCreatedEvent) {
+        if (!props.enabled) {
+            return
+        }
         val userAtts = recordsService.getAtts(event.record, KeycloakUserAttributes::class.java)
 
         val user = UserRepresentation()
@@ -71,6 +79,9 @@ class KeycloakUserService(
     }
 
     fun updateUser(event: DbRecordChangedEvent) {
+        if (!props.enabled) {
+            return
+        }
         val updatedUserAtts = recordsService.getAtts(event.record, KeycloakUserAttributes::class.java)
 
         val users = realmResource.users().search(updatedUserAtts.id)
@@ -86,6 +97,9 @@ class KeycloakUserService(
     }
 
     fun deleteUser(event: DbRecordDeletedEvent) {
+        if (!props.enabled) {
+            return
+        }
         val userAtts = recordsService.getAtts(event.record, KeycloakUserAttributes::class.java)
         val userName = userAtts.id
 
@@ -97,6 +111,12 @@ class KeycloakUserService(
     }
 
     fun updateUserPassword(username: String, newpass: String) {
+        if (!props.enabled) {
+            throw IllegalStateException("Cannot update user password. Keycloak integration is disabled.")
+        }
+        if (!checkUserAuth(username)) {
+            return
+        }
 
         val users = realmResource.users().search(username)
         if (users.isNotEmpty()) {
@@ -109,6 +129,11 @@ class KeycloakUserService(
         } else {
             log.warn("User with username '$username' not found.")
         }
+    }
+
+    private fun checkUserAuth(username: String): Boolean {
+        val runAs = AuthContext.getCurrentRunAsAuth()
+        return (AuthContext.isSystemAuth(runAs) || AuthContext.isAdminAuth(runAs) || AuthContext.getCurrentUser() == username)
     }
 }
 
@@ -127,5 +152,6 @@ data class KeycloakUserAttributes(
 data class KeycloakAdminProps(
     val url: String,
     val user: String,
-    val password: String
+    val password: String,
+    val enabled: Boolean
 )

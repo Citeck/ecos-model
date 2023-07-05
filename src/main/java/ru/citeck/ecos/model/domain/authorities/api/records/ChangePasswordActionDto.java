@@ -7,21 +7,21 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.model.service.keycloak.KeycloakUserService;
-import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records3.RecordsService;
 import ru.citeck.ecos.records3.record.dao.mutate.ValueMutateDao;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 
 
 @Component
 @Slf4j
-public class ChangePassAction implements ValueMutateDao<ChangeInfoDto> {
+public class ChangePasswordActionDto implements ValueMutateDao<ChangeInfoDto> {
 
     private final RecordsService recordsService;
     private final KeycloakUserService keycloakUserService;
 
 
     @Autowired
-    public ChangePassAction(RecordsService recordsService, KeycloakUserService keycloakUserService) {
+    public ChangePasswordActionDto(RecordsService recordsService, KeycloakUserService keycloakUserService) {
         this.recordsService = recordsService;
         this.keycloakUserService = keycloakUserService;
     }
@@ -29,17 +29,17 @@ public class ChangePassAction implements ValueMutateDao<ChangeInfoDto> {
     @NotNull
     @Override
     public String getId() {
-        return "change-pass";
+        return "change-password";
     }
 
     @Nullable
     @Override
     public Object mutate(@NotNull ChangeInfoDto changeInfoDto) throws Exception {
-        RecordRef record = changeInfoDto.getRecordRef();
-        String newpass = changeInfoDto.getNewpass();
+        EntityRef userRef = changeInfoDto.getRecordRef();
+        String userNewPassword = changeInfoDto.getNewPassword();
 
-        String username = recordsService.getAtt(record, "id").asText();
-        keycloakUserService.updateUserPassword(username, newpass);
+        String username = recordsService.getAtt(userRef, "id").asText();
+        keycloakUserService.updateUserPassword(username, userNewPassword);
 
         return "";
     }
@@ -47,6 +47,6 @@ public class ChangePassAction implements ValueMutateDao<ChangeInfoDto> {
 }
 @Data
 class ChangeInfoDto {
-    private RecordRef recordRef;
-    private String newpass;
+    private EntityRef recordRef;
+    private String newPassword;
 }

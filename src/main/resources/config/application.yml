@@ -34,5 +34,5 @@ ecos:
     keycloakAdmin:
       url: http://localhost/ecos-idp/auth
       user: admin
-      password: VeryStrongPassword
+      password: admin
       enabled: false
