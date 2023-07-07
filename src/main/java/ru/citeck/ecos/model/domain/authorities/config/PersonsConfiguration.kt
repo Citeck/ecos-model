@@ -190,11 +190,11 @@ class PersonsConfiguration(
             override fun onCreated(event: DbRecordCreatedEvent) {
                 authorityService.resetPersonCache(getRecId(event.record))
                 eventsService.onPersonCreated(event)
-                TxnContext.doBeforeCommit(100f) {keycloakUserService.createUser(event)}
+                TxnContext.doBeforeCommit(100f) { keycloakUserService.createUser(event) }
             }
             override fun onDeleted(event: DbRecordDeletedEvent) {
                 authorityService.resetPersonCache(getRecId(event.record))
-                TxnContext.doBeforeCommit(100f) {keycloakUserService.deleteUser(event)}
+                TxnContext.doBeforeCommit(100f) { keycloakUserService.deleteUser(event) }
             }
         })
         recordsDao.addListener(

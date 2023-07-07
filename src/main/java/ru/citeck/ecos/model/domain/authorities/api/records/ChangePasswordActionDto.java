@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import ru.citeck.ecos.model.service.keycloak.KeycloakUserService;
 import ru.citeck.ecos.records3.RecordsService;
 import ru.citeck.ecos.records3.record.dao.mutate.ValueMutateDao;
-import ru.citeck.ecos.webapp.api.entity.EntityRef;
 
 
 @Component
@@ -35,11 +34,10 @@ public class ChangePasswordActionDto implements ValueMutateDao<ChangeInfoDto> {
     @Nullable
     @Override
     public Object mutate(@NotNull ChangeInfoDto changeInfoDto) throws Exception {
-        EntityRef userRef = changeInfoDto.getRecordRef();
+        String userName = changeInfoDto.getUserName();
         String userNewPassword = changeInfoDto.getNewPassword();
 
-        String username = recordsService.getAtt(userRef, "id").asText();
-        keycloakUserService.updateUserPassword(username, userNewPassword);
+        keycloakUserService.updateUserPassword(userName, userNewPassword);
 
         return "";
     }
@@ -47,6 +45,6 @@ public class ChangePasswordActionDto implements ValueMutateDao<ChangeInfoDto> {
 }
 @Data
 class ChangeInfoDto {
-    private EntityRef recordRef;
+    private String userName;
     private String newPassword;
 }

@@ -18,7 +18,6 @@ import ru.citeck.ecos.webapp.lib.env.EcosWebAppEnvironment
 import java.util.*
 import javax.annotation.PostConstruct
 
-
 @Slf4j
 @Service
 class KeycloakUserService(
@@ -49,7 +48,7 @@ class KeycloakUserService(
             )
             realmResource = keycloak.realm(defaultRealm)
         } else {
-            log.warn("Keycloak integration is disabled. Skipping Keycloak initialization.")
+            log.info("Keycloak integration is disabled. Skipping Keycloak initialization.")
         }
     }
 
@@ -75,7 +74,7 @@ class KeycloakUserService(
         requiredActions.add("UPDATE_PASSWORD")
         user.setRequiredActions(requiredActions)
 
-        realmResource.users().create(user);
+        realmResource.users().create(user)
     }
 
     fun updateUser(event: DbRecordChangedEvent) {
@@ -92,7 +91,7 @@ class KeycloakUserService(
             userToUpdate.setEmail(updatedUserAtts.email)
             userToUpdate.setEnabled(!updatedUserAtts.personDisabled)
 
-            realmResource.users().get(userToUpdate.getId()).update(userToUpdate);
+            realmResource.users().get(userToUpdate.getId()).update(userToUpdate)
         }
     }
 
@@ -115,7 +114,7 @@ class KeycloakUserService(
             throw IllegalStateException("Cannot update user password. Keycloak integration is disabled.")
         }
         if (!checkUserAuth(username)) {
-            return
+            throw IllegalStateException("Cannot update user password. User does not have permissions.")
         }
 
         val users = realmResource.users().search(username)
