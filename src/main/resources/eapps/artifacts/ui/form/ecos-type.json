@@ -2219,18 +2219,22 @@
                             "components": [
                               {
                                 "label": {
-                                  "en": "Storage type",
-                                  "ru": "Тип хранилища"
+                                  "ru": "Хранилище",
+                                  "en": "Storage"
                                 },
-                                "key": "storageType",
-                                "tooltip": {
-                                  "ru": "Тип хранилища для атрибутов с типом CONTENT у данного типа. Если значение не задано, то оно наследуется от родителя или берется по умолчанию - \"local\". Локальный тип хранилища означает хранение контента в БД рядом с таблицей сущностей этого типа. Вы можете задать уточненный тип хранилища с подтипом используя символ \"/\".",
-                                  "en": "Storage type for CONTENT attributes in this type. If no value is specified, it is inherited from the parent or taken by default - \"local\". Local storage type means storing content in the DB next to an entities table of that type. You can specify a storage type with a subtype using the \"/\" symbol."
+                                "key": "storageRef",
+                                "modalTitle": "",
+                                "journalId": "content-storages",
+                                "source": {
+                                  "type": "journal",
+                                  "custom": {
+                                    "columns": []
+                                  }
                                 },
-                                "defaultValue": "",
+                                "queryData": "",
                                 "refreshOn": [],
                                 "optionalWhenDisabled": false,
-                                "type": "textfield",
+                                "type": "selectJournal",
                                 "input": true
                               }
                             ]

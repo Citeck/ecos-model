@@ -1,0 +1,5 @@
+---
+id: content-storages
+columns:
+  - id: name
+  - id: type

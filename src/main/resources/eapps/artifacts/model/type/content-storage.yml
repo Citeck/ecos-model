@@ -1,0 +1,25 @@
+---
+id: content-storage
+name:
+  en: Content storage
+  ru: Хранилище контента
+system: true
+sourceId: emodel/content-storage
+journalRef: uiserv/journal@content-storages
+defaultCreateVariant: false
+model:
+  attributes:
+    - id: name
+      name:
+        ru: Имя
+        en: Name
+      type: MLTEXT
+    - id: type
+      name:
+        en: Type
+        ru: Тип
+    - id: config
+      name:
+        en: Configuration
+        ru: Конфигурация
+      type: JSON
