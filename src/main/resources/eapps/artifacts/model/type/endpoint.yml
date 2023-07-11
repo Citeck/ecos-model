@@ -1,0 +1,40 @@
+---
+id: endpoint
+name:
+  ru: Конечная точка
+  en: Endpoint
+
+system: true
+
+queryPermsPolicy: PUBLIC
+
+storageType: ECOS_MODEL
+
+journalRef: uiserv/journal@endpoints
+formRef: uiserv/form@endpoint-form
+
+model:
+  roles:
+    - id: EVERYONE
+    - id: administrators
+      assignees:
+        - GROUP_ECOS_ADMINISTRATORS
+  statuses:
+    - id: EMPTY
+  attributes:
+    - id: name
+      name:
+        ru: Имя
+        en: Name
+      type: MLTEXT
+    - id: url
+      name:
+        ru: URL
+        en: URL
+    - id: credentials
+      name:
+        ru: Данные для аутентификации
+        en: Credentials
+      type: ASSOC
+      config:
+        typeRef: emodel/type@secret

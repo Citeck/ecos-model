@@ -1,0 +1,12 @@
+modelVersion: "1.0"
+
+source-id: "endpoint"
+
+name:
+  ru: Конечная точка
+  en: Endpoint
+
+controller:
+  type: json
+  config:
+    format: yaml

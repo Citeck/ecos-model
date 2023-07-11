@@ -1,0 +1,15 @@
+{
+  "id": "22f18d04-5e02-4c2a-a51d-6f127e6f5012",
+  "typeRef": "emodel/type@endpoint",
+  "permissions": {
+    "matrix": {
+      "EVERYONE": {
+        "ANY": "READ"
+      },
+      "administrators": {
+        "EMPTY": "WRITE"
+      }
+    }
+  },
+  "attributes": {}
+}
