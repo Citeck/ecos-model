@@ -54,8 +54,9 @@ public class DocLibRecords extends AbstractRecordsDao
     public String mutate(@NotNull LocalRecordAtts localRecordAtts) {
         String id = localRecordAtts.getId();
         EntityRef tempFile = EntityRef.EMPTY;
-        if (!Objects.requireNonNull(localRecordAtts.getAttributes().get("_type").getAs(EntityRef.class)).getLocalId().equals("directory")) {
+        if (localRecordAtts.getAttributes().get("_type").getAs(EntityRef.class).getLocalId().equals("directory")) {
             tempFile = AuthContext.runAsSystem(() -> ecosContentApi.uploadTempFile()
+                .withAttributes(this.docLibService.createEntity(localRecordAtts.getAttributes()))
                 .withMimeType(parseFileType(localRecordAtts))
                 .withName(parseFileName(localRecordAtts))
                 .writeContent(writer -> {

@@ -59,7 +59,6 @@ public class DocLibService {
     public RecordRef createEntity(ObjectData attributes) {
 
         attributes = prepareForMutation(attributes);
-
         String parent = attributes.get(RecordConstants.ATT_PARENT).asText();
         EntityId parentEntityId = getEntityId(RecordRef.valueOf(parent));
 
@@ -83,6 +82,14 @@ public class DocLibService {
         if (dataCopy.has("cm:title") && !dataCopy.has("cm:name")) {
             dataCopy.set("cm:name", dataCopy.get("cm:title"));
         }
+        String parent = dataCopy.get(RecordConstants.ATT_PARENT).asText();
+        EntityId parentEntityId = getEntityId(RecordRef.valueOf(parent));
+
+        RecordRef docLibTypeRef = parentEntityId.getTypeRef();
+        if (EntityRef.isEmpty(docLibTypeRef)) {
+            throw new IllegalStateException("Incorrect parent entity id: '" + parent + "'. Type info is missing.");
+        }
+        dataCopy.set(RecordConstants.ATT_PARENT_ATT, parentEntityId);
 
         return dataCopy;
     }

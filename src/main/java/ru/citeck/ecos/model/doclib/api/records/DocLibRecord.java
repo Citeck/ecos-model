@@ -71,13 +71,6 @@ public class DocLibRecord {
         return getDocLibNodeInfo().getTypeRef();
     }
 
-    public EntityRef getDocLibTypeRef() {
-        return getDocLibNodeInfo().getDocLibTypeRef();
-    }
-
-    public Boolean getHasChildrenDirs() {
-        return docLibService.hasChildrenDirs(recordRef);
-    }
 
     @AttName("?disp")
     public String getDisplayName() {
