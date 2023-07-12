@@ -5,11 +5,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.citeck.ecos.commons.data.DataValue;
 import ru.citeck.ecos.context.lib.auth.AuthContext;
 import ru.citeck.ecos.model.doclib.service.DocLibChildrenQuery;
 import ru.citeck.ecos.model.doclib.service.DocLibService;
-import ru.citeck.ecos.records2.RecordConstants;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts;
 import ru.citeck.ecos.records3.record.dao.AbstractRecordsDao;
@@ -21,6 +19,8 @@ import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery;
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes;
 import ru.citeck.ecos.webapp.api.content.EcosContentApi;
 import ru.citeck.ecos.webapp.api.entity.EntityRef;
+
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -53,8 +53,9 @@ public class DocLibRecords extends AbstractRecordsDao
     @Override
     public String mutate(@NotNull LocalRecordAtts localRecordAtts) {
         String id = localRecordAtts.getId();
-        if (!localRecordAtts.getAttributes().get("_type").getAs(EntityRef.class).getLocalId().equals("directory")) {
-            EntityRef tempFile = AuthContext.runAsSystem(() -> ecosContentApi.uploadTempFile()
+        EntityRef tempFile = EntityRef.EMPTY;
+        if (!Objects.requireNonNull(localRecordAtts.getAttributes().get("_type").getAs(EntityRef.class)).getLocalId().equals("directory")) {
+            tempFile = AuthContext.runAsSystem(() -> ecosContentApi.uploadTempFile()
                 .withMimeType(parseFileType(localRecordAtts))
                 .withName(parseFileName(localRecordAtts))
                 .writeContent(writer -> {
@@ -109,7 +110,7 @@ public class DocLibRecords extends AbstractRecordsDao
     public RecsQueryRes<DocLibRecord> getChildren(DocLibChildrenQuery query, QueryPage page) {
 
         RecsQueryRes<RecordRef> childrenRes = docLibService.getChildren(query, page);
-        if (childrenRes.getRecords().isEmpty() && childrenRes.getTotalCount() == 0) {
+        if (childrenRes == null || (childrenRes.getRecords().isEmpty() && childrenRes.getTotalCount() == 0) ){
             return new RecsQueryRes<>();
         }
 

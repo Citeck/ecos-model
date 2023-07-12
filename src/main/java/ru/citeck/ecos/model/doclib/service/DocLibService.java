@@ -18,14 +18,11 @@ import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts;
 import ru.citeck.ecos.records3.record.atts.schema.ScalarType;
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName;
 import ru.citeck.ecos.records3.record.dao.query.dto.query.QueryPage;
-import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery;
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes;
 import ru.citeck.ecos.webapp.api.entity.EntityRef;
-import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef;
 import ru.citeck.ecos.webapp.lib.model.type.registry.EcosTypesRegistry;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor(onConstructor_={@Autowired})
@@ -71,8 +68,7 @@ public class DocLibService {
             throw new IllegalStateException("Incorrect parent entity id: '" + parent + "'. Type info is missing.");
         }
 
-        String ecosType = attributes.get(RecordConstants.ATT_TYPE).asText();
-        return null;
+        return recordsService.create(docLibTypeRef.getLocalId(), attributes);
     }
 
     private ObjectData prepareForMutation(ObjectData data) {
@@ -116,7 +112,6 @@ public class DocLibService {
         return !queryRes.getRecords().isEmpty();
     }
 
-    @NotNull
     public DocLibNodeInfo getDocLibNodeInfo(@Nullable RecordRef docLibRef) {
 
         EntityId entityId = getEntityId(docLibRef);
