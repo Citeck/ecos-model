@@ -20,23 +20,36 @@
         "components": [
           {
             "label": {
-              "ru": "Хранилище контента",
-              "en": "Content storage"
+              "ru": "Container"
             },
-            "key": "ref",
-            "modalTitle": "",
-            "journalId": "content-storages",
-            "source": {
-              "type": "journal",
-              "custom": {
-                "columns": []
-              }
-            },
+            "key": "_value",
+            "hideLabel": true,
             "refreshOn": [],
             "optionalWhenDisabled": false,
-            "type": "selectJournal",
+            "type": "container",
             "input": true,
-            "queryData": ""
+            "components": [
+              {
+                "label": {
+                  "ru": "Хранилище контента",
+                  "en": "Content storage"
+                },
+                "key": "ref",
+                "modalTitle": "",
+                "journalId": "content-storages",
+                "source": {
+                  "type": "journal",
+                  "custom": {
+                    "columns": []
+                  }
+                },
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
+                "type": "selectJournal",
+                "input": true,
+                "queryData": ""
+              }
+            ]
           }
         ]
       },
