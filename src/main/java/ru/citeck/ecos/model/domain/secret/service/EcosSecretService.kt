@@ -18,8 +18,8 @@ import ru.citeck.ecos.secrets.lib.secret.EcosSecret
 import ru.citeck.ecos.secrets.lib.secret.EcosSecretImpl
 import ru.citeck.ecos.secrets.lib.secret.EcosSecretType
 import ru.citeck.ecos.txn.lib.TxnContext
-import ru.citeck.ecos.webapp.lib.spring.context.secrets.EcosModelSecretsProvider
-import ru.citeck.ecos.webapp.lib.spring.context.secrets.SecretChangedEvent
+import ru.citeck.ecos.webapp.lib.secret.event.SecretChangedEvent
+import ru.citeck.ecos.webapp.lib.secret.provider.ModelEcosSecretsProvider
 import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverter
 import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverterFactory
 import java.lang.IllegalArgumentException
@@ -30,7 +30,7 @@ import javax.annotation.PostConstruct
 class EcosSecretService(
     private val repo: EcosSecretRepo,
     private val predicateJpaService: JpaSearchConverterFactory,
-    private val ecosModelSecretsProvider: EcosModelSecretsProvider,
+    private val modelSecretsProvider: ModelEcosSecretsProvider,
     private val eventsService: EventsService
 ) {
 
@@ -44,7 +44,7 @@ class EcosSecretService(
         searchConverter = predicateJpaService.createConverter(EcosSecretEntity::class.java)
             .withDefaultPageSize(10000)
             .build()
-        ecosModelSecretsProvider.setCustomSecretResolver(this::getSecret)
+        modelSecretsProvider.setCustomSecretResolver(this::getSecret)
         secretChangedEventEmitter = eventsService.getEmitter {
             withEventClass(SecretChangedEvent::class.java)
             withEventType(SecretChangedEvent.EVENT_ID)
