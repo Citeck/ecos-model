@@ -35,6 +35,7 @@ import ru.citeck.ecos.records3.record.dao.impl.proxy.MutateProxyProcessor
 import ru.citeck.ecos.records3.record.dao.impl.proxy.ProxyProcContext
 import ru.citeck.ecos.txn.lib.TxnContext
 import javax.sql.DataSource
+import kotlin.reflect.jvm.jvmName
 
 @Configuration
 class PersonsConfiguration(
@@ -51,6 +52,9 @@ class PersonsConfiguration(
 
         // users with this group can edit authorityGroups
         const val GROUPS_MANAGERS_GROUP_WITH_PREFIX = AuthGroup.PREFIX + AuthorityGroupConstants.GROUPS_MANAGERS_GROUP
+
+        private val UPDATE_KK_USERS_TXN_KEY = PersonsConfiguration::class.jvmName + "-update-kk-users"
+        private val DELETE_KK_USERS_TXN_KEY = PersonsConfiguration::class.jvmName + "-delete-kk-users"
     }
 
     @Bean
@@ -177,26 +181,10 @@ class PersonsConfiguration(
         recordsDao.addAttributesMixin(PersonMixin(recordsService, authorityService))
         recordsDao.addAttributesMixin(AuthorityMixin(recordsService, authorityService, AuthorityType.PERSON))
 
-        val getRecId = { rec: Any ->
-            recordsService.getAtt(rec, "?localId").asText()
+        val getRecLocalId = { rec: Any ->
+            recordsService.getAtt(rec, ScalarType.LOCAL_ID_SCHEMA).asText()
         }
 
-        recordsDao.addListener(object : DbRecordsListenerAdapter() {
-            override fun onChanged(event: DbRecordChangedEvent) {
-                authorityService.resetPersonCache(getRecId(event.record))
-                eventsService.onPersonChanged(event)
-                TxnContext.doBeforeCommit(100f) { keycloakUserService.updateUser(event) }
-            }
-            override fun onCreated(event: DbRecordCreatedEvent) {
-                authorityService.resetPersonCache(getRecId(event.record))
-                eventsService.onPersonCreated(event)
-                TxnContext.doBeforeCommit(100f) { keycloakUserService.createUser(event) }
-            }
-            override fun onDeleted(event: DbRecordDeletedEvent) {
-                authorityService.resetPersonCache(getRecId(event.record))
-                TxnContext.doBeforeCommit(100f) { keycloakUserService.deleteUser(event) }
-            }
-        })
         recordsDao.addListener(
             AuthorityGroupsManagementCheckListener(
                 recordsService,
@@ -205,6 +193,31 @@ class PersonsConfiguration(
                 AuthorityType.PERSON
             )
         )
+        recordsDao.addListener(object : DbRecordsListenerAdapter() {
+            override fun onChanged(event: DbRecordChangedEvent) {
+                val userName = getRecLocalId(event.record)
+                authorityService.resetPersonCache(userName)
+                eventsService.onPersonChanged(event)
+                TxnContext.processSetBeforeCommit(UPDATE_KK_USERS_TXN_KEY, userName) { users ->
+                    users.forEach { keycloakUserService.updateUser(it) }
+                }
+            }
+            override fun onCreated(event: DbRecordCreatedEvent) {
+                val userName = getRecLocalId(event.record)
+                authorityService.resetPersonCache(userName)
+                eventsService.onPersonCreated(event)
+                TxnContext.processSetBeforeCommit(UPDATE_KK_USERS_TXN_KEY, userName) { users ->
+                    users.forEach { keycloakUserService.updateUser(it) }
+                }
+            }
+            override fun onDeleted(event: DbRecordDeletedEvent) {
+                val userName = getRecLocalId(event.record)
+                authorityService.resetPersonCache(userName)
+                TxnContext.processSetBeforeCommit(DELETE_KK_USERS_TXN_KEY, userName) { users ->
+                    users.forEach { keycloakUserService.deleteUser(it) }
+                }
+            }
+        })
         return recordsDao
     }
 

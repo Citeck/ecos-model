@@ -9,9 +9,7 @@ import org.keycloak.representations.idm.UserRepresentation
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import ru.citeck.ecos.context.lib.auth.AuthContext
-import ru.citeck.ecos.data.sql.records.listener.DbRecordChangedEvent
-import ru.citeck.ecos.data.sql.records.listener.DbRecordCreatedEvent
-import ru.citeck.ecos.data.sql.records.listener.DbRecordDeletedEvent
+import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.webapp.lib.env.EcosWebAppEnvironment
@@ -34,10 +32,11 @@ class KeycloakUserService(
     @Value("\${ecos.idp.default-realm}")
     lateinit var defaultRealm: String
 
-    private var props = ecosEnv.getValue("ecos.integrations.keycloakAdmin", KeycloakAdminProps::class.java)
+    private lateinit var props: KeycloakAdminProps
 
     @PostConstruct
     fun init() {
+        props = ecosEnv.getValue("ecos.integrations.keycloakAdmin", KeycloakAdminProps::class.java)
         if (props.enabled) {
             keycloak = Keycloak.getInstance(
                 props.url,
@@ -52,105 +51,117 @@ class KeycloakUserService(
         }
     }
 
-    fun createUser(event: DbRecordCreatedEvent) {
+    fun updateUser(userName: String) {
+
         if (!props.enabled) {
             return
         }
-        val userAtts = recordsService.getAtts(event.record, KeycloakUserAttributes::class.java)
 
-        val user = UserRepresentation()
-        user.setUsername(userAtts.id)
-        user.setFirstName(userAtts.firstName)
-        user.setLastName(userAtts.lastName)
-        user.setEmail(userAtts.email)
-        user.setEnabled(!userAtts.personDisabled)
-
-        val credential = CredentialRepresentation()
-        credential.type = CredentialRepresentation.PASSWORD
-        credential.value = userAtts.id
-        user.credentials = Arrays.asList(credential)
-
-        val requiredActions = ArrayList<String>()
-        requiredActions.add("UPDATE_PASSWORD")
-        user.setRequiredActions(requiredActions)
-
-        realmResource.users().create(user)
-    }
-
-    fun updateUser(event: DbRecordChangedEvent) {
-        if (!props.enabled) {
-            return
+        if (!checkUserAuth(userName)) {
+            throw IllegalStateException("Cannot update user '$userName'. User does not have permissions.")
         }
-        val updatedUserAtts = recordsService.getAtts(event.record, KeycloakUserAttributes::class.java)
 
-        val users = realmResource.users().search(updatedUserAtts.id)
-        if (!users.isEmpty()) {
-            val userToUpdate = users[0]
-            userToUpdate.setFirstName(updatedUserAtts.firstName)
-            userToUpdate.setLastName(updatedUserAtts.lastName)
-            userToUpdate.setEmail(updatedUserAtts.email)
-            userToUpdate.setEnabled(!updatedUserAtts.personDisabled)
-
-            realmResource.users().get(userToUpdate.getId()).update(userToUpdate)
-        }
-    }
-
-    fun deleteUser(event: DbRecordDeletedEvent) {
-        if (!props.enabled) {
-            return
-        }
-        val userAtts = recordsService.getAtts(event.record, KeycloakUserAttributes::class.java)
-        val userName = userAtts.id
+        val personRef = AuthorityType.PERSON.getRef(userName)
+        val userAtts = recordsService.getAtts(personRef, KeycloakUserAttributes::class.java)
 
         val users = realmResource.users().search(userName)
-        if (!users.isEmpty()) {
+        if (users.isEmpty()) {
+
+            val user = UserRepresentation()
+            user.username = userAtts.id
+            user.firstName = userAtts.firstName
+            user.lastName = userAtts.lastName
+            user.email = userAtts.email
+            user.isEnabled = !userAtts.personDisabled
+
+            val credential = CredentialRepresentation()
+            credential.type = CredentialRepresentation.PASSWORD
+            credential.value = userAtts.id
+            user.credentials = listOf(credential)
+
+            val requiredActions = ArrayList<String>()
+            requiredActions.add("UPDATE_PASSWORD")
+            user.requiredActions = requiredActions
+
+            realmResource.users().create(user)
+
+        } else {
+
+            val userToUpdate = users[0]
+            userToUpdate.firstName = userAtts.firstName
+            userToUpdate.lastName = userAtts.lastName
+            userToUpdate.email = userAtts.email
+            userToUpdate.isEnabled = !userAtts.personDisabled
+
+            realmResource.users().get(userToUpdate.id).update(userToUpdate)
+        }
+    }
+
+    fun deleteUser(userName: String) {
+
+        if (!props.enabled) {
+            return
+        }
+
+        if (!checkUserAuth(userName)) {
+            throw IllegalStateException("Cannot delete user '$userName'. User does not have permissions.")
+        }
+
+        val users = realmResource.users().search(userName)
+        if (users.isNotEmpty()) {
             val userId = users[0].id
             realmResource.users().delete(userId)
         }
     }
 
-    fun updateUserPassword(username: String, newpass: String) {
+    fun updateUserPassword(userName: String, newPassword: String) {
+
         if (!props.enabled) {
-            throw IllegalStateException("Cannot update user password. Keycloak integration is disabled.")
+            throw IllegalStateException(
+                "Cannot update user password for '$userName'. " +
+                "Keycloak integration is disabled."
+            )
         }
-        if (!checkUserAuth(username)) {
-            throw IllegalStateException("Cannot update user password. User does not have permissions.")
+        if (!checkUserAuth(userName)) {
+            throw IllegalStateException(
+                "Cannot update user password for '$userName'. " +
+                    "User does not have permissions."
+            )
         }
 
-        val users = realmResource.users().search(username)
+        val users = realmResource.users().search(userName)
         if (users.isNotEmpty()) {
             val userToUpdate = users[0]
             val credential = CredentialRepresentation()
             credential.type = CredentialRepresentation.PASSWORD
-            credential.value = newpass
+            credential.value = newPassword
 
             realmResource.users().get(userToUpdate.id).resetPassword(credential)
         } else {
-            log.warn("User with username '$username' not found.")
+            log.warn("User with username '$userName' not found.")
         }
     }
 
-    private fun checkUserAuth(username: String): Boolean {
-        val runAs = AuthContext.getCurrentRunAsAuth()
-        return (AuthContext.isSystemAuth(runAs) || AuthContext.isAdminAuth(runAs) || AuthContext.getCurrentUser() == username)
+    private fun checkUserAuth(changedUserName: String): Boolean {
+        return AuthContext.isRunAsSystemOrAdmin() || AuthContext.getCurrentUser() == changedUserName
     }
+
+    data class KeycloakUserAttributes(
+        val id: String,
+        @AttName("firstName!")
+        val firstName: String,
+        @AttName("lastName!")
+        val lastName: String,
+        @AttName("email!")
+        val email: String,
+        @AttName("personDisabled!")
+        val personDisabled: Boolean
+    )
+
+    data class KeycloakAdminProps(
+        val url: String,
+        val user: String,
+        val password: String,
+        val enabled: Boolean
+    )
 }
-
-data class KeycloakUserAttributes(
-    val id: String,
-    @AttName("firstName!")
-    val firstName: String,
-    @AttName("lastName!")
-    val lastName: String,
-    @AttName("email!")
-    val email: String,
-    @AttName("personDisabled!")
-    val personDisabled: Boolean
-)
-
-data class KeycloakAdminProps(
-    val url: String,
-    val user: String,
-    val password: String,
-    val enabled: Boolean
-)

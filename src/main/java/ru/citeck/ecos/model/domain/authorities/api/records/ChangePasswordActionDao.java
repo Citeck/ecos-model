@@ -1,29 +1,20 @@
 package ru.citeck.ecos.model.domain.authorities.api.records;
 
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.model.service.keycloak.KeycloakUserService;
-import ru.citeck.ecos.records3.RecordsService;
 import ru.citeck.ecos.records3.record.dao.mutate.ValueMutateDao;
 
-
-@Component
 @Slf4j
-public class ChangePasswordActionDto implements ValueMutateDao<ChangeInfoDto> {
+@Component
+@RequiredArgsConstructor
+public class ChangePasswordActionDao implements ValueMutateDao<ChangePasswordActionDao.ChangeInfoDto> {
 
-    private final RecordsService recordsService;
     private final KeycloakUserService keycloakUserService;
-
-
-    @Autowired
-    public ChangePasswordActionDto(RecordsService recordsService, KeycloakUserService keycloakUserService) {
-        this.recordsService = recordsService;
-        this.keycloakUserService = keycloakUserService;
-    }
 
     @NotNull
     @Override
@@ -34,17 +25,18 @@ public class ChangePasswordActionDto implements ValueMutateDao<ChangeInfoDto> {
     @Nullable
     @Override
     public Object mutate(@NotNull ChangeInfoDto changeInfoDto) throws Exception {
-        String userName = changeInfoDto.getUserName();
-        String userNewPassword = changeInfoDto.getNewPassword();
 
-        keycloakUserService.updateUserPassword(userName, userNewPassword);
+        String userName = changeInfoDto.getUserName();
+        String newPassword = changeInfoDto.getNewPassword();
+
+        keycloakUserService.updateUserPassword(userName, newPassword);
 
         return "";
     }
 
-}
-@Data
-class ChangeInfoDto {
-    private String userName;
-    private String newPassword;
+    @Data
+    static class ChangeInfoDto {
+        private String userName;
+        private String newPassword;
+    }
 }
