@@ -31,3 +31,8 @@ ecos:
   integrations:
     onlyoffice:
       host: only-office-app
+    keycloakAdmin:
+      url: http://localhost/ecos-idp/auth
+      user: admin
+      password: admin
+      enabled: false
