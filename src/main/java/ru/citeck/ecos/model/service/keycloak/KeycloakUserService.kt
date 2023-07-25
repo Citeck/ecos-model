@@ -51,10 +51,14 @@ class KeycloakUserService(
         }
     }
 
+    fun isEnabled(): Boolean {
+        return props.enabled
+    }
+
     fun updateUser(userName: String) {
 
         if (!props.enabled) {
-            return
+            error("Keycloak integration is disabled")
         }
 
         if (!checkUserAuth(userName)) {
@@ -100,7 +104,7 @@ class KeycloakUserService(
     fun deleteUser(userName: String) {
 
         if (!props.enabled) {
-            return
+            error("Keycloak integration is disabled")
         }
 
         if (!checkUserAuth(userName)) {

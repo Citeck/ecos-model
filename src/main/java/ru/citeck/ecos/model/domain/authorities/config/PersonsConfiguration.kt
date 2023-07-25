@@ -141,19 +141,27 @@ class PersonsConfiguration(
                         return true
                     }
                     override fun hasWritePerms(): Boolean {
-                        return authorities.contains(AuthRole.SYSTEM) ||
-                            authorities.contains(AuthRole.ADMIN) ||
-                            userName == user ||
+                        return isSystemOrAdminOrOwner() ||
                             authorities.contains(USERS_PROFILE_ADMIN_WITH_PREFIX) ||
                             authorities.contains(GROUPS_MANAGERS_GROUP_WITH_PREFIX)
                     }
 
                     override fun getAdditionalPerms(): Set<String> {
-                        return emptySet()
+                        val perms = HashSet<String>()
+                        if (keycloakUserService.isEnabled() && isSystemOrAdminOrOwner()) {
+                            perms.add("CHANGE_PASSWORD")
+                        }
+                        return perms
                     }
 
                     override fun getAuthoritiesWithReadPermission(): Set<String> {
                         return setOf(AuthGroup.EVERYONE)
+                    }
+
+                    private fun isSystemOrAdminOrOwner(): Boolean {
+                        return authorities.contains(AuthRole.SYSTEM) ||
+                            authorities.contains(AuthRole.ADMIN) ||
+                            userName == user
                     }
                 }
             }
@@ -198,23 +206,29 @@ class PersonsConfiguration(
                 val userName = getRecLocalId(event.record)
                 authorityService.resetPersonCache(userName)
                 eventsService.onPersonChanged(event)
-                TxnContext.processSetBeforeCommit(UPDATE_KK_USERS_TXN_KEY, userName) { users ->
-                    users.forEach { keycloakUserService.updateUser(it) }
+                if (keycloakUserService.isEnabled()) {
+                    TxnContext.processSetBeforeCommit(UPDATE_KK_USERS_TXN_KEY, userName) { users ->
+                        users.forEach { keycloakUserService.updateUser(it) }
+                    }
                 }
             }
             override fun onCreated(event: DbRecordCreatedEvent) {
                 val userName = getRecLocalId(event.record)
                 authorityService.resetPersonCache(userName)
                 eventsService.onPersonCreated(event)
-                TxnContext.processSetBeforeCommit(UPDATE_KK_USERS_TXN_KEY, userName) { users ->
-                    users.forEach { keycloakUserService.updateUser(it) }
+                if (keycloakUserService.isEnabled()) {
+                    TxnContext.processSetBeforeCommit(UPDATE_KK_USERS_TXN_KEY, userName) { users ->
+                        users.forEach { keycloakUserService.updateUser(it) }
+                    }
                 }
             }
             override fun onDeleted(event: DbRecordDeletedEvent) {
                 val userName = getRecLocalId(event.record)
                 authorityService.resetPersonCache(userName)
-                TxnContext.processSetBeforeCommit(DELETE_KK_USERS_TXN_KEY, userName) { users ->
-                    users.forEach { keycloakUserService.deleteUser(it) }
+                if (keycloakUserService.isEnabled()) {
+                    TxnContext.processSetBeforeCommit(DELETE_KK_USERS_TXN_KEY, userName) { users ->
+                        users.forEach { keycloakUserService.deleteUser(it) }
+                    }
                 }
             }
         })
