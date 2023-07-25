@@ -41,6 +41,18 @@
       "config": {
         "journalId": "authorities-sync"
       }
+    },
+    {
+      "type": "JOURNAL",
+      "config": {
+        "journalId": "endpoints"
+      }
+    },
+    {
+      "type": "JOURNAL",
+      "config": {
+        "journalId": "ecos-secrets"
+      }
     }
   ]
 }

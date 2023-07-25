@@ -3,5 +3,5 @@ id: counterparty-document
 name:
   ru: Документ контрагента
   en: Counterparty Document
-
+storageType: ECOS_MODEL
 parentRef: emodel/type@document

@@ -87,7 +87,7 @@
                             "clearOnHide": false,
                             "dataSrc": "custom",
                             "data": {
-                              "custom": "values = [\n  {\n    label: utils.getTextByLocale({\n      en: 'Case',\n      ru: 'Кейс'\n    }),\n    value: 'emodel/type@case'\n  },  \n  {\n    label: utils.getTextByLocale({\n      en: 'Data List Item',\n      ru: 'Справочник'\n    }),\n    value: 'emodel/type@data-list'\n  },\n  {\n    label: utils.getTextByLocale({\n      en: 'Rest',\n      ru: 'Остальное'\n    }),\n    value: '__rest__'\n  },\n];"
+                              "custom": "values = [\n  {\n    label: utils.getTextByLocale({\n      en: 'Case',\n      ru: 'Кейс'\n    }),\n    value: 'emodel/type@case'\n  },  \n  {\n    label: utils.getTextByLocale({\n      en: 'Data List Item',\n      ru: 'Справочник'\n    }),\n    value: 'emodel/type@data-list'\n  },\n  {\n    label: utils.getTextByLocale({\n      en: 'Document',\n      ru: 'Документ'\n    }),\n    value: 'emodel/type@document'\n  },\n  {\n    label: utils.getTextByLocale({\n      en: 'Rest',\n      ru: 'Остальное'\n    }),\n    value: '__rest__'\n  },\n];"
                             },
                             "defaultValue": "",
                             "calculateValue": "const { parentRef, _parentRefJournal, _parentRefSelector } = data;\n\nif (_parentRefSelector === '__rest__') {\n  return;\n}\n\nif (!parentRef) {\n  value = 'emodel/type@case';\n} \n\nif (parentRef && ['emodel/type@data-list', 'emodel/type@case'].includes(parentRef)) {\n  value = parentRef;\n} else { \n  value = '__rest__';\n}",
@@ -475,6 +475,52 @@
                             "optionalWhenDisabled": false,
                             "customConditional": "show = data['storageType'] === 'ECOS_MODEL' || data['storageType'] === 'DEFAULT' || !data['storageType'];",
                             "type": "textfield",
+                            "input": true
+                          },
+                          {
+                            "label": {
+                              "ru": "Политика проверки прав при поиске",
+                              "en": "Query permissions policy"
+                            },
+                            "key": "queryPermsPolicy",
+                            "tooltip": {
+                              "ru": "Данная политика позволяет настроить поиск с проверкой прав непосредственно записи, её родителя или вовсе отключить проверку прав при поиске. В любом режиме результат поиска дополнительно проверяется на наличие доступа.",
+                              "en": "This policy allows you to configure the search to check permissions directly on the record, its parent, or completely disable permission checking during the search. In any mode, the search results are additionally checked for access."
+                            },
+                            "dataSrc": "values",
+                            "data": {
+                              "values": [
+                                {
+                                  "label": "Inherit from parent or data source",
+                                  "value": "DEFAULT"
+                                },
+                                {
+                                  "label": "Check own permissions",
+                                  "value": "OWN"
+                                },
+                                {
+                                  "label": "Check parent permissions",
+                                  "value": "PARENT"
+                                },
+                                {
+                                  "label": "Don't check permissions",
+                                  "value": "PUBLIC"
+                                },
+                                {
+                                  "label": "Query is disabled",
+                                  "value": "NONE"
+                                }
+                              ],
+                              "headers": [
+                                {
+                                  "key": "",
+                                  "value": ""
+                                }
+                              ]
+                            },
+                            "defaultValue": "DEFAULT",
+                            "optionalWhenDisabled": false,
+                            "type": "ecosSelect",
                             "input": true
                           },
                           {
@@ -2219,18 +2265,22 @@
                             "components": [
                               {
                                 "label": {
-                                  "en": "Storage type",
-                                  "ru": "Тип хранилища"
+                                  "ru": "Хранилище",
+                                  "en": "Storage"
                                 },
-                                "key": "storageType",
-                                "tooltip": {
-                                  "ru": "Тип хранилища для атрибутов с типом CONTENT у данного типа. Если значение не задано, то оно наследуется от родителя или берется по умолчанию - \"local\". Локальный тип хранилища означает хранение контента в БД рядом с таблицей сущностей этого типа. Вы можете задать уточненный тип хранилища с подтипом используя символ \"/\".",
-                                  "en": "Storage type for CONTENT attributes in this type. If no value is specified, it is inherited from the parent or taken by default - \"local\". Local storage type means storing content in the DB next to an entities table of that type. You can specify a storage type with a subtype using the \"/\" symbol."
+                                "key": "storageRef",
+                                "modalTitle": "",
+                                "journalId": "content-storages",
+                                "source": {
+                                  "type": "journal",
+                                  "custom": {
+                                    "columns": []
+                                  }
                                 },
-                                "defaultValue": "",
+                                "queryData": "",
                                 "refreshOn": [],
                                 "optionalWhenDisabled": false,
-                                "type": "textfield",
+                                "type": "selectJournal",
                                 "input": true
                               }
                             ]

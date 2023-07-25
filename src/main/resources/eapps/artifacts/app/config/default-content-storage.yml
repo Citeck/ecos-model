@@ -1,0 +1,12 @@
+---
+id: default-content-storage
+value:
+  ref: emodel/content-storage@LOCAL
+  config: {}
+valueDef:
+  formRef: uiserv/form@config-default-content-storage
+  attributes:
+    - id: ref
+      type: ASSOC
+    - id: config
+      type: JSON

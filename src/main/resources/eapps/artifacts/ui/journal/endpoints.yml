@@ -1,0 +1,29 @@
+---
+id: endpoints
+name: { ru: Конечные точки, en: Endpoints }
+
+system: true
+
+actions:
+  - uiserv/action@edit
+  - uiserv/action@edit-json
+  - uiserv/action@delete
+  - uiserv/action@download-text-yml
+
+columns:
+
+  - id: id
+    name: { ru: Идентификатор, en: Id }
+    type: TEXT
+
+  - id: name
+    name: { ru: Имя, en: Name }
+    type: TEXT
+
+  - id: _modified
+    type: DATETIME
+    name: { ru: Изменен, en: Modified }
+
+  - id: _modifier
+    type: PERSON
+    name: { ru: Кем изменен, en: Modified by }

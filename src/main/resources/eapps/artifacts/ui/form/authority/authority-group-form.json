@@ -1,14 +1,14 @@
 {
   "id": "authority-group-form",
-  "system": true,
   "formKey": "",
   "title": {
     "en": "Group form"
   },
   "description": {},
-  "customModule": null,
+  "customModule": "",
   "typeRef": "",
   "width": "default",
+  "system": true,
   "i18n": {},
   "definition": {
     "components": [
@@ -163,10 +163,10 @@
                         "components": [
                           {
                             "label": {
-                              "ru": "TableForm"
+                              "ru": "Группы и Пользователи, входящие в группу:",
+                              "en": "Groups and Users included in group:"
                             },
                             "key": "tableForm",
-                            "hideLabel": true,
                             "noColHeaders": true,
                             "persistent": false,
                             "source": {
@@ -312,5 +312,6 @@
       }
     ]
   },
-  "attributes": {}
+  "attributes": {},
+  "notExists": false
 }

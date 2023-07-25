@@ -158,6 +158,10 @@ class TypeDefResolver {
                 contentConfig.withPath(contentConfig.path)
             }
         }
+        if (contentConfig.storageRef.isEmpty()) {
+            contentConfig.withStorageRef(resolvedParentDef.contentConfig.storageRef)
+            contentConfig.withStorageConfig(resolvedParentDef.contentConfig.storageConfig)
+        }
         resTypeDef.withContentConfig(contentConfig.build())
 
         if (resTypeDef.inheritActions && resolvedParentDef.actions.isNotEmpty()) {
