@@ -1,7 +1,7 @@
 ---
 id: scan-document
 name:
-  ru: Отсканированный документ
-  en: Scan document
+  ru: Отсканированные документы
+  en: Scan documents
 storageType: ECOS_MODEL
 parentRef: emodel/type@document
