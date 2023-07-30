@@ -1,15 +1,15 @@
 {
   "id": "person-form",
-  "system": true,
   "formKey": "",
   "title": {
     "en": "User",
     "ru": "Пользователь"
   },
   "description": {},
-  "customModule": null,
+  "customModule": "",
   "typeRef": "",
   "width": "lg",
+  "system": true,
   "i18n": {},
   "definition": {
     "components": [
@@ -259,6 +259,89 @@
         "input": false
       },
       {
+        "label": {
+          "ru": "Columns"
+        },
+        "key": "columns4",
+        "columns": [
+          {
+            "components": [
+              {
+                "label": "Cancel",
+                "removeIndents": true,
+                "action": "event",
+                "state": "",
+                "showValidations": false,
+                "event": "cancel",
+                "block": true,
+                "clearOnHide": false,
+                "key": "submit3",
+                "type": "button",
+                "input": true
+              }
+            ],
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 0
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 1,
+            "components": []
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 2,
+            "components": []
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 3,
+            "components": [
+              {
+                "label": {
+                  "ru": "Сохранить",
+                  "en": "Save"
+                },
+                "key": "сохранить",
+                "state": "",
+                "headers": [
+                  {
+                    "header": "",
+                    "value": ""
+                  }
+                ],
+                "theme": "primary",
+                "block": true,
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
+                "type": "button",
+                "input": true
+              }
+            ]
+          }
+        ],
+        "oneColumnInViewMode": false,
+        "customConditional": "show = _.get(instance, \"options.formMode\") === \"EDIT\";",
+        "type": "columns",
+        "input": false
+      },
+      {
+        "label": {
+          "ru": "Columns"
+        },
+        "key": "columns3",
         "columns": [
           {
             "components": [
@@ -306,24 +389,38 @@
             "index": 3,
             "components": [
               {
-                "removeIndents": true,
+                "label": {
+                  "ru": "Создать",
+                  "en": "Create"
+                },
+                "key": "submit",
                 "state": "",
+                "headers": [
+                  {
+                    "header": "",
+                    "value": ""
+                  }
+                ],
+                "removeIndents": true,
                 "theme": "primary",
                 "block": true,
                 "disableOnInvalid": true,
                 "clearOnHide": false,
-                "key": "submit",
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
                 "type": "button",
                 "input": true
               }
             ]
           }
         ],
-        "key": "columns3",
+        "oneColumnInViewMode": false,
+        "customConditional": "show = _.get(instance, \"options.formMode\") === \"CREATE\";",
         "type": "columns",
         "input": false
       }
     ]
   },
-  "attributes": {}
+  "attributes": {},
+  "notExists": false
 }
