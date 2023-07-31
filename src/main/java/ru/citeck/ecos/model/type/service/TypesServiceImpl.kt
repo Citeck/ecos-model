@@ -36,7 +36,9 @@ class TypesServiceImpl(
             "type",
             "user-base",
             "file",
-            "directory"
+            "directory",
+            "doclib-directory",
+            "doclib-file"
         )
         private const val VALID_ID_PATTERN_TXT = "^[\\w\$/.-]+\\w\$"
         private val VALID_ID_PATTERN = Pattern.compile(VALID_ID_PATTERN_TXT)

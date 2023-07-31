@@ -87,7 +87,7 @@
                             "clearOnHide": false,
                             "dataSrc": "custom",
                             "data": {
-                              "custom": "values = [\n  {\n    label: utils.getTextByLocale({\n      en: 'Case',\n      ru: 'Кейс'\n    }),\n    value: 'emodel/type@case'\n  },  \n  {\n    label: utils.getTextByLocale({\n      en: 'Data List Item',\n      ru: 'Справочник'\n    }),\n    value: 'emodel/type@data-list'\n  },\n  {\n    label: utils.getTextByLocale({\n      en: 'Document',\n      ru: 'Документ'\n    }),\n    value: 'emodel/type@document'\n  },\n  {\n    label: utils.getTextByLocale({\n      en: 'Rest',\n      ru: 'Остальное'\n    }),\n    value: '__rest__'\n  },\n];"
+                              "custom": "values = [\n  {\n    label: utils.getTextByLocale({\n      en: 'Case',\n      ru: 'Кейс'\n    }),\n    value: 'emodel/type@case'\n  },  \n  {\n    label: utils.getTextByLocale({\n      en: 'Data List Item',\n      ru: 'Справочник'\n    }),\n    value: 'emodel/type@data-list'\n  },\n  {\n    label: utils.getTextByLocale({\n      en: 'Document',\n      ru: 'Документ'\n    }),\n    value: 'emodel/type@document'\n  },\n  {\n    label: utils.getTextByLocale({\n      en: 'Documents library file',\n      ru: 'Файл библиотеки документов'\n    }),\n    value: 'emodel/type@doclib-file'\n  },\n  {\n    label: utils.getTextByLocale({\n      en: 'Rest',\n      ru: 'Остальное'\n    }),\n    value: '__rest__'\n  },\n];"
                             },
                             "defaultValue": "",
                             "calculateValue": "const { parentRef, _parentRefJournal, _parentRefSelector } = data;\n\nif (_parentRefSelector === '__rest__') {\n  return;\n}\n\nif (!parentRef) {\n  value = 'emodel/type@case';\n} \n\nif (parentRef && ['emodel/type@data-list', 'emodel/type@case'].includes(parentRef)) {\n  value = parentRef;\n} else { \n  value = '__rest__';\n}",
@@ -320,17 +320,6 @@
                             "optionalWhenDisabled": false,
                             "customConditional": "show = !!data['configFormRef'];",
                             "type": "button",
-                            "input": true
-                          },
-                          {
-                            "label": {
-                              "ru": "Отображать библиотеку документов",
-                              "en": "Show documents library"
-                            },
-                            "key": "docLibEnabled",
-                            "refreshOn": [],
-                            "optionalWhenDisabled": false,
-                            "type": "checkbox",
                             "input": true
                           }
                         ],
