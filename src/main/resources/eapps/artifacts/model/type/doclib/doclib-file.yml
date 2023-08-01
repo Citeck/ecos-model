@@ -1,7 +1,7 @@
 ---
 id: doclib-file
 name:
-  ru: Файл библиотеки документов1233
+  ru: Файл библиотеки документов
   en: Documents library file
 
 parentRef: emodel/type@user-base
