@@ -1,0 +1,27 @@
+---
+id: doclib-directory
+name:
+  ru: Папка
+  en: Folder
+
+parentRef: emodel/type@user-base
+formRef: uiserv/form@doclib-directory-form
+
+system: true
+dashboardType: case-details
+storageType: ECOS_MODEL
+
+model:
+  attributes:
+    - id: name
+      name:
+        ru: Имя
+        en: Name
+    - id: children
+      name:
+        ru: Дочерние элементы
+        en: Child elements
+      type: ASSOC
+      config:
+        child: true
+      multiple: true

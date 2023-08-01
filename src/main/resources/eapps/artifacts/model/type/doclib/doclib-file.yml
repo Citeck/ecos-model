@@ -1,0 +1,36 @@
+---
+id: doclib-file
+name:
+  ru: Файл библиотеки документов1233
+  en: Documents library file
+
+parentRef: emodel/type@user-base
+formRef: uiserv/form@doclib-file-form
+
+system: true
+
+dashboardType: case-details
+storageType: ECOS_MODEL
+
+actions:
+  - uiserv/action@edit
+  - uiserv/action@content-preview-modal
+  - uiserv/action@content-download
+  - uiserv/action@delete
+
+queryPermsPolicy: OWN
+
+aspects:
+  - ref: emodel/aspect@doclib
+
+model:
+  attributes:
+    - id: name
+      name:
+        ru: Имя файла
+        en: File name
+    - id: content
+      name:
+        ru: Содержимое
+        en: Content
+      type: CONTENT
