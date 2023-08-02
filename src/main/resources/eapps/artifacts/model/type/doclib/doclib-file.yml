@@ -12,6 +12,7 @@ system: true
 dashboardType: case-details
 storageType: ECOS_MODEL
 
+inheritActions: false
 actions:
   - uiserv/action@view-dashboard
   - uiserv/action@edit
