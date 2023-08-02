@@ -13,8 +13,8 @@ dashboardType: case-details
 storageType: ECOS_MODEL
 
 actions:
+  - uiserv/action@view-dashboard
   - uiserv/action@edit
-  - uiserv/action@content-preview-modal
   - uiserv/action@content-download
   - uiserv/action@delete
 
