@@ -1,7 +1,7 @@
 ---
 id: doclib-file
 name:
-  ru: Файл библиотеки документов1233
+  ru: Файл библиотеки документов
   en: Documents library file
 
 parentRef: emodel/type@user-base
@@ -12,9 +12,11 @@ system: true
 dashboardType: case-details
 storageType: ECOS_MODEL
 
+inheritActions: false
 actions:
+  - uiserv/action@view-dashboard
   - uiserv/action@edit
-  - uiserv/action@content-preview-modal
+  - uiserv/action@edit-in-onlyoffice-tfm
   - uiserv/action@content-download
   - uiserv/action@delete
 
