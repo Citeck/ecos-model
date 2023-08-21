@@ -4,7 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import ru.citeck.ecos.model.EcosModelApp;
 import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.json.Json;
@@ -24,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(EcosSpringExtension.class)
+@SpringBootTest(classes = EcosModelApp.class)
 public class SectionServiceImplTest {
 
     @MockBean

@@ -37,9 +37,12 @@ class DocLibRecord(
                     filter = VoidPredicate.INSTANCE
                 )
                 docLibRecords.getChildren(
-                    query, listOf(
+                    query,
+                    listOf(
                         SortBy("_name", true)
-                    ), 0, -1
+                    ),
+                    0,
+                    -1
                 )
             }
             ATT_NODE_TYPE -> nodeType

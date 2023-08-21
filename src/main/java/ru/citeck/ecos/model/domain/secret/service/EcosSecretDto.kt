@@ -5,7 +5,6 @@ import ecos.com.fasterxml.jackson210.databind.annotation.JsonPOJOBuilder
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.commons.json.serialization.annotation.IncludeNonDefault
-import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncDef
 
 @IncludeNonDefault
 @JsonDeserialize(builder = EcosSecretDto.Builder::class)

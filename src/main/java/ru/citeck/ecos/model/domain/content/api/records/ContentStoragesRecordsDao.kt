@@ -131,5 +131,4 @@ class ContentStoragesRecordsDao(
         @AttName("_type?localId")
         val type: String
     )
-
 }

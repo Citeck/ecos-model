@@ -16,7 +16,7 @@ class DocLibRecordId(
                 return DocLibRecordId("", EntityRef.EMPTY)
             }
             if (!id.contains(TYPE_DELIM)) {
-                return DocLibRecordId( "", EntityRef.EMPTY)
+                return DocLibRecordId("", EntityRef.EMPTY)
             }
             val delimIdx = id.indexOf(TYPE_DELIM)
             if (delimIdx <= 0) {

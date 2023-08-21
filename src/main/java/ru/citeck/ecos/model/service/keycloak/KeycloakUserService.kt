@@ -88,7 +88,6 @@ class KeycloakUserService(
             user.requiredActions = requiredActions
 
             realmResource.users().create(user)
-
         } else {
 
             val userToUpdate = users[0]
@@ -123,7 +122,7 @@ class KeycloakUserService(
         if (!props.enabled) {
             throw IllegalStateException(
                 "Cannot update user password for '$userName'. " +
-                "Keycloak integration is disabled."
+                    "Keycloak integration is disabled."
             )
         }
         if (!checkUserAuth(userName)) {

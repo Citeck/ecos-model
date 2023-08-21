@@ -155,13 +155,15 @@ class DocLibRecords @Autowired constructor(
         var recsQuery = RecordsQuery.create {
             withLanguage(PredicateService.LANGUAGE_PREDICATE)
             withQuery(filterPredicate)
-            withSortBy(normalizedSorting.mapNotNull {
-                when (it.attribute) {
-                    DocLibRecord.ATT_NODE_TYPE -> null
-                    "?disp" -> SortBy("_name", it.ascending)
-                    else -> it
+            withSortBy(
+                normalizedSorting.mapNotNull {
+                    when (it.attribute) {
+                        DocLibRecord.ATT_NODE_TYPE -> null
+                        "?disp" -> SortBy("_name", it.ascending)
+                        else -> it
+                    }
                 }
-            })
+            )
             withSkipCount(innerQuerySkipCount)
             withMaxItems(innerQueryMaxItems)
         }
