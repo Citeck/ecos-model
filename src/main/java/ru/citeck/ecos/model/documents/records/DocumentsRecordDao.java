@@ -2,7 +2,6 @@ package ru.citeck.ecos.model.documents.records;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
@@ -95,6 +94,11 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
 
         if (typesRefs.isEmpty()) {
             return Collections.emptyList();
+        }
+
+        if (typesRefs.size() == 1 && (typesRefs.contains("emodel/type@user-base") || typesRefs.contains("emodel/type@base"))) {
+            List<EntityRef> documents = recordsService.getAtt(recordRef, "docs:documents[]{?id}").toList(EntityRef.class);
+            return new TypeDocumentsRecord(typesRefs.get(0), documents);
         }
 
         Map<String, List<String>> sortedTypesRefs = new HashMap<>();
