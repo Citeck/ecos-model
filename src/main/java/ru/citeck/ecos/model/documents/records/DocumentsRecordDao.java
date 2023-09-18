@@ -163,10 +163,11 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
                                                          List<String> types) {
         List<TypeDocumentsRecord> typeDocumentsList = new ArrayList<>();
         if (sourceId.isEmpty()) {
-            List<EntityRef> documents = recordsService.getAtt(recordRef, "docs:documents[]{?id}").toList(EntityRef.class);
+            ChildDocumentsList documents = recordsService.getAtts(recordRef, ChildDocumentsList.class);
             types.forEach(type -> {
-                    List<EntityRef> childDocuments = documents.stream()
-                        .filter(ref -> typeRefService.isSubType(EntityRef.valueOf(recordsService.getAtt(ref, "_type?id")), EntityRef.valueOf(type)))
+                    List<EntityRef> childDocuments = documents.getDocuments().stream()
+                        .filter(doc -> typeRefService.isSubType(doc.getType(), EntityRef.valueOf(type)))
+                        .map(ChildDocumentAtts::getId)
                         .collect(Collectors.toList());
                     typeDocumentsList.add(new TypeDocumentsRecord(type, childDocuments));
                 }
@@ -243,3 +244,17 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
         private EntityRef type;
     }
 }
+
+@Data
+class ChildDocumentsList {
+    @AttName("docs:documents")
+    private List<ChildDocumentAtts> documents;
+}
+
+@Data
+class ChildDocumentAtts {
+    EntityRef id;
+    @AttName("_type?id")
+    EntityRef type;
+}
+
