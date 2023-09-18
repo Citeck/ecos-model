@@ -22,7 +22,6 @@
       "hrdl:reiGender": "Пол",
       "city": "Город",
       "jobtitle": "Должность",
-      "lineManager": "Линейный руководитель",
       "sex": "Пол",
       "organization": "Компания",
       "Male": "Мужской",
@@ -41,7 +40,6 @@
       "hrdl:reiGender": "Gender",
       "city": "City",
       "jobtitle": "Job title",
-      "lineManager": "Line manager",
       "sex": "Sex",
       "organization": "Company",
       "Male": "Male",
@@ -294,7 +292,8 @@
                   },
                   {
                     "label": {
-                      "ru": "lineManager"
+                      "ru": "Линейный руководитель",
+                      "en": "Line manager"
                     },
                     "key": "manager",
                     "refreshOn": [],
