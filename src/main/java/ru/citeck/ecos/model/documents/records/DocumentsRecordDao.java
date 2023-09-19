@@ -2,7 +2,6 @@ package ru.citeck.ecos.model.documents.records;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
@@ -18,6 +17,7 @@ import ru.citeck.ecos.records3.record.atts.value.AttValue;
 import ru.citeck.ecos.records3.record.atts.value.impl.AttValueDelegate;
 import ru.citeck.ecos.records3.record.atts.value.impl.InnerAttValue;
 import ru.citeck.ecos.records3.record.dao.AbstractRecordsDao;
+import ru.citeck.ecos.model.lib.type.service.TypeRefService;
 import ru.citeck.ecos.records3.record.dao.query.RecordsQueryDao;
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery;
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes;
@@ -41,9 +41,12 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
     static {
         SOURCE_ID_MAPPING = new HashMap<>();
         SOURCE_ID_MAPPING.put(ALF_NODES_SOURCE_ID + "@", ALF_NODES_SOURCE_ID);
+        SOURCE_ID_MAPPING.put(AppName.EMODEL + "/user-base", "");
+        SOURCE_ID_MAPPING.put(AppName.EMODEL + "/document", "");
     }
 
     private final EcosRemoteWebAppsApi ecosWebAppsApi;
+    private final TypeRefService typeRefService;
 
     @Nullable
     @Override
@@ -105,10 +108,8 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
         typeRefsAtts.forEach(type -> {
             String sourceId = type.get("sourceId").asText();
             sourceId = SOURCE_ID_MAPPING.getOrDefault(sourceId, sourceId);
-            if (sourceId.contains("/")) {
-                sortedTypesRefs.computeIfAbsent(sourceId, srcId -> new ArrayList<>())
-                    .add(TypeUtils.getTypeRef(type.getId().getLocalId()).toString());
-            }
+            sortedTypesRefs.computeIfAbsent(sourceId, srcId -> new ArrayList<>())
+                .add(TypeUtils.getTypeRef(type.getId().getLocalId()).toString());
         });
 
         sortedTypesRefs.forEach((sourceId, typesList) -> {
@@ -160,6 +161,20 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
     private List<TypeDocumentsRecord> getRecordsForTypes(String sourceId,
                                                          RecordRef recordRef,
                                                          List<String> types) {
+        List<TypeDocumentsRecord> typeDocumentsList = new ArrayList<>();
+        if (sourceId.isEmpty()) {
+            ChildDocumentsList documents = recordsService.getAtts(recordRef, ChildDocumentsList.class);
+            types.forEach(type -> {
+                    List<EntityRef> childDocuments = documents.getDocuments().stream()
+                        .filter(doc -> typeRefService.isSubType(doc.getType(), EntityRef.valueOf(type)))
+                        .map(ChildDocumentAtts::getId)
+                        .collect(Collectors.toList());
+                    typeDocumentsList.add(new TypeDocumentsRecord(type, childDocuments));
+                }
+            );
+            return typeDocumentsList;
+        }
+
         RecordsQuery query = RecordsQuery.create()
             .withSourceId(sourceId)
             .withQuery(Predicates.and(
@@ -168,8 +183,6 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
             ))
             .build();
         RecsQueryRes<DocumentRefWithType> documents = recordsService.query(query, DocumentRefWithType.class);
-
-        List<TypeDocumentsRecord> typeDocumentsList = new ArrayList<>();
 
         types.forEach(type -> typeDocumentsList.add(new TypeDocumentsRecord(type, documents.getRecords().stream()
             .filter(doc -> doc.getType().toString().equals(type))
@@ -231,3 +244,17 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
         private EntityRef type;
     }
 }
+
+@Data
+class ChildDocumentsList {
+    @AttName("docs:documents")
+    private List<ChildDocumentAtts> documents;
+}
+
+@Data
+class ChildDocumentAtts {
+    EntityRef id;
+    @AttName("_type?id")
+    EntityRef type;
+}
+
