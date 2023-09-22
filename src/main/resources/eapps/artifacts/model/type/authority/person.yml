@@ -40,6 +40,11 @@ model:
       name:
         ru: Должность
         en: Job Title
+    - id: manager
+      name:
+        ru: Линейный руководитель
+        en: Line manager
+      type: PERSON
     - id: employeeId
       name:
         ru: Табельный номер

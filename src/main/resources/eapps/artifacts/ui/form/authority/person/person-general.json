@@ -289,6 +289,18 @@
                     },
                     "type": "textfield",
                     "input": true
+                  },
+                  {
+                    "label": {
+                      "ru": "Линейный руководитель",
+                      "en": "Line manager"
+                    },
+                    "key": "manager",
+                    "refreshOn": [],
+                    "optionalWhenDisabled": false,
+                    "type": "selectOrgstruct",
+                    "input": true,
+                    "defaultValue": ""
                   }
                 ]
               },
