@@ -1,10 +1,10 @@
 package ru.citeck.ecos.model.domain.endpoint.api.webapi
 
 import org.springframework.stereotype.Component
+import ru.citeck.ecos.endpoints.lib.EcosEndpoints
 import ru.citeck.ecos.webapp.api.web.executor.EcosWebExecutor
 import ru.citeck.ecos.webapp.api.web.executor.EcosWebExecutorReq
 import ru.citeck.ecos.webapp.api.web.executor.EcosWebExecutorResp
-import ru.citeck.ecos.webapp.lib.endpoint.EcosEndpoints
 import ru.citeck.ecos.webapp.lib.endpoint.provider.ModelEcosEndpointsProvider
 
 @Component

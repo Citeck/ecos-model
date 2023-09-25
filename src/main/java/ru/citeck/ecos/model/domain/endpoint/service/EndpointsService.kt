@@ -1,6 +1,7 @@
 package ru.citeck.ecos.model.domain.endpoint.service
 
 import org.springframework.context.annotation.Configuration
+import ru.citeck.ecos.endpoints.lib.EcosEndpointImpl
 import ru.citeck.ecos.events2.EventsService
 import ru.citeck.ecos.events2.emitter.EventsEmitter
 import ru.citeck.ecos.events2.type.RecordChangedEvent
@@ -9,7 +10,6 @@ import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.webapp.api.entity.EntityRef
-import ru.citeck.ecos.webapp.lib.endpoint.EcosEndpointImpl
 import ru.citeck.ecos.webapp.lib.endpoint.event.EndpointChangedEvent
 import ru.citeck.ecos.webapp.lib.endpoint.provider.ModelEcosEndpointsProvider
 import java.util.concurrent.CopyOnWriteArrayList
