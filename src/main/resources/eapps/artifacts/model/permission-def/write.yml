@@ -1,0 +1,8 @@
+---
+id: write
+name:
+  ru: Право на изменение (write)
+  en: Permission to change (write)
+
+appliesToTypes:
+  - emodel/type@base

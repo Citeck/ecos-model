@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class TypePermsModuleHandler implements EcosArtifactHandler<TypePermsDef> {
+public class TypePermsArtifactHandler implements EcosArtifactHandler<TypePermsDef> {
 
     private final TypePermsService typePermsService;
 

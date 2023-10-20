@@ -1,0 +1,37 @@
+---
+id: permission-def
+name:
+  ru: Описание права
+  en: Permission definition
+
+system: true
+sourceId: emodel/permission-def
+
+formRef: uiserv/form@permission-def
+journalRef: uiserv/journal@DEFAULT_JOURNAL
+
+defaultCreateVariant: true
+
+queryPermsPolicy: PUBLIC
+
+actions:
+  - uiserv/action@edit-json
+  - uiserv/action@edit
+  - uiserv/action@download-text-yml
+  - uiserv/action@delete
+
+model:
+  attributes:
+    - id: name
+      name:
+        ru: Имя
+        en: Name
+      type: MLTEXT
+    - id: appliesToTypes
+      name:
+        ru: Применимо к типам
+        en: Applies to types
+      type: ASSOC
+      multiple: true
+      config:
+        typeRef: emodel/type@type

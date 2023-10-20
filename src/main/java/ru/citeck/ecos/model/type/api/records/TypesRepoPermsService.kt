@@ -1,0 +1,135 @@
+package ru.citeck.ecos.model.type.api.records
+
+import org.springframework.stereotype.Service
+import ru.citeck.ecos.context.lib.auth.AuthContext
+import ru.citeck.ecos.context.lib.auth.AuthRole
+import ru.citeck.ecos.model.type.service.TypesService
+import ru.citeck.ecos.records2.RecordConstants
+import ru.citeck.ecos.records3.record.atts.schema.ScalarType
+import ru.citeck.ecos.webapp.api.entity.EntityRef
+import ru.citeck.ecos.webapp.api.properties.EcosWebAppProps
+import ru.citeck.ecos.webapp.lib.perms.EcosPermissionsService
+import ru.citeck.ecos.webapp.lib.perms.RecordPerms
+import ru.citeck.ecos.webapp.lib.perms.RecordPermsContext
+import ru.citeck.ecos.webapp.lib.perms.component.RecordPermsComponent
+import ru.citeck.ecos.webapp.lib.perms.component.RecordPermsData
+
+@Service
+class TypesRepoPermsService(
+    val typesService: TypesService,
+    val webAppProps: EcosWebAppProps,
+    ecosPermissionsService: EcosPermissionsService
+) {
+
+    companion object {
+        private const val PERMISSION_CREATE_CHILDREN = "create-children"
+        private const val PERMISSION_DELETE = "delete"
+        private const val PERMISSION_WRITE = "write"
+
+        private const val ATT_CREATOR_USERNAME = RecordConstants.ATT_CREATOR + ScalarType.LOCAL_ID_SCHEMA
+    }
+
+    private val permsCalculator = ecosPermissionsService.createCalculator()
+        .addComponent(object : RecordPermsComponent {
+            override fun getOrder(): Float {
+                return Float.MAX_VALUE
+            }
+
+            override fun getPerms(context: RecordPermsContext): RecordPermsData {
+                val authorities = context.getAuthorities()
+                val creator = context.getRecord().getAtt(ATT_CREATOR_USERNAME).asText()
+                return DefaultPerms(
+                    authorities.contains(AuthRole.ADMIN) ||
+                        authorities.contains(AuthRole.SYSTEM) ||
+                        creator == context.getUser()
+                )
+            }
+        })
+        .build()
+
+    fun getPermissions(record: Any): RecordPerms {
+        return permsCalculator.getPermissions(record)
+    }
+
+    fun checkMutationPermissions(record: TypesRepoRecordsMutDao.TypeMutRecord) {
+
+        if (AuthContext.isRunAsSystemOrAdmin()) {
+            return
+        }
+
+        val parentBefore = getRepoRef(record.baseTypeDef.parentRef)
+        val parentAfter = getRepoRef(record.parentRef)
+
+        if (record.isNewRec() || parentBefore != parentAfter) {
+            val parentPerms = permsCalculator.getPermissions(parentAfter)
+            if (!parentPerms.hasPermission(PERMISSION_CREATE_CHILDREN)) {
+                throwPermissionDenied(PERMISSION_CREATE_CHILDREN)
+            }
+        }
+
+        if (!record.isNewRec()) {
+            val perms = permsCalculator.getPermissions(getRepoRef(record.id))
+            if (perms.hasWritePerms()) {
+                return
+            }
+            val currentDef = typesService.getByIdWithMetaOrNull(record.id)
+            val creator = currentDef?.meta?.creator ?: ""
+            if (creator.isBlank() || creator != AuthContext.getCurrentUser()) {
+                throwPermissionDenied(PERMISSION_WRITE)
+            }
+        }
+    }
+
+    fun checkDeletePermissions(typeId: String) {
+        if (AuthContext.isRunAsSystemOrAdmin()) {
+            return
+        }
+        val perms = permsCalculator.getPermissions(getRepoRef(typeId))
+        if (perms.hasWritePerms()) {
+            return
+        }
+        val currentDef = typesService.getByIdWithMetaOrNull(typeId)
+        if (currentDef == null) {
+            throwPermissionDenied(PERMISSION_DELETE)
+        } else if (currentDef.meta.creator == AuthContext.getCurrentUser()) {
+            return
+        }
+        throwPermissionDenied(PERMISSION_DELETE)
+    }
+
+    fun throwPermissionDenied(permission: String) {
+        error("Permission denied: $permission")
+    }
+
+    private fun getRepoRef(ref: Any): EntityRef {
+        val typeId = when (ref) {
+            is EntityRef -> ref.getLocalId().ifBlank { "base" }
+            is String -> ref
+            else -> error("invalid ref: $ref")
+        }
+        return EntityRef.create(webAppProps.appName, TypesRepoRecordsDao.ID, typeId)
+    }
+
+    private class DefaultPerms(
+        private val hasWritePerms: Boolean
+    ) : RecordPermsData {
+        override fun getAdditionalPerms(): Set<String> {
+            return emptySet()
+        }
+        override fun getAuthoritiesWithReadPermission(): Set<String> {
+            return emptySet()
+        }
+        override fun hasAttReadPerms(name: String): Boolean {
+            return true
+        }
+        override fun hasAttWritePerms(name: String): Boolean {
+            return hasWritePerms
+        }
+        override fun hasReadPerms(): Boolean {
+            return true
+        }
+        override fun hasWritePerms(): Boolean {
+            return hasWritePerms
+        }
+    }
+}

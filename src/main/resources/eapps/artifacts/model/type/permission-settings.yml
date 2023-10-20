@@ -1,0 +1,42 @@
+---
+id: permission-settings
+name:
+  ru: Настройка прав
+  en: Permission settings
+
+system: true
+sourceId: emodel/permission-settings
+
+formRef: uiserv/form@permission-settings
+journalRef: uiserv/journal@DEFAULT_JOURNAL
+
+queryPermsPolicy: PUBLIC
+
+actions:
+  - uiserv/action@edit-json
+  - uiserv/action@edit
+  - uiserv/action@download-text-yml
+  - uiserv/action@delete
+
+model:
+  attributes:
+    - id: recordRef
+      name:
+        ru: Запись
+        en: Record
+      type: ASSOC
+      config:
+        typeRef: "emodel/type@base"
+      index:
+        enabled: true
+    - id: inherit
+      name:
+        ru: Наследовать права
+        en: Inherit permissions
+      type: BOOLEAN
+    - id: settings
+      name:
+        ru: Настройки прав
+        en: Permission settings
+      multiple: true
+      type: JSON

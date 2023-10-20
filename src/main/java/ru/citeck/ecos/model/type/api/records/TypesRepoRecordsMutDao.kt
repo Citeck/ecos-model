@@ -1,8 +1,6 @@
 package ru.citeck.ecos.model.type.api.records
 
-import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
-import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
 import ru.citeck.ecos.model.lib.procstages.dto.ProcStageDef
 import ru.citeck.ecos.model.lib.role.dto.RoleDef
@@ -16,12 +14,12 @@ import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 
 @Component
 class TypesRepoRecordsMutDao(
-    private val typeService: TypesService
+    private val typeService: TypesService,
+    private val typesRepoPermsService: TypesRepoPermsService? = null
 ) : RecordMutateDtoDao<TypesRepoRecordsMutDao.TypeMutRecord>, RecordDeleteDao {
 
     override fun getId() = "types-repo"
 
-    @Secured(AuthRole.ADMIN, AuthRole.SYSTEM)
     override fun getRecToMutate(recordId: String): TypeMutRecord {
         if (recordId.isEmpty()) {
             return TypeMutRecord(TypeDef.EMPTY)
@@ -29,7 +27,6 @@ class TypesRepoRecordsMutDao(
         return TypeMutRecord(typeService.getById(recordId))
     }
 
-    @Secured(AuthRole.ADMIN, AuthRole.SYSTEM)
     override fun saveMutatedRec(record: TypeMutRecord): String {
 
         val newTypeDef = record.build()
@@ -38,18 +35,25 @@ class TypesRepoRecordsMutDao(
             error("Type identifier is empty")
         }
 
+        typesRepoPermsService?.checkMutationPermissions(record)
+
         val baseId = record.baseTypeDef.id
         val clonedRecord = baseId.isNotEmpty() && baseId != newTypeDef.id
+
         return typeService.save(newTypeDef, clonedRecord).id
     }
 
-    @Secured("ROLE_ADMIN")
     override fun delete(recordId: String): DelStatus {
+        typesRepoPermsService?.checkDeletePermissions(recordId)
         typeService.delete(recordId)
         return DelStatus.OK
     }
 
     class TypeMutRecord(val baseTypeDef: TypeDef) : TypeDef.Builder(baseTypeDef) {
+
+        fun isNewRec(): Boolean {
+            return this.id != baseTypeDef.id
+        }
 
         fun withLocalId(localId: String) {
             this.withId(localId)

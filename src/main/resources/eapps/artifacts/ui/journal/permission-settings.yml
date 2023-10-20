@@ -1,0 +1,17 @@
+---
+id: permission-settings
+name:
+  ru: Настройка прав
+  en: Permission settings
+typeRef: emodel/type@permission-settings
+columns:
+  - id: recordRef
+    name:
+      ru: Запись
+      en: Record
+    type: ASSOC
+  - id: inherit
+    name:
+      ru: Наследовать права
+      en: Inherit permissions
+    type: BOOLEAN

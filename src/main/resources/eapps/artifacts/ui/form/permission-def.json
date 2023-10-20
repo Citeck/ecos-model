@@ -1,0 +1,145 @@
+{
+  "id": "permission-def",
+  "title": {
+    "ru": "Описание права",
+    "en": "Permission definition"
+  },
+  "description": {},
+  "customModule": "",
+  "typeRef": "",
+  "width": "m",
+  "system": false,
+  "i18n": {},
+  "definition": {
+    "components": [
+      {
+        "label": {
+          "en": "id",
+          "ru": "Индентификатор"
+        },
+        "key": "id",
+        "validate": {
+          "required": true,
+          "pattern": "[\\w-]+",
+          "minLength": 3,
+          "maxLength": 100
+        },
+        "defaultValue": "",
+        "refreshOn": [],
+        "optionalWhenDisabled": false,
+        "logic": [
+          {
+            "name": "disable-on-edit",
+            "trigger": {
+              "type": "javascript",
+              "javascript": "result = instance.options.formMode != 'CREATE';"
+            },
+            "actions": [
+              {
+                "name": "disable",
+                "type": "property",
+                "property": {
+                  "label": "Disabled",
+                  "value": "disabled",
+                  "type": "boolean"
+                },
+                "state": "true"
+              }
+            ]
+          }
+        ],
+        "type": "textfield",
+        "input": true,
+        "inputMasks": [
+          {}
+        ]
+      },
+      {
+        "label": {
+          "ru": "Имя",
+          "en": "Name"
+        },
+        "key": "name",
+        "refreshOn": [],
+        "optionalWhenDisabled": false,
+        "type": "mlText",
+        "input": true
+      },
+      {
+        "type": "selectJournal",
+        "input": true,
+        "multiple": true,
+        "journalId": "ecos-types",
+        "key": "appliesToTypes",
+        "label": {
+          "ru": "Применимо к типам",
+          "en": "Applies to types"
+        }
+      },
+      {
+        "type": "columns",
+        "key": "buttons-columns",
+        "columns": [
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 0,
+            "components": [],
+            "key": "column"
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 1,
+            "key": "column",
+            "components": []
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 2,
+            "components": [
+              {
+                "type": "button",
+                "key": "cancel",
+                "label": {
+                  "ru": "Отменить",
+                  "en": "Cancel"
+                },
+                "action": "event",
+                "event": "cancel",
+                "block": true,
+                "input": true
+              }
+            ],
+            "key": "column"
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 3,
+            "components": [
+              {
+                "type": "button",
+                "theme": "primary",
+                "key": "submit",
+                "label": {
+                  "ru": "Сохранить",
+                  "en": "Save"
+                },
+                "block": true,
+                "input": true
+              }
+            ],
+            "key": "column"
+          }
+        ],
+        "input": false
+      }
+    ]
+  }
+}

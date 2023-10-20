@@ -1,0 +1,186 @@
+{
+  "id": "permission-settings",
+  "title": {
+    "ru": "Настройка прав",
+    "en": "Permission settings"
+  },
+  "description": {},
+  "customModule": "",
+  "typeRef": "",
+  "width": "extra-lg",
+  "system": false,
+  "i18n": {},
+  "definition": {
+    "components": [
+      {
+        "label": {
+          "en": "Record",
+          "ru": "Запись"
+        },
+        "key": "recordRef",
+        "disabled": true,
+        "modalTitle": "",
+        "journalId": "",
+        "source": {
+          "type": "journal",
+          "custom": {
+            "columns": []
+          },
+          "customValues": []
+        },
+        "refreshOn": [],
+        "optionalWhenDisabled": false,
+        "type": "selectJournal",
+        "input": true
+      },
+      {
+        "type": "checkbox",
+        "input": true,
+        "key": "inherit",
+        "label": {
+          "ru": "Наследовать права",
+          "en": "Inherit permissions"
+        }
+      },
+      {
+        "label": {
+          "en": "Data Grid"
+        },
+        "key": "settings",
+        "hideLabel": true,
+        "multiple": true,
+        "validate": {
+          "minLength": "",
+          "maxLength": ""
+        },
+        "disableAddingRemovingRows": false,
+        "addAnotherPosition": "bottom",
+        "removePlacement": "col",
+        "defaultOpen": false,
+        "layoutFixed": false,
+        "enableRowGroups": false,
+        "reorder": false,
+        "defaultValue": [
+          {
+            "permissions": "",
+            "authorities": [],
+            "roles": []
+          }
+        ],
+        "refreshOn": [],
+        "optionalWhenDisabled": false,
+        "type": "datagrid",
+        "input": true,
+        "components": [
+          {
+            "label": {
+              "en": "Permissions",
+              "ru": "Права"
+            },
+            "key": "permissions",
+            "multiple": true,
+            "modalTitle": "",
+            "journalId": "permission-def",
+            "queryData": "",
+            "refreshOn": [],
+            "optionalWhenDisabled": false,
+            "type": "selectJournal",
+            "input": true,
+            "row": "0-0",
+            "source": {
+              "custom": {
+                "columns": []
+              },
+              "type": "journal",
+              "customValues": []
+            }
+          },
+          {
+            "label": {
+              "en": "Groups or users",
+              "ru": "Группы или люди"
+            },
+            "key": "authorities",
+            "multiple": true,
+            "reorder": false,
+            "isIncludedAdminGroup": true,
+            "dataType": "authority",
+            "defaultValue": [],
+            "refreshOn": [],
+            "optionalWhenDisabled": false,
+            "type": "selectOrgstruct",
+            "input": true,
+            "row": "0-1"
+          }
+        ],
+        "rowGroups": [
+          {}
+        ]
+      },
+      {
+        "type": "columns",
+        "key": "buttons-columns",
+        "columns": [
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 0,
+            "components": [],
+            "key": "column"
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 1,
+            "key": "column",
+            "components": []
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 2,
+            "components": [
+              {
+                "type": "button",
+                "key": "cancel",
+                "label": {
+                  "ru": "Отменить",
+                  "en": "Cancel"
+                },
+                "action": "event",
+                "event": "cancel",
+                "block": true,
+                "input": true
+              }
+            ],
+            "key": "column"
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 3,
+            "components": [
+              {
+                "type": "button",
+                "theme": "primary",
+                "key": "submit",
+                "label": {
+                  "ru": "Сохранить",
+                  "en": "Save"
+                },
+                "block": true,
+                "input": true
+              }
+            ],
+            "key": "column"
+          }
+        ],
+        "input": false
+      }
+    ]
+  }
+}

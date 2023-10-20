@@ -1,0 +1,21 @@
+---
+id: permission-def
+name:
+  ru: Описание права
+  en: Permission definition
+typeRef: emodel/type@permission-def
+columns:
+  - id: id
+    name:
+      ru: Идентификатор
+      en: Identifier
+  - id: name
+    name:
+      ru: Имя
+      en: Name
+    type: MLTEXT
+  - id: appliesToTypes
+    name:
+      ru: Применимо к типам
+      en: Applies to types
+    type: ASSOC

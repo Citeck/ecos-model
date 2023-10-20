@@ -22,6 +22,8 @@ interface TypesService {
 
     fun getAll(max: Int, skip: Int): List<TypeDef>
 
+    fun getAllWithMeta(max: Int, skip: Int): List<EntityWithMeta<TypeDef>>
+
     fun getAll(max: Int, skip: Int, predicate: Predicate): List<TypeDef>
 
     fun getAll(): List<TypeDef>
@@ -31,6 +33,8 @@ interface TypesService {
     fun getAll(typeIds: Collection<String>): List<TypeDef>
 
     fun getAllWithMeta(typeIds: Collection<String>): List<EntityWithMeta<TypeDef>>
+
+    fun getAllWithMeta(max: Int, skip: Int, predicate: Predicate, sort: List<SortBy>): List<EntityWithMeta<TypeDef>>
 
     fun getAll(max: Int, skip: Int, predicate: Predicate, sort: List<SortBy>): List<TypeDef>
 

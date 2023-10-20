@@ -1,0 +1,13 @@
+{
+  "id": "edit-permissions",
+  "name": {
+    "en": "Edit permissions",
+    "ru": "Редактировать права"
+  },
+  "type": "edit-permissions",
+  "predicate": {
+    "t": "eq",
+    "a": "$user.authorities._has.ROLE_ADMIN",
+    "v": true
+  }
+}

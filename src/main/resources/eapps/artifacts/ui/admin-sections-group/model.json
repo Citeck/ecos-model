@@ -53,6 +53,18 @@
       "config": {
         "journalId": "ecos-secrets"
       }
+    },
+    {
+      "type": "JOURNAL",
+      "config": {
+        "journalId": "permission-settings"
+      }
+    },
+    {
+      "type": "JOURNAL",
+      "config": {
+        "journalId": "permission-def"
+      }
     }
   ]
 }

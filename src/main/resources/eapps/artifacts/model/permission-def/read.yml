@@ -1,0 +1,8 @@
+---
+id: read
+name:
+  ru: Право на чтение (read)
+  en: Permission to read (read)
+
+appliesToTypes:
+  - emodel/type@base

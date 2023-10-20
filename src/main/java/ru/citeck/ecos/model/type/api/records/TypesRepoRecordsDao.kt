@@ -3,15 +3,21 @@ package ru.citeck.ecos.model.type.api.records
 import ecos.com.fasterxml.jackson210.databind.JsonNode
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.data.MLText
+import ru.citeck.ecos.commons.data.entity.EntityMeta
+import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.commons.json.Json.mapper
 import ru.citeck.ecos.commons.json.YamlUtils
 import ru.citeck.ecos.events2.type.RecordEventsService
+import ru.citeck.ecos.model.lib.authorities.AuthorityType
+import ru.citeck.ecos.model.lib.permissions.dto.PermissionType
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
+import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.predicate.PredicateService
 import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
+import ru.citeck.ecos.records3.record.atts.value.AttValue
 import ru.citeck.ecos.records3.record.dao.AbstractRecordsDao
 import ru.citeck.ecos.records3.record.dao.atts.RecordAttsDao
 import ru.citeck.ecos.records3.record.dao.query.RecordsQueryDao
@@ -19,12 +25,15 @@ import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
+import ru.citeck.ecos.webapp.lib.perms.RecordPerms
 import java.nio.charset.StandardCharsets
+import java.time.Instant
 
 @Component
 class TypesRepoRecordsDao(
     private val typeService: TypesService,
-    private val recordEventsService: RecordEventsService? = null
+    private val recordEventsService: RecordEventsService? = null,
+    private val typesRepoPermsService: TypesRepoPermsService? = null
 ) : AbstractRecordsDao(), RecordsQueryDao, RecordAttsDao {
 
     companion object {
@@ -32,7 +41,7 @@ class TypesRepoRecordsDao(
     }
 
     init {
-        typeService.addListener { before, after ->
+        typeService.addListenerWithMeta { before, after ->
             if (after != null) {
                 onTypeDefChanged(before, after)
             }
@@ -51,25 +60,25 @@ class TypesRepoRecordsDao(
 
                 val predicate = recsQuery.getQuery(Predicate::class.java)
 
-                val types = typeService.getAll(
+                val types = typeService.getAllWithMeta(
                     recsQuery.page.maxItems,
                     recsQuery.page.skipCount,
                     predicate,
                     recsQuery.sortBy
                 )
 
-                result.setRecords(types.map { TypeRecord(it, typeService) })
+                result.setRecords(types.map { TypeRecord(it.entity, it.meta, typeService) })
                 result.setTotalCount(typeService.getCount(predicate))
             }
             else -> {
 
                 val max: Int = recsQuery.page.maxItems
                 val types = if (max < 0) {
-                    typeService.getAll()
+                    typeService.getAllWithMeta()
                 } else {
-                    typeService.getAll(max, recsQuery.page.skipCount)
+                    typeService.getAllWithMeta(max, recsQuery.page.skipCount)
                 }
-                result.setRecords(types.map { TypeRecord(it, typeService) })
+                result.setRecords(types.map { TypeRecord(it.entity, it.meta, typeService) })
             }
         }
 
@@ -77,19 +86,22 @@ class TypesRepoRecordsDao(
     }
 
     override fun getRecordAtts(recordId: String): TypeRecord? {
-        return typeService.getByIdOrNull(recordId)?.let { TypeRecord(it, typeService) }
-    }
-
-    private fun onTypeDefChanged(before: TypeDef?, after: TypeDef) {
-        recordEventsService?.emitRecChanged(before, after, getId()) {
-            TypeRecord(it, typeService)
+        return typeService.getByIdWithMetaOrNull(recordId)?.let {
+            TypeRecord(it.entity, it.meta, typeService)
         }
     }
 
-    class TypeRecord(
+    private fun onTypeDefChanged(before: EntityWithMeta<TypeDef>?, after: EntityWithMeta<TypeDef>) {
+        recordEventsService?.emitRecChanged(before, after, getId()) {
+            TypeRecord(it.entity, it.meta, typeService)
+        }
+    }
+
+    inner class TypeRecord(
         @AttName("...")
         val typeDef: TypeDef,
-        val typeService: TypesService
+        private val audit: EntityMeta,
+        private val typeService: TypesService
     ) {
 
         fun getFormRef(): EntityRef {
@@ -126,6 +138,41 @@ class TypesRepoRecordsDao(
         @AttName("_type")
         fun getEcosType(): EntityRef {
             return ModelUtils.getTypeRef("type")
+        }
+
+        fun getPermissions(): Any? {
+            return typesRepoPermsService?.let {
+                PermissionsValue(it.getPermissions(this))
+            }
+        }
+
+        @AttName(RecordConstants.ATT_CREATOR)
+        fun getCreator(): EntityRef {
+            return AuthorityType.PERSON.getRef(audit.creator)
+        }
+
+        @AttName(RecordConstants.ATT_MODIFIER)
+        fun getModifier(): EntityRef {
+            return AuthorityType.PERSON.getRef(audit.modifier)
+        }
+
+        @AttName(RecordConstants.ATT_MODIFIED)
+        fun getModified(): Instant {
+            return audit.modified
+        }
+
+        @AttName(RecordConstants.ATT_CREATED)
+        fun getCreated(): Instant {
+            return audit.created
+        }
+
+        private inner class PermissionsValue(val perms: RecordPerms) : AttValue {
+            override fun has(name: String): Boolean {
+                if (name.equals(PermissionType.READ.name, true)) {
+                    return true
+                }
+                return perms.hasPermission(name)
+            }
         }
     }
 }

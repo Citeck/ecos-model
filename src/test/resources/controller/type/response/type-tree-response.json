@@ -1,5 +1,5 @@
 {
-    "id": "type@type-tree",
+    "id": "emodel/type@type-tree",
     "attributes": {
         "name": "test-type",
         "description": "some description",

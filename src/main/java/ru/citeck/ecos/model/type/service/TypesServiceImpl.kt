@@ -67,12 +67,35 @@ class TypesServiceImpl(
             .toList()
     }
 
+    override fun getAllWithMeta(
+        max: Int,
+        skip: Int,
+        predicate: Predicate,
+        sort: List<SortBy>
+    ): List<EntityWithMeta<TypeDef>> {
+        if (max <= 0) {
+            return emptyList()
+        }
+        return typeRepoDao.findAll(predicate, max, skip, sort)
+            .map { typeConverter.toDtoWithMeta(it) }
+            .toList()
+    }
+
     override fun getAll(max: Int, skip: Int): List<TypeDef> {
         if (max <= 0) {
             return emptyList()
         }
         return typeRepoDao.findAll(VoidPredicate.INSTANCE, max, skip, emptyList())
             .map { typeConverter.toDto(it) }
+            .toList()
+    }
+
+    override fun getAllWithMeta(max: Int, skip: Int): List<EntityWithMeta<TypeDef>> {
+        if (max <= 0) {
+            return emptyList()
+        }
+        return typeRepoDao.findAll(VoidPredicate.INSTANCE, max, skip, emptyList())
+            .map { typeConverter.toDtoWithMeta(it) }
             .toList()
     }
 
