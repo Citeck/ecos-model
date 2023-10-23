@@ -11,6 +11,8 @@ import ru.citeck.ecos.webapp.api.properties.EcosWebAppProps
 import ru.citeck.ecos.webapp.lib.perms.EcosPermissionsService
 import ru.citeck.ecos.webapp.lib.perms.RecordPerms
 import ru.citeck.ecos.webapp.lib.perms.RecordPermsContext
+import ru.citeck.ecos.webapp.lib.perms.component.RecordAttsPermsComponent
+import ru.citeck.ecos.webapp.lib.perms.component.RecordAttsPermsData
 import ru.citeck.ecos.webapp.lib.perms.component.RecordPermsComponent
 import ru.citeck.ecos.webapp.lib.perms.component.RecordPermsData
 
@@ -30,19 +32,29 @@ class TypesRepoPermsService(
     }
 
     private val permsCalculator = ecosPermissionsService.createCalculator()
-        .addComponent(object : RecordPermsComponent {
+        .addComponent(object : RecordPermsComponent, RecordAttsPermsComponent {
             override fun getOrder(): Float {
                 return Float.MAX_VALUE
             }
 
-            override fun getPerms(context: RecordPermsContext): RecordPermsData {
-                val authorities = context.getAuthorities()
-                val creator = context.getRecord().getAtt(ATT_CREATOR_USERNAME).asText()
-                return DefaultPerms(
-                    authorities.contains(AuthRole.ADMIN) ||
-                        authorities.contains(AuthRole.SYSTEM) ||
-                        creator == context.getUser()
-                )
+            override fun getRecordPerms(context: RecordPermsContext): RecordPermsData {
+                return evalPerms(context)
+            }
+
+            override fun getRecordAttsPerms(context: RecordPermsContext): RecordAttsPermsData {
+                return evalPerms(context)
+            }
+
+            private fun evalPerms(context: RecordPermsContext): DefaultPerms {
+                return context.computeIfAbsent(this::class) {
+                    val authorities = context.getAuthorities()
+                    val creator = context.getRecord().getAtt(ATT_CREATOR_USERNAME).asText()
+                    DefaultPerms(
+                        authorities.contains(AuthRole.ADMIN) ||
+                            authorities.contains(AuthRole.SYSTEM) ||
+                            creator == context.getUser()
+                    )
+                }
             }
         })
         .build()
@@ -112,7 +124,7 @@ class TypesRepoPermsService(
 
     private class DefaultPerms(
         private val hasWritePerms: Boolean
-    ) : RecordPermsData {
+    ) : RecordPermsData, RecordAttsPermsData {
         override fun getAdditionalPerms(): Set<String> {
             return emptySet()
         }
