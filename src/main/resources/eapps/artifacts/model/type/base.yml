@@ -17,6 +17,10 @@ actions:
 
 journalRef: uiserv/journal@base
 
+assignablePerms:
+  - emodel/permission-def@read
+  - emodel/permission-def@write
+
 associations:
 
   - id: assoc:associatedWith

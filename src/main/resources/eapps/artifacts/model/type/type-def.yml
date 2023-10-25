@@ -10,6 +10,9 @@ sourceId: emodel/types-repo
 formRef: uiserv/form@ecos-type
 journalRef: uiserv/journal@ecos-types-def
 
+assignablePerms:
+  - emodel/permission-def@create-children
+
 defaultCreateVariant: false
 
 createVariants:

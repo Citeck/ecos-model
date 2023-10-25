@@ -206,6 +206,20 @@ class TypeDefResolver {
             resTypeDef.withQueryPermsPolicy(resolvedParentDef.queryPermsPolicy)
         }
 
+        if (resolvedParentDef.assignablePerms.isNotEmpty()) {
+            val assignablePerms = ArrayList<EntityRef>(
+                resolvedParentDef.assignablePerms.size + resTypeDef.assignablePerms.size
+            )
+            val existingPerms = HashSet(resTypeDef.assignablePerms)
+            resolvedParentDef.assignablePerms.forEach {
+                if (!existingPerms.contains(it)) {
+                    assignablePerms.add(it)
+                }
+            }
+            assignablePerms.addAll(resTypeDef.assignablePerms)
+            resTypeDef.withAssignablePerms(assignablePerms)
+        }
+
         context.types[resTypeDef.id] = resTypeDef
         return resTypeDef
     }
