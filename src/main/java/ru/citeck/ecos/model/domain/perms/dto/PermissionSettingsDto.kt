@@ -6,6 +6,7 @@ data class PermissionSettingsDto(
     val id: String,
     val recordRef: EntityRef,
     val inherit: Boolean,
+    val version: Int,
     val settings: List<PermissionSettingDto>
 ) {
     companion object {
@@ -16,5 +17,6 @@ data class PermissionSettingsDto(
         const val ATT_RECORD_REF = "recordRef"
         const val ATT_INHERIT = "inherit"
         const val ATT_SETTINGS = "settings"
+        const val ATT_VERSION = "version"
     }
 }

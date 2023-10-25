@@ -43,6 +43,7 @@ class PermissionSettingsService(
                 perms.id,
                 recordRef,
                 perms.inherit ?: true,
+                perms.version ?: 0,
                 perms.settings.map { setting ->
                     PermissionSettingDto(setting.permissions, setting.roles, setting.authorities)
                 }
@@ -55,8 +56,13 @@ class PermissionSettingsService(
             atts.id,
             atts.recordRef,
             atts.inherit ?: true,
+            atts.version ?: 0,
             atts.settings.map { setting ->
-                PermissionSettingDto(setting.permissions, setting.roles, setting.authorities)
+                PermissionSettingDto(
+                    setting.permissions,
+                    setting.roles,
+                    setting.authorities
+                )
             }
         )
     }
@@ -65,6 +71,7 @@ class PermissionSettingsService(
         val id: String,
         val recordRef: EntityRef,
         val inherit: Boolean?,
+        val version: Int?,
         val settings: List<CustomPermsSettingsAtts>
     )
 

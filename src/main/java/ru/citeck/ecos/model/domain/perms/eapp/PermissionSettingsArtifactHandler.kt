@@ -43,6 +43,7 @@ class PermissionSettingsArtifactHandler(
                         it.id,
                         it.recordRef,
                         it.inherit,
+                        it.version,
                         it.settings
                     )
                 )
@@ -61,6 +62,8 @@ class PermissionSettingsArtifactHandler(
         val recordRef: EntityRef,
         @AttName("record.inherit!true")
         val inherit: Boolean,
+        @AttName("record.version!0")
+        val version: Int,
         @AttName("record.settings[]?json!")
         val settings: List<PermissionSettingDto>
     )

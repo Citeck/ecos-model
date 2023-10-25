@@ -34,6 +34,11 @@ model:
         ru: Наследовать права
         en: Inherit permissions
       type: BOOLEAN
+    - id: version
+      name:
+        ru: Версия настроек
+        en: Settings version
+      type: NUMBER
     - id: settings
       name:
         ru: Настройки прав

@@ -65,6 +65,8 @@ class TypeEntity : AbstractAuditingEntity() {
     @Enumerated(EnumType.STRING)
     var queryPermsPolicy: QueryPermsPolicy? = null
 
+    var assignablePerms: String? = null
+
     override fun equals(other: Any?): Boolean {
         if (other !is TypeEntity) {
             return false

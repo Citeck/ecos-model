@@ -78,14 +78,15 @@ class PermissionSettingsConfig {
                     if (id.isBlank() && recordRef.isEmpty()) {
                         error("'id' or 'recordRef' should be defined")
                     }
+                    var existingPerms: PermissionSettingsDto? = null
                     if (id.isBlank()) {
-                        val existingPerms = customPermsService.getSettingsForRecord(recordRef)
+                        existingPerms = customPermsService.getSettingsForRecord(recordRef)
                         if (existingPerms != null) {
                             id = existingPerms.id
                         }
                     }
                     if (id.isNotBlank() && recordRef.isNotEmpty()) {
-                        val existingPerms = customPermsService.getSettingsForRecord(recordRef)
+                        existingPerms = customPermsService.getSettingsForRecord(recordRef)
                         if (existingPerms != null && existingPerms.recordRef != recordRef) {
                             error(
                                 "Permissions with id '$id' already " +
@@ -93,6 +94,10 @@ class PermissionSettingsConfig {
                                     "and can't be applied to '$recordRef'"
                             )
                         }
+                    }
+                    val newVersion = record.getAtt("version").asInt(0)
+                    if (existingPerms != null && newVersion <= existingPerms.version) {
+                        record.setAtt(PermissionSettingsDto.ATT_SETTINGS, existingPerms.settings)
                     }
                 }
                 return super.mutate(records)
