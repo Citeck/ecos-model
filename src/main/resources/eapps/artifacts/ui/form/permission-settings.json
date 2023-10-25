@@ -1,5 +1,6 @@
 {
   "id": "permission-settings",
+  "formKey": "",
   "title": {
     "ru": "Настройка прав",
     "en": "Permission settings"
@@ -8,7 +9,7 @@
   "customModule": "",
   "typeRef": "",
   "width": "extra-lg",
-  "system": false,
+  "system": true,
   "i18n": {},
   "definition": {
     "components": [
@@ -21,13 +22,6 @@
         "disabled": true,
         "modalTitle": "",
         "journalId": "",
-        "source": {
-          "type": "journal",
-          "custom": {
-            "columns": []
-          },
-          "customValues": []
-        },
         "refreshOn": [],
         "optionalWhenDisabled": false,
         "type": "selectJournal",
@@ -44,7 +38,7 @@
       },
       {
         "label": {
-          "en": "Data Grid"
+          "en": "Settings"
         },
         "key": "settings",
         "hideLabel": true,
@@ -59,13 +53,9 @@
         "defaultOpen": false,
         "layoutFixed": false,
         "enableRowGroups": false,
-        "reorder": false,
+        "reorder": true,
         "defaultValue": [
-          {
-            "permissions": "",
-            "authorities": [],
-            "roles": []
-          }
+          {}
         ],
         "refreshOn": [],
         "optionalWhenDisabled": false,
@@ -74,41 +64,41 @@
         "components": [
           {
             "label": {
+              "ru": "Люди или группы",
+              "en": "People or groups"
+            },
+            "key": "authorities",
+            "multiple": true,
+            "dataType": "authority",
+            "refreshOn": [],
+            "optionalWhenDisabled": false,
+            "type": "selectOrgstruct",
+            "input": true,
+            "defaultValue": "",
+            "reorder": false,
+            "row": "0-0"
+          },
+          {
+            "label": {
               "en": "Permissions",
               "ru": "Права"
             },
             "key": "permissions",
             "multiple": true,
-            "modalTitle": "",
-            "journalId": "permission-def",
-            "queryData": "",
-            "refreshOn": [],
-            "optionalWhenDisabled": false,
-            "type": "selectJournal",
-            "input": true,
-            "row": "0-0",
-            "source": {
-              "custom": {
-                "columns": []
-              },
-              "type": "journal",
-              "customValues": []
-            }
-          },
-          {
-            "label": {
-              "en": "Groups or users",
-              "ru": "Группы или люди"
-            },
-            "key": "authorities",
-            "multiple": true,
             "reorder": false,
-            "isIncludedAdminGroup": true,
-            "dataType": "authority",
+            "dataSrc": "custom",
+            "data": {
+              "custom": "debugger;\nvalues = _.get(data, 'assignablePerms.perms', []);",
+              "headers": [
+                {}
+              ]
+            },
             "defaultValue": [],
-            "refreshOn": [],
+            "refreshOn": [
+              "assignablePerms"
+            ],
             "optionalWhenDisabled": false,
-            "type": "selectOrgstruct",
+            "type": "ecosSelect",
             "input": true,
             "row": "0-1"
           }
@@ -180,6 +170,31 @@
           }
         ],
         "input": false
+      },
+      {
+        "label": "Record assignable perms",
+        "source": {
+          "type": "record",
+          "record": {
+            "id": "{{data.recordRef}}",
+            "attributes": {
+              "perms": "_type.assignablePerms[]{value:?id,label:?disp}"
+            }
+          },
+          "forceLoad": false
+        },
+        "update": {
+          "type": "once"
+        },
+        "refreshOn": [
+          {
+            "label": "recordRef",
+            "value": "recordRef"
+          }
+        ],
+        "key": "assignablePerms",
+        "type": "asyncData",
+        "input": true
       }
     ]
   }

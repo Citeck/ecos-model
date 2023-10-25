@@ -8,7 +8,7 @@
   "customModule": "",
   "typeRef": "",
   "width": "m",
-  "system": false,
+  "system": true,
   "i18n": {},
   "definition": {
     "components": [
