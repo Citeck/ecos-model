@@ -21,7 +21,7 @@
         "key": "recordRef",
         "disabled": true,
         "modalTitle": "",
-        "journalId": "",
+        "journalId": "search",
         "refreshOn": [],
         "optionalWhenDisabled": false,
         "type": "selectJournal",
