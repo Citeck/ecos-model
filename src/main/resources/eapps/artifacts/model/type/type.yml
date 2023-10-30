@@ -12,6 +12,9 @@ journalRef: uiserv/journal@ecos-types
 
 defaultCreateVariant: false
 
+assignablePerms:
+  - emodel/permission-def@create-children
+
 model:
   attributes:
     - id: name
