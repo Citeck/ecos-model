@@ -11,6 +11,7 @@ import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.api.entity.toEntityRef
 import ru.citeck.ecos.webapp.lib.perms.component.custom.CustomRecordPerms
 import ru.citeck.ecos.webapp.lib.perms.component.custom.CustomRecordPermsApi
+import ru.citeck.ecos.webapp.lib.perms.component.custom.CustomRecordPermsData
 
 @Primary
 @Component
@@ -23,14 +24,15 @@ class CustomRecordPermsApiImpl(
         private const val PARENT_REF_ATT = RecordConstants.ATT_PARENT + ScalarType.ID_SCHEMA
     }
 
-    override fun getPerms(recordRef: EntityRef): List<CustomRecordPerms> {
+    override fun getPerms(recordRef: EntityRef): CustomRecordPerms {
 
-        val result = LinkedHashSet<CustomRecordPerms>()
+        val result = LinkedHashSet<CustomRecordPermsData>()
+        val dependencies = HashSet<EntityRef>()
         fun addCustomPerms(perms: PermissionSettingsDto?) {
             perms ?: return
             result.addAll(
                 perms.settings.map { setting ->
-                    CustomRecordPerms(
+                    CustomRecordPermsData(
                         setting.permissions.mapTo(LinkedHashSet()) { it.getLocalId() },
                         setting.authorities,
                         setting.roles
@@ -38,6 +40,7 @@ class CustomRecordPermsApiImpl(
                 }
             )
         }
+        dependencies.add(recordRef)
         var atts = permissionSettings.getSettingsForRecord(recordRef)
         addCustomPerms(atts)
 
@@ -48,10 +51,11 @@ class CustomRecordPermsApiImpl(
             if (parentRef.isEmpty()) {
                 break
             }
+            dependencies.add(parentRef)
             atts = permissionSettings.getSettingsForRecord(parentRef)
             addCustomPerms(atts)
             currentRef = parentRef
         }
-        return result.toList()
+        return CustomRecordPerms(result.toList(), dependencies)
     }
 }

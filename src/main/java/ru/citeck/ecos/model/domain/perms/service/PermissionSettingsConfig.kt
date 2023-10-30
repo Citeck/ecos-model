@@ -9,10 +9,12 @@ import ru.citeck.ecos.data.sql.domain.DbDomainFactory
 import ru.citeck.ecos.data.sql.records.DbRecordsDaoConfig
 import ru.citeck.ecos.data.sql.records.listener.DbRecordChangedEvent
 import ru.citeck.ecos.data.sql.records.listener.DbRecordCreatedEvent
+import ru.citeck.ecos.data.sql.records.listener.DbRecordDeletedEvent
 import ru.citeck.ecos.data.sql.records.listener.DbRecordsListenerAdapter
 import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
 import ru.citeck.ecos.data.sql.records.perms.DbRecordPerms
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
+import ru.citeck.ecos.events2.EventsService
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.perms.dto.PermissionSettingsDto
 import ru.citeck.ecos.model.lib.utils.ModelUtils
@@ -21,6 +23,7 @@ import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
 import ru.citeck.ecos.records3.record.dao.RecordsDao
 import ru.citeck.ecos.records3.record.dao.delete.DelStatus
 import ru.citeck.ecos.records3.record.dao.impl.proxy.RecordsDaoProxy
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.api.entity.toEntityRef
 
 @Configuration
@@ -37,7 +40,11 @@ class PermissionSettingsConfig {
     }
 
     @Bean
-    fun customPermDefDao(recordsService: RecordsService, dbDomainFactory: DbDomainFactory): RecordsDao {
+    fun permissionDefDao(
+        recordsService: RecordsService,
+        eventsService: EventsService,
+        dbDomainFactory: DbDomainFactory
+    ): RecordsDao {
 
         val typeRef = ModelUtils.getTypeRef(PERMISSION_DEF_TYPE_ID)
         val recordsDao = dbDomainFactory.create(
@@ -59,12 +66,12 @@ class PermissionSettingsConfig {
             .withPermsComponent(AdminPerms())
             .build()
 
-        recordsDao.addListener(PermissionsRestrictionListener())
+        recordsDao.addListener(PermissionSettingsListener(recordsService, eventsService))
         return recordsDao
     }
 
     @Bean
-    fun customPermsDao(
+    fun permissionSettingsDao(
         recordsService: RecordsService,
         dbDomainFactory: DbDomainFactory,
         customPermsService: PermissionSettingsService
@@ -113,7 +120,11 @@ class PermissionSettingsConfig {
     }
 
     @Bean
-    fun customPermsRepoDao(recordsService: RecordsService, dbDomainFactory: DbDomainFactory): RecordsDao {
+    fun permissionSettingsRepoDao(
+        recordsService: RecordsService,
+        dbDomainFactory: DbDomainFactory,
+        eventsService: EventsService
+    ): RecordsDao {
 
         val typeRef = ModelUtils.getTypeRef(PermissionSettingsDto.TYPE_ID)
         val recordsDao = dbDomainFactory.create(
@@ -135,20 +146,45 @@ class PermissionSettingsConfig {
             .withPermsComponent(AdminPerms())
             .build()
 
-        recordsDao.addListener(PermissionsRestrictionListener())
+        recordsDao.addListener(PermissionSettingsListener(recordsService, eventsService))
         return recordsDao
     }
 
-    private class PermissionsRestrictionListener : DbRecordsListenerAdapter() {
+    private class PermissionSettingsListener(
+        val recordsService: RecordsService,
+        eventsService: EventsService
+    ) : DbRecordsListenerAdapter() {
+
+        private val permsChangedEmitter = eventsService.getEmitter<PermissionSettingsChangedEvent> {
+            this.withEventType(PermissionSettingsChangedEvent.TYPE)
+            this.withEventClass(PermissionSettingsChangedEvent::class.java)
+            this.withSource("ecos-model")
+        }
+
         override fun onCreated(event: DbRecordCreatedEvent) {
             if (AuthContext.isNotRunAsSystemOrAdmin()) {
                 error("Permission denied")
             }
+            emitEvent(event.record)
         }
+
         override fun onChanged(event: DbRecordChangedEvent) {
             if (AuthContext.isNotRunAsSystemOrAdmin()) {
                 error("Permission denied")
             }
+            emitEvent(event.record)
+        }
+
+        override fun onDeleted(event: DbRecordDeletedEvent) {
+            if (AuthContext.isNotRunAsSystemOrAdmin()) {
+                error("Permission denied")
+            }
+            emitEvent(event.record)
+        }
+
+        private fun emitEvent(settings: Any) {
+            val recordRef = recordsService.getAtt(settings, "recordRef?id").asText().toEntityRef()
+            permsChangedEmitter.emit(PermissionSettingsChangedEvent(recordRef, settings))
         }
     }
 
@@ -178,6 +214,15 @@ class PermissionSettingsConfig {
                     return emptySet()
                 }
             }
+        }
+    }
+
+    class PermissionSettingsChangedEvent(
+        val record: EntityRef,
+        val settings: Any
+    ) {
+        companion object {
+            const val TYPE = "permission-settings-changed"
         }
     }
 }

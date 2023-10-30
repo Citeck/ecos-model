@@ -34,7 +34,8 @@
         "label": {
           "ru": "Наследовать права",
           "en": "Inherit permissions"
-        }
+        },
+        "defaultValue": true
       },
       {
         "label": {

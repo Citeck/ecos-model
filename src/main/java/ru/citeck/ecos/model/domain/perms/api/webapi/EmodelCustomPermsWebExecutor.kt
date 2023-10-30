@@ -6,6 +6,7 @@ import ru.citeck.ecos.webapp.api.entity.toEntityRef
 import ru.citeck.ecos.webapp.api.web.executor.EcosWebExecutor
 import ru.citeck.ecos.webapp.api.web.executor.EcosWebExecutorReq
 import ru.citeck.ecos.webapp.api.web.executor.EcosWebExecutorResp
+import ru.citeck.ecos.webapp.lib.perms.component.custom.CustomRecordPerms
 import ru.citeck.ecos.webapp.lib.perms.component.custom.CustomRecordPermsEmodelWebApi
 
 @Component
@@ -18,11 +19,11 @@ class EmodelCustomPermsWebExecutor(
         val record = request.getHeaders().get(CustomRecordPermsEmodelWebApi.HEADER_REC) ?: ""
 
         val respData = if (record.isBlank()) {
-            emptyList()
+            CustomRecordPerms.EMPTY
         } else {
             service.getPerms(record.toEntityRef())
         }
-        response.getBodyWriter().writeDto(CustomRecordPermsEmodelWebApi.ResponseDto(respData))
+        response.getBodyWriter().writeDto(respData)
     }
 
     override fun getPath(): String {
