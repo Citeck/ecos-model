@@ -128,9 +128,6 @@ class TypesRepoPermsService(
         override fun getAdditionalPerms(): Set<String> {
             return emptySet()
         }
-        override fun getAuthoritiesWithReadPermission(): Set<String> {
-            return emptySet()
-        }
         override fun hasAttReadPerms(name: String): Boolean {
             return true
         }
