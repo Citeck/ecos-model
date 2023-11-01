@@ -71,11 +71,12 @@
             "key": "authorities",
             "multiple": true,
             "dataType": "authority",
+            "allowedGroupType": "ROLE, BRANCH, GROUP",
             "refreshOn": [],
             "optionalWhenDisabled": false,
             "type": "selectOrgstruct",
             "input": true,
-            "defaultValue": "",
+            "defaultValue": [],
             "reorder": false,
             "row": "0-0"
           },
