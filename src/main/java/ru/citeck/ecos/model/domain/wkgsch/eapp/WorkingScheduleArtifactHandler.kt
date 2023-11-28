@@ -2,6 +2,7 @@ package ru.citeck.ecos.model.domain.wkgsch.eapp
 
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.apps.app.domain.handler.EcosArtifactHandler
+import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.events2.EventsService
 import ru.citeck.ecos.records2.predicate.model.Predicates
@@ -41,6 +42,7 @@ class WorkingScheduleArtifactHandler(
                 listener.accept(
                     WorkingScheduleDto(
                         id = it.id,
+                        name = it.name,
                         version = it.version,
                         country = it.country,
                         type = it.type,
@@ -60,6 +62,8 @@ class WorkingScheduleArtifactHandler(
         val id: String,
         @AttName("record.version?num!")
         val version: Int,
+        @AttName("record.name?json!")
+        val name: MLText,
         @AttName("record.country!")
         val country: String,
         @AttName("record.type!")
