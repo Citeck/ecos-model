@@ -8,7 +8,7 @@ system: true
 storageType: ECOS_MODEL
 
 formRef: uiserv/form@DEFAULT_FORM
-journalRef: uiserv/journal@DEFAULT_JOURNAL
+journalRef: uiserv/journal@working-calendar
 queryPermsPolicy: PUBLIC
 
 defaultCreateVariant: true

@@ -1,0 +1,31 @@
+---
+id: working-calendar
+name:
+  ru: Производственный календарь
+  en: Working calendar
+
+columns:
+  - id: id
+    name:
+      ru: Идентификатор
+      en: Name
+  - id: extensionFor
+    name:
+      ru: Эти настройки являются расширением для указанного календаря
+      en: These settings are an extension for the specified calendar
+    type: ASSOC
+  - id: from
+    name:
+      ru: Календарь действует начиная с
+      en: Calendar starts from
+    type: DATE
+  - id: until
+    name:
+      ru: Календарь действует до
+      en: Calendar ends at
+    type: DATE
+  - id: enabled
+    name:
+      ru: Календарь включен
+      en: Calendar is active
+    type: BOOLEAN

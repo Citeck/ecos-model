@@ -75,7 +75,7 @@
     {
       "type": "JOURNAL",
       "config": {
-        "journalId": "type$working-calendar"
+        "journalId": "working-calendar"
       }
     }
   ]
