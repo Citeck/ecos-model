@@ -65,6 +65,18 @@
       "config": {
         "journalId": "permission-def"
       }
+    },
+    {
+      "type": "JOURNAL",
+      "config": {
+        "journalId": "type$working-schedule"
+      }
+    },
+    {
+      "type": "JOURNAL",
+      "config": {
+        "journalId": "type$working-calendar"
+      }
     }
   ]
 }

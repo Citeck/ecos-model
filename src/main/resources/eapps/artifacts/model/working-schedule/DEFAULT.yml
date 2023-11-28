@@ -1,0 +1,18 @@
+---
+id: DEFAULT
+name:
+  ru: Стандартное расписание 5/2
+  en: Sta1ndard schedule 5/2
+type: weekly
+version: 0
+config:
+  workingDayStart: 08:00
+  workingDayEnd: 17:00
+  workingDayTimeZone: '+03:00'
+  workdays:
+    - MONDAY
+    - TUESDAY
+    - WEDNESDAY
+    - THURSDAY
+    - FRIDAY
+  workingCalendar: emodel/working-calendar@RU
