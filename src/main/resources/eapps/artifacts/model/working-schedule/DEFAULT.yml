@@ -6,7 +6,7 @@ name:
 type: weekly
 version: 0
 config:
-  workingDayStart: 08:00
+  workingDayStart: 09:00
   workingDayEnd: 17:00
   workingDayTimeZone: '+03:00'
   workdays:
