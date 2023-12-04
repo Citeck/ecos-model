@@ -21,7 +21,8 @@ data class CommentUpdateEvent(
 data class CommentCreateEvent(
     val record: EntityRef,
     val commentRecord: EntityRef,
-    val text: String? = null
+    val text: String? = null,
+    val attachments: List<EntityRef>?
 ) {
 
     companion object {
