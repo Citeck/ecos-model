@@ -34,7 +34,7 @@ class ContentStoragesRecordsDao(
         private val LOCAL_STORAGE_RECORD = StorageRecord(
             EntityRef.create(AppName.EMODEL, ID, "LOCAL"),
             MLText(
-                I18nContext.RUSSIAN to "Локальное хранишлище в БД",
+                I18nContext.RUSSIAN to "Локальное хранилище в БД",
                 I18nContext.ENGLISH to "Local DB storage"
             ),
             ECOS_TYPE
@@ -42,7 +42,7 @@ class ContentStoragesRecordsDao(
         private val DEFAULT_STORAGE_RECORD = StorageRecord(
             EntityRef.create(AppName.EMODEL, ID, "DEFAULT"),
             MLText(
-                I18nContext.RUSSIAN to "Хранишлище по умолчанию",
+                I18nContext.RUSSIAN to "Хранилище по умолчанию",
                 I18nContext.ENGLISH to "Default storage"
             ),
             ECOS_TYPE
