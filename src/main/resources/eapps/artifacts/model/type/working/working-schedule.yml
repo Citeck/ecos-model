@@ -1,0 +1,50 @@
+---
+id: working-schedule
+name:
+  ru: Рабочее расписание
+  en: Working schedule
+
+system: true
+storageType: ECOS_MODEL
+
+formRef: uiserv/form@DEFAULT_FORM
+journalRef: uiserv/journal@DEFAULT_JOURNAL
+queryPermsPolicy: PUBLIC
+
+defaultCreateVariant: true
+createVariants:
+  - id: upload
+    name: { ru: Загрузить конфигурацию, en: Upload configuration }
+    formRef: 'uiserv/form@ecos-artifact-upload'
+
+actions:
+  - uiserv/action@download-text-yml
+  - uiserv/action@edit
+  - uiserv/action@edit-json
+  - uiserv/action@delete
+
+model:
+  attributes:
+    - id: name
+      name:
+        ru: Имя
+        en: Name
+      type: MLTEXT
+    - id: type
+      name:
+        ru: Тип
+        en: Type
+    - id: version
+      name:
+        ru: Версия
+        en: Version
+      type: NUMBER
+    - id: country
+      name:
+        ru: Страна
+        en: Country
+    - id: config
+      name:
+        ru: Конфигурация
+        en: Configuration
+      type: JSON

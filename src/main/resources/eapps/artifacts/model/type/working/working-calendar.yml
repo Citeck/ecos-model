@@ -1,0 +1,55 @@
+---
+id: working-calendar
+name:
+  ru: Производственный календарь
+  en: Working calendar
+
+system: true
+storageType: ECOS_MODEL
+
+formRef: uiserv/form@DEFAULT_FORM
+journalRef: uiserv/journal@working-calendar
+queryPermsPolicy: PUBLIC
+
+defaultCreateVariant: true
+createVariants:
+  - id: upload
+    name: { ru: Загрузить конфигурацию, en: Upload configuration }
+    formRef: 'uiserv/form@ecos-artifact-upload'
+
+actions:
+  - uiserv/action@download-text-yml
+  - uiserv/action@edit
+  - uiserv/action@edit-json
+  - uiserv/action@delete
+
+model:
+  attributes:
+    - id: extensionFor
+      name:
+        ru: Эти настройки являются расширением для указанного календаря
+        en: These settings are an extension for the specified calendar
+      type: ASSOC
+      config:
+        typeRef: emodel/type@working-calendar
+    - id: from
+      name:
+        ru: Календарь действует начиная с
+        en: Calendar starts from
+      type: DATE
+    - id: until
+      name:
+        ru: Календарь действует до
+        en: Calendar ends at
+      type: DATE
+    - id: enabled
+      name:
+        ru: Календарь включен
+        en: Calendar is active
+      type: BOOLEAN
+    - id: dates
+      name:
+        ru: Даты
+        en: Dates
+      multiple: true
+      type: JSON

@@ -1,0 +1,14 @@
+---
+id: has-working-schedule
+name:
+  ru: Имеет рабочее расписание
+  en: Has working schedule
+
+attributes:
+  - id: schedule
+    name:
+      ru: Рабочее расписание
+      en: Working schedule
+    type: ASSOC
+    config:
+      typeRef: emodel/type@working-schedule
