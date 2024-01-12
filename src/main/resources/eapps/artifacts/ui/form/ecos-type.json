@@ -575,25 +575,16 @@
                         "reorder": true,
                         "defaultValue": [
                           {
-                            "id2": "",
                             "id": "",
-                            "name2": {},
                             "name": {},
-                            "submit3": false,
-                            "submit4": false,
                             "type": "TEXT",
                             "submit": false,
-                            "submit6": false,
-                            "submit7": false,
-                            "submit8": false,
                             "container": {
                               "submit7": false
                             },
-                            "submit9": false,
                             "multiple": false,
                             "ecosSelect": "",
                             "select": "",
-                            "multiple2": false,
                             "mandatory": false
                           }
                         ],
@@ -1321,15 +1312,10 @@
                     "reorder": true,
                     "defaultValue": [
                       {
-                        "id2": "",
                         "id": "",
-                        "name2": {},
                         "name": {},
-                        "submit3": false,
-                        "submit4": false,
                         "assignees": [],
-                        "attributes": [],
-                        "submit9": false
+                        "attributes": []
                       }
                     ],
                     "validate": {
@@ -1525,15 +1511,8 @@
                     "reorder": true,
                     "defaultValue": [
                       {
-                        "id2": "",
                         "id": "",
-                        "name2": {},
-                        "name": {},
-                        "submit3": false,
-                        "submit4": false,
-                        "id3": "",
-                        "name3": {},
-                        "submit5": false
+                        "name": {}
                       }
                     ],
                     "refreshOn": [],
@@ -1655,7 +1634,7 @@
                             },
                             "key": "name",
                             "validate": {
-                              "required": true
+                              "custom": "let isNameFill = false;\n\n_.forIn(row.name, (value) => {\n  if (value) {\n    isNameFill = true;\n  }\n});\n\nif (!isNameFill && row.statuses.length) {\n  valid = false;\n} else {\n  valid = true;\n}"
                             },
                             "clearOnHide": false,
                             "refreshOn": [],
@@ -1672,18 +1651,15 @@
                             "key": "statuses",
                             "multiple": true,
                             "validate": {
-                              "required": true
+                              "custom": "let isNameFill = false;\n\n_.forIn(row.name, (value) => {\n  if (value) {\n    isNameFill = true;\n  }\n});\n\nif (isNameFill && !row.statuses.length) {\n  valid = false;\n} else {\n  valid = true;\n}"
                             },
                             "reorder": false,
                             "dataSrc": "custom",
                             "data": {
+                              "custom": "const { modelStatuses = [] } = data;\nconst statuses = [];\n\nmodelStatuses.forEach(item => {\n  const value = item.id;\n  const label = utils.getTextByLocale(item.name) || value;\n  \n  if (value) {\n    statuses.push({ label, value });\n  }\n});\n\nvalues = statuses;",
                               "headers": [
-                                {
-                                  "key": "",
-                                  "value": ""
-                                }
-                              ],
-                              "custom": "const { modelStatuses = [] } = data;\nconst statuses = [];\n\nmodelStatuses.forEach(item => {\n  const value = item.id;\n  const label = utils.getTextByLocale(item.name) || value;\n  \n  if (value) {\n    statuses.push({ label, value });\n  }\n});\n\nvalues = statuses;\n"
+                                {}
+                              ]
                             },
                             "unavailableItems": {
                               "isActive": true,
