@@ -298,6 +298,7 @@ class AuthoritiesSyncService(
             override fun setState(state: Any?) {
                 recordsService.mutateAtt(ref, "state", state)
             }
+
             override fun updateAuthorities(type: AuthorityType, authorities: List<ObjectData>) {
                 for (authorityAtts in authorities) {
                     val idValue = authorityAtts["id"].asText()
@@ -338,6 +339,18 @@ class AuthoritiesSyncService(
                     } finally {
                         syncContext.remove()
                     }
+                }
+            }
+
+            override fun deleteAuthorities(type: AuthorityType, authorities: List<String>) {
+                //TODO finish after implementing full deletion logic of authorities
+                authorities.forEach {
+                    val idValue = it;
+                    if (idValue.isBlank()) {
+                        error("Empty id")
+                    }
+                    val authorityRef = RecordRef.create(type.sourceId, idValue)
+                    recordsService.mutateAtt(authorityRef, "del:isNeedToDelete", true)
                 }
             }
         }

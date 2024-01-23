@@ -1,0 +1,14 @@
+---
+id: removable
+name:
+  ru: Удаляемый
+  en: Removable
+
+prefix: del
+
+attributes:
+  - id: isNeedToDelete
+    name:
+      ru: Требуется удалить
+      en: Is need to delete
+    type: BOOLEAN
