@@ -37,7 +37,10 @@ open class GroupsPersonsRecordsDao(
     private val targetSourceId = "$id-repo"
 
     override fun delete(recordIds: List<String>): List<DelStatus> {
-        error("Not supported")
+        if (!AuthContext.isRunAsSystemOrAdmin()) {
+            error("Permission denied")
+        }
+        return super.delete(recordIds)
     }
 
     override fun getRecordsAtts(recordIds: List<String>): List<*>? {
