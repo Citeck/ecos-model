@@ -350,7 +350,13 @@ class AuthoritiesSyncService(
                         error("Empty id")
                     }
                     val authorityRef = RecordRef.create(type.sourceId, idValue)
-                    recordsService.mutateAtt(authorityRef, "del:isNeedToDelete", true)
+                    if (AuthorityType.PERSON == type) {
+                        val personAtts = RecordAtts(authorityRef)
+                        personAtts.setAtts(ObjectData.create()
+                            .set("personDisabled", true)
+                            .set("personDisableReason", "Removed form AD (ldap sync)"))
+                        recordsService.mutate(personAtts)
+                    }
                 }
             }
         }
