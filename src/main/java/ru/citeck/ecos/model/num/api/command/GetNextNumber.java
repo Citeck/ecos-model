@@ -1,9 +1,10 @@
-package ru.citeck.ecos.model.num.command;
+package ru.citeck.ecos.model.num.api.command;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import ru.citeck.ecos.commands.CommandExecutor;
@@ -11,7 +12,7 @@ import ru.citeck.ecos.commands.CommandsService;
 import ru.citeck.ecos.commands.annotation.CommandType;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.model.num.service.NumTemplateService;
-import ru.citeck.ecos.records2.RecordRef;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 
 import javax.annotation.PostConstruct;
 
@@ -32,7 +33,24 @@ public class GetNextNumber {
         @Nullable
         @Override
         public Object execute(Command command) {
-            return new Response(numTemplateService.getNextNumber(command.templateRef, command.getModel()));
+            boolean increment = !Boolean.FALSE.equals(command.increment);
+            if (StringUtils.isNotBlank(command.counterKey)) {
+                return new Response(
+                    numTemplateService.getNextNumber(
+                        command.templateRef,
+                        command.counterKey,
+                        increment
+                    )
+                );
+            } else {
+                return new Response(
+                    numTemplateService.getNextNumber(
+                        command.templateRef,
+                        command.getModel(),
+                        increment
+                    )
+                );
+            }
         }
     }
 
@@ -41,8 +59,16 @@ public class GetNextNumber {
     @AllArgsConstructor
     @CommandType("ecos.number.template.get-next")
     public static class Command {
-        private RecordRef templateRef;
+
+        private EntityRef templateRef;
         private ObjectData model;
+        private String counterKey;
+        private Boolean increment;
+
+        public Command(EntityRef templateRef, ObjectData model) {
+            this.templateRef = templateRef;
+            this.model = model;
+        }
     }
 
     @Data
@@ -52,4 +78,3 @@ public class GetNextNumber {
         private Long number;
     }
 }
-

@@ -3,6 +3,7 @@ package ru.citeck.ecos.model.num.service;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -19,9 +20,9 @@ import ru.citeck.ecos.model.num.domain.NumTemplateEntity;
 import ru.citeck.ecos.model.num.dto.NumTemplateDto;
 import ru.citeck.ecos.model.num.repository.EcosNumCounterRepository;
 import ru.citeck.ecos.model.num.repository.NumTemplateRepository;
-import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
 import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverter;
 import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverterFactory;
 
@@ -56,6 +57,28 @@ public class NumTemplateService {
         searchConverter = predicateToJpaConvFactory.createConverter(NumTemplateEntity.class)
             .withDefaultPageSize(10000)
             .build();
+    }
+
+    @Transactional
+    public void setNextNumber(EntityRef templateRef, String counterKey, long nextNumber) {
+
+        NumTemplateEntity numTemplateEntity = templateRepo.findByExtId(templateRef.getLocalId());
+        if (numTemplateEntity == null) {
+            numTemplateEntity = new NumTemplateEntity();
+            numTemplateEntity.setExtId(templateRef.getLocalId());
+            numTemplateEntity.setName(templateRef.getLocalId());
+            numTemplateEntity.setCounterKey(counterKey);
+            numTemplateEntity = templateRepo.save(numTemplateEntity);
+        }
+
+        NumCounterEntity counterEntity = counterRepo.findByTemplateAndKey(numTemplateEntity, counterKey);
+        if (counterEntity == null) {
+            counterEntity = new NumCounterEntity();
+            counterEntity.setTemplate(numTemplateEntity);
+            counterEntity.setKey(counterKey);
+        }
+        counterEntity.setCounter(nextNumber - 1L);
+        counterRepo.save(counterEntity);
     }
 
     public List<EntityWithMeta<NumTemplateDef>> getAll() {
@@ -114,26 +137,55 @@ public class NumTemplateService {
         return toDto(entity);
     }
 
-    public long getNextNumber(RecordRef templateRef, ObjectData model) {
+    public long getNextNumber(EntityRef templateRef, ObjectData model) {
+        return getNextNumber(templateRef, model, true);
+    }
 
-        NumTemplateEntity numTemplateEntity = templateRepo.findByExtId(templateRef.getId());
+    public long getNextNumber(EntityRef templateRef, String counterKey, boolean increment) {
+
+        NumTemplateEntity numTemplateEntity = getNumTemplateEntity(templateRef);
+
+        return getNextNumber(numTemplateEntity, counterKey, increment);
+    }
+
+    public long getNextNumber(EntityRef templateRef, ObjectData model, boolean increment) {
+
+        NumTemplateEntity numTemplateEntity = getNumTemplateEntity(templateRef);
+        String counterKey = TmplUtils.applyAtts(numTemplateEntity.getCounterKey(), model).asText();
+
+        return getNextNumber(numTemplateEntity, counterKey, increment);
+    }
+
+    @NotNull
+    private NumTemplateEntity getNumTemplateEntity(EntityRef templateRef) {
+        NumTemplateEntity numTemplateEntity = templateRepo.findByExtId(templateRef.getLocalId());
         if (numTemplateEntity == null) {
             throw new IllegalArgumentException("Number template doesn't exists: " + templateRef);
         }
+        return numTemplateEntity;
+    }
 
-        String key = TmplUtils.applyAtts(numTemplateEntity.getCounterKey(), model).asText();
+    private long getNextNumber(NumTemplateEntity numTemplateEntity, String counterKey, boolean increment) {
 
-        NumCounterEntity counterEntity = counterRepo.findByTemplateAndKey(numTemplateEntity, key);
+        NumCounterEntity counterEntity = counterRepo.findByTemplateAndKey(numTemplateEntity, counterKey);
+        if (!increment) {
+            if (counterEntity == null) {
+                return 1;
+            } else {
+                return counterEntity.getCounter() + 1;
+            }
+        }
+
         if (counterEntity == null) {
             counterEntity = new NumCounterEntity();
-            counterEntity.setKey(key);
+            counterEntity.setKey(counterKey);
             counterEntity.setCounter(0L);
             counterEntity.setTemplate(numTemplateEntity);
             try {
                 counterEntity = counterRepo.save(counterEntity);
             } catch (Exception e) {
                 log.warn("Counter can't be created. Perhaps another thread already did it", e);
-                counterEntity = counterRepo.findByTemplateAndKey(numTemplateEntity, key);
+                counterEntity = counterRepo.findByTemplateAndKey(numTemplateEntity, counterKey);
                 if (counterEntity == null) {
                     throw new IllegalStateException("Counter is null");
                 }
@@ -154,13 +206,13 @@ public class NumTemplateService {
                 } catch (InterruptedException e) {
                     ExceptionUtils.throwException(e);
                 }
-                counterEntity = counterRepo.findByTemplateAndKey(numTemplateEntity, key);
+                counterEntity = counterRepo.findByTemplateAndKey(numTemplateEntity, counterKey);
             }
         }
 
         if (updatedCount == 0) {
             throw new IllegalStateException("Counter can't be incremented. " +
-                "Template ref: " + templateRef + " Model: " + model);
+                "Template id: " + numTemplateEntity.getExtId() + " Counter key: " + counterKey);
         }
 
         return counterEntity.getCounter() + 1;
