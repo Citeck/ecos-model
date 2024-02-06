@@ -9,7 +9,7 @@ import ru.citeck.ecos.commands.CommandsService;
 import ru.citeck.ecos.commands.dto.CommandResult;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.model.EcosModelApp;
-import ru.citeck.ecos.model.num.command.GetNextNumber;
+import ru.citeck.ecos.model.num.api.command.GetNextNumber;
 import ru.citeck.ecos.model.num.dto.NumTemplateDto;
 import ru.citeck.ecos.model.num.service.NumTemplateService;
 import ru.citeck.ecos.records2.RecordRef;

@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.num.records;
+package ru.citeck.ecos.model.num.api.records;
 
 import ecos.com.fasterxml.jackson210.annotation.JsonProperty;
 import ecos.com.fasterxml.jackson210.annotation.JsonValue;
