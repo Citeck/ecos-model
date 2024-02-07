@@ -177,7 +177,8 @@ open class GroupsPersonsRecordsDao(
             error("Id field is missing for records: ${attsWithBlankId.map { it.id }}")
         }
         val result = ArrayList<String>()
-        for (record in records) {
+        val updateRecords = records.map { updateAttsByLocalRecordAtts(it) }
+        for (record in updateRecords) {
 
             var id = record.id
             if (id.isBlank()) {
@@ -236,6 +237,22 @@ open class GroupsPersonsRecordsDao(
             RecordRef.create(targetSourceId, id),
             CurrentAuthorityAtts::class.java
         )
+    }
+
+    private fun updateAttsByLocalRecordAtts(record: LocalRecordAtts) : LocalRecordAtts {
+        if (authorityType == AuthorityType.PERSON) {
+            val recordId = if (record.id == PersonConstants.CURRENT_USER_ID) {
+                AuthContext.getCurrentUser()
+            } else {
+                record.id
+            }
+            val attributes = record.attributes
+            if (attributes["id"].asText() == PersonConstants.CURRENT_USER_ID) {
+                attributes["id"] = AuthContext.getCurrentUser()
+            }
+            return LocalRecordAtts(recordId, attributes)
+        }
+        return record
     }
 
     private class CurrentAuthorityAtts(
