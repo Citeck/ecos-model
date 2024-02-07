@@ -13,7 +13,9 @@ import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records2.predicate.PredicateService
 import ru.citeck.ecos.records2.predicate.PredicateUtils
-import ru.citeck.ecos.records2.predicate.model.*
+import ru.citeck.ecos.records2.predicate.model.Predicate
+import ru.citeck.ecos.records2.predicate.model.Predicates
+import ru.citeck.ecos.records2.predicate.model.ValuePredicate
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.delete.DelStatus
@@ -177,8 +179,8 @@ open class GroupsPersonsRecordsDao(
             error("Id field is missing for records: ${attsWithBlankId.map { it.id }}")
         }
         val result = ArrayList<String>()
-        val updateRecords = records.map { updateAttsByLocalRecordAtts(it) }
-        for (record in updateRecords) {
+        for (recordIt in records) {
+            val record = prepareLocalAttsToMutation(recordIt)
 
             var id = record.id
             if (id.isBlank()) {
@@ -239,19 +241,15 @@ open class GroupsPersonsRecordsDao(
         )
     }
 
-    private fun updateAttsByLocalRecordAtts(record: LocalRecordAtts) : LocalRecordAtts {
-        if (authorityType == AuthorityType.PERSON) {
-            val recordId = if (record.id == PersonConstants.CURRENT_USER_ID) {
-                AuthContext.getCurrentUser()
-            } else {
-                record.id
-            }
-            val attributes = record.attributes
-            if (attributes["id"].asText() == PersonConstants.CURRENT_USER_ID) {
-                attributes["id"] = AuthContext.getCurrentUser()
-            }
-            return LocalRecordAtts(recordId, attributes)
+    private fun prepareLocalAttsToMutation(record: LocalRecordAtts): LocalRecordAtts {
+        if (authorityType != AuthorityType.PERSON) {
+            return record
         }
+
+        if (record.id == PersonConstants.CURRENT_USER_ID) {
+            return LocalRecordAtts(AuthContext.getCurrentUser(), record.attributes)
+        }
+
         return record
     }
 
