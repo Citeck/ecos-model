@@ -1,0 +1,18 @@
+---
+id: has-ldap-sync
+name:
+  ru: Синхронизирован с ldap
+  en: Synced with ldap
+
+prefix: ldap-sync
+
+attributes:
+  - id: ldapSyncId
+    name:
+      ru: Id конфига синхронизации
+      en: Ldap sync config id
+  - id: lastLdapSyncDate
+    name:
+      ru: Дата синхронизации с ldap
+      en: Last ldap sync date
+    type: DATE
