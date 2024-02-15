@@ -13,7 +13,9 @@ import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records2.predicate.PredicateService
 import ru.citeck.ecos.records2.predicate.PredicateUtils
-import ru.citeck.ecos.records2.predicate.model.*
+import ru.citeck.ecos.records2.predicate.model.Predicate
+import ru.citeck.ecos.records2.predicate.model.Predicates
+import ru.citeck.ecos.records2.predicate.model.ValuePredicate
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.delete.DelStatus
@@ -37,7 +39,10 @@ open class GroupsPersonsRecordsDao(
     private val targetSourceId = "$id-repo"
 
     override fun delete(recordIds: List<String>): List<DelStatus> {
-        error("Not supported")
+        if (!AuthContext.isRunAsSystemOrAdmin()) {
+            error("Permission denied")
+        }
+        return super.delete(recordIds)
     }
 
     override fun getRecordsAtts(recordIds: List<String>): List<*>? {
@@ -174,7 +179,8 @@ open class GroupsPersonsRecordsDao(
             error("Id field is missing for records: ${attsWithBlankId.map { it.id }}")
         }
         val result = ArrayList<String>()
-        for (record in records) {
+        for (recordIt in records) {
+            val record = prepareLocalAttsToMutation(recordIt)
 
             var id = record.id
             if (id.isBlank()) {
@@ -233,6 +239,18 @@ open class GroupsPersonsRecordsDao(
             RecordRef.create(targetSourceId, id),
             CurrentAuthorityAtts::class.java
         )
+    }
+
+    private fun prepareLocalAttsToMutation(record: LocalRecordAtts): LocalRecordAtts {
+        if (authorityType != AuthorityType.PERSON) {
+            return record
+        }
+
+        if (record.id == PersonConstants.CURRENT_USER_ID) {
+            return LocalRecordAtts(AuthContext.getCurrentUser(), record.attributes)
+        }
+
+        return record
     }
 
     private class CurrentAuthorityAtts(
