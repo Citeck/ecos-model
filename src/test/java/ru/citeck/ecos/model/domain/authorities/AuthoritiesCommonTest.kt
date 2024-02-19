@@ -71,7 +71,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
             recordsService.create(testPersonRef.sourceId, personAtts)
         }
 
-        assertThat(personCreateResult.id).isEqualTo(testPersonRef.id)
+        assertThat(personCreateResult.getLocalId()).isEqualTo(testPersonRef.id)
 
         val testGroupRef = AuthorityType.GROUP.getRef("test-group")
         val groupAtts = ObjectData.create()
@@ -81,7 +81,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
         val groupCreateResult = AuthContext.runAsSystem {
             recordsService.create(testGroupRef.sourceId, groupAtts)
         }
-        assertThat(groupCreateResult.id).isEqualTo(testGroupRef.id)
+        assertThat(groupCreateResult.getLocalId()).isEqualTo(testGroupRef.id)
 
         val checkAuthorities = { expected: List<String> ->
             val currentAuthorities = recordsService.getAtt(testPersonRef, "authorities.list[]").asStrList()

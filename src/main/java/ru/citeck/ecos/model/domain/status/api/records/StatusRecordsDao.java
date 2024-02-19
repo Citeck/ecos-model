@@ -15,6 +15,7 @@ import ru.citeck.ecos.records2.request.query.RecordsQueryResult;
 import ru.citeck.ecos.records2.source.dao.local.LocalRecordsDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsMetaDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsQueryDao;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +35,7 @@ public class StatusRecordsDao extends LocalRecordsDao implements LocalRecordsMet
 
     @NotNull
     @Override
-    public RecordsQueryResult<RecordRef> queryLocalRecords(@NotNull RecordsQuery recordsQuery) {
+    public RecordsQueryResult<EntityRef> queryLocalRecords(@NotNull RecordsQuery recordsQuery) {
         return new RecordsQueryResult<>(statuses.keySet().stream()
             .map(s -> RecordRef.create(EcosModelApp.NAME, getId(), s))
             .collect(Collectors.toList()));
@@ -42,8 +43,8 @@ public class StatusRecordsDao extends LocalRecordsDao implements LocalRecordsMet
 
     @NotNull
     @Override
-    public List<Object> getLocalRecordsMeta(@NotNull List<RecordRef> list, @NotNull MetaField metaField) {
-        return list.stream().map(RecordRef::getId).map(
+    public List<Object> getLocalRecordsMeta(@NotNull List<EntityRef> list, @NotNull MetaField metaField) {
+        return list.stream().map(EntityRef::getLocalId).map(
             id -> statuses.getOrDefault(id, EmptyValue.INSTANCE)
         ).collect(Collectors.toList());
     }

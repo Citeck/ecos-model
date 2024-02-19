@@ -211,11 +211,11 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
 
     private static class RecVal extends AttValueDelegate implements AttValue {
 
-        private final RecordRef id;
+        private final EntityRef id;
         AttValue base;
         Map<String, Object> atts;
 
-        public RecVal(RecordRef id, AttValue base, Map<String, Object> atts) {
+        public RecVal(EntityRef id, AttValue base, Map<String, Object> atts) {
             super(base);
             this.base = base;
             this.id = id;

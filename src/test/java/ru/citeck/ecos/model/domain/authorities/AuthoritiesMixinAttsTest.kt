@@ -19,8 +19,8 @@ class AuthoritiesMixinAttsTest : AuthoritiesTestBase() {
             user0Ref,
             "authorities.list[]",
             listOf(
-                user0Ref.id,
-                *listOf(group0Ref, group1Ref).map { AuthGroup.PREFIX + it.id }.toTypedArray(),
+                user0Ref.getLocalId(),
+                *listOf(group0Ref, group1Ref).map { AuthGroup.PREFIX + it.getLocalId() }.toTypedArray(),
                 AuthRole.USER,
                 AuthGroup.EVERYONE
             )
@@ -47,7 +47,7 @@ class AuthoritiesMixinAttsTest : AuthoritiesTestBase() {
             user0Ref,
             "${AuthorityConstants.ATT_AUTHORITY_GROUPS_FULL}[]?localId|join()",
             listOf(
-                group1Ref.id + "," + group0Ref.id
+                group1Ref.getLocalId() + "," + group0Ref.getLocalId()
             )
         )
 

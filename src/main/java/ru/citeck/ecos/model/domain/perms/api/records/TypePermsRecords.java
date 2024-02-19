@@ -26,6 +26,7 @@ import ru.citeck.ecos.records2.source.dao.local.LocalRecordsDao;
 import ru.citeck.ecos.records2.source.dao.local.MutableRecordsLocalDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsMetaDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsQueryWithMetaDao;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -79,19 +80,19 @@ public class TypePermsRecords extends LocalRecordsDao
 
     @NotNull
     @Override
-    public List<Object> getLocalRecordsMeta(@NotNull List<RecordRef> list, @NotNull MetaField metaField) {
+    public List<Object> getLocalRecordsMeta(@NotNull List<EntityRef> list, @NotNull MetaField metaField) {
         return list.stream()
-            .map(ref -> Optional.ofNullable(permsService.getPermsById(ref.getId())))
+            .map(ref -> Optional.ofNullable(permsService.getPermsById(ref.getLocalId())))
             .map(perms -> perms.isPresent() ? toRecord(perms.get()) : EmptyValue.INSTANCE)
             .collect(Collectors.toList());
     }
 
     @NotNull
     @Override
-    public List<TypePermsDef.Builder> getValuesToMutate(@NotNull List<RecordRef> list) {
+    public List<TypePermsDef.Builder> getValuesToMutate(@NotNull List<EntityRef> list) {
         return list.stream().map(l -> {
-            TypePermsDef permsDef = permsService.getPermsById(l.getId());
-            return permsDef != null ? permsDef.copy() : TypePermsDef.create().withId(l.getId());
+            TypePermsDef permsDef = permsService.getPermsById(l.getLocalId());
+            return permsDef != null ? permsDef.copy() : TypePermsDef.create().withId(l.getLocalId());
         }).collect(Collectors.toList());
     }
 
@@ -112,7 +113,7 @@ public class TypePermsRecords extends LocalRecordsDao
     public RecordsDelResult delete(RecordsDeletion recordsDeletion) {
         List<RecordMeta> result = new ArrayList<>();
         recordsDeletion.getRecords().forEach(r -> {
-            permsService.delete(r.getId());
+            permsService.delete(r.getLocalId());
             result.add(new RecordMeta(r));
         });
         return new RecordsDelResult(new RecordsResult<>(result));

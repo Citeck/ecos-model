@@ -97,11 +97,11 @@ public class TypesSyncRecordsDaoTest {
             .withMaxItems(1000)
             .build();
 
-        RecsQueryRes<RecordRef> result = localRecordsService.query(query);
+        RecsQueryRes<EntityRef> result = localRecordsService.query(query);
         assertEquals(TOTAL_TYPES + 2 /* +1 for base and type types */, result.getTotalCount());
         assertEquals(TOTAL_TYPES + 2, remoteSyncRecordsDao.getRecords().size());
 
-        TypeDef dto = localRecordsService.getAtts(RecordRef.valueOf(TYPES_SOURCE_ID + "@type-id-100"), TypeDef.class);
+        TypeDef dto = localRecordsService.getAtts(EntityRef.valueOf(TYPES_SOURCE_ID + "@type-id-100"), TypeDef.class);
         TypeDef origDto = types.stream().filter(v -> v.getId().equals("type-id-100")).findFirst().orElse(null);
 
         assertEquals(normalizeSrc(origDto), normalizeRes(dto));
@@ -114,14 +114,14 @@ public class TypesSyncRecordsDaoTest {
             .withQuery(predicate)
             .build();
 
-        RecsQueryRes<RecordRef> recs = RequestContext.doWithCtx(localServiceFactory, ctx -> {
-            RecsQueryRes<RecordRef> res = localRecordsService.query(query1);
+        RecsQueryRes<EntityRef> recs = RequestContext.doWithCtx(localServiceFactory, ctx -> {
+            RecsQueryRes<EntityRef> res = localRecordsService.query(query1);
             assertEquals(0, ctx.getErrors().size());
             return res;
         });
 
         assertEquals(1, recs.getRecords().size());
-        assertEquals(RecordRef.valueOf(TYPES_SOURCE_ID + "@type-id-100"), recs.getRecords().get(0));
+        assertEquals(EntityRef.valueOf(TYPES_SOURCE_ID + "@type-id-100"), recs.getRecords().get(0));
 
         RecsQueryRes<TypeDef> resultWithMeta = RequestContext.doWithCtx(localServiceFactory, ctx -> {
             RecsQueryRes<TypeDef> res = localRecordsService.query(query1, TypeDef.class);
