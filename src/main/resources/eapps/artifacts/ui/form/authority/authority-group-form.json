@@ -188,6 +188,7 @@
                             ],
                             "calculateValue": "const groupAndUsers = _.get(data, 'groupAndUsers') || [];\nvalue = groupAndUsers",
                             "optionalWhenDisabled": false,
+                            "displayElementsJS": "value = {edit: false, delete: false};",
                             "type": "tableForm",
                             "input": true
                           }
