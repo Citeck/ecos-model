@@ -7,6 +7,7 @@ import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.records2.QueryContext;
 import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -20,7 +21,7 @@ public class SectionDto {
     private MLText name;
     private String description;
     private String tenant;
-    private Set<RecordRef> types;
+    private Set<EntityRef> types;
 
     private ObjectData attributes;
 

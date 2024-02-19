@@ -12,7 +12,7 @@ import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityGroupConstants
 import ru.citeck.ecos.model.domain.authorities.patch.CreateDefaultGroupsAndPersonsPatch
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
-import ru.citeck.ecos.records2.RecordRef
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 
 class UsersAndGroupsManagersTest : AuthoritiesTestBase() {
 
@@ -43,21 +43,21 @@ class UsersAndGroupsManagersTest : AuthoritiesTestBase() {
             createGroup("TEST_GROUP")
         }
 
-        val managerRef: RecordRef = AuthContext.runAsSystem {
+        val managerRef: EntityRef = AuthContext.runAsSystem {
             val managerPersonRef = createPerson("manager")
             addAuthorityToGroup(managerPersonRef, profileAdminGroup)
             managerPersonRef
         }
 
-        val regularUser: RecordRef = AuthContext.runAsSystem {
+        val regularUser: EntityRef = AuthContext.runAsSystem {
             createPerson("regular-user")
         }
 
-        val testUser: RecordRef = AuthContext.runAsSystem {
+        val testUser: EntityRef = AuthContext.runAsSystem {
             createPerson("test-user")
         }
 
-        AuthContext.runAsFull(managerRef.id, getPersonAuthorities(managerRef.id)) {
+        AuthContext.runAsFull(managerRef.getLocalId(), getPersonAuthorities(managerRef.getLocalId())) {
             recordsService.mutateAtt(testUser, "firstName", "Tester")
             recordsService.mutateAtt(testUser, "email", "test@example.com")
         }
@@ -70,7 +70,7 @@ class UsersAndGroupsManagersTest : AuthoritiesTestBase() {
         /* Mutate by regular user */
 
         checkPermissionDenied(true) {
-            AuthContext.runAsFull(regularUser.id, getPersonAuthorities(regularUser.id)) {
+            AuthContext.runAsFull(regularUser.getLocalId(), getPersonAuthorities(regularUser.getLocalId())) {
                 recordsService.mutateAtt(testUser, "firstName", "TesterNewName")
             }
         }
@@ -78,7 +78,7 @@ class UsersAndGroupsManagersTest : AuthoritiesTestBase() {
         /* Creating new user by manager */
 
         checkPermissionDenied(true) {
-            AuthContext.runAsFull(managerRef.id, getPersonAuthorities(managerRef.id)) {
+            AuthContext.runAsFull(managerRef.getLocalId(), getPersonAuthorities(managerRef.getLocalId())) {
                 createPerson("new-user")
             }
         }
@@ -86,7 +86,7 @@ class UsersAndGroupsManagersTest : AuthoritiesTestBase() {
         /* authorityGroups attribute mutation by manager */
 
         checkPermissionDenied(true) {
-            AuthContext.runAsFull(managerRef.id, getPersonAuthorities(managerRef.id)) {
+            AuthContext.runAsFull(managerRef.getLocalId(), getPersonAuthorities(managerRef.getLocalId())) {
                 recordsService.mutate(regularUser, mapOf(AuthorityConstants.ATT_AUTHORITY_GROUPS to listOf(testGroup)))
             }
         }
@@ -95,7 +95,7 @@ class UsersAndGroupsManagersTest : AuthoritiesTestBase() {
 
         val admin = AuthorityType.PERSON.getRef("admin")
         checkPermissionDenied(true) {
-            AuthContext.runAsFull(managerRef.id, getPersonAuthorities(managerRef.id)) {
+            AuthContext.runAsFull(managerRef.getLocalId(), getPersonAuthorities(managerRef.getLocalId())) {
                 recordsService.mutateAtt(admin, "firstName", "NewAdminName")
             }
         }
@@ -108,21 +108,21 @@ class UsersAndGroupsManagersTest : AuthoritiesTestBase() {
 
         CreateDefaultGroupsAndPersonsPatch(recordsService).call()
 
-        val managersGroup: RecordRef = AuthorityType.GROUP.getRef(
+        val managersGroup: EntityRef = AuthorityType.GROUP.getRef(
             AuthorityGroupConstants.GROUPS_MANAGERS_GROUP
         )
 
-        val managedGroupsRoot: RecordRef = AuthorityType.GROUP.getRef(
+        val managedGroupsRoot: EntityRef = AuthorityType.GROUP.getRef(
             AuthorityGroupConstants.MANAGED_GROUPS_GROUP
         )
 
-        val manager: RecordRef = AuthContext.runAsSystem {
+        val manager: EntityRef = AuthContext.runAsSystem {
             val createdManager = createPerson("manager")
             addAuthorityToGroup(createdManager, managersGroup)
             createdManager
         }
 
-        val testGroup: RecordRef = AuthContext.runAsSystem {
+        val testGroup: EntityRef = AuthContext.runAsSystem {
             val testGroup = createGroup("SOME_TEST_GROUP")
             addAuthorityToGroup(testGroup, managedGroupsRoot)
             testGroup
@@ -134,7 +134,7 @@ class UsersAndGroupsManagersTest : AuthoritiesTestBase() {
             I18nContext.ENGLISH to "New name for test group",
             I18nContext.RUSSIAN to "New name for test group"
         )
-        AuthContext.runAsFull(manager.id, getPersonAuthorities(manager.id)) {
+        AuthContext.runAsFull(manager.getLocalId(), getPersonAuthorities(manager.getLocalId())) {
             recordsService.mutateAtt(testGroup, AuthorityGroupConstants.ATT_NAME, newName)
         }
         Assertions.assertThat(recordsService.getAtt(testGroup, AuthorityGroupConstants.ATT_NAME))
@@ -142,24 +142,24 @@ class UsersAndGroupsManagersTest : AuthoritiesTestBase() {
 
         /* Mutate managed group by regular user */
 
-        val regularUser: RecordRef = AuthContext.runAsSystem {
+        val regularUser: EntityRef = AuthContext.runAsSystem {
             createPerson("regular-user")
         }
 
         checkPermissionDenied(true) {
-            AuthContext.runAsFull(regularUser.id, getPersonAuthorities(regularUser.id)) {
+            AuthContext.runAsFull(regularUser.getLocalId(), getPersonAuthorities(regularUser.getLocalId())) {
                 recordsService.mutateAtt(testGroup, AuthorityGroupConstants.ATT_NAME, newName)
             }
         }
 
         /* Mutate unmanaged group by manager */
 
-        val testUnmanagedGroup: RecordRef = AuthContext.runAsSystem {
+        val testUnmanagedGroup: EntityRef = AuthContext.runAsSystem {
             createGroup("SOME_UNMANAGED_TEST_GROUP")
         }
 
         checkPermissionDenied(true) {
-            AuthContext.runAsFull(manager.id, getPersonAuthorities(manager.id)) {
+            AuthContext.runAsFull(manager.getLocalId(), getPersonAuthorities(manager.getLocalId())) {
                 recordsService.mutateAtt(testUnmanagedGroup, AuthorityGroupConstants.ATT_NAME, newName)
             }
         }
@@ -167,7 +167,7 @@ class UsersAndGroupsManagersTest : AuthoritiesTestBase() {
         /* Mutate unmanaged group by regular user */
 
         checkPermissionDenied(true) {
-            AuthContext.runAsFull(regularUser.id, getPersonAuthorities(regularUser.id)) {
+            AuthContext.runAsFull(regularUser.getLocalId(), getPersonAuthorities(regularUser.getLocalId())) {
                 recordsService.mutateAtt(testUnmanagedGroup, AuthorityGroupConstants.ATT_NAME, newName)
             }
         }
@@ -176,7 +176,7 @@ class UsersAndGroupsManagersTest : AuthoritiesTestBase() {
 
         GroupDbPermsComponent.PROTECTED_GROUPS.forEach {
             checkPermissionDenied(true) {
-                AuthContext.runAsFull(manager.id, getPersonAuthorities(manager.id)) {
+                AuthContext.runAsFull(manager.getLocalId(), getPersonAuthorities(manager.getLocalId())) {
                     val groupRef = AuthorityType.GROUP.getRef(it)
                     addAuthorityToGroup(regularUser, groupRef)
                 }

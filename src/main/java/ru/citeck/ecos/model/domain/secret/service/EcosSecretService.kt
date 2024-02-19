@@ -72,7 +72,7 @@ class EcosSecretService(
             return null
         }
 
-        return EcosSecretImpl(secretType, data)
+        return EcosSecretImpl(id, secretType, data)
     }
 
     fun getById(id: String): EcosSecretDto? {

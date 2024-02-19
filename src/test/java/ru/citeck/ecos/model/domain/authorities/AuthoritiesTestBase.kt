@@ -10,10 +10,10 @@ import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.model.EcosModelApp
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
-import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records2.predicate.model.VoidPredicate
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension
 import javax.sql.DataSource
 
@@ -53,20 +53,20 @@ class AuthoritiesTestBase {
         deleteAll(AuthorityType.PERSON)
     }
 
-    fun assertStrListAtt(ref: RecordRef, att: String, expected: List<String>) {
+    fun assertStrListAtt(ref: EntityRef, att: String, expected: List<String>) {
         val list = recordsService.getAtt(ref, att).toStrList()
         Assertions.assertThat(list).containsExactlyInAnyOrderElementsOf(expected)
     }
 
-    fun createPerson(id: String, vararg props: Pair<String, Any?>): RecordRef {
+    fun createPerson(id: String, vararg props: Pair<String, Any?>): EntityRef {
         return createAuthority(id, AuthorityType.PERSON, props.toMap())
     }
 
-    fun createGroup(id: String, vararg props: Pair<String, Any?>): RecordRef {
+    fun createGroup(id: String, vararg props: Pair<String, Any?>): EntityRef {
         return createAuthority(id, AuthorityType.GROUP, props.toMap())
     }
 
-    fun createAuthority(id: String, type: AuthorityType, props: Map<String, Any?>): RecordRef {
+    fun createAuthority(id: String, type: AuthorityType, props: Map<String, Any?>): EntityRef {
         val authorityAtts = ObjectData.create().set("id", id)
         props.forEach {
             authorityAtts.set(it.key, it.value)
@@ -78,7 +78,7 @@ class AuthoritiesTestBase {
         }
     }
 
-    fun addAuthorityToGroup(authorityRef: RecordRef, targetGroup: RecordRef) {
+    fun addAuthorityToGroup(authorityRef: EntityRef, targetGroup: EntityRef) {
         runInAuthCtx {
             recordsService.mutateAtt(
                 authorityRef,
@@ -88,7 +88,7 @@ class AuthoritiesTestBase {
         }
     }
 
-    fun setAuthorityGroups(authorityRef: RecordRef, groups: List<RecordRef>) {
+    fun setAuthorityGroups(authorityRef: EntityRef, groups: List<EntityRef>) {
         runInAuthCtx {
             recordsService.mutateAtt(
                 authorityRef,

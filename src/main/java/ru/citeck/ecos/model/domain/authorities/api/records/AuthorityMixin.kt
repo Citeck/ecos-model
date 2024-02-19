@@ -37,7 +37,7 @@ class AuthorityMixin(
             }
             AuthorityConstants.ATT_CONTAINED_USERS -> {
                 val ref = value.getRef()
-                if (!ref.sourceId.startsWith("authority-group")) {
+                if (!ref.getSourceId().startsWith("authority-group")) {
                     emptyList()
                 } else {
                     val groupRef = AuthorityType.GROUP.getRef(ref.getLocalId()).toString()

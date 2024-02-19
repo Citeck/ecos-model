@@ -111,7 +111,7 @@ class InactiveUsersDisablingJob(
         log.info { "Found ${personsToDisable.size} persons to disable" }
 
         for (person in personsToDisable) {
-            log.info { "Disable person '${person.id}'" }
+            log.info { "Disable person '${person.getLocalId()}'" }
             RequestContext.doWithTxn {
                 recordsService.mutate(
                     person,

@@ -29,6 +29,7 @@ import ru.citeck.ecos.records2.source.dao.local.MutableRecordsLocalDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsMetaDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsQueryWithMetaDao;
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -56,13 +57,13 @@ public class SectionRecordsDao extends LocalRecordsDao
     }
 
     @Override
-    public List<SectionRecord> getLocalRecordsMeta(List<RecordRef> list, MetaField metaField) {
-        if (list.size() == 1 && list.get(0).getId().isEmpty()) {
+    public List<SectionRecord> getLocalRecordsMeta(List<EntityRef> list, MetaField metaField) {
+        if (list.size() == 1 && list.get(0).getLocalId().isEmpty()) {
             return Collections.singletonList(EMPTY_RECORD);
         }
 
         return list.stream()
-            .map(ref -> new SectionRecord(sectionService.getByExtId(ref.getId())))
+            .map(ref -> new SectionRecord(sectionService.getByExtId(ref.getLocalId())))
             .collect(Collectors.toList());
     }
 
@@ -72,7 +73,7 @@ public class SectionRecordsDao extends LocalRecordsDao
         List<RecordMeta> result = new ArrayList<>();
 
         recordsDeletion.getRecords().forEach(r -> {
-            sectionService.delete(r.getId());
+            sectionService.delete(r.getLocalId());
             result.add(new RecordMeta(r));
         });
 
@@ -83,9 +84,9 @@ public class SectionRecordsDao extends LocalRecordsDao
     }
 
     @Override
-    public List<SectionMutRecord> getValuesToMutate(List<RecordRef> list) {
+    public List<SectionMutRecord> getValuesToMutate(List<EntityRef> list) {
         return list.stream()
-            .map(RecordRef::getId)
+            .map(EntityRef::getLocalId)
             .map(id -> {
                 if (StringUtils.isBlank(id)) {
                     return new SectionMutRecord();
@@ -123,7 +124,7 @@ public class SectionRecordsDao extends LocalRecordsDao
             Elements<RecordElement> elements = new RecordElements(recordsService, recordsQuery);
 
             Set<String> filteredResultIds = predicateService.filter(elements, predicate).stream()
-                .map(e -> e.getRecordRef().getId())
+                .map(e -> e.getRecordRef().getLocalId())
                 .collect(Collectors.toSet());
 
             result.addRecords(sectionService.getAll(filteredResultIds).stream()

@@ -10,6 +10,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import ru.citeck.ecos.model.EcosModelApp;
 import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
 import ru.citeck.ecos.records2.predicate.PredicateService;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension;
 import ru.citeck.ecos.model.domain.permissions.dto.AttributeDto;
 import ru.citeck.ecos.model.domain.permissions.dto.AttributesPermissionWithMetaDto;
@@ -43,7 +44,7 @@ public class AttrPermissionsRecordsDaoTest {
 
     private AttributesPermissionRecordsDao recordsDao;
 
-    private List<RecordRef> recordRefs;
+    private List<EntityRef> recordRefs;
     private RecordsQuery recordsQuery;
     private AttributesPermissionWithMetaDto metaDto;
     private MetaField metaField;

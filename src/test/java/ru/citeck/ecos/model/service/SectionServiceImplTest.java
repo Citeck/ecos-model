@@ -7,6 +7,7 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import ru.citeck.ecos.model.EcosModelApp;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.json.Json;
@@ -47,7 +48,7 @@ public class SectionServiceImplTest {
 
         sectionExtId = "section";
 
-        Set<RecordRef> typesRefs = Collections.singleton(RecordRef.create("type", "type"));
+        Set<EntityRef> typesRefs = Collections.singleton(EntityRef.create("type", "type"));
 
         sectionDto = new SectionDto();
         sectionDto.setId(sectionExtId);
@@ -88,9 +89,9 @@ public class SectionServiceImplTest {
         assertEquals(resultSectionDto.getDescription(), sectionEntity.getDescription());
         assertEquals(resultSectionDto.getId(), sectionEntity.getExtId());
         assertEquals(resultSectionDto.getTypes().size(), sectionEntity.getTypes().size());
-        RecordRef resultTypeRef = resultSectionDto.getTypes().iterator().next();
+        EntityRef resultTypeRef = resultSectionDto.getTypes().iterator().next();
         TypeEntity type = sectionEntity.getTypes().iterator().next();
-        assertEquals(resultTypeRef.getId(), type.getExtId());
+        assertEquals(resultTypeRef.getLocalId(), type.getExtId());
     }
 
     @Test
@@ -112,9 +113,9 @@ public class SectionServiceImplTest {
         assertEquals(resultSectionDto.getDescription(), sectionEntity.getDescription());
         assertEquals(resultSectionDto.getId(), sectionEntity.getExtId());
         assertEquals(resultSectionDto.getTypes().size(), sectionEntity.getTypes().size());
-        RecordRef resultTypeRef = resultSectionDto.getTypes().iterator().next();
+        EntityRef resultTypeRef = resultSectionDto.getTypes().iterator().next();
         TypeEntity type = sectionEntity.getTypes().iterator().next();
-        assertEquals(resultTypeRef.getId(), type.getExtId());
+        assertEquals(resultTypeRef.getLocalId(), type.getExtId());
     }
 
     @Test
@@ -133,9 +134,9 @@ public class SectionServiceImplTest {
         assertEquals(resultSectionDto.getDescription(), sectionEntity.getDescription());
         assertEquals(resultSectionDto.getId(), sectionEntity.getExtId());
         assertEquals(resultSectionDto.getTypes().size(), sectionEntity.getTypes().size());
-        RecordRef resultTypeRef = resultSectionDto.getTypes().iterator().next();
+        EntityRef resultTypeRef = resultSectionDto.getTypes().iterator().next();
         TypeEntity type = sectionEntity.getTypes().iterator().next();
-        assertEquals(resultTypeRef.getId(), type.getExtId());
+        assertEquals(resultTypeRef.getLocalId(), type.getExtId());
     }
 
     @Test

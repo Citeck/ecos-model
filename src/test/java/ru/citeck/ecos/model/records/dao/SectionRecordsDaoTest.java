@@ -7,6 +7,7 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import ru.citeck.ecos.model.EcosModelApp;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.model.section.records.dao.SectionRecordsDao;
@@ -49,9 +50,9 @@ public class SectionRecordsDaoTest {
 
     private SectionRecordsDao sectionRecordsDao;
 
-    private List<RecordRef> recordRefs;
+    private List<EntityRef> recordRefs;
     private RecordsQuery recordsQuery;
-    private Set<RecordRef> types;
+    private Set<EntityRef> types;
     private SectionDto sectionDto;
     private MetaField metaField;
     private Predicate predicate;
@@ -62,7 +63,7 @@ public class SectionRecordsDaoTest {
         sectionRecordsDao.setRecordsServiceFactory(new RecordsServiceFactory());
 
         recordRefs = Arrays.asList(
-            RecordRef.create("section", "section")
+            EntityRef.create("section", "section")
         );
 
         recordsQuery = new RecordsQuery();
@@ -70,7 +71,7 @@ public class SectionRecordsDaoTest {
         recordsQuery.setLanguage("query");
 
         types = Collections.singleton(
-            RecordRef.create("type", "type")
+            EntityRef.create("type", "type")
         );
 
         sectionDto = new SectionDto();

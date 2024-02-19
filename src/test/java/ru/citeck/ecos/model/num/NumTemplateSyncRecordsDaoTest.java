@@ -22,6 +22,7 @@ import ru.citeck.ecos.records2.source.dao.local.RemoteSyncRecordsDao;
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery;
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes;
 import ru.citeck.ecos.webapp.api.EcosWebAppApi;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef;
 import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension;
 
@@ -86,10 +87,10 @@ public class NumTemplateSyncRecordsDaoTest {
             .withMaxItems(1000)
             .build();
 
-        RecsQueryRes<RecordRef> result = localRecordsService.query(query);
+        RecsQueryRes<EntityRef> result = localRecordsService.query(query);
         assertEquals(TOTAL_TEMPLATES, result.getTotalCount());
 
-        NumTemplateDto dto = localRecordsService.getAtts(RecordRef.valueOf(SOURCE_ID + "@template-id-100"), NumTemplateDto.class);
+        NumTemplateDto dto = localRecordsService.getAtts(EntityRef.valueOf(SOURCE_ID + "@template-id-100"), NumTemplateDto.class);
         NumTemplateDto origDto = templates.stream().filter(v -> v.getId().equals("template-id-100")).findFirst().orElse(null);
 
         assertEquals(origDto, normalize(dto));

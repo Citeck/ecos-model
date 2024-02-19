@@ -34,6 +34,7 @@ import ru.citeck.ecos.records2.source.dao.local.MutableRecordsLocalDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsMetaDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsQueryWithMetaDao;
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -58,7 +59,7 @@ public class NumTemplateRecordsDao extends LocalRecordsDao
     }
 
     @Override
-    public List<NumTemplateRecord> getValuesToMutate(List<RecordRef> records) {
+    public List<NumTemplateRecord> getValuesToMutate(List<EntityRef> records) {
         return getLocalRecordsMeta(records, null);
     }
 
@@ -119,7 +120,7 @@ public class NumTemplateRecordsDao extends LocalRecordsDao
     public RecordsDelResult delete(RecordsDeletion deletion) {
         RecordsDelResult result = new RecordsDelResult();
         deletion.getRecords().stream()
-            .map(RecordRef::getId)
+            .map(EntityRef::getLocalId)
             .forEach(id -> {
                 numTemplateService.delete(id);
                 result.addRecord(new RecordMeta(id));
@@ -128,9 +129,9 @@ public class NumTemplateRecordsDao extends LocalRecordsDao
     }
 
     @Override
-    public List<NumTemplateRecord> getLocalRecordsMeta(List<RecordRef> records, MetaField metaField) {
+    public List<NumTemplateRecord> getLocalRecordsMeta(List<EntityRef> records, MetaField metaField) {
         return records.stream()
-            .map(RecordRef::getId)
+            .map(EntityRef::getLocalId)
             .map(id -> numTemplateService.getById(id).map(NumTemplateWithMetaDto::new)
                 .orElseGet(() -> new NumTemplateWithMetaDto(id)))
             .map(NumTemplateRecord::new)

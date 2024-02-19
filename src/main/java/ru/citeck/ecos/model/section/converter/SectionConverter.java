@@ -10,12 +10,14 @@ import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.converter.AbstractDtoConverter;
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils;
+import ru.citeck.ecos.model.lib.utils.ModelUtils;
 import ru.citeck.ecos.model.section.domain.SectionEntity;
 import ru.citeck.ecos.model.type.repository.TypeEntity;
 import ru.citeck.ecos.model.section.dto.SectionDto;
 import ru.citeck.ecos.model.section.repository.SectionRepository;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.records2.RecordRef;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -44,7 +46,7 @@ public class SectionConverter extends AbstractDtoConverter<SectionDto, SectionEn
 
         if (dto.getTypes() != null) {
             dtoTypesExtIds = dto.getTypes().stream()
-                .map(RecordRef::getId)
+                .map(EntityRef::getLocalId)
                 .collect(Collectors.toSet());
         } else {
             dtoTypesExtIds = Collections.emptySet();
@@ -74,10 +76,10 @@ public class SectionConverter extends AbstractDtoConverter<SectionDto, SectionEn
 
     @Override
     public SectionDto entityToDto(SectionEntity entity) {
-        Set<RecordRef> typesRefs = null;
+        Set<EntityRef> typesRefs = null;
         if (entity.getTypes() != null) {
             typesRefs = entity.getTypes().stream()
-                .map(e -> TypeUtils.getTypeRef(e.getExtId()))
+                .map(e -> ModelUtils.getTypeRef(e.getExtId()))
                 .collect(Collectors.toSet());
         }
 
