@@ -174,14 +174,17 @@ class AuthoritiesSyncService(
                         error("Invalid factory: $factory")
                     }
                     val convertedConfig = v.config.getAs(configAndStateTypes[0])
-                        ?: error("Config can't be converted to ${configAndStateTypes[0]}")
+                    if (convertedConfig == null) {
+                        log.error { "Can't convert config to type ${configAndStateTypes[0]}" }
+                        continue
+                    }
 
                     log.info { "Register new synchronization instance: $syncId" }
                     registeredSyncCount++
 
                     val newInstance = SyncInstance(
                         syncId,
-                        factory.createSync(convertedConfig, v.authorityType, createContext(syncId)),
+                        factory.createSync(syncId, convertedConfig, v.authorityType, createContext(syncId)),
                         configAndStateTypes[1],
                         syncInstanceConfig
                     )
