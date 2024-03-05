@@ -118,8 +118,8 @@ class EmodelTwoPhaseCommitCoordinatorRepo : TwoPhaseCommitRepo {
     override fun afterRollback(txnId: TxnId, rolledBackApps: Set<String>, errors: Map<String, Throwable>) {
         log.debug {
             "AFTER ROLLBACK $txnId " +
-            "rolledBackApps: $rolledBackApps " +
-            "errors: ${errors.entries.map { it.key + "-" + it.value.message }}"
+                "rolledBackApps: $rolledBackApps " +
+                "errors: ${errors.entries.map { it.key + "-" + it.value.message }}"
         }
         afterCommitOrRollback(txnId, rolledBackApps, errors)
     }
@@ -272,7 +272,7 @@ class EmodelTwoPhaseCommitCoordinatorRepo : TwoPhaseCommitRepo {
     ) {
         companion object {
             fun valueOf(error: Throwable): ErrorInfo {
-                val root = ExceptionUtils.getRootCause(error)
+                val root = ExceptionUtils.getRootCause(error) ?: error
                 return ErrorInfo(
                     type = error::class.java.name,
                     message = error.message ?: "",
