@@ -172,16 +172,11 @@ class EmodelTwoPhaseCommitCoordinatorRepo : TwoPhaseCommitRepo {
                 listOf(DbFindSort(TwoPcEntity.RECOVERY_TIME, true)),
                 DbFindPage.FIRST
             ).entities.firstOrNull()
-        }?.let {
-            RecoveryData(
-                txnId = TxnId.valueOf(it.txnId),
-                data = Json.mapper.readNotNull(it.data, TxnCommitData::class.java),
-                status = TwoPhaseCommitStatus.values()[it.status],
-                appsToProcess = Json.mapper.readList(it.appsToProcess, String::class.java).toSet(),
-                ownerApp = it.ownerApp,
-                appRoutes = Json.mapper.readMap(it.appRoutes, String::class.java, String::class.java)
-            )
-        }
+        }?.asRecoveryData()
+    }
+
+    override fun getRecoveryData(txnId: TxnId): RecoveryData? {
+        return findEntity(txnId)?.asRecoveryData()
     }
 
     private inline fun <T> doInNewTxn(readOnly: Boolean = false, crossinline action: () -> T): T {
@@ -261,6 +256,17 @@ class EmodelTwoPhaseCommitCoordinatorRepo : TwoPhaseCommitRepo {
 
         @Constraints(DbColumnConstraint.NOT_NULL)
         var ownerApp: String = ""
+    }
+
+    private fun TwoPcEntity.asRecoveryData(): RecoveryData {
+        return RecoveryData(
+            txnId = TxnId.valueOf(this.txnId),
+            data = Json.mapper.readNotNull(this.data, TxnCommitData::class.java),
+            status = TwoPhaseCommitStatus.values()[this.status],
+            appsToProcess = Json.mapper.readList(this.appsToProcess, String::class.java).toSet(),
+            ownerApp = this.ownerApp,
+            appRoutes = Json.mapper.readMap(this.appRoutes, String::class.java, String::class.java)
+        )
     }
 
     class ErrorInfo(
