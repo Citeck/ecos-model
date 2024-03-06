@@ -27,7 +27,10 @@ ecos:
     dataSources:
       main:
         xa: true
-
+    task:
+      executors:
+        txn-actions:
+          corePoolSize: 10
   integrations:
     onlyoffice:
       host: only-office-app
