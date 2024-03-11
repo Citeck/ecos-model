@@ -747,7 +747,8 @@
                                     ],
                                     "type": "button",
                                     "input": true,
-                                    "row": "0-3"
+                                    "row": "0-3",
+                                    "headers" : [ { } ]
                                   },
                                   {
                                     "label": {
@@ -833,7 +834,8 @@
                                     "refreshOn": [],
                                     "optionalWhenDisabled": false,
                                     "type": "button",
-                                    "input": true
+                                    "input": true,
+                                    "headers" : [ { } ]
                                   },
                                   {
                                     "label": {
