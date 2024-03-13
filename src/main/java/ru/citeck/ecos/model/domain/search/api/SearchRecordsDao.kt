@@ -12,6 +12,7 @@ import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.query.RecordsQueryDao
 import ru.citeck.ecos.records3.record.dao.query.dto.query.Consistency
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 import java.time.Instant
 
 @Component
@@ -189,14 +190,14 @@ class SearchRecordsDao(
     )
 
     class SearchRecord(
-        val rec: RecordRef,
+        val rec: EntityRef,
         private val displayName: String,
         val groupType: String,
-        private val ecosType: RecordRef,
+        private val ecosType: EntityRef,
         private val modified: Instant,
         private val created: Instant
     ) {
-        fun getId(): RecordRef {
+        fun getId(): EntityRef {
             return rec
         }
 
@@ -204,7 +205,7 @@ class SearchRecordsDao(
             return displayName
         }
 
-        fun getEcosType(): RecordRef {
+        fun getEcosType(): EntityRef {
             return ecosType
         }
 

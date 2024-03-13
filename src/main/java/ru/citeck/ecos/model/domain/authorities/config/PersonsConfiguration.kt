@@ -34,6 +34,7 @@ import ru.citeck.ecos.records3.record.dao.RecordsDao
 import ru.citeck.ecos.records3.record.dao.impl.proxy.MutateProxyProcessor
 import ru.citeck.ecos.records3.record.dao.impl.proxy.ProxyProcContext
 import ru.citeck.ecos.txn.lib.TxnContext
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 import javax.sql.DataSource
 import kotlin.reflect.jvm.jvmName
 
@@ -81,7 +82,7 @@ class PersonsConfiguration(
                         LocalRecordAtts(recordId, newAtts)
                     }
                 }
-                override fun mutatePostProcess(records: List<RecordRef>, context: ProxyProcContext): List<RecordRef> {
+                override fun mutatePostProcess(records: List<EntityRef>, context: ProxyProcContext): List<EntityRef> {
                     return records
                 }
             }

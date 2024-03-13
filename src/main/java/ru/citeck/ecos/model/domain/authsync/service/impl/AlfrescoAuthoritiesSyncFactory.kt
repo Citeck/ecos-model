@@ -55,6 +55,7 @@ class AlfrescoAuthoritiesSyncFactory(
     }
 
     override fun createSync(
+        id: String,
         config: Config,
         authorityType: AuthorityType,
         context: AuthoritiesSyncContext<State>

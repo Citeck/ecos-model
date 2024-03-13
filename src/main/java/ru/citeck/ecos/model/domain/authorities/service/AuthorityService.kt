@@ -13,6 +13,7 @@ import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.request.RequestContext
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
@@ -144,7 +145,7 @@ class AuthorityService(
         }
     }
 
-    fun getGroupMembers(groupRef: RecordRef, membersType: AuthorityType): List<RecordRef> {
+    fun getGroupMembers(groupRef: EntityRef, membersType: AuthorityType): List<EntityRef> {
         return records.query(
             RecordsQuery.create {
                 withSourceId(membersType.sourceId)
@@ -192,7 +193,7 @@ class AuthorityService(
         val nextGroups: List<String> = if (asc) {
             records.getAtt(groupRef, ATT_AUTHORITY_GROUPS).asList(RecordRef::class.java).map { it.id }
         } else {
-            getGroupMembers(groupRef, AuthorityType.GROUP).map { it.id }
+            getGroupMembers(groupRef, AuthorityType.GROUP).map { it.getLocalId() }
         }
         if (cache != null) {
             val groupsToCache = LinkedHashSet<String>()

@@ -27,6 +27,7 @@ import ru.citeck.ecos.records3.record.atts.dto.RecordAtts
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.request.RequestContext
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.api.lock.EcosLockApi
 import ru.citeck.ecos.webapp.api.task.EcosTasksApi
 import ru.citeck.ecos.webapp.api.task.scheduler.EcosScheduledTask
@@ -173,14 +174,17 @@ class AuthoritiesSyncService(
                         error("Invalid factory: $factory")
                     }
                     val convertedConfig = v.config.getAs(configAndStateTypes[0])
-                        ?: error("Config can't be converted to ${configAndStateTypes[0]}")
+                    if (convertedConfig == null) {
+                        log.error { "Can't convert config to type ${configAndStateTypes[0]}" }
+                        continue
+                    }
 
                     log.info { "Register new synchronization instance: $syncId" }
                     registeredSyncCount++
 
                     val newInstance = SyncInstance(
                         syncId,
-                        factory.createSync(convertedConfig, v.authorityType, createContext(syncId)),
+                        factory.createSync(syncId, convertedConfig, v.authorityType, createContext(syncId)),
                         configAndStateTypes[1],
                         syncInstanceConfig
                     )
@@ -292,7 +296,7 @@ class AuthoritiesSyncService(
 
     private fun createContext(syncId: String): AuthoritiesSyncContext<Any> {
 
-        val ref = RecordRef.create(EcosModelApp.NAME, SOURCE_ID, syncId)
+        val ref = EntityRef.create(EcosModelApp.NAME, SOURCE_ID, syncId)
 
         return object : AuthoritiesSyncContext<Any> {
             override fun setState(state: Any?) {
@@ -308,7 +312,7 @@ class AuthoritiesSyncService(
                     if (type == AuthorityType.GROUP && PROTECTED_FROM_SYNC_GROUPS.contains(idValue)) {
                         continue
                     }
-                    val authorityRef = RecordRef.create(type.sourceId, idValue)
+                    val authorityRef = EntityRef.create(type.sourceId, idValue)
                     val currentAuthorityAtts = recordsService.getAtts(authorityRef, CurrentAuthorityAtts::class.java)
 
                     val attsCopy = authorityAtts.deepCopy()
@@ -318,7 +322,7 @@ class AuthoritiesSyncService(
                             log.error { "Alfresco admin group without authorityGroups. Atts: $attsCopy" }
                         } else {
                             val hasEcosAdminGroup = authorityGroups.any {
-                                RecordRef.valueOf(it.asText()).id == AuthorityGroupConstants.ADMIN_GROUP
+                                EntityRef.valueOf(it.asText()).getLocalId() == AuthorityGroupConstants.ADMIN_GROUP
                             }
                             if (!hasEcosAdminGroup) {
                                 authorityGroups.add(AuthorityType.GROUP.getRef(AuthorityGroupConstants.ADMIN_GROUP))
@@ -327,14 +331,14 @@ class AuthoritiesSyncService(
                     }
                     syncContext.set(true)
                     try {
-                        val isEmptyManagedBySync = RecordRef.isEmpty(currentAuthorityAtts.managedBySync)
+                        val isEmptyManagedBySync = EntityRef.isEmpty(currentAuthorityAtts.managedBySync)
                         if (currentAuthorityAtts.notExists == true || isEmptyManagedBySync) {
                             attsCopy["managedBySync"] = ref
                         }
                         if (currentAuthorityAtts.notExists == true) {
                             recordsService.create(type.sourceId, attsCopy)
                         } else if (isEmptyManagedBySync || currentAuthorityAtts.managedBySync == ref) {
-                            recordsService.mutate(RecordAtts(RecordRef.create(type.sourceId, ""), attsCopy))
+                            recordsService.mutate(RecordAtts(EntityRef.create(type.sourceId, ""), attsCopy))
                         }
                     } finally {
                         syncContext.remove()
@@ -343,18 +347,20 @@ class AuthoritiesSyncService(
             }
 
             override fun deleteAuthorities(type: AuthorityType, authorities: List<String>) {
-                //TODO finish after implementing full deletion logic of authorities
+                // TODO finish after implementing full deletion logic of authorities
                 authorities.forEach {
-                    val idValue = it;
+                    val idValue = it
                     if (idValue.isBlank()) {
                         error("Empty id")
                     }
-                    val authorityRef = RecordRef.create(type.sourceId, idValue)
+                    val authorityRef = EntityRef.create(type.sourceId, idValue)
                     if (AuthorityType.PERSON == type) {
                         val personAtts = RecordAtts(authorityRef)
-                        personAtts.setAtts(ObjectData.create()
-                            .set("personDisabled", true)
-                            .set("personDisableReason", "Removed form AD (ldap sync)"))
+                        personAtts.setAtts(
+                            ObjectData.create()
+                                .set("personDisabled", true)
+                                .set("personDisableReason", "Removed form AD (ldap sync)")
+                        )
                         recordsService.mutate(personAtts)
                     }
                 }

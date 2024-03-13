@@ -30,6 +30,7 @@ import ru.citeck.ecos.records2.source.dao.local.MutableRecordsLocalDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsMetaDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsQueryWithMetaDao;
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -55,14 +56,14 @@ public class AttributesPermissionRecordsDao extends LocalRecordsDao
     }
 
     @Override
-    public List<MetaValue> getLocalRecordsMeta(List<RecordRef> list, MetaField metaField) {
-        if (list.size() == 1 && list.get(0).getId().isEmpty()) {
+    public List<MetaValue> getLocalRecordsMeta(List<EntityRef> list, MetaField metaField) {
+        if (list.size() == 1 && list.get(0).getLocalId().isEmpty()) {
             return Collections.singletonList(EMPTY_RECORD);
         }
 
         return list.stream()
             .map(ref -> {
-                Optional<AttributesPermissionWithMetaDto> dto = attributesPermissionsService.getById(ref.getId());
+                Optional<AttributesPermissionWithMetaDto> dto = attributesPermissionsService.getById(ref.getLocalId());
                 return dto.isPresent() ? new AttributesPermissionRecord(dto.get()) : EmptyValue.INSTANCE;
             })
             .collect(Collectors.toList());
@@ -74,7 +75,7 @@ public class AttributesPermissionRecordsDao extends LocalRecordsDao
         List<RecordMeta> result = new ArrayList<>();
 
         recordsDeletion.getRecords().forEach(r -> {
-            attributesPermissionsService.delete(r.getId());
+            attributesPermissionsService.delete(r.getLocalId());
             result.add(new RecordMeta(r));
         });
 
@@ -85,9 +86,9 @@ public class AttributesPermissionRecordsDao extends LocalRecordsDao
     }
 
     @Override
-    public List<AttrPermissionsMutRecord> getValuesToMutate(List<RecordRef> list) {
+    public List<AttrPermissionsMutRecord> getValuesToMutate(List<EntityRef> list) {
         return list.stream()
-            .map(RecordRef::getId)
+            .map(EntityRef::getLocalId)
             .map(id -> {
                 if (StringUtils.isBlank(id)) {
                     return new AttrPermissionsMutRecord();

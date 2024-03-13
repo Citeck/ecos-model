@@ -27,6 +27,7 @@ import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery;
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes;
 import ru.citeck.ecos.records3.record.request.RequestContext;
 import ru.citeck.ecos.webapp.api.EcosWebAppApi;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef;
 import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension;
 
@@ -98,12 +99,12 @@ public class AttrPermissionsSyncRecordsDaoTest {
             .withMaxItems(100)
             .build();
 
-        RecsQueryRes<RecordRef> result = localRecordsService.query(query);
+        RecsQueryRes<EntityRef> result = localRecordsService.query(query);
         assertEquals(TOTAL_TYPES , result.getTotalCount());
         assertEquals(TOTAL_TYPES, remoteSyncRecordsDao.getRecords().size());
 
         AttributesPermissionDto origDto = permissions.stream().filter(v -> v.getId().equals("att-perm-id-1")).findFirst().orElse(null);
-        AttributesPermissionDto dto = localRecordsService.getAtts(RecordRef.valueOf(SOURCE_ID + "@att-perm-id-1"), AttributesPermissionDto.class);
+        AttributesPermissionDto dto = localRecordsService.getAtts(EntityRef.valueOf(SOURCE_ID + "@att-perm-id-1"), AttributesPermissionDto.class);
 
         assertEquals(origDto, dto);
 
@@ -115,8 +116,8 @@ public class AttrPermissionsSyncRecordsDaoTest {
             .withQuery(predicate)
             .build();
 
-        RecsQueryRes<RecordRef> recs = RequestContext.doWithCtx(localServiceFactory, ctx -> {
-            RecsQueryRes<RecordRef> res = localRecordsService.query(query1);
+        RecsQueryRes<EntityRef> recs = RequestContext.doWithCtx(localServiceFactory, ctx -> {
+            RecsQueryRes<EntityRef> res = localRecordsService.query(query1);
             assertEquals(0, ctx.getErrors().size());
             return res;
         });

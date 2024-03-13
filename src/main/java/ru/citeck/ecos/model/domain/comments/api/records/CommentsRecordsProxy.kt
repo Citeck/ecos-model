@@ -2,7 +2,6 @@ package ru.citeck.ecos.model.domain.comments.api.records
 
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.model.domain.comments.api.validator.CommentValidator
-import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
 import ru.citeck.ecos.records3.record.atts.dto.RecordAtts
 import ru.citeck.ecos.records3.record.atts.schema.resolver.AttContext
@@ -13,6 +12,7 @@ import ru.citeck.ecos.records3.record.atts.value.impl.InnerAttValue
 import ru.citeck.ecos.records3.record.dao.impl.proxy.RecordsDaoProxy
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 
 const val COMMENT_REPO_DAO_ID = "comment-repo"
 const val COMMENT_DAO_ID = "comment"
@@ -41,7 +41,7 @@ class CommentsRecordsProxy : RecordsDaoProxy(
         val commentsAvailableToRead = comments.getRecords().filter {
             it[RECORD_READ_PERM_ATT]["/permissions/_has/Read/?bool"].asBoolean()
         }.map {
-            val ref = RecordRef.create(COMMENT_DAO_ID, it.getId().id)
+            val ref = EntityRef.create(COMMENT_DAO_ID, it.getId().getLocalId())
             val innerAttValue = InnerAttValue(it.getAtts().getData().asJson())
 
             ProxyRecVal(ref, innerAttValue)
@@ -63,7 +63,7 @@ class CommentsRecordsProxy : RecordsDaoProxy(
     }
 
     private class ProxyRecVal(
-        private val id: RecordRef,
+        private val id: EntityRef,
         base: AttValue
     ) : AttValueDelegate(base), AttValueProxy {
 
