@@ -74,6 +74,7 @@ class EmodelTwoPhaseCommitCoordinatorRepo : TwoPhaseCommitRepo {
 
     override fun beforePrepare(txnId: TxnId, data: TxnCommitData) {
         log.debug { "BEFORE PREPARE $txnId data: $data" }
+        val appRoutes = Json.mapper.toStringNotNull(EcosWebRoute.getTxnRoutesMap())
         doInNewTxn {
             val entity = TwoPcEntity()
             entity.txnId = txnId.toString()
@@ -83,7 +84,7 @@ class EmodelTwoPhaseCommitCoordinatorRepo : TwoPhaseCommitRepo {
             entity.created = Instant.now()
             entity.modified = entity.created
             entity.recoveryTime = Instant.now().plus(RECOVERY_TIME_BY_ITERATION[0])
-            entity.appRoutes = Json.mapper.toStringNotNull(EcosWebRoute.getTxnRoutesMap())
+            entity.appRoutes = appRoutes
             entity.appsToProcess = Json.mapper.toStringNotNull(data.apps.keys)
             dataService.save(entity)
         }
@@ -146,12 +147,16 @@ class EmodelTwoPhaseCommitCoordinatorRepo : TwoPhaseCommitRepo {
                 } else {
                     entity.appsToProcess = Json.mapper.toStringNotNull(remainingAppsToProc)
                     entity.modified = Instant.now()
-                    entity.procIteration = entity.procIteration + 1
                     entity.errors = Json.mapper.toStringNotNull(
                         errors.entries.associate {
                             it.key to ErrorInfo.valueOf(it.value)
                         }
                     )
+                    if (entity.procIteration == 0) {
+                        entity.initialErrors = entity.errors
+                        entity.initialErrorsTime = Instant.now()
+                    }
+                    entity.procIteration = entity.procIteration + 1
                     val recoveryTimeIdx = min(entity.procIteration, RECOVERY_TIME_BY_ITERATION.lastIndex)
                     entity.recoveryTime = Instant.now().plus(RECOVERY_TIME_BY_ITERATION[recoveryTimeIdx])
 
@@ -249,6 +254,14 @@ class EmodelTwoPhaseCommitCoordinatorRepo : TwoPhaseCommitRepo {
         @ColumnType(DbColumnType.JSON)
         @Constraints(DbColumnConstraint.NOT_NULL)
         var errors: String = "{}"
+
+        @ColumnType(DbColumnType.JSON)
+        @Constraints(DbColumnConstraint.NOT_NULL)
+        var initialErrors: String = "{}"
+
+        @ColumnType(DbColumnType.DATETIME)
+        @Constraints(DbColumnConstraint.NOT_NULL)
+        var initialErrorsTime: Instant = Instant.EPOCH
 
         @ColumnType(DbColumnType.JSON)
         @Constraints(DbColumnConstraint.NOT_NULL)
