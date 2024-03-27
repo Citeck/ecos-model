@@ -23,11 +23,13 @@ import ru.citeck.ecos.model.num.repository.NumTemplateRepository;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
 import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy;
 import ru.citeck.ecos.webapp.api.entity.EntityRef;
+import ru.citeck.ecos.webapp.lib.lock.EcosAppLockService;
 import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverter;
 import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverterFactory;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -45,6 +47,8 @@ public class NumTemplateService {
 
     private final EntityManager entityManager;
     private final TransactionTemplate transactionTemplate;
+
+    private final EcosAppLockService ecosAppLockService;
 
     private final JpaSearchConverterFactory predicateToJpaConvFactory;
     private JpaSearchConverter<NumTemplateEntity> searchConverter;
@@ -167,14 +171,24 @@ public class NumTemplateService {
 
     private long getNextNumber(NumTemplateEntity numTemplateEntity, String counterKey, boolean increment) {
 
-        NumCounterEntity counterEntity = counterRepo.findByTemplateAndKey(numTemplateEntity, counterKey);
         if (!increment) {
+            NumCounterEntity counterEntity = counterRepo.findByTemplateAndKey(numTemplateEntity, counterKey);
             if (counterEntity == null) {
                 return 1;
             } else {
                 return counterEntity.getCounter() + 1;
             }
         }
+        return ecosAppLockService.doInSync(
+            "num-tlt-" + numTemplateEntity.getExtId() + "-" + counterKey,
+            Duration.ofMinutes(10),
+            lock -> getNextNumberAndIncrement(numTemplateEntity, counterKey)
+        );
+    }
+
+    private long getNextNumberAndIncrement(NumTemplateEntity numTemplateEntity, String counterKey) {
+
+        NumCounterEntity counterEntity = counterRepo.findByTemplateAndKey(numTemplateEntity, counterKey);
 
         if (counterEntity == null) {
             counterEntity = new NumCounterEntity();
