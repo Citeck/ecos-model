@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.num.service;
 
+import kotlin.jvm.functions.Function0;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,12 +8,14 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.data.entity.EntityMeta;
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta;
-import ru.citeck.ecos.commons.utils.ExceptionUtils;
 import ru.citeck.ecos.commons.utils.TmplUtils;
 import ru.citeck.ecos.model.lib.num.dto.NumTemplateDef;
 import ru.citeck.ecos.model.num.domain.NumCounterEntity;
@@ -28,7 +31,6 @@ import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchCon
 import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverterFactory;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,8 +47,8 @@ public class NumTemplateService {
     private final NumTemplateRepository templateRepo;
     private final EcosNumCounterRepository counterRepo;
 
-    private final EntityManager entityManager;
-    private final TransactionTemplate transactionTemplate;
+    private final PlatformTransactionManager transactionManager;
+    private TransactionTemplate doInNewTxnTemplate;
 
     private final EcosAppLockService ecosAppLockService;
 
@@ -61,6 +63,10 @@ public class NumTemplateService {
         searchConverter = predicateToJpaConvFactory.createConverter(NumTemplateEntity.class)
             .withDefaultPageSize(10000)
             .build();
+
+        DefaultTransactionDefinition txnDef = new DefaultTransactionDefinition();
+        txnDef.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        doInNewTxnTemplate = new TransactionTemplate(transactionManager, txnDef);
     }
 
     @Transactional
@@ -182,7 +188,7 @@ public class NumTemplateService {
         return ecosAppLockService.doInSync(
             "num-tlt-" + numTemplateEntity.getExtId() + "-" + counterKey,
             Duration.ofMinutes(10),
-            lock -> getNextNumberAndIncrement(numTemplateEntity, counterKey)
+            lock -> doInNewTxn(() -> getNextNumberAndIncrement(numTemplateEntity, counterKey))
         );
     }
 
@@ -193,61 +199,19 @@ public class NumTemplateService {
         if (counterEntity == null) {
             counterEntity = new NumCounterEntity();
             counterEntity.setKey(counterKey);
-            counterEntity.setCounter(0L);
+            counterEntity.setCounter(1L);
             counterEntity.setTemplate(numTemplateEntity);
-            try {
-                counterEntity = counterRepo.save(counterEntity);
-            } catch (Exception e) {
-                log.warn("Counter can't be created. Perhaps another thread already did it", e);
-                counterEntity = counterRepo.findByTemplateAndKey(numTemplateEntity, counterKey);
-                if (counterEntity == null) {
-                    throw new IllegalStateException("Counter is null");
-                }
-            }
+        } else {
+            counterEntity.setCounter(counterEntity.getCounter() + 1);
         }
-
-        Integer updatedCount = 0;
-        for (int i = 0; i < 40 && updatedCount == 0; i++) {
-
-            updatedCount = updateCounter(counterEntity, numTemplateEntity);
-            if (updatedCount == null) {
-                updatedCount = 0;
-            }
-
-            if (updatedCount == 0) {
-                try {
-                    Thread.sleep(i * 5L);
-                } catch (InterruptedException e) {
-                    ExceptionUtils.throwException(e);
-                }
-                counterEntity = counterRepo.findByTemplateAndKey(numTemplateEntity, counterKey);
-            }
-        }
-
-        if (updatedCount == 0) {
-            throw new IllegalStateException("Counter can't be incremented. " +
-                "Template id: " + numTemplateEntity.getExtId() + " Counter key: " + counterKey);
-        }
-
-        return counterEntity.getCounter() + 1;
+        return counterRepo.save(counterEntity).getCounter();
     }
 
-    protected Integer updateCounter(NumCounterEntity counter, NumTemplateEntity numTemplate) {
-
-        return transactionTemplate.execute(status -> {
-            int updated = entityManager.createQuery(
-                "UPDATE NumCounterEntity " +
-                    "SET counter = :oldCounter + 1 " +
-                    "WHERE key = :counterKey " +
-                    "AND counter = :oldCounter " +
-                    "AND template = :numTemplate")
-                .setParameter("oldCounter", counter.getCounter().intValue()) //todo: why Long is not working?
-                .setParameter("counterKey", counter.getKey())
-                .setParameter("numTemplate", numTemplate)
-                .executeUpdate();
-
+    private <T> T doInNewTxn(Function0<T> action) {
+        return doInNewTxnTemplate.execute(status -> {
+            T res = action.invoke();
             status.flush();
-            return updated;
+            return res;
         });
     }
 
