@@ -720,7 +720,7 @@
                                     "action": "custom",
                                     "state": "",
                                     "showValidations": false,
-                                    "custom": "var currentRow = row;\nvar config = row.config || {}; \nvar formData = config;\n\nCiteck.EcosFormUtils.getFormById('uiserv/form@att-type-' + row.type + '-form', {\n    definition: 'definition?json'\n}).then(function(formConfig) {\n    \n    var inputs = Citeck.EcosFormUtils.getFormInputs(formConfig.definition);\n\n    Citeck.Dialogs.showFormDialog({\n        title: 'Attribute type config',\n        showDefaultButtons: true,\n        formDefinition: formConfig.definition,\n        formData: formData,\n        onSubmit: submission => {\n            var data = submission.data || {};\n            var configData = {};\n            for (var i in inputs) {\n                var att = inputs[i].attribute;\n                configData[att] = data[att];\n            }\n            currentRow.config = configData;\n        }\n    })\n    \n});",
+                                    "custom": "var currentRow = row;\nvar config = row.config || {}; \nvar formData = config;\n\nfunction checkForChanges(newData, originalData) {\n    const changed = {};\n    for (let key in newData) {\n        if (newData.hasOwnProperty(key) && originalData.hasOwnProperty(key)) {\n            if (newData[key] !== originalData[key]) {\n                changed[key] = {\n                    oldValue: originalData[key],\n                    newValue: newData[key]\n                };\n            }\n        }\n    }\n    return Object.keys(changed).length > 0 ? { \n      instance: changed, \n      component: { type: \"button\" }\n    } : null;\n}\n\n\nCiteck.EcosFormUtils.getFormById('uiserv/form@att-type-' + row.type + '-form', {\n    definition: 'definition?json'\n}).then(function(formConfig) {\n    \n    var inputs = Citeck.EcosFormUtils.getFormInputs(formConfig.definition);\n\n    Citeck.Dialogs.showFormDialog({\n        title: 'Attribute type config',\n        showDefaultButtons: true,\n        formDefinition: formConfig.definition,\n        formData: formData,\n        onSubmit: submission => {\n            var data = submission.data || {};\n            var configData = {};\n            for (var i in inputs) {\n                var att = inputs[i].attribute;\n                configData[att] = data[att];\n            }\n            currentRow.config = configData;\n            const changedData = checkForChanges(data, formData);\n            submission.changed = changedData;\n            form.emit(\"change\", submission);\n        }\n    })\n    \n});",
                                     "block": true,
                                     "refreshOn": [],
                                     "optionalWhenDisabled": false,
@@ -747,7 +747,8 @@
                                     ],
                                     "type": "button",
                                     "input": true,
-                                    "row": "0-3"
+                                    "row": "0-3",
+                                    "headers" : [ { } ]
                                   },
                                   {
                                     "label": {
@@ -826,14 +827,15 @@
                                     "action": "custom",
                                     "state": "",
                                     "showValidations": false,
-                                    "custom": "var currentRow = row;\nvar computed = row.computed || {}; \nvar computedType = computed.type || 'NONE';\nvar formData = {\n    type: computedType,\n    storingType: computed.storingType || 'NONE'\n};\nformData[computedType + '_config'] = computed.config || {};\n\n\nCiteck.EcosFormUtils.getFormById('uiserv/form@computed-attribute-form', {\n    definition: 'definition?json'\n}).then(function(formConfig) {\n    const lang = form && form.i18next && form.i18next.options ? form.i18next.options.lng : 'en';\n    let modalTitle = '';\n    if(lang === 'ru') { \n      modalTitle = 'Вычисляемые атрибуты'; \n    }\n    if(lang === 'en') {\n      modalTitle = 'Computed attribute';\n    }\n    \n    Citeck.Dialogs.showFormDialog({\n        title: modalTitle,\n        showDefaultButtons: true,\n        formDefinition: formConfig.definition,\n        formData: formData,\n        onSubmit: submission => {\n            var data = submission.data || {};\n\n            currentRow.computed = {\n                type: data.type,\n                storingType: data.storingType,\n                config: data[data.type + '_config']\n            }\n        }\n    })\n    \n});",
+                                    "custom": "var currentRow = row;\nvar computed = row.computed || {}; \nvar computedType = computed.type || 'NONE';\nvar formData = {\n    type: computedType,\n    storingType: computed.storingType || 'NONE'\n};\nformData[computedType + '_config'] = computed.config || {};\n\nfunction checkForChanges(newData, originalData) {\n    const changed = {};\n    for (let key in newData) {\n        if (newData.hasOwnProperty(key) && originalData.hasOwnProperty(key)) {\n            if (newData[key] !== originalData[key]) {\n                changed[key] = {\n                    oldValue: originalData[key],\n                    newValue: newData[key]\n                };\n            }\n        }\n    }\n    return Object.keys(changed).length > 0 ? { \n      instance: changed, \n      component: { type: \"button\" }\n    } : null;\n}\n\nCiteck.EcosFormUtils.getFormById('uiserv/form@computed-attribute-form', {\n    definition: 'definition?json'\n}).then(function(formConfig) {\n    const lang = form && form.i18next && form.i18next.options ? form.i18next.options.lng : 'en';\n    let modalTitle = '';\n    if(lang === 'ru') { \n      modalTitle = 'Вычисляемые атрибуты'; \n    }\n    if(lang === 'en') {\n      modalTitle = 'Computed attribute';\n    }\n    \n    Citeck.Dialogs.showFormDialog({\n        title: modalTitle,\n        showDefaultButtons: true,\n        formDefinition: formConfig.definition,\n        formData: formData,\n        onSubmit: submission => {\n            var data = submission.data || {};\n\n            currentRow.computed = {\n                type: data.type,\n                storingType: data.storingType,\n                config: data[data.type + '_config']\n            }\n            \n            const changedData = checkForChanges(data, formData);\n            submission.changed = changedData;\n            form.emit(\"change\", submission);\n        }\n    })\n    \n});",
                                     "removeIndents": true,
                                     "leftIcon": "icon-items",
                                     "block": true,
                                     "refreshOn": [],
                                     "optionalWhenDisabled": false,
                                     "type": "button",
-                                    "input": true
+                                    "input": true,
+                                    "headers" : [ { } ]
                                   },
                                   {
                                     "label": {
