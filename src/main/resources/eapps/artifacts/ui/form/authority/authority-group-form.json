@@ -1,15 +1,10 @@
 {
   "id": "authority-group-form",
-  "formKey": "",
   "title": {
     "en": "Group form"
   },
-  "description": {},
-  "customModule": "",
-  "typeRef": "",
   "width": "default",
   "system": true,
-  "i18n": {},
   "definition": {
     "components": [
       {
@@ -84,50 +79,7 @@
                         "refreshOn": [],
                         "type": "mlText",
                         "input": true
-                      }
-                    ],
-                    "type": "column",
-                    "input": false,
-                    "key": "column",
-                    "index": 0
-                  },
-                  {
-                    "index": 1,
-                    "type": "column",
-                    "input": false,
-                    "key": "column",
-                    "components": [
-                      {
-                        "label": {
-                          "ru": "Родительские группы",
-                          "en": "Parent groups"
-                        },
-                        "multiple": true,
-                        "key": "authorityGroups",
-                        "journalId": "authority-groups",
-                        "queryData": "",
-                        "defaultValue": [
-                          "emodel/authority-group@_orgstruct_home_"
-                        ],
-                        "refreshOn": [],
-                        "type": "selectJournal",
-                        "input": true,
-                        "reorder": false
-                      }
-                    ]
-                  }
-                ],
-                "type": "columns",
-                "input": false
-              },
-              {
-                "label": {
-                  "ru": "Columns"
-                },
-                "key": "columns4",
-                "columns": [
-                  {
-                    "components": [
+                      },
                       {
                         "label": {
                           "ru": "Описание",
@@ -136,6 +88,23 @@
                         "key": "description",
                         "refreshOn": [],
                         "type": "mlTextarea",
+                        "input": true
+                      },
+                      {
+                        "label": {
+                          "ru": "Родительские группы",
+                          "en": "Parent groups"
+                        },
+                        "key": "authorityGroups",
+                        "multiple": true,
+                        "viewModeType": "tags",
+                        "reorder": false,
+                        "allowedAuthorityType": "GROUP",
+                        "allowedGroupType": "GROUP",
+                        "defaultValue": [],
+                        "refreshOn": [],
+                        "optionalWhenDisabled": false,
+                        "type": "selectOrgstruct",
                         "input": true
                       }
                     ],
@@ -155,7 +124,6 @@
                           "ru": "Panel"
                         },
                         "key": "panel",
-                        "scrollableContent": true,
                         "refreshOn": [],
                         "optionalWhenDisabled": false,
                         "type": "panel",
@@ -197,7 +165,6 @@
                     ]
                   }
                 ],
-                "oneColumnInViewMode": false,
                 "type": "columns",
                 "input": false
               },
@@ -207,7 +174,7 @@
                   "type": "custom",
                   "custom": {
                     "syncData": "value = {\n  recordRefs: data.authorityGroups,\n  formMode: _.get(instance, 'root.options.formMode'),\n  groupId: data.id,\n}",
-                    "asyncData": "const parentGroups = data.formMode === 'CREATE' ? data.recordRefs || [] : [`emodel/authority-group@${data.groupId}`];\n\nconst query = {\n   t: \"or\",\n   v: parentGroups.map(parentGroup => ({\n      t: \"contains\",\n      a: \"authorityGroups\",\n      v: parentGroup\n    }))\n};\n\ngetGroups = async () => {\n  return await  Citeck.Records.query(\n    { sourceId: 'emodel/authority-group',\n      query,\n      language: 'predicate',\n      page: { maxItems: 100 } \n    });\n}\n\ngetUsers = async () => {\n  return await Citeck.Records.query(\n        { sourceId: 'emodel/person',\n          query,\n          language: 'predicate', \n          page: { maxItems: 100 } \n        })\n}\n\ngetUsersAndGroups = async () => {\n  const groups = await getGroups();\n  const users = await getUsers();\n  return [...groups.records, ...users.records];\n}\n  \nvalue = parentGroups.length ? getUsersAndGroups() : [];"
+                    "asyncData": "const parentGroups = data.formMode === 'CREATE' ? data.recordRefs || []: [`emodel/authority-group@${data.groupId}`];\n\nconst query = {\n   t: \"or\",\n   v: parentGroups.map(parentGroup => ({\n    t: \"contains\",\n    a: \"authorityGroups\",\n    v: parentGroup\n  }))\n};\n\ngetGroups = async () => {\n  return await  Citeck.Records.query(\n  { sourceId: 'emodel/authority-group',\n    query,\n    language: 'predicate',\n    page: { maxItems: 100 } \n  });\n}\n\ngetUsers = async () => {\n  return await Citeck.Records.query(\n    { sourceId: 'emodel/person',\n      query,\n      language: 'predicate', \n      page: { maxItems: 100 } \n    })\n}\n\ngetUsersAndGroups = async () => {\n  const groups = await getGroups();\n  const users = await getUsers();\n  return [...groups.records, ...users.records];\n}\n  \nvalue = parentGroups.length ? getUsersAndGroups(): [];"
                   },
                   "forceLoad": false
                 },
@@ -291,18 +258,23 @@
             "components": [
               {
                 "label": {
-                  "ru": "Создать",
-                  "en": "Submit"
+                  "ru": "Сохранить",
+                  "en": "Save"
                 },
-                "removeIndents": true,
+                "key": "submit",
                 "state": "",
+                "removeIndents": true,
                 "theme": "primary",
                 "block": true,
                 "disableOnInvalid": true,
                 "clearOnHide": false,
-                "key": "submit",
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
                 "type": "button",
-                "input": true
+                "input": true,
+                "headers": [
+                  {}
+                ]
               }
             ]
           }
@@ -313,6 +285,5 @@
       }
     ]
   },
-  "attributes": {},
   "notExists": false
 }
