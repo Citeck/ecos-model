@@ -16,8 +16,6 @@
     <properties>
         <jsoup.version>1.16.1</jsoup.version>
         <keycloak.admin.client.version>12.0.4</keycloak.admin.client.version>
-
-        <ecos.data.version>1.49.5</ecos.data.version>
     </properties>
 
     <dependencies>
