@@ -18,6 +18,8 @@ import ru.citeck.ecos.webapp.lib.registry.EcosRegistry
 import ru.citeck.ecos.webapp.lib.registry.EcosRegistryProps
 import ru.citeck.ecos.webapp.lib.registry.MutableEcosRegistry
 import ru.citeck.ecos.webapp.lib.registry.init.EcosRegistryInitializer
+import java.time.Duration
+import java.util.concurrent.TimeoutException
 
 @Component
 class TypesRegistryInitializer(
@@ -31,6 +33,7 @@ class TypesRegistryInitializer(
     private val resolver = TypeDefResolver()
 
     private lateinit var aspectsRegistry: EcosRegistry<AspectDef>
+    private lateinit var typesHierarchyUpdater: TypesHierarchyUpdater
 
     override fun init(
         registry: MutableEcosRegistry<TypeDef>,
@@ -42,6 +45,15 @@ class TypesRegistryInitializer(
         val rawProv = TypesServiceBasedProv(typesService)
         val resProv = RegistryBasedTypesProv(registry)
         val aspectsProv = AspectsProv()
+
+        typesHierarchyUpdater = TypesHierarchyUpdater(
+            typesService,
+            resolver,
+            rawProv,
+            resProv,
+            aspectsProv,
+            registry
+        ).start()
 
         resolver.getResolvedTypesWithMeta(types, rawProv, EmptyProv(), aspectsProv).forEach {
             registry.setValue(it.entity.id, it)
@@ -56,13 +68,11 @@ class TypesRegistryInitializer(
             val key = this::class.java.simpleName + ".types-to-update"
             typeIds.forEach { typeId ->
                 TxnContext.processSetAfterCommit(key, typeId) { changedTypes ->
-                    resolver.getResolvedTypesWithMeta(
-                        typesService.getAllWithMeta(changedTypes),
-                        rawProv,
-                        resProv,
-                        aspectsProv
-                    ).forEach {
-                        registry.setValue(it.entity.id, it)
+                    try {
+                        typesHierarchyUpdater.addTypesToUpdate(changedTypes)
+                            .get(Duration.ofSeconds(20))
+                    } catch (e: TimeoutException) {
+                        // do nothing
                     }
                 }
             }

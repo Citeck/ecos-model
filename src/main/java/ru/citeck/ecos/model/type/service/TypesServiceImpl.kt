@@ -321,18 +321,24 @@ class TypesServiceImpl(
     @Transactional
     override fun save(dto: TypeDef, clonedRecord: Boolean): TypeDef {
 
-        val typeDefBefore: EntityWithMeta<TypeDef>? = typeRepoDao.findByExtId(dto.id)?.let {
+        val existingEntity = typeRepoDao.findByExtId(dto.id)
+
+        val typeDefBefore: EntityWithMeta<TypeDef>? = existingEntity?.let {
             typeConverter.toDtoWithMeta(it)
         }
         if (typeDefBefore != null) {
             if (clonedRecord) {
                 error("Type with id '${dto.id}' already exists")
             }
+            if (typeDefBefore.entity == dto) {
+                // nothing changed
+                return typeDefBefore.entity
+            }
         } else if (!VALID_ID_PATTERN.matcher(dto.id).matches()) {
             error("Invalid type id: '${dto.id}'. Valid name pattern: '$VALID_ID_PATTERN_TXT'")
         }
 
-        var entity = typeConverter.toEntity(dto)
+        var entity = typeConverter.toEntity(dto, existingEntity)
 
         entity = typeRepoDao.save(entity)
 

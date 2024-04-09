@@ -26,13 +26,19 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
     var mutMetaMixin: MutMetaMixin? = null
 
     fun toEntity(dto: TypeDef): TypeEntity {
+        return toEntity(dto, typeRepoDao.findByExtId(dto.id))
+    }
 
-        var entity = typeRepoDao.findByExtId(dto.id)
-        if (entity == null) {
-            entity = TypeEntity()
+    fun toEntity(dto: TypeDef, entityToUpdate: TypeEntity?): TypeEntity {
+
+        val entity = if (entityToUpdate == null) {
+            val entity = TypeEntity()
             entity.extId = dto.id.ifBlank {
                 UUID.randomUUID().toString()
             }
+            entity
+        } else {
+            entityToUpdate
         }
 
         val typeDef = dto.copy().build()
