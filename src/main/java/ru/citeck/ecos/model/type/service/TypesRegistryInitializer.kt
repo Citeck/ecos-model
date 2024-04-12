@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.type.service
 
+import org.springframework.beans.factory.DisposableBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
@@ -20,11 +21,12 @@ import ru.citeck.ecos.webapp.lib.registry.MutableEcosRegistry
 import ru.citeck.ecos.webapp.lib.registry.init.EcosRegistryInitializer
 import java.time.Duration
 import java.util.concurrent.TimeoutException
+import java.util.concurrent.atomic.AtomicBoolean
 
 @Component
 class TypesRegistryInitializer(
     private val typesService: TypesService
-) : EcosRegistryInitializer<TypeDef> {
+) : EcosRegistryInitializer<TypeDef>, DisposableBean {
 
     companion object {
         const val ORDER = -10f
@@ -34,6 +36,7 @@ class TypesRegistryInitializer(
 
     private lateinit var aspectsRegistry: EcosRegistry<AspectDef>
     private lateinit var typesHierarchyUpdater: TypesHierarchyUpdater
+    private val initialized = AtomicBoolean()
 
     override fun init(
         registry: MutableEcosRegistry<TypeDef>,
@@ -89,6 +92,7 @@ class TypesRegistryInitializer(
             updateTypes(changedTypes)
         }
 
+        initialized.set(true)
         return Promises.resolve(Unit)
     }
 
@@ -125,6 +129,12 @@ class TypesRegistryInitializer(
         }
         override fun getChildren(typeId: String): List<String> {
             return typesService.getChildren(typeId)
+        }
+    }
+
+    override fun destroy() {
+        if (initialized.get()) {
+            typesHierarchyUpdater.dispose()
         }
     }
 

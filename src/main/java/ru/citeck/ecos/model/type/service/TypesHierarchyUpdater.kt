@@ -29,6 +29,8 @@ class TypesHierarchyUpdater(
     private val updaterEnabled = AtomicBoolean()
     private val typesToUpdateQueue = ArrayBlockingQueue<TypesToUpdate>(100)
 
+    private val shutdownHook = thread(start = false) { updaterEnabled.set(false) }
+
     fun start(): TypesHierarchyUpdater {
         updaterEnabled.set(true)
         thread(start = true) {
@@ -36,11 +38,7 @@ class TypesHierarchyUpdater(
                 update(typesToUpdateQueue.poll(1, TimeUnit.SECONDS))
             }
         }
-        Runtime.getRuntime().addShutdownHook(object : Thread() {
-            override fun run() {
-                updaterEnabled.set(false)
-            }
-        })
+        Runtime.getRuntime().addShutdownHook(shutdownHook)
         return this
     }
 
@@ -106,6 +104,11 @@ class TypesHierarchyUpdater(
             typesToUpdateQueue.add(TypesToUpdate(typesIdsToUpdate, future))
             Thread.sleep(10_000)
         }
+    }
+
+    fun dispose() {
+        updaterEnabled.set(false)
+        Runtime.getRuntime().removeShutdownHook(shutdownHook)
     }
 
     private class TypesToUpdate(
