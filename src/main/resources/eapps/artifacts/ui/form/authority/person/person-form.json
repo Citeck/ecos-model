@@ -401,8 +401,8 @@
             "components": [
               {
                 "label": {
-                  "ru": "Создать",
-                  "en": "Create"
+                  "ru": "Сохранить",
+                  "en": "Save"
                 },
                 "key": "submit",
                 "state": "",
