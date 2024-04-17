@@ -21,6 +21,8 @@ class PersonMixin(
 
     companion object {
 
+        private const val ATT_USER_NAME = "userName"
+
         private val NON_DELEGATABLE_AUTHORITIES = setOf(
             "GROUP__orgstruct_home_",
             AuthGroup.EVERYONE
@@ -31,6 +33,7 @@ class PersonMixin(
         )
 
         private val providedAtts = listOf(
+            ATT_USER_NAME,
             PersonConstants.ATT_AUTHORITIES,
             PersonConstants.ATT_IS_ADMIN,
             PersonConstants.ATT_IS_AUTHENTICATION_MUTABLE,
@@ -45,6 +48,9 @@ class PersonMixin(
 
     override fun getAtt(path: String, value: AttValueCtx): Any? {
         return when (path) {
+            ATT_USER_NAME -> {
+                return value.getLocalId()
+            }
             PersonConstants.ATT_AUTHORITIES -> {
                 return Authorities(authorityService.getAuthoritiesForPerson(value.getLocalId()))
             }
