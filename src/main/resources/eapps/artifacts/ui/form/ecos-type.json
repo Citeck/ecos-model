@@ -804,17 +804,19 @@
                                 "components": [
                                   {
                                     "label": {
-                                      "en": "Permissions"
+                                      "en": "Permissions",
+                                      "ru": "Права доступа"
                                     },
-                                    "hideLabel": true,
+                                    "key": "submit3",
                                     "action": "custom",
                                     "state": "",
                                     "showValidations": false,
-                                    "custom": "\nvar mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = 'emodel/type@' + data.moduleId;\nvar customProps = {\n  roles: (data.modelRoles || []).map(mapToSingleLang),\n  statuses: (data.modelStatuses || []).map(mapToSingleLang),\n  attributeName: Citeck.helpers.getMLValue(row.name)\n};\n\nvar typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypeAttPermissions(\n  typeRef, \n  row.id, \n  customProps\n)",
+                                    "custom": "var mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = 'emodel/type@' + data.moduleId;\nvar customProps = {\n  roles: (data.modelRoles || []).map(mapToSingleLang),\n  statuses: (data.modelStatuses || []).map(mapToSingleLang),\n  attributeName: Citeck.helpers.getMLValue(row.name)\n};\n\nvar typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypeAttPermissions(\n  typeRef, \n  row.id, \n  customProps\n)",
+                                    "hideLabel": true,
                                     "leftIcon": "icon-decision-tables",
                                     "block": true,
-                                    "key": "submit3",
-                                    "customConditional": "show = _.get(data, 'ecosEdition.isEnterprise', false)",
+                                    "refreshOn": [],
+                                    "optionalWhenDisabled": false,
                                     "type": "button",
                                     "input": true,
                                     "row": "0-4"
@@ -1025,7 +1027,6 @@
                     "collapsed": false,
                     "refreshOn": [],
                     "optionalWhenDisabled": false,
-                    "customConditional": "show = _.get(data, 'ecosEdition.isEnterprise', false)",
                     "type": "panel",
                     "input": false,
                     "components": [
@@ -1112,26 +1113,6 @@
                         "input": false
                       }
                     ],
-                    "tab": 1
-                  },
-                  {
-                    "label": "ecosEdition",
-                    "source": {
-                      "type": "record",
-                      "forceLoad": true,
-                      "record": {
-                        "id": "emodel/meta@",
-                        "attributes": {
-                          "isEnterprise": "$license.enterprise?bool"
-                        }
-                      }
-                    },
-                    "update": {
-                      "type": "once"
-                    },
-                    "key": "ecosEdition",
-                    "type": "asyncData",
-                    "input": true,
                     "tab": 1
                   },
                   {
