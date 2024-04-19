@@ -242,6 +242,10 @@ class PersonsConfiguration(
             I18nContext.RUSSIAN to "Система"
         )
         val userName = AuthUser.SYSTEM
+
+        fun getFirstName(): MLText {
+            return name
+        }
     }
 
     private class PersonAwayStateAtts(

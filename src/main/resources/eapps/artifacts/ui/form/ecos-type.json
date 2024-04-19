@@ -1133,6 +1133,29 @@
                     "type": "asyncData",
                     "input": true,
                     "tab": 1
+                  },
+                  {
+                    "label": "Attributes options",
+                    "source": {
+                      "type": "custom",
+                      "custom": {
+                        "syncData": "let currentAtts = (data.modelAttributes || []).filter(a => !!a.id).map(a => {\n  return {\n    value: a.id, \n    label: Citeck.helpers.getMLValue(a.name) || a.id\n  };\n});\nlet aspects = (data.aspects || []).filter(a => !!a.ref).map(a => a.ref);\n\nvalue = {\n  parent: data.parentRef,\n  aspects,\n  currentAtts\n};",
+                        "asyncData": "let parentAttsPromise;\nif (data.parent) {\n    parentAttsPromise = Records.get(data.parent).load({\n        attributes: 'model.attributes[]{label:name,value:id}',\n        systemAtts: 'model.systemAttributes[]{label:name,value:id}'\n    });\n} else {\n    parentAttsPromise = Promise.resolve({});\n}\n\nlet aspectsAttsPromise;\nif (data.aspects) {\n    aspectsAttsPromise = Records.get(data.aspects).load({\n        prefix: 'prefix!id',\n        attributes: 'attributes[]{label:name._as.mltext,value:id}',\n        systemAtts: 'systemAttributes[]{label:name._as.mltext,value:id}'\n    }).then(aspectsAtts => {\n        const addPrefix = (prefix, atts) => {\n            let result = [];\n            for (let att of atts) {\n                result.push({\n                    label: att.label,\n                    value: prefix + ':' + att.value\n                });\n            }\n            return result;\n        }\n        const resultAspects = [];\n        for (let aspect of aspectsAtts) {\n            resultAspects.push({\n                attributes: addPrefix(aspect.prefix, aspect.attributes || []),\n                systemAttributes: addPrefix(aspect.prefix, aspect.systemAtts || [])\n            });\n        }\n        return resultAspects;\n    });\n} else {\n    aspectsAttsPromise = Promise.resolve([]);\n}\n\nvalue = Promise.all([parentAttsPromise, aspectsAttsPromise]).then(results => {\n\n    const parentAtts = results[0] || {};\n    const aspectsAtts = results[1] || [];\n\n    const attributes = {};\n    const systemAtts = {};\n    const fillAtts = (attsToFill, target) => {\n        if (!attsToFill || !attsToFill.length) {\n            return;\n        }\n        for (let att of attsToFill) {\n            if (att.value) {\n                let label = att.label\n                if (!label) {\n                    label = target[att.value] || att.value;\n                }\n                target[att.value] = label;\n            }\n        }\n    }\n    fillAtts(parentAtts.systemAtts, systemAtts);\n    fillAtts(parentAtts.attributes, attributes);\n\n    for (let aspectAtts of aspectsAtts) {\n        fillAtts(aspectAtts.systemAtts, systemAtts);\n        fillAtts(aspectAtts.attributes, attributes);\n    }\n\n    fillAtts(data.currentAtts, attributes);\n\n    const fullAtts = {};\n    for (let attId in systemAtts) {\n        fullAtts[attId] = systemAtts[attId];\n    }\n    for (let attId in attributes) {\n        fullAtts[attId] = attributes[attId];\n    }\n\n    const objToArray = (obj) => {\n        const resArr = [];\n        for (let value in obj) {\n            resArr.push({label: obj[value], value});\n        }\n        return resArr;    \n    }\n    \n    return {\n        attributes: objToArray(attributes),\n        systemAtts: objToArray(systemAtts),\n        fullAtts: objToArray(fullAtts)\n    }\n});"
+                      }
+                    },
+                    "update": {
+                      "type": "any-change",
+                      "rate": 500
+                    },
+                    "refreshOn": [
+                      {
+                        "label": "parentRef",
+                        "value": "parentRef"
+                      }
+                    ],
+                    "key": "attributesOptions",
+                    "type": "asyncData",
+                    "input": true
                   }
                 ]
               },
