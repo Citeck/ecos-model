@@ -89,10 +89,15 @@ public class NumTemplateTest {
             for (int i = 0; i < iterationsCount; i++) {
                 CommandResult comResult = null;
                 for (int repeatCounterOnError = 0; repeatCounterOnError < 10; repeatCounterOnError++) {
+                    long getNextNumberStartedAt = System.currentTimeMillis();
                     comResult = commandsService.executeSync(new GetNextNumber.Command(
                         RecordRef.create(EcosModelApp.NAME, "num-template", "template-mt-id"),
                         ObjectData.create("{\"prop\":\"propValue\"}")
                     ));
+                    long getNextNumberTime = System.currentTimeMillis() - getNextNumberStartedAt;
+                    if (getNextNumberTime > 1000) {
+                        log.warn("GetNextNumber time: " + getNextNumberTime);
+                    }
                     if (comResult.getPrimaryError() == null) {
                         break;
                     }

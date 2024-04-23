@@ -1,5 +1,7 @@
 package ru.citeck.ecos.model.num.service;
 
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.ILock;
 import kotlin.jvm.functions.Function0;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -31,11 +33,11 @@ import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchCon
 import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverterFactory;
 
 import javax.annotation.PostConstruct;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
@@ -50,7 +52,7 @@ public class NumTemplateService {
     private final PlatformTransactionManager transactionManager;
     private TransactionTemplate doInNewTxnTemplate;
 
-    private final EcosAppLockService ecosAppLockService;
+    private final HazelcastInstance hazelcast;
 
     private final JpaSearchConverterFactory predicateToJpaConvFactory;
     private JpaSearchConverter<NumTemplateEntity> searchConverter;
@@ -185,11 +187,20 @@ public class NumTemplateService {
                 return counterEntity.getCounter() + 1;
             }
         }
-        return ecosAppLockService.doInSync(
-            "num-tlt-" + numTemplateEntity.getExtId() + "-" + counterKey,
-            Duration.ofMinutes(10),
-            lock -> doInNewTxn(() -> getNextNumberAndIncrement(numTemplateEntity, counterKey))
-        );
+
+        long lockingStartedAt = System.currentTimeMillis();
+
+        ILock lock = hazelcast.getLock("num-tlt-" + numTemplateEntity.getExtId() + "-" + counterKey);
+        lock.lock(10, TimeUnit.MINUTES);
+        try {
+            long lockingTime = System.currentTimeMillis() - lockingStartedAt;
+            if (lockingTime > 1000) {
+                log.warn("Too high lockingTime: "  + lockingTime);
+            }
+            return doInNewTxn(() -> getNextNumberAndIncrement(numTemplateEntity, counterKey));
+        } finally {
+            lock.unlock();
+        }
     }
 
     private long getNextNumberAndIncrement(NumTemplateEntity numTemplateEntity, String counterKey) {
