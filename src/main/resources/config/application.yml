@@ -24,9 +24,6 @@ ecos:
     inactiveUsersDisabling:
       cron: '0 0 0/6 ? * *'
   webapp:
-    dataSources:
-      main:
-        xa: true
     task:
       executors:
         txn-actions:

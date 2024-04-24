@@ -22,7 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
-@Disabled
 @ExtendWith(EcosSpringExtension.class)
 @SpringBootTest(classes = EcosModelApp.class)
 public class NumTemplateTest {
@@ -130,7 +129,7 @@ public class NumTemplateTest {
             ObjectData.create("{\"prop\":\"propValue\"}")
         )).getResultAs(GetNextNumber.Response.class);
 
-        assertEquals(numbers.size(), (iterationsCount * threadsCount));
+        assertEquals((iterationsCount * threadsCount), numbers.size());
 
         Set<Long> expectedNumbers = new TreeSet<>();
         for (int i = 1; i <= (iterationsCount * threadsCount); i++) {
