@@ -16,7 +16,7 @@ import ru.citeck.ecos.webapp.lib.patch.annotaion.EcosPatch
 import java.util.concurrent.Callable
 
 @Component
-@EcosPatch("default-authorities", "2022-06-29T00:00:01Z")
+@EcosPatch("default-authorities", "2022-06-29T00:00:02Z")
 class CreateDefaultGroupsAndPersonsPatch(
     val recordsService: RecordsService
 ) : Callable<List<String>> {
@@ -25,7 +25,7 @@ class CreateDefaultGroupsAndPersonsPatch(
 
         private const val ORGSTRUCT_HOME_GROUP = "_orgstruct_home_"
 
-        val DEFAULT_GROUPS = listOf(
+        private val DEFAULT_GROUPS = listOf(
             SystemGroupInfo(
                 AuthorityGroupConstants.EVERYONE_GROUP,
                 MLText(
@@ -67,10 +67,17 @@ class CreateDefaultGroupsAndPersonsPatch(
                     I18nContext.ENGLISH to "Groups managers",
                     I18nContext.RUSSIAN to "Менеджеры групп"
                 )
+            ),
+            SystemGroupInfo(
+                AuthorityGroupConstants.EXTERNAL_USERS,
+                MLText(
+                    I18nContext.ENGLISH to "External users",
+                    I18nContext.RUSSIAN to "Внешние пользователи"
+                )
             )
         )
 
-        val DEFAULT_USERS = listOf(
+        private val DEFAULT_USERS = listOf(
             SystemUserInfo(
                 "admin",
                 "",
@@ -79,7 +86,8 @@ class CreateDefaultGroupsAndPersonsPatch(
                 listOf(AuthorityGroupConstants.ADMIN_GROUP, ORGSTRUCT_HOME_GROUP)
             )
         )
-        val log = KotlinLogging.logger {}
+
+        private val log = KotlinLogging.logger {}
     }
 
     override fun call(): List<String> {

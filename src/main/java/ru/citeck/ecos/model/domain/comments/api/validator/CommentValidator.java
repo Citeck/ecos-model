@@ -9,7 +9,12 @@ public class CommentValidator {
 
     public static String removeVulnerabilities(String data) {
         Document doc = Jsoup.parse(removeNonPrintable(StringEscapeUtils.unescapeHtml(data)));
-        return Jsoup.clean(doc.toString(), Safelist.relaxed());
+        return Jsoup.clean(
+            doc.toString(),
+            Safelist.relaxed()
+                .addAttributes("p", "dir")
+                .addAttributes("span", "data-mention")
+        );
     }
 
     private static String removeNonPrintable(String data){
