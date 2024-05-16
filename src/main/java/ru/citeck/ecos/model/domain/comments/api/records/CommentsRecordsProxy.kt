@@ -1,9 +1,9 @@
 package ru.citeck.ecos.model.domain.comments.api.records
 
 import org.springframework.stereotype.Component
+import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.model.domain.comments.api.validator.CommentValidator
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
-import ru.citeck.ecos.records3.record.atts.dto.RecordAtts
 import ru.citeck.ecos.records3.record.atts.schema.resolver.AttContext
 import ru.citeck.ecos.records3.record.atts.value.AttValue
 import ru.citeck.ecos.records3.record.atts.value.AttValueProxy
@@ -25,6 +25,7 @@ class CommentsRecordsProxy : RecordsDaoProxy(
     COMMENT_DAO_ID,
     COMMENT_REPO_DAO_ID
 ) {
+
     override fun mutate(records: List<LocalRecordAtts>): List<String> {
         for (record in records) {
             val text = record.getAtt(ATT_TEXT).asText()
@@ -36,30 +37,32 @@ class CommentsRecordsProxy : RecordsDaoProxy(
     }
 
     override fun queryRecords(recsQuery: RecordsQuery): RecsQueryRes<*> {
-        val comments = getCommentsWithPermissions(recsQuery)
 
-        val commentsAvailableToRead = comments.getRecords().filter {
-            it[RECORD_READ_PERM_ATT]["/permissions/_has/Read/?bool"].asBoolean()
-        }.map {
-            val ref = EntityRef.create(COMMENT_DAO_ID, it.getId().getLocalId())
-            val innerAttValue = InnerAttValue(it.getAtts().getData().asJson())
+        val isRunAsSystem = AuthContext.isRunAsSystem()
 
-            ProxyRecVal(ref, innerAttValue)
+        var innerAttsMap = AttContext.getInnerAttsMap()
+        if (!isRunAsSystem) {
+            innerAttsMap = innerAttsMap.toMutableMap()
+            innerAttsMap[RECORD_READ_PERM_ATT] = "$COMMENT_RECORD_ATT.permissions._has.Read?bool!"
         }
 
-        val result = RecsQueryRes(commentsAvailableToRead)
-        result.setTotalCount(commentsAvailableToRead.size.toLong())
+        var commentsRecs = recordsService.query(
+            recsQuery.withSourceId(COMMENT_REPO_DAO_ID),
+            innerAttsMap,
+            true
+        ).getRecords()
 
-        return result
-    }
-
-    private fun getCommentsWithPermissions(recsQuery: RecordsQuery): RecsQueryRes<RecordAtts> {
-        val innerAttsMap = AttContext.getInnerAttsMap()
-
-        val attsWithPermissionReadAtt = innerAttsMap.toMutableMap()
-        attsWithPermissionReadAtt[RECORD_READ_PERM_ATT] = "$COMMENT_RECORD_ATT.permissions._has.Read?bool!"
-
-        return recordsService.query(recsQuery.withSourceId(COMMENT_REPO_DAO_ID), attsWithPermissionReadAtt, true)
+        if (!isRunAsSystem) {
+            commentsRecs = commentsRecs.filter {
+                it[RECORD_READ_PERM_ATT]["/permissions/_has/Read/?bool"].asBoolean()
+            }
+        }
+        val resRecords = commentsRecs.map {
+            val ref = EntityRef.create(COMMENT_DAO_ID, it.getId().getLocalId())
+            val innerAttValue = InnerAttValue(it.getAtts().getData().asJson())
+            ProxyRecVal(ref, innerAttValue)
+        }
+        return RecsQueryRes(resRecords)
     }
 
     private class ProxyRecVal(
