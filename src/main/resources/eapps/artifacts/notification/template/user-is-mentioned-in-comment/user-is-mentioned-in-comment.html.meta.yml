@@ -1,0 +1,12 @@
+{
+  "id" : "user-is-mentioned-in-comment",
+  "name" : "Уведомление об упоминании в комментарии",
+  "notificationTitle" : {
+    "ru" : "Вас упомянули в комментарии к документу ${docDisp}"
+  },
+  "model" : {
+    "docDisp" : "record?disp",
+    "docRef" : "record?id",
+    "commentText": "text"
+  }
+}
