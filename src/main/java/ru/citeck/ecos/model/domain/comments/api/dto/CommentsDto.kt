@@ -47,6 +47,7 @@ enum class CommentTagType(defaultName: MLText = MLText.EMPTY) {
             I18nContext.RUSSIAN to "Внутренний"
         )
     ),
+
     @JsonEnumDefaultValue
     UNKNOWN;
 

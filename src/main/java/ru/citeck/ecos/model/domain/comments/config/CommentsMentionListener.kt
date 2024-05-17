@@ -40,11 +40,12 @@ class CommentsMentionListener(
     private val emitter: EventsEmitter<UserIsMentionedInCommentEvent>
 
     init {
-        emitter = eventsService.getEmitter(EmitterConfig.create<UserIsMentionedInCommentEvent>()
-            .withSource(AppName.EMODEL)
-            .withEventClass(UserIsMentionedInCommentEvent::class.java)
-            .withEventType(UserIsMentionedInCommentEvent.TYPE)
-            .build()
+        emitter = eventsService.getEmitter(
+            EmitterConfig.create<UserIsMentionedInCommentEvent>()
+                .withSource(AppName.EMODEL)
+                .withEventClass(UserIsMentionedInCommentEvent::class.java)
+                .withEventType(UserIsMentionedInCommentEvent.TYPE)
+                .build()
         )
     }
 
