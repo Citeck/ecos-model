@@ -1,12 +1,11 @@
 package ru.citeck.ecos.model.domain.perms.api.records;
 
-import kotlin.Suppress;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.context.lib.auth.AuthContext;
+import ru.citeck.ecos.context.lib.i18n.I18nContext;
 import ru.citeck.ecos.model.domain.perms.dto.TypePermsMeta;
 import ru.citeck.ecos.model.domain.perms.service.TypePermsService;
 import ru.citeck.ecos.model.lib.permissions.dto.PermissionsDef;
@@ -30,6 +29,8 @@ import ru.citeck.ecos.records2.source.dao.local.LocalRecordsDao;
 import ru.citeck.ecos.records2.source.dao.local.MutableRecordsLocalDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsMetaDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsQueryWithMetaDao;
+import ru.citeck.ecos.records3.RecordsService;
+import ru.citeck.ecos.records3.record.atts.schema.ScalarType;
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName;
 import ru.citeck.ecos.webapp.api.entity.EntityRef;
 
@@ -52,6 +53,7 @@ public class TypePermsRecords extends LocalRecordsDao
     public static final String LANG_TYPE = "type";
 
     private final TypePermsService permsService;
+    private final RecordsService recordsService3;
 
     @Override
     public RecordsQueryResult<Object> queryLocalRecords(@NotNull RecordsQuery query, MetaField field) {
@@ -134,12 +136,13 @@ public class TypePermsRecords extends LocalRecordsDao
         if (permsMeta == null) {
             permsMeta = new TypePermsMeta(Instant.EPOCH);
         }
-        return new PermsRecord(permsDef, permsMeta);
+        return new PermsRecord(recordsService3, permsDef, permsMeta);
     }
 
     @RequiredArgsConstructor
     public static class PermsRecord implements MetaValue {
 
+        private final RecordsService recordsService;
         private final TypePermsDef typePermsDef;
         private final TypePermsMeta typePermsMeta;
 
@@ -168,6 +171,16 @@ public class TypePermsRecords extends LocalRecordsDao
         @Override
         public Object getJson() {
             return typePermsDef;
+        }
+
+        @Override
+        public String getDisplayName() {
+            String typeName = recordsService.getAtt(typePermsDef.getTypeRef(), ScalarType.DISP_SCHEMA).asText();
+            if (I18nContext.RUSSIAN.equals(I18nContext.getLocale())) {
+                return "Матрица прав для '" + typeName + "'";
+            } else {
+                return "Permissions matrix for '" + typeName + "'";
+            }
         }
     }
 

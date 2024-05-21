@@ -9,6 +9,14 @@ sourceId: emodel/perms
 
 journalRef: uiserv/journal@type-perms
 
+defaultCreateVariant: false
+
+createVariants:
+
+  - id: upload-perms
+    name: { ru: Загрузить матрицу, en: Upload matrix }
+    formRef: uiserv/form@ecos-artifact-upload
+
 actions:
   - uiserv/action@edit-json
   - uiserv/action@download-text-yml
