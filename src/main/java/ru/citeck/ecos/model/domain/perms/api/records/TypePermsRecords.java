@@ -1,11 +1,15 @@
 package ru.citeck.ecos.model.domain.perms.api.records;
 
+import kotlin.Suppress;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
+import ru.citeck.ecos.context.lib.auth.AuthContext;
 import ru.citeck.ecos.model.domain.perms.dto.TypePermsMeta;
 import ru.citeck.ecos.model.domain.perms.service.TypePermsService;
+import ru.citeck.ecos.model.lib.permissions.dto.PermissionsDef;
 import ru.citeck.ecos.model.lib.type.dto.TypePermsDef;
 import ru.citeck.ecos.model.utils.LegacyRecordsUtils;
 import ru.citeck.ecos.records2.RecordConstants;
@@ -26,6 +30,7 @@ import ru.citeck.ecos.records2.source.dao.local.LocalRecordsDao;
 import ru.citeck.ecos.records2.source.dao.local.MutableRecordsLocalDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsMetaDao;
 import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsQueryWithMetaDao;
+import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName;
 import ru.citeck.ecos.webapp.api.entity.EntityRef;
 
 import java.time.Instant;
@@ -68,7 +73,7 @@ public class TypePermsRecords extends LocalRecordsDao
                 LegacyRecordsUtils.mapLegacySortBy(query.getSortBy())
             ).stream().map(this::toRecord).collect(Collectors.toList());
 
-            RecordsQueryResult<Object> permissions =  new RecordsQueryResult<>();
+            RecordsQueryResult<Object> permissions = new RecordsQueryResult<>();
             permissions.setRecords(new ArrayList<>(perms));
 
             permissions.setTotalCount(permsService.getCount(predicate));
@@ -153,16 +158,44 @@ public class TypePermsRecords extends LocalRecordsDao
                 case "typeRef":
                     return typePermsDef.getTypeRef();
                 case "permissions":
-                    return typePermsDef.getPermissions();
+                    return new PermsWrapper(typePermsDef.getPermissions());
                 case "attributes":
                     return typePermsDef.getAttributes();
             }
             return null;
         }
+
+        @Override
+        public Object getJson() {
+            return typePermsDef;
+        }
+    }
+
+    // hack to allow standard checking of permissions._has.Write?bool
+    @Data
+    @SuppressWarnings("unused")
+    @RequiredArgsConstructor
+    public static class PermsWrapper {
+        @AttName("...")
+        private final PermissionsDef impl;
+
+        public Boolean has(String name) {
+            if ("WRITE".equalsIgnoreCase(name)) {
+                return AuthContext.isRunAsSystemOrAdmin();
+            }
+            if ("READ".equalsIgnoreCase(name)) {
+                return true;
+            }
+            return null;
+        }
+
+        public PermissionsDef getAsJson() {
+            return impl;
+        }
     }
 
     @Data
     public static class TypeQuery {
-        private RecordRef typeRef;
+        private EntityRef typeRef;
     }
 }

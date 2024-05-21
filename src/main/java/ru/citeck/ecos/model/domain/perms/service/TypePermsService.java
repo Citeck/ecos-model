@@ -71,7 +71,7 @@ public class TypePermsService {
     }
 
     @Nullable
-    public TypePermsDef getPermsForType(RecordRef typeRef) {
+    public TypePermsDef getPermsForType(EntityRef typeRef) {
         return toDto(repository.findByTypeRef(typeRef.toString()));
     }
 
@@ -136,11 +136,9 @@ public class TypePermsService {
     public void delete(String id) {
         TypePermsEntity typePerms = repository.findByExtId(id);
         if (typePerms != null) {
-            // Full deletion is not available. Other remote services can save this configs in cache
-            TypePermsEntity emptyEntity = toEntity(TypePermsDef.EMPTY);
-            typePerms.setAttributes(emptyEntity.getAttributes());
-            typePerms.setPermissions(emptyEntity.getPermissions());
-            repository.save(typePerms);
+            EntityWithMeta<TypePermsDef> permsDefBefore = toDtoWithMeta(typePerms);
+            repository.delete(typePerms);
+            listeners.forEach(it -> it.invoke(permsDefBefore, null));
         }
     }
 
@@ -198,7 +196,7 @@ public class TypePermsService {
             entity = new TypePermsEntity();
             String id = dto.getId();
             if (StringUtils.isBlank(id)) {
-                id = UUID.randomUUID().toString();
+                id = dto.getTypeRef().getLocalId();
             }
             entity.setExtId(id);
         }

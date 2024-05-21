@@ -57,6 +57,12 @@
     {
       "type": "JOURNAL",
       "config": {
+        "journalId": "type-perms"
+      }
+    },
+    {
+      "type": "JOURNAL",
+      "config": {
         "journalId": "permission-settings"
       }
     },

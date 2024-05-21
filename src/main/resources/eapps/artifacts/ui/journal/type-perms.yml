@@ -1,0 +1,18 @@
+---
+id: type-perms
+name: { ru: Матрицы прав, en: Permission matrices }
+
+system: true
+
+columns:
+
+  - id: id
+    name: { ru: Идентификатор, en: Id }
+
+  - id: typeRef
+    name: { ru: Тип, en: Type }
+    type: ASSOC
+
+  - id: _modified
+    type: DATETIME
+    name: { ru: Изменен, en: Modified }

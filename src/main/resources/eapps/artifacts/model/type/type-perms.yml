@@ -1,0 +1,23 @@
+---
+id: type-perms
+name:
+  ru: Настройки прав типа
+  en: Type permissions settings
+
+system: true
+sourceId: emodel/perms
+
+journalRef: uiserv/journal@type-perms
+
+actions:
+  - uiserv/action@edit-json
+  - uiserv/action@download-text-yml
+  - uiserv/action@delete
+
+model:
+  attributes:
+    - id: id
+      name: { ru: Идентификатор, en: Id }
+    - id: typeRef
+      name: { ru: Тип, en: Type }
+      type: ASSOC

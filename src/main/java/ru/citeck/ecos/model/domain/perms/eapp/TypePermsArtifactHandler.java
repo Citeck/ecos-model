@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.domain.perms.eapp;
 
+import kotlin.Unit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -36,6 +37,11 @@ public class TypePermsArtifactHandler implements EcosArtifactHandler<TypePermsDe
 
     @Override
     public void listenChanges(@NotNull Consumer<TypePermsDef> consumer) {
-
+        typePermsService.addListener((before, after) -> {
+            if (after != null) {
+                consumer.accept(after.getEntity());
+            }
+            return Unit.INSTANCE;
+        });
     }
 }
