@@ -10,6 +10,7 @@ import ru.citeck.ecos.model.domain.perms.dto.TypePermsMeta;
 import ru.citeck.ecos.model.domain.perms.service.TypePermsService;
 import ru.citeck.ecos.model.lib.permissions.dto.PermissionsDef;
 import ru.citeck.ecos.model.lib.type.dto.TypePermsDef;
+import ru.citeck.ecos.model.lib.utils.ModelUtils;
 import ru.citeck.ecos.model.utils.LegacyRecordsUtils;
 import ru.citeck.ecos.records2.RecordConstants;
 import ru.citeck.ecos.records2.RecordMeta;
@@ -181,6 +182,11 @@ public class TypePermsRecords extends LocalRecordsDao
             } else {
                 return "Permissions matrix for '" + typeName + "'";
             }
+        }
+
+        @Override
+        public EntityRef getRecordType() {
+            return ModelUtils.getTypeRef("type-perms");
         }
     }
 
