@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.domain.comments.event
 
+import mu.KotlinLogging
 import org.jsoup.Jsoup
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.data.sql.records.listener.DbRecordChangedEvent
@@ -20,17 +21,27 @@ class CommentsEmitEventsDbRecordsListener(
     private val extractor: CommentExtractor
 ) : DbRecordsListenerAdapter() {
 
+    companion object {
+        private val log = KotlinLogging.logger {}
+    }
+
     override fun onChanged(event: DbRecordChangedEvent) {
+        log.debug { "Comment changed: ${event.record}" }
+
         val comment = event.toCommentEvent()
         commentEventEmitter.emitCommentUpdate(comment)
     }
 
     override fun onCreated(event: DbRecordCreatedEvent) {
+        log.debug { "Comment created: ${event.record}" }
+
         val comment = event.toCommentEvent()
         commentEventEmitter.emitCommentCreate(comment)
     }
 
     override fun onDeleted(event: DbRecordDeletedEvent) {
+        log.debug { "Comment deleted: ${event.record}" }
+
         val comment = event.toCommentEvent()
         commentEventEmitter.emitCommentDelete(comment)
     }
