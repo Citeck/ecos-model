@@ -83,7 +83,6 @@
                             },
                             "key": "_parentRefSelector",
                             "disableInlineEdit": true,
-                            "persistent": false,
                             "clearOnHide": false,
                             "dataSrc": "custom",
                             "data": {
