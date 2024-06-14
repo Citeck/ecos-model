@@ -88,16 +88,13 @@ class CommentsConfiguration(private val dbDomainFactory: DbDomainFactory) {
                     }
 
                     override fun hasWritePerms(): Boolean {
-                        if (isAdmin) {
-                            return true
-                        }
                         val commentData = AuthContext.runAsSystem {
                             recordsService.getAtts(record, CommentData::class.java)
                         }
                         if (commentData.tags.any { it.type in TAGS_DISABLED_EDITING }) {
                             return false
                         }
-                        return commentData.creator == user
+                        return isAdmin || commentData.creator == user
                     }
                 }
             }
