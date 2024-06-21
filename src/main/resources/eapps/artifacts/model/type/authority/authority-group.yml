@@ -15,6 +15,9 @@ journalRef: uiserv/journal@authority-groups
 system: true
 sourceId: emodel/authority-group
 
+actions:
+  - uiserv/action@edit-ext-users-info
+
 model:
   attributes:
     - id: name

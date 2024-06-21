@@ -1,0 +1,32 @@
+---
+id: edit-ext-users-info
+name:
+  ru: Настроить внешних пользователей
+  en: Edit external users
+
+icon: icon-settings
+type: mutate
+
+confirm:
+  title:
+    ru: Настроить внешних пользователей
+    en: Edit external users
+  formRef: uiserv/form@edit-ext-users-info
+  formAttributes:
+    "ext-users-info:extPortalHost": "${ext-users-info:extPortalHost}"
+  attributesMapping:
+    "record.attributes.ext-users-info:extPortalHost": "ext-users-info:extPortalHost"
+
+config:
+  record:
+    id: ${?id}
+
+predicate:
+  t: or
+  val:
+    - t: eq
+      a: ?localId
+      v: EXTERNAL_USERS
+    - t: contains
+      a: authorityGroupsFull[]?localId
+      v: EXTERNAL_USERS

@@ -1,0 +1,11 @@
+---
+id: ext-users-info
+name:
+  ru: Информация о внешних пользователях
+  en: External users info
+
+attributes:
+  - id: extPortalHost
+    name:
+      ru: Хост внешнего портала
+      en: External portal host
