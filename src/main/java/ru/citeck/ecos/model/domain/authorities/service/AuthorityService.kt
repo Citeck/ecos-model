@@ -75,7 +75,7 @@ class AuthorityService(
 
     private fun getAuthoritiesForPersonImpl(personId: String): Set<String> {
 
-        val personRef = RecordRef.create("person", personId)
+        val personRef = EntityRef.create("person", personId)
         val personGroups = records.getAtt(personRef, ATT_AUTHORITY_GROUPS).asStrList()
 
         val authorities = LinkedHashSet<String>()
@@ -191,7 +191,7 @@ class AuthorityService(
 
         val groupRef = AuthorityType.GROUP.getRef(groupId)
         val nextGroups: List<String> = if (asc) {
-            records.getAtt(groupRef, ATT_AUTHORITY_GROUPS).asList(RecordRef::class.java).map { it.id }
+            records.getAtt(groupRef, ATT_AUTHORITY_GROUPS).asList(EntityRef::class.java).map { it.getLocalId() }
         } else {
             getGroupMembers(groupRef, AuthorityType.GROUP).map { it.getLocalId() }
         }

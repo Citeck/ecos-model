@@ -19,12 +19,12 @@ import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityGroupConstants
 import ru.citeck.ecos.model.domain.authorities.constant.PersonConstants
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
+import ru.citeck.ecos.model.domain.authorities.service.ExtUsersService
 import ru.citeck.ecos.model.domain.authorities.service.PersonEventsService
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.model.service.keycloak.KeycloakUserService
-import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.RecordsServiceFactory
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
@@ -89,7 +89,7 @@ class PersonsConfiguration(
         ) {
             override fun setRecordsServiceFactory(serviceFactory: RecordsServiceFactory) {
                 serviceFactory.recordsResolver.registerVirtualRecord(
-                    RecordRef.create(AuthorityType.PERSON.sourceId, AuthUser.SYSTEM),
+                    EntityRef.create(AuthorityType.PERSON.sourceId, AuthUser.SYSTEM),
                     SystemUserRecord()
                 )
                 super.setRecordsServiceFactory(serviceFactory)
@@ -122,7 +122,8 @@ class PersonsConfiguration(
 
     @Bean
     fun personRepo(
-        dataSource: DataSource
+        dataSource: DataSource,
+        extUsersService: ExtUsersService
     ): RecordsDao {
 
         val permsComponent = object : DbPermsComponent {
@@ -187,7 +188,7 @@ class PersonsConfiguration(
                 .build()
         ).withSchema(AuthorityConstants.DEFAULT_SCHEMA).withPermsComponent(permsComponent).build()
 
-        recordsDao.addAttributesMixin(PersonMixin(recordsService, authorityService))
+        recordsDao.addAttributesMixin(PersonMixin(recordsService, authorityService, extUsersService))
         recordsDao.addAttributesMixin(AuthorityMixin(recordsService, authorityService, AuthorityType.PERSON))
 
         val getRecLocalId = { rec: Any ->

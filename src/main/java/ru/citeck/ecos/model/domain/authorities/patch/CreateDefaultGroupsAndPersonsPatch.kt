@@ -69,7 +69,7 @@ class CreateDefaultGroupsAndPersonsPatch(
                 )
             ),
             SystemGroupInfo(
-                AuthorityGroupConstants.EXTERNAL_USERS,
+                AuthorityGroupConstants.EXTERNAL_USERS_GROUP,
                 MLText(
                     I18nContext.ENGLISH to "External users",
                     I18nContext.RUSSIAN to "Внешние пользователи"

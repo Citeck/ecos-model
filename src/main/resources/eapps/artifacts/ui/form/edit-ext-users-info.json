@@ -19,7 +19,7 @@
               "ru": "Хост внешнего портала",
               "en": "External portal host"
             },
-            "key": "ext-users-info:extPortalHost",
+            "key": "ext-users-info:extPortalUrl",
             "defaultValue": "",
             "refreshOn": [],
             "optionalWhenDisabled": false,

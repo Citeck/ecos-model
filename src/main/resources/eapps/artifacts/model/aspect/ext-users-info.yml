@@ -5,7 +5,7 @@ name:
   en: External users info
 
 attributes:
-  - id: extPortalHost
+  - id: extPortalUrl
     name:
-      ru: Хост внешнего портала
-      en: External portal host
+      ru: URL внешнего портала
+      en: External portal URL

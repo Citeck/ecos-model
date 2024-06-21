@@ -13,9 +13,9 @@ confirm:
     en: Edit external users
   formRef: uiserv/form@edit-ext-users-info
   formAttributes:
-    "ext-users-info:extPortalHost": "${ext-users-info:extPortalHost}"
+    "ext-users-info:extPortalUrl": "${ext-users-info:extPortalUrl}"
   attributesMapping:
-    "record.attributes.ext-users-info:extPortalHost": "ext-users-info:extPortalHost"
+    "record.attributes.ext-users-info:extPortalUrl": "ext-users-info:extPortalUrl"
 
 config:
   record:

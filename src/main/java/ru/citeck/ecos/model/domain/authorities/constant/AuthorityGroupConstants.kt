@@ -5,6 +5,7 @@ object AuthorityGroupConstants {
     const val ATT_BRANCH_TYPE = "branchType"
     const val ATT_ROLE_TYPE = "roleType"
     const val ATT_NAME = "name"
+    const val ATT_EXT_PORTAL_URL = "ext-users-info:extPortalUrl"
 
     const val ADMIN_GROUP = "ECOS_ADMINISTRATORS"
     const val EVERYONE_GROUP = "EVERYONE"
@@ -12,5 +13,5 @@ object AuthorityGroupConstants {
     const val GROUPS_MANAGERS_GROUP = "AUTHORITY_GROUPS_MANAGERS"
     const val MANAGED_GROUPS_GROUP = "MANAGED_AUTHORITY_GROUPS"
 
-    const val EXTERNAL_USERS = "EXTERNAL_USERS"
+    const val EXTERNAL_USERS_GROUP = "EXTERNAL_USERS"
 }

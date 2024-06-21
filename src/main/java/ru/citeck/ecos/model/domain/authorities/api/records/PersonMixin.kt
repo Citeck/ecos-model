@@ -5,6 +5,7 @@ import ru.citeck.ecos.context.lib.auth.AuthGroup
 import ru.citeck.ecos.context.lib.i18n.I18nContext
 import ru.citeck.ecos.model.domain.authorities.constant.PersonConstants
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
+import ru.citeck.ecos.model.domain.authorities.service.ExtUsersService
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.ScalarType
@@ -16,12 +17,12 @@ import java.util.concurrent.TimeUnit
 
 class PersonMixin(
     private val recordsService: RecordsService,
-    private val authorityService: AuthorityService
+    private val authorityService: AuthorityService,
+    private val extUsersService: ExtUsersService
 ) : AttMixin {
 
     companion object {
 
-        private const val ATT_USER_NAME = "userName"
 
         private val NON_DELEGATABLE_AUTHORITIES = setOf(
             "GROUP__orgstruct_home_",
@@ -33,7 +34,7 @@ class PersonMixin(
         )
 
         private val providedAtts = listOf(
-            ATT_USER_NAME,
+            PersonConstants.ATT_USER_NAME,
             PersonConstants.ATT_AUTHORITIES,
             PersonConstants.ATT_IS_ADMIN,
             PersonConstants.ATT_IS_AUTHENTICATION_MUTABLE,
@@ -42,19 +43,19 @@ class PersonMixin(
             PersonConstants.ATT_AVATAR_URL,
             PersonConstants.ATT_IS_MUTABLE,
             PersonConstants.ATT_INACTIVITY_DAYS,
-            PersonConstants.ATT_DELEGATABLE_AUTHORITIES
+            PersonConstants.ATT_DELEGATABLE_AUTHORITIES,
+            PersonConstants.ATT_EXT_PORTAL_URL
         )
     }
 
     override fun getAtt(path: String, value: AttValueCtx): Any? {
         return when (path) {
-            ATT_USER_NAME -> {
-                return value.getLocalId()
+            PersonConstants.ATT_USER_NAME -> {
+                value.getLocalId()
             }
             PersonConstants.ATT_AUTHORITIES -> {
-                return Authorities(authorityService.getAuthoritiesForPerson(value.getLocalId()))
+                Authorities(authorityService.getAuthoritiesForPerson(value.getLocalId()))
             }
-
             PersonConstants.ATT_DELEGATABLE_AUTHORITIES -> {
 
                 val authorities = authorityService.getAuthoritiesForPerson(value.getLocalId())
@@ -105,6 +106,9 @@ class PersonMixin(
                 }
                 val inactivityMs = Instant.now().toEpochMilli() - lastActivity.toEpochMilli()
                 return inactivityMs / TimeUnit.DAYS.toMillis(1)
+            }
+            PersonConstants.ATT_EXT_PORTAL_URL -> {
+                extUsersService.getExtPortalUrlForUser(value.getLocalId())
             }
             else -> null
         }
