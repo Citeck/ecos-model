@@ -5,7 +5,7 @@
     "ru" : "Вас упомянули в комментарии к документу ${docDisp}"
   },
   "model" : {
-    "docDisp" : "record?disp",
+    "docDisp" : "record._disp.closest.ru!record?disp",
     "docRef" : "record?id",
     "commentText": "text"
   }
