@@ -16,8 +16,8 @@
         "components": [
           {
             "label": {
-              "ru": "Хост внешнего портала",
-              "en": "External portal host"
+              "ru": "URL внешнего портала",
+              "en": "External portal URL"
             },
             "key": "ext-users-info:extPortalUrl",
             "defaultValue": "",
