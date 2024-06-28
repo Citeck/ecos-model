@@ -51,7 +51,7 @@ class CommentsMentionListener(
 
     override fun onChanged(event: DbRecordChangedEvent) {
         val textBefore = event.before[ATT_TEXT] as? String ?: ""
-        val textAfter = event.before[ATT_TEXT] as? String ?: ""
+        val textAfter = event.after[ATT_TEXT] as? String ?: ""
         process(textBefore, textAfter, event.record, event.globalRef)
     }
 
