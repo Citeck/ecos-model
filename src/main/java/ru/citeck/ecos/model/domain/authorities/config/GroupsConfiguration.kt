@@ -11,12 +11,14 @@ import ru.citeck.ecos.model.domain.authorities.api.records.AuthorityGroupMixin
 import ru.citeck.ecos.model.domain.authorities.api.records.AuthorityMixin
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
+import ru.citeck.ecos.model.domain.authorities.service.PrivateGroupsService
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.ScalarType
 import ru.citeck.ecos.records3.record.dao.RecordsDao
+import ru.citeck.ecos.webapp.api.authority.EcosAuthoritiesApi
 import javax.sql.DataSource
 
 @Configuration
@@ -24,7 +26,9 @@ class GroupsConfiguration(
     private val dbDomainFactory: DbDomainFactory,
     private val authoritiesSyncService: AuthoritiesSyncService,
     private val authorityService: AuthorityService,
-    private val recordsService: RecordsService
+    private val recordsService: RecordsService,
+    private val privateGroupsService: PrivateGroupsService,
+    private val authoritiesApi: EcosAuthoritiesApi
 ) {
 
     @Bean
@@ -33,7 +37,9 @@ class GroupsConfiguration(
             AuthorityType.GROUP.sourceId,
             AuthorityType.GROUP,
             authoritiesSyncService,
-            authorityService
+            authorityService,
+            privateGroupsService,
+            authoritiesApi
         )
     }
 

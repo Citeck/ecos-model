@@ -8,7 +8,6 @@ import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityGroupConstants
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
-import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
@@ -40,9 +39,9 @@ class AuthorityService(
         val ADMIN_GROUPS_AUTH_NAME = ADMIN_GROUPS.mapTo(LinkedHashSet()) { AuthGroup.PREFIX + it }
     }
 
-    private val ascGroupsCache: IMap<String, Set<String>>
-    private val descGroupsCache: IMap<String, Set<String>>
-    private val personAuthoritiesCache: IMap<String, Set<String>>
+    private final val ascGroupsCache: IMap<String, Set<String>>
+    private final val descGroupsCache: IMap<String, Set<String>>
+    private final val personAuthoritiesCache: IMap<String, Set<String>>
 
     init {
         ascGroupsCache = hazelcast.getMap(ASC_GROUPS_CACHE_KEY)

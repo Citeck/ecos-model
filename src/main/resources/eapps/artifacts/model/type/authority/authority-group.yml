@@ -30,6 +30,11 @@ model:
         ru: Описание
         en: Description
       type: MLTEXT
+    - id: privateGroup
+      name:
+        ru: Приватная группа
+        en: Private group
+      type: BOOLEAN
     - id: branchType
     - id: branchSubType
     - id: roleType

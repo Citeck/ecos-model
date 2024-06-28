@@ -131,6 +131,17 @@
                         "components": [
                           {
                             "label": {
+                              "ru": "Приватная группа",
+                              "en": "Private group"
+                            },
+                            "key": "privateGroup",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "checkbox",
+                            "input": true
+                          },
+                          {
+                            "label": {
                               "ru": "Группы и Пользователи, входящие в группу:",
                               "en": "Groups and Users included in group:"
                             },
@@ -284,6 +295,5 @@
         "input": false
       }
     ]
-  },
-  "notExists": false
+  }
 }

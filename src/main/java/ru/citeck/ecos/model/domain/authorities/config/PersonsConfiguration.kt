@@ -21,6 +21,7 @@ import ru.citeck.ecos.model.domain.authorities.constant.PersonConstants
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
 import ru.citeck.ecos.model.domain.authorities.service.ExtUsersService
 import ru.citeck.ecos.model.domain.authorities.service.PersonEventsService
+import ru.citeck.ecos.model.domain.authorities.service.PrivateGroupsService
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.utils.ModelUtils
@@ -34,6 +35,7 @@ import ru.citeck.ecos.records3.record.dao.RecordsDao
 import ru.citeck.ecos.records3.record.dao.impl.proxy.MutateProxyProcessor
 import ru.citeck.ecos.records3.record.dao.impl.proxy.ProxyProcContext
 import ru.citeck.ecos.txn.lib.TxnContext
+import ru.citeck.ecos.webapp.api.authority.EcosAuthoritiesApi
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import javax.sql.DataSource
 import kotlin.reflect.jvm.jvmName
@@ -45,7 +47,9 @@ class PersonsConfiguration(
     private val authorityService: AuthorityService,
     private val dbDomainFactory: DbDomainFactory,
     private val authoritiesSyncService: AuthoritiesSyncService,
-    private val keycloakUserService: KeycloakUserService
+    private val keycloakUserService: KeycloakUserService,
+    private val privateGroupsService: PrivateGroupsService,
+    private val authoritiesApi: EcosAuthoritiesApi
 ) {
 
     companion object {
@@ -65,6 +69,8 @@ class PersonsConfiguration(
             AuthorityType.PERSON,
             authoritiesSyncService,
             authorityService,
+            privateGroupsService,
+            authoritiesApi,
             object : MutateProxyProcessor {
 
                 override fun mutatePreProcess(

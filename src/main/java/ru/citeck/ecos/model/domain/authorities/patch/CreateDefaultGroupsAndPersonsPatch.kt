@@ -16,7 +16,7 @@ import ru.citeck.ecos.webapp.lib.patch.annotaion.EcosPatch
 import java.util.concurrent.Callable
 
 @Component
-@EcosPatch("default-authorities", "2022-06-29T00:00:02Z")
+@EcosPatch("default-authorities", "2022-06-29T00:00:03Z")
 class CreateDefaultGroupsAndPersonsPatch(
     val recordsService: RecordsService
 ) : Callable<List<String>> {
@@ -73,6 +73,13 @@ class CreateDefaultGroupsAndPersonsPatch(
                 MLText(
                     I18nContext.ENGLISH to "External users",
                     I18nContext.RUSSIAN to "Внешние пользователи"
+                )
+            ),
+            SystemGroupInfo(
+                AuthorityGroupConstants.UNIFIED_PRIVATE_GROUP,
+                MLText(
+                    I18nContext.ENGLISH to "Unified private group",
+                    I18nContext.RUSSIAN to "Единая приватная группа"
                 )
             )
         )

@@ -2,20 +2,20 @@ package ru.citeck.ecos.model.domain.authorities.config
 
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.context.lib.auth.AuthContext
+import ru.citeck.ecos.context.lib.auth.AuthGroup
+import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants.ATT_AUTHORITY_GROUPS
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants.ATT_AUTHORITY_GROUPS_FULL
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityGroupConstants
 import ru.citeck.ecos.model.domain.authorities.constant.PersonConstants
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
+import ru.citeck.ecos.model.domain.authorities.service.PrivateGroupsService
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.records2.RecordConstants
-import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records2.predicate.PredicateService
 import ru.citeck.ecos.records2.predicate.PredicateUtils
-import ru.citeck.ecos.records2.predicate.model.Predicate
-import ru.citeck.ecos.records2.predicate.model.Predicates
-import ru.citeck.ecos.records2.predicate.model.ValuePredicate
+import ru.citeck.ecos.records2.predicate.model.*
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.delete.DelStatus
@@ -25,6 +25,8 @@ import ru.citeck.ecos.records3.record.dao.mutate.RecordsMutateWithAnyResDao
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes
+import ru.citeck.ecos.webapp.api.authority.EcosAuthoritiesApi
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -33,8 +35,17 @@ open class GroupsPersonsRecordsDao(
     private val authorityType: AuthorityType,
     private val syncService: AuthoritiesSyncService,
     private val authorityService: AuthorityService,
+    private val privateGroupsService: PrivateGroupsService,
+    private val authoritiesApi: EcosAuthoritiesApi,
     proxyProcessor: ProxyProcessor? = null
 ) : RecordsDaoProxy(id, "$id-repo", proxyProcessor), RecordsMutateWithAnyResDao {
+
+    companion object {
+        private val UNIFIED_PRIVATE_GROUP_AUTH = AuthGroup.PREFIX + AuthorityGroupConstants.UNIFIED_PRIVATE_GROUP
+        private val UNIFIED_PRIVATE_GROUP_REF = AuthorityType.GROUP.getRef(
+            AuthorityGroupConstants.UNIFIED_PRIVATE_GROUP
+        )
+    }
 
     private val targetSourceId = "$id-repo"
 
@@ -68,19 +79,25 @@ open class GroupsPersonsRecordsDao(
         if (recsQuery.language != PredicateService.LANGUAGE_PREDICATE) {
             return super.queryRecords(recsQuery)
         }
-        val predicate = PredicateUtils.mapValuePredicates(recsQuery.getQuery(Predicate::class.java)) { pred ->
+        var predicate = recsQuery.getQuery(Predicate::class.java)
+        val authConditions = getAuthConditions()
+        if (authConditions != Predicates.alwaysTrue()) {
+            predicate = AndPredicate.of(predicate, authConditions)
+        }
+        predicate = PredicateUtils.mapValuePredicates(predicate) { pred ->
 
             var result: Predicate? = if (pred.getType() == ValuePredicate.Type.CONTAINS &&
                 pred.getAttribute() == ATT_AUTHORITY_GROUPS_FULL
             ) {
-
-                val values = pred.getValue().toList(RecordRef::class.java)
-                val expandedGroups = authorityService.getExpandedGroups(values.map { it.id }, false)
-                ValuePredicate(
-                    ATT_AUTHORITY_GROUPS,
-                    ValuePredicate.Type.IN,
-                    expandedGroups.map { AuthorityType.GROUP.getRef(it).toString() }
-                )
+                AuthContext.runAsSystem {
+                    val values = pred.getValue().toList(EntityRef::class.java)
+                    val expandedGroups = authorityService.getExpandedGroups(values.map { it.getLocalId() }, false)
+                    ValuePredicate(
+                        ATT_AUTHORITY_GROUPS,
+                        ValuePredicate.Type.IN,
+                        expandedGroups.map { AuthorityType.GROUP.getRef(it).toString() }
+                    )
+                }
             } else {
                 pred
             }
@@ -90,13 +107,59 @@ open class GroupsPersonsRecordsDao(
             }
 
             result
-        }
+        } ?: Predicates.alwaysTrue()
+
         return super.queryRecords(
             recsQuery.copy {
                 withQuery(predicate)
                 withSortBy(newSortBy)
             }
         )
+    }
+
+    private fun getAuthConditions(): Predicate {
+
+        val currentUserAuth = AuthContext.getCurrentRunAsAuthorities()
+        if (currentUserAuth.contains(AuthRole.ADMIN)
+            || currentUserAuth.contains(AuthRole.SYSTEM)
+            || currentUserAuth.contains(UNIFIED_PRIVATE_GROUP_AUTH)
+        ) {
+            return Predicates.alwaysTrue()
+        }
+        val privateGroups = privateGroupsService.getPrivateGroups()
+        if (privateGroups.isEmpty()) {
+            return Predicates.alwaysTrue()
+        }
+        val userPrivateGroups = currentUserAuth.filterTo(LinkedHashSet()) { privateGroups.contains(it) }
+        val privateGroupsOutOfUser = privateGroups.subtract(userPrivateGroups).map {
+            authoritiesApi.getAuthorityRef(it)
+        }
+
+        var predicate: Predicate = if (authorityType == AuthorityType.PERSON && userPrivateGroups.isNotEmpty()) {
+            // users in private group can view only users from same private groups
+            ValuePredicate.contains(ATT_AUTHORITY_GROUPS_FULL, userPrivateGroups)
+        } else {
+            // users out of private groups can view only users out of private groups
+            NotPredicate(ValuePredicate.contains(ATT_AUTHORITY_GROUPS_FULL, privateGroupsOutOfUser))
+        }
+
+        if (authorityType == AuthorityType.GROUP) {
+            predicate = AndPredicate.of(
+                predicate,
+                NotPredicate(
+                    ValuePredicate(
+                        "id",
+                        ValuePredicate.Type.IN,
+                        privateGroupsOutOfUser.map { it.getLocalId() })
+                )
+            )
+        } else if (authorityType == AuthorityType.PERSON) {
+            predicate = OrPredicate.of(
+                ValuePredicate.contains(ATT_AUTHORITY_GROUPS_FULL, UNIFIED_PRIVATE_GROUP_REF),
+                predicate
+            )
+        }
+        return predicate
     }
 
     private fun preProcessPersonSortBy(sortBy: SortBy): SortBy {
@@ -156,12 +219,12 @@ open class GroupsPersonsRecordsDao(
                     continue
                 }
                 var newGroups: List<String> = rec.getAtt(ATT_AUTHORITY_GROUPS)
-                    .toList(RecordRef::class.java)
-                    .map { it.id }
+                    .toList(EntityRef::class.java)
+                    .map { it.getLocalId() }
                 if (newGroups.isEmpty()) {
                     newGroups = rec.getAtt("att_add_$ATT_AUTHORITY_GROUPS")
-                        .toList(RecordRef::class.java)
-                        .map { it.id }
+                        .toList(EntityRef::class.java)
+                        .map { it.getLocalId() }
                 }
                 for (newGroup in newGroups) {
                     val expandedGroups = authorityService.getExpandedGroups(newGroup, true)
@@ -202,21 +265,21 @@ open class GroupsPersonsRecordsDao(
                 } else {
                     super.mutate(listOf(record))[0]
                 }
-            } else if (RecordRef.isEmpty(currentAtts.managedBySync) ||
-                !syncService.isSyncEnabled(currentAtts.managedBySync?.id)
+            } else if (EntityRef.isEmpty(currentAtts.managedBySync) ||
+                !syncService.isSyncEnabled(currentAtts.managedBySync?.getLocalId())
             ) {
 
                 super.mutate(listOf(record))[0]
             } else {
                 isManaged = true
-                syncService.update(currentAtts.managedBySync!!.id, record)
+                syncService.update(currentAtts.managedBySync!!.getLocalId(), record)
             }
             result.add(authorityId)
 
             if (isManaged) {
 
                 val attsAfterMutation = getTargetAuthorityAtts(id)
-                val syncId = attsAfterMutation.managedBySync?.id
+                val syncId = attsAfterMutation.managedBySync?.getLocalId()
                 val managedAtts = syncService.getManagedAtts(syncId)
 
                 val newAtts = ObjectData.create()
@@ -236,7 +299,7 @@ open class GroupsPersonsRecordsDao(
 
     private fun getTargetAuthorityAtts(id: String): CurrentAuthorityAtts {
         return recordsService.getAtts(
-            RecordRef.create(targetSourceId, id),
+            EntityRef.create(targetSourceId, id),
             CurrentAuthorityAtts::class.java
         )
     }
@@ -256,6 +319,6 @@ open class GroupsPersonsRecordsDao(
     private class CurrentAuthorityAtts(
         @AttName(RecordConstants.ATT_NOT_EXISTS)
         val notExists: Boolean? = null,
-        val managedBySync: RecordRef? = null
+        val managedBySync: EntityRef? = null
     )
 }
