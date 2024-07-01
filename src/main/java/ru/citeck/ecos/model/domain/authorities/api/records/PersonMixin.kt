@@ -23,7 +23,6 @@ class PersonMixin(
 
     companion object {
 
-
         private val NON_DELEGATABLE_AUTHORITIES = setOf(
             "GROUP__orgstruct_home_",
             AuthGroup.EVERYONE

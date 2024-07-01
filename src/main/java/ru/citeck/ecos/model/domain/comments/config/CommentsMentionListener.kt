@@ -10,7 +10,6 @@ import ru.citeck.ecos.data.sql.records.listener.DbRecordsListenerAdapter
 import ru.citeck.ecos.events2.EventsService
 import ru.citeck.ecos.events2.emitter.EmitterConfig
 import ru.citeck.ecos.events2.emitter.EventsEmitter
-import ru.citeck.ecos.model.domain.comments.api.records.ATT_TEXT
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.notifications.lib.Notification
 import ru.citeck.ecos.notifications.lib.NotificationType
@@ -37,7 +36,7 @@ class CommentsMentionListener(
         )
     }
 
-    private val emitter: EventsEmitter<UserIsMentionedInCommentEvent>
+    private final val emitter: EventsEmitter<UserIsMentionedInCommentEvent>
 
     init {
         emitter = eventsService.getEmitter(
@@ -50,13 +49,13 @@ class CommentsMentionListener(
     }
 
     override fun onChanged(event: DbRecordChangedEvent) {
-        val textBefore = event.before[ATT_TEXT] as? String ?: ""
-        val textAfter = event.after[ATT_TEXT] as? String ?: ""
+        val textBefore = event.before[CommentDesc.ATT_TEXT] as? String ?: ""
+        val textAfter = event.after[CommentDesc.ATT_TEXT] as? String ?: ""
         process(textBefore, textAfter, event.record, event.globalRef)
     }
 
     override fun onCreated(event: DbRecordCreatedEvent) {
-        val text = recordsService.getAtt(event.record, ATT_TEXT).asText()
+        val text = recordsService.getAtt(event.record, CommentDesc.ATT_TEXT).asText()
         process("", text, event.record, event.globalRef)
     }
 

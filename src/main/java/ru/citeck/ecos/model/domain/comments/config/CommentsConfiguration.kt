@@ -13,7 +13,6 @@ import ru.citeck.ecos.data.sql.records.perms.DbRecordPerms
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
 import ru.citeck.ecos.model.domain.comments.api.dto.CommentTag
 import ru.citeck.ecos.model.domain.comments.api.dto.CommentTagType
-import ru.citeck.ecos.model.domain.comments.api.records.COMMENT_RECORD_ATT
 import ru.citeck.ecos.model.domain.comments.api.records.COMMENT_REPO_DAO_ID
 import ru.citeck.ecos.model.domain.comments.api.records.CommentsMixin
 import ru.citeck.ecos.model.domain.comments.event.CommentsEmitEventsDbRecordsListener
@@ -61,7 +60,7 @@ class CommentsConfiguration(private val dbDomainFactory: DbDomainFactory) {
                     }
 
                     override fun hasAttReadPerms(name: String): Boolean {
-                        if (name == COMMENT_RECORD_ATT) {
+                        if (name == CommentDesc.ATT_RECORD) {
                             return true
                         }
                         return hasReadPerms()
@@ -69,7 +68,7 @@ class CommentsConfiguration(private val dbDomainFactory: DbDomainFactory) {
 
                     override fun hasAttWritePerms(name: String): Boolean {
                         return when (name) {
-                            COMMENT_RECORD_ATT -> isAdmin
+                            CommentDesc.ATT_RECORD -> isAdmin
                             "tags" -> isAdmin
                             else -> hasWritePerms()
                         }
@@ -82,7 +81,7 @@ class CommentsConfiguration(private val dbDomainFactory: DbDomainFactory) {
                         return AuthContext.runAs(user, authorities.toList()) {
                             recordsService.getAtt(
                                 record,
-                                "$COMMENT_RECORD_ATT.permissions._has.Read?bool!"
+                                "${CommentDesc.ATT_RECORD}.permissions._has.Read?bool!"
                             ).asBoolean()
                         }
                     }

@@ -120,9 +120,9 @@ open class GroupsPersonsRecordsDao(
     private fun getAuthConditions(): Predicate {
 
         val currentUserAuth = AuthContext.getCurrentRunAsAuthorities()
-        if (currentUserAuth.contains(AuthRole.ADMIN)
-            || currentUserAuth.contains(AuthRole.SYSTEM)
-            || currentUserAuth.contains(UNIFIED_PRIVATE_GROUP_AUTH)
+        if (currentUserAuth.contains(AuthRole.ADMIN) ||
+            currentUserAuth.contains(AuthRole.SYSTEM) ||
+            currentUserAuth.contains(UNIFIED_PRIVATE_GROUP_AUTH)
         ) {
             return Predicates.alwaysTrue()
         }
@@ -150,7 +150,8 @@ open class GroupsPersonsRecordsDao(
                     ValuePredicate(
                         "id",
                         ValuePredicate.Type.IN,
-                        privateGroupsOutOfUser.map { it.getLocalId() })
+                        privateGroupsOutOfUser.map { it.getLocalId() }
+                    )
                 )
             )
         } else if (authorityType == AuthorityType.PERSON) {

@@ -25,17 +25,19 @@ class ExtUsersService(
         private const val EXT_USERS_GROUP_AUTH_NAME = "GROUP_" + AuthorityGroupConstants.EXTERNAL_USERS_GROUP
     }
 
-    private var extPortalsUrl = AtomicReference<List<Pair<String,String>>>()
+    private var extPortalsUrl = AtomicReference<List<Pair<String, String>>>()
 
     @PostConstruct
     fun init() {
         eventsService.addListener<Unit> {
             withEventType(RecordChangedEvent.TYPE)
             withDataClass(Unit::class.java)
-            withFilter(Predicates.and(
-                Predicates.eq("typeDef.id", "authority-group"),
-                Predicates.eq("diff._has.${AuthorityGroupConstants.ATT_EXT_PORTAL_URL}?bool", true)
-            ))
+            withFilter(
+                Predicates.and(
+                    Predicates.eq("typeDef.id", "authority-group"),
+                    Predicates.eq("diff._has.${AuthorityGroupConstants.ATT_EXT_PORTAL_URL}?bool", true)
+                )
+            )
             withExclusive(false)
             withAction { extPortalsUrl.set(null) }
         }

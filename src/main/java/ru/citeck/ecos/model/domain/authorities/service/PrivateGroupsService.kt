@@ -31,9 +31,10 @@ class PrivateGroupsService(
             withDataClass(Unit::class.java)
             withFilter(
                 Predicates.and(
-                Predicates.eq("typeDef.id", "authority-group"),
-                Predicates.eq("diff._has.${AuthorityGroupConstants.ATT_PRIVATE_GROUP}?bool", true)
-            ))
+                    Predicates.eq("typeDef.id", "authority-group"),
+                    Predicates.eq("diff._has.${AuthorityGroupConstants.ATT_PRIVATE_GROUP}?bool", true)
+                )
+            )
             withExclusive(false)
             withAction { privateGroups.set(null) }
         }
