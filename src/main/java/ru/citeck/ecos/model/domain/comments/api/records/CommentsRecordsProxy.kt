@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.model.domain.comments.api.extractor.CommentExtractor
 import ru.citeck.ecos.model.domain.comments.api.validator.CommentValidator
+import ru.citeck.ecos.model.domain.comments.config.CommentDesc
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
@@ -23,8 +24,6 @@ import ru.citeck.ecos.webapp.api.entity.toEntityRef
 
 const val COMMENT_REPO_DAO_ID = "comment-repo"
 const val COMMENT_DAO_ID = "comment"
-const val COMMENT_RECORD_ATT = "record"
-const val ATT_TEXT = "text"
 private const val RECORD_READ_PERM_ATT = "hasReadRecordsPermissions"
 
 @Component
@@ -37,15 +36,21 @@ class CommentsRecordsProxy(
 
     companion object {
         private const val INTERNAL_TAG_TYPE = "INTERNAL"
+        private const val TEMP_FILE_SRC_ID = "temp-file"
+        private const val ATTACHMENT_SRC_ID = "attachment"
+        private const val DOCS_ASSOC = "docs:documents"
+        private const val ATT_ADD_ASPECTS = "att_add__aspects"
+
+        private val INTERNAL_DOC_ASPECT_REF = ModelUtils.getAspectRef("internal-document")
     }
 
     override fun mutate(records: List<LocalRecordAtts>): List<String> {
         for (record in records) {
-            val text = record.getAtt(ATT_TEXT).asText()
+            val text = record.getAtt(CommentDesc.ATT_TEXT).asText()
             if (text.isNotBlank()) {
                 val commentAtts = getCommentAtts(record)
                 val commentText = createDocumentAttachmentsFromTempFiles(text, commentAtts)
-                record.setAtt(ATT_TEXT, CommentValidator.removeVulnerabilities(commentText))
+                record.setAtt(CommentDesc.ATT_TEXT, CommentValidator.removeVulnerabilities(commentText))
             }
         }
         return super.mutate(records)
@@ -53,8 +58,8 @@ class CommentsRecordsProxy(
 
     private fun getCommentAtts(recordAtts: LocalRecordAtts): CommentAtts {
         return if (recordAtts.id.isEmpty()) {
-            val record = recordAtts.getAtt("record").asText().toEntityRef()
-            val tags = recordAtts.getAtt("tags").map { it["type"].asText() }
+            val record = recordAtts.getAtt(CommentDesc.ATT_RECORD).asText().toEntityRef()
+            val tags = recordAtts.getAtt(CommentDesc.ATT_TAGS).map { it["type"].asText() }
             CommentAtts(record, tags)
         } else {
             AuthContext.runAsSystem {
@@ -75,7 +80,7 @@ class CommentsRecordsProxy(
             return text
         }
 
-        val tempFilesRefs = attachments.filter { it.getSourceId() == "temp-file" }
+        val tempFilesRefs = attachments.filter { it.getSourceId() == TEMP_FILE_SRC_ID }
         if (tempFilesRefs.isEmpty()) {
             return text
         }
@@ -87,13 +92,13 @@ class CommentsRecordsProxy(
         val isInternalComment = commentAtts.tags.any { it == INTERNAL_TAG_TYPE }
 
         for (tempFileRef in tempFilesRefs) {
-            val mutationAtts = RecordAtts(EntityRef.create(AppName.EMODEL, "attachment", ""))
+            val mutationAtts = RecordAtts(EntityRef.create(AppName.EMODEL, ATTACHMENT_SRC_ID, ""))
             if (isInternalComment) {
-                mutationAtts["att_add__aspects"] = ModelUtils.getAspectRef("internal-document")
+                mutationAtts[ATT_ADD_ASPECTS] = INTERNAL_DOC_ASPECT_REF
             }
-            mutationAtts["_content"] = tempFileRef
+            mutationAtts[RecordConstants.ATT_CONTENT] = tempFileRef
             mutationAtts[RecordConstants.ATT_PARENT] = commentAtts.record
-            mutationAtts[RecordConstants.ATT_PARENT_ATT] = "docs:documents"
+            mutationAtts[RecordConstants.ATT_PARENT_ATT] = DOCS_ASSOC
             val newDocRef = recordsService.mutate(mutationAtts)
             resText = resText.replace(tempFileRef.toString(), newDocRef.toString())
         }
@@ -108,7 +113,7 @@ class CommentsRecordsProxy(
         var innerAttsMap = AttContext.getInnerAttsMap()
         if (!isRunAsSystem) {
             innerAttsMap = innerAttsMap.toMutableMap()
-            innerAttsMap[RECORD_READ_PERM_ATT] = "$COMMENT_RECORD_ATT.permissions._has.Read?bool!"
+            innerAttsMap[RECORD_READ_PERM_ATT] = "${CommentDesc.ATT_RECORD}.permissions._has.Read?bool!"
         }
 
         var commentsRecs = recordsService.query(
