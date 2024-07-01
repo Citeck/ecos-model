@@ -9,6 +9,9 @@ import ru.citeck.ecos.webapp.api.entity.toEntityRef
 class CommentExtractor {
 
     fun extractJsonStrings(text: String?): List<String> {
+        if (text.isNullOrBlank()) {
+            return emptyList()
+        }
         val jsonStrings = mutableListOf<String>()
 
         text?.let {
@@ -23,6 +26,8 @@ class CommentExtractor {
     fun extractAttachmentsRefs(jsonStrings: List<String>): List<EntityRef> {
         return jsonStrings.map {
             Json.mapper.read(it)?.get("fileRecordId")?.asText().toEntityRef()
+        }.filter {
+            it.isNotEmpty()
         }
     }
 
