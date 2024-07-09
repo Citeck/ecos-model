@@ -78,6 +78,10 @@ class AuthoritiesTestBase {
         }
     }
 
+    fun addUserToGroup(userId: String, groupId: String) {
+        addAuthorityToGroup(AuthorityType.PERSON.getRef(userId), AuthorityType.GROUP.getRef(groupId))
+    }
+
     fun addAuthorityToGroup(authorityRef: EntityRef, targetGroup: EntityRef) {
         runInAuthCtx {
             recordsService.mutateAtt(
@@ -86,6 +90,20 @@ class AuthoritiesTestBase {
                 targetGroup
             )
         }
+    }
+
+    fun removeUserFromGroup(userId: String, groupId: String) {
+        runInAuthCtx {
+            recordsService.mutateAtt(
+                AuthorityType.PERSON.getRef(userId),
+                "att_rem_${AuthorityConstants.ATT_AUTHORITY_GROUPS}",
+                AuthorityType.GROUP.getRef(groupId)
+            )
+        }
+    }
+
+    fun setUserGroups(userId: String, groups: List<String>) {
+        setAuthorityGroups(AuthorityType.PERSON.getRef(userId), groups.map { AuthorityType.GROUP.getRef(it) })
     }
 
     fun setAuthorityGroups(authorityRef: EntityRef, groups: List<EntityRef>) {
