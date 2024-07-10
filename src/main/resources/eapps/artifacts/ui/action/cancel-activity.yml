@@ -12,7 +12,7 @@ config:
   record:
     id: emodel/cancel-activity@
     attributes:
-      recordRef: ${recordRef}
+      recordRef: ${?id}
       responsibleEmail: ${responsible.email!}
       organizerEmail: ${_creator.email!}
       activityDate: ${activityDate}
@@ -39,7 +39,3 @@ predicate:
     - t: eq
       att: _type.isSubTypeOf.planned-activity?bool
       val: true
-
-
-
-

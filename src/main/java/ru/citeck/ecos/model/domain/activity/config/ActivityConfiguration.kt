@@ -12,7 +12,6 @@ import ru.citeck.ecos.records3.record.dao.RecordsDao
 import ru.citeck.ecos.records3.record.dao.impl.proxy.RecordsDaoProxy
 import javax.sql.DataSource
 
-
 @Configuration
 class ActivityConfiguration(private val dbDomainFactory: DbDomainFactory) {
 

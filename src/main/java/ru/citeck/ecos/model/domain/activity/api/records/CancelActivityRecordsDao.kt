@@ -45,6 +45,7 @@ class CancelActivityRecordsDao(
     }
 
     override fun mutate(value: ActivityDto): Any? {
+
         val record = value.recordRef
         val sourceId = "${record.getAppName()}${EntityRef.APP_NAME_DELIMITER}${record.getSourceId()}"
         if (SOURCE_ID != sourceId) {
@@ -60,6 +61,7 @@ class CancelActivityRecordsDao(
     }
 
     private fun deleteActiveProcess(activity: EntityRef) {
+
         val process = recordsService.queryOne(
             RecordsQuery.create()
                 .withSourceId("eproc/bpmn-proc")
