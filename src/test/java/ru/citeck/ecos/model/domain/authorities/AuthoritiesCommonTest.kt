@@ -26,7 +26,9 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
                 val ex = assertThrows<Exception> {
                     action.invoke()
                 }
-                assertThat(ex.message).contains("Permission denied")
+                if (ex.message?.contains("Permission denied") != true) {
+                    throw ex
+                }
             } else {
                 action.invoke()
             }
