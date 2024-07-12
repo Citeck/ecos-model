@@ -73,5 +73,4 @@ class AuthoritiesListTest : AuthoritiesTestBase() {
             *DEFAULT_USER_AUTHORITIES.toTypedArray()
         )
     }
-
 }
