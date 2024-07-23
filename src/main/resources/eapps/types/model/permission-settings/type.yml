@@ -1,6 +1,6 @@
 modelVersion: "1.0"
 
-source-id: ""
+source-id: "permission-settings"
 
 name:
   ru: Настройка прав

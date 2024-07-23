@@ -1,6 +1,6 @@
 modelVersion: "1.0"
 
-source-id: "emodel/authorities-sync"
+source-id: "authorities-sync"
 
 name:
   ru: Синхронизация пользователей и групп
