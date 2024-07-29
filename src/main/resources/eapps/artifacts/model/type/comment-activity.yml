@@ -1,0 +1,37 @@
+---
+id: comment-activity
+name:
+  ru: Комментарии/Активности
+  en: Comment/Activity
+
+system: true
+storageType: ECOS_MODEL
+parentRef: emodel/type@case
+
+inheritForm: false
+defaultCreateVariant: true
+model:
+  attributes:
+    - id: type
+      name:
+        ru: Тип
+        en: Type
+      type: ASSOC
+      config:
+        typeRef: emodel/type@activity-type
+        child: false
+    - id: document
+      name:
+        ru: Документ
+        en: Document
+      type: ASSOC
+    - id: record
+      name:
+        ru: Запись
+        en: Record
+      type: ASSOC
+    - id: data
+      name:
+        ru: Данные
+        en: Data
+      type: JSON

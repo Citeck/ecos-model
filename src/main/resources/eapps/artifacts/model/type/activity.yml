@@ -1,0 +1,96 @@
+---
+id: ecos-activity
+name:
+  ru: Активность
+  en: Activity
+
+system: true
+sourceId: emodel/activity
+parentRef: emodel/type@case
+
+formRef: uiserv/form@activity-form
+journalRef: uiserv/journal@activity-journal
+
+defaultStatus: planned
+inheritActions: false
+actions:
+  - uiserv/action@cancel-activity
+defaultCreateVariant: true
+model:
+  roles:
+    - id: responsible
+      name:
+        ru: Ответственный
+        en: Responsible
+      attributes:
+        - responsible
+  statuses:
+    - id: planned
+      name:
+        ru: Запланирована
+        en: Planned
+    - id: completed
+      name:
+        ru: Выполнена
+        en: Completed
+    - id: expired
+      name:
+        ru: Просрочена
+        en: Expired
+    - id: canceled
+      name:
+        ru: Отменена
+        en: Canceled
+  attributes:
+    - id: record
+      name:
+        ru: Документ
+        en: Document
+      type: ASSOC
+    - id: type
+      name:
+        ru: Тип
+        en: Type
+      type: ASSOC
+      config:
+        typeRef: emodel/type@activity-type
+    - id: activityDate
+      name:
+        ru: Дата активности
+        en: Activity date
+      type: DATETIME
+    - id: duration
+      name:
+        ru: Продолжительность
+        en: Duration
+    - id: responsible
+      name:
+        ru: Ответственный
+        en: Responsible
+      type: PERSON
+    - id: description
+      name:
+        ru: Описание
+        en: Description
+    - id: result
+      name:
+        ru: Результат
+        en: Result
+    - id: calendarEventSummary
+      name:
+        ru: Calendar Event Summary
+        en: Calendar Event Summary
+      computed:
+        type: SCRIPT
+        config:
+          fn: return "Событие по " + value.load("record?disp");
+        storingType: ON_MUTATE
+    - id: calendarEventUid
+      name:
+        ru: Calendar Event UID
+        en: Calendar Event UID
+    - id: calendarEventSequence
+      name:
+        ru: Calendar Event Sequence
+        en: Calendar Event Sequence
+      type: NUMBER

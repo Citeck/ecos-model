@@ -1,0 +1,153 @@
+{
+  "id": "activity-form",
+  "formKey": "",
+  "title": {
+    "ru": "Активность",
+    "en": "Activity"
+  },
+  "description": {},
+  "customModule": "",
+  "typeRef": "emodel/type@ecos-activity",
+  "width": "m",
+  "system": false,
+  "i18n": {},
+  "definition": {
+    "components": [
+      {
+        "label": {
+          "ru": "Документ",
+          "en": "Document"
+        },
+        "key": "record",
+        "defaultValue": "",
+        "refreshOn": [],
+        "optionalWhenDisabled": false,
+        "type": "textfield",
+        "input": true,
+        "inputMasks": [
+          {}
+        ]
+      },
+      {
+        "type": "selectJournal",
+        "input": true,
+        "journalId": "activity-type-journal",
+        "key": "type",
+        "label": {
+          "ru": "Тип",
+          "en": "Type"
+        }
+      },
+      {
+        "type": "datetime",
+        "input": true,
+        "key": "activityDate",
+        "label": {
+          "ru": "Дата активности",
+          "en": "Activity date"
+        },
+        "suffix": true
+      },
+      {
+        "type": "textfield",
+        "input": true,
+        "key": "duration",
+        "label": {
+          "ru": "Продолжительность",
+          "en": "Duration"
+        }
+      },
+      {
+        "type": "selectOrgstruct",
+        "input": true,
+        "allowedAuthorityType": "USER",
+        "key": "responsible",
+        "label": {
+          "ru": "Ответственный",
+          "en": "Responsible"
+        }
+      },
+      {
+        "type": "textfield",
+        "input": true,
+        "key": "description",
+        "label": {
+          "ru": "Описание",
+          "en": "Description"
+        }
+      },
+      {
+        "type": "columns",
+        "key": "buttons-columns",
+        "columns": [
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 0,
+            "components": [
+              {
+                "type": "button",
+                "key": "cancel",
+                "label": {
+                  "ru": "Отменить",
+                  "en": "Cancel"
+                },
+                "action": "event",
+                "event": "cancel",
+                "block": true,
+                "input": true
+              }
+            ],
+            "key": "column"
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 1,
+            "key": "column",
+            "components": []
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 2,
+            "components": [],
+            "key": "column"
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 3,
+            "components": [
+              {
+                "label": {
+                  "en": "Create",
+                  "ru": "Создать"
+                },
+                "key": "submit",
+                "state": "",
+                "theme": "primary",
+                "block": true,
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
+                "type": "button",
+                "input": true,
+                "headers": [
+                  {}
+                ]
+              }
+            ],
+            "key": "column"
+          }
+        ],
+        "input": false
+      }
+    ]
+  },
+  "attributes": {},
+  "notExists": false
+}

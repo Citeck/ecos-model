@@ -1,0 +1,15 @@
+{
+  "id" : "activity-calendar-event-notification",
+  "name" : "Шаблон уведомлений активности",
+  "notificationTitle" : {
+    "ru" : "${titleEventAction}: ${titleEventSummary} | ${titleEventType}"
+  },
+  "tags" : [ ],
+  "model" : {
+    "titleEventAction" : "$process.eventAction",
+    "titleEventSummary" : "$process.eventSummary",
+    "titleEventType" : "type?disp",
+    "body" : "description"
+  },
+  "multiTemplateConfig" : [ ]
+}

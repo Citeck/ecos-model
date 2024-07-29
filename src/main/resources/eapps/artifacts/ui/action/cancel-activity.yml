@@ -1,0 +1,37 @@
+---
+id: cancel-activity
+name:
+  ru: Отменить
+  en: Cancel
+type: mutate
+confirm:
+  title:
+    ru: Отменить активность
+    en: Cancel activity
+config:
+  record:
+    id: emodel/cancel-activity@
+    attributes:
+      recordRef: ${recordRef}
+      responsibleEmail: ${responsible.email!}
+      organizerEmail: ${_creator.email!}
+      activityDate: ${activityDate}
+      duration: ${duration}
+      description: ${description}
+      calendarEventSummary: ${calendarEventSummary}
+      calendarEventUid: ${calendarEventUid}
+      calendarEventSequence: ${calendarEventSequence}
+features:
+  execForQuery: false
+  execForRecord: true
+  execForRecords: false
+predicate:
+  t: or
+  val:
+    - t: eq
+      att: _status?str
+      val: planned
+    - t: eq
+      att: _status?str
+      val: expired
+
