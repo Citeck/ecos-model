@@ -5,10 +5,10 @@
             <bpmn:outgoing >Flow_12mq15r</bpmn:outgoing>
         </bpmn:startEvent>
         <bpmn:sequenceFlow sourceRef="StartEvent_1ew9rff" targetRef="Activity_0fhrd08" name="" id="Flow_12mq15r" ecos:name_ml="{}" ecos:conditionConfig="{&quot;fn&quot;:&quot;&quot;,&quot;expression&quot;:&quot;&quot;,&quot;outcome&quot;:&quot;&quot;}" ecos:conditionType="NONE"/>
-        <bpmn:scriptTask scriptFormat="javascript" name="Подготовка данных" id="Activity_0fhrd08" ecos:documentation="{}" ecos:asyncConfig="{&quot;asyncBefore&quot;:false,&quot;asyncAfter&quot;:false,&quot;exclusive&quot;:true}" ecos:name_ml="{&quot;ru&quot;:&quot;Подготовка данных&quot;}" ecos:jobConfig="{&quot;jobPriority&quot;:null,&quot;jobRetryTimeCycle&quot;:null}" ecos:script="var data = DataValue.of(document.load('data'));&#10;execution.setVariable('data', data);">
+        <bpmn:scriptTask scriptFormat="javascript" name="Подготовка данных" id="Activity_0fhrd08" ecos:documentation="{}" ecos:asyncConfig="{&quot;asyncBefore&quot;:false,&quot;asyncAfter&quot;:false,&quot;exclusive&quot;:true}" ecos:name_ml="{&quot;ru&quot;:&quot;Подготовка данных&quot;}" ecos:jobConfig="{&quot;jobPriority&quot;:null,&quot;jobRetryTimeCycle&quot;:null}" ecos:script="var data = document.load('data?json');&#10;execution.setVariable('data', data);">
             <bpmn:incoming >Flow_12mq15r</bpmn:incoming>
             <bpmn:outgoing >Flow_1qxvl67</bpmn:outgoing>
-            <bpmn:script>var data = DataValue.of(document.load('data'));
+            <bpmn:script>var data = document.load('data?json');
                 execution.setVariable('data', data);</bpmn:script>
         </bpmn:scriptTask>
         <bpmn:exclusiveGateway default="Flow_0qqfary" name="" id="Gateway_0xfv2sw" ecos:documentation="{}" ecos:name_ml="{}">

@@ -4,12 +4,13 @@ import mu.KotlinLogging
 import net.fortuna.ical4j.model.property.Method
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.utils.DurationStrUtils
+import ru.citeck.ecos.model.domain.activity.config.ActivityConfiguration
 import ru.citeck.ecos.model.domain.activity.config.ActivityStatus
 import ru.citeck.ecos.model.lib.status.constants.StatusConstants
 import ru.citeck.ecos.notifications.lib.Notification
 import ru.citeck.ecos.notifications.lib.NotificationType
+import ru.citeck.ecos.notifications.lib.icalendar.CalendarEvent
 import ru.citeck.ecos.notifications.lib.service.NotificationService
-import ru.citeck.ecos.notifications.lib.utils.CalendarEventUtils
 import ru.citeck.ecos.records2.predicate.PredicateService
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.record.dao.AbstractRecordsDao
@@ -27,6 +28,8 @@ class CancelActivityRecordsDao(
 
     companion object {
         const val ID = "cancel-activity"
+        private val SOURCE_ID = "${AppName.EMODEL}${EntityRef.APP_NAME_DELIMITER}${ActivityConfiguration.ACTIVITY_DAO_ID}"
+        private const val PROCESS_DEFINITION_KEY = "ecos-activity-process"
         private const val NOTIFICATION_ATTACHMENTS = "_attachments"
 
         private val log = KotlinLogging.logger {}
@@ -42,30 +45,41 @@ class CancelActivityRecordsDao(
     }
 
     override fun mutate(value: ActivityDto): Any? {
-        log.info { "Start cancellation activity ${value.recordRef}" }
-        deleteActiveProcess(value.recordRef)
+        val record = value.recordRef
+        val sourceId = "${record.getAppName()}${EntityRef.APP_NAME_DELIMITER}${record.getSourceId()}"
+        if (SOURCE_ID != sourceId) {
+            throw IllegalArgumentException("Action not supported for $sourceId")
+        }
+
+        log.info { "Start cancellation activity $record" }
+        deleteActiveProcess(record)
         sendNotification(value)
-        updateStatus(value.recordRef)
-        log.info { "Canceled activity ${value.recordRef}" }
+        updateStatus(record)
+        log.info { "Canceled activity $record" }
         return ""
     }
 
     private fun deleteActiveProcess(activity: EntityRef) {
-        val processList = recordsService.query(
+        val process = recordsService.queryOne(
             RecordsQuery.create()
                 .withSourceId("eproc/bpmn-proc")
                 .withLanguage(PredicateService.LANGUAGE_PREDICATE)
-                .withQuery(Predicates.eq("document", activity))
+                .withQuery(
+                    Predicates.and(
+                        Predicates.eq("processDefinitionKey", PROCESS_DEFINITION_KEY),
+                        Predicates.eq("document", activity)
+                    )
+                )
                 .withPage(
                     QueryPage.create()
-                        .withMaxItems(10)
-                        .build())
-                .build()
-        ).getRecords()
+                        .withMaxItems(1)
+                        .build()
+                ).build()
+        )
 
-        for (process in processList) {
+        process?.let {
             recordsService.mutate(
-                process,
+                it,
                 mapOf(
                     "action" to "DELETE",
                     "skipCustomListener" to false,
@@ -78,17 +92,17 @@ class CancelActivityRecordsDao(
 
     private fun sendNotification(activity: ActivityDto) {
         val sequence = activity.calendarEventSequence + 1
-        val canceledCalendarEventAttach = CalendarEventUtils.createCalendarEventAttachment(
-            activity.calendarEventSummary,
-            activity.description,
-            activity.activityDate,
-            DurationStrUtils.parseDurationToMillis(activity.duration),
-            activity.organizerEmail,
-            listOf(activity.responsibleEmail),
-            uid = activity.calendarEventUid,
-            sequence = sequence,
-            method = Method.CANCEL
-        )
+        val durationInMillis = DurationStrUtils.parseDurationToMillis(activity.duration)
+        val canceledCalendarEvent = CalendarEvent.Builder(activity.calendarEventSummary, activity.activityDate)
+            .uid(activity.calendarEventUid)
+            .sequence(sequence)
+            .description(activity.description)
+            .durationInMillis(durationInMillis)
+            .organizer(activity.organizerEmail)
+            .attendees(listOf(activity.responsibleEmail))
+            .method(Method.CANCEL)
+            .build()
+        val canceledCalendarEventAttach = canceledCalendarEvent.createAttachment()
         val additionalMeta = mapOf(
             NOTIFICATION_ATTACHMENTS to canceledCalendarEventAttach
         )
