@@ -1,0 +1,11 @@
+---
+id: call-activity
+name:
+  ru: Звонок
+  en: Call
+
+system: true
+storageType: DEFAULT
+parentRef: emodel/type@planned-activity
+
+inheritActions: true

@@ -1,0 +1,16 @@
+---
+id: has-ecos-activities
+name:
+  ru: Имеет активности
+  en: Has activities
+
+attributes:
+  - id: ecosActivities
+    name:
+      en: Activities
+      ru: Активности
+    type: ASSOC
+    config:
+      child: true
+      typeRef: emodel/type@ecos-activity
+    multiple: true

@@ -16,8 +16,8 @@ config:
       responsibleEmail: ${responsible.email!}
       organizerEmail: ${_creator.email!}
       activityDate: ${activityDate}
-      duration: ${duration}
-      description: ${description}
+      duration: ${activityDuration}
+      description: ${text}
       calendarEventSummary: ${calendarEventSummary}
       calendarEventUid: ${calendarEventUid}
       calendarEventSequence: ${calendarEventSequence}
@@ -26,12 +26,20 @@ features:
   execForRecord: true
   execForRecords: false
 predicate:
-  t: or
+  t: and
   val:
+    - t: or
+      val:
+        - t: eq
+          att: _status?str
+          val: planned
+        - t: eq
+          att: _status?str
+          val: expired
     - t: eq
-      att: _status?str
-      val: planned
-    - t: eq
-      att: _status?str
-      val: expired
+      att: _type.isSubTypeOf.planned-activity?bool
+      val: true
+
+
+
 

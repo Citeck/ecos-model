@@ -8,8 +8,8 @@
   "model" : {
     "titleEventAction" : "$process.eventAction",
     "titleEventSummary" : "$process.eventSummary",
-    "titleEventType" : "type?disp",
-    "body" : "description"
+    "titleEventType" : "_type?disp",
+    "body" : "text"
   },
   "multiTemplateConfig" : [ ]
 }

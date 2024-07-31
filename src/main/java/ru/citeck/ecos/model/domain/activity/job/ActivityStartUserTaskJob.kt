@@ -8,7 +8,6 @@ import ru.citeck.ecos.events2.EventsService
 import ru.citeck.ecos.events2.emitter.EmitterConfig
 import ru.citeck.ecos.events2.emitter.EventsEmitter
 import ru.citeck.ecos.model.domain.activity.config.ActivityConfiguration
-import ru.citeck.ecos.model.domain.activity.config.ActivityDesc
 import ru.citeck.ecos.model.domain.activity.config.ActivityStatus
 import ru.citeck.ecos.model.lib.status.constants.StatusConstants
 import ru.citeck.ecos.records2.RecordConstants
@@ -37,6 +36,7 @@ class ActivityStartUserTaskJob(
         private val log = KotlinLogging.logger {}
 
         private const val MAX_ITERATION = 10_000
+        private const val ATT_ACTIVITY_DATE = "activityDate"
     }
 
     @Value("\${ecos.job.activityStartUserTask.cron}")
@@ -85,7 +85,7 @@ class ActivityStartUserTaskJob(
             withLanguage(PredicateService.LANGUAGE_PREDICATE)
             withQuery(
                 Predicates.and(
-                    Predicates.le(ActivityDesc.ATT_ACTIVITY_DATE, Instant.now()),
+                    Predicates.le(ATT_ACTIVITY_DATE, Instant.now()),
                     Predicates.eq(StatusConstants.ATT_STATUS, ActivityStatus.PLANNED.id)
                 )
             )

@@ -6,8 +6,8 @@
   },
   "tags" : [ ],
   "model" : {
-    "titleEventType" : "type?disp",
-    "body" : "description"
+    "titleEventType" : "_type?disp",
+    "body" : "text"
   },
   "multiTemplateConfig" : [ ]
 }

@@ -1,0 +1,39 @@
+---
+id: ecos-activity
+name:
+  ru: Активность
+  en: Activity
+
+system: true
+queryPermsPolicy: PARENT
+sourceId: emodel/activity
+parentRef: emodel/type@user-base
+
+defaultStatus: planned
+inheritActions: false
+actions:
+  - uiserv/action@cancel-activity
+defaultCreateVariant: true
+model:
+  statuses:
+    - id: planned
+      name:
+        ru: Запланирована
+        en: Planned
+    - id: completed
+      name:
+        ru: Выполнена
+        en: Completed
+    - id: expired
+      name:
+        ru: Просрочена
+        en: Expired
+    - id: canceled
+      name:
+        ru: Отменена
+        en: Canceled
+  attributes:
+    - id: text
+      name:
+        ru: Текст
+        en: Text
