@@ -5,7 +5,8 @@ name:
   en: Activity
 
 system: true
-queryPermsPolicy: PARENT
+queryPermsPolicy: PUBLIC # visibility controlled in DAO
+
 sourceId: emodel/activity
 parentRef: emodel/type@user-base
 
