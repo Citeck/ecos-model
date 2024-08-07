@@ -4,6 +4,8 @@ name:
   ru: Производственный календарь
   en: Working calendar
 
+parentRef: emodel/type@ecos-vcs-object
+
 system: true
 storageType: ECOS_MODEL
 

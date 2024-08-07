@@ -4,6 +4,8 @@ name:
   ru: Аспект
   en: Aspect
 
+parentRef: emodel/type@ecos-vcs-object
+
 system: true
 sourceId: emodel/aspect
 

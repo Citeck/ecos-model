@@ -1,9 +1,10 @@
 ---
 id: number-template
-
 name:
   en: Number template
   ru: Шаблон нумерации
+
+parentRef: emodel/type@ecos-vcs-object
 
 system: true
 

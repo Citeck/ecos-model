@@ -4,6 +4,8 @@ name:
   ru: Описание типа данных
   en: Data type definition
 
+parentRef: emodel/type@ecos-vcs-object
+
 system: true
 sourceId: emodel/types-repo
 
