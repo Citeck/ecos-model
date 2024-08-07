@@ -1,6 +1,6 @@
 modelVersion: "1.0"
 
-source-id: "working-schedule"
+sourceId: "working-schedule"
 
 name:
   ru: Рабочее расписание

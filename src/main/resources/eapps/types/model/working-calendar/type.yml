@@ -1,6 +1,6 @@
 modelVersion: "1.0"
 
-source-id: "working-calendar"
+sourceId: "working-calendar"
 
 name:
   ru: Производственный календарь

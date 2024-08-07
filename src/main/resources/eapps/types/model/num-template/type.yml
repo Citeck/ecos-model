@@ -1,6 +1,6 @@
 modelVersion: "1.0"
 
-source-id: "num-template"
+sourceId: "num-template"
 
 name:
   ru: Шаблон нумерации

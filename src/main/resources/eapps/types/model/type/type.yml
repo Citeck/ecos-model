@@ -1,6 +1,6 @@
 modelVersion: "1.0"
 
-source-id: "type"
+sourceId: "type"
 
 name:
   ru: Тип данных

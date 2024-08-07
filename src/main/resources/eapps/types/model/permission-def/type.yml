@@ -1,6 +1,6 @@
 modelVersion: "1.0"
 
-source-id: "permission-def"
+sourceId: "permission-def"
 
 name:
   ru: Описание права
