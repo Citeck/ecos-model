@@ -2,9 +2,9 @@
 id: DEFAULT
 name:
   ru: Стандартное расписание 5/2
-  en: Sta1ndard schedule 5/2
+  en: Standard schedule 5/2
 type: weekly
-version: 0
+version: 1
 config:
   workingDayStart: 09:00
   workingDayEnd: 17:00
