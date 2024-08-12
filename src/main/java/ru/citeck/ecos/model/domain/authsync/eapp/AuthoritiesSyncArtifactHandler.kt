@@ -5,8 +5,8 @@ import ru.citeck.ecos.apps.app.domain.handler.EcosArtifactHandler
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncDef
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
-import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records3.RecordsService
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 import java.util.function.Consumer
 
 @Component
@@ -17,11 +17,11 @@ class AuthoritiesSyncArtifactHandler(
     private lateinit var listener: Consumer<AuthoritiesSyncDef>
 
     override fun deleteArtifact(artifactId: String) {
-        recordsService.delete(RecordRef.create(AuthoritiesSyncService.SOURCE_ID, artifactId))
+        recordsService.delete(EntityRef.create(AuthoritiesSyncService.SOURCE_ID, artifactId))
     }
 
     override fun deployArtifact(artifact: AuthoritiesSyncDef) {
-        val recordRef = RecordRef.create(AuthoritiesSyncService.SOURCE_ID, "")
+        val recordRef = EntityRef.create(AuthoritiesSyncService.SOURCE_ID, "")
         AuthContext.runAsSystem {
             recordsService.mutate(recordRef, artifact)
         }

@@ -19,14 +19,13 @@ import ru.citeck.ecos.model.domain.perms.repo.TypePermsEntity;
 import ru.citeck.ecos.model.domain.perms.repo.TypePermsRepository;
 import ru.citeck.ecos.model.lib.permissions.dto.PermissionsDef;
 import ru.citeck.ecos.model.lib.type.dto.TypePermsDef;
-import ru.citeck.ecos.records2.RecordRef;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
 import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy;
-import ru.citeck.ecos.webapp.api.entity.EntityRef;
 import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverter;
 import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverterFactory;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
@@ -171,7 +170,7 @@ public class TypePermsService {
 
         TypePermsDef typePermsDef = TypePermsDef.create()
             .withId(entity.getExtId())
-            .withTypeRef(RecordRef.valueOf(entity.getTypeRef()))
+            .withTypeRef(EntityRef.valueOf(entity.getTypeRef()))
             .withAttributes(DataValue.create(entity.getAttributes()).asMap(String.class, PermissionsDef.class))
             .withPermissions(permissionsDef)
             .build();

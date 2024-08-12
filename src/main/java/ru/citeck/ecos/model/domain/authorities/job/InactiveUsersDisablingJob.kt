@@ -1,6 +1,7 @@
 package ru.citeck.ecos.model.domain.authorities.job
 
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
+import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.task.schedule.Schedules
@@ -11,13 +12,12 @@ import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
-import ru.citeck.ecos.records3.record.request.RequestContext
+import ru.citeck.ecos.txn.lib.TxnContext
 import ru.citeck.ecos.webapp.api.task.scheduler.EcosScheduledTask
 import ru.citeck.ecos.webapp.api.task.scheduler.EcosTaskSchedulerApi
 import java.time.Duration
 import java.time.Instant
 import java.time.format.DateTimeParseException
-import javax.annotation.PostConstruct
 
 @Component
 class InactiveUsersDisablingJob(
@@ -112,7 +112,7 @@ class InactiveUsersDisablingJob(
 
         for (person in personsToDisable) {
             log.info { "Disable person '${person.getLocalId()}'" }
-            RequestContext.doWithTxn {
+            TxnContext.doInTxn {
                 recordsService.mutate(
                     person,
                     mapOf(

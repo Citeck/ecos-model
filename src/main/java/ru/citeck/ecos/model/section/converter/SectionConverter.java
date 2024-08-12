@@ -9,14 +9,12 @@ import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.converter.AbstractDtoConverter;
-import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils;
 import ru.citeck.ecos.model.lib.utils.ModelUtils;
 import ru.citeck.ecos.model.section.domain.SectionEntity;
 import ru.citeck.ecos.model.type.repository.TypeEntity;
 import ru.citeck.ecos.model.section.dto.SectionDto;
 import ru.citeck.ecos.model.section.repository.SectionRepository;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
-import ru.citeck.ecos.records2.RecordRef;
 import ru.citeck.ecos.webapp.api.entity.EntityRef;
 
 import java.util.Collections;

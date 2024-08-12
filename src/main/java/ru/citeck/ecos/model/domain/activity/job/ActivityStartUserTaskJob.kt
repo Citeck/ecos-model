@@ -1,6 +1,7 @@
 package ru.citeck.ecos.model.domain.activity.job
 
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
+import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.task.schedule.Schedules
@@ -22,7 +23,6 @@ import ru.citeck.ecos.webapp.api.task.scheduler.EcosTaskSchedulerApi
 import ru.citeck.ecos.webapp.lib.lock.EcosAppLockService
 import java.time.Duration
 import java.time.Instant
-import javax.annotation.PostConstruct
 
 @Component
 class ActivityStartUserTaskJob(
@@ -55,10 +55,12 @@ class ActivityStartUserTaskJob(
         )
 
         taskScheduler.schedule(
-            "ActivityStartUserTaskJob", Schedules.cron(cron)
+            "ActivityStartUserTaskJob",
+            Schedules.cron(cron)
         ) {
             appLockService.doInSyncOrSkip(
-                "ActivityStartUserTaskJob", Duration.ofSeconds(10)
+                "ActivityStartUserTaskJob",
+                Duration.ofSeconds(10)
             ) { sync() }
         }
     }

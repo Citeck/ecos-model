@@ -1,6 +1,6 @@
 package ru.citeck.ecos.model.domain.comments.event
 
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.jsoup.Jsoup
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.data.sql.records.listener.DbRecordChangedEvent

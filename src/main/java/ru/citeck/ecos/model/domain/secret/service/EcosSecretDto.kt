@@ -1,7 +1,7 @@
 package ru.citeck.ecos.model.domain.secret.service
 
-import ecos.com.fasterxml.jackson210.databind.annotation.JsonDeserialize
-import ecos.com.fasterxml.jackson210.databind.annotation.JsonPOJOBuilder
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.commons.json.serialization.annotation.IncludeNonDefault

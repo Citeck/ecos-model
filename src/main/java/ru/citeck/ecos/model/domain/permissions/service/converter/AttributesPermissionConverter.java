@@ -2,7 +2,7 @@ package ru.citeck.ecos.model.domain.permissions.service.converter;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
@@ -14,10 +14,9 @@ import ru.citeck.ecos.model.domain.permissions.dto.RuleDto;
 import ru.citeck.ecos.model.domain.permissions.repo.AttributesPermissionsRepository;
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils;
 import ru.citeck.ecos.model.service.exception.TypeNotFoundException;
-import ru.citeck.ecos.model.type.api.records.TypesRepoRecordsDao;
 import ru.citeck.ecos.model.type.repository.TypeEntity;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
-import ru.citeck.ecos.records2.RecordRef;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 
 import java.util.List;
 import java.util.Optional;
@@ -40,7 +39,7 @@ public class AttributesPermissionConverter extends AbstractDtoConverter<Attribut
             throw new IllegalArgumentException("Can't find type of permission attrs matrix");
         }
 
-        TypeEntity optionalType = typeRepository.findByExtId(dto.getTypeRef().getId());
+        TypeEntity optionalType = typeRepository.findByExtId(dto.getTypeRef().getLocalId());
         if (optionalType == null) {
             throw new TypeNotFoundException(dto.getId());
         }
@@ -69,7 +68,7 @@ public class AttributesPermissionConverter extends AbstractDtoConverter<Attribut
 
         if (entity.getType() != null) {
             String typeId = entity.getType().getExtId();
-            RecordRef typeRecordRef = TypeUtils.getTypeRef(typeId);
+            EntityRef typeRecordRef = TypeUtils.getTypeRef(typeId);
             dto.setTypeRef(typeRecordRef);
         } else {
             log.warn("Target type for permission attr matrix with id " + dto.getId() + " is null");

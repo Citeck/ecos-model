@@ -1,6 +1,6 @@
 package ru.citeck.ecos.model.domain.permissions.dto;
 
-import ecos.com.fasterxml.jackson210.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.time.Instant;

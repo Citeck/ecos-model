@@ -1,6 +1,7 @@
 package ru.citeck.ecos.model.domain.doceditor.onlyoffice.api
 
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
@@ -17,7 +18,6 @@ import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.webapp.api.content.EcosContentApi
 import ru.citeck.ecos.webapp.lib.remote.callback.RemoteCallbackService
 import java.net.URI
-import javax.servlet.http.HttpServletResponse
 
 @RestController
 class OnlyOfficeDocEditorCallbackController(

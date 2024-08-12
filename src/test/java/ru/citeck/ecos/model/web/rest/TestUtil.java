@@ -1,8 +1,8 @@
 package ru.citeck.ecos.model.web.rest;
 
-import ecos.com.fasterxml.jackson210.annotation.JsonInclude;
-import ecos.com.fasterxml.jackson210.databind.ObjectMapper;
-import ecos.com.fasterxml.jackson210.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.springframework.core.io.ClassPathResource;

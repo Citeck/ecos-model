@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.domain.authorities.service
 
+import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Service
 import ru.citeck.ecos.commons.task.schedule.Schedules
 import ru.citeck.ecos.events2.EventsService
@@ -12,7 +13,6 @@ import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.api.task.EcosTasksApi
 import java.time.Duration
 import java.util.concurrent.atomic.AtomicReference
-import javax.annotation.PostConstruct
 
 @Service
 class ExtUsersService(

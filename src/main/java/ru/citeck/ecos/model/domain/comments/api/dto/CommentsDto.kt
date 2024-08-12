@@ -1,8 +1,8 @@
 package ru.citeck.ecos.model.domain.comments.api.dto
 
-import ecos.com.fasterxml.jackson210.annotation.JsonEnumDefaultValue
-import ecos.com.fasterxml.jackson210.databind.annotation.JsonDeserialize
-import ecos.com.fasterxml.jackson210.databind.annotation.JsonPOJOBuilder
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.context.lib.i18n.I18nContext
 

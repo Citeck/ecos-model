@@ -1,7 +1,7 @@
 package ru.citeck.ecos.model.domain.authorities.service
 
 import com.hazelcast.core.HazelcastInstance
-import com.hazelcast.core.IMap
+import com.hazelcast.map.IMap
 import org.springframework.stereotype.Service
 import ru.citeck.ecos.context.lib.auth.AuthGroup
 import ru.citeck.ecos.context.lib.auth.AuthRole
@@ -12,6 +12,7 @@ import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.request.RequestContext
+import ru.citeck.ecos.txn.lib.TxnContext
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
@@ -127,7 +128,7 @@ class AuthorityService(
         groupsToResetCache.add(groupId)
 
         if (groupsToResetCache.size == 1) {
-            ctx.doAfterCommit {
+            TxnContext.doAfterCommit(0f, false) {
                 val ascProcessedGroups = HashSet<String>()
                 val descProcessedGroups = HashSet<String>()
                 groupsToResetCache.forEach {

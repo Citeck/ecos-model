@@ -28,8 +28,8 @@ class ActivityRecordsProxy : RecordsDaoProxy(
         var parentRef: EntityRef = EntityRef.EMPTY
 
         PredicateUtils.mapValuePredicates(predicate, { valuePred ->
-            if (valuePred.getType() == ValuePredicate.Type.EQ
-                && valuePred.getAttribute() == RecordConstants.ATT_PARENT
+            if (valuePred.getType() == ValuePredicate.Type.EQ &&
+                valuePred.getAttribute() == RecordConstants.ATT_PARENT
             ) {
                 parentRef = valuePred.getValue().asText().toEntityRef()
             }

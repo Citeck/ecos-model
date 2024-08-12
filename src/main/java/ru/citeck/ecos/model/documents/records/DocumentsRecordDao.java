@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import ru.citeck.ecos.commons.data.DataValue;
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils;
 import ru.citeck.ecos.records2.RecordConstants;
-import ru.citeck.ecos.records2.RecordRef;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 import ru.citeck.ecos.records2.predicate.model.Predicates;
 import ru.citeck.ecos.records3.record.atts.dto.RecordAtts;
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName;
@@ -68,7 +68,7 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
             return Collections.emptyList();
         }
 
-        RecordRef recordRef = RecordRef.valueOf(recordsQuery.getQuery().get("recordRef").asText());
+        EntityRef recordRef = EntityRef.valueOf(recordsQuery.getQuery().get("recordRef").asText());
 
         if (!AppName.ALFRESCO.equals(recordRef.getAppName())) {
             return Collections.emptyList();
@@ -93,7 +93,7 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
 
     private Object getTypesDocuments(RecordsQuery recordsQuery) {
 
-        RecordRef recordRef = RecordRef.valueOf(recordsQuery.getQuery().get("recordRef").asText());
+        EntityRef recordRef = EntityRef.valueOf(recordsQuery.getQuery().get("recordRef").asText());
         List<String> typesRefs = recordsQuery.getQuery().get("types").asList(String.class);
 
         if (typesRefs.isEmpty()) {
@@ -159,7 +159,7 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
     }
 
     private List<TypeDocumentsRecord> getRecordsForTypes(String sourceId,
-                                                         RecordRef recordRef,
+                                                         EntityRef recordRef,
                                                          List<String> types) {
         List<TypeDocumentsRecord> typeDocumentsList = new ArrayList<>();
         if (sourceId.isEmpty()) {

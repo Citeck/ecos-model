@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import ru.citeck.ecos.model.domain.AbstractAuditingEntity;
 import ru.citeck.ecos.model.type.repository.TypeEntity;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Data
 @Entity
@@ -18,8 +18,8 @@ import javax.persistence.*;
 public class AttributesPermissionEntity extends AbstractAuditingEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ecos_attrs_permission_seq_gen")
-    @SequenceGenerator(name = "ecos_attrs_permission_seq_gen")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibernate_sequence")
+    @SequenceGenerator(name = "hibernate_sequence")
     private Long id;
 
     @ManyToOne

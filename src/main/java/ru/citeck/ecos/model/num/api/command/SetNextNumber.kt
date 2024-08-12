@@ -1,12 +1,12 @@
 package ru.citeck.ecos.model.num.api.command
 
+import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Service
 import ru.citeck.ecos.commands.CommandExecutor
 import ru.citeck.ecos.commands.CommandsService
 import ru.citeck.ecos.commands.annotation.CommandType
 import ru.citeck.ecos.model.num.service.NumTemplateService
 import ru.citeck.ecos.webapp.api.entity.EntityRef
-import javax.annotation.PostConstruct
 
 @Service
 class SetNextNumberCommandExecutor(

@@ -1,13 +1,12 @@
 package ru.citeck.ecos.model.section.dto;
 
-import ecos.com.fasterxml.jackson210.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
-import ru.citeck.ecos.records2.QueryContext;
-import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName;
+import ru.citeck.ecos.context.lib.i18n.I18nContext;
 import ru.citeck.ecos.webapp.api.entity.EntityRef;
+import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -39,6 +38,6 @@ public class SectionDto {
     @AttName("?disp")
     @JsonIgnore
     public String getDisplayName() {
-        return MLText.getClosestValue(name, QueryContext.getCurrent().getLocale());
+        return MLText.getClosestValue(name, I18nContext.getLocale());
     }
 }

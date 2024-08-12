@@ -10,9 +10,9 @@ import ru.citeck.ecos.context.lib.auth.data.EmptyAuth
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.records2.RecordConstants
-import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 
 class AuthoritiesCommonTest : AuthoritiesTestBase() {
 
@@ -66,24 +66,24 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
         val testPersonFirstName = "Test First Name"
 
         val personAtts = ObjectData.create()
-        personAtts["id"] = testPersonRef.id
+        personAtts["id"] = testPersonRef.getLocalId()
         personAtts["firstName"] = testPersonFirstName
 
         val personCreateResult = AuthContext.runAsSystem {
-            recordsService.create(testPersonRef.sourceId, personAtts)
+            recordsService.create(testPersonRef.getSourceId(), personAtts)
         }
 
-        assertThat(personCreateResult.getLocalId()).isEqualTo(testPersonRef.id)
+        assertThat(personCreateResult.getLocalId()).isEqualTo(testPersonRef.getLocalId())
 
         val testGroupRef = AuthorityType.GROUP.getRef("test-group")
         val groupAtts = ObjectData.create()
-        groupAtts["id"] = testGroupRef.id
+        groupAtts["id"] = testGroupRef.getLocalId()
         groupAtts["name"] = MLText("Test Group Name")
 
         val groupCreateResult = AuthContext.runAsSystem {
-            recordsService.create(testGroupRef.sourceId, groupAtts)
+            recordsService.create(testGroupRef.getSourceId(), groupAtts)
         }
-        assertThat(groupCreateResult.getLocalId()).isEqualTo(testGroupRef.id)
+        assertThat(groupCreateResult.getLocalId()).isEqualTo(testGroupRef.getLocalId())
 
         val checkAuthorities = { expected: List<String> ->
             val currentAuthorities = recordsService.getAtt(testPersonRef, "authorities.list[]").asStrList()
@@ -95,7 +95,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
             val notExists = recordsService.getAtt(groupRef, RecordConstants.ATT_NOT_EXISTS).asBoolean()
             if (notExists) {
                 val newGroupAtts = ObjectData.create()
-                newGroupAtts.set("id", groupRef.id)
+                newGroupAtts.set("id", groupRef.getLocalId())
                 AuthContext.runAsSystem {
                     recordsService.create(AuthorityType.GROUP.sourceId, newGroupAtts)
                 }
@@ -116,7 +116,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
 
         checkAuthorities(
             listOf(
-                testPersonRef.id,
+                testPersonRef.getLocalId(),
                 AuthGroup.EVERYONE,
                 AuthRole.USER
             )
@@ -128,8 +128,8 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
 
         checkAuthorities(
             listOf(
-                testPersonRef.id,
-                "GROUP_${testGroupRef.id}",
+                testPersonRef.getLocalId(),
+                "GROUP_${testGroupRef.getLocalId()}",
                 AuthGroup.EVERYONE,
                 AuthRole.USER
             )
@@ -141,8 +141,8 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
 
         checkAuthorities(
             listOf(
-                testPersonRef.id,
-                "GROUP_${testGroupRef.id}",
+                testPersonRef.getLocalId(),
+                "GROUP_${testGroupRef.getLocalId()}",
                 "GROUP_$otherGroupId",
                 AuthGroup.EVERYONE,
                 AuthRole.USER
@@ -151,7 +151,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
 
         listOf(
             "" to true,
-            testPersonRef.id to true,
+            testPersonRef.getLocalId() to true,
             "admin" to false,
             AuthUser.SYSTEM to false
         ).forEach {
@@ -183,8 +183,8 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
 
         checkAuthorities(
             listOf(
-                testPersonRef.id,
-                "GROUP_${testGroupRef.id}",
+                testPersonRef.getLocalId(),
+                "GROUP_${testGroupRef.getLocalId()}",
                 "GROUP_$otherGroupId",
                 "GROUP_other-auth-group-admin",
                 "GROUP_other-auth-group-${AuthUser.SYSTEM}",
@@ -198,23 +198,23 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
                 recordsService.mutateAtt(testPersonRef, "email", "test@test.ru")
             }
         }
-        AuthContext.runAs(testPersonRef.id) {
+        AuthContext.runAs(testPersonRef.getLocalId()) {
             recordsService.mutateAtt(testPersonRef, "email", "test@test.ru")
         }
         assertThat(recordsService.getAtt(testPersonRef, "email").asText()).isEqualTo("test@test.ru")
 
-        val newParentGroupRef = RecordRef.create(AuthorityType.GROUP.sourceId, "new-parent-group")
+        val newParentGroupRef = EntityRef.create(AuthorityType.GROUP.sourceId, "new-parent-group")
         AuthContext.runAsSystem {
-            val groupRef = RecordRef.create(AuthorityType.GROUP.sourceId, otherGroupId)
+            val groupRef = EntityRef.create(AuthorityType.GROUP.sourceId, otherGroupId)
             recordsService.mutateAtt(groupRef, "att_add_authorityGroups", newParentGroupRef)
         }
 
         checkAuthorities(
             listOf(
-                testPersonRef.id,
-                "GROUP_${testGroupRef.id}",
+                testPersonRef.getLocalId(),
+                "GROUP_${testGroupRef.getLocalId()}",
                 "GROUP_$otherGroupId",
-                "GROUP_${newParentGroupRef.id}",
+                "GROUP_${newParentGroupRef.getLocalId()}",
                 "GROUP_other-auth-group-admin",
                 "GROUP_other-auth-group-${AuthUser.SYSTEM}",
                 AuthGroup.EVERYONE,
@@ -227,8 +227,8 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
         }
         checkAuthorities(
             listOf(
-                testPersonRef.id,
-                "GROUP_${testGroupRef.id}",
+                testPersonRef.getLocalId(),
+                "GROUP_${testGroupRef.getLocalId()}",
                 "GROUP_$otherGroupId",
                 "GROUP_other-auth-group-admin",
                 "GROUP_other-auth-group-${AuthUser.SYSTEM}",
@@ -246,8 +246,8 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
         }
         checkAuthorities(
             listOf(
-                testPersonRef.id,
-                "GROUP_${testGroupRef.id}",
+                testPersonRef.getLocalId(),
+                "GROUP_${testGroupRef.getLocalId()}",
                 "GROUP_other-auth-group-admin",
                 "GROUP_other-auth-group-${AuthUser.SYSTEM}",
                 AuthGroup.EVERYONE,
@@ -283,8 +283,8 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
         }
         checkAuthorities(
             listOf(
-                testPersonRef.id,
-                "GROUP_${testGroupRef.id}",
+                testPersonRef.getLocalId(),
+                "GROUP_${testGroupRef.getLocalId()}",
                 "GROUP_other-auth-group-admin",
                 "GROUP_other-auth-group-${AuthUser.SYSTEM}",
                 "GROUP_$otherGroupId",
@@ -299,7 +299,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
         listOf(
             *groupsChain,
             otherGroupId,
-            testGroupRef.id
+            testGroupRef.getLocalId()
         ).forEach { groupId ->
 
             val query = RecordsQuery.create {
@@ -324,8 +324,8 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
 
         checkAuthorities(
             listOf(
-                testPersonRef.id,
-                "GROUP_${testGroupRef.id}",
+                testPersonRef.getLocalId(),
+                "GROUP_${testGroupRef.getLocalId()}",
                 "GROUP_other-auth-group-admin",
                 "GROUP_other-auth-group-${AuthUser.SYSTEM}",
                 "GROUP_$otherGroupId",

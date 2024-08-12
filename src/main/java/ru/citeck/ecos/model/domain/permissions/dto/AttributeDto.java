@@ -1,6 +1,6 @@
 package ru.citeck.ecos.model.domain.permissions.dto;
 
-import ecos.com.fasterxml.jackson210.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,9 +1,11 @@
 package ru.citeck.ecos.model.section.records.dao;
 
-import ecos.com.fasterxml.jackson210.annotation.JsonIgnore;
-import ecos.com.fasterxml.jackson210.annotation.JsonProperty;
-import ecos.com.fasterxml.jackson210.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.commons.data.ObjectData;
@@ -11,34 +13,31 @@ import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.section.records.record.SectionRecord;
 import ru.citeck.ecos.model.section.dto.SectionDto;
 import ru.citeck.ecos.model.section.service.SectionService;
-import ru.citeck.ecos.records2.RecordMeta;
-import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
-import ru.citeck.ecos.records2.predicate.PredicateService;
-import ru.citeck.ecos.records2.predicate.RecordElement;
-import ru.citeck.ecos.records2.predicate.RecordElements;
-import ru.citeck.ecos.records2.predicate.element.Elements;
-import ru.citeck.ecos.records2.predicate.model.Predicate;
-import ru.citeck.ecos.records2.request.delete.RecordsDelResult;
-import ru.citeck.ecos.records2.request.delete.RecordsDeletion;
-import ru.citeck.ecos.records2.request.mutation.RecordsMutResult;
-import ru.citeck.ecos.records2.request.query.RecordsQuery;
-import ru.citeck.ecos.records2.request.query.RecordsQueryResult;
-import ru.citeck.ecos.records2.source.dao.local.LocalRecordsDao;
-import ru.citeck.ecos.records2.source.dao.local.MutableRecordsLocalDao;
-import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsMetaDao;
-import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsQueryWithMetaDao;
-import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName;
+import ru.citeck.ecos.records2.predicate.element.raw.RawElements;
+import ru.citeck.ecos.records3.iter.IterableRecordRefs;
+import ru.citeck.ecos.records3.iter.IterableRecordsConfig;
+import ru.citeck.ecos.records3.record.dao.AbstractRecordsDao;
+import ru.citeck.ecos.records3.record.dao.atts.RecordAttsDao;
+import ru.citeck.ecos.records3.record.dao.delete.DelStatus;
+import ru.citeck.ecos.records3.record.dao.delete.RecordsDeleteDao;
+import ru.citeck.ecos.records3.record.dao.mutate.RecordMutateDtoDao;
+import ru.citeck.ecos.records3.record.dao.query.RecordsQueryDao;
+import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery;
+import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes;
 import ru.citeck.ecos.webapp.api.entity.EntityRef;
+import ru.citeck.ecos.records2.predicate.PredicateService;
+import ru.citeck.ecos.records2.predicate.model.Predicate;
+import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-public class SectionRecordsDao extends LocalRecordsDao
-    implements LocalRecordsQueryWithMetaDao<SectionRecord>,
-               LocalRecordsMetaDao<SectionRecord>,
-               MutableRecordsLocalDao<SectionRecordsDao.SectionMutRecord> {
+public class SectionRecordsDao extends AbstractRecordsDao
+    implements RecordsQueryDao,
+    RecordAttsDao,
+    RecordsDeleteDao,
+    RecordMutateDtoDao<SectionRecordsDao.SectionMutRecord> {
 
     private static final String ID = "section";
     private static final String LANGUAGE_EMPTY = "";
@@ -51,80 +50,71 @@ public class SectionRecordsDao extends LocalRecordsDao
     @Autowired
     public SectionRecordsDao(SectionService sectionService,
                              PredicateService predicateService) {
-        setId(ID);
+
         this.sectionService = sectionService;
         this.predicateService = predicateService;
     }
 
+    @Nullable
     @Override
-    public List<SectionRecord> getLocalRecordsMeta(List<EntityRef> list, MetaField metaField) {
-        if (list.size() == 1 && list.get(0).getLocalId().isEmpty()) {
+    public Object getRecordAtts(@NotNull String recordId) {
+        if (recordId.isEmpty()) {
             return Collections.singletonList(EMPTY_RECORD);
         }
+        return new SectionRecord(sectionService.getByExtId(recordId));
+    }
 
-        return list.stream()
-            .map(ref -> new SectionRecord(sectionService.getByExtId(ref.getLocalId())))
-            .collect(Collectors.toList());
+    @NotNull
+    @Override
+    public List<DelStatus> delete(@NotNull List<String> recordIds) throws Exception {
+
+        List<DelStatus> statuses = new ArrayList<>();
+
+        for (String recordId : recordIds) {
+            sectionService.delete(recordId);
+            statuses.add(DelStatus.OK);
+        }
+
+        return statuses;
     }
 
     @Override
-    public RecordsDelResult delete(RecordsDeletion recordsDeletion) {
-
-        List<RecordMeta> result = new ArrayList<>();
-
-        recordsDeletion.getRecords().forEach(r -> {
-            sectionService.delete(r.getLocalId());
-            result.add(new RecordMeta(r));
-        });
-
-        RecordsDelResult delRes = new RecordsDelResult();
-        delRes.setRecords(result);
-
-        return delRes;
+    public SectionMutRecord getRecToMutate(@NotNull String recordId) throws Exception {
+        if (StringUtils.isBlank(recordId)) {
+            return new SectionMutRecord();
+        } else {
+            return new SectionMutRecord(sectionService.getByExtId(recordId));
+        }
     }
 
+    @NotNull
     @Override
-    public List<SectionMutRecord> getValuesToMutate(List<EntityRef> list) {
-        return list.stream()
-            .map(EntityRef::getLocalId)
-            .map(id -> {
-                if (StringUtils.isBlank(id)) {
-                    return new SectionMutRecord();
-                } else {
-                    return new SectionMutRecord(sectionService.getByExtId(id));
-                }
-            })
-            .collect(Collectors.toList());
+    public String saveMutatedRec(SectionMutRecord sectionMutRecord) throws Exception {
+        return sectionService.save(sectionMutRecord).getId();
     }
 
+    @Nullable
     @Override
-    public RecordsMutResult save(List<SectionMutRecord> list) {
+    public Object queryRecords(@NotNull RecordsQuery recordsQuery) throws Exception {
 
-        RecordsMutResult result = new RecordsMutResult();
-
-        list.forEach(sec -> {
-            SectionDto resDto = sectionService.save(sec);
-            result.addRecord(new RecordMeta(RecordRef.valueOf(resDto.getId())));
-        });
-
-        return result;
-    }
-
-    @Override
-    public RecordsQueryResult<SectionRecord> queryLocalRecords(RecordsQuery recordsQuery, MetaField metaField) {
-
-        RecordsQueryResult<SectionRecord> result = new RecordsQueryResult<>();
+        RecsQueryRes<SectionRecord> result = new RecsQueryRes<>();
 
         if (recordsQuery.getLanguage().equals(PredicateService.LANGUAGE_PREDICATE)) {
             Predicate predicate = recordsQuery.getQuery(Predicate.class);
 
-            recordsQuery.setSourceId(ID);
-            recordsQuery.setLanguage(LANGUAGE_EMPTY);
+            RecordsQuery elementsQuery = recordsQuery.copy()
+                    .withSourceId(ID)
+                        .withLanguage(LANGUAGE_EMPTY)
+                            .build();
 
-            Elements<RecordElement> elements = new RecordElements(recordsService, recordsQuery);
+            RawElements<EntityRef> elements = new RawElements(recordsService, new IterableRecordRefs(
+                elementsQuery,
+                IterableRecordsConfig.EMPTY,
+                recordsService
+            ));
 
             Set<String> filteredResultIds = predicateService.filter(elements, predicate).stream()
-                .map(e -> e.getRecordRef().getLocalId())
+                .map(e -> e.getObj().getLocalId())
                 .collect(Collectors.toSet());
 
             result.addRecords(sectionService.getAll(filteredResultIds).stream()
@@ -132,7 +122,11 @@ public class SectionRecordsDao extends LocalRecordsDao
                 .collect(Collectors.toList()));
 
         } else {
-            result.setRecords(sectionService.getAll(recordsQuery.getMaxItems(), recordsQuery.getSkipCount()).stream()
+            result.setRecords(
+                sectionService.getAll(
+                    recordsQuery.getPage().getMaxItems(),
+                    recordsQuery.getPage().getSkipCount()
+                ).stream()
                 .map(SectionRecord::new)
                 .collect(Collectors.toList()));
             result.setTotalCount(sectionService.getCount());
@@ -140,6 +134,11 @@ public class SectionRecordsDao extends LocalRecordsDao
         return result;
     }
 
+    @NotNull
+    @Override
+    public String getId() {
+        return ID;
+    }
 
     public static class SectionMutRecord extends SectionDto {
 

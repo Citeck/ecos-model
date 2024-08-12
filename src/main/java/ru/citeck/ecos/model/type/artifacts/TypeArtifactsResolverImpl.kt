@@ -1,6 +1,6 @@
 package ru.citeck.ecos.model.type.artifacts
 
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.apps.app.domain.ecostype.service.ModelTypeArtifactResolver
 import ru.citeck.ecos.model.type.service.TypesService

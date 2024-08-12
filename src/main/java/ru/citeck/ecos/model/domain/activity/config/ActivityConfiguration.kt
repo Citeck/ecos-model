@@ -113,4 +113,3 @@ class ActivityConfiguration(private val dbDomainFactory: DbDomainFactory) {
         val creator: String
     )
 }
-

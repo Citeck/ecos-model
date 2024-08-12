@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta
-import ru.citeck.ecos.commons.promise.Promises
 import ru.citeck.ecos.model.lib.aspect.dto.AspectInfo
 import ru.citeck.ecos.model.type.service.resolver.AspectsProvider
 import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
@@ -13,6 +12,7 @@ import ru.citeck.ecos.model.type.service.resolver.TypesProvider
 import ru.citeck.ecos.txn.lib.TxnContext
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.api.promise.Promise
+import ru.citeck.ecos.webapp.api.promise.Promises
 import ru.citeck.ecos.webapp.lib.model.aspect.dto.AspectDef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import ru.citeck.ecos.webapp.lib.registry.EcosRegistry

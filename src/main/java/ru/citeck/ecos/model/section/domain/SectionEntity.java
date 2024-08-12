@@ -4,7 +4,7 @@ import lombok.*;
 import ru.citeck.ecos.model.domain.BaseEntity;
 import ru.citeck.ecos.model.type.repository.TypeEntity;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Set;
 
 @Data

@@ -7,7 +7,7 @@ import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
-import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
+import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.model.type.converter.TypeConverter
 import ru.citeck.ecos.model.type.repository.TypeEntity
 import ru.citeck.ecos.model.type.service.dao.TypeRepoDao
@@ -274,7 +274,7 @@ class TypesServiceImpl(
 
         val typeDef = TypeDef.create()
         typeDef.withId(typeId)
-        typeDef.withParentRef(TypeUtils.getTypeRef("user-base"))
+        typeDef.withParentRef(ModelUtils.getTypeRef("user-base"))
         typeDef.withName(MLText(typeId))
 
         return save(typeDef.build())

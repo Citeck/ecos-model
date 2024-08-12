@@ -1,11 +1,12 @@
 package ru.citeck.ecos.model.num.api.records;
 
-import ecos.com.fasterxml.jackson210.annotation.JsonProperty;
-import ecos.com.fasterxml.jackson210.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.commons.data.ObjectData;
@@ -19,20 +20,16 @@ import ru.citeck.ecos.model.lib.num.dto.NumTemplateDef;
 import ru.citeck.ecos.model.num.dto.NumTemplateDto;
 import ru.citeck.ecos.model.num.dto.NumTemplateWithMetaDto;
 import ru.citeck.ecos.model.num.service.NumTemplateService;
-import ru.citeck.ecos.model.utils.LegacyRecordsUtils;
-import ru.citeck.ecos.records2.RecordMeta;
-import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
+import ru.citeck.ecos.records3.record.dao.AbstractRecordsDao;
+import ru.citeck.ecos.records3.record.dao.atts.RecordAttsDao;
+import ru.citeck.ecos.records3.record.dao.delete.DelStatus;
+import ru.citeck.ecos.records3.record.dao.delete.RecordsDeleteDao;
+import ru.citeck.ecos.records3.record.dao.mutate.RecordMutateDtoDao;
+import ru.citeck.ecos.records3.record.dao.query.RecordsQueryDao;
+import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery;
+import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
-import ru.citeck.ecos.records2.request.delete.RecordsDelResult;
-import ru.citeck.ecos.records2.request.delete.RecordsDeletion;
-import ru.citeck.ecos.records2.request.mutation.RecordsMutResult;
-import ru.citeck.ecos.records2.request.query.RecordsQuery;
-import ru.citeck.ecos.records2.request.query.RecordsQueryResult;
-import ru.citeck.ecos.records2.source.dao.local.LocalRecordsDao;
-import ru.citeck.ecos.records2.source.dao.local.MutableRecordsLocalDao;
-import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsMetaDao;
-import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsQueryWithMetaDao;
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName;
 import ru.citeck.ecos.webapp.api.entity.EntityRef;
 
@@ -41,17 +38,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-public class NumTemplateRecordsDao extends LocalRecordsDao
-    implements LocalRecordsMetaDao<NumTemplateRecordsDao.NumTemplateRecord>,
-    LocalRecordsQueryWithMetaDao<NumTemplateRecordsDao.NumTemplateRecord>,
-    MutableRecordsLocalDao<NumTemplateRecordsDao.NumTemplateRecord> {
+public class NumTemplateRecordsDao extends AbstractRecordsDao
+    implements RecordAttsDao,
+    RecordsQueryDao,
+    RecordsDeleteDao,
+    RecordMutateDtoDao<NumTemplateRecordsDao.NumTemplateRecord> {
 
     private static final String ID = "num-template";
     private final NumTemplateService numTemplateService;
     private final RecordEventsService recordEventsService;
 
     public NumTemplateRecordsDao(NumTemplateService numTemplateService, RecordEventsService recordEventsService) {
-        setId(ID);
         this.numTemplateService = numTemplateService;
         this.recordEventsService = recordEventsService;
 
@@ -59,24 +56,25 @@ public class NumTemplateRecordsDao extends LocalRecordsDao
     }
 
     @Override
-    public List<NumTemplateRecord> getValuesToMutate(List<EntityRef> records) {
-        return getLocalRecordsMeta(records, null);
+    public NumTemplateRecord getRecToMutate(@NotNull String recordId) throws Exception {
+        return getRecordAtts(recordId);
     }
 
+    @Nullable
     @Override
-    public RecordsQueryResult<NumTemplateRecord> queryLocalRecords(RecordsQuery recordsQuery, MetaField metaField) {
+    public Object queryRecords(@NotNull RecordsQuery recordsQuery) throws Exception {
 
-        RecordsQueryResult<NumTemplateRecord> result = new RecordsQueryResult<>();
+        RecsQueryRes<NumTemplateRecord> result = new RecsQueryRes<>();
 
         if ("predicate".equals(recordsQuery.getLanguage())) {
 
             Predicate predicate = recordsQuery.getQuery(Predicate.class);
 
             Collection<EntityWithMeta<NumTemplateDef>> types = numTemplateService.getAll(
-                recordsQuery.getMaxItems(),
-                recordsQuery.getSkipCount(),
+                recordsQuery.getPage().getMaxItems(),
+                recordsQuery.getPage().getSkipCount(),
                 predicate,
-                LegacyRecordsUtils.mapLegacySortBy(recordsQuery.getSortBy())
+                recordsQuery.getSortBy()
             );
 
             result.setRecords(types.stream()
@@ -88,8 +86,11 @@ public class NumTemplateRecordsDao extends LocalRecordsDao
 
         if ("criteria".equals(recordsQuery.getLanguage())) {
 
-            result.setRecords(numTemplateService.getAll(recordsQuery.getMaxItems(), recordsQuery.getSkipCount())
-                .stream()
+            result.setRecords(
+                numTemplateService.getAll(
+                    recordsQuery.getPage().getMaxItems(),
+                    recordsQuery.getPage().getSkipCount()
+                ).stream()
                 .map(NumTemplateRecord::new)
                 .collect(Collectors.toList())
             );
@@ -98,44 +99,38 @@ public class NumTemplateRecordsDao extends LocalRecordsDao
             return result;
         }
 
-        return new RecordsQueryResult<>();
+        return new RecsQueryRes<>();
     }
 
+    @NotNull
     @Override
-    public RecordsMutResult save(List<NumTemplateRecord> values) {
-
-        RecordsMutResult result = new RecordsMutResult();
-        values.forEach(dto -> {
-            if (StringUtils.isBlank(dto.getId())) {
-                throw new IllegalArgumentException("Attribute 'id' is mandatory");
-            }
-            String id = numTemplateService.save(dto).getEntity().getId();
-            result.addRecord(new RecordMeta(id));
-        });
-
-        return result;
+    public String saveMutatedRec(NumTemplateRecord dto) throws Exception {
+        if (StringUtils.isBlank(dto.getId())) {
+            throw new IllegalArgumentException("Attribute 'id' is mandatory");
+        }
+        return numTemplateService.save(dto).getEntity().getId();
     }
 
+    @NotNull
     @Override
-    public RecordsDelResult delete(RecordsDeletion deletion) {
-        RecordsDelResult result = new RecordsDelResult();
-        deletion.getRecords().stream()
-            .map(EntityRef::getLocalId)
-            .forEach(id -> {
-                numTemplateService.delete(id);
-                result.addRecord(new RecordMeta(id));
-            });
-        return result;
+    public List<DelStatus> delete(@NotNull List<String> recordIds) throws Exception {
+        List<DelStatus> results = new ArrayList<>();
+
+        for (String recordId : recordIds) {
+            numTemplateService.delete(recordId);
+            results.add(DelStatus.OK);
+        }
+        return results;
     }
 
+    @Nullable
     @Override
-    public List<NumTemplateRecord> getLocalRecordsMeta(List<EntityRef> records, MetaField metaField) {
-        return records.stream()
-            .map(EntityRef::getLocalId)
-            .map(id -> numTemplateService.getById(id).map(NumTemplateWithMetaDto::new)
-                .orElseGet(() -> new NumTemplateWithMetaDto(id)))
-            .map(NumTemplateRecord::new)
-            .collect(Collectors.toList());
+    public NumTemplateRecord getRecordAtts(@NotNull String recordId) throws Exception {
+
+        NumTemplateWithMetaDto dto = numTemplateService.getById(recordId).map(NumTemplateWithMetaDto::new)
+            .orElseGet(() -> new NumTemplateWithMetaDto(recordId));
+
+        return new NumTemplateRecord(dto);
     }
 
     private void onTemplateChanged(@Nullable EntityWithMeta<NumTemplateDef> before,
@@ -148,6 +143,12 @@ public class NumTemplateRecordsDao extends LocalRecordsDao
                 dto -> new NumTemplateRecord(new NumTemplateWithMetaDto(dto))
             );
         }
+    }
+
+    @NotNull
+    @Override
+    public String getId() {
+        return ID;
     }
 
     @NoArgsConstructor
@@ -167,8 +168,8 @@ public class NumTemplateRecordsDao extends LocalRecordsDao
         }
 
         @AttName("_type")
-        public RecordRef getEcosType() {
-            return RecordRef.create(EcosModelApp.NAME, "type", "number-template");
+        public EntityRef getEcosType() {
+            return EntityRef.create(EcosModelApp.NAME, "type", "number-template");
         }
 
         public String getModuleId() {
@@ -194,7 +195,6 @@ public class NumTemplateRecordsDao extends LocalRecordsDao
         }
 
         @JsonValue
-        @com.fasterxml.jackson.annotation.JsonValue
         public NumTemplateDto toJson() {
             return new NumTemplateDto(this);
         }

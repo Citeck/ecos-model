@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.domain.endpoint.service
 
+import jakarta.annotation.PostConstruct
 import org.springframework.context.annotation.Configuration
 import ru.citeck.ecos.endpoints.lib.EcosEndpointImpl
 import ru.citeck.ecos.events2.EventsService
@@ -13,7 +14,6 @@ import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.endpoint.event.EndpointChangedEvent
 import ru.citeck.ecos.webapp.lib.endpoint.provider.ModelEcosEndpointsProvider
 import java.util.concurrent.CopyOnWriteArrayList
-import javax.annotation.PostConstruct
 
 @Configuration
 class EndpointsService(

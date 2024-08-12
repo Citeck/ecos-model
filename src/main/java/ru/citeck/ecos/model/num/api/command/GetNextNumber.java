@@ -14,7 +14,7 @@ import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.model.num.service.NumTemplateService;
 import ru.citeck.ecos.webapp.api.entity.EntityRef;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 public class GetNextNumber {
 

@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.domain.aspects.config
 
+import jakarta.annotation.PostConstruct
 import org.springframework.context.annotation.Configuration
 import ru.citeck.ecos.context.lib.auth.AuthGroup
 import ru.citeck.ecos.context.lib.auth.AuthRole
@@ -19,7 +20,6 @@ import ru.citeck.ecos.model.domain.aspects.service.AspectsRegistryInitializer
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.webapp.lib.model.aspect.dto.AspectDef
-import javax.annotation.PostConstruct
 
 @Configuration
 class AspectsConfiguration(

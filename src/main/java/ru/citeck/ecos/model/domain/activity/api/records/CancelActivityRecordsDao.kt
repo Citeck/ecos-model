@@ -1,6 +1,6 @@
 package ru.citeck.ecos.model.domain.activity.api.records
 
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import net.fortuna.ical4j.model.property.Method
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.utils.DurationStrUtils

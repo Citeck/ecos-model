@@ -30,6 +30,10 @@ ecos:
       executors:
         txn-actions:
           corePoolSize: 10
+    x509:
+      keys:
+        application:
+          location: classpath:ecos/x509/keys/application.key
   integrations:
     onlyoffice:
       host: only-office-app

@@ -13,7 +13,7 @@
                 <constraints nullable="false" unique="true" />
             </column>
             <column name="id" type="BIGINT" autoIncrement="${autoIncrement}">
-                <constraints primaryKey="true" nullable="false" />
+                <constraints primaryKey="true" primaryKeyName="pk_ecos_association" nullable="false" />
             </column>
             <column name="source_id" type="BIGINT">
                 <constraints nullable="false" foreignKeyName="source_id" references="ecos_type(id)"/>

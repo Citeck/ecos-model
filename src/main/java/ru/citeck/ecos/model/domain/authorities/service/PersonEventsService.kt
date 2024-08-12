@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.domain.authorities.service
 
+import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import ru.citeck.ecos.context.lib.auth.AuthContext
@@ -13,7 +14,6 @@ import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.ScalarType
 import java.time.Instant
-import javax.annotation.PostConstruct
 
 @Service
 class PersonEventsService(

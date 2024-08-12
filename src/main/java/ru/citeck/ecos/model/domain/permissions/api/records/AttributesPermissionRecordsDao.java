@@ -1,9 +1,11 @@
 package ru.citeck.ecos.model.domain.permissions.api.records;
 
-import ecos.com.fasterxml.jackson210.annotation.JsonIgnore;
-import ecos.com.fasterxml.jackson210.annotation.JsonProperty;
-import ecos.com.fasterxml.jackson210.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.commons.data.ObjectData;
@@ -11,24 +13,20 @@ import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.model.domain.permissions.dto.AttributesPermissionDto;
 import ru.citeck.ecos.model.domain.permissions.dto.AttributesPermissionWithMetaDto;
 import ru.citeck.ecos.model.domain.permissions.service.AttributesPermissionsService;
-import ru.citeck.ecos.model.utils.LegacyRecordsUtils;
 import ru.citeck.ecos.records2.RecordConstants;
-import ru.citeck.ecos.records2.RecordMeta;
-import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records2.graphql.meta.value.EmptyValue;
-import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
-import ru.citeck.ecos.records2.graphql.meta.value.MetaValue;
+import ru.citeck.ecos.records3.record.atts.value.AttValue;
+import ru.citeck.ecos.records3.record.atts.value.impl.EmptyAttValue;
+import ru.citeck.ecos.records3.record.dao.AbstractRecordsDao;
+import ru.citeck.ecos.records3.record.dao.atts.RecordAttsDao;
+import ru.citeck.ecos.records3.record.dao.delete.DelStatus;
+import ru.citeck.ecos.records3.record.dao.delete.RecordDeleteDao;
+import ru.citeck.ecos.records3.record.dao.mutate.RecordMutateDtoDao;
+import ru.citeck.ecos.records3.record.dao.query.RecordsQueryDao;
+import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery;
+import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 import ru.citeck.ecos.records2.predicate.PredicateService;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
-import ru.citeck.ecos.records2.request.delete.RecordsDelResult;
-import ru.citeck.ecos.records2.request.delete.RecordsDeletion;
-import ru.citeck.ecos.records2.request.mutation.RecordsMutResult;
-import ru.citeck.ecos.records2.request.query.RecordsQuery;
-import ru.citeck.ecos.records2.request.query.RecordsQueryResult;
-import ru.citeck.ecos.records2.source.dao.local.LocalRecordsDao;
-import ru.citeck.ecos.records2.source.dao.local.MutableRecordsLocalDao;
-import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsMetaDao;
-import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsQueryWithMetaDao;
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName;
 import ru.citeck.ecos.webapp.api.entity.EntityRef;
 
@@ -36,95 +34,73 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-public class AttributesPermissionRecordsDao extends LocalRecordsDao
-    implements LocalRecordsQueryWithMetaDao<AttributesPermissionRecordsDao.AttributesPermissionRecord>,
-    LocalRecordsMetaDao<MetaValue>,
-    MutableRecordsLocalDao<AttributesPermissionRecordsDao.AttrPermissionsMutRecord> {
+public class AttributesPermissionRecordsDao extends AbstractRecordsDao
+    implements RecordsQueryDao,
+    RecordAttsDao,
+    RecordDeleteDao,
+    RecordMutateDtoDao<AttributesPermissionRecordsDao.AttrPermissionsMutRecord> {
 
-    private static final String ID = "attrs_permission";
+    public static final String ID = "attrs_permission";
 
     private final AttributesPermissionsService attributesPermissionsService;
 
     private final AttributesPermissionRecord EMPTY_RECORD = new AttributesPermissionRecord(new AttributesPermissionWithMetaDto());
 
     @Autowired
-    public AttributesPermissionRecordsDao(AttributesPermissionsService attributesPermissionsService,
-                                          PredicateService predicateService) {
-        setId(ID);
+    public AttributesPermissionRecordsDao(AttributesPermissionsService attributesPermissionsService) {
         this.attributesPermissionsService = attributesPermissionsService;
-        this.predicateService = predicateService;
     }
 
+    @Nullable
     @Override
-    public List<MetaValue> getLocalRecordsMeta(List<EntityRef> list, MetaField metaField) {
-        if (list.size() == 1 && list.get(0).getLocalId().isEmpty()) {
+    public Object getRecordAtts(@NotNull String recordId) throws Exception {
+        if (recordId.isEmpty()) {
             return Collections.singletonList(EMPTY_RECORD);
         }
+        AttributesPermissionWithMetaDto perms = attributesPermissionsService.getById(recordId).orElse(null);
+        if (perms != null) {
+            return new AttributesPermissionRecord(perms);
+        } else {
+            return EmptyAttValue.INSTANCE;
+        }
+    }
 
-        return list.stream()
-            .map(ref -> {
-                Optional<AttributesPermissionWithMetaDto> dto = attributesPermissionsService.getById(ref.getLocalId());
-                return dto.isPresent() ? new AttributesPermissionRecord(dto.get()) : EmptyValue.INSTANCE;
-            })
-            .collect(Collectors.toList());
+    @NotNull
+    @Override
+    public DelStatus delete(@NotNull String recordId) throws Exception {
+        attributesPermissionsService.delete(recordId);
+        return DelStatus.OK;
     }
 
     @Override
-    public RecordsDelResult delete(RecordsDeletion recordsDeletion) {
-
-        List<RecordMeta> result = new ArrayList<>();
-
-        recordsDeletion.getRecords().forEach(r -> {
-            attributesPermissionsService.delete(r.getLocalId());
-            result.add(new RecordMeta(r));
-        });
-
-        RecordsDelResult delRes = new RecordsDelResult();
-        delRes.setRecords(result);
-
-        return delRes;
+    public AttrPermissionsMutRecord getRecToMutate(@NotNull String recordId) throws Exception {
+        if (StringUtils.isBlank(recordId)) {
+            return new AttrPermissionsMutRecord();
+        } else {
+            return new AttrPermissionsMutRecord(attributesPermissionsService.getById(recordId).orElse(null));
+        }
     }
 
+    @NotNull
     @Override
-    public List<AttrPermissionsMutRecord> getValuesToMutate(List<EntityRef> list) {
-        return list.stream()
-            .map(EntityRef::getLocalId)
-            .map(id -> {
-                if (StringUtils.isBlank(id)) {
-                    return new AttrPermissionsMutRecord();
-                } else {
-                    return new AttrPermissionsMutRecord(attributesPermissionsService.getById(id).orElse(null));
-                }
-            })
-            .collect(Collectors.toList());
+    public String saveMutatedRec(AttrPermissionsMutRecord attrPermissionsMutRecord) throws Exception {
+        return attributesPermissionsService.save(attrPermissionsMutRecord).getId();
     }
 
+    @Nullable
     @Override
-    public RecordsMutResult save(List<AttrPermissionsMutRecord> list) {
+    public Object queryRecords(@NotNull RecordsQuery recordsQuery) throws Exception {
 
-        RecordsMutResult result = new RecordsMutResult();
-
-        list.forEach(item -> {
-            AttributesPermissionDto resDto = attributesPermissionsService.save(item);
-            result.addRecord(new RecordMeta(RecordRef.valueOf(resDto.getId())));
-        });
-
-        return result;
-    }
-
-    @Override
-    public RecordsQueryResult<AttributesPermissionRecord> queryLocalRecords(RecordsQuery recordsQuery, MetaField metaField) {
-
-        RecordsQueryResult<AttributesPermissionRecord> result = new RecordsQueryResult<>();
+        RecsQueryRes<AttributesPermissionRecord> result = new RecsQueryRes<>();
 
         if (recordsQuery.getLanguage().equals(PredicateService.LANGUAGE_PREDICATE)) {
             Predicate predicate = recordsQuery.getQuery(Predicate.class);
 
             Collection<AttributesPermissionWithMetaDto> attrsPermWithMetas = attributesPermissionsService.getAll(
-                recordsQuery.getMaxItems(),
-                recordsQuery.getSkipCount(),
+                recordsQuery.getPage().getMaxItems(),
+                recordsQuery.getPage().getSkipCount(),
                 predicate,
-                LegacyRecordsUtils.mapLegacySortBy(recordsQuery.getSortBy())
+                recordsQuery.getSortBy()
             );
 
             result.setRecords(attrsPermWithMetas.stream()
@@ -134,7 +110,11 @@ public class AttributesPermissionRecordsDao extends LocalRecordsDao
             result.setTotalCount(attributesPermissionsService.getCount(predicate));
 
         } else {
-            result.setRecords(attributesPermissionsService.getAll(recordsQuery.getMaxItems(), recordsQuery.getSkipCount())
+            result.setRecords(
+                attributesPermissionsService.getAll(
+                recordsQuery.getPage().getMaxItems(),
+                        recordsQuery.getPage().getSkipCount()
+                    )
                 .stream()
                 .map(AttributesPermissionRecord::new)
                 .collect(Collectors.toList()));
@@ -144,7 +124,13 @@ public class AttributesPermissionRecordsDao extends LocalRecordsDao
         return result;
     }
 
-    public static class AttributesPermissionRecord implements MetaValue {
+    @NotNull
+    @Override
+    public String getId() {
+        return ID;
+    }
+
+    public static class AttributesPermissionRecord implements AttValue {
 
         private final AttributesPermissionWithMetaDto dto;
 
@@ -153,7 +139,7 @@ public class AttributesPermissionRecordsDao extends LocalRecordsDao
         }
 
         @Override
-        public Object getJson() {
+        public Object asJson() {
             return dto;
         }
 
@@ -173,7 +159,7 @@ public class AttributesPermissionRecordsDao extends LocalRecordsDao
         }
 
         @Override
-        public Object getAttribute(String name, MetaField field) {
+        public Object getAtt(String name) {
             switch (name) {
                 case "extId":
                 case "moduleId":

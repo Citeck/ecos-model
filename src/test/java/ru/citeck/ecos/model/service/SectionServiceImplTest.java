@@ -17,7 +17,6 @@ import ru.citeck.ecos.model.type.repository.TypeEntity;
 import ru.citeck.ecos.model.section.dto.SectionDto;
 import ru.citeck.ecos.model.section.repository.SectionRepository;
 import ru.citeck.ecos.model.section.service.impl.SectionServiceImpl;
-import ru.citeck.ecos.records2.RecordRef;
 
 import java.util.Collections;
 import java.util.Optional;

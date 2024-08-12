@@ -1,6 +1,6 @@
 package ru.citeck.ecos.model.domain.comments.config
 
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.jsoup.Jsoup
 import org.jsoup.parser.Parser
 import org.springframework.stereotype.Component

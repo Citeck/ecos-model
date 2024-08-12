@@ -1,14 +1,13 @@
 package ru.citeck.ecos.model.type.api.records.mixin
 
+import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.model.type.api.records.TypesRepoRecordsDao
-import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records3.record.atts.value.AttValueCtx
 import ru.citeck.ecos.records3.record.mixin.AttMixin
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.model.type.records.TypeRecordsDao
-import javax.annotation.PostConstruct
 
 @Component
 class TypesRegistryMixin(
@@ -27,7 +26,7 @@ class TypesRegistryMixin(
 
     override fun getAtt(path: String, value: AttValueCtx): Any? {
         when (path) {
-            REPO_TYPE_REF -> RecordRef.create(TypesRepoRecordsDao.ID, value.getLocalId())
+            REPO_TYPE_REF -> EntityRef.create(TypesRepoRecordsDao.ID, value.getLocalId())
             // temp solution until aspects config can be calculated by custom logic
             DOC_LIB_INFO -> {
                 val config = value.getAtt("aspectById.doclib.config?json")
