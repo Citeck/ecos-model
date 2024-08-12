@@ -7,6 +7,11 @@
                         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
     <changeSet id="00000000000006" author="citeck">
+        <!--
+        Liquibase changes default naming for primary key (pk_ecos_association -> ecos_association_pkey)
+        in new version, and we must update this changeset without checksum checking
+        -->
+        <validCheckSum>7:810fdb5f19d441427d14a8d93d9da94c</validCheckSum>
 
         <createTable tableName="ecos_association">
             <column name="ext_id" type="VARCHAR(36)">
