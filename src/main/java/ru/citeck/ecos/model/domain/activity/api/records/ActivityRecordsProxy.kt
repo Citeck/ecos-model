@@ -1,6 +1,7 @@
 package ru.citeck.ecos.model.domain.activity.api.records
 
 import org.springframework.stereotype.Component
+import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.model.domain.activity.config.ActivityConfiguration
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.predicate.PredicateService
@@ -36,12 +37,14 @@ class ActivityRecordsProxy : RecordsDaoProxy(
             valuePred
         }, onlyAnd = true, optimize = false, filterEmptyComposite = false)
 
-        if (parentRef.isEmpty()) {
-            return null
-        }
-        val canReadParent = recordsService.getAtt(parentRef, "permissions._has.read?bool!").asBoolean()
-        if (!canReadParent) {
-            return null
+        if (AuthContext.isNotRunAsSystem()) {
+            if (parentRef.isEmpty()) {
+                return null
+            }
+            val canReadParent = recordsService.getAtt(parentRef, "permissions._has.read?bool!").asBoolean()
+            if (!canReadParent) {
+                return null
+            }
         }
         return super.queryRecords(recsQuery)
     }
