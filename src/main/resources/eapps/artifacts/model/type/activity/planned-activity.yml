@@ -25,6 +25,12 @@ model:
         ru: Ответственный
         en: Responsible
       type: PERSON
+    - id: participants
+      name:
+        ru: Участники
+        en: Participants
+      type: AUTHORITY
+      multiple: true
     - id: result
       name:
         ru: Результат
