@@ -11,7 +11,13 @@ import ru.citeck.ecos.records2.predicate.PredicateUtils
 import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records2.predicate.model.ValuePredicate
+import ru.citeck.ecos.records2.utils.ValWithIdx
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
+import ru.citeck.ecos.records3.record.atts.schema.resolver.AttContext
+import ru.citeck.ecos.records3.record.atts.value.AttValue
+import ru.citeck.ecos.records3.record.atts.value.AttValueProxy
+import ru.citeck.ecos.records3.record.atts.value.impl.AttValueDelegate
+import ru.citeck.ecos.records3.record.atts.value.impl.InnerAttValue
 import ru.citeck.ecos.records3.record.dao.impl.proxy.RecordsDaoProxy
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes
@@ -32,19 +38,57 @@ class ActivityRecordsProxy(
     }
 
     override fun getRecordsAtts(recordIds: List<String>): List<*>? {
-        val (commentIds, activityIds) = recordIds.partition { recordId ->
-            recordId.startsWith(COMMENT_ID_PREFIX)
-        }
-        val result = super.getRecordsAtts(activityIds)?.toMutableList() ?: mutableListOf()
 
-        if (commentIds.isNotEmpty()) {
-            val ids = commentIds.map { id -> id.substringAfter('$') }
-            val commentAtts = commentRecordsProxy.getRecordsAtts(ids)
-            commentAtts?.let {
-                result.addAll(commentAtts)
+        val commentIds = mutableListOf<ValWithIdx<String>>()
+        val activityIds = mutableListOf<ValWithIdx<String>>()
+
+        recordIds.forEachIndexed { idx, recordId ->
+            if (recordId.startsWith(COMMENT_ID_PREFIX)) {
+                commentIds.add(ValWithIdx(recordId, idx))
+            } else {
+                activityIds.add(ValWithIdx(recordId, idx))
             }
         }
-        return result
+
+        val actResult = super.getRecordsAtts(activityIds.map { it.value })
+            ?: error("getRecordAtts is null. Ids: $activityIds")
+
+        if (commentIds.isEmpty()) {
+            return actResult
+        }
+
+        val fullResult = ArrayList<ValWithIdx<*>>()
+        actResult.forEachIndexed { idx, value ->
+            fullResult.add(ValWithIdx(value, activityIds[idx].idx))
+        }
+
+        val schemaAtts = AttContext.getCurrentSchemaAtt().inner
+        val writer = serviceFactory.attSchemaWriter
+        val commentAttsToLoad = LinkedHashMap<String, String>()
+        schemaAtts.forEach { att ->
+            commentAttsToLoad[att.getAliasForValue()] = writer.write(att)
+        }
+
+        recordsService.getAtts(
+            commentIds.map {
+                it.value.substringAfter('$').toEntityRef()
+            },
+            commentAttsToLoad,
+            true
+        ).forEachIndexed { idx, atts ->
+            val idData = commentIds[idx]
+            fullResult.add(
+                ValWithIdx(
+                    ProxyCommentVal(
+                        EntityRef.create(AppName.EMODEL, ActivityConfiguration.ACTIVITY_DAO_ID, idData.value),
+                        InnerAttValue(atts.getAtts().getData().asJson())
+                    ),
+                    idx
+                )
+            )
+        }
+
+        return fullResult.sortedBy { it.idx }.map { it.value }
     }
 
     override fun mutate(records: List<LocalRecordAtts>): List<String> {
@@ -125,5 +169,15 @@ class ActivityRecordsProxy(
                 )
             }
         return comments
+    }
+
+    private class ProxyCommentVal(
+        private val id: EntityRef,
+        base: AttValue
+    ) : AttValueDelegate(base), AttValueProxy {
+
+        override fun getId(): Any {
+            return id
+        }
     }
 }
