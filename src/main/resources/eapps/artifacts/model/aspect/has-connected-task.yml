@@ -1,0 +1,13 @@
+---
+id: has-connected-task
+name:
+  ru: Имеет связанную задачу
+  en: Has connected task
+
+attributes:
+  - id: records
+    name:
+      en: Connected documents to the task
+      ru: Связанные документы с задачей
+    type: ASSOC
+    multiple: true

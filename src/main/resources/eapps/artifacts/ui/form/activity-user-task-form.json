@@ -38,7 +38,7 @@
               "ru": "Дата активности",
               "en": "Activity date"
             },
-            "key": "activityDate",
+            "key": "_ECM_activityDate",
             "datePicker": {
               "minDate": "",
               "maxDate": ""

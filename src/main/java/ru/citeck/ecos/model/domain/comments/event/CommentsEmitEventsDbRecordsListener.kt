@@ -28,7 +28,8 @@ class CommentsEmitEventsDbRecordsListener(
     override fun onChanged(event: DbRecordChangedEvent) {
         log.debug { "Comment changed: ${event.record}" }
 
-        if (event.after["record"] == null) {
+        val recordAtt = recordsService.getAtt(event.record, "record")
+        if (recordAtt.isNull()) {
             // record was deleted
             return
         }
