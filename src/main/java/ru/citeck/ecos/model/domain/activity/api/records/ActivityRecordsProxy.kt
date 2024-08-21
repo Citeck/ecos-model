@@ -13,11 +13,13 @@ import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records2.predicate.model.ValuePredicate
 import ru.citeck.ecos.records2.utils.ValWithIdx
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
+import ru.citeck.ecos.records3.record.atts.dto.RecordAtts
 import ru.citeck.ecos.records3.record.atts.schema.resolver.AttContext
 import ru.citeck.ecos.records3.record.atts.value.AttValue
 import ru.citeck.ecos.records3.record.atts.value.AttValueProxy
 import ru.citeck.ecos.records3.record.atts.value.impl.AttValueDelegate
 import ru.citeck.ecos.records3.record.atts.value.impl.InnerAttValue
+import ru.citeck.ecos.records3.record.dao.delete.DelStatus
 import ru.citeck.ecos.records3.record.dao.impl.proxy.RecordsDaoProxy
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes
@@ -71,7 +73,7 @@ class ActivityRecordsProxy(
 
         recordsService.getAtts(
             commentIds.map {
-                it.value.substringAfter('$').toEntityRef()
+                EntityRef.create(AppName.EMODEL, COMMENT_DAO_ID, it.value.substringAfter('$'))
             },
             commentAttsToLoad,
             true
@@ -98,9 +100,33 @@ class ActivityRecordsProxy(
         val result = super.mutate(activityRecords).toMutableList()
 
         if (commentRecords.isNotEmpty()) {
-            val commentRecordsToMutate = commentRecords.map { record -> record.withId(record.id.substringAfter('$')) }
-            val ids = commentRecordsProxy.mutate(commentRecordsToMutate).map { "$COMMENT_ID_PREFIX$it" }
+            val commentRecordsToMutate = commentRecords.map { record ->
+                val atts = record.attributes
+                atts.remove(RecordConstants.ATT_PARENT)
+                atts.remove(RecordConstants.ATT_PARENT_ATT)
+                RecordAtts(
+                    EntityRef.Companion.create(AppName.EMODEL, COMMENT_DAO_ID, record.id.substringAfter('$')),
+                    atts
+                )
+            }
+            val ids = recordsService.mutate(commentRecordsToMutate).map { "$COMMENT_ID_PREFIX$it" }
             result.addAll(ids)
+        }
+        return result
+    }
+
+    override fun delete(recordIds: List<String>): List<DelStatus> {
+        val (commentIds, activityIds) = recordIds.partition { id ->
+            id.startsWith(COMMENT_ID_PREFIX)
+        }
+        val result = super.delete(activityIds).toMutableList()
+
+        if (commentIds.isNotEmpty()) {
+            val commentRecordsToDelete = commentIds.map { id ->
+                EntityRef.create(AppName.EMODEL, COMMENT_DAO_ID, id.substringAfter('$'))
+            }
+            val delStatuses = recordsService.delete(commentRecordsToDelete)
+            result.addAll(delStatuses)
         }
         return result
     }
@@ -131,20 +157,19 @@ class ActivityRecordsProxy(
                 return null
             }
         }
-        val result = RecsQueryRes<Any>()
 
-        val queryRecords = super.queryRecords(recsQuery)
+        val result = RecsQueryRes<Any>()
+        val queryRes = super.queryRecords(recsQuery)
+        if (queryRes != null) {
+            result.addRecords(queryRes.getRecords())
+            result.setHasMore(queryRes.getHasMore())
+            result.setTotalCount(queryRes.getTotalCount())
+        }
+
         if (parentRef.isNotEmpty()) {
             val comments = queryComments(parentRef)
-            if (queryRecords != null) {
-                result.setRecords(queryRecords.getRecords())
-                result.setHasMore(queryRecords.getHasMore())
-                result.addRecords(comments)
-                result.setTotalCount(queryRecords.getTotalCount() + comments.size)
-            } else {
-                result.setRecords(comments)
-                result.setTotalCount(comments.size.toLong())
-            }
+            result.addRecords(comments)
+            result.setTotalCount(result.getTotalCount() + comments.size)
         }
         return result
     }
@@ -157,7 +182,7 @@ class ActivityRecordsProxy(
                 .withQuery(
                     Predicates.and(
                         Predicates.eq("record", parentRef),
-                        Predicates.eq("_parent", null)
+                        Predicates.eq(RecordConstants.ATT_PARENT, null)
                     )
                 ).build()
         ).getRecords()
