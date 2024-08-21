@@ -219,20 +219,15 @@ open class GroupsPersonsRecordsDao(
                 if (currentGroupId.isEmpty()) {
                     continue
                 }
-                var newGroups: List<String> = rec.getAtt(ATT_AUTHORITY_GROUPS)
+                var newGroups: Set<String> = rec.getAtt(ATT_AUTHORITY_GROUPS)
                     .toList(EntityRef::class.java)
-                    .map { it.getLocalId() }
+                    .mapTo(HashSet()) { it.getLocalId() }
                 if (newGroups.isEmpty()) {
                     newGroups = rec.getAtt("att_add_$ATT_AUTHORITY_GROUPS")
                         .toList(EntityRef::class.java)
-                        .map { it.getLocalId() }
+                        .mapTo(HashSet()) { it.getLocalId() }
                 }
-                for (newGroup in newGroups) {
-                    val expandedGroups = authorityService.getExpandedGroups(newGroup, true)
-                    if (expandedGroups.contains(currentGroupId)) {
-                        error("Cyclic dependency. Group '$currentGroupId' can't be added to group: $newGroup")
-                    }
-                }
+                authorityService.integrityCheckBeforeAddToParents(currentGroupId, newGroups)
             }
         }
 

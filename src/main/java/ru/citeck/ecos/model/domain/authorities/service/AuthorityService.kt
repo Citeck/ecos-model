@@ -1,8 +1,10 @@
 package ru.citeck.ecos.model.domain.authorities.service
 
 import com.hazelcast.core.HazelcastInstance
+import com.hazelcast.crdt.pncounter.PNCounter
 import com.hazelcast.map.IMap
 import org.springframework.stereotype.Service
+import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthGroup
 import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
@@ -10,12 +12,14 @@ import ru.citeck.ecos.model.domain.authorities.constant.AuthorityGroupConstants
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
+import ru.citeck.ecos.records3.iter.IterableRecords
+import ru.citeck.ecos.records3.iter.IterableRecordsConfig
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.request.RequestContext
 import ru.citeck.ecos.txn.lib.TxnContext
 import ru.citeck.ecos.webapp.api.entity.EntityRef
-import java.util.concurrent.TimeUnit
-import kotlin.random.Random
+import java.util.LinkedList
+import java.util.concurrent.locks.ReentrantLock
 
 @Service
 class AuthorityService(
@@ -24,9 +28,9 @@ class AuthorityService(
 ) {
 
     companion object {
-        private const val ASC_GROUPS_CACHE_KEY = "asc-authority-groups-cache"
-        private const val DESC_GROUPS_CACHE_KEY = "desc-authority-groups-cache"
         private const val PERSON_AUTHORITIES_CACHE_KEY = "person-authorities-cache"
+
+        private const val AUTH_GROUPS_TREE_VERSION_COUNTER_KEY = "auth-groups-tree-version-counter"
 
         private const val CTX_UPDATE_GROUPS_CACHE_KEY = "ctx-update-groups-cache-key"
 
@@ -40,15 +44,12 @@ class AuthorityService(
         val ADMIN_GROUPS_AUTH_NAME = ADMIN_GROUPS.mapTo(LinkedHashSet()) { AuthGroup.PREFIX + it }
     }
 
-    private final val ascGroupsCache: IMap<String, Set<String>>
-    private final val descGroupsCache: IMap<String, Set<String>>
-    private final val personAuthoritiesCache: IMap<String, Set<String>>
+    private final val personAuthoritiesCache: IMap<String, Set<String>> = hazelcast.getMap(PERSON_AUTHORITIES_CACHE_KEY)
 
-    init {
-        ascGroupsCache = hazelcast.getMap(ASC_GROUPS_CACHE_KEY)
-        descGroupsCache = hazelcast.getMap(DESC_GROUPS_CACHE_KEY)
-        personAuthoritiesCache = hazelcast.getMap(PERSON_AUTHORITIES_CACHE_KEY)
-    }
+    @Volatile
+    private var authGroupsTree = AuthGroupsTree(-1)
+    private val authGroupsTreeBuildLock = ReentrantLock()
+    private final val authGroupsVersionCounter: PNCounter = hazelcast.getPNCounter(AUTH_GROUPS_TREE_VERSION_COUNTER_KEY)
 
     fun isAdminsGroup(groupId: String): Boolean {
         val groupIdWithoutPrefix = if (groupId.startsWith(AuthGroup.PREFIX)) {
@@ -70,6 +71,31 @@ class AuthorityService(
     fun getAuthoritiesForPerson(personId: String): Set<String> {
         return personAuthoritiesCache.computeIfAbsent(personId) {
             getAuthoritiesForPersonImpl(personId)
+        }
+    }
+
+    fun integrityCheckBeforeAddToParents(child: String, parents: Set<String>) {
+        if (parents.contains(child)) {
+            error("Group can't be added to itself. Id: $child")
+        }
+        val checkedGroups = HashSet<String>()
+        for (rootParent in parents) {
+            val parentsToCheck = LinkedList<String>()
+            parentsToCheck.add(rootParent)
+            while (parentsToCheck.isNotEmpty()) {
+                val parentId = parentsToCheck.poll()
+                if (!checkedGroups.add(parentId)) {
+                    continue
+                }
+                val parentsOfParent = records.getAtt(
+                    AuthorityType.GROUP.getRef(parentId),
+                    ATT_AUTHORITY_GROUPS
+                ).asStrList()
+                if (parentsOfParent.contains(child)) {
+                    error("Cyclic dependency. Group '$child' can't be added to group: $rootParent")
+                }
+                parentsToCheck.addAll(parentsOfParent)
+            }
         }
     }
 
@@ -108,7 +134,7 @@ class AuthorityService(
             } else {
                 groupId
             }
-            forEachGroup(groupIdWithoutPrefix, processedGroups, true, asc) { result.add(it) }
+            forEachGroup(groupIdWithoutPrefix, processedGroups, asc) { result.add(it) }
         }
         return result
     }
@@ -128,18 +154,8 @@ class AuthorityService(
         groupsToResetCache.add(groupId)
 
         if (groupsToResetCache.size == 1) {
-            TxnContext.doAfterCommit(0f, false) {
-                val ascProcessedGroups = HashSet<String>()
-                val descProcessedGroups = HashSet<String>()
-                groupsToResetCache.forEach {
-                    forEachGroup(it, ascProcessedGroups, withCache = false, asc = true) { groupId ->
-                        descGroupsCache.remove(groupId)
-                    }
-                    forEachGroup(it, descProcessedGroups, withCache = false, asc = false) { groupId ->
-                        ascGroupsCache.remove(groupId)
-                    }
-                }
-                groupsToResetCache.clear()
+            TxnContext.doAfterCommit(-1000f, false) {
+                authGroupsVersionCounter.incrementAndGet()
                 personAuthoritiesCache.clear()
             }
         }
@@ -154,66 +170,69 @@ class AuthorityService(
         ).getRecords()
     }
 
+    private fun getAuthGroupsTree(): AuthGroupsTree {
+        val version = authGroupsVersionCounter.get()
+        if (authGroupsTree.version != version) {
+            authGroupsTreeBuildLock.lock()
+            try {
+                if (authGroupsTree.version != version) {
+                    AuthContext.runAsSystem {
+                        authGroupsTree = buildAuthGroupsTree(version)
+                    }
+                }
+            } finally {
+                authGroupsTreeBuildLock.unlock()
+            }
+        }
+        return authGroupsTree
+    }
+
+    private fun buildAuthGroupsTree(version: Long): AuthGroupsTree {
+
+        val newTree = AuthGroupsTree(version)
+
+        val iterableRecords = IterableRecords(
+            RecordsQuery.create()
+                .withSourceId(AuthorityType.GROUP.sourceId)
+                .withQuery(Predicates.alwaysTrue())
+                .build(),
+            IterableRecordsConfig.create()
+                .withAttsToLoad(mapOf("groups" to ATT_AUTHORITY_GROUPS))
+                .build(),
+            records
+        )
+        val recordsIt = iterableRecords.iterator()
+        while (recordsIt.hasNext()) {
+            val record = recordsIt.next()
+            val group = newTree.getOrCreateGroup(record.getId().getLocalId())
+            for (groupIdData in record.getAtt("groups")) {
+                val groupId = groupIdData.asText()
+                if (groupId.isNotBlank()) {
+                    group.addParent(newTree.getOrCreateGroup(groupId))
+                }
+            }
+        }
+        return newTree
+    }
+
     private fun forEachGroup(
         groupId: String,
         processedGroups: MutableSet<String>,
-        withCache: Boolean,
         asc: Boolean,
         action: (String) -> Unit
     ) {
-
         if (!processedGroups.add(groupId)) {
             return
         }
 
         action.invoke(groupId)
-        val cache: IMap<String, Set<String>>? = if (withCache) {
-            if (asc) {
-                ascGroupsCache
-            } else {
-                descGroupsCache
-            }
-        } else {
-            null
-        }
 
-        if (cache != null) {
-            val cachedGroups = cache[groupId]
-            if (cachedGroups != null) {
-                for (cachedGroup in cachedGroups) {
-                    if (processedGroups.add(cachedGroup)) {
-                        action(cachedGroup)
-                    }
-                }
-                return
-            }
-        }
-
-        val groupRef = AuthorityType.GROUP.getRef(groupId)
-        val nextGroups: List<String> = if (asc) {
-            records.getAtt(groupRef, ATT_AUTHORITY_GROUPS).asList(EntityRef::class.java).map { it.getLocalId() }
+        val authGroupsTree = getAuthGroupsTree()
+        val group = authGroupsTree.getGroup(groupId) ?: return
+        if (asc) {
+            group.doWithEachParentFull { action.invoke(it.id) }
         } else {
-            getGroupMembers(groupRef, AuthorityType.GROUP).map { it.getLocalId() }
-        }
-        if (cache != null) {
-            val groupsToCache = LinkedHashSet<String>()
-            for (nextGroup in nextGroups) {
-                // previous computed groups should not affect on cache of this group.
-                // because of this we should not pass processedGroup for next forEach
-                forEachGroup(nextGroup, HashSet(), withCache, asc) {
-                    groupsToCache.add(it)
-                    if (processedGroups.add(it)) {
-                        action(it)
-                    }
-                }
-            }
-            // random shift to avoid cache massive eviction
-            val ttl = TimeUnit.MINUTES.toSeconds(30) + (Random.nextFloat() * 60).toLong()
-            cache.put(groupId, groupsToCache, ttl, TimeUnit.SECONDS)
-        } else {
-            for (nextGroup in nextGroups) {
-                forEachGroup(nextGroup, processedGroups, withCache, asc, action)
-            }
+            group.doWithEachChildFull { action.invoke(it.id) }
         }
     }
 }
