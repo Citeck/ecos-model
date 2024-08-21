@@ -34,6 +34,14 @@ ecos:
       keys:
         application:
           location: classpath:ecos/x509/keys/application.key
+    hazelcast:
+      mapConfigs:
+        personAuthorities:
+          name: person-authorities-cache
+          eviction:
+            evictionPolicy: LRU
+            size: 50
+            maxSizePolicy: FREE_HEAP_SIZE
   integrations:
     onlyoffice:
       host: only-office-app
