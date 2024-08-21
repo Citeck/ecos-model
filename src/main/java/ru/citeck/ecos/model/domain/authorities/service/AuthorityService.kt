@@ -155,8 +155,8 @@ class AuthorityService(
 
         if (groupsToResetCache.size == 1) {
             TxnContext.doAfterCommit(-1000f, false) {
-                authGroupsVersionCounter.incrementAndGet()
                 personAuthoritiesCache.clear()
+                authGroupsVersionCounter.incrementAndGet()
             }
         }
     }
