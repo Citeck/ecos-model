@@ -4,7 +4,6 @@ import org.springframework.stereotype.Component
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.model.domain.activity.config.ActivityConfiguration
 import ru.citeck.ecos.model.domain.comments.api.records.COMMENT_DAO_ID
-import ru.citeck.ecos.model.domain.comments.api.records.CommentsRecordsProxy
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.predicate.PredicateService
 import ru.citeck.ecos.records2.predicate.PredicateUtils
@@ -28,15 +27,13 @@ import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.api.entity.toEntityRef
 
 @Component
-class ActivityRecordsProxy(
-    private val commentRecordsProxy: CommentsRecordsProxy
-) : RecordsDaoProxy(
+class ActivityRecordsProxy : RecordsDaoProxy(
     ActivityConfiguration.ACTIVITY_DAO_ID,
     ActivityConfiguration.ACTIVITY_REPO_DAO_ID
 ) {
 
     companion object {
-        private const val COMMENT_ID_PREFIX = "comment$"
+        const val COMMENT_ID_PREFIX = "comment$"
     }
 
     override fun getRecordsAtts(recordIds: List<String>): List<*>? {
@@ -159,18 +156,31 @@ class ActivityRecordsProxy(
         }
 
         val result = RecsQueryRes<Any>()
-        val queryRes = super.queryRecords(recsQuery)
-        if (queryRes != null) {
-            result.addRecords(queryRes.getRecords())
-            result.setHasMore(queryRes.getHasMore())
-            result.setTotalCount(queryRes.getTotalCount())
+        val allRecords = mutableListOf<EntityRef>()
+
+        val targetQuery = recsQuery.copy().withSourceId(getTargetId()).build()
+        val queryRes = doWithSourceIdMapping {
+            recordsService.query(targetQuery)
         }
+
+        allRecords.addAll(queryRes.getRecords())
+        result.setHasMore(queryRes.getHasMore())
+        result.setTotalCount(queryRes.getTotalCount())
 
         if (parentRef.isNotEmpty()) {
             val comments = queryComments(parentRef)
-            result.addRecords(comments)
+            allRecords.addAll(comments)
             result.setTotalCount(result.getTotalCount() + comments.size)
         }
+
+        val sortedRecords = predicateService.filterAndSort(
+            allRecords,
+            Predicates.alwaysTrue(),
+            recsQuery.sortBy,
+            recsQuery.page.skipCount,
+            recsQuery.page.maxItems
+        )
+        result.setRecords(sortedRecords)
         return result
     }
 
