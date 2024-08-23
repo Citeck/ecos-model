@@ -19,6 +19,7 @@ actions:
   - uiserv/action@edit-in-onlyoffice-tfm
   - uiserv/action@content-download
   - uiserv/action@delete
+  - uiserv/action@upload-new-version
 
 queryPermsPolicy: OWN
 
