@@ -14,10 +14,8 @@ config:
     attributes:
       recordRef: ${?id}
       responsibleEmail: ${responsible.email!}
-      organizerEmail: ${_creator.email!}
+      participantsEmails: ${participants[].email!}
       activityDate: ${activityDate}
-      duration: ${activityDuration}
-      description: ${text}
       calendarEventSummary: ${calendarEventSummary}
       calendarEventUid: ${calendarEventUid}
       calendarEventSequence: ${calendarEventSequence}

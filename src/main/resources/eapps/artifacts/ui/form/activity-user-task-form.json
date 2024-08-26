@@ -20,35 +20,55 @@
         "components": [
           {
             "label": {
-              "en": "Result",
-              "ru": "Результат"
+              "ru": "Результат",
+              "en": "Result"
             },
             "key": "result",
             "defaultValue": "",
             "refreshOn": [],
             "optionalWhenDisabled": false,
-            "type": "textfield",
-            "input": true,
-            "inputMasks": [
-              {}
-            ]
+            "type": "textarea",
+            "input": true
           },
           {
             "label": {
-              "ru": "Дата активности",
-              "en": "Activity date"
+              "ru": "Columns"
             },
-            "key": "_ECM_activityDate",
-            "datePicker": {
-              "minDate": "",
-              "maxDate": ""
-            },
-            "defaultValue": "",
-            "refreshOn": [],
-            "optionalWhenDisabled": false,
-            "type": "datetime",
-            "input": true,
-            "suffix": true
+            "key": "columns",
+            "columns": [
+              {
+                "components": [
+                  {
+                    "label": {
+                      "ru": "Дата активности",
+                      "en": "Activity date"
+                    },
+                    "key": "_ECM_activityDate",
+                    "format": "yyyy-MM-dd HH:mm",
+                    "datePicker": {
+                      "minDate": "",
+                      "maxDate": ""
+                    },
+                    "timePicker": {
+                      "showMeridian": false
+                    },
+                    "defaultValue": "",
+                    "refreshOn": [],
+                    "optionalWhenDisabled": false,
+                    "type": "datetime",
+                    "input": true,
+                    "suffix": true
+                  }
+                ],
+                "type": "column",
+                "input": false,
+                "key": "column",
+                "index": 0
+              }
+            ],
+            "oneColumnInViewMode": false,
+            "type": "columns",
+            "input": false
           }
         ]
       },
@@ -62,12 +82,11 @@
             "components": [
               {
                 "label": {
-                  "en": "Done",
-                  "ru": "Выполнено"
+                  "en": "Reschedule activity",
+                  "ru": "Перенести активность"
                 },
-                "key": "outcome_done",
+                "key": "outcome_reschedule",
                 "state": "",
-                "theme": "primary",
                 "block": true,
                 "disableOnInvalid": true,
                 "refreshOn": [],
@@ -95,11 +114,12 @@
             "components": [
               {
                 "label": {
-                  "en": "Reschedule activity",
-                  "ru": "Перенести активность"
+                  "en": "Done",
+                  "ru": "Выполнено"
                 },
-                "key": "outcome_reschedule",
+                "key": "outcome_done",
                 "state": "",
+                "theme": "primary",
                 "block": true,
                 "disableOnInvalid": true,
                 "refreshOn": [],

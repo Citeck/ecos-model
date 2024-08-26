@@ -116,7 +116,11 @@ class ActivityRecordsProxy : RecordsDaoProxy(
         val (commentIds, activityIds) = recordIds.partition { id ->
             id.startsWith(COMMENT_ID_PREFIX)
         }
-        val result = super.delete(activityIds).toMutableList()
+        val result = mutableListOf<DelStatus>()
+        if (activityIds.isNotEmpty()) {
+            activityIds.forEach(::cancelActivity)
+            result.addAll(super.delete(activityIds))
+        }
 
         if (commentIds.isNotEmpty()) {
             val commentRecordsToDelete = commentIds.map { id ->
@@ -204,6 +208,26 @@ class ActivityRecordsProxy : RecordsDaoProxy(
                 )
             }
         return comments
+    }
+
+    private fun cancelActivity(activityId: String) {
+        val cancelActivityAtts = recordsService.getAtts(
+            EntityRef.create(AppName.EMODEL, ActivityConfiguration.ACTIVITY_DAO_ID, activityId),
+            mapOf(
+                "recordRef" to "?id",
+                "responsibleEmail" to "responsible.email!",
+                "participantsEmails" to "participants[].email!",
+                "activityDate" to "activityDate",
+                "calendarEventSummary" to "calendarEventSummary",
+                "calendarEventUid" to "calendarEventUid",
+                "calendarEventSequence" to "calendarEventSequence"
+            )
+        ).getAtts()
+
+        recordsService.mutate(
+            "emodel/cancel-activity@",
+            cancelActivityAtts
+        )
     }
 
     private class ProxyCommentVal(
