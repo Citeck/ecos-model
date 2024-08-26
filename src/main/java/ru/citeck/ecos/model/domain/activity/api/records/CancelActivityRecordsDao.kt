@@ -3,6 +3,7 @@ package ru.citeck.ecos.model.domain.activity.api.records
 import io.github.oshai.kotlinlogging.KotlinLogging
 import net.fortuna.ical4j.model.property.Method
 import org.springframework.stereotype.Component
+import ru.citeck.ecos.commons.utils.DurationStrUtils
 import ru.citeck.ecos.model.domain.activity.config.ActivityConfiguration
 import ru.citeck.ecos.model.domain.activity.config.ActivityStatus
 import ru.citeck.ecos.model.lib.status.constants.StatusConstants
@@ -92,17 +93,22 @@ class CancelActivityRecordsDao(
 
     private fun sendNotification(activity: ActivityDto) {
         val sequence = activity.calendarEventSequence + 1
+        val durationInMillis = DurationStrUtils.parseDurationToMillis(activity.duration)
+        val recipients = mutableSetOf(activity.responsibleEmail)
+        recipients.addAll(activity.participantsEmails)
         val canceledCalendarEvent = CalendarEvent.Builder(activity.calendarEventSummary, activity.activityDate)
             .uid(activity.calendarEventUid)
             .sequence(sequence)
+            .description(activity.description)
+            .durationInMillis(durationInMillis)
+            .organizer(activity.organizerEmail)
+            .attendees(recipients)
             .method(Method.CANCEL)
             .build()
         val canceledCalendarEventAttach = canceledCalendarEvent.createAttachment()
         val additionalMeta = mapOf(
             NOTIFICATION_ATTACHMENTS to canceledCalendarEventAttach
         )
-        val recipients = mutableListOf(activity.responsibleEmail)
-        recipients.addAll(activity.participantsEmails)
 
         notificationService.send(
             Notification.Builder()
@@ -128,7 +134,10 @@ class CancelActivityRecordsDao(
         val recordRef: EntityRef = EntityRef.EMPTY,
         val responsibleEmail: String,
         val participantsEmails: List<String> = emptyList(),
+        val organizerEmail: String,
         val activityDate: Instant,
+        val duration: String,
+        val description: String,
         val calendarEventSummary: String,
         val calendarEventUid: String,
         val calendarEventSequence: Int

@@ -217,7 +217,10 @@ class ActivityRecordsProxy : RecordsDaoProxy(
                 "recordRef" to "?id",
                 "responsibleEmail" to "responsible.email!",
                 "participantsEmails" to "participants[].email!",
+                "organizerEmail" to "_creator.email!",
                 "activityDate" to "activityDate",
+                "duration" to "activityDuration",
+                "description" to "text",
                 "calendarEventSummary" to "calendarEventSummary",
                 "calendarEventUid" to "calendarEventUid",
                 "calendarEventSequence" to "calendarEventSequence"

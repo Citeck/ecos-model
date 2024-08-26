@@ -8,7 +8,8 @@
   "model" : {
     "titleEventAction" : "$process.eventAction",
     "titleEventSummary" : "$process.eventSummary",
-    "body" : "text"
+    "body" : "text",
+    "docRef" : "_parent?id"
   },
   "multiTemplateConfig" : [ ]
 }
