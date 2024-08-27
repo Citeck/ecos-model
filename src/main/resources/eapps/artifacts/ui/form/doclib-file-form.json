@@ -33,9 +33,7 @@
           "en": "Content",
           "ru": "Содержимое"
         },
-        "storage": "url",
         "type": "file",
-        "url": "/gateway/alfresco/alfresco/s/eform/file",
         "validate": {
           "required": "true"
         }
