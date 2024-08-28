@@ -118,7 +118,13 @@ class ActivityRecordsProxy : RecordsDaoProxy(
         }
         val result = mutableListOf<DelStatus>()
         if (activityIds.isNotEmpty()) {
-            activityIds.forEach(::cancelActivity)
+            for (activityId in activityIds) {
+                val activityRef = EntityRef.create(AppName.EMODEL, ActivityConfiguration.ACTIVITY_DAO_ID, activityId)
+                val isPlannedActivity = recordsService.getAtt(activityRef, "_type.isSubTypeOf.planned-activity?bool!").asBoolean()
+                if (isPlannedActivity) {
+                    cancelActivity(activityRef)
+                }
+            }
             result.addAll(super.delete(activityIds))
         }
 
@@ -210,9 +216,9 @@ class ActivityRecordsProxy : RecordsDaoProxy(
         return comments
     }
 
-    private fun cancelActivity(activityId: String) {
+    private fun cancelActivity(activityRef: EntityRef) {
         val cancelActivityAtts = recordsService.getAtts(
-            EntityRef.create(AppName.EMODEL, ActivityConfiguration.ACTIVITY_DAO_ID, activityId),
+            activityRef,
             mapOf(
                 "recordRef" to "?id",
                 "responsibleEmail" to "responsible.email!",
