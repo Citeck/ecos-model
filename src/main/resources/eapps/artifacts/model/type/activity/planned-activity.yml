@@ -51,3 +51,13 @@ model:
         ru: Calendar Event Sequence
         en: Calendar Event Sequence
       type: NUMBER
+aspects:
+  - ref: emodel/aspect@history-config
+    config:
+      disableHistory: false
+      excludedAtts:
+        - calendarEventSummary
+        - calendarEventUid
+        - calendarEventSequence
+      onCreationHistoricalAtts: []
+    inheritConfig: false
