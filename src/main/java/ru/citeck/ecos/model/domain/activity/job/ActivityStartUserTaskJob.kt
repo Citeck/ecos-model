@@ -70,10 +70,10 @@ class ActivityStartUserTaskJob(
         var activities = getActivities()
         while (activities.isNotEmpty() && iter < MAX_ITERATION) {
             for (activity in activities) {
-                updateStatus(activity)
-
                 val event = ActivityStartProcessEvent(activity)
                 activityStartProcessEmitter.emit(event)
+
+                updateStatus(activity)
                 log.debug { "Start user task for ${activity.getLocalId()}" }
             }
             activities = getActivities()

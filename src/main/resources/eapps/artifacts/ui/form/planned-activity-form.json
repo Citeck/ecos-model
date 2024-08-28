@@ -1,0 +1,49 @@
+{
+  "id": "planned-activity-form",
+  "formKey": "",
+  "title": {
+    "en": "Форма планируемой активности"
+  },
+  "description": {},
+  "customModule": "",
+  "typeRef": "",
+  "width": "",
+  "system": false,
+  "i18n": {},
+  "definition": {
+    "components": [
+      {
+        "scrollableContent": true,
+        "key": "panel2",
+        "type": "panel",
+        "input": false,
+        "components": [
+          {
+            "label": {
+              "ru": "Документ",
+              "en": "Document"
+            },
+            "key": "_parent",
+            "disabled": true,
+            "modalTitle": "",
+            "journalId": "search",
+            "refreshOn": [],
+            "optionalWhenDisabled": false,
+            "type": "selectJournal",
+            "input": true,
+            "queryData": "",
+            "source": {
+              "custom": {
+                "columns": []
+              },
+              "type": "journal",
+              "customValues": []
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "attributes": {},
+  "notExists": false
+}
