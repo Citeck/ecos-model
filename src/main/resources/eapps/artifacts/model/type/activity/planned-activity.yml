@@ -5,6 +5,7 @@ name:
   en: Planned activity
 system: true
 parentRef: emodel/type@ecos-activity
+formRef: uiserv/form@planned-activity-form
 defaultCreateVariant: true
 model:
   attributes:

@@ -20,6 +20,32 @@
         "components": [
           {
             "label": {
+              "ru": "Описание",
+              "en": "Description"
+            },
+            "key": "_ECM_text",
+            "disabled": true,
+            "editor": "quill",
+            "wysiwyg": {
+              "theme": "snow",
+              "placeholder": "",
+              "modules": {
+                "clipboard": {
+                  "matchVisual": false
+                },
+                "toolbar": false
+              }
+            },
+            "persistent": false,
+            "defaultValue": "",
+            "refreshOn": [],
+            "optionalWhenDisabled": false,
+            "as": "",
+            "type": "textarea",
+            "input": true
+          },
+          {
+            "label": {
               "ru": "Результат",
               "en": "Result"
             },
