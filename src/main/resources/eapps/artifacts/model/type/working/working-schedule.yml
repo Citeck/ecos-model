@@ -4,6 +4,8 @@ name:
   ru: Рабочее расписание
   en: Working schedule
 
+parentRef: emodel/type@ecos-vcs-object
+
 system: true
 storageType: ECOS_MODEL
 

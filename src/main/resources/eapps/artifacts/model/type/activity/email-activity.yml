@@ -1,0 +1,11 @@
+---
+id: email-activity
+name:
+  ru: Письмо
+  en: Email
+
+system: true
+storageType: DEFAULT
+parentRef: emodel/type@planned-activity
+
+inheritActions: true

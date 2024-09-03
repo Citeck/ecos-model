@@ -1,0 +1,11 @@
+---
+id: meeting-activity
+name:
+  ru: Встреча
+  en: Meeting
+
+system: true
+storageType: DEFAULT
+parentRef: emodel/type@planned-activity
+
+inheritActions: true

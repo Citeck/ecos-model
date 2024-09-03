@@ -4,6 +4,8 @@ name:
   ru: Конечная точка
   en: Endpoint
 
+parentRef: emodel/type@ecos-vcs-object
+
 system: true
 
 queryPermsPolicy: PUBLIC

@@ -4,6 +4,8 @@ name:
   ru: Настройки прав типа
   en: Type permissions settings
 
+parentRef: emodel/type@ecos-vcs-object
+
 system: true
 sourceId: emodel/perms
 

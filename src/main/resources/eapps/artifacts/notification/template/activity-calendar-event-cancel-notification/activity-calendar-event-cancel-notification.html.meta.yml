@@ -1,0 +1,13 @@
+{
+  "id" : "activity-calendar-event-cancel-notification",
+  "name" : "Шаблон уведомления отмены активности",
+  "notificationTitle" : {
+    "ru" : "Событие отменено | ${titleEventType}"
+  },
+  "tags" : [ ],
+  "model" : {
+    "titleEventType" : "_type?disp",
+    "body" : "text"
+  },
+  "multiTemplateConfig" : [ ]
+}

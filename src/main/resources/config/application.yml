@@ -23,6 +23,8 @@ ecos:
   job:
     inactiveUsersDisabling:
       cron: '0 0 0/6 ? * *'
+    activityStartUserTask:
+      cron: '0 */5 * * * *'
   webapp:
     task:
       executors:

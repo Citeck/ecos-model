@@ -1,0 +1,49 @@
+---
+id: planned-activity
+name:
+  ru: Планируемая активность
+  en: Planned activity
+
+system: true
+storageType: DEFAULT
+parentRef: emodel/type@ecos-activity
+
+inheritActions: true
+model:
+  attributes:
+    - id: activityDate
+      name:
+        ru: Дата активности
+        en: Activity date
+      type: DATETIME
+    - id: activityDuration
+      name:
+        ru: Продолжительность активности
+        en: Activity duration
+    - id: responsible
+      name:
+        ru: Ответственный
+        en: Responsible
+      type: PERSON
+    - id: result
+      name:
+        ru: Результат
+        en: Result
+    - id: calendarEventSummary
+      name:
+        ru: Calendar Event Summary
+        en: Calendar Event Summary
+      computed:
+        type: SCRIPT
+        config:
+          fn: return "Событие по " + value.load("_parent?disp");
+        storingType: ON_MUTATE
+    - id: calendarEventUid
+      name:
+        ru: Calendar Event UID
+        en: Calendar Event UID
+    - id: calendarEventSequence
+      name:
+        ru: Calendar Event Sequence
+        en: Calendar Event Sequence
+      type: NUMBER

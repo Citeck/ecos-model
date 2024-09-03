@@ -4,6 +4,8 @@ name:
   ru: Тип данных
   en: Data type
 
+parentRef: emodel/type@ecos-vcs-object
+
 system: true
 sourceId: emodel/type
 

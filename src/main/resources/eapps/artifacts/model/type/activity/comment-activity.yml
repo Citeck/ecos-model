@@ -1,0 +1,21 @@
+---
+id: comment-activity
+name:
+  ru: Комментарий
+  en: Comment
+
+system: true
+storageType: DEFAULT
+parentRef: emodel/type@immediate-activity
+
+inheritActions: true
+model:
+  attributes:
+    - id: comment
+      name:
+        ru: Комментарий
+        en: Comment
+      type: ASSOC
+      config:
+        typeRef: emodel/type@ecos-comment
+        child: true
