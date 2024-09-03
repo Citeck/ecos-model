@@ -4,7 +4,6 @@ import org.springframework.stereotype.Component
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.model.domain.activity.config.ActivityConfiguration
 import ru.citeck.ecos.model.domain.comments.api.records.COMMENT_DAO_ID
-import ru.citeck.ecos.model.domain.comments.api.records.CommentsRecordsProxy
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.predicate.PredicateService
 import ru.citeck.ecos.records2.predicate.PredicateUtils
@@ -28,15 +27,13 @@ import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.api.entity.toEntityRef
 
 @Component
-class ActivityRecordsProxy(
-    private val commentRecordsProxy: CommentsRecordsProxy
-) : RecordsDaoProxy(
+class ActivityRecordsProxy : RecordsDaoProxy(
     ActivityConfiguration.ACTIVITY_DAO_ID,
     ActivityConfiguration.ACTIVITY_REPO_DAO_ID
 ) {
 
     companion object {
-        private const val COMMENT_ID_PREFIX = "comment$"
+        const val COMMENT_ID_PREFIX = "comment$"
     }
 
     override fun getRecordsAtts(recordIds: List<String>): List<*>? {
@@ -119,7 +116,17 @@ class ActivityRecordsProxy(
         val (commentIds, activityIds) = recordIds.partition { id ->
             id.startsWith(COMMENT_ID_PREFIX)
         }
-        val result = super.delete(activityIds).toMutableList()
+        val result = mutableListOf<DelStatus>()
+        if (activityIds.isNotEmpty()) {
+            for (activityId in activityIds) {
+                val activityRef = EntityRef.create(AppName.EMODEL, ActivityConfiguration.ACTIVITY_DAO_ID, activityId)
+                val isPlannedActivity = recordsService.getAtt(activityRef, "_type.isSubTypeOf.planned-activity?bool!").asBoolean()
+                if (isPlannedActivity) {
+                    cancelActivity(activityRef)
+                }
+            }
+            result.addAll(super.delete(activityIds))
+        }
 
         if (commentIds.isNotEmpty()) {
             val commentRecordsToDelete = commentIds.map { id ->
@@ -159,18 +166,31 @@ class ActivityRecordsProxy(
         }
 
         val result = RecsQueryRes<Any>()
-        val queryRes = super.queryRecords(recsQuery)
-        if (queryRes != null) {
-            result.addRecords(queryRes.getRecords())
-            result.setHasMore(queryRes.getHasMore())
-            result.setTotalCount(queryRes.getTotalCount())
+        val allRecords = mutableListOf<EntityRef>()
+
+        val targetQuery = recsQuery.copy().withSourceId(getTargetId()).build()
+        val queryRes = doWithSourceIdMapping {
+            recordsService.query(targetQuery)
         }
+
+        allRecords.addAll(queryRes.getRecords())
+        result.setHasMore(queryRes.getHasMore())
+        result.setTotalCount(queryRes.getTotalCount())
 
         if (parentRef.isNotEmpty()) {
             val comments = queryComments(parentRef)
-            result.addRecords(comments)
+            allRecords.addAll(comments)
             result.setTotalCount(result.getTotalCount() + comments.size)
         }
+
+        val sortedRecords = predicateService.filterAndSort(
+            allRecords,
+            Predicates.alwaysTrue(),
+            recsQuery.sortBy,
+            recsQuery.page.skipCount,
+            recsQuery.page.maxItems
+        )
+        result.setRecords(sortedRecords)
         return result
     }
 
@@ -194,6 +214,29 @@ class ActivityRecordsProxy(
                 )
             }
         return comments
+    }
+
+    private fun cancelActivity(activityRef: EntityRef) {
+        val cancelActivityAtts = recordsService.getAtts(
+            activityRef,
+            mapOf(
+                "recordRef" to "?id",
+                "responsibleEmail" to "responsible.email!",
+                "participantsEmails" to "participants[].email!",
+                "organizerEmail" to "_creator.email!",
+                "activityDate" to "activityDate",
+                "duration" to "activityDuration",
+                "description" to "text",
+                "calendarEventSummary" to "calendarEventSummary",
+                "calendarEventUid" to "calendarEventUid",
+                "calendarEventSequence" to "calendarEventSequence"
+            )
+        ).getAtts()
+
+        recordsService.mutate(
+            "emodel/cancel-activity@",
+            cancelActivityAtts
+        )
     }
 
     private class ProxyCommentVal(

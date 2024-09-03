@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.events2.EventsService
 import ru.citeck.ecos.events2.type.RecordChangedEvent
+import ru.citeck.ecos.model.domain.activity.api.records.ActivityRecordsProxy
 import ru.citeck.ecos.model.domain.activity.config.ActivityConfiguration
 import ru.citeck.ecos.model.domain.comments.event.CommentDeleteEvent
 import ru.citeck.ecos.model.domain.comments.event.CommentUpdateEvent
@@ -91,8 +92,10 @@ class MutateCommentEventListener(
         )
 
         activityRecord?.let {
-            recordsService.delete(activityRecord)
-            log.info { "Comment activity $activityRecord successfully deleted" }
+            if (!activityRecord.getLocalId().startsWith(ActivityRecordsProxy.COMMENT_ID_PREFIX)) {
+                recordsService.delete(activityRecord)
+                log.info { "Comment activity $activityRecord successfully deleted" }
+            }
         }
     }
 
