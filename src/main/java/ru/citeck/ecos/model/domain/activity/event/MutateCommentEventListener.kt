@@ -73,7 +73,7 @@ class MutateCommentEventListener(
                 "text" to event.commentText
             )
         )
-        log.info { "Comment activity ${event.activityRecord} successfully updated" }
+        log.debug { "Comment activity ${event.activityRecord} successfully updated" }
     }
 
     private fun deleteCommentActivity(event: CommentDeleteEvent) {
@@ -94,7 +94,7 @@ class MutateCommentEventListener(
         activityRecord?.let {
             if (!activityRecord.getLocalId().startsWith(ActivityRecordsProxy.COMMENT_ID_PREFIX)) {
                 recordsService.delete(activityRecord)
-                log.info { "Comment activity $activityRecord successfully deleted" }
+                log.debug { "Comment activity $activityRecord successfully deleted" }
             }
         }
     }
@@ -106,7 +106,7 @@ class MutateCommentEventListener(
                 "text" to event.activityText
             )
         )
-        log.info { "Comment ${event.commentRecord} successfully updated" }
+        log.debug { "Comment ${event.commentRecord} successfully updated" }
     }
 
     private data class UpdateCommentEvent(
