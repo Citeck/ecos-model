@@ -52,11 +52,11 @@ class CancelActivityRecordsDao(
             throw IllegalArgumentException("Action not supported for $sourceId")
         }
 
-        log.info { "Start cancellation activity $record" }
+        log.debug { "Start cancellation activity $record" }
         deleteActiveProcess(record)
         sendNotification(value)
         updateStatus(record)
-        log.info { "Canceled activity $record" }
+        log.debug { "Canceled activity $record" }
         return ""
     }
 
@@ -87,7 +87,7 @@ class CancelActivityRecordsDao(
                     "skipIoMapping" to false
                 )
             )
-            log.info { "Successful delete process $process" }
+            log.debug { "Successful delete process $process" }
         }
     }
 
