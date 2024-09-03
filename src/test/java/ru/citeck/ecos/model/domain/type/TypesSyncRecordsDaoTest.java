@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.domain.type;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
@@ -11,13 +12,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.citeck.ecos.commons.data.DataValue;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
+import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.test.commons.EcosWebAppApiMock;
 import ru.citeck.ecos.model.EcosModelApp;
 import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef;
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.model.type.service.TypesService;
-import ru.citeck.ecos.records2.RecordRef;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 import ru.citeck.ecos.records3.RecordsService;
 import ru.citeck.ecos.records3.RecordsServiceFactory;
 import ru.citeck.ecos.records2.predicate.PredicateService;
@@ -29,7 +31,6 @@ import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery;
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes;
 import ru.citeck.ecos.records3.record.request.RequestContext;
 import ru.citeck.ecos.webapp.api.EcosWebAppApi;
-import ru.citeck.ecos.webapp.api.entity.EntityRef;
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef;
 import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension;
 
@@ -66,7 +67,10 @@ public class TypesSyncRecordsDaoTest {
 
         EcosWebAppApiMock webAppCtxMock = new EcosWebAppApiMock();
         webAppCtxMock.setWebClientExecuteImpl((targetApp, path, request) ->
-            remoteServiceFactory.getRestHandlerAdapter().queryRecords(request)
+            remoteServiceFactory.getRestHandlerAdapter().queryRecords(
+                Json.getMapper().convertNotNull(request, ObjectNode.class),
+                2
+            )
         );
         localServiceFactory = new RecordsServiceFactory() {
             public EcosWebAppApi getEcosWebAppApi() {
@@ -74,7 +78,7 @@ public class TypesSyncRecordsDaoTest {
             }
         };
 
-        this.localRecordsService = localServiceFactory.getRecordsServiceV1();
+        this.localRecordsService = localServiceFactory.getRecordsService();
 
         generateData();
 
@@ -165,7 +169,7 @@ public class TypesSyncRecordsDaoTest {
             if (!sourceId.contains("/")) {
                 sourceId = "emodel/" + sourceId;
             }
-            res.withMetaRecord(RecordRef.valueOf(sourceId + "@"));
+            res.withMetaRecord(EntityRef.valueOf(sourceId + "@"));
         }
         res.withCreateVariants(res.getCreateVariants().stream().map(cv -> {
             CreateVariantDef.Builder cvRes = cv.copy();
@@ -190,8 +194,8 @@ public class TypesSyncRecordsDaoTest {
     TypeDef normalizeRes(TypeDef dto) {
 
         TypeDef.Builder res = dto.copy();
-/*        if (RecordRef.isEmpty(res.getMetaRecord())) {
-            res.withMetaRecord(RecordRef.valueOf(res.getSourceId() + "@"));
+/*        if (EntityRef.isEmpty(res.getMetaRecord())) {
+            res.withMetaRecord(EntityRef.valueOf(res.getSourceId() + "@"));
         }*/
 
      /*   List<AssociationDto> assocs = DataValue.create(dto.getAssociations()).toList(AssociationDto.class);
@@ -224,28 +228,28 @@ public class TypesSyncRecordsDaoTest {
             typeDto.withId("type-id-" + i);
 
             typeDto.setActions(Arrays.asList(
-                RecordRef.valueOf("uiserv/action@action-" + i + "-0"),
-                RecordRef.valueOf("uiserv/action@action-" + i + "-1")
+                EntityRef.valueOf("uiserv/action@action-" + i + "-0"),
+                EntityRef.valueOf("uiserv/action@action-" + i + "-1")
             ));
 
             //typeDto.setAssociations(generateAssocs(i));
             typeDto.withSourceType("CUSTOM_ID");
-            typeDto.withSourceRef(RecordRef.EMPTY);
+            typeDto.withSourceRef(EntityRef.EMPTY);
             typeDto.withProperties(ObjectData.create("{\"attKey\":\"attValue-" + i + "\"}"));
             typeDto.setConfig(ObjectData.create("{\"configKey\":\"configValue-" + i + "\"}"));
-            typeDto.withConfigFormRef(RecordRef.create("uiserv", "eform", "config-form-" + i));
+            typeDto.withConfigFormRef(EntityRef.create("uiserv", "eform", "config-form-" + i));
             typeDto.withCreateVariants(generateCreateVariants(i));
             typeDto.withDashboardType("card-details");
             typeDto.withDescription(new MLText("Description-" + i));
-            typeDto.withFormRef(RecordRef.valueOf("uiserv/form@form-" + i));
-            typeDto.withJournalRef(RecordRef.valueOf("uiserv/journal@journal-" + i));
+            typeDto.withFormRef(EntityRef.valueOf("uiserv/form@form-" + i));
+            typeDto.withJournalRef(EntityRef.valueOf("uiserv/journal@journal-" + i));
             typeDto.withSourceId("emodel/source-" + i);
             typeDto.withName(new MLText("name-" + i));
-            typeDto.withParentRef(RecordRef.valueOf("emodel/type@base"));
+            typeDto.withParentRef(EntityRef.valueOf("emodel/type@base"));
             typeDto.withDispNameTemplate(DataValue.create("{\"ru\": \"Тест\"}").getAs(MLText.class));
             typeDto.withInheritNumTemplate(true);
-            typeDto.withNumTemplateRef(RecordRef.valueOf("emodel/num-template@test"));
-            typeDto.withPostCreateActionRef(RecordRef.valueOf("uiserv/action@post-create-action"));
+            typeDto.withNumTemplateRef(EntityRef.valueOf("emodel/num-template@test"));
+            typeDto.withPostCreateActionRef(EntityRef.valueOf("uiserv/action@post-create-action"));
 
             TypeDef typeDef = typeDto.build();
             types.add(typeDef);
@@ -275,7 +279,7 @@ public class TypesSyncRecordsDaoTest {
             dto.setId("assoc-" + idx + "-" + i);
             dto.setDirection(AssocDirection.BOTH);
             dto.setName(new MLText("Assoc " + idx + "-" + i));
-            dto.setTarget(RecordRef.create("emodel", "type", "base"));
+            dto.setTarget(EntityRef.create("emodel", "type", "base"));
             result.add(dto);
         }
         return result;

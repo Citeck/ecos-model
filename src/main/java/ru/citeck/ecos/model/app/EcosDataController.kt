@@ -1,6 +1,6 @@
 package ru.citeck.ecos.model.app
 
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController

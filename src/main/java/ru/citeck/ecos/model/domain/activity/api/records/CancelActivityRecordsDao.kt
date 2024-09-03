@@ -1,6 +1,6 @@
 package ru.citeck.ecos.model.domain.activity.api.records
 
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import net.fortuna.ical4j.model.property.Method
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.utils.DurationStrUtils
@@ -28,7 +28,8 @@ class CancelActivityRecordsDao(
 
     companion object {
         const val ID = "cancel-activity"
-        private val SOURCE_ID = "${AppName.EMODEL}${EntityRef.APP_NAME_DELIMITER}${ActivityConfiguration.ACTIVITY_DAO_ID}"
+        private val SOURCE_ID =
+            "${AppName.EMODEL}${EntityRef.APP_NAME_DELIMITER}${ActivityConfiguration.ACTIVITY_DAO_ID}"
         private const val PROCESS_DEFINITION_KEY = "ecos-activity-process"
         private const val NOTIFICATION_ATTACHMENTS = "_attachments"
 
@@ -45,7 +46,6 @@ class CancelActivityRecordsDao(
     }
 
     override fun mutate(value: ActivityDto): Any? {
-
         val record = value.recordRef
         val sourceId = "${record.getAppName()}${EntityRef.APP_NAME_DELIMITER}${record.getSourceId()}"
         if (SOURCE_ID != sourceId) {
@@ -61,7 +61,6 @@ class CancelActivityRecordsDao(
     }
 
     private fun deleteActiveProcess(activity: EntityRef) {
-
         val process = recordsService.queryOne(
             RecordsQuery.create()
                 .withSourceId("eproc/bpmn-proc")
@@ -95,13 +94,15 @@ class CancelActivityRecordsDao(
     private fun sendNotification(activity: ActivityDto) {
         val sequence = activity.calendarEventSequence + 1
         val durationInMillis = DurationStrUtils.parseDurationToMillis(activity.duration)
+        val recipients = mutableSetOf(activity.responsibleEmail)
+        recipients.addAll(activity.participantsEmails)
         val canceledCalendarEvent = CalendarEvent.Builder(activity.calendarEventSummary, activity.activityDate)
             .uid(activity.calendarEventUid)
             .sequence(sequence)
             .description(activity.description)
             .durationInMillis(durationInMillis)
             .organizer(activity.organizerEmail)
-            .attendees(listOf(activity.responsibleEmail))
+            .attendees(recipients)
             .method(Method.CANCEL)
             .build()
         val canceledCalendarEventAttach = canceledCalendarEvent.createAttachment()
@@ -111,7 +112,7 @@ class CancelActivityRecordsDao(
 
         notificationService.send(
             Notification.Builder()
-                .addRecipient(activity.responsibleEmail)
+                .recipients(recipients)
                 .record(activity.recordRef)
                 .notificationType(NotificationType.EMAIL_NOTIFICATION)
                 .templateRef(notificationTemplate)
@@ -132,6 +133,7 @@ class CancelActivityRecordsDao(
     data class ActivityDto(
         val recordRef: EntityRef = EntityRef.EMPTY,
         val responsibleEmail: String,
+        val participantsEmails: List<String> = emptyList(),
         val organizerEmail: String,
         val activityDate: Instant,
         val duration: String,

@@ -2,7 +2,7 @@ package ru.citeck.ecos.model.domain;
 
 import lombok.Getter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Objects;
 
 /**
@@ -12,8 +12,8 @@ import java.util.Objects;
 public class BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
-    @SequenceGenerator(name = "sequenceGenerator")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibernate_sequence")
+    @SequenceGenerator(name = "hibernate_sequence")
     @Getter
     protected Long id;
 

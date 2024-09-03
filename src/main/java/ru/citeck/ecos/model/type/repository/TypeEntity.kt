@@ -1,16 +1,16 @@
 package ru.citeck.ecos.model.type.repository
 
+import jakarta.persistence.*
 import ru.citeck.ecos.model.domain.AbstractAuditingEntity
 import ru.citeck.ecos.model.lib.type.dto.QueryPermsPolicy
-import javax.persistence.*
 
 @Entity
 @Table(name = "ecos_type")
 class TypeEntity : AbstractAuditingEntity() {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ecos_types_seq_gen")
-    @SequenceGenerator(name = "ecos_types_seq_gen")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibernate_sequence")
+    @SequenceGenerator(name = "hibernate_sequence")
     val id: Long? = null
 
     @Column(unique = true)

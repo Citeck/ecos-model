@@ -2,13 +2,12 @@ package ru.citeck.ecos.model.section.records.record;
 
 import org.jetbrains.annotations.Nullable;
 import ru.citeck.ecos.commons.data.MLText;
+import ru.citeck.ecos.context.lib.i18n.I18nContext;
 import ru.citeck.ecos.model.section.dto.SectionDto;
-import ru.citeck.ecos.records2.QueryContext;
 import ru.citeck.ecos.records2.RecordConstants;
-import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
-import ru.citeck.ecos.records2.graphql.meta.value.MetaValue;
+import ru.citeck.ecos.records3.record.atts.value.AttValue;
 
-public class SectionRecord implements MetaValue {
+public class SectionRecord implements AttValue {
 
     private final SectionDto dto;
 
@@ -17,7 +16,7 @@ public class SectionRecord implements MetaValue {
     }
 
     @Override
-    public Object getJson() {
+    public Object asJson() {
         return dto;
     }
 
@@ -28,27 +27,20 @@ public class SectionRecord implements MetaValue {
 
     @Override
     public String getDisplayName() {
-        return MLText.getClosestValue(dto.getName(), QueryContext.getCurrent().getLocale(), dto.getId());
+        return MLText.getClosestValue(dto.getName(), I18nContext.getLocale(), dto.getId());
     }
 
     @Override
-    public Object getAttribute(String name, MetaField field) {
-        switch (name) {
-            case "name":
-                return dto.getName();
-            case "description":
-                return dto.getDescription();
-            case "tenant":
-                return dto.getTenant();
-            case "types":
-                return dto.getTypes();
-            case "attributes":
-                return dto.getAttributes();
-            case "moduleId":
-                return dto.getId();
-            case RecordConstants.ATT_FORM_KEY:
-                return "module_model/section";
-        }
-        return null;
+    public Object getAtt(String name) {
+        return switch (name) {
+            case "name" -> dto.getName();
+            case "description" -> dto.getDescription();
+            case "tenant" -> dto.getTenant();
+            case "types" -> dto.getTypes();
+            case "attributes" -> dto.getAttributes();
+            case "moduleId" -> dto.getId();
+            case RecordConstants.ATT_FORM_KEY -> "module_model/section";
+            default -> null;
+        };
     }
 }

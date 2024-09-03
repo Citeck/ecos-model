@@ -1,7 +1,7 @@
 package ru.citeck.ecos.model.domain.secret.repo
 
+import jakarta.persistence.*
 import ru.citeck.ecos.model.domain.AbstractAuditingEntity
-import javax.persistence.*
 
 @Entity
 @Table(name = "ecos_secret")

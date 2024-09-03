@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.citeck.ecos.commons.data.DataValue;
 import ru.citeck.ecos.commons.mime.MimeTypes;
-import ru.citeck.ecos.records2.RecordRef;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 import ru.citeck.ecos.webapp.api.constants.AppName;
 import ru.citeck.ecos.webapp.api.content.EcosContentData;
 import ru.citeck.ecos.webapp.api.mime.MimeType;
@@ -32,7 +32,7 @@ public class DocumentPrintRedirectController {
     private final EcosWebClientApi webClient;
 
     @GetMapping(value = "/api/content/printpdf")
-    public ResponseEntity<ByteArrayResource> returnPrintPdf(@RequestParam RecordRef ref) {
+    public ResponseEntity<ByteArrayResource> returnPrintPdf(@RequestParam EntityRef ref) {
 
         if (ref.getAppName().equals(AppName.ALFRESCO)) {
             HttpHeaders headers = new HttpHeaders();

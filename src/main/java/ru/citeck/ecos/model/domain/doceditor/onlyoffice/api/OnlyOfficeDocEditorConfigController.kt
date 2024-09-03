@@ -131,9 +131,9 @@ class OnlyOfficeDocEditorConfigController(
 
     private fun getDocType(extension: String): String? {
         return if ((
-            ".doc.docx.docm.dot.dotx.dotm.odt.fodt.ott" +
-                ".rtf.txt.html.htm.mht.pdf.djvu.fb2.epub.xps"
-            ).indexOf(extension) != -1
+                ".doc.docx.docm.dot.dotx.dotm.odt.fodt.ott" +
+                    ".rtf.txt.html.htm.mht.pdf.djvu.fb2.epub.xps"
+                ).indexOf(extension) != -1
         ) {
             "text"
         } else if (".xls.xlsx.xlsm.xlt.xltx.xltm.ods.fods.ots.csv".indexOf(extension) != -1) {

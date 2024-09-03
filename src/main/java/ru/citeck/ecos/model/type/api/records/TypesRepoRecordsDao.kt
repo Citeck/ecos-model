@@ -1,6 +1,6 @@
 package ru.citeck.ecos.model.type.api.records
 
-import ecos.com.fasterxml.jackson210.databind.JsonNode
+import com.fasterxml.jackson.databind.JsonNode
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.entity.EntityMeta

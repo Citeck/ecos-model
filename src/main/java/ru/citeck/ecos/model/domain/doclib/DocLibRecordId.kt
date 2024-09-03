@@ -1,6 +1,6 @@
 package ru.citeck.ecos.model.domain.doclib
 
-import org.apache.commons.lang.StringUtils
+import org.apache.commons.lang3.StringUtils
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 
 class DocLibRecordId(

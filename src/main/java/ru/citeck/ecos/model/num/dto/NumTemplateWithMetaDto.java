@@ -1,6 +1,6 @@
 package ru.citeck.ecos.model.num.dto;
 
-import ecos.com.fasterxml.jackson210.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta;

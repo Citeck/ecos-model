@@ -1,7 +1,8 @@
 package ru.citeck.ecos.model.service.keycloak
 
+import io.github.oshai.kotlinlogging.KotlinLogging
+import jakarta.annotation.PostConstruct
 import lombok.extern.slf4j.Slf4j
-import mu.KotlinLogging
 import org.keycloak.admin.client.Keycloak
 import org.keycloak.admin.client.resource.RealmResource
 import org.keycloak.representations.idm.CredentialRepresentation
@@ -14,7 +15,6 @@ import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.webapp.lib.env.EcosWebAppEnvironment
 import java.util.*
-import javax.annotation.PostConstruct
 
 @Slf4j
 @Service

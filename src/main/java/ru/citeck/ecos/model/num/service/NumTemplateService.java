@@ -1,7 +1,7 @@
 package ru.citeck.ecos.model.num.service;
 
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.ILock;
+import com.hazelcast.cp.lock.FencedLock;
 import kotlin.jvm.functions.Function0;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -28,11 +28,10 @@ import ru.citeck.ecos.model.num.repository.NumTemplateRepository;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
 import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy;
 import ru.citeck.ecos.webapp.api.entity.EntityRef;
-import ru.citeck.ecos.webapp.lib.lock.EcosAppLockService;
 import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverter;
 import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverterFactory;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -190,8 +189,10 @@ public class NumTemplateService {
 
         long lockingStartedAt = System.currentTimeMillis();
 
-        ILock lock = hazelcast.getLock("num-tlt-" + numTemplateEntity.getExtId() + "-" + counterKey);
-        lock.lock(10, TimeUnit.MINUTES);
+        FencedLock lock = hazelcast.getCPSubsystem().getLock("num-tlt-" + numTemplateEntity.getExtId() + "-" + counterKey);
+        if (!lock.tryLock(10, TimeUnit.MINUTES)) {
+            throw new IllegalStateException("Number template lock can't be locked");
+        }
         try {
             long lockingTime = System.currentTimeMillis() - lockingStartedAt;
             if (lockingTime > 1000) {

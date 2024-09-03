@@ -1,6 +1,6 @@
 package ru.citeck.ecos.model.domain.authsync.service
 
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
@@ -19,14 +19,13 @@ import ru.citeck.ecos.model.lib.authorities.sync.AuthoritiesSync
 import ru.citeck.ecos.model.lib.authorities.sync.AuthoritiesSyncContext
 import ru.citeck.ecos.model.lib.authorities.sync.AuthoritiesSyncFactory
 import ru.citeck.ecos.model.lib.utils.ModelUtils
-import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records2.predicate.model.VoidPredicate
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
 import ru.citeck.ecos.records3.record.atts.dto.RecordAtts
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
-import ru.citeck.ecos.records3.record.request.RequestContext
+import ru.citeck.ecos.txn.lib.TxnContext
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.api.lock.EcosLockApi
 import ru.citeck.ecos.webapp.api.task.EcosTasksApi
@@ -92,7 +91,7 @@ class AuthoritiesSyncService(
             ?: error("Sync instance is not found by id $newAuthorityManagerId")
 
         val attributes = record.attributes.deepCopy()
-        attributes["managedBySync"] = RecordRef.create(EcosModelApp.NAME, SOURCE_ID, syncInstance.id)
+        attributes["managedBySync"] = EntityRef.create(EcosModelApp.NAME, SOURCE_ID, syncInstance.id)
         if (authorityType == AuthorityType.GROUP && record.id == AuthorityGroupConstants.ADMIN_GROUP) {
             var authorityGroups = attributes[AuthorityConstants.ATT_AUTHORITY_GROUPS]
             if (authorityGroups.isNull()) {
@@ -206,7 +205,7 @@ class AuthoritiesSyncService(
                                 Schedules.fixedDelay(Duration.ofMinutes(1), repeatDelayDuration)
                             ) {
                                 AuthContext.runAsSystem {
-                                    RequestContext.doWithTxn {
+                                    TxnContext.doInTxn {
                                         run(newInstance, true)
                                     }
                                 }
@@ -270,7 +269,7 @@ class AuthoritiesSyncService(
 
         log.debug { "==== Run synchronization ${sync.id} ====" }
 
-        val ref = RecordRef.create(EcosModelApp.NAME, SOURCE_ID, sync.id)
+        val ref = EntityRef.create(EcosModelApp.NAME, SOURCE_ID, sync.id)
 
         val stateData = recordsService.getAtts(ref, SyncStateAtts::class.java)
         val state = if (stateData.stateVersion < sync.config.version) {
@@ -404,7 +403,7 @@ class AuthoritiesSyncService(
     private class CurrentAuthorityAtts(
         @AttName("_notExists")
         val notExists: Boolean? = null,
-        val managedBySync: RecordRef? = null
+        val managedBySync: EntityRef? = null
     )
 
     private class SyncStateAtts(

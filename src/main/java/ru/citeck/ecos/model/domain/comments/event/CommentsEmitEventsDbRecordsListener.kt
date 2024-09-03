@@ -1,6 +1,6 @@
 package ru.citeck.ecos.model.domain.comments.event
 
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.jsoup.Jsoup
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.data.sql.records.listener.DbRecordChangedEvent
@@ -28,7 +28,8 @@ class CommentsEmitEventsDbRecordsListener(
     override fun onChanged(event: DbRecordChangedEvent) {
         log.debug { "Comment changed: ${event.record}" }
 
-        if (event.after["record"] == null) {
+        val recordAtt = recordsService.getAtt(event.record, "record")
+        if (recordAtt.isNull()) {
             // record was deleted
             return
         }

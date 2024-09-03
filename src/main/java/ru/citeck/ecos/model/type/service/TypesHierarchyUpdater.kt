@@ -1,11 +1,11 @@
 package ru.citeck.ecos.model.type.service
 
-import mu.KotlinLogging
-import ru.citeck.ecos.commons.promise.Promises
+import io.github.oshai.kotlinlogging.KotlinLogging
 import ru.citeck.ecos.model.type.service.resolver.AspectsProvider
 import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
 import ru.citeck.ecos.model.type.service.resolver.TypesProvider
 import ru.citeck.ecos.webapp.api.promise.Promise
+import ru.citeck.ecos.webapp.api.promise.Promises
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import ru.citeck.ecos.webapp.lib.registry.MutableEcosRegistry
 import java.util.concurrent.ArrayBlockingQueue

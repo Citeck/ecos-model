@@ -3,6 +3,7 @@ package ru.citeck.ecos.model.domain.perms.api.records;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.context.lib.auth.AuthContext;
 import ru.citeck.ecos.context.lib.i18n.I18nContext;
@@ -11,43 +12,36 @@ import ru.citeck.ecos.model.domain.perms.service.TypePermsService;
 import ru.citeck.ecos.model.lib.permissions.dto.PermissionsDef;
 import ru.citeck.ecos.model.lib.type.dto.TypePermsDef;
 import ru.citeck.ecos.model.lib.utils.ModelUtils;
-import ru.citeck.ecos.model.utils.LegacyRecordsUtils;
 import ru.citeck.ecos.records2.RecordConstants;
-import ru.citeck.ecos.records2.RecordMeta;
-import ru.citeck.ecos.records2.RecordRef;
-import ru.citeck.ecos.records2.graphql.meta.value.EmptyValue;
-import ru.citeck.ecos.records2.graphql.meta.value.MetaField;
-import ru.citeck.ecos.records2.graphql.meta.value.MetaValue;
+import ru.citeck.ecos.records3.record.atts.value.AttValue;
+import ru.citeck.ecos.records3.record.atts.value.impl.EmptyAttValue;
+import ru.citeck.ecos.records3.record.dao.AbstractRecordsDao;
+import ru.citeck.ecos.records3.record.dao.atts.RecordAttsDao;
+import ru.citeck.ecos.records3.record.dao.delete.DelStatus;
+import ru.citeck.ecos.records3.record.dao.delete.RecordDeleteDao;
+import ru.citeck.ecos.records3.record.dao.mutate.RecordMutateDtoDao;
+import ru.citeck.ecos.records3.record.dao.query.RecordsQueryDao;
+import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery;
+import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 import ru.citeck.ecos.records2.predicate.PredicateService;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
-import ru.citeck.ecos.records2.request.delete.RecordsDelResult;
-import ru.citeck.ecos.records2.request.delete.RecordsDeletion;
-import ru.citeck.ecos.records2.request.mutation.RecordsMutResult;
-import ru.citeck.ecos.records2.request.query.RecordsQuery;
-import ru.citeck.ecos.records2.request.query.RecordsQueryResult;
-import ru.citeck.ecos.records2.request.result.RecordsResult;
-import ru.citeck.ecos.records2.source.dao.local.LocalRecordsDao;
-import ru.citeck.ecos.records2.source.dao.local.MutableRecordsLocalDao;
-import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsMetaDao;
-import ru.citeck.ecos.records2.source.dao.local.v2.LocalRecordsQueryWithMetaDao;
 import ru.citeck.ecos.records3.RecordsService;
 import ru.citeck.ecos.records3.record.atts.schema.ScalarType;
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName;
-import ru.citeck.ecos.webapp.api.entity.EntityRef;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-public class TypePermsRecords extends LocalRecordsDao
-    implements LocalRecordsMetaDao<Object>,
-    LocalRecordsQueryWithMetaDao<Object>,
-    MutableRecordsLocalDao<TypePermsDef.Builder> {
+public class TypePermsRecords extends AbstractRecordsDao
+    implements RecordAttsDao,
+    RecordsQueryDao,
+    RecordDeleteDao,
+    RecordMutateDtoDao<TypePermsDef.Builder> {
 
     public static final String ID = "perms";
 
@@ -56,75 +50,65 @@ public class TypePermsRecords extends LocalRecordsDao
     private final TypePermsService permsService;
     private final RecordsService recordsService3;
 
+    @Nullable
     @Override
-    public RecordsQueryResult<Object> queryLocalRecords(@NotNull RecordsQuery query, MetaField field) {
+    public Object queryRecords(@NotNull RecordsQuery recordsQuery) throws Exception {
 
-        if (query.getLanguage().equals(LANG_TYPE)) {
-            TypeQuery typeQuery = query.getQuery(TypeQuery.class);
+        if (recordsQuery.getLanguage().equals(LANG_TYPE)) {
+            TypeQuery typeQuery = recordsQuery.getQuery(TypeQuery.class);
             TypePermsDef permsDef = permsService.getPermsForType(typeQuery.typeRef);
-            return permsDef != null ? RecordsQueryResult.of(permsDef) : new RecordsQueryResult<>();
+            return permsDef != null ? RecsQueryRes.of(permsDef) : new RecsQueryRes<>();
         }
 
-        if (query.getLanguage().equals(PredicateService.LANGUAGE_PREDICATE)) {
+        if (recordsQuery.getLanguage().equals(PredicateService.LANGUAGE_PREDICATE)) {
 
-            Predicate predicate = query.getQuery(Predicate.class);
+            Predicate predicate = recordsQuery.getQuery(Predicate.class);
 
             Collection<PermsRecord> perms = permsService.getAll(
-                query.getMaxItems(),
-                query.getSkipCount(),
+                recordsQuery.getPage().getMaxItems(),
+                recordsQuery.getPage().getSkipCount(),
                 predicate,
-                LegacyRecordsUtils.mapLegacySortBy(query.getSortBy())
+                recordsQuery.getSortBy()
             ).stream().map(this::toRecord).collect(Collectors.toList());
 
-            RecordsQueryResult<Object> permissions = new RecordsQueryResult<>();
+            RecsQueryRes<Object> permissions = new RecsQueryRes<>();
             permissions.setRecords(new ArrayList<>(perms));
 
             permissions.setTotalCount(permsService.getCount(predicate));
             return permissions;
         }
 
-        return new RecordsQueryResult<>();
+        return new RecsQueryRes<>();
     }
 
-    @NotNull
+    @Nullable
     @Override
-    public List<Object> getLocalRecordsMeta(@NotNull List<EntityRef> list, @NotNull MetaField metaField) {
-        return list.stream()
-            .map(ref -> Optional.ofNullable(permsService.getPermsById(ref.getLocalId())))
-            .map(perms -> perms.isPresent() ? toRecord(perms.get()) : EmptyValue.INSTANCE)
-            .collect(Collectors.toList());
-    }
-
-    @NotNull
-    @Override
-    public List<TypePermsDef.Builder> getValuesToMutate(@NotNull List<EntityRef> list) {
-        return list.stream().map(l -> {
-            TypePermsDef permsDef = permsService.getPermsById(l.getLocalId());
-            return permsDef != null ? permsDef.copy() : TypePermsDef.create().withId(l.getLocalId());
-        }).collect(Collectors.toList());
-    }
-
-    @NotNull
-    @Override
-    public RecordsMutResult save(@NotNull List<TypePermsDef.Builder> list) {
-        List<RecordMeta> result = new ArrayList<>();
-        for (TypePermsDef.Builder config : list) {
-            permsService.save(config.build());
-            result.add(new RecordMeta(RecordRef.create("", config.getId())));
+    public Object getRecordAtts(@NotNull String recordId) throws Exception {
+        TypePermsDef permsDef = permsService.getPermsById(recordId);
+        if (permsDef == null) {
+            return EmptyAttValue.INSTANCE;
+        } else {
+            return toRecord(permsDef);
         }
-        RecordsMutResult recordsMutResult = new RecordsMutResult();
-        recordsMutResult.setRecords(result);
-        return recordsMutResult;
     }
 
     @Override
-    public RecordsDelResult delete(RecordsDeletion recordsDeletion) {
-        List<RecordMeta> result = new ArrayList<>();
-        recordsDeletion.getRecords().forEach(r -> {
-            permsService.delete(r.getLocalId());
-            result.add(new RecordMeta(r));
-        });
-        return new RecordsDelResult(new RecordsResult<>(result));
+    public TypePermsDef.Builder getRecToMutate(@NotNull String recordId) throws Exception {
+        TypePermsDef permsDef = permsService.getPermsById(recordId);
+        return permsDef != null ? permsDef.copy() : TypePermsDef.create().withId(recordId);
+    }
+
+    @NotNull
+    @Override
+    public String saveMutatedRec(TypePermsDef.Builder builder) throws Exception {
+        return permsService.save(builder.build()).getId();
+    }
+
+    @NotNull
+    @Override
+    public DelStatus delete(@NotNull String recordId) throws Exception {
+        permsService.delete(recordId);
+        return DelStatus.OK;
     }
 
     @Override
@@ -141,7 +125,7 @@ public class TypePermsRecords extends LocalRecordsDao
     }
 
     @RequiredArgsConstructor
-    public static class PermsRecord implements MetaValue {
+    public static class PermsRecord implements AttValue {
 
         private final RecordsService recordsService;
         private final TypePermsDef typePermsDef;
@@ -153,7 +137,7 @@ public class TypePermsRecords extends LocalRecordsDao
         }
 
         @Override
-        public Object getAttribute(@NotNull String name, @NotNull MetaField field) {
+        public Object getAtt(@NotNull String name) {
             switch (name) {
                 case RecordConstants.ATT_MODIFIED:
                     return typePermsMeta.getModified();
@@ -170,7 +154,7 @@ public class TypePermsRecords extends LocalRecordsDao
         }
 
         @Override
-        public Object getJson() {
+        public Object asJson() {
             return typePermsDef;
         }
 
@@ -185,7 +169,7 @@ public class TypePermsRecords extends LocalRecordsDao
         }
 
         @Override
-        public EntityRef getRecordType() {
+        public EntityRef getType() {
             return ModelUtils.getTypeRef("type-perms");
         }
     }

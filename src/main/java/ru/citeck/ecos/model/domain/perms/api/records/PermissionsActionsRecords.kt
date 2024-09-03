@@ -1,6 +1,6 @@
 package ru.citeck.ecos.model.domain.perms.api.records
 
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.context.lib.auth.AuthContext

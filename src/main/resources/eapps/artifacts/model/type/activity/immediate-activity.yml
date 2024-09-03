@@ -9,3 +9,10 @@ storageType: DEFAULT
 parentRef: emodel/type@ecos-activity
 
 inheritActions: true
+
+model:
+  statuses:
+    - id: created
+      name:
+        ru: Создано
+        en: Created

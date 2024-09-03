@@ -81,7 +81,7 @@ open class TypeTestBase {
         val typeConverter = TypeConverter(typesRepo)
         typeService = TypesServiceImpl(typeConverter, typesRepo)
         artifactHandler = TypeArtifactHandler(typeService)
-        records = recordsServices.recordsServiceV1
+        records = recordsServices.recordsService
 
         val typesRegistryInitializer = TypesRegistryInitializer(typeService)
         typesRegistryInitializer.setAspectsRegistry(

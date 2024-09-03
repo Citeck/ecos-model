@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.permissions;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.citeck.ecos.commons.data.MLText;
 import ru.citeck.ecos.commons.data.ObjectData;
+import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.test.commons.EcosWebAppApiMock;
 import ru.citeck.ecos.model.EcosModelApp;
 import ru.citeck.ecos.model.domain.permissions.dto.*;
@@ -15,7 +17,7 @@ import ru.citeck.ecos.model.domain.permissions.repo.AttributesPermissionsReposit
 import ru.citeck.ecos.model.domain.permissions.service.AttributesPermissionsService;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
 import ru.citeck.ecos.model.type.service.TypesService;
-import ru.citeck.ecos.records2.RecordRef;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 import ru.citeck.ecos.records3.RecordsService;
 import ru.citeck.ecos.records3.RecordsServiceFactory;
 import ru.citeck.ecos.records2.predicate.PredicateService;
@@ -27,7 +29,6 @@ import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery;
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes;
 import ru.citeck.ecos.records3.record.request.RequestContext;
 import ru.citeck.ecos.webapp.api.EcosWebAppApi;
-import ru.citeck.ecos.webapp.api.entity.EntityRef;
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef;
 import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension;
 
@@ -67,7 +68,10 @@ public class AttrPermissionsSyncRecordsDaoTest {
 
         EcosWebAppApiMock webAppCtxMock = new EcosWebAppApiMock();
         webAppCtxMock.setWebClientExecuteImpl((targetApp, path, request) ->
-            remoteServiceFactory.getRestHandlerAdapter().queryRecords(request)
+            remoteServiceFactory.getRestHandlerAdapter().queryRecords(
+                Json.getMapper().convertNotNull(request, ObjectNode.class),
+                2
+            )
         );
         localServiceFactory = new RecordsServiceFactory() {
             public EcosWebAppApi getEcosWebAppApi() {
@@ -75,7 +79,7 @@ public class AttrPermissionsSyncRecordsDaoTest {
             }
         };
 
-        this.localRecordsService = localServiceFactory.getRecordsServiceV1();
+        this.localRecordsService = localServiceFactory.getRecordsService();
 
         generateData();
 
@@ -122,7 +126,7 @@ public class AttrPermissionsSyncRecordsDaoTest {
             return res;
         });
         assertEquals(1, recs.getRecords().size());
-        assertEquals(RecordRef.valueOf(SOURCE_ID + "@att-perm-id-1"), recs.getRecords().get(0));
+        assertEquals(EntityRef.valueOf(SOURCE_ID + "@att-perm-id-1"), recs.getRecords().get(0));
 
         RecsQueryRes<AttributesPermissionDto> resultWithMeta = RequestContext.doWithCtx(localServiceFactory, ctx -> {
             RecsQueryRes<AttributesPermissionDto> res = localRecordsService.query(query1, AttributesPermissionDto.class);
@@ -158,10 +162,10 @@ public class AttrPermissionsSyncRecordsDaoTest {
             TypeDef.Builder type = TypeDef.create();
             type.withId("atype-id-" + i);
             type.withName(new MLText("atype-id-" + i));
-            type.withParentRef(RecordRef.valueOf("emodel/type@base"));
+            type.withParentRef(EntityRef.valueOf("emodel/type@base"));
             typeService.save(type.build());
 
-            dto.setTypeRef(RecordRef.valueOf("emodel/type@atype-id-" + i));
+            dto.setTypeRef(EntityRef.valueOf("emodel/type@atype-id-" + i));
 
             RuleDto rule = new RuleDto();
             rule.setRoles(Collections.emptyList());
@@ -180,7 +184,7 @@ public class AttrPermissionsSyncRecordsDaoTest {
         TypeDef.Builder typeNotFound = TypeDef.create();
         typeNotFound.withId("not-f");
         typeNotFound.withName(new MLText("not-f"));
-        typeNotFound.withParentRef(RecordRef.valueOf("emodel/type@atype-id-0"));
+        typeNotFound.withParentRef(EntityRef.valueOf("emodel/type@atype-id-0"));
 
         typeService.save(typeNotFound.build());
     }

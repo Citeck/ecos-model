@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.num;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -7,13 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.citeck.ecos.commons.data.DataValue;
 import ru.citeck.ecos.commons.data.MLText;
+import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.test.commons.EcosWebAppApiMock;
 import ru.citeck.ecos.model.EcosModelApp;
 import ru.citeck.ecos.model.num.dto.NumTemplateDto;
 import ru.citeck.ecos.model.num.repository.NumTemplateRepository;
 import ru.citeck.ecos.model.num.service.NumTemplateService;
 import ru.citeck.ecos.model.type.service.TypesService;
-import ru.citeck.ecos.records2.RecordRef;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 import ru.citeck.ecos.records3.RecordsService;
 import ru.citeck.ecos.records3.RecordsServiceFactory;
 import ru.citeck.ecos.records2.predicate.PredicateService;
@@ -22,7 +24,6 @@ import ru.citeck.ecos.records2.source.dao.local.RemoteSyncRecordsDao;
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery;
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes;
 import ru.citeck.ecos.webapp.api.EcosWebAppApi;
-import ru.citeck.ecos.webapp.api.entity.EntityRef;
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef;
 import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension;
 
@@ -61,7 +62,11 @@ public class NumTemplateSyncRecordsDaoTest {
 
         EcosWebAppApiMock webAppCtx = new EcosWebAppApiMock();
         webAppCtx.setWebClientExecuteImpl((app, path, req) ->
-            remoteServiceFactory.getRestHandlerAdapter().queryRecords(req));
+            remoteServiceFactory.getRestHandlerAdapter().queryRecords(
+                Json.getMapper().convertNotNull(req, ObjectNode.class),
+                2
+            )
+        );
 
         localServiceFactory = new RecordsServiceFactory() {
             public EcosWebAppApi getEcosWebAppApi() {
@@ -69,7 +74,7 @@ public class NumTemplateSyncRecordsDaoTest {
             }
         };
 
-        this.localRecordsService = localServiceFactory.getRecordsServiceV1();
+        this.localRecordsService = localServiceFactory.getRecordsService();
 
         generateData();
 
@@ -95,7 +100,7 @@ public class NumTemplateSyncRecordsDaoTest {
 
         assertEquals(origDto, normalize(dto));
 
-        DataValue att = remoteServiceFactory.getRecordsService().getAttribute(RecordRef.valueOf(SOURCE_ID + "@template-id-100"), "modelAttributes[]");
+        DataValue att = remoteServiceFactory.getRecordsService().getAtt(EntityRef.valueOf(SOURCE_ID + "@template-id-100"), "modelAttributes[]");
         assertEquals(new ArrayList<>(Collections.singletonList("some-att")), new ArrayList<>(att.toStrList()));
 
         assertEquals(new HashSet<>(templates), new HashSet<>(

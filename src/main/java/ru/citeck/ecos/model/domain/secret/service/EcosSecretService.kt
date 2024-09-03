@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.domain.secret.service
 
+import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Service
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.entity.EntityMeta
@@ -24,7 +25,6 @@ import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchCon
 import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverterFactory
 import java.lang.IllegalArgumentException
 import java.util.concurrent.CopyOnWriteArrayList
-import javax.annotation.PostConstruct
 
 @Service
 class EcosSecretService(

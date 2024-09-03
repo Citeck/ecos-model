@@ -20,7 +20,7 @@ import ru.citeck.ecos.model.lib.type.dto.TypeContentConfig
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.model.lib.utils.ModelUtils
-import ru.citeck.ecos.records2.RecordRef
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.model.type.dto.AssocDef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import java.util.*
@@ -38,7 +38,7 @@ class TypesServiceTest : TypeTestBase() {
                     AssocDef.create {
                         withId("base-test")
                         withName(MLText("test-name"))
-                        withTarget(RecordRef.create(EcosModelApp.NAME, "type", "assocTarget"))
+                        withTarget(EntityRef.create(EcosModelApp.NAME, "type", "assocTarget"))
                     }
                 )
             )
@@ -48,7 +48,7 @@ class TypesServiceTest : TypeTestBase() {
 
         val assocTargetType = TypeDef.create {
             withId("assocTarget")
-            withJournalRef(RecordRef.create("uiserv", "journal", "someJournal"))
+            withJournalRef(EntityRef.create("uiserv", "journal", "someJournal"))
         }
         artifactHandler.deployArtifact(assocTargetType)
 
@@ -61,8 +61,8 @@ class TypesServiceTest : TypeTestBase() {
             )
             this.withActions(
                 listOf(
-                    RecordRef.valueOf("uiserv/action@test0"),
-                    RecordRef.valueOf("uiserv/action@test2")
+                    EntityRef.valueOf("uiserv/action@test0"),
+                    EntityRef.valueOf("uiserv/action@test2")
                 )
             )
             this.withAssociations(
@@ -71,24 +71,24 @@ class TypesServiceTest : TypeTestBase() {
                         this.withId("test")
                         this.withAttribute("test-att")
                         this.withName(MLText("test-assoc-name"))
-                        this.withTarget(RecordRef.valueOf("emodel/type@base"))
+                        this.withTarget(EntityRef.valueOf("emodel/type@base"))
                         this.withDirection(AssocDef.Direction.SOURCE)
                     }
                 )
             )
-            this.withFormRef(RecordRef.valueOf("uiserv/form@test-form"))
+            this.withFormRef(EntityRef.valueOf("uiserv/form@test-form"))
             this.withConfig(ObjectData.create("{\"aa\":\"bb\"}"))
-            this.withConfigFormRef(RecordRef.valueOf("uiserv/form@config-form"))
+            this.withConfigFormRef(EntityRef.valueOf("uiserv/form@config-form"))
             this.withCreateVariants(
                 listOf(
                     CreateVariantDef.create {
                         withId("create-0")
-                        withFormRef(RecordRef.valueOf("uiserv/form@cv-form-0"))
+                        withFormRef(EntityRef.valueOf("uiserv/form@cv-form-0"))
                         withName(MLText("cv-0-name"))
                     },
                     CreateVariantDef.create {
                         withId("create-1")
-                        withFormRef(RecordRef.valueOf("uiserv/form@cv-form-1"))
+                        withFormRef(EntityRef.valueOf("uiserv/form@cv-form-1"))
                         withName(MLText("cv-1-name"))
                     }
                 )
@@ -117,7 +117,7 @@ class TypesServiceTest : TypeTestBase() {
             this.withInheritActions(true)
             this.withInheritForm(true)
             this.withInheritNumTemplate(true)
-            this.withJournalRef(RecordRef.valueOf("uiserv/journal@journal-ref"))
+            this.withJournalRef(EntityRef.valueOf("uiserv/journal@journal-ref"))
             this.withModel(
                 TypeModelDef.create {
                     this.withRoles(
@@ -172,7 +172,7 @@ class TypesServiceTest : TypeTestBase() {
                     )
                 }
             )
-            this.withNumTemplateRef(RecordRef.valueOf("emodel/num-template@num-template-ref"))
+            this.withNumTemplateRef(EntityRef.valueOf("emodel/num-template@num-template-ref"))
             this.withProperties(ObjectData.create("""{"aa":"aaa","bb":"bbb"}"""))
             this.withSystem(true)
         }
@@ -227,7 +227,7 @@ class TypesServiceTest : TypeTestBase() {
         assertEquals(displayName, records.getAtt(typeRef, "_disp").asText())
 
         val assocs = records.getAtt(
-            RecordRef.create(EcosModelApp.NAME, "rtype", typeRef.getLocalId()),
+            EntityRef.create(EcosModelApp.NAME, "rtype", typeRef.getLocalId()),
             "assocsFull[].name"
         )
 
@@ -251,8 +251,8 @@ class TypesServiceTest : TypeTestBase() {
             assertEquals(0, assocs.size())
         }
 
-        val parents = records.getAtt(typeRef.withSourceId("type"), "parents[]?id").asList(RecordRef::class.java)
-        assertTrue(parents.contains(TypeUtils.getTypeRef("base")))
+        val parents = records.getAtt(typeRef.withSourceId("type"), "parents[]?id").asList(EntityRef::class.java)
+        assertTrue(parents.contains(ModelUtils.getTypeRef("base")))
 
         typeDef.createVariants.forEach {
 
@@ -270,10 +270,10 @@ class TypesServiceTest : TypeTestBase() {
 
         val custom0 = TypeDef.create {
             withId("custom0")
-            withNumTemplateRef(RecordRef.valueOf("emodel/num-template@numTemplateRefValue"))
+            withNumTemplateRef(EntityRef.valueOf("emodel/num-template@numTemplateRefValue"))
         }
         artifactHandler.deployArtifact(custom0)
-        val custom0Ref = RecordRef.valueOf("emodel/type@custom0")
+        val custom0Ref = EntityRef.valueOf("emodel/type@custom0")
         val getCustom0AttStr = { att: String ->
             records.getAtt(custom0Ref, att).asText()
         }
@@ -285,11 +285,11 @@ class TypesServiceTest : TypeTestBase() {
 
         val custom1 = TypeDef.create {
             withId("custom1")
-            withNumTemplateRef(RecordRef.valueOf("emodel/num-template@numTemplateRefValue1123"))
+            withNumTemplateRef(EntityRef.valueOf("emodel/num-template@numTemplateRefValue1123"))
             withInheritNumTemplate(false)
         }
         artifactHandler.deployArtifact(custom1)
-        val custom1Ref = RecordRef.valueOf("emodel/type@custom1")
+        val custom1Ref = EntityRef.valueOf("emodel/type@custom1")
         val getCustom1AttStr = { att: String ->
             records.getAtt(custom1Ref, att).asText()
         }
@@ -301,6 +301,6 @@ class TypesServiceTest : TypeTestBase() {
     }
 
     class TypeDto0 {
-        var inhNumTemplateRef: RecordRef = RecordRef.EMPTY
+        var inhNumTemplateRef: EntityRef = EntityRef.EMPTY
     }
 }

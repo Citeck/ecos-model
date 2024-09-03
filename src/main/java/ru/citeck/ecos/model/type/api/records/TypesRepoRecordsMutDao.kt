@@ -6,10 +6,10 @@ import ru.citeck.ecos.model.lib.procstages.dto.ProcStageDef
 import ru.citeck.ecos.model.lib.role.dto.RoleDef
 import ru.citeck.ecos.model.lib.status.dto.StatusDef
 import ru.citeck.ecos.model.type.service.TypesService
-import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records3.record.dao.delete.DelStatus
 import ru.citeck.ecos.records3.record.dao.delete.RecordDeleteDao
 import ru.citeck.ecos.records3.record.dao.mutate.RecordMutateDtoDao
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 
 @Component
@@ -83,11 +83,11 @@ class TypesRepoRecordsMutDao(
             withDocLib(docLib.copy().withEnabled(enabled).build())
         }
 
-        fun withDocLibFileTypeRefs(fileTypeRefs: List<RecordRef>) {
+        fun withDocLibFileTypeRefs(fileTypeRefs: List<EntityRef>) {
             withDocLib(docLib.copy().withFileTypeRefs(fileTypeRefs).build())
         }
 
-        fun withDocLibDirTypeRef(typeRef: RecordRef) {
+        fun withDocLibDirTypeRef(typeRef: EntityRef) {
             withDocLib(docLib.copy().withDirTypeRef(typeRef).build())
         }
     }

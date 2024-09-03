@@ -2,7 +2,6 @@ package ru.citeck.ecos.model.domain.search.api
 
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.records2.RecordConstants
-import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records2.predicate.PredicateService
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
@@ -96,7 +95,7 @@ class SearchRecordsDao(
             if (taskId.isBlank()) {
                 null
             } else {
-                RecordRef.create("eproc", "wftask", taskId)
+                EntityRef.create("eproc", "wftask", taskId)
             }
         }
         val tasksAtts = recordsService.getAtts(taskRecords, getAttsToRequest())
@@ -165,7 +164,7 @@ class SearchRecordsDao(
             rec.getId(),
             rec.getAtt(DISP_NAME_ALIAS).asText(),
             groupType,
-            RecordRef.valueOf(rec.getAtt(ECOS_TYPE_ALIAS).asText()),
+            EntityRef.valueOf(rec.getAtt(ECOS_TYPE_ALIAS).asText()),
             getInstant(rec, MODIFIED_ALIAS),
             getInstant(rec, CREATED_ALIAS)
         )

@@ -1,6 +1,6 @@
 package ru.citeck.ecos.model.domain.authsync.service.impl
 
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.data.MLText
@@ -13,7 +13,6 @@ import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.authorities.sync.AuthoritiesSync
 import ru.citeck.ecos.model.lib.authorities.sync.AuthoritiesSyncContext
 import ru.citeck.ecos.model.lib.authorities.sync.AuthoritiesSyncFactory
-import ru.citeck.ecos.records2.RecordRef
 import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records2.predicate.model.ValuePredicate
@@ -24,6 +23,7 @@ import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.query.dto.query.Consistency
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.*
@@ -157,9 +157,9 @@ class AlfrescoAuthoritiesSyncFactory(
                 AuthorityType.PERSON -> "people"
                 AuthorityType.GROUP -> "authority-group"
             }
-            val refToMutate = RecordRef.create("alfresco", targetSourceId, record.id)
-            val refToSync = if (refToMutate.id.isEmpty()) {
-                refToMutate.withId(newAtts["id"].asText())
+            val refToMutate = EntityRef.create("alfresco", targetSourceId, record.id)
+            val refToSync = if (refToMutate.getLocalId().isEmpty()) {
+                refToMutate.withLocalId(newAtts["id"].asText())
             } else {
                 refToMutate
             }
@@ -182,11 +182,11 @@ class AlfrescoAuthoritiesSyncFactory(
             val attsAfterMutation = recordsService.getAtts(refToSync, attsToSync)
             updateAuthorities(context, listOf(attsAfterMutation))
 
-            return refToSync.id
+            return refToSync.getLocalId()
         }
 
         private fun prepareGroupsUpdateRecords(
-            authorityRef: RecordRef,
+            authorityRef: EntityRef,
             atts: ObjectData,
             withRemove: Boolean
         ): List<RecordAtts> {
@@ -194,7 +194,7 @@ class AlfrescoAuthoritiesSyncFactory(
             if (!atts.has(AuthorityConstants.ATT_AUTHORITY_GROUPS)) {
                 return emptyList()
             }
-            val newGroups = atts[AuthorityConstants.ATT_AUTHORITY_GROUPS].asList(RecordRef::class.java)
+            val newGroups = atts[AuthorityConstants.ATT_AUTHORITY_GROUPS].asList(EntityRef::class.java)
 
             val recsToMutate = mutableListOf<RecordAtts>()
 
@@ -203,7 +203,7 @@ class AlfrescoAuthoritiesSyncFactory(
                 return emptyList()
             }
 
-            val oldGroups = recordsService.getAtt(authorityRef, groupsAtt).asList(RecordRef::class.java)
+            val oldGroups = recordsService.getAtt(authorityRef, groupsAtt).asList(EntityRef::class.java)
 
             if (withRemove) {
                 val removedGroups = HashSet(oldGroups)
@@ -219,9 +219,9 @@ class AlfrescoAuthoritiesSyncFactory(
         }
 
         private fun prepareAddOrRemoveGroupsActions(
-            recRef: RecordRef,
+            recRef: EntityRef,
             add: Boolean,
-            groups: Set<RecordRef>
+            groups: Set<EntityRef>
         ): List<RecordAtts> {
             if (groups.isEmpty()) {
                 return emptyList()
@@ -232,26 +232,30 @@ class AlfrescoAuthoritiesSyncFactory(
                 log.info { "Remove groups for $recRef. Groups: $groups" }
             }
             val groupsAlfAuthRefs = groups.map {
-                RecordRef.create("alfresco", "authority", "${AuthGroup.PREFIX}${it.id}")
+                EntityRef.create("alfresco", "authority", "${AuthGroup.PREFIX}${it.getLocalId()}")
             }.toList()
 
             val groupsNodeRefs = recordsService.getAtts(groupsAlfAuthRefs, listOf("nodeRef")).map {
                 it.getAtt("nodeRef").asText()
             }.toList()
-            val refAlfAuthRef = RecordRef.create(
+            val refAlfAuthRef = EntityRef.create(
                 "alfresco",
                 "authority",
                 when (authorityType) {
-                    AuthorityType.PERSON -> recRef.id
-                    AuthorityType.GROUP -> "${AuthGroup.PREFIX}${recRef.id}"
+                    AuthorityType.PERSON -> recRef.getLocalId()
+                    AuthorityType.GROUP -> "${AuthGroup.PREFIX}${recRef.getLocalId()}"
                 }
             )
             val recRefNodeRef = recordsService.getAtt(refAlfAuthRef, "nodeRef").asText()
 
             return groupsNodeRefs.map {
-                val groupAlfRef = RecordRef.create("alfresco", "assoc-actions", "")
+                val groupAlfRef = EntityRef.create("alfresco", "assoc-actions", "")
                 val groupAtts = ObjectData.create()
-                groupAtts["action"] = if (add) { "CREATE" } else { "REMOVE" }
+                groupAtts["action"] = if (add) {
+                    "CREATE"
+                } else {
+                    "REMOVE"
+                }
                 groupAtts["sourceRef"] = it
                 groupAtts["targetRef"] = recRefNodeRef
                 groupAtts["association"] = "cm:member"
@@ -363,7 +367,7 @@ class AlfrescoAuthoritiesSyncFactory(
             ).asText()
 
             if (newPhotoCacheKey != currPhotoCacheKey) {
-                val alfRef = RecordRef.create("alfresco", "people", id)
+                val alfRef = EntityRef.create("alfresco", "people", id)
                 val photoAtts = recordsService.getAtts(alfRef, PhotoAtts::class.java)
                 if (!photoAtts.bytes.isNullOrBlank()) {
                     val mimeType = photoAtts.mimeType?.ifBlank { "image/jpeg" } ?: "image/jpeg"

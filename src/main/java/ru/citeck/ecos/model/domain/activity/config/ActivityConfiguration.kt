@@ -77,10 +77,10 @@ class ActivityConfiguration(private val dbDomainFactory: DbDomainFactory) {
                     }
 
                     override fun hasWritePerms(): Boolean {
-                        val commentData = AuthContext.runAsSystem {
+                        val activityData = AuthContext.runAsSystem {
                             recordsService.getAtts(record, ActivityAtts::class.java)
                         }
-                        return commentData.creator == user
+                        return activityData.creator == user || activityData.responsible == user
                     }
                 }
             }
@@ -110,7 +110,8 @@ class ActivityConfiguration(private val dbDomainFactory: DbDomainFactory) {
 
     class ActivityAtts(
         @AttName("_creator?localId")
-        val creator: String
+        val creator: String,
+        @AttName("responsible?localId")
+        val responsible: String?
     )
 }
-

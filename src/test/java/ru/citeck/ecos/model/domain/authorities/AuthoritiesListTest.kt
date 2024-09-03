@@ -28,7 +28,7 @@ class AuthoritiesListTest : AuthoritiesTestBase() {
         createPerson("user0", "authorityGroups" to groupsRefs)
 
         val runAsAuth = when (runAsUser) {
-            "system" -> SimpleAuthData("system", AuthContext.getSystemAuthorities())
+            "system" -> SimpleAuthData("system", AuthContext.SYSTEM_AUTH.getAuthorities())
             "user0" -> SimpleAuthData("user0", emptyList())
             "user1" -> SimpleAuthData("user1", emptyList())
             else -> error("Unknown user: $runAsUser")

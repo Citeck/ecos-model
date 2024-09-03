@@ -1,6 +1,6 @@
 package ru.citeck.ecos.model.type.patch
 
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.webapp.lib.patch.annotaion.EcosPatch
 import java.util.concurrent.Callable

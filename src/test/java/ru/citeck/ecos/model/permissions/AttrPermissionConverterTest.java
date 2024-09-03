@@ -20,7 +20,7 @@ import ru.citeck.ecos.model.domain.permissions.dto.AttributesPermissionWithMetaD
 import ru.citeck.ecos.model.domain.permissions.dto.RuleDto;
 import ru.citeck.ecos.model.domain.permissions.repo.AttributesPermissionsRepository;
 import ru.citeck.ecos.model.type.repository.TypeRepository;
-import ru.citeck.ecos.records2.RecordRef;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 
 import java.util.Optional;
 
@@ -65,7 +65,7 @@ public class AttrPermissionConverterTest {
 
         targetDto = new AttributesPermissionWithMetaDto();
         targetDto.setId("testAttrPermId");
-        targetDto.setTypeRef(RecordRef.create(EcosModelApp.NAME, "type", "type"));
+        targetDto.setTypeRef(EntityRef.create(EcosModelApp.NAME, "type", "type"));
         targetDto.setRules(Json.getMapper().readList(rules, RuleDto.class));
     }
 

@@ -1,7 +1,6 @@
 package ru.citeck.ecos.model.num;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,7 @@ import ru.citeck.ecos.model.EcosModelApp;
 import ru.citeck.ecos.model.num.api.command.GetNextNumber;
 import ru.citeck.ecos.model.num.dto.NumTemplateDto;
 import ru.citeck.ecos.model.num.service.NumTemplateService;
-import ru.citeck.ecos.records2.RecordRef;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension;
 
 import java.util.*;
@@ -42,28 +41,28 @@ public class NumTemplateTest {
         numTemplateService.save(dto);
 
         GetNextNumber.Response result = commandsService.executeSync(new GetNextNumber.Command(
-            RecordRef.create(EcosModelApp.NAME, "num-template", "template-id"),
+            EntityRef.create(EcosModelApp.NAME, "num-template", "template-id"),
             ObjectData.create("{\"prop\":\"propValue\"}")
         )).getResultAs(GetNextNumber.Response.class);
 
         assertEquals(Long.valueOf(1L), result.getNumber());
 
         result = commandsService.executeSync(new GetNextNumber.Command(
-            RecordRef.create(EcosModelApp.NAME, "num-template", "template-id"),
+            EntityRef.create(EcosModelApp.NAME, "num-template", "template-id"),
             ObjectData.create("{\"prop\":\"propValue\"}")
         )).getResultAs(GetNextNumber.Response.class);
 
         assertEquals(Long.valueOf(2L), result.getNumber());
 
         result = commandsService.executeSync(new GetNextNumber.Command(
-            RecordRef.create(EcosModelApp.NAME, "num-template", "template-id"),
+            EntityRef.create(EcosModelApp.NAME, "num-template", "template-id"),
             ObjectData.create("{\"prop\":\"propValue\"}")
         )).getResultAs(GetNextNumber.Response.class);
 
         assertEquals(Long.valueOf(3L), result.getNumber());
 
         result = commandsService.executeSync(new GetNextNumber.Command(
-            RecordRef.create(EcosModelApp.NAME, "num-template", "template-id"),
+            EntityRef.create(EcosModelApp.NAME, "num-template", "template-id"),
             ObjectData.create("{\"prop\":\"propValue2\"}")
         )).getResultAs(GetNextNumber.Response.class);
 
@@ -92,7 +91,7 @@ public class NumTemplateTest {
                 for (int repeatCounterOnError = 0; repeatCounterOnError < 10; repeatCounterOnError++) {
                     long getNextNumberStartedAt = System.currentTimeMillis();
                     comResult = commandsService.executeSync(new GetNextNumber.Command(
-                        RecordRef.create(EcosModelApp.NAME, "num-template", "template-mt-id"),
+                        EntityRef.create(EcosModelApp.NAME, "num-template", "template-mt-id"),
                         ObjectData.create("{\"prop\":\"propValue\"}")
                     ));
                     long getNextNumberTime = System.currentTimeMillis() - getNextNumberStartedAt;
@@ -125,7 +124,7 @@ public class NumTemplateTest {
         }
 
         GetNextNumber.Response result = commandsService.executeSync(new GetNextNumber.Command(
-            RecordRef.create(EcosModelApp.NAME, "num-template", "template-mt-id"),
+            EntityRef.create(EcosModelApp.NAME, "num-template", "template-mt-id"),
             ObjectData.create("{\"prop\":\"propValue\"}")
         )).getResultAs(GetNextNumber.Response.class);
 

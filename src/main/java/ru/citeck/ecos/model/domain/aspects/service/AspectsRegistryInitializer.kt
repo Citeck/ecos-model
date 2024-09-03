@@ -1,9 +1,8 @@
 package ru.citeck.ecos.model.domain.aspects.service
 
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta
-import ru.citeck.ecos.commons.promise.Promises
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.model.domain.aspects.config.AspectsConfiguration
 import ru.citeck.ecos.records2.predicate.model.Predicates
@@ -11,6 +10,7 @@ import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.dao.query.dto.query.QueryPage
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.webapp.api.promise.Promise
+import ru.citeck.ecos.webapp.api.promise.Promises
 import ru.citeck.ecos.webapp.lib.model.aspect.dto.AspectDef
 import ru.citeck.ecos.webapp.lib.registry.EcosRegistryProps
 import ru.citeck.ecos.webapp.lib.registry.MutableEcosRegistry

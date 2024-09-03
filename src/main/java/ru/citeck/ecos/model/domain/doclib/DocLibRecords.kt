@@ -1,6 +1,6 @@
 package ru.citeck.ecos.model.domain.doclib
 
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.data.MLText
