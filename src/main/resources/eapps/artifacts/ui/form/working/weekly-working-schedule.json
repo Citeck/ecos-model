@@ -1,0 +1,386 @@
+{
+  "id": "weekly-working-schedule",
+  "formKey": "",
+  "title": {
+    "ru": "Рабочее расписание",
+    "en": "Working schedule"
+  },
+  "width": "m",
+  "system": true,
+  "i18n": {},
+  "definition": {
+    "components": [
+      {
+        "label": {
+          "ru": "Columns"
+        },
+        "key": "columns2",
+        "columns": [
+          {
+            "components": [
+              {
+                "label": {
+                  "ru": "Идентификатор",
+                  "en": "Id"
+                },
+                "key": "id",
+                "validate": {
+                  "required": true
+                },
+                "defaultValue": "",
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
+                "logic": [
+                  {
+                    "name": "disable-on-edit",
+                    "trigger": {
+                      "type": "javascript",
+                      "javascript": "result = instance.options.formMode !== 'CREATE';"
+                    },
+                    "actions": [
+                      {
+                        "name": "disable",
+                        "type": "property",
+                        "property": {
+                          "label": "Disabled",
+                          "value": "disabled",
+                          "type": "boolean"
+                        },
+                        "state": "true"
+                      }
+                    ]
+                  }
+                ],
+                "type": "textfield",
+                "input": true,
+                "inputMasks": [
+                  {}
+                ]
+              },
+              {
+                "label": {
+                  "ru": "Тип",
+                  "en": "Type"
+                },
+                "key": "type",
+                "disabled": true,
+                "defaultValue": "weekly",
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
+                "type": "textfield",
+                "input": true,
+                "inputMasks": [
+                  {}
+                ]
+              }
+            ],
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 0
+          },
+          {
+            "index": 1,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "components": [
+              {
+                "type": "mlText",
+                "input": true,
+                "key": "name",
+                "label": {
+                  "ru": "Имя",
+                  "en": "Name"
+                }
+              },
+              {
+                "type": "number",
+                "input": true,
+                "key": "version",
+                "label": {
+                  "ru": "Версия",
+                  "en": "Version"
+                }
+              },
+              {
+                "type": "textfield",
+                "input": true,
+                "key": "country",
+                "label": {
+                  "ru": "Страна",
+                  "en": "Country"
+                }
+              }
+            ]
+          }
+        ],
+        "oneColumnInViewMode": false,
+        "type": "columns",
+        "input": false
+      },
+      {
+        "label": {
+          "ru": "Конфигурация",
+          "en": "Config"
+        },
+        "key": "config",
+        "hideLabel": true,
+        "refreshOn": [],
+        "optionalWhenDisabled": false,
+        "type": "container",
+        "input": true,
+        "components": [
+          {
+            "label": {
+              "ru": "Columns"
+            },
+            "key": "columns",
+            "columns": [
+              {
+                "components": [
+                  {
+                    "label": {
+                      "ru": "Начало рабочего дня",
+                      "en": "Working day start"
+                    },
+                    "key": "workingDayStart",
+                    "validate": {
+                      "required": true,
+                      "pattern": "[0-2]\\d:\\d\\d"
+                    },
+                    "inputMask": "99:99",
+                    "defaultValue": "08:00",
+                    "refreshOn": [],
+                    "optionalWhenDisabled": false,
+                    "type": "textfield",
+                    "input": true,
+                    "inputMasks": [
+                      {}
+                    ]
+                  }
+                ],
+                "type": "column",
+                "input": false,
+                "key": "column",
+                "index": 0,
+                "md": 4
+              },
+              {
+                "index": 1,
+                "type": "column",
+                "input": false,
+                "key": "column",
+                "components": [
+                  {
+                    "label": {
+                      "ru": "Завершение рабочего дня",
+                      "en": "Working day end"
+                    },
+                    "key": "workingDayEnd",
+                    "validate": {
+                      "required": true,
+                      "pattern": "[0-2]\\d:\\d\\d"
+                    },
+                    "inputMask": "99:99",
+                    "defaultValue": "17:00",
+                    "refreshOn": [],
+                    "optionalWhenDisabled": false,
+                    "type": "textfield",
+                    "input": true,
+                    "inputMasks": [
+                      {}
+                    ]
+                  }
+                ],
+                "md": 4
+              },
+              {
+                "md": 4,
+                "type": "column",
+                "input": false,
+                "key": "column",
+                "index": 2,
+                "components": [
+                  {
+                    "label": {
+                      "ru": "Часовой пояс",
+                      "en": "Timezone"
+                    },
+                    "key": "workingDayTimeZone",
+                    "placeholder": {
+                      "ru": "+0"
+                    },
+                    "defaultValue": "",
+                    "refreshOn": [],
+                    "optionalWhenDisabled": false,
+                    "type": "textfield",
+                    "input": true,
+                    "inputMasks": [
+                      {}
+                    ]
+                  }
+                ]
+              }
+            ],
+            "oneColumnInViewMode": false,
+            "type": "columns",
+            "input": false
+          },
+          {
+            "label": {
+              "ru": "Рабочие дни",
+              "en": "Working days"
+            },
+            "key": "workingDays",
+            "multiple": true,
+            "placeholder": {
+              "ru": "Понедельник, вторник, среда, четверг, пятница",
+              "en": "Monday, tuesday, wednesday, thursday, friday"
+            },
+            "reorder": false,
+            "dataSrc": "values",
+            "data": {
+              "values": [
+                {
+                  "label": {
+                    "ru": "Понедельник",
+                    "en": "Monday"
+                  },
+                  "value": "MONDAY"
+                },
+                {
+                  "label": {
+                    "ru": "Вторник",
+                    "en": "Tuesday"
+                  },
+                  "value": "TUESDAY"
+                },
+                {
+                  "label": {
+                    "ru": "Среда",
+                    "en": "Wednesday"
+                  },
+                  "value": "WEDNESDAY"
+                },
+                {
+                  "label": {
+                    "ru": "Черверг",
+                    "en": "Thursday"
+                  },
+                  "value": "THURSDAY"
+                },
+                {
+                  "label": {
+                    "ru": "Пятница",
+                    "en": "Friday"
+                  },
+                  "value": "FRIDAY"
+                },
+                {
+                  "label": {
+                    "ru": "Суббота",
+                    "en": "Saturday"
+                  },
+                  "value": "SATURDAY"
+                },
+                {
+                  "label": {
+                    "ru": "Воскресенье",
+                    "en": "Sunday"
+                  },
+                  "value": "SUNDAY"
+                }
+              ],
+              "headers": [
+                {}
+              ]
+            },
+            "defaultValue": [],
+            "optionalWhenDisabled": false,
+            "type": "ecosSelect",
+            "input": true
+          },
+          {
+            "label": {
+              "ru": "Производственный календарь",
+              "en": "Working calendar"
+            },
+            "key": "workingCalendar",
+            "modalTitle": "",
+            "journalId": "working-calendar",
+            "refreshOn": [],
+            "optionalWhenDisabled": false,
+            "type": "selectJournal",
+            "input": true,
+            "queryData": ""
+          }
+        ]
+      },
+      {
+        "type": "columns",
+        "key": "buttons-columns",
+        "columns": [
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 0,
+            "components": [],
+            "key": "column"
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 1,
+            "key": "column",
+            "components": []
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 2,
+            "components": [
+              {
+                "type": "button",
+                "key": "cancel",
+                "label": {
+                  "ru": "Отменить",
+                  "en": "Cancel"
+                },
+                "action": "event",
+                "event": "cancel",
+                "block": true,
+                "input": true
+              }
+            ],
+            "key": "column"
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 3,
+            "components": [
+              {
+                "type": "button",
+                "theme": "primary",
+                "key": "submit",
+                "label": {
+                  "ru": "Сохранить",
+                  "en": "Save"
+                },
+                "block": true,
+                "input": true
+              }
+            ],
+            "key": "column"
+          }
+        ],
+        "input": false
+      }
+    ]
+  }
+}

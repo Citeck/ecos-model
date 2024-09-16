@@ -9,7 +9,8 @@ parentRef: emodel/type@ecos-vcs-object
 system: true
 storageType: ECOS_MODEL
 
-formRef: uiserv/form@DEFAULT_FORM
+# in future form ref should be calculated using schedule type
+formRef: uiserv/form@weekly-working-schedule
 journalRef: uiserv/journal@DEFAULT_JOURNAL
 queryPermsPolicy: PUBLIC
 
