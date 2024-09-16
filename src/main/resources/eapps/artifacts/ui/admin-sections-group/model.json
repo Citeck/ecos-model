@@ -9,6 +9,12 @@
     {
       "type": "JOURNAL",
       "config": {
+        "journalId": "workspaces-journal"
+      }
+    },
+    {
+      "type": "JOURNAL",
+      "config": {
         "journalId": "ecos-types-def"
       }
     },

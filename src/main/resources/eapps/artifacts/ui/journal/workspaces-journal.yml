@@ -1,0 +1,20 @@
+---
+id: workspaces-journal
+name:
+  ru: Рабочие пространства
+  en: Workspaces
+system: true
+editable: false
+columns:
+  - id: name
+    name:
+      ru: Имя
+      en: Name
+  - id: description
+    name:
+      ru: Описание
+      en: Description
+  - id: visibility
+    name:
+      ru: Видимость
+      en: Visibility

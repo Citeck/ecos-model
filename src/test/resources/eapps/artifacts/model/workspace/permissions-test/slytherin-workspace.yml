@@ -1,0 +1,15 @@
+---
+id: slytherin-workspace
+name:
+  en: Slytherin
+visibility: PRIVATE
+workspaceMembers:
+  - id: slytherin-member-draco
+    authority: emodel/person@draco
+    memberRole: MANAGER
+  - id: slytherin-member-crabbe
+    authority: emodel/person@crabbe
+    memberRole: USER
+  - id: slytherin-member-group
+    authority: emodel/authority-group@slytherin-group
+    memberRole: USER

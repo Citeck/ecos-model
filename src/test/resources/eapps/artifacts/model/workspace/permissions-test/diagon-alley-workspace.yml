@@ -1,0 +1,18 @@
+---
+id: diagon-alley-workspace
+name:
+  en: Diagon Alley
+visibility: PUBLIC
+workspaceMembers:
+  - id: diagon-alley-member-hagrid
+    authority: emodel/person@hagrid
+    memberRole: MANAGER
+  - id: diagon-alley-member-malfoy
+    authority: emodel/person@malfoy
+    memberRole: USER
+  - id: diagon-alley-member-hermione
+    authority: emodel/person@hermione
+    memberRole: USER
+  - id: diagon-alley-manager-group
+    authority: emodel/authority-group@diagon-alley-managers
+    memberRole: MANAGER

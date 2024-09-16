@@ -1,0 +1,12 @@
+---
+id: hogwarts-workspace
+name:
+  en: Hogwarts
+visibility: PUBLIC
+workspaceMembers:
+  - id: hogwarts-member-dumbledore
+    authority: emodel/person@dumbledore
+    memberRole: MANAGER
+  - id: hogwarts-member-snape
+    authority: emodel/person@snape
+    memberRole: USER
