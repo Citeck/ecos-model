@@ -80,7 +80,7 @@ class WorkspacePermissions(
         return currentAuthorities.none { it == AuthRole.ANONYMOUS || it == AuthRole.GUEST }
     }
 
-    fun canJoin(user: String, authorities: List<String>): Boolean {
+    fun canJoin(user: String, authorities: Collection<String>): Boolean {
         return user.isNotBlank() &&
             authorities.contains(AuthRole.USER) &&
             authorities.none { blockJoinForRoles.contains(it) } &&
