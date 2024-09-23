@@ -174,3 +174,8 @@ model:
         enabled: true
     - id: photoCacheKey
       type: TEXT
+    - id: createdByRegistration
+      type: BOOLEAN
+      name:
+        ru: Создан при регистрации
+        en: Created by registration
