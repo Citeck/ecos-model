@@ -4,15 +4,20 @@ import org.springframework.stereotype.Component
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceAction
 import ru.citeck.ecos.model.domain.workspace.service.WorkspacePermissions
 import ru.citeck.ecos.model.domain.workspace.service.WorkspaceService
+import ru.citeck.ecos.model.lib.ModelServiceFactory
+import ru.citeck.ecos.model.lib.workspace.api.WorkspaceWebApi
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
 import ru.citeck.ecos.records3.record.dao.impl.proxy.RecordsDaoProxy
+import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
+import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes
 import ru.citeck.ecos.webapp.api.constants.AppName
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 
 @Component
 class WorkspaceProxyDao(
     private val workspacePermissions: WorkspacePermissions,
-    private val workspaceService: WorkspaceService
+    private val workspaceService: WorkspaceService,
+    private val modelServices: ModelServiceFactory
 ) : RecordsDaoProxy(
     WORKSPACE_SOURCE_ID,
     WORKSPACE_REPO_SOURCE_ID
@@ -23,6 +28,19 @@ class WorkspaceProxyDao(
         const val WORKSPACE_REPO_SOURCE_ID = "$WORKSPACE_SOURCE_ID-repo"
 
         const val WORKSPACE_ACTION_ATT = "action"
+
+        const val USER_WORKSPACES = "user-workspaces"
+    }
+
+    override fun queryRecords(recsQuery: RecordsQuery): RecsQueryRes<*>? {
+        if (recsQuery.language == USER_WORKSPACES) {
+            val query = recsQuery.getQuery(WorkspaceWebApi.GetUserWorkspacesReq::class.java)
+            val result = RecsQueryRes<EntityRef>()
+            result.setRecords(modelServices.workspaceService.getUserWorkspaces(query.user)
+                .map { EntityRef.create(AppName.EMODEL, WORKSPACE_SOURCE_ID, it) })
+            return result
+        }
+        return super.queryRecords(recsQuery)
     }
 
     override fun mutate(records: List<LocalRecordAtts>): List<String> {
