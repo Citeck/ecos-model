@@ -3,6 +3,7 @@ package ru.citeck.ecos.model.type.repository
 import jakarta.persistence.*
 import ru.citeck.ecos.model.domain.AbstractAuditingEntity
 import ru.citeck.ecos.model.lib.type.dto.QueryPermsPolicy
+import ru.citeck.ecos.model.lib.type.dto.WorkspaceScope
 
 @Entity
 @Table(name = "ecos_type")
@@ -46,6 +47,9 @@ class TypeEntity : AbstractAuditingEntity() {
     var createVariantsForChildTypes: Boolean? = null
     var postCreateActionRef: String? = null
     var associations: String? = null
+
+    @Enumerated(EnumType.STRING)
+    var workspaceScope: WorkspaceScope? = null
 
     @ManyToOne(cascade = [CascadeType.DETACH])
     @JoinColumn(name = "parent_id")

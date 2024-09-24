@@ -5,7 +5,8 @@ name:
   en: Workspace
 
 system: true
-storageType: ECOS_MODEL
+storageType: DEFAULT
+sourceId: emodel/workspace
 
 parentRef: emodel/type@ecos-vcs-object
 journalRef: uiserv/journal@workspaces-journal
@@ -48,5 +49,3 @@ model:
         en: Visibility
       mandatory: true
       type: TEXT
-
-

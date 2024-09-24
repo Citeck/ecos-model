@@ -483,6 +483,46 @@
                           },
                           {
                             "label": {
+                              "ru": "Видимость в рабочих пространствах",
+                              "en": "Workspace visibility"
+                            },
+                            "key": "workspaceScope",
+                            "dataSrc": "values",
+                            "data": {
+                              "values": [
+                                {
+                                  "label": {
+                                    "en": "Default",
+                                    "ru": "По умолчанию"
+                                  },
+                                  "value": "DEFAULT"
+                                },
+                                {
+                                  "label": {
+                                    "en": "Private",
+                                    "ru": "Приватная"
+                                  },
+                                  "value": "PRIVATE"
+                                },
+                                {
+                                  "label": {
+                                    "en": "Public",
+                                    "ru": "Публичная"
+                                  },
+                                  "value": "PUBLIC"
+                                }
+                              ],
+                              "headers": [
+                                {}
+                              ]
+                            },
+                            "defaultValue": "DEFAULT",
+                            "optionalWhenDisabled": false,
+                            "type": "ecosSelect",
+                            "input": true
+                          },
+                          {
+                            "label": {
                               "ru": "ID источника данных",
                               "en": "Source ID"
                             },

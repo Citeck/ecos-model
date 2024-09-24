@@ -5,7 +5,8 @@ name:
   en: Workspace member
 
 system: true
-storageType: ECOS_MODEL
+storageType: DEFAULT
+sourceId: emodel/workspace-member
 
 parentRef: emodel/type@ecos-vcs-object
 formRef: uiserv/form@workspace-member-form
@@ -26,4 +27,3 @@ model:
         en: Role
       mandatory: true
       type: TEXT
-

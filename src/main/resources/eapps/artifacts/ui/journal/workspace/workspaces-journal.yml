@@ -6,6 +6,10 @@ name:
 system: true
 editable: false
 columns:
+  - id: id
+    name:
+      ru: Идентификатор
+      en: Identifier
   - id: name
     name:
       ru: Имя
