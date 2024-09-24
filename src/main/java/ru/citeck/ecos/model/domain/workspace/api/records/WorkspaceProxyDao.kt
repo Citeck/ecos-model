@@ -1,11 +1,11 @@
 package ru.citeck.ecos.model.domain.workspace.api.records
 
 import org.springframework.stereotype.Component
+import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceAction
 import ru.citeck.ecos.model.domain.workspace.service.WorkspacePermissions
 import ru.citeck.ecos.model.domain.workspace.service.WorkspaceService
 import ru.citeck.ecos.model.lib.ModelServiceFactory
-import ru.citeck.ecos.model.lib.workspace.api.WorkspaceWebApi
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
 import ru.citeck.ecos.records3.record.dao.impl.proxy.RecordsDaoProxy
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
@@ -34,9 +34,9 @@ class WorkspaceProxyDao(
 
     override fun queryRecords(recsQuery: RecordsQuery): RecsQueryRes<*>? {
         if (recsQuery.language == USER_WORKSPACES) {
-            val query = recsQuery.getQuery(WorkspaceWebApi.GetUserWorkspacesReq::class.java)
+            val user = recsQuery.query["user"].asText().ifBlank { AuthContext.getCurrentUser() }
             val result = RecsQueryRes<EntityRef>()
-            result.setRecords(modelServices.workspaceService.getUserWorkspaces(query.user)
+            result.setRecords(modelServices.workspaceService.getUserWorkspaces(user)
                 .map { EntityRef.create(AppName.EMODEL, WORKSPACE_SOURCE_ID, it) })
             return result
         }
