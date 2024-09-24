@@ -71,15 +71,14 @@ class KeycloakEventsListener(
             withEventType(EVENT_TYPE_USER)
             withDataClass(RegisterEventAtts::class.java)
             withAction {
-                // At the register event keycloak doesn't provide user's first name and last name
                 processUserCreatedEvent(
                     UserCreatedEvent(
                         createdByRegistration = true,
                         user = UserRepresentation(
                             userName = it.userName,
                             enabled = true,
-                            firstName = null,
-                            lastName = null,
+                            firstName = it.firstName,
+                            lastName = it.lastName,
                             email = it.email
                         )
                     )
@@ -105,25 +104,11 @@ class KeycloakEventsListener(
         }
     }
 
-    /**
-     * Only in login event we can get user's first name and last name from keycloak after registration
-     */
     private fun processLoginEvent(event: LoginEventAtts) {
-        val personRef = AuthorityType.PERSON.getRef(event.userName.lowercase())
-        val mutAtts = mutableMapOf<String, Any>(
+        val mutAtts = mapOf(
             PersonConstants.ATT_LAST_LOGIN_TIME to event.time,
             PersonConstants.ATT_LAST_ACTIVITY_TIME to event.time
         )
-
-        val currentUserInfo = recordsService.getAtts(personRef, UserInfo::class.java)
-
-        // Fill user meta only for first login after registration
-        if (currentUserInfo.lastLoginTime == null) {
-            currentUserInfo.firstName.ifBlank { mutAtts[PersonConstants.ATT_FIRST_NAME] = event.firstName }
-            currentUserInfo.lastName.ifBlank { mutAtts[PersonConstants.ATT_LAST_NAME] = event.lastName }
-            currentUserInfo.email.ifBlank { mutAtts[PersonConstants.ATT_EMAIL] = event.email }
-        }
-
         recordsService.mutate(AuthorityType.PERSON.getRef(event.userName.lowercase()), mutAtts)
     }
 
@@ -162,31 +147,18 @@ class KeycloakEventsListener(
         @AttName("time?num")
         val time: Instant,
         @AttName("details.username")
-        val userName: String,
-        @AttName("details.firstName!")
-        val firstName: String,
-        @AttName("details.lastName!")
-        val lastName: String,
-        @AttName("details.email!")
-        val email: String
+        val userName: String
     )
 
     data class RegisterEventAtts(
         @AttName("details.username!")
         val userName: String,
         @AttName("details.email!")
-        val email: String
-    )
-
-    data class UserInfo(
-        @AttName("firstName!")
-        val firstName: String,
-        @AttName("lastName!")
-        val lastName: String,
-        @AttName("email!")
         val email: String,
-        @AttName("lastLoginTime")
-        val lastLoginTime: Instant?
+        @AttName("details.firstName!")
+        val firstName: String,
+        @AttName("details.lastName!")
+        val lastName: String,
     )
 
     data class UserRepresentationAtts(
