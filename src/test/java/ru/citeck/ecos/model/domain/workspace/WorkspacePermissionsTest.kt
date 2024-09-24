@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import ru.citeck.ecos.apps.app.service.LocalAppService
 import ru.citeck.ecos.commons.data.MLText
+import ru.citeck.ecos.commons.utils.resource.ResourceUtils
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.context.lib.auth.AuthUser
@@ -77,7 +78,7 @@ class WorkspacePermissionsTest {
     @BeforeAll
     fun setUp() {
         AuthContext.runAsSystem {
-            localAppService.deployLocalArtifacts()
+            localAppService.deployLocalArtifacts(ResourceUtils.getFile("classpath:eapps/artifacts"))
         }
     }
 
