@@ -1,0 +1,51 @@
+---
+id: workspace
+name:
+  ru: Рабочее пространство
+  en: Workspace
+
+system: true
+storageType: DEFAULT
+sourceId: emodel/workspace
+
+parentRef: emodel/type@ecos-vcs-object
+journalRef: uiserv/journal@workspaces-journal
+formRef: uiserv/form@workspace-form
+
+defaultCreateVariant: true
+
+queryPermsPolicy: PUBLIC
+
+actions:
+  - uiserv/action@edit
+  - uiserv/action@view-dashboard
+  - uiserv/action@download-text-yml
+
+model:
+  attributes:
+    - id: name
+      name:
+        ru: Имя
+        en: Name
+      type: MLTEXT
+      mandatory: true
+    - id: description
+      name:
+        ru: Описание
+        en: Description
+      type: MLTEXT
+    - id: workspaceMembers
+      name:
+        ru: Участники рабочего пространства
+        en: Workspace members
+      type: ASSOC
+      multiple: true
+      config:
+        typeRef: emodel/type@workspace-member
+        child: true
+    - id: visibility
+      name:
+        ru: Видимость
+        en: Visibility
+      mandatory: true
+      type: TEXT

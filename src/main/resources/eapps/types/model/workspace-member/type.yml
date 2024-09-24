@@ -1,0 +1,12 @@
+modelVersion: "1.0"
+
+sourceId: "workspace-member"
+
+name:
+  ru: Участник рабочего пространства
+  en: Workspace member
+
+controller:
+  type: json
+  config:
+    format: yaml

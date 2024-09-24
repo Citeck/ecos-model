@@ -1,0 +1,29 @@
+---
+id: workspace-member
+name:
+  ru: Участник рабочего пространства
+  en: Workspace member
+
+system: true
+storageType: DEFAULT
+sourceId: emodel/workspace-member
+
+parentRef: emodel/type@ecos-vcs-object
+formRef: uiserv/form@workspace-member-form
+
+queryPermsPolicy: PUBLIC
+
+model:
+  attributes:
+    - id: authority
+      name:
+        ru: Группа или пользователь
+        en: Authority
+      mandatory: true
+      type: AUTHORITY
+    - id: memberRole
+      name:
+        ru: Роль
+        en: Role
+      mandatory: true
+      type: TEXT

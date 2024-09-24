@@ -1,0 +1,15 @@
+---
+id: gryffindor-workspace
+name:
+  en: Gryffindor
+visibility: PRIVATE
+workspaceMembers:
+  - id: gryffindor-member-harry
+    authority: emodel/person@harry
+    memberRole: MANAGER
+  - id: gryffindor-member-ron
+    authority: emodel/person@ron
+    memberRole: USER
+  - id: gryffindor-manager-group
+    authority: emodel/authority-group@gryffindor-managers
+    memberRole: MANAGER

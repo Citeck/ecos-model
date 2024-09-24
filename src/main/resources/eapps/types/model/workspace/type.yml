@@ -1,0 +1,12 @@
+modelVersion: "1.0"
+
+sourceId: "workspace"
+
+name:
+  ru: Рабочее пространство
+  en: Workspace
+
+controller:
+  type: json
+  config:
+    format: yaml

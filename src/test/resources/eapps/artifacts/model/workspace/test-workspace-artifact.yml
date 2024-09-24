@@ -1,0 +1,16 @@
+---
+id: test-workspace-artifact
+name:
+  ru: Тестовый артефакт рабочего пространства
+  en: Test workspace artifact
+description:
+  ru: Это тестовый артефакт рабочего пространства
+  en: This is a test workspace artifact
+visibility: PUBLIC
+workspaceMembers:
+  - id: test-workspace-member-group-artifact-child
+    authority: emodel/authority-group@test-group
+    memberRole: USER
+  - id: test-workspace-member-user-artifact-child
+    authority: emodel/person@test-user
+    memberRole: MANAGER

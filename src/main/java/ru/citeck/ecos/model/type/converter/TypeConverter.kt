@@ -8,7 +8,7 @@ import ru.citeck.ecos.commons.data.entity.EntityMeta
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.model.lib.type.dto.*
-import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
+import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.model.type.repository.TypeEntity
 import ru.citeck.ecos.model.type.service.dao.TypeRepoDao
 import ru.citeck.ecos.records3.record.mixin.impl.mutmeta.MutMeta
@@ -85,6 +85,7 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
         entity.aspects = Json.mapper.toString(typeDef.aspects)
         entity.queryPermsPolicy = typeDef.queryPermsPolicy
         entity.assignablePerms = Json.mapper.toString(typeDef.assignablePerms)
+        entity.workspaceScope = typeDef.workspaceScope
 
         checkCyclicDependencies(entity)
 
@@ -129,7 +130,7 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
             .withSourceId(entity.sourceId)
             .withSourceRef(EntityRef.valueOf(entity.sourceRef))
             .withMetaRecord(EntityRef.valueOf(entity.metaRecord))
-            .withParentRef(EntityRef.valueOf(TypeUtils.getTypeRef(entity.parent?.extId ?: "")))
+            .withParentRef(EntityRef.valueOf(ModelUtils.getTypeRef(entity.parent?.extId ?: "")))
             .withFormRef(EntityRef.valueOf(entity.form))
             .withJournalRef(EntityRef.valueOf(entity.journal))
             .withDefaultStatus(entity.defaultStatus)
@@ -155,6 +156,7 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
             .withAspects(DataValue.create(entity.aspects).asList(TypeAspectDef::class.java))
             .withQueryPermsPolicy(entity.queryPermsPolicy)
             .withAssignablePerms(DataValue.create(entity.assignablePerms).asList(EntityRef::class.java))
+            .withWorkspaceScope(entity.workspaceScope)
             .build()
 
         return EntityWithMeta(
