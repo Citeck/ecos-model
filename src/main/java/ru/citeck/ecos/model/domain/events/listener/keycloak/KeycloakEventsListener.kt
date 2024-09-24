@@ -13,6 +13,10 @@ import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import java.time.Instant
 
+/**
+ * User Registration flow [EVENT_TYPE_REGISTER] depends on ECOS Keycloak Extension. 12.0.2.8
+ * @see <a href="https://gitlab.citeck.ru/citeck-projects/ecos-keycloak-ext">ECOS Keycloak Extension</a>
+ */
 @Component
 class KeycloakEventsListener(
     val eventsService: EventsService,
