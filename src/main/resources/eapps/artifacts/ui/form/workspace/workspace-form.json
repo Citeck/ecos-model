@@ -20,6 +20,42 @@
         "components": [
           {
             "label": {
+              "ru": "Id",
+              "en": "Id"
+            },
+            "key": "id",
+            "defaultValue": "",
+            "refreshOn": [],
+            "optionalWhenDisabled": false,
+            "logic": [
+              {
+                "name": "disable-for-non-create-form",
+                "trigger": {
+                  "type": "javascript",
+                  "javascript": "result = instance.options.formMode !== 'CREATE';"
+                },
+                "actions": [
+                  {
+                    "name": "disable-field",
+                    "type": "property",
+                    "property": {
+                      "label": "Disabled",
+                      "value": "disabled",
+                      "type": "boolean"
+                    },
+                    "state": "true"
+                  }
+                ]
+              }
+            ],
+            "type": "textfield",
+            "input": true,
+            "inputMasks": [
+              {}
+            ]
+          },
+          {
+            "label": {
               "ru": "Имя",
               "en": "Name"
             },
