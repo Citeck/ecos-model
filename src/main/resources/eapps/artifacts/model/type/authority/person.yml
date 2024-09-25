@@ -15,6 +15,10 @@ system: true
 dashboardType: profile-details
 sourceId: emodel/person
 
+actions:
+  - uiserv/action@edit
+  - uiserv/action@delete
+
 properties:
   alfType: cm:person
 
