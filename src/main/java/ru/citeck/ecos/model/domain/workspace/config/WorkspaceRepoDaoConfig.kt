@@ -34,7 +34,7 @@ class WorkspaceRepoDaoConfig(
                         withStoreTableMeta(true)
                     }
                 ).build()
-        ).withSchema("ecos_data")
+        ).withSchema("public")
             .withPermsComponent(workspaceDbPerms)
             .build()
 
