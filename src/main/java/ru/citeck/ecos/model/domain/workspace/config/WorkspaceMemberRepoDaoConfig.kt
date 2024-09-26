@@ -36,7 +36,7 @@ class WorkspaceMemberRepoDaoConfig(
                         withStoreTableMeta(true)
                     }
                 ).build()
-        ).withSchema("public")
+        ).withSchema("ecos_data")
             .build()
 
         return recordsDao

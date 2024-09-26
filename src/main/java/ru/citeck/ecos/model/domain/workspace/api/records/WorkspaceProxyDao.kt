@@ -36,8 +36,10 @@ class WorkspaceProxyDao(
         if (recsQuery.language == USER_WORKSPACES) {
             val user = recsQuery.query["user"].asText().ifBlank { AuthContext.getCurrentUser() }
             val result = RecsQueryRes<EntityRef>()
-            result.setRecords(modelServices.workspaceService.getUserWorkspaces(user)
-                .map { EntityRef.create(AppName.EMODEL, WORKSPACE_SOURCE_ID, it) })
+            result.setRecords(
+                modelServices.workspaceService.getUserWorkspaces(user)
+                    .map { EntityRef.create(AppName.EMODEL, WORKSPACE_SOURCE_ID, it) }
+            )
             return result
         }
         return super.queryRecords(recsQuery)
