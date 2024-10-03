@@ -33,12 +33,15 @@
           "en": "Content",
           "ru": "Содержимое"
         },
-        "storage": "url",
         "type": "file",
-        "url": "/gateway/alfresco/alfresco/s/eform/file",
         "validate": {
-          "required": "true"
-        }
+          "required": true
+        },
+        "description": {
+          "ru": "Дождитесь загрузки файла",
+          "en": "Wait for the file to upload"
+        },
+        "fileMaxSize": "500MB"
       },
       {
         "label": {
