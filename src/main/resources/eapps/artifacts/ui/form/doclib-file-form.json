@@ -40,7 +40,8 @@
         "description": {
           "ru": "Дождитесь загрузки файла",
           "en": "Wait for the file to upload"
-        }
+        },
+        "fileMaxSize": "500MB"
       },
       {
         "label": {
