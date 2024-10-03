@@ -1,0 +1,25 @@
+---
+id: kanban-task
+
+workspaceScope: PRIVATE
+
+defaultStatus: new
+model:
+  attributes:
+    - id: name
+      name:
+        ru: Название
+        en: Name
+  statuses:
+    - id: new
+      name:
+        ru: Новая
+        en: New
+    - id: in-progress
+      name:
+        ru: В работе
+        en: In progress
+    - id: completed
+      name:
+        ru: Завершена
+        en: Completed

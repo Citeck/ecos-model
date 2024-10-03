@@ -3,8 +3,8 @@ package ru.citeck.ecos.model.domain.workspace.api.records
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceAction
+import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
 import ru.citeck.ecos.model.domain.workspace.service.WorkspacePermissions
-import ru.citeck.ecos.model.domain.workspace.service.WorkspaceService
 import ru.citeck.ecos.model.lib.ModelServiceFactory
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
 import ru.citeck.ecos.records3.record.dao.impl.proxy.RecordsDaoProxy
@@ -16,7 +16,7 @@ import ru.citeck.ecos.webapp.api.entity.EntityRef
 @Component
 class WorkspaceProxyDao(
     private val workspacePermissions: WorkspacePermissions,
-    private val workspaceService: WorkspaceService,
+    private val workspaceService: EmodelWorkspaceService,
     private val modelServices: ModelServiceFactory
 ) : RecordsDaoProxy(
     WORKSPACE_SOURCE_ID,

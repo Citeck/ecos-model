@@ -7,7 +7,7 @@ import ru.citeck.ecos.model.lib.workspace.api.WorkspaceApi
 
 @Component
 class CustomWorkspaceApi(
-    private val workspaceService: WorkspaceService,
+    private val workspaceService: EmodelWorkspaceService,
     private val modelServiceFactory: ModelServiceFactory
 ) : WorkspaceApi {
 
@@ -18,5 +18,9 @@ class CustomWorkspaceApi(
 
     override fun getUserWorkspaces(user: String): Set<String> {
         return workspaceService.getUserWorkspaces(user)
+    }
+
+    override fun isUserManagerOf(user: String, workspace: String): Boolean {
+        return workspaceService.isUserManagerOf(user, workspace)
     }
 }

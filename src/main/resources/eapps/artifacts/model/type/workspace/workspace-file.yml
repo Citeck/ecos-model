@@ -1,0 +1,12 @@
+---
+id: workspace-file
+name:
+  ru: Рабочее пространство
+  en: Workspace
+
+system: true
+storageType: DEFAULT
+
+parentRef: emodel/type@doclib-file
+
+workspaceScope: PRIVATE

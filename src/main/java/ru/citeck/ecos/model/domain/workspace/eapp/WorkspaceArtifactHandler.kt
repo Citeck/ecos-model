@@ -9,7 +9,7 @@ import ru.citeck.ecos.events2.type.RecordCreatedEvent
 import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao.Companion.WORKSPACE_SOURCE_ID
 import ru.citeck.ecos.model.domain.workspace.config.WORKSPACE_TYPE
 import ru.citeck.ecos.model.domain.workspace.dto.Workspace
-import ru.citeck.ecos.model.domain.workspace.service.WorkspaceService
+import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.webapp.api.constants.AppName
@@ -20,7 +20,7 @@ import java.util.function.Consumer
 class WorkspaceArtifactHandler(
     private val recordsService: RecordsService,
     private val eventsService: EventsService,
-    private val workspaceService: WorkspaceService
+    private val workspaceService: EmodelWorkspaceService
 ) : EcosArtifactHandler<Workspace> {
 
     override fun deployArtifact(artifact: Workspace) {

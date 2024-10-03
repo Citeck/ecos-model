@@ -23,7 +23,7 @@ import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao.Compa
 import ru.citeck.ecos.model.domain.workspace.dto.Workspace
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceAction
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceVisibility
-import ru.citeck.ecos.model.domain.workspace.service.WorkspaceService
+import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
 import ru.citeck.ecos.records2.predicate.PredicateService
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
@@ -50,7 +50,7 @@ class WorkspacePermissionsTest {
     private lateinit var localAppService: LocalAppService
 
     @Autowired
-    private lateinit var workspaceService: WorkspaceService
+    private lateinit var workspaceService: EmodelWorkspaceService
 
     @Autowired
     private lateinit var ecosAuthoritiesApi: EcosAuthoritiesApi

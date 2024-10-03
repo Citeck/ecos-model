@@ -14,31 +14,57 @@ import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
+import ru.citeck.ecos.records3.record.atts.schema.ScalarType
+import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.webapp.api.authority.EcosAuthoritiesApi
 import ru.citeck.ecos.webapp.api.constants.AppName
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 
 @Service
-class WorkspaceService(
+class EmodelWorkspaceService(
     private val recordsService: RecordsService,
     private val ecosAuthoritiesApi: EcosAuthoritiesApi,
     private val authorityService: AuthorityService,
     private val workspacePermissions: WorkspacePermissions
 ) {
 
-    fun getUserWorkspaces(user: String): Set<String> {
-
-        val userRef = AuthorityType.PERSON.getRef(user)
-
-        val authoritiesToQuery = authorityService.getAuthoritiesForPerson(user).mapNotNullTo(HashSet()) {
+    private fun getUserAuthoritiesRefs(userRef: EntityRef): Set<EntityRef> {
+        val authoritiesRefs = authorityService.getAuthoritiesForPerson(userRef.getLocalId()).mapNotNullTo(HashSet()) {
             if (it.startsWith(AuthGroup.PREFIX)) {
                 AuthorityType.GROUP.getRef(it.substring(AuthGroup.PREFIX.length))
             } else {
                 null
             }
         }
-        authoritiesToQuery.add(userRef)
+        authoritiesRefs.add(userRef)
+        return authoritiesRefs
+    }
+
+    fun isUserManagerOf(user: String, workspace: String): Boolean {
+
+        val workspaceRef = EntityRef.create("workspace", workspace)
+        val workspaceData = recordsService.getAtts(workspaceRef, WorkspaceMembersAtts::class.java)
+        if (workspaceData.creator.getLocalId() == user) {
+            return true
+        }
+        val managers = workspaceData.workspaceMembers
+            ?.filter { it.memberRole == WorkspaceMemberRole.MANAGER }
+            ?.mapNotNull { it.authority }
+
+        if (managers.isNullOrEmpty()) {
+            return false
+        }
+
+        val authorities = getUserAuthoritiesRefs(AuthorityType.PERSON.getRef(user))
+
+        return managers.any { authorities.contains(it) }
+    }
+
+    fun getUserWorkspaces(user: String): Set<String> {
+
+        val userRef = AuthorityType.PERSON.getRef(user)
+        val authoritiesToQuery = getUserAuthoritiesRefs(userRef)
 
         return recordsService.query(
             RecordsQuery.create()
@@ -115,6 +141,17 @@ class WorkspaceService(
                 RecordConstants.ATT_PARENT to workspace,
                 RecordConstants.ATT_PARENT_ATT to "workspaceMembers",
             )
+        )
+    }
+
+    private class WorkspaceMembersAtts(
+        @AttName(RecordConstants.ATT_CREATOR + ScalarType.ID_SCHEMA)
+        val creator: EntityRef,
+        val workspaceMembers: List<MemberInfo>?
+    ) {
+        class MemberInfo(
+            val authority: EntityRef?,
+            val memberRole: WorkspaceMemberRole?
         )
     }
 }
