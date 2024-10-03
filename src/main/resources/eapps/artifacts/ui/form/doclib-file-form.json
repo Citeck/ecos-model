@@ -35,7 +35,11 @@
         },
         "type": "file",
         "validate": {
-          "required": "true"
+          "required": true
+        },
+        "description": {
+          "ru": "Дождитесь загрузки файла",
+          "en": "Wait for the file to upload"
         }
       },
       {
