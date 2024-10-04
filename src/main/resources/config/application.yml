@@ -18,8 +18,8 @@ spring:
       - org.springframework.boot.autoconfigure.data.ldap.LdapDataAutoConfiguration
   servlet:
     multipart:
-      max-file-size: 500MB
-      max-request-size: 500MB
+      max-file-size: 100MB
+      max-request-size: 100MB
 ecos:
   idp:
     default-realm: ecos-app
