@@ -21,7 +21,7 @@
         },
         "defaultValue": "",
         "validate": {
-          "required": "true"
+          "required": "false"
         },
         "type": "textfield",
         "input": true
@@ -41,7 +41,7 @@
           "ru": "Дождитесь загрузки файла",
           "en": "Wait for the file to upload"
         },
-        "fileMaxSize": "500MB"
+        "fileMaxSize": "100MB"
       },
       {
         "label": {
