@@ -20,9 +20,6 @@
           "ru": "Название"
         },
         "defaultValue": "",
-        "validate": {
-          "required": "false"
-        },
         "type": "textfield",
         "input": true
       },
