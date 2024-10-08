@@ -12,18 +12,21 @@ import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import ru.citeck.ecos.apps.app.service.LocalAppService
+import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.utils.resource.ResourceUtils
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.context.lib.auth.AuthUser
 import ru.citeck.ecos.model.EcosModelApp
+import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao
 import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao.Companion.WORKSPACE_ACTION_ATT
 import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao.Companion.WORKSPACE_SOURCE_ID
 import ru.citeck.ecos.model.domain.workspace.dto.Workspace
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceAction
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceVisibility
 import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
+import ru.citeck.ecos.model.lib.workspace.USER_WORKSPACE_PREFIX
 import ru.citeck.ecos.records2.predicate.PredicateService
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
@@ -551,6 +554,73 @@ class WorkspacePermissionsTest {
         workspaceService.deleteWorkspace(createdWorkspace)
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = [AuthRole.ADMIN, AuthRole.SYSTEM])
+    fun `admin or system should see all user workspaces`(role: String) {
+        val ronUser = "ron"
+        val workspaces = AuthContext.runAs("someUser", listOf(role)) {
+            queryUserWorkspaces(ronUser)
+        }
+
+        assertThat(workspaces).containsAll(
+            listOf(
+                GRYFFINDOR_WORKSPACE.toWorkspaceRef(),
+                ronUser.toUsernameToUserVirtualWorkspaceRef()
+            )
+        )
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = [AuthRole.ANONYMOUS, AuthRole.GUEST])
+    fun `not authenticated auth should not see any user workspaces`(role: String) {
+        val ronUser = "ron"
+        val workspaces = AuthContext.runAs("someUser", listOf(role)) {
+            queryUserWorkspaces(ronUser)
+        }
+
+        assertThat(workspaces).isEmpty()
+    }
+
+    @Test
+    fun `user should see own user workspaces`() {
+        val ronUser = "ron"
+        val workspaces = AuthContext.runAs("ron", listOf(AuthRole.USER)) {
+            queryUserWorkspaces(ronUser)
+        }
+
+        assertThat(workspaces).containsAll(
+            listOf(
+                GRYFFINDOR_WORKSPACE.toWorkspaceRef(),
+                ronUser.toUsernameToUserVirtualWorkspaceRef()
+            )
+        )
+    }
+
+    @Test
+    fun `regular user should not see other user workspaces`() {
+        val ronUser = "ron"
+        val workspaces = AuthContext.runAs("harry", listOf(AuthRole.USER)) {
+            queryUserWorkspaces(ronUser)
+        }
+
+        assertThat(workspaces).isEmpty()
+    }
+
+    @Test
+    fun `query user workspaces without user query param should use current user auth`() {
+        val ronUser = "ron"
+        val workspaces = AuthContext.runAs(ronUser, listOf(AuthRole.USER)) {
+            queryUserWorkspaces("")
+        }
+
+        assertThat(workspaces).containsAll(
+            listOf(
+                GRYFFINDOR_WORKSPACE.toWorkspaceRef(),
+                ronUser.toUsernameToUserVirtualWorkspaceRef()
+            )
+        )
+    }
+
     fun queryWorkspacesFor(forUser: String, authorities: List<String> = emptyList()): List<EntityRef> {
         return AuthContext.runAs(forUser, authorities) {
             recordsService.query(
@@ -563,8 +633,31 @@ class WorkspacePermissionsTest {
             ).getRecords()
         }
     }
+
+    fun queryUserWorkspaces(user: String): List<EntityRef> {
+        return recordsService.query(
+            RecordsQuery.create {
+                withSourceId(WORKSPACE_SOURCE_ID)
+                withLanguage(WorkspaceProxyDao.USER_WORKSPACES)
+                withQuery(
+                    DataValue.of(
+                        """
+                        {
+                            "user": "$user"
+                        }
+                        """.trimIndent()
+                    )
+                )
+                withPage(QueryPage(100, 0, null))
+            }
+        ).getRecords()
+    }
 }
 
 private fun String.toWorkspaceRef(): EntityRef {
     return EntityRef.create(AppName.EMODEL, WORKSPACE_SOURCE_ID, this)
+}
+
+private fun String.toUsernameToUserVirtualWorkspaceRef(): EntityRef {
+    return EntityRef.create(AppName.EMODEL, WORKSPACE_SOURCE_ID, "$USER_WORKSPACE_PREFIX$this")
 }

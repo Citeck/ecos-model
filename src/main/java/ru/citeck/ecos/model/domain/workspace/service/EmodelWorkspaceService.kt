@@ -43,7 +43,7 @@ class EmodelWorkspaceService(
 
     fun isUserManagerOf(user: String, workspace: String): Boolean {
 
-        val workspaceRef = EntityRef.create("workspace", workspace)
+        val workspaceRef = EntityRef.create(WORKSPACE_SOURCE_ID, workspace)
         val workspaceData = recordsService.getAtts(workspaceRef, WorkspaceMembersAtts::class.java)
         if (workspaceData.creator.getLocalId() == user) {
             return true
