@@ -5,6 +5,7 @@ import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthGroup
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
 import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceMemberProxyDao.Companion.WORKSPACE_MEMBER_SOURCE_ID
+import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao.Companion.WORKSPACE_ATT_MEMBER_AUTHORITY
 import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao.Companion.WORKSPACE_SOURCE_ID
 import ru.citeck.ecos.model.domain.workspace.dto.Workspace
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMember
@@ -72,7 +73,7 @@ class EmodelWorkspaceService(
                 .withQuery(
                     Predicates.or(
                         Predicates.eq(RecordConstants.ATT_CREATOR, userRef),
-                        Predicates.inVals("workspaceMembers.authority", authoritiesToQuery)
+                        Predicates.inVals(WORKSPACE_ATT_MEMBER_AUTHORITY, authoritiesToQuery)
                     )
                 )
                 .withMaxItems(1000)
