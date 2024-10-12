@@ -26,7 +26,6 @@ import ru.citeck.ecos.model.domain.workspace.dto.Workspace
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceAction
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceVisibility
 import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
-import ru.citeck.ecos.model.lib.workspace.USER_WORKSPACE_PREFIX
 import ru.citeck.ecos.records2.predicate.PredicateService
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
@@ -34,7 +33,6 @@ import ru.citeck.ecos.records3.record.atts.dto.RecordAtts
 import ru.citeck.ecos.records3.record.dao.query.dto.query.QueryPage
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.webapp.api.authority.EcosAuthoritiesApi
-import ru.citeck.ecos.webapp.api.constants.AppName
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension
 import java.util.UUID
@@ -60,10 +58,10 @@ class WorkspacePermissionsTest {
 
     companion object {
 
-        private const val HOGWARTS_WORKSPACE = "hogwarts-workspace"
-        private const val GRYFFINDOR_WORKSPACE = "gryffindor-workspace"
-        private const val SLYTHERIN_WORKSPACE = "slytherin-workspace"
-        private const val DIAGON_ALLEY_WORKSPACE = "diagon-alley-workspace"
+        const val HOGWARTS_WORKSPACE = "hogwarts-workspace"
+        const val GRYFFINDOR_WORKSPACE = "gryffindor-workspace"
+        const val SLYTHERIN_WORKSPACE = "slytherin-workspace"
+        const val DIAGON_ALLEY_WORKSPACE = "diagon-alley-workspace"
 
         private val allWorkspacesRefs = listOf(
             HOGWARTS_WORKSPACE.toWorkspaceRef(),
@@ -621,7 +619,7 @@ class WorkspacePermissionsTest {
         )
     }
 
-    fun queryWorkspacesFor(forUser: String, authorities: List<String> = emptyList()): List<EntityRef> {
+    private fun queryWorkspacesFor(forUser: String, authorities: List<String> = emptyList()): List<EntityRef> {
         return AuthContext.runAs(forUser, authorities) {
             recordsService.query(
                 RecordsQuery.create {
@@ -634,7 +632,7 @@ class WorkspacePermissionsTest {
         }
     }
 
-    fun queryUserWorkspaces(user: String): List<EntityRef> {
+    private fun queryUserWorkspaces(user: String): List<EntityRef> {
         return recordsService.query(
             RecordsQuery.create {
                 withSourceId(WORKSPACE_SOURCE_ID)
@@ -652,12 +650,4 @@ class WorkspacePermissionsTest {
             }
         ).getRecords()
     }
-}
-
-private fun String.toWorkspaceRef(): EntityRef {
-    return EntityRef.create(AppName.EMODEL, WORKSPACE_SOURCE_ID, this)
-}
-
-private fun String.toUsernameToUserVirtualWorkspaceRef(): EntityRef {
-    return EntityRef.create(AppName.EMODEL, WORKSPACE_SOURCE_ID, "$USER_WORKSPACE_PREFIX$this")
 }

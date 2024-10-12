@@ -54,6 +54,11 @@ class WorkspacePermissions(
             }
     }
 
+    fun currentAuthCanReadPersonalWorkspaceOf(user: String): Boolean {
+        val currentUser = AuthContext.getCurrentUser()
+        return AuthContext.isRunAsSystemOrAdmin() || currentUser == user
+    }
+
     fun allowWrite(user: String, userAuthorities: Set<String>, record: Any): Boolean {
         val workspace = recordsService.getAtts(record, WorkspaceInfo::class.java)
         val readAllowed = allowReadForWorkspace(user, userAuthorities, workspace)

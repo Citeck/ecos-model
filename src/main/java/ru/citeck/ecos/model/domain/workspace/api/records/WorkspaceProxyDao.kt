@@ -3,21 +3,28 @@ package ru.citeck.ecos.model.domain.workspace.api.records
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.data.DataValue
+import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthRole
+import ru.citeck.ecos.context.lib.i18n.I18nContext
 import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
+import ru.citeck.ecos.model.domain.workspace.dto.Workspace
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceAction
+import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMember
+import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMemberRole
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceVisibility
 import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
 import ru.citeck.ecos.model.domain.workspace.service.WorkspacePermissions
 import ru.citeck.ecos.model.lib.ModelServiceFactory
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
+import ru.citeck.ecos.model.lib.workspace.USER_WORKSPACE_PREFIX
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.predicate.PredicateService
 import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
+import ru.citeck.ecos.records3.record.atts.value.impl.EmptyAttValue
 import ru.citeck.ecos.records3.record.dao.impl.proxy.RecordsDaoProxy
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes
@@ -58,9 +65,10 @@ class WorkspaceProxyDao(
      */
     override fun queryRecords(recsQuery: RecordsQuery): RecsQueryRes<*>? {
         val currentAuthorities = AuthContext.getCurrentAuthorities()
-        if (AuthContext.isNotRunAsSystemOrAdmin() && (currentAuthorities.contains(AuthRole.GUEST) ||
-                currentAuthorities.contains(AuthRole.ANONYMOUS) ||
-                currentAuthorities.none { it == AuthRole.USER }
+        if (AuthContext.isNotRunAsSystemOrAdmin() && (
+                currentAuthorities.contains(AuthRole.GUEST) ||
+                    currentAuthorities.contains(AuthRole.ANONYMOUS) ||
+                    currentAuthorities.none { it == AuthRole.USER }
                 )
         ) {
             return RecsQueryRes<EntityRef>()
@@ -147,5 +155,53 @@ class WorkspaceProxyDao(
         }
 
         return processActionsIds
+    }
+
+    override fun getRecordsAtts(recordIds: List<String>): List<*>? {
+        val recordAtts = super.getRecordsAtts(recordIds)
+        if (recordAtts.isNullOrEmpty()) {
+            return recordAtts
+        }
+
+        val virtualUserAttsIdx = recordIds.mapIndexed { idx, id ->
+            if (id.startsWith(USER_WORKSPACE_PREFIX)) {
+                idx to id
+            } else {
+                null
+            }
+        }.filterNotNull().toMap()
+
+        val result = recordAtts.toMutableList()
+
+        for ((idx, id) in virtualUserAttsIdx) {
+            val user = id.removePrefix(USER_WORKSPACE_PREFIX)
+            val virtualUserWorkspace = if (workspacePermissions.currentAuthCanReadPersonalWorkspaceOf(user)
+            ) {
+                generateVirtualUserWorkspace(user)
+            } else {
+                EmptyAttValue.INSTANCE
+            }
+            result[idx] = virtualUserWorkspace
+        }
+
+        return result.toList()
+    }
+
+    private fun generateVirtualUserWorkspace(user: String): Workspace {
+        return Workspace(
+            id = "$USER_WORKSPACE_PREFIX$user",
+            name = MLText(
+                I18nContext.ENGLISH to "Personal workspace",
+                I18nContext.RUSSIAN to "Персональное рабочее пространство"
+            ),
+            visibility = WorkspaceVisibility.PRIVATE,
+            workspaceMembers = listOf(
+                WorkspaceMember(
+                    id = user,
+                    authority = AuthorityType.PERSON.getRef(user),
+                    memberRole = WorkspaceMemberRole.MANAGER
+                )
+            )
+        )
     }
 }

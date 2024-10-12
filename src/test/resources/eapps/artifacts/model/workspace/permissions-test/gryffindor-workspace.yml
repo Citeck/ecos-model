@@ -2,6 +2,10 @@
 id: gryffindor-workspace
 name:
   en: Gryffindor
+  ru: Гриффиндор
+description:
+  en: The workspace for Gryffindor
+  ru: Рабочее пространство для Гриффиндор
 visibility: PRIVATE
 workspaceMembers:
   - id: gryffindor-member-harry

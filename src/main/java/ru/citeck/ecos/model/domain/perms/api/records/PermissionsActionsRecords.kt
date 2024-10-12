@@ -78,7 +78,7 @@ class PermissionsActionsRecords : AbstractRecordsDao(), ValueMutateDao<Permissio
                 }
                 log.info {
                     "Permissions updating finished. " +
-                    "Processed $processedCount records with type ${value.typeRef}"
+                        "Processed $processedCount records with type ${value.typeRef}"
                 }
             }
         }
