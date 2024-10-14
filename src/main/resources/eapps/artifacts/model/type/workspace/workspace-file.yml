@@ -1,8 +1,8 @@
 ---
 id: workspace-file
 name:
-  ru: Рабочее пространство
-  en: Workspace
+  ru: Файлы рабочего пространства
+  en: Workspace files
 
 system: true
 storageType: DEFAULT
