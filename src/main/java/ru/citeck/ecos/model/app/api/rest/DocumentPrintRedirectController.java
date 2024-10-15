@@ -32,7 +32,9 @@ public class DocumentPrintRedirectController {
     private final EcosWebClientApi webClient;
 
     @GetMapping(value = "/api/content/printpdf")
-    public ResponseEntity<ByteArrayResource> returnPrintPdf(@RequestParam EntityRef ref) {
+    public ResponseEntity<ByteArrayResource> returnPrintPdf(
+        @RequestParam(name = "ref") EntityRef ref
+    ) {
 
         if (ref.getAppName().equals(AppName.ALFRESCO)) {
             HttpHeaders headers = new HttpHeaders();
