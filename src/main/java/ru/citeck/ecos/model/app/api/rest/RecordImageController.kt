@@ -25,9 +25,9 @@ class RecordImageController(
 
     @GetMapping("/image", produces = [MediaType.IMAGE_PNG_VALUE])
     fun getImage(
-        @RequestParam(required = true) ref: EntityRef,
-        @RequestParam(required = true) att: String,
-        @RequestParam(required = false) width: Int?
+        @RequestParam(name = "ref", required = true) ref: EntityRef,
+        @RequestParam(name = "att", required = true) att: String,
+        @RequestParam(name = "width", required = false) width: Int?
     ): HttpEntity<ByteArray> {
 
         val headers = HttpHeaders()

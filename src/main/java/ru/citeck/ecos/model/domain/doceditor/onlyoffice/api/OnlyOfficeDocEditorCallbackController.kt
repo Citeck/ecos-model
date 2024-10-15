@@ -42,7 +42,7 @@ class OnlyOfficeDocEditorCallbackController(
 
     @GetMapping(GET_CONTENT_PATH)
     fun getContent(
-        @RequestParam(required = true) jwt: String,
+        @RequestParam(name = "jwt", required = true) jwt: String,
         response: HttpServletResponse
     ) {
         callbackService.doWithJwtData(jwt, OnlyOfficeDocEditorCallbackJwt::class.java) { jwtData ->
@@ -71,7 +71,7 @@ class OnlyOfficeDocEditorCallbackController(
         produces = [MediaType.APPLICATION_JSON_UTF8_VALUE]
     )
     fun postStatus(
-        @RequestParam(required = true) jwt: String,
+        @RequestParam(name = "jwt", required = true) jwt: String,
         @RequestBody(required = true) body: String
     ): ByteArray {
 

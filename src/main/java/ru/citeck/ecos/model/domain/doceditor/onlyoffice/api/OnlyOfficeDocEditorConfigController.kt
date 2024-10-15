@@ -38,8 +38,8 @@ class OnlyOfficeDocEditorConfigController(
         produces = [MediaType.APPLICATION_JSON_UTF8_VALUE]
     )
     fun getConfig(
-        @RequestParam(required = true) ref: String,
-        @RequestParam(required = false) att: String?
+        @RequestParam(name = "ref", required = true) ref: String,
+        @RequestParam(name = "att", required = false) att: String?
     ): ByteArray {
 
         val entityRef = ref.toEntityRef()
