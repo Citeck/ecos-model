@@ -10,6 +10,11 @@ typeRef: emodel/type@kanban-task
 journalRef: uiserv/journal@type$kanban-task
 cardFormRef: uiserv/form@kanban-task-board-form
 
+actions:
+  - uiserv/action@view-dashboard
+  - uiserv/action@edit
+  - uiserv/action@delete
+
 readOnly: false
 disableTitle: false
 
