@@ -1,0 +1,32 @@
+---
+id: kanban-task-board
+
+name:
+  ru: Канбан задачи
+  en: Kanban tasks
+
+typeRef: emodel/type@kanban-task
+
+journalRef: uiserv/journal@type$kanban-task
+cardFormRef: uiserv/form@kanban-task-board-form
+
+readOnly: false
+disableTitle: false
+
+system: true
+
+columns:
+  - id: new
+    name:
+      ru: Новая
+      en: New
+  - id: in-progress
+    name:
+      ru: В работе
+      en: In progress
+  - id: completed
+    name:
+      ru: Завершена
+      en: Completed
+    hideOldItems: true
+    hideItemsOlderThan: P7D

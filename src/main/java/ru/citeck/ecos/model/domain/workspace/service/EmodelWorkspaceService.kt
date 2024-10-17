@@ -12,6 +12,7 @@ import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMember
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMemberRole
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceVisibility
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
+import ru.citeck.ecos.model.lib.workspace.USER_WORKSPACE_PREFIX
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
@@ -43,6 +44,11 @@ class EmodelWorkspaceService(
     }
 
     fun isUserManagerOf(user: String, workspace: String): Boolean {
+
+        if (workspace.startsWith(USER_WORKSPACE_PREFIX)) {
+            return user == workspace.substring(USER_WORKSPACE_PREFIX.length)
+                || authorityService.isAdmin(user)
+        }
 
         val workspaceRef = EntityRef.create(WORKSPACE_SOURCE_ID, workspace)
         val workspaceData = recordsService.getAtts(workspaceRef, WorkspaceMembersAtts::class.java)

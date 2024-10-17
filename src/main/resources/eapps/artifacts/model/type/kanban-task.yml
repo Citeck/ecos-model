@@ -1,7 +1,16 @@
 ---
 id: kanban-task
+name:
+  ru: Kanban задача
+  en: Kanban task
 
 workspaceScope: PRIVATE
+storageType: ECOS_MODEL
+
+formRef: uiserv/form@kanban-task-form
+journalRef: uiserv/journal@DEFAULT_JOURNAL
+
+defaultCreateVariant: true
 
 defaultStatus: new
 model:
