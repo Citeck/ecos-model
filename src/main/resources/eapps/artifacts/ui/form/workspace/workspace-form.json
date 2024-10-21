@@ -170,27 +170,7 @@
             "defaultValue": "",
             "refreshOn": [],
             "optionalWhenDisabled": false,
-            "logic": [
-              {
-                "name": "disabled",
-                "trigger": {
-                  "type": "javascript",
-                  "javascript": "result = _.get(instance, 'root.options.formMode') !== 'CREATE';"
-                },
-                "actions": [
-                  {
-                    "name": "setDisabled",
-                    "type": "property",
-                    "property": {
-                      "label": "Hidden",
-                      "value": "hidden",
-                      "type": "boolean"
-                    },
-                    "state": "true"
-                  }
-                ]
-              }
-            ],
+            "customConditional": "show = _.get(instance, 'options.formMode') !== 'CREATE';",
             "type": "selectOrgstruct",
             "input": true
           }

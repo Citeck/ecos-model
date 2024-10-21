@@ -76,17 +76,18 @@ class WorkspaceProxyDao(
 
         return when (recsQuery.language) {
             USER_WORKSPACES -> {
-                val user = recsQuery.query[WORKSPACE_QUERY_USER_ATT].asText().ifBlank { AuthContext.getCurrentUser() }
+                val user = recsQuery.query[WORKSPACE_QUERY_USER_ATT].asText()
+                    .ifBlank { AuthContext.getCurrentUser() }
                 val result = RecsQueryRes<EntityRef>()
                 result.setRecords(
                     modelServices.workspaceService.getUserWorkspaces(user)
                         .map { EntityRef.create(AppName.EMODEL, WORKSPACE_SOURCE_ID, it) }
                 )
-                return result
+                result
             }
 
             PredicateService.LANGUAGE_PREDICATE -> {
-                return super.queryRecords(getPermissionsPrefilteredQuery(recsQuery))
+                super.queryRecords(getPermissionsPrefilteredQuery(recsQuery))
             }
 
             else -> error("Unsupported query language: ${recsQuery.language}")
