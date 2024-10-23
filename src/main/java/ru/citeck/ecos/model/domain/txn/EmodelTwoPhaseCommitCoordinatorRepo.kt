@@ -18,6 +18,7 @@ import ru.citeck.ecos.data.sql.service.DbDataService
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
 import ru.citeck.ecos.data.sql.service.DbDataServiceImpl
 import ru.citeck.ecos.model.lib.type.dto.QueryPermsPolicy
+import ru.citeck.ecos.records2.predicate.model.AndPredicate
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.txn.lib.TxnContext
 import ru.citeck.ecos.txn.lib.commit.RecoveryData
@@ -156,7 +157,7 @@ class EmodelTwoPhaseCommitCoordinatorRepo : TwoPhaseCommitRepo {
                         entity.initialErrors = entity.errors
                         entity.initialErrorsTime = Instant.now()
                     }
-                    entity.procIteration = entity.procIteration + 1
+                    entity.procIteration += 1
                     val recoveryTimeIdx = min(entity.procIteration, RECOVERY_TIME_BY_ITERATION.lastIndex)
                     entity.recoveryTime = Instant.now().plus(RECOVERY_TIME_BY_ITERATION[recoveryTimeIdx])
 
@@ -166,14 +167,38 @@ class EmodelTwoPhaseCommitCoordinatorRepo : TwoPhaseCommitRepo {
         }
     }
 
+    override fun findOwnDataToRecover(exclusions: List<TxnId>): RecoveryData? {
+        return findDataToRecover(true, exclusions)
+    }
+
     override fun findDataToRecover(): RecoveryData? {
-        return doInNewTxn(true) {
+        return findDataToRecover(false, emptyList())
+    }
+
+    private fun findDataToRecover(own: Boolean, exclusions: List<TxnId>): RecoveryData? {
+        val conditions = AndPredicate()
+        conditions.addPredicate(Predicates.lt(TwoPcEntity.RECOVERY_TIME, Instant.now()))
+        if (own) {
+            conditions.addPredicate(
+                Predicates.eq(
+                    TwoPcEntity.OWNER_APP,
+                    discoveryService.getCurrentInstance().getRef().toString()
+                )
+            )
+        } else {
             val activeApps = discoveryService.getInstances(AppName.EMODEL).map { it.getRef().toString() }
+            conditions.addPredicate(Predicates.not(Predicates.inVals(TwoPcEntity.OWNER_APP, activeApps)))
+        }
+        if (exclusions.isNotEmpty()) {
+            conditions.addPredicate(
+                Predicates.not(
+                    Predicates.inVals(TwoPcEntity.TXN_ID, exclusions.map { it.toString() })
+                )
+            )
+        }
+        return doInNewTxn(true) {
             dataService.find(
-                Predicates.and(
-                    Predicates.lt(TwoPcEntity.RECOVERY_TIME, Instant.now()),
-                    Predicates.not(Predicates.inVals(TwoPcEntity.OWNER_APP, activeApps)),
-                ),
+                conditions,
                 listOf(DbFindSort(TwoPcEntity.RECOVERY_TIME, true)),
                 DbFindPage.FIRST
             ).entities.firstOrNull()
@@ -275,7 +300,7 @@ class EmodelTwoPhaseCommitCoordinatorRepo : TwoPhaseCommitRepo {
         return RecoveryData(
             txnId = TxnId.valueOf(this.txnId),
             data = Json.mapper.readNotNull(this.data, TxnCommitData::class.java),
-            status = TwoPhaseCommitStatus.values()[this.status],
+            status = TwoPhaseCommitStatus.entries[this.status],
             appsToProcess = Json.mapper.readList(this.appsToProcess, String::class.java).toSet(),
             ownerApp = this.ownerApp,
             appRoutes = Json.mapper.readMap(this.appRoutes, String::class.java, String::class.java)
