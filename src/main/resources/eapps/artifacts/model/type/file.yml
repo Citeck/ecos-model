@@ -11,3 +11,11 @@ system: true
 
 dashboardType: case-details
 storageType: ECOS_MODEL
+
+model:
+  attributes:
+    - id: content
+      name:
+        ru: Содержимое
+        en: Content
+      type: CONTENT
