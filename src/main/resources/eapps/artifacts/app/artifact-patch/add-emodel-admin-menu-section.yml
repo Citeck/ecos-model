@@ -1,0 +1,150 @@
+---
+id: add-emodel-admin-menu-section
+name:
+  ru: Добавить раздел администратора emodel
+  en: Add emodel admin section
+
+target: 'ui/menu$admin-workspace-menu'
+system: true
+order: 100
+
+type: json
+config:
+  operations:
+    - op: add
+      path: '$.subMenu.left.items'
+      value:
+        id: emodel-section
+        label:
+          en: Model
+          ru: Модель
+        hidden: false
+        type: SECTION
+        config: { }
+        items:
+          - id: emodel-ecos-types
+            label:
+              ru: Типы данных
+              en: Data types
+            icon: ui/icon@i-leftmenu-tools
+            hidden: false
+            type: JOURNAL
+            config:
+              recordRef: uiserv/journal@ecos-types-def
+          - id: emodel-ecos-aspects
+            label:
+              ru: Аспекты
+              en: Aspects
+            icon: ui/icon@i-leftmenu-tools
+            hidden: false
+            type: JOURNAL
+            config:
+              recordRef: uiserv/journal@ecos-aspects
+          - id: emodel-workspaces
+            label:
+              ru: Рабочие пространства
+              en: Workspaces
+            icon: ui/icon@i-leftmenu-tools
+            hidden: false
+            type: JOURNAL
+            config:
+              recordRef: uiserv/journal@workspaces-journal
+          - id: emodel-number-templates
+            label:
+              ru: Шаблоны нумерации
+              en: Number templates
+            icon: ui/icon@i-leftmenu-tools
+            hidden: false
+            type: JOURNAL
+            config:
+              recordRef: uiserv/journal@number-templates
+          - id: emodel-persons
+            label:
+              ru: Пользователи
+              en: Users
+            icon: ui/icon@i-leftmenu-tools
+            hidden: false
+            type: JOURNAL
+            config:
+              recordRef: uiserv/journal@persons
+          - id: emodel-authority-groups
+            label:
+              ru: Группы
+              en: Groups
+            icon: ui/icon@i-leftmenu-tools
+            hidden: false
+            type: JOURNAL
+            config:
+              recordRef: uiserv/journal@authority-groups
+          - id: emodel-authorities-sync
+            label:
+              ru: LDAP Синхронизация
+              en: LDAP Synchronization
+            icon: ui/icon@i-leftmenu-tools
+            hidden: false
+            type: JOURNAL
+            config:
+              recordRef: uiserv/journal@authorities-sync
+          - id: emodel-endpoints
+            label:
+              ru: Конечные точки
+              en: Endpoints
+            icon: ui/icon@i-leftmenu-tools
+            hidden: false
+            type: JOURNAL
+            config:
+              recordRef: uiserv/journal@endpoints
+          - id: emodel-ecos-secrets
+            label:
+              ru: Секреты
+              en: Secrets
+            icon: ui/icon@i-leftmenu-tools
+            hidden: false
+            type: JOURNAL
+            config:
+              recordRef: uiserv/journal@ecos-secrets
+          - id: emodel-type-perms
+            label:
+              ru: Матрицы прав
+              en: Permission matrices
+            icon: ui/icon@i-leftmenu-tools
+            hidden: false
+            type: JOURNAL
+            config:
+              recordRef: uiserv/journal@type-perms
+          - id: emodel-permission-settings
+            label:
+              ru: Настройка прав
+              en: Permission settings
+            icon: ui/icon@i-leftmenu-tools
+            hidden: false
+            type: JOURNAL
+            config:
+              recordRef: uiserv/journal@permission-settings
+          - id: emodel-permission-def
+            label:
+              ru: Описание права
+              en: Permission definition
+            icon: ui/icon@i-leftmenu-tools
+            hidden: false
+            type: JOURNAL
+            config:
+              recordRef: uiserv/journal@permission-def
+          - id: emodel-working-schedule
+            label:
+              ru: Рабочее расписание
+              en: Working schedule
+            icon: ui/icon@i-leftmenu-tools
+            hidden: false
+            type: JOURNAL
+            config:
+              recordRef: uiserv/journal@type$working-schedule
+          - id: emodel-working-calendar
+            label:
+              ru: Производственный календарь
+              en: Working calendar
+            icon: ui/icon@i-leftmenu-tools
+            hidden: false
+            type: JOURNAL
+            config:
+              recordRef: uiserv/journal@working-calendar
