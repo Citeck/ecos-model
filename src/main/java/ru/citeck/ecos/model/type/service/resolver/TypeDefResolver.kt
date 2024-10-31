@@ -28,6 +28,8 @@ class TypeDefResolver {
         const val ATT_ASSOC_TYPE_REF_KEY = "typeRef"
         const val ATT_ASSOC_CHILD_FLAG_KEY = "child"
 
+        private const val ASSOCS_FROM_TARGET_LIMIT = 50
+
         private val log = KotlinLogging.logger {}
 
         private val TYPES_WITHOUT_CREATE_VARIANTS = setOf(
@@ -470,6 +472,10 @@ class TypeDefResolver {
         val result = ArrayList(journals)
         for (childId in context.getChildrenByParentId(target.getLocalId())) {
 
+            if (result.size > ASSOCS_FROM_TARGET_LIMIT) {
+                break
+            }
+
             val childDef = context.getResolvedType(childId)
 
             if (EntityRef.isNotEmpty(childDef.journalRef)) {
@@ -479,12 +485,15 @@ class TypeDefResolver {
                 continue
             }
 
-            context.getChildrenByParentId(childId).forEach { childChildId ->
+            for (childChildId in context.getChildrenByParentId(childId)) {
                 val childChildDef = context.getResolvedType(childChildId)
                 val journalRef = childChildDef.journalRef
                 if (EntityRef.isNotEmpty(journalRef)) {
                     if (existingJournals.add(journalRef)) {
                         result.add(journalRef)
+                        if (result.size > ASSOCS_FROM_TARGET_LIMIT) {
+                            break
+                        }
                     }
                 }
             }
