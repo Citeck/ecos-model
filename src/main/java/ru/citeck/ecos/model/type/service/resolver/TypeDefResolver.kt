@@ -467,38 +467,38 @@ class TypeDefResolver {
         if (EntityRef.isNotEmpty(targetTypeDef.journalRef)) {
             return listOf(targetTypeDef.journalRef)
         }
+        val childJournals: Set<EntityRef> = context.getFromCacheOrCompute(JournalsByTargetTypeKey(target)) { key ->
 
-        val existingJournals = HashSet(journals)
-        val result = ArrayList(journals)
-        for (childId in context.getChildrenByParentId(target.getLocalId())) {
+            val childJournals = LinkedHashSet<EntityRef>()
+            for (childId in context.getChildrenByParentId(key.target.getLocalId())) {
 
-            if (result.size > ASSOCS_FROM_TARGET_LIMIT) {
-                break
-            }
-
-            val childDef = context.getResolvedType(childId)
-
-            if (EntityRef.isNotEmpty(childDef.journalRef)) {
-                if (existingJournals.add(childDef.journalRef)) {
-                    result.add(childDef.journalRef)
+                if (childJournals.size > ASSOCS_FROM_TARGET_LIMIT) {
+                    break
                 }
-                continue
-            }
 
-            for (childChildId in context.getChildrenByParentId(childId)) {
-                val childChildDef = context.getResolvedType(childChildId)
-                val journalRef = childChildDef.journalRef
-                if (EntityRef.isNotEmpty(journalRef)) {
-                    if (existingJournals.add(journalRef)) {
-                        result.add(journalRef)
-                        if (result.size > ASSOCS_FROM_TARGET_LIMIT) {
+                val childDef = context.getResolvedType(childId)
+
+                if (EntityRef.isNotEmpty(childDef.journalRef)) {
+                    childJournals.add(childDef.journalRef)
+                    continue
+                }
+
+                for (childChildId in context.getChildrenByParentId(childId)) {
+                    val childChildDef = context.getResolvedType(childChildId)
+                    val journalRef = childChildDef.journalRef
+                    if (EntityRef.isNotEmpty(journalRef)) {
+                        if (childJournals.add(journalRef) && childJournals.size > ASSOCS_FROM_TARGET_LIMIT) {
                             break
                         }
                     }
                 }
             }
+            childJournals
         }
-        return result
+        val result = LinkedHashSet(journals)
+        result.addAll(childJournals)
+
+        return result.toList()
     }
 
     private fun doWithMeta(
@@ -510,6 +510,10 @@ class TypeDefResolver {
         return resTypes.zip(entities) { a, b -> EntityWithMeta(a, b.meta) }
     }
 
+    private data class JournalsByTargetTypeKey(
+        val target: EntityRef
+    )
+
     private class ResolveContext(
         val rawProv: TypesProvider,
         val resProv: TypesProvider,
@@ -519,6 +523,15 @@ class TypeDefResolver {
 
         private val childrenById: MutableMap<String, List<String>> = HashMap()
         private val resolvedTypes: MutableMap<String, TypeDef> = HashMap()
+
+        private val cache = HashMap<Any, Any>()
+
+        @Suppress("UNCHECKED_CAST")
+        fun <K : Any, V : Any> getFromCacheOrCompute(key: K, action: (K) -> V): V {
+            return cache.computeIfAbsent(key) {
+                action.invoke(it as K)
+            } as V
+        }
 
         fun getResolvedType(id: String): TypeDef {
             return resolvedTypes.computeIfAbsent(id) {
