@@ -30,6 +30,40 @@
             "optionalWhenDisabled": false,
             "type": "textfield",
             "input": true
+          },
+          {
+            "label": {
+              "en": "Description",
+              "ru": "Описание"
+            },
+            "key": "description",
+            "defaultValue": "",
+            "refreshOn": [],
+            "optionalWhenDisabled": false,
+            "type": "textarea",
+            "input": true
+          },
+          {
+            "label": {
+              "en": "Creation date",
+              "ru": "Дата создания"
+            },
+            "key": "_created",
+            "disabled": true,
+            "format": "yyyy-MM-dd HH:mm",
+            "datePicker": {
+              "minDate": "",
+              "maxDate": ""
+            },
+            "timePicker": {
+              "showMeridian": false
+            },
+            "defaultValue": "",
+            "refreshOn": [],
+            "optionalWhenDisabled": false,
+            "type": "datetime",
+            "input": true,
+            "suffix": true
           }
         ]
       },

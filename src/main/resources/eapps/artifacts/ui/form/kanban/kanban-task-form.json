@@ -33,6 +33,18 @@
             "optionalWhenDisabled": false,
             "type": "textfield",
             "input": true
+          },
+          {
+            "label": {
+              "en": "Description",
+              "ru": "Описание"
+            },
+            "key": "description",
+            "defaultValue": "",
+            "refreshOn": [],
+            "optionalWhenDisabled": false,
+            "type": "textarea",
+            "input": true
           }
         ]
       },

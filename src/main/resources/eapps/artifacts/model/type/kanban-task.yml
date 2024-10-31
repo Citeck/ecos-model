@@ -19,6 +19,10 @@ model:
       name:
         ru: Название
         en: Name
+    - id: description
+      name:
+        ru: Описание
+        en: Description
   statuses:
     - id: new
       name:
