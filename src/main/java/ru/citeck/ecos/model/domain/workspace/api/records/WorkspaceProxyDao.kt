@@ -202,7 +202,8 @@ class WorkspaceProxyDao(
                     authority = AuthorityType.PERSON.getRef(user),
                     memberRole = WorkspaceMemberRole.MANAGER
                 )
-            )
+            ),
+            homePageLink = ""
         )
     }
 }

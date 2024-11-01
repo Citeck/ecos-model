@@ -7,9 +7,9 @@ import ru.citeck.ecos.events2.EventsService
 import ru.citeck.ecos.events2.type.RecordChangedEvent
 import ru.citeck.ecos.events2.type.RecordCreatedEvent
 import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao.Companion.WORKSPACE_SOURCE_ID
-import ru.citeck.ecos.model.domain.workspace.config.WORKSPACE_TYPE
 import ru.citeck.ecos.model.domain.workspace.dto.Workspace
 import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
+import ru.citeck.ecos.model.domain.workspace.service.WorkspaceDesc
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.webapp.api.constants.AppName
@@ -34,7 +34,7 @@ class WorkspaceArtifactHandler(
             eventsService.addListener<Workspace> {
                 withEventType(eventType)
                 withDataClass(Workspace::class.java)
-                withFilter(Predicates.eq("typeDef.id", WORKSPACE_TYPE))
+                withFilter(Predicates.eq("typeDef.id", WorkspaceDesc.TYPE_ID))
                 withAction {
                     listener.accept(it)
                 }
@@ -49,6 +49,6 @@ class WorkspaceArtifactHandler(
     }
 
     override fun getArtifactType(): String {
-        return "model/${WORKSPACE_TYPE}"
+        return "model/${WorkspaceDesc.TYPE_ID}"
     }
 }

@@ -82,7 +82,8 @@ data class Workspace(
     val name: MLText,
     val description: MLText = MLText.EMPTY,
     val workspaceMembers: List<WorkspaceMember> = emptyList(),
-    val visibility: WorkspaceVisibility
+    val visibility: WorkspaceVisibility,
+    val homePageLink: String
 ) {
 
     companion object {
@@ -107,6 +108,7 @@ data class Workspace(
         var description: MLText = MLText.EMPTY
         var workspaceMembers: List<WorkspaceMember> = emptyList()
         var visibility: WorkspaceVisibility = WorkspaceVisibility.PUBLIC
+        var homePageLink: String = ""
 
         constructor(base: Workspace) : this() {
             this.id = base.id
@@ -114,6 +116,7 @@ data class Workspace(
             this.description = base.description
             this.workspaceMembers = base.workspaceMembers
             this.visibility = base.visibility
+            this.homePageLink = base.homePageLink
         }
 
         fun withId(id: String?): Builder {
@@ -141,8 +144,13 @@ data class Workspace(
             return this
         }
 
+        fun withHomePageLink(homePageLink: String?): Builder {
+            this.homePageLink = homePageLink ?: ""
+            return this
+        }
+
         fun build(): Workspace {
-            return Workspace(id, name, description, workspaceMembers, visibility)
+            return Workspace(id, name, description, workspaceMembers, visibility, homePageLink)
         }
     }
 }

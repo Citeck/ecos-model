@@ -57,7 +57,8 @@ class VirtualUserWorkspacesTest {
                     authority = AuthorityType.PERSON.getRef("ron"),
                     memberRole = WorkspaceMemberRole.MANAGER
                 )
-            )
+            ),
+            homePageLink = ""
         )
 
         private val harryPersonalWorkspaceDto = Workspace(
@@ -73,7 +74,8 @@ class VirtualUserWorkspacesTest {
                     authority = AuthorityType.PERSON.getRef("harry"),
                     memberRole = WorkspaceMemberRole.MANAGER
                 )
-            )
+            ),
+            homePageLink = ""
         )
 
         private val gryffindorWorkspaceDto = Workspace(
@@ -103,7 +105,8 @@ class VirtualUserWorkspacesTest {
                     authority = "emodel/authority-group@gryffindor-managers".toEntityRef(),
                     memberRole = WorkspaceMemberRole.MANAGER
                 )
-            )
+            ),
+            homePageLink = ""
         )
     }
 
@@ -187,7 +190,8 @@ class VirtualUserWorkspacesTest {
         return Workspace(
             id = "${USER_WORKSPACE_PREFIX}$user",
             name = MLText.EMPTY,
-            visibility = WorkspaceVisibility.PRIVATE
+            visibility = WorkspaceVisibility.PRIVATE,
+            homePageLink = ""
         )
     }
 

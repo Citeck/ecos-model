@@ -8,7 +8,10 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import ru.citeck.ecos.apps.app.service.LocalAppService
+import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.data.MLText
+import ru.citeck.ecos.commons.io.file.std.EcosStdFile
+import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.commons.utils.resource.ResourceUtils
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.i18n.I18nContext
@@ -80,5 +83,26 @@ class WorkspaceArtifactsHandlerTest {
                 memberRole = WorkspaceMemberRole.USER
             }
         )
+    }
+
+    @Test
+    fun `check json attribute`() {
+        val ref = EntityRef.create(
+            AppName.EMODEL,
+            WORKSPACE_SOURCE_ID,
+            "test-workspace-artifact"
+        )
+
+        val expectedData = Json.mapper.readNotNull(
+            EcosStdFile(
+                ResourceUtils.getFile(
+                    "classpath:eapps/artifacts/model/workspace/test-workspace-artifact.yml"
+                )
+            ),
+            DataValue::class.java
+        )
+        val workspaceJson = recordsService.getAtt(ref, "?json")
+        assertThat(workspaceJson.getAs(Workspace::class.java))
+            .isEqualTo(expectedData.getAs(Workspace::class.java))
     }
 }
