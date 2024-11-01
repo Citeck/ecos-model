@@ -20,159 +20,238 @@
         "components": [
           {
             "label": {
-              "ru": "Id",
-              "en": "Id"
+              "ru": "Tabs"
             },
-            "key": "id",
-            "defaultValue": "",
-            "refreshOn": [],
-            "optionalWhenDisabled": false,
-            "logic": [
+            "key": "tabs",
+            "components": [
               {
-                "name": "disable-for-non-create-form",
-                "trigger": {
-                  "type": "javascript",
-                  "javascript": "result = instance.options.formMode !== 'CREATE';"
+                "label": {
+                  "ru": "Основное",
+                  "en": "General"
                 },
-                "actions": [
+                "key": "general",
+                "components": [
                   {
-                    "name": "disable-field",
-                    "type": "property",
-                    "property": {
-                      "label": "Disabled",
-                      "value": "disabled",
-                      "type": "boolean"
+                    "label": {
+                      "ru": "Columns"
                     },
-                    "state": "true"
+                    "key": "columns3",
+                    "columns": [
+                      {
+                        "components": [
+                          {
+                            "label": {
+                              "ru": "Id",
+                              "en": "Id"
+                            },
+                            "key": "id",
+                            "defaultValue": "",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "logic": [
+                              {
+                                "name": "disable-for-non-create-form",
+                                "trigger": {
+                                  "type": "javascript",
+                                  "javascript": "result = instance.options.formMode !== 'CREATE';"
+                                },
+                                "actions": [
+                                  {
+                                    "name": "disable-field",
+                                    "type": "property",
+                                    "property": {
+                                      "label": "Disabled",
+                                      "value": "disabled",
+                                      "type": "boolean"
+                                    },
+                                    "state": "true"
+                                  }
+                                ]
+                              }
+                            ],
+                            "type": "textfield",
+                            "input": true,
+                            "inputMasks": [
+                              {}
+                            ]
+                          },
+                          {
+                            "label": {
+                              "ru": "Видимость",
+                              "en": "Visibility"
+                            },
+                            "key": "visibility",
+                            "validate": {
+                              "required": true
+                            },
+                            "dataSrc": "values",
+                            "data": {
+                              "values": [
+                                {
+                                  "label": {
+                                    "ru": "Публичное",
+                                    "en": "Public"
+                                  },
+                                  "value": "PUBLIC"
+                                },
+                                {
+                                  "label": {
+                                    "ru": "Приватное",
+                                    "en": "Private"
+                                  },
+                                  "value": "PRIVATE"
+                                }
+                              ],
+                              "headers": [
+                                {}
+                              ]
+                            },
+                            "defaultValue": "PRIVATE",
+                            "optionalWhenDisabled": false,
+                            "type": "ecosSelect",
+                            "input": true
+                          },
+                          {
+                            "label": {
+                              "ru": "Участники рабочего пространства",
+                              "en": "Workspace members"
+                            },
+                            "key": "workspaceMembers",
+                            "multiple": true,
+                            "source": {
+                              "type": "custom",
+                              "custom": {
+                                "columns": [
+                                  {
+                                    "name": "authority",
+                                    "formatter": "",
+                                    "setAttributesManually": true,
+                                    "title": {
+                                      "ru": "Группа или пользователь",
+                                      "en": "Authority"
+                                    },
+                                    "type": "authority",
+                                    "multiple": false
+                                  },
+                                  {
+                                    "name": "memberRole",
+                                    "formatter": "",
+                                    "setAttributesManually": true,
+                                    "title": {
+                                      "ru": "Роль",
+                                      "en": "Role"
+                                    },
+                                    "type": "text",
+                                    "multiple": false
+                                  }
+                                ],
+                                "record": null,
+                                "attribute": null
+                              }
+                            },
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "tableForm",
+                            "input": true,
+                            "reorder": false
+                          }
+                        ],
+                        "type": "column",
+                        "input": false,
+                        "key": "column",
+                        "index": 0
+                      },
+                      {
+                        "index": 1,
+                        "type": "column",
+                        "input": false,
+                        "key": "column",
+                        "components": [
+                          {
+                            "label": {
+                              "ru": "Имя",
+                              "en": "Name"
+                            },
+                            "key": "name",
+                            "validate": {
+                              "required": true
+                            },
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "mlText",
+                            "input": true
+                          },
+                          {
+                            "label": {
+                              "ru": "Описание",
+                              "en": "Description"
+                            },
+                            "key": "description",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "mlText",
+                            "input": true
+                          },
+                          {
+                            "label": {
+                              "ru": "Создатель",
+                              "en": "Creator"
+                            },
+                            "key": "_creator",
+                            "disabled": true,
+                            "disableInlineEdit": true,
+                            "persistent": false,
+                            "allowedAuthorityType": "USER",
+                            "defaultValue": "",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "customConditional": "show = _.get(instance, 'options.formMode') !== 'CREATE';",
+                            "type": "selectOrgstruct",
+                            "input": true
+                          }
+                        ]
+                      }
+                    ],
+                    "oneColumnInViewMode": false,
+                    "type": "columns",
+                    "input": false
+                  }
+                ]
+              },
+              {
+                "label": {
+                  "ru": "Дополнительное",
+                  "en": "Additional"
+                },
+                "key": "additional",
+                "components": [
+                  {
+                    "label": {
+                      "ru": "Адрес домашней страницы",
+                      "en": "Home page link"
+                    },
+                    "key": "homePageLink",
+                    "tooltip": {
+                      "ru": "Адрес, который будет открываться при переходе в рабочее пространство и при нажатии на логотип в меню.",
+                      "en": "The URL that will open when the workspace is opened and when clicking on the logo in the menu."
+                    },
+                    "placeholder": {
+                      "ru": "/v2/dashboard"
+                    },
+                    "defaultValue": "",
+                    "refreshOn": [],
+                    "optionalWhenDisabled": false,
+                    "type": "textfield",
+                    "input": true,
+                    "inputMasks": [
+                      {}
+                    ]
                   }
                 ]
               }
             ],
-            "type": "textfield",
-            "input": true,
-            "inputMasks": [
-              {}
-            ]
-          },
-          {
-            "label": {
-              "ru": "Имя",
-              "en": "Name"
-            },
-            "key": "name",
-            "validate": {
-              "required": true
-            },
-            "refreshOn": [],
-            "optionalWhenDisabled": false,
-            "type": "mlText",
-            "input": true
-          },
-          {
-            "label": {
-              "ru": "Описание",
-              "en": "Description"
-            },
-            "key": "description",
-            "refreshOn": [],
-            "optionalWhenDisabled": false,
-            "type": "mlText",
-            "input": true
-          },
-          {
-            "label": {
-              "ru": "Видимость",
-              "en": "Visibility"
-            },
-            "key": "visibility",
-            "validate": {
-              "required": true
-            },
-            "dataSrc": "values",
-            "data": {
-              "values": [
-                {
-                  "label": {
-                    "ru": "Публичное",
-                    "en": "Public"
-                  },
-                  "value": "PUBLIC"
-                },
-                {
-                  "label": {
-                    "ru": "Приватное",
-                    "en": "Private"
-                  },
-                  "value": "PRIVATE"
-                }
-              ],
-              "headers": [
-                {}
-              ]
-            },
-            "defaultValue": "PRIVATE",
-            "optionalWhenDisabled": false,
-            "type": "ecosSelect",
-            "input": true
-          },
-          {
-            "label": {
-              "ru": "Участники рабочего пространства",
-              "en": "Workspace members"
-            },
-            "key": "workspaceMembers",
-            "multiple": true,
-            "source": {
-              "type": "custom",
-              "custom": {
-                "columns": [
-                  {
-                    "name": "authority",
-                    "formatter": "",
-                    "setAttributesManually": true,
-                    "title": {
-                      "ru": "Группа или пользователь",
-                      "en": "Authority"
-                    },
-                    "type": "authority",
-                    "multiple": false
-                  },
-                  {
-                    "name": "memberRole",
-                    "formatter": "",
-                    "setAttributesManually": true,
-                    "title": {
-                      "ru": "Роль",
-                      "en": "Role"
-                    },
-                    "type": "text",
-                    "multiple": false
-                  }
-                ]
-              }
-            },
-            "refreshOn": [],
-            "optionalWhenDisabled": false,
-            "type": "tableForm",
-            "input": true,
-            "reorder": false
-          },
-          {
-            "label": {
-              "ru": "Создатель",
-              "en": "Creator"
-            },
-            "key": "_creator",
-            "disabled": true,
-            "disableInlineEdit": true,
-            "persistent": false,
-            "allowedAuthorityType": "USER",
-            "defaultValue": "",
-            "refreshOn": [],
-            "optionalWhenDisabled": false,
-            "customConditional": "show = _.get(instance, 'options.formMode') !== 'CREATE';",
-            "type": "selectOrgstruct",
-            "input": true
+            "type": "tabs",
+            "input": false
           }
         ]
       },
@@ -269,9 +348,6 @@
         "type": "columns",
         "input": false
       }
-    ],
-    "formId": "workspace-form"
-  },
-  "attributes": {},
-  "notExists": false
+    ]
+  }
 }

@@ -48,4 +48,7 @@ model:
         ru: Видимость
         en: Visibility
       mandatory: true
-      type: TEXT
+    - id: homePageLink
+      name:
+        ru: Адрес домашней страницы
+        en: Home page link
