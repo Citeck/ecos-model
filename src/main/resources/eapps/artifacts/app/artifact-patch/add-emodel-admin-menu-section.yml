@@ -12,6 +12,18 @@ type: json
 config:
   operations:
     - op: add
+      path: '$.subMenu.create.items'
+      value:
+        - id: create-type
+          label:
+            en: Create type
+            ru: Создать тип
+          type: LINK-CREATE-CASE
+          config:
+            typeRef: emodel/type@type-def
+            variantId: create-new-template
+            variantTypeRef: emodel/type@type-def
+    - op: add
       path: '$.subMenu.left.items'
       value:
         id: emodel-section
