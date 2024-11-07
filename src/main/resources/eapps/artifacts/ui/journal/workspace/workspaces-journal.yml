@@ -22,3 +22,5 @@ columns:
     name:
       ru: Видимость
       en: Visibility
+    editor:
+      type: select

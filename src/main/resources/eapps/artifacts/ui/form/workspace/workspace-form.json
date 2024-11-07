@@ -84,27 +84,9 @@
                             "validate": {
                               "required": true
                             },
-                            "dataSrc": "values",
+                            "dataSrc": "url",
                             "data": {
-                              "values": [
-                                {
-                                  "label": {
-                                    "ru": "Публичное",
-                                    "en": "Public"
-                                  },
-                                  "value": "PUBLIC"
-                                },
-                                {
-                                  "label": {
-                                    "ru": "Приватное",
-                                    "en": "Private"
-                                  },
-                                  "value": "PRIVATE"
-                                }
-                              ],
-                              "headers": [
-                                {}
-                              ]
+                              "url": "/citeck/ecos/records/query"
                             },
                             "defaultValue": "PRIVATE",
                             "optionalWhenDisabled": false,

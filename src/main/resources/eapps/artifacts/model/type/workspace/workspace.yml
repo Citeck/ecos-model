@@ -48,6 +48,18 @@ model:
         ru: Видимость
         en: Visibility
       mandatory: true
+      type: OPTIONS
+      config:
+        source: values
+        values:
+          - value: PUBLIC
+            label:
+              ru: Публичный
+              en: Public
+          - value: PRIVATE
+            label:
+              ru: Приватный
+              en: Private
     - id: homePageLink
       name:
         ru: Адрес домашней страницы

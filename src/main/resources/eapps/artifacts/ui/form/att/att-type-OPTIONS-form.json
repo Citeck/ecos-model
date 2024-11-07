@@ -1,0 +1,107 @@
+{
+  "id": "att-type-OPTIONS-form",
+  "title": {
+    "en": "Association form"
+  },
+  "description": {},
+  "customModule": "",
+  "typeRef": "",
+  "width": "",
+  "system": true,
+  "i18n": {},
+  "definition": {
+    "components": [
+      {
+        "label": {
+          "ru": "Источник вариантов для выбора",
+          "en": "Source of options to choose"
+        },
+        "key": "source",
+        "validate": {
+          "required": true
+        },
+        "dataSrc": "values",
+        "data": {
+          "values": [
+            {
+              "label": {
+                "ru": "Список значений",
+                "en": "Values list"
+              },
+              "value": "values"
+            }
+          ],
+          "headers": [
+            {}
+          ]
+        },
+        "defaultValue": "values",
+        "optionalWhenDisabled": false,
+        "type": "ecosSelect",
+        "input": true
+      },
+      {
+        "label": {
+          "ru": "Значения",
+          "en": "Values"
+        },
+        "key": "values",
+        "multiple": true,
+        "validate": {
+          "minLength": "",
+          "maxLength": ""
+        },
+        "disableAddingRemovingRows": false,
+        "addAnotherPosition": "bottom",
+        "removePlacement": "col",
+        "defaultOpen": false,
+        "layoutFixed": false,
+        "enableRowGroups": false,
+        "reorder": true,
+        "refreshOn": [],
+        "optionalWhenDisabled": false,
+        "conditional": {
+          "show": "true",
+          "when": "source",
+          "eq": "values"
+        },
+        "type": "datagrid",
+        "input": true,
+        "components": [
+          {
+            "label": {
+              "ru": "Значение",
+              "en": "Value"
+            },
+            "key": "value",
+            "defaultValue": "",
+            "refreshOn": [],
+            "optionalWhenDisabled": false,
+            "type": "textfield",
+            "input": true,
+            "inputMasks": [
+              {}
+            ],
+            "row": "0-0"
+          },
+          {
+            "label": {
+              "ru": "Отображаемый текст",
+              "en": "Displayed text"
+            },
+            "key": "label",
+            "refreshOn": [],
+            "optionalWhenDisabled": false,
+            "type": "mlText",
+            "input": true,
+            "row": "0-1"
+          }
+        ],
+        "rowGroups": [
+          {}
+        ],
+        "defaultValue": []
+      }
+    ]
+  }
+}
