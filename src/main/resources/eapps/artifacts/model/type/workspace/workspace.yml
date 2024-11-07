@@ -54,11 +54,11 @@ model:
         values:
           - value: PUBLIC
             label:
-              ru: Публичный
+              ru: Публичное
               en: Public
           - value: PRIVATE
             label:
-              ru: Приватный
+              ru: Приватное
               en: Private
     - id: homePageLink
       name:
