@@ -46,8 +46,8 @@ class EmodelWorkspaceService(
     fun isUserManagerOf(user: String, workspace: String): Boolean {
 
         if (workspace.startsWith(USER_WORKSPACE_PREFIX)) {
-            return user == workspace.substring(USER_WORKSPACE_PREFIX.length)
-                || authorityService.isAdmin(user)
+            return user == workspace.substring(USER_WORKSPACE_PREFIX.length) ||
+                authorityService.isAdmin(user)
         }
 
         val workspaceRef = EntityRef.create(WORKSPACE_SOURCE_ID, workspace)

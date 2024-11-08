@@ -45,6 +45,8 @@ class VirtualUserWorkspacesTest {
     private lateinit var localAppService: LocalAppService
 
     companion object {
+        private val personalWsIconRef = EntityRef.valueOf("uiserv/icon@personal-workspace-icon")
+
         private val ronPersonalWorkspace = Workspace(
             id = "${USER_WORKSPACE_PREFIX}ron",
             name = MLText(
@@ -60,7 +62,7 @@ class VirtualUserWorkspacesTest {
                 )
             ),
             homePageLink = "",
-            icon = EntityRef.EMPTY
+            icon = personalWsIconRef
         )
 
         private val harryPersonalWorkspaceDto = Workspace(
@@ -78,7 +80,7 @@ class VirtualUserWorkspacesTest {
                 )
             ),
             homePageLink = "",
-            icon = EntityRef.EMPTY
+            icon = personalWsIconRef
         )
 
         private val gryffindorWorkspaceDto = Workspace(
@@ -117,7 +119,7 @@ class VirtualUserWorkspacesTest {
     @BeforeAll
     fun setUp() {
         AuthContext.runAsSystem {
-            localAppService.deployLocalArtifacts(ResourceUtils.getFile("classpath:eapps/artifacts"))
+            localAppService.deployLocalArtifacts("model/workspace")
         }
     }
 
