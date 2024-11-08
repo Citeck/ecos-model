@@ -1,0 +1,9 @@
+---
+id: personal-workspace
+name:
+  ru: Персональное рабочее пространство
+  en: Personal workspace
+
+visibility: PRIVATE
+
+icon: uiserv/icon@personal-workspace-icon

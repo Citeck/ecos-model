@@ -3,11 +3,9 @@ package ru.citeck.ecos.model.domain.workspace.api.records
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.data.DataValue
-import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthRole
-import ru.citeck.ecos.context.lib.i18n.I18nContext
 import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
 import ru.citeck.ecos.model.domain.workspace.dto.Workspace
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceAction
@@ -164,46 +162,45 @@ class WorkspaceProxyDao(
             return recordAtts
         }
 
-        val virtualUserAttsIdx = recordIds.mapIndexed { idx, id ->
+        val virtualUserAttsIdx = recordIds.mapIndexedNotNull { idx, id ->
             if (id.startsWith(USER_WORKSPACE_PREFIX)) {
                 idx to id
             } else {
                 null
             }
-        }.filterNotNull().toMap()
+        }.toMap()
 
+        if (virtualUserAttsIdx.isEmpty()) {
+            return recordAtts
+        }
+
+        val defaultConfig = AuthContext.runAsSystem {
+            recordsService.getAtts(
+                EntityRef.create(WORKSPACE_REPO_SOURCE_ID, "personal-workspace"),
+                Workspace::class.java
+            )
+        }
         val result = recordAtts.toMutableList()
 
         for ((idx, id) in virtualUserAttsIdx) {
             val user = id.removePrefix(USER_WORKSPACE_PREFIX)
-            val virtualUserWorkspace = if (workspacePermissions.currentAuthCanReadPersonalWorkspaceOf(user)
-            ) {
-                generateVirtualUserWorkspace(user)
+            result[idx] = if (workspacePermissions.currentAuthCanReadPersonalWorkspaceOf(user)) {
+                defaultConfig.copy()
+                    .withId(id)
+                    .withWorkspaceMembers(
+                        listOf(
+                            WorkspaceMember(
+                                id = user,
+                                authority = AuthorityType.PERSON.getRef(user),
+                                memberRole = WorkspaceMemberRole.MANAGER
+                            )
+                        )
+                    ).build()
             } else {
                 EmptyAttValue.INSTANCE
             }
-            result[idx] = virtualUserWorkspace
         }
 
         return result.toList()
-    }
-
-    private fun generateVirtualUserWorkspace(user: String): Workspace {
-        return Workspace(
-            id = "$USER_WORKSPACE_PREFIX$user",
-            name = MLText(
-                I18nContext.ENGLISH to "Personal workspace",
-                I18nContext.RUSSIAN to "Персональное рабочее пространство"
-            ),
-            visibility = WorkspaceVisibility.PRIVATE,
-            workspaceMembers = listOf(
-                WorkspaceMember(
-                    id = user,
-                    authority = AuthorityType.PERSON.getRef(user),
-                    memberRole = WorkspaceMemberRole.MANAGER
-                )
-            ),
-            homePageLink = ""
-        )
     }
 }

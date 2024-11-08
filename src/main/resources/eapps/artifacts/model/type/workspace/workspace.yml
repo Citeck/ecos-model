@@ -29,6 +29,13 @@ model:
         en: Name
       type: MLTEXT
       mandatory: true
+    - id: icon
+      name:
+        ru: Иконка
+        en: Icon
+      type: ASSOC
+      config:
+        typeRef: emodel/type@icon
     - id: description
       name:
         ru: Описание
