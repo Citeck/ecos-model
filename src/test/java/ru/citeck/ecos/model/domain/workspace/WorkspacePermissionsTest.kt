@@ -271,7 +271,8 @@ class WorkspacePermissionsTest {
             id = UUID.randomUUID().toString(),
             name = MLText("Test workspace"),
             visibility = WorkspaceVisibility.PUBLIC,
-            homePageLink = ""
+            homePageLink = "",
+            icon = EntityRef.EMPTY
         )
 
         val createdWorkspace = AuthContext.runAs("someUser", listOf(role)) {
@@ -293,7 +294,8 @@ class WorkspacePermissionsTest {
             id = UUID.randomUUID().toString(),
             name = MLText("Test workspace"),
             visibility = WorkspaceVisibility.PRIVATE,
-            homePageLink = ""
+            homePageLink = "",
+            icon = EntityRef.EMPTY
         )
 
         val createdWorkspace = AuthContext.runAs("someUser", listOf(role)) {
@@ -316,7 +318,8 @@ class WorkspacePermissionsTest {
                         id = UUID.randomUUID().toString(),
                         name = MLText("Test workspace"),
                         visibility = WorkspaceVisibility.PUBLIC,
-                        homePageLink = ""
+                        homePageLink = "",
+                        icon = EntityRef.EMPTY
                     )
                 )
             }
@@ -331,7 +334,8 @@ class WorkspacePermissionsTest {
                 id = UUID.randomUUID().toString(),
                 name = MLText("Test workspace"),
                 visibility = WorkspaceVisibility.PUBLIC,
-                homePageLink = ""
+                homePageLink = "",
+                icon = EntityRef.EMPTY
             )
         )
 
@@ -352,7 +356,8 @@ class WorkspacePermissionsTest {
                 id = UUID.randomUUID().toString(),
                 name = MLText("Test workspace"),
                 visibility = WorkspaceVisibility.PUBLIC,
-                homePageLink = ""
+                homePageLink = "",
+                icon = EntityRef.EMPTY
             )
         )
 
@@ -375,7 +380,8 @@ class WorkspacePermissionsTest {
                 id = UUID.randomUUID().toString(),
                 name = MLText("Test workspace"),
                 visibility = WorkspaceVisibility.PUBLIC,
-                homePageLink = ""
+                homePageLink = "",
+                icon = EntityRef.EMPTY
             )
         )
 
@@ -395,7 +401,8 @@ class WorkspacePermissionsTest {
                 id = UUID.randomUUID().toString(),
                 name = MLText("Test workspace"),
                 visibility = WorkspaceVisibility.PUBLIC,
-                homePageLink = ""
+                homePageLink = "",
+                icon = EntityRef.EMPTY
             )
         )
         val userName = "someUserToJoin"
@@ -420,7 +427,8 @@ class WorkspacePermissionsTest {
                 id = UUID.randomUUID().toString(),
                 name = MLText("Test workspace"),
                 visibility = WorkspaceVisibility.PUBLIC,
-                homePageLink = ""
+                homePageLink = "",
+                icon = EntityRef.EMPTY
             )
         )
         val userName = "someUserToJoin"
@@ -448,7 +456,8 @@ class WorkspacePermissionsTest {
                 id = UUID.randomUUID().toString(),
                 name = MLText("Test workspace"),
                 visibility = WorkspaceVisibility.PRIVATE,
-                homePageLink = ""
+                homePageLink = "",
+                icon = EntityRef.EMPTY
             )
         )
 
@@ -468,7 +477,8 @@ class WorkspacePermissionsTest {
                 id = UUID.randomUUID().toString(),
                 name = MLText("Test workspace"),
                 visibility = WorkspaceVisibility.PUBLIC,
-                homePageLink = ""
+                homePageLink = "",
+                icon = EntityRef.EMPTY
             )
         )
         val userName = "someUserToJoin"
@@ -493,7 +503,8 @@ class WorkspacePermissionsTest {
             id = UUID.randomUUID().toString(),
             name = MLText("Test workspace"),
             visibility = WorkspaceVisibility.PRIVATE,
-            homePageLink = ""
+            homePageLink = "",
+            icon = EntityRef.EMPTY
         )
 
         val createdWorkspace = AuthContext.runAs("someUser", listOf(role)) {
@@ -516,7 +527,8 @@ class WorkspacePermissionsTest {
                         id = UUID.randomUUID().toString(),
                         name = MLText("Test workspace"),
                         visibility = WorkspaceVisibility.PRIVATE,
-                        homePageLink = ""
+                        homePageLink = "",
+                        icon = EntityRef.EMPTY
                     )
                 )
             }
@@ -530,7 +542,8 @@ class WorkspacePermissionsTest {
             id = UUID.randomUUID().toString(),
             name = MLText("Test workspace"),
             visibility = visibility,
-            homePageLink = ""
+            homePageLink = "",
+            icon = EntityRef.EMPTY
         )
 
         val createdWorkspace = AuthContext.runAs("someUser", listOf(AuthRole.USER)) {
@@ -551,7 +564,8 @@ class WorkspacePermissionsTest {
             id = UUID.randomUUID().toString(),
             name = MLText("Test workspace"),
             visibility = visibility,
-            homePageLink = ""
+            homePageLink = "",
+            icon = EntityRef.EMPTY
         )
 
         val createdWorkspace = AuthContext.runAs("someUser", listOf(AuthRole.USER)) {

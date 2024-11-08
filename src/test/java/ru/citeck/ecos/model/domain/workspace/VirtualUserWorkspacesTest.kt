@@ -28,6 +28,7 @@ import ru.citeck.ecos.model.lib.workspace.USER_WORKSPACE_PREFIX
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.dao.query.dto.query.QueryPage
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.api.entity.toEntityRef
 import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension
 import kotlin.test.Test
@@ -58,7 +59,8 @@ class VirtualUserWorkspacesTest {
                     memberRole = WorkspaceMemberRole.MANAGER
                 )
             ),
-            homePageLink = ""
+            homePageLink = "",
+            icon = EntityRef.EMPTY
         )
 
         private val harryPersonalWorkspaceDto = Workspace(
@@ -75,7 +77,8 @@ class VirtualUserWorkspacesTest {
                     memberRole = WorkspaceMemberRole.MANAGER
                 )
             ),
-            homePageLink = ""
+            homePageLink = "",
+            icon = EntityRef.EMPTY
         )
 
         private val gryffindorWorkspaceDto = Workspace(
@@ -106,7 +109,8 @@ class VirtualUserWorkspacesTest {
                     memberRole = WorkspaceMemberRole.MANAGER
                 )
             ),
-            homePageLink = ""
+            homePageLink = "",
+            icon = EntityRef.EMPTY
         )
     }
 
@@ -191,7 +195,8 @@ class VirtualUserWorkspacesTest {
             id = "${USER_WORKSPACE_PREFIX}$user",
             name = MLText.EMPTY,
             visibility = WorkspaceVisibility.PRIVATE,
-            homePageLink = ""
+            homePageLink = "",
+            icon = EntityRef.EMPTY
         )
     }
 
