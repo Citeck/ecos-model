@@ -54,7 +54,8 @@ class DocLibRecords @Autowired constructor(
                 childrenQuery,
                 recsQuery.sortBy,
                 recsQuery.page.skipCount,
-                recsQuery.page.maxItems
+                recsQuery.page.maxItems,
+                recsQuery.workspaces
             )
         }
         return null
@@ -82,21 +83,22 @@ class DocLibRecords @Autowired constructor(
         return path.reversed()
     }
 
-    fun hasChildrenDirs(entityRef: EntityRef): Boolean {
+    fun hasChildrenDirs(entityRef: EntityRef, workspaces: List<String>): Boolean {
 
         val query = DocLibChildrenQuery(
             parentRef = entityRef,
             filter = VoidPredicate.INSTANCE,
             nodeType = DocLibNodeType.DIR
         )
-        return getChildren(query, emptyList(), 0, 1).isNotEmpty()
+        return getChildren(query, emptyList(), 0, 1, workspaces).isNotEmpty()
     }
 
     fun getChildren(
         query: DocLibChildrenQuery,
         sortBy: List<SortBy>,
         skipCount: Int,
-        maxItems: Int
+        maxItems: Int,
+        workspaces: List<String>
     ): List<EntityRef> {
 
         val normalizedMaxItems = if (maxItems < 0) {
@@ -166,6 +168,7 @@ class DocLibRecords @Autowired constructor(
             )
             withSkipCount(innerQuerySkipCount)
             withMaxItems(innerQueryMaxItems)
+            withWorkspaces(workspaces)
         }
 
         val resultRecordsInnerRefs = ArrayList<EntityRef>()
