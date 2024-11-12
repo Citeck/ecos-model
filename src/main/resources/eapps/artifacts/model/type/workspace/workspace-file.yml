@@ -5,7 +5,7 @@ name:
   en: Workspace files
 
 system: true
-storageType: DEFAULT
+storageType: ECOS_MODEL
 
 parentRef: emodel/type@doclib-file
 
