@@ -42,11 +42,12 @@ class DocLibRecord(
                         SortBy("_name", true)
                     ),
                     0,
-                    -1
+                    -1,
+                    emptyList()
                 )
             }
             ATT_NODE_TYPE -> nodeType
-            ATT_HAS_CHILDREN_DIRS -> docLibRecords.hasChildrenDirs(id)
+            ATT_HAS_CHILDREN_DIRS -> docLibRecords.hasChildrenDirs(id, emptyList())
             else -> super.getAtt(name)
         }
     }
