@@ -18,6 +18,7 @@ queryPermsPolicy: PUBLIC
 
 actions:
   - uiserv/action@edit
+  - uiserv/action@delete
   - uiserv/action@view-dashboard
   - uiserv/action@download-text-yml
 
