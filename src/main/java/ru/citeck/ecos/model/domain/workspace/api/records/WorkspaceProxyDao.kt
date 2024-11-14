@@ -7,6 +7,7 @@ import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
+import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.model.domain.workspace.dto.Workspace
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceAction
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMember
@@ -37,13 +38,12 @@ class WorkspaceProxyDao(
     private val modelServices: ModelServiceFactory,
     private val ecosAuthoritiesApi: EcosAuthoritiesApi
 ) : RecordsDaoProxy(
-    WORKSPACE_SOURCE_ID,
+    WorkspaceDesc.SOURCE_ID,
     WORKSPACE_REPO_SOURCE_ID
 ) {
 
     companion object {
-        const val WORKSPACE_SOURCE_ID = "workspace"
-        const val WORKSPACE_REPO_SOURCE_ID = "$WORKSPACE_SOURCE_ID-repo"
+        const val WORKSPACE_REPO_SOURCE_ID = "${WorkspaceDesc.SOURCE_ID}-repo"
 
         const val WORKSPACE_ACTION_ATT = "action"
         const val WORKSPACE_QUERY_USER_ATT = "user"
@@ -79,7 +79,7 @@ class WorkspaceProxyDao(
                 val result = RecsQueryRes<EntityRef>()
                 result.setRecords(
                     modelServices.workspaceService.getUserWorkspaces(user)
-                        .map { EntityRef.create(AppName.EMODEL, WORKSPACE_SOURCE_ID, it) }
+                        .map { EntityRef.create(AppName.EMODEL, WorkspaceDesc.SOURCE_ID, it) }
                 )
                 result
             }
@@ -145,7 +145,7 @@ class WorkspaceProxyDao(
                 workspaceService.joinCurrentUserToWorkspace(
                     EntityRef.create(
                         AppName.EMODEL,
-                        WORKSPACE_SOURCE_ID,
+                        WorkspaceDesc.SOURCE_ID,
                         record.id
                     )
                 )

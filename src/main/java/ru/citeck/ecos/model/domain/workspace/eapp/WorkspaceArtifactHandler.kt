@@ -6,10 +6,9 @@ import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.events2.EventsService
 import ru.citeck.ecos.events2.type.RecordChangedEvent
 import ru.citeck.ecos.events2.type.RecordCreatedEvent
-import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao.Companion.WORKSPACE_SOURCE_ID
 import ru.citeck.ecos.model.domain.workspace.dto.Workspace
 import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
-import ru.citeck.ecos.model.domain.workspace.service.WorkspaceDesc
+import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.webapp.api.constants.AppName
@@ -44,7 +43,7 @@ class WorkspaceArtifactHandler(
 
     override fun deleteArtifact(artifactId: String) {
         AuthContext.runAsSystem {
-            recordsService.delete(EntityRef.create(AppName.EMODEL, WORKSPACE_SOURCE_ID, artifactId))
+            recordsService.delete(EntityRef.create(AppName.EMODEL, WorkspaceDesc.SOURCE_ID, artifactId))
         }
     }
 

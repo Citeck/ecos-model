@@ -6,7 +6,8 @@ import ru.citeck.ecos.context.lib.auth.AuthGroup
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
 import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceMemberProxyDao.Companion.WORKSPACE_MEMBER_SOURCE_ID
 import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao.Companion.WORKSPACE_ATT_MEMBER_AUTHORITY
-import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao.Companion.WORKSPACE_SOURCE_ID
+import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
+import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceVisitDesc
 import ru.citeck.ecos.model.domain.workspace.dto.Workspace
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMember
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMemberRole
@@ -19,6 +20,7 @@ import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.ScalarType
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
+import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy
 import ru.citeck.ecos.webapp.api.authority.EcosAuthoritiesApi
 import ru.citeck.ecos.webapp.api.constants.AppName
 import ru.citeck.ecos.webapp.api.entity.EntityRef
@@ -50,7 +52,7 @@ class EmodelWorkspaceService(
                 authorityService.isAdmin(user)
         }
 
-        val workspaceRef = EntityRef.create(WORKSPACE_SOURCE_ID, workspace)
+        val workspaceRef = EntityRef.create(WorkspaceDesc.SOURCE_ID, workspace)
         val workspaceData = recordsService.getAtts(workspaceRef, WorkspaceMembersAtts::class.java)
         if (workspaceData.creator.getLocalId() == user) {
             return true
@@ -73,9 +75,9 @@ class EmodelWorkspaceService(
         val userRef = AuthorityType.PERSON.getRef(user)
         val authoritiesToQuery = getUserAuthoritiesRefs(userRef)
 
-        return recordsService.query(
+        val workspaces = recordsService.query(
             RecordsQuery.create()
-                .withSourceId(WORKSPACE_SOURCE_ID)
+                .withSourceId(WorkspaceDesc.SOURCE_ID)
                 .withQuery(
                     Predicates.or(
                         Predicates.eq(RecordConstants.ATT_CREATOR, userRef),
@@ -84,7 +86,36 @@ class EmodelWorkspaceService(
                 )
                 .withMaxItems(1000)
                 .build(),
-        ).getRecords().mapTo(HashSet()) { it.getLocalId() }
+        ).getRecords().mapTo(LinkedHashSet()) { it.getLocalId() }
+        workspaces.add("$USER_WORKSPACE_PREFIX$user")
+
+        val orders = recordsService.query(
+            RecordsQuery.create()
+                .withSourceId(WorkspaceVisitDesc.SOURCE_ID)
+                .withQuery(
+                    Predicates.and(
+                        Predicates.eq(WorkspaceVisitDesc.ATT_USER, userRef),
+                        Predicates.inVals(WorkspaceVisitDesc.ATT_WORKSPACE, workspaces),
+                    )
+                )
+                .withSortBy(
+                    listOf(
+                        SortBy(WorkspaceVisitDesc.ATT_VISITS_COUNT, false),
+                        SortBy(WorkspaceVisitDesc.ATT_LAST_VISIT_TIME, false),
+                    )
+                ).build(),
+            WorkspaceVisitAtts::class.java
+        ).getRecords()
+
+        val result = LinkedHashSet<String>()
+        orders.forEach {
+            result.add(it.workspace)
+            workspaces.remove(it.workspace)
+        }
+        workspaces.forEach {
+            result.add(it)
+        }
+        return result
     }
 
     fun getWorkspace(workspace: EntityRef): Workspace {
@@ -95,7 +126,7 @@ class EmodelWorkspaceService(
         val workspaceWithoutMembers = workspace.copy(workspaceMembers = emptyList())
 
         val createdWorkspace = recordsService.mutate(
-            EntityRef.create(AppName.EMODEL, WORKSPACE_SOURCE_ID, ""),
+            EntityRef.create(AppName.EMODEL, WorkspaceDesc.SOURCE_ID, ""),
             workspaceWithoutMembers
         )
 
@@ -150,6 +181,10 @@ class EmodelWorkspaceService(
             )
         )
     }
+
+    private class WorkspaceVisitAtts(
+        val workspace: String
+    )
 
     private class WorkspaceMembersAtts(
         @AttName(RecordConstants.ATT_CREATOR + ScalarType.ID_SCHEMA)

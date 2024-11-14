@@ -1,0 +1,26 @@
+---
+id: workspace-visit
+name:
+  ru: Посещение рабочего пространства
+  en: Workspace visit
+
+system: true
+storageType: DEFAULT
+sourceId: emodel/workspace-visit
+
+queryPermsPolicy: OWN
+
+model:
+  attributes:
+    - id: workspace
+      mandatory: true
+      index:
+        enabled: true
+    - id: lastVisitTime
+      type: DATETIME
+    - id: user
+      type: PERSON
+      index:
+        enabled: true
+    - id: visitsCount
+      type: NUMBER
