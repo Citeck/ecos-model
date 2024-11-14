@@ -94,10 +94,12 @@ class WorkspaceVisitedAction : AbstractRecordsDao(), ValueMutateDao<WorkspaceVis
         val visitAtts = recordsService.queryOne(
             RecordsQuery.create()
                 .withSourceId(WorkspaceVisitDesc.SOURCE_ID)
-                .withQuery(Predicates.and(
-                    Predicates.eq(WorkspaceVisitDesc.ATT_USER, userRef),
-                    Predicates.eq(WorkspaceVisitDesc.ATT_WORKSPACE, action.workspace)
-                )).build(),
+                .withQuery(
+                    Predicates.and(
+                        Predicates.eq(WorkspaceVisitDesc.ATT_USER, userRef),
+                        Predicates.eq(WorkspaceVisitDesc.ATT_WORKSPACE, action.workspace)
+                    )
+                ).build(),
             VisitAtts::class.java
         )
         val mutAtts = if (visitAtts == null) {

@@ -6,9 +6,9 @@ import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.events2.EventsService
 import ru.citeck.ecos.events2.type.RecordChangedEvent
 import ru.citeck.ecos.events2.type.RecordCreatedEvent
+import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.model.domain.workspace.dto.Workspace
 import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
-import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.webapp.api.constants.AppName

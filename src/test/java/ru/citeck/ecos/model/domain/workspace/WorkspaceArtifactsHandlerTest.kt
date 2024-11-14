@@ -16,7 +16,7 @@ import ru.citeck.ecos.commons.utils.resource.ResourceUtils
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.i18n.I18nContext
 import ru.citeck.ecos.model.EcosModelApp
-import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao.Companion.WORKSPACE_SOURCE_ID
+import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.model.domain.workspace.dto.Workspace
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMember
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMemberRole
@@ -48,7 +48,7 @@ class WorkspaceArtifactsHandlerTest {
     fun `check workspace meta data after deploy`() {
         val ref = EntityRef.create(
             AppName.EMODEL,
-            WORKSPACE_SOURCE_ID,
+            WorkspaceDesc.SOURCE_ID,
             "test-workspace-artifact"
         )
         val workspace = recordsService.getAtts(
@@ -89,7 +89,7 @@ class WorkspaceArtifactsHandlerTest {
     fun `check json attribute`() {
         val ref = EntityRef.create(
             AppName.EMODEL,
-            WORKSPACE_SOURCE_ID,
+            WorkspaceDesc.SOURCE_ID,
             "test-workspace-artifact"
         )
 

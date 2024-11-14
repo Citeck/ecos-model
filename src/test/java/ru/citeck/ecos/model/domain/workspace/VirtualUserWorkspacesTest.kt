@@ -11,14 +11,13 @@ import org.springframework.boot.test.context.SpringBootTest
 import ru.citeck.ecos.apps.app.service.LocalAppService
 import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.data.MLText
-import ru.citeck.ecos.commons.utils.resource.ResourceUtils
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.context.lib.i18n.I18nContext
 import ru.citeck.ecos.model.EcosModelApp
 import ru.citeck.ecos.model.domain.workspace.WorkspacePermissionsTest.Companion.GRYFFINDOR_WORKSPACE
 import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao
-import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao.Companion.WORKSPACE_SOURCE_ID
+import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.model.domain.workspace.dto.Workspace
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMember
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMemberRole
@@ -205,7 +204,7 @@ class VirtualUserWorkspacesTest {
     private fun queryUserWorkspaces(user: String): List<Workspace> {
         return recordsService.query(
             RecordsQuery.create {
-                withSourceId(WORKSPACE_SOURCE_ID)
+                withSourceId(WorkspaceDesc.SOURCE_ID)
                 withLanguage(WorkspaceProxyDao.USER_WORKSPACES)
                 withQuery(
                     DataValue.of(

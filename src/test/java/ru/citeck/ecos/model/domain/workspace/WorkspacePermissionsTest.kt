@@ -21,7 +21,7 @@ import ru.citeck.ecos.context.lib.auth.AuthUser
 import ru.citeck.ecos.model.EcosModelApp
 import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao
 import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao.Companion.WORKSPACE_ACTION_ATT
-import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao.Companion.WORKSPACE_SOURCE_ID
+import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.model.domain.workspace.dto.Workspace
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceAction
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceVisibility
@@ -651,7 +651,7 @@ class WorkspacePermissionsTest {
         return AuthContext.runAs(forUser, authorities) {
             recordsService.query(
                 RecordsQuery.create {
-                    withSourceId(WORKSPACE_SOURCE_ID)
+                    withSourceId(WorkspaceDesc.SOURCE_ID)
                     withLanguage(PredicateService.LANGUAGE_PREDICATE)
                     withQuery(Predicates.alwaysTrue())
                     withPage(QueryPage(100, 0, null))
@@ -663,7 +663,7 @@ class WorkspacePermissionsTest {
     private fun queryUserWorkspaces(user: String): List<EntityRef> {
         return recordsService.query(
             RecordsQuery.create {
-                withSourceId(WORKSPACE_SOURCE_ID)
+                withSourceId(WorkspaceDesc.SOURCE_ID)
                 withLanguage(WorkspaceProxyDao.USER_WORKSPACES)
                 withQuery(
                     DataValue.of(

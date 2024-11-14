@@ -10,5 +10,4 @@ object WorkspaceVisitDesc {
     const val ATT_WORKSPACE = "workspace"
     const val ATT_LAST_VISIT_TIME = "lastVisitTime"
     const val ATT_VISITS_COUNT = "visitsCount"
-
 }
