@@ -39,6 +39,7 @@ class DocLibRecords @Autowired constructor(
         private const val PARENT_ATT_ALIAS = "__parentRef"
         private const val ATT_NOT_EXISTS = RecordConstants.ATT_NOT_EXISTS + ScalarType.BOOL_SCHEMA
         private const val ATT_PARENT_ID = RecordConstants.ATT_PARENT + ScalarType.ID_SCHEMA
+        private const val ATT_CHILDREN = "children"
 
         private val IN_MEM_ATTS = hashSetOf(
             DocLibRecord.ATT_NODE_TYPE
@@ -270,7 +271,18 @@ class DocLibRecords @Autowired constructor(
     }
 
     private fun updateEntity(entityId: DocLibRecordId, attributes: ObjectData): EntityRef {
-        attributes.remove(RecordConstants.ATT_PARENT)
+        if (attributes.has(RecordConstants.ATT_PARENT)) {
+            val parentRef = EntityRef.valueOf(attributes[RecordConstants.ATT_PARENT].asText())
+            if (parentRef.getLocalId().isEmpty()) {
+                error("Empty parent attribute in mutation of record ${entityId.entityRef}")
+            }
+            val parentId = DocLibRecordId.valueOf(parentRef.getLocalId())
+            if (parentId.entityRef == entityId.entityRef) {
+                error("Cyclic parent reference: ${parentId.entityRef}")
+            }
+            attributes[RecordConstants.ATT_PARENT] = parentId.entityRef
+            attributes[RecordConstants.ATT_PARENT_ATT] = ATT_CHILDREN
+        }
         return recordsService.mutate(EntityRef.valueOf(entityId.entityRef), attributes)
     }
 
@@ -308,7 +320,7 @@ class DocLibRecords @Autowired constructor(
         } else {
             attributes[RecordConstants.ATT_PARENT] = parentId.entityRef
         }
-        attributes[RecordConstants.ATT_PARENT_ATT] = "children"
+        attributes[RecordConstants.ATT_PARENT_ATT] = ATT_CHILDREN
 
         return recordsService.create(typeDefForNewEntity.sourceId, attributes)
     }
