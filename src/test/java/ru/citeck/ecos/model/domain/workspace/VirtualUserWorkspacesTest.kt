@@ -46,6 +46,29 @@ class VirtualUserWorkspacesTest {
     companion object {
         private val personalWsIconRef = EntityRef.valueOf("uiserv/icon@personal-workspace-icon")
 
+        private val defaultWorkspace = Workspace(
+            id = "default",
+            name = MLText(
+                I18nContext.RUSSIAN to "По умолчанию",
+                I18nContext.ENGLISH to "Default"
+            ),
+            visibility = WorkspaceVisibility.PUBLIC,
+            workspaceMembers = listOf(
+                WorkspaceMember(
+                    id = "default-administrators",
+                    authority = AuthorityType.GROUP.getRef("ECOS_ADMINISTRATORS"),
+                    memberRole = WorkspaceMemberRole.MANAGER
+                ),
+                WorkspaceMember(
+                    id = "default-all-users",
+                    authority = AuthorityType.GROUP.getRef("EVERYONE"),
+                    memberRole = WorkspaceMemberRole.USER
+                )
+            ),
+            homePageLink = "",
+            icon = EntityRef.EMPTY
+        )
+
         private val ronPersonalWorkspace = Workspace(
             id = "${USER_WORKSPACE_PREFIX}ron",
             name = MLText(
@@ -129,10 +152,11 @@ class VirtualUserWorkspacesTest {
             queryUserWorkspaces(ronUser)
         }
 
-        assertThat(workspaces).containsExactlyElementsOf(
+        assertThat(workspaces).containsExactlyInAnyOrderElementsOf(
             listOf(
                 gryffindorWorkspaceDto,
-                ronPersonalWorkspace
+                ronPersonalWorkspace,
+                defaultWorkspace
             )
         )
     }
