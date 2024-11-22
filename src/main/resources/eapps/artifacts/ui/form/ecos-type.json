@@ -673,7 +673,7 @@
                                 "components": [
                                   {
                                     "label": {
-                                      "ru": "Тип            ",
+                                      "ru": "Тип",
                                       "en": "Type"
                                     },
                                     "key": "type",
