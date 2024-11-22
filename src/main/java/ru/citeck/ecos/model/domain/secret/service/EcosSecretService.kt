@@ -68,7 +68,7 @@ class EcosSecretService(
 
         val secretType = try {
             EcosSecretType.valueOf(type)
-        } catch (e: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
             return null
         }
 

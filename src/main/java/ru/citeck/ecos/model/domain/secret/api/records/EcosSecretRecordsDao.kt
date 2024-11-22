@@ -1,8 +1,10 @@
 package ru.citeck.ecos.model.domain.secret.api.records
 
 import org.springframework.stereotype.Component
+import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.entity.EntityMeta
 import ru.citeck.ecos.commons.json.Json
+import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.model.domain.secret.service.EcosSecretDto
 import ru.citeck.ecos.model.domain.secret.service.EcosSecretService
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
@@ -18,6 +20,9 @@ import ru.citeck.ecos.records3.record.dao.mutate.RecordMutateDao
 import ru.citeck.ecos.records3.record.dao.query.RecordsQueryDao
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes
+import ru.citeck.ecos.secrets.lib.EcosSecrets
+import ru.citeck.ecos.secrets.lib.secret.certificate.CertificateSecretData
+import ru.citeck.ecos.secrets.lib.secret.certificate.CertificateValidityStatus
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import java.time.Instant
 
@@ -75,28 +80,82 @@ class EcosSecretRecordsDao(
         return ID
     }
 
+    /**
+     * We purposely don`t return secret data here, because it is sensitive information.
+     */
     class SecretRecord(
         @AttName("...")
         val dto: EcosSecretDto,
         val meta: EntityMeta
     ) {
+
+        private val certificateData: CertificateSecretData? by lazy {
+            EcosSecrets.getSecretOrNull(dto.id)?.getCertificateDataOrNull()
+        }
+
+        @get:AttName(".disp")
+        val disp: MLText?
+            get() = let {
+                val name = dto.name
+                if (name != MLText.EMPTY) {
+                    name
+                } else {
+                    MLText(dto.id)
+                }
+            }
+
         fun getEcosType(): String {
             return "secret"
         }
+
         fun getCreated(): Instant {
             return meta.created
         }
+
         fun getCreator(): EntityRef {
             return AuthorityType.PERSON.getRef(meta.creator)
         }
+
         fun getModified(): Instant {
             return meta.modified
         }
+
         fun getModifier(): EntityRef {
             return AuthorityType.PERSON.getRef(meta.modifier)
         }
+
         fun getAsJson(): EcosSecretDto {
             return dto
+        }
+
+        fun getCertValidityFrom(): Instant? {
+            if (AuthContext.isRunAsSystemOrAdmin()) {
+                return AuthContext.runAsSystem {
+                    certificateData?.validityFrom
+                }
+            }
+
+            return null
+        }
+
+        fun getCertValidityTo(): Instant? {
+            if (AuthContext.isRunAsSystemOrAdmin()) {
+                return AuthContext.runAsSystem {
+                    certificateData?.validityTo
+                }
+            }
+
+            return null
+        }
+
+        fun getCertificateValidityStatus(): CertificateValidityStatus {
+            if (AuthContext.isRunAsSystemOrAdmin()) {
+                return AuthContext.runAsSystem {
+                    certificateData?.validityStatus ?: CertificateValidityStatus.UNKNOWN
+                }
+            }
+
+            return CertificateValidityStatus.UNKNOWN
         }
     }
 }
