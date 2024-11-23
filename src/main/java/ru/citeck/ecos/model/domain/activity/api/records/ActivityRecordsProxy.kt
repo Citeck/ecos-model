@@ -13,6 +13,7 @@ import ru.citeck.ecos.records2.predicate.model.ValuePredicate
 import ru.citeck.ecos.records2.utils.ValWithIdx
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
 import ru.citeck.ecos.records3.record.atts.dto.RecordAtts
+import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.atts.schema.resolver.AttContext
 import ru.citeck.ecos.records3.record.atts.value.AttValue
 import ru.citeck.ecos.records3.record.atts.value.AttValueProxy
@@ -34,6 +35,7 @@ class ActivityRecordsProxy : RecordsDaoProxy(
 
     companion object {
         const val COMMENT_ID_PREFIX = "comment$"
+        private const val STATUS_COMPLETED = "completed"
     }
 
     override fun getRecordsAtts(recordIds: List<String>): List<*>? {
@@ -120,8 +122,8 @@ class ActivityRecordsProxy : RecordsDaoProxy(
         if (activityIds.isNotEmpty()) {
             for (activityId in activityIds) {
                 val activityRef = EntityRef.create(AppName.EMODEL, ActivityConfiguration.ACTIVITY_DAO_ID, activityId)
-                val isPlannedActivity = recordsService.getAtt(activityRef, "_type.isSubTypeOf.planned-activity?bool!").asBoolean()
-                if (isPlannedActivity) {
+                val activityData = recordsService.getAtts(activityRef, ActivityData::class.java)
+                if (activityData.isPlannedActivity && STATUS_COMPLETED != activityData.status) {
                     cancelActivity(activityRef)
                 }
             }
@@ -238,6 +240,13 @@ class ActivityRecordsProxy : RecordsDaoProxy(
             cancelActivityAtts
         )
     }
+
+    data class ActivityData(
+        @AttName("_type.isSubTypeOf.planned-activity?bool!")
+        val isPlannedActivity: Boolean,
+        @AttName("_status?str")
+        val status: String
+    )
 
     private class ProxyCommentVal(
         private val id: EntityRef,
