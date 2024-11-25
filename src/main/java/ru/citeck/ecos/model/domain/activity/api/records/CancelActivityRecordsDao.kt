@@ -92,50 +92,54 @@ class CancelActivityRecordsDao(
     }
 
     private fun sendNotification(activity: ActivityDto) {
-        if (activity.calendarEventSummary != null && activity.activityDate != null && activity.calendarEventUid != null) {
-            val eventBuilder = CalendarEvent.Builder(activity.calendarEventSummary, activity.activityDate)
-                .uid(activity.calendarEventUid)
-
-            activity.calendarEventSequence?.let {
-                val sequence = it + 1
-                eventBuilder.sequence(sequence)
-            }
-            activity.description?.let {
-                eventBuilder.description(it)
-            }
-            activity.duration?.let {
-                val durationInMillis = DurationStrUtils.parseDurationToMillis(activity.duration)
-                eventBuilder.durationInMillis(durationInMillis)
-            }
-            activity.organizerEmail?.let {
-                eventBuilder.organizer(activity.organizerEmail)
-            }
-
-            val recipients = mutableSetOf<String>()
-            recipients.addAll(activity.participantsEmails)
-            activity.responsibleEmail?.let {
-                recipients.add(it)
-            }
-
-            val canceledCalendarEvent = eventBuilder
-                .attendees(recipients)
-                .method(Method.CANCEL)
-                .build()
-            val canceledCalendarEventAttach = canceledCalendarEvent.createAttachment()
-            val additionalMeta = mapOf(
-                NOTIFICATION_ATTACHMENTS to canceledCalendarEventAttach
-            )
-
-            notificationService.send(
-                Notification.Builder()
-                    .recipients(recipients)
-                    .record(activity.recordRef)
-                    .notificationType(NotificationType.EMAIL_NOTIFICATION)
-                    .templateRef(notificationTemplate)
-                    .additionalMeta(additionalMeta)
-                    .build()
-            )
+        if (activity.calendarEventSummary == null
+            || activity.activityDate == null
+            || activity.calendarEventUid == null
+        ) {
+            return
         }
+        val eventBuilder = CalendarEvent.Builder(activity.calendarEventSummary, activity.activityDate)
+            .uid(activity.calendarEventUid)
+
+        activity.calendarEventSequence?.let {
+            val sequence = it + 1
+            eventBuilder.sequence(sequence)
+        }
+        activity.description?.let {
+            eventBuilder.description(it)
+        }
+        activity.duration?.let {
+            val durationInMillis = DurationStrUtils.parseDurationToMillis(activity.duration)
+            eventBuilder.durationInMillis(durationInMillis)
+        }
+        activity.organizerEmail?.let {
+            eventBuilder.organizer(activity.organizerEmail)
+        }
+
+        val recipients = mutableSetOf<String>()
+        recipients.addAll(activity.participantsEmails)
+        activity.responsibleEmail?.let {
+            recipients.add(it)
+        }
+
+        val canceledCalendarEvent = eventBuilder
+            .attendees(recipients)
+            .method(Method.CANCEL)
+            .build()
+        val canceledCalendarEventAttach = canceledCalendarEvent.createAttachment()
+        val additionalMeta = mapOf(
+            NOTIFICATION_ATTACHMENTS to canceledCalendarEventAttach
+        )
+
+        notificationService.send(
+            Notification.Builder()
+                .recipients(recipients)
+                .record(activity.recordRef)
+                .notificationType(NotificationType.EMAIL_NOTIFICATION)
+                .templateRef(notificationTemplate)
+                .additionalMeta(additionalMeta)
+                .build()
+        )
     }
 
     private fun updateStatus(activity: EntityRef) {
