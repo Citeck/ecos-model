@@ -1896,7 +1896,7 @@
                             "multiple": true,
                             "reorder": true,
                             "clearOnHide": false,
-                            "allowedAuthorityType": "GROUP",
+                            "allowedGroupType": "ROLE, BRANCH, GROUP",
                             "dataType": "authority",
                             "defaultValue": [],
                             "refreshOn": [],
