@@ -92,16 +92,37 @@ class CancelActivityRecordsDao(
     }
 
     private fun sendNotification(activity: ActivityDto) {
-        val sequence = activity.calendarEventSequence + 1
-        val durationInMillis = DurationStrUtils.parseDurationToMillis(activity.duration)
-        val recipients = mutableSetOf(activity.responsibleEmail)
-        recipients.addAll(activity.participantsEmails)
-        val canceledCalendarEvent = CalendarEvent.Builder(activity.calendarEventSummary, activity.activityDate)
+        if (activity.calendarEventSummary == null
+            || activity.activityDate == null
+            || activity.calendarEventUid == null
+        ) {
+            return
+        }
+        val eventBuilder = CalendarEvent.Builder(activity.calendarEventSummary, activity.activityDate)
             .uid(activity.calendarEventUid)
-            .sequence(sequence)
-            .description(activity.description)
-            .durationInMillis(durationInMillis)
-            .organizer(activity.organizerEmail)
+
+        activity.calendarEventSequence?.let {
+            val sequence = it + 1
+            eventBuilder.sequence(sequence)
+        }
+        activity.description?.let {
+            eventBuilder.description(it)
+        }
+        activity.duration?.let {
+            val durationInMillis = DurationStrUtils.parseDurationToMillis(activity.duration)
+            eventBuilder.durationInMillis(durationInMillis)
+        }
+        activity.organizerEmail?.let {
+            eventBuilder.organizer(activity.organizerEmail)
+        }
+
+        val recipients = mutableSetOf<String>()
+        recipients.addAll(activity.participantsEmails)
+        activity.responsibleEmail?.let {
+            recipients.add(it)
+        }
+
+        val canceledCalendarEvent = eventBuilder
             .attendees(recipients)
             .method(Method.CANCEL)
             .build()
@@ -132,14 +153,14 @@ class CancelActivityRecordsDao(
 
     data class ActivityDto(
         val recordRef: EntityRef = EntityRef.EMPTY,
-        val responsibleEmail: String,
+        val responsibleEmail: String?,
         val participantsEmails: List<String> = emptyList(),
-        val organizerEmail: String,
-        val activityDate: Instant,
-        val duration: String,
-        val description: String,
-        val calendarEventSummary: String,
-        val calendarEventUid: String,
-        val calendarEventSequence: Int
+        val organizerEmail: String?,
+        val activityDate: Instant?,
+        val duration: String?,
+        val description: String?,
+        val calendarEventSummary: String?,
+        val calendarEventUid: String?,
+        val calendarEventSequence: Int?
     )
 }
