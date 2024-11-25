@@ -1312,7 +1312,7 @@
                                 "action": "custom",
                                 "state": "",
                                 "showValidations": false,
-                                "custom": "var currentRow = row;\r\nvar config = row.config || {};\r\nvar formData = config;\r\nvar aspectRef = row.ref;\r\n\r\nCiteck.Records\r\n  .get(aspectRef)\r\n  .load('configFormRef?id', true)\r\n  .then((formRef) => {\r\n    Citeck.EcosFormUtils.getFormById(formRef, {\r\n      definition: 'definition?json'\r\n    }).then(function(formConfig) {\r\n\r\n      var inputs = Citeck.EcosFormUtils.getFormInputs(formConfig.definition);\r\n\r\n      Citeck.Dialogs.showFormDialog({\r\n          title: 'Aspect type config',\r\n          showDefaultButtons: false,\r\n          formDefinition: formConfig.definition,\r\n          formData: formData,\r\n          onSubmit: submission => {\r\n              var data = submission.data || {};\r\n              var configData = {};\r\n              for (var i in inputs) {\r\n                  var att = inputs[i].attribute;\r\n                  configData[att] = data[att];\r\n              }\r\n\r\n              currentRow.config = configData;\r\n          }\r\n      })\r\n  });\r\n});",
+                                "custom": "var currentRow = row;\r\nvar config = row.config || {};\r\nvar formData = config;\r\nvar aspectRef = row.ref;\r\n\r\nCiteck.Records\r\n    .get(aspectRef)\r\n    .load('configFormRef?id', true)\r\n    .then((formRef) => {\r\n        Citeck.EcosFormUtils.getFormById(formRef, {\r\n            definition: 'definition?json'\r\n        }).then(function(formConfig) {\r\n\r\n            var inputs = Citeck.EcosFormUtils.getFormInputs(formConfig.definition);\r\n\r\n            Citeck.Dialogs.showFormDialog({\r\n                title: 'Aspect type config',\r\n                showDefaultButtons: false,\r\n                formDefinition: formConfig.definition,\r\n                formData: formData,\r\n                onSubmit: submission => {\r\n                    var data = submission.data || {};\r\n                    var configData = {};\r\n                    for (let input of inputs) {\r\n                        if (!input.scope) {\r\n                            configData[input.attribute] = data[input.attribute];\r\n                        } else {\r\n                            let key = _.get(input, 'scope.component.key');\r\n                            if (key && !configData.hasOwnProperty(key)) {\r\n                                configData[key] = data[key];\r\n                            }\r\n                        }\r\n                    }\r\n\r\n                    currentRow.config = configData;\r\n                }\r\n            });\r\n        });\r\n    });",
                                 "headers": [
                                   {
                                     "header": "",
@@ -1940,7 +1940,7 @@
                             "multiple": true,
                             "reorder": true,
                             "clearOnHide": false,
-                            "allowedAuthorityType": "GROUP",
+                            "allowedGroupType": "ROLE, BRANCH, GROUP",
                             "dataType": "authority",
                             "defaultValue": [],
                             "refreshOn": [],
