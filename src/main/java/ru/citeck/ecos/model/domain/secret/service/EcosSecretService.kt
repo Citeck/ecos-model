@@ -2,6 +2,7 @@ package ru.citeck.ecos.model.domain.secret.service
 
 import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.entity.EntityMeta
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta
@@ -27,6 +28,7 @@ import java.lang.IllegalArgumentException
 import java.util.concurrent.CopyOnWriteArrayList
 
 @Service
+@Transactional
 class EcosSecretService(
     private val repo: EcosSecretRepo,
     private val predicateJpaService: JpaSearchConverterFactory,
