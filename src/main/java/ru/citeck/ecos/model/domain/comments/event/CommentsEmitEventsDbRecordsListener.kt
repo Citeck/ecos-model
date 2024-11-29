@@ -47,6 +47,11 @@ class CommentsEmitEventsDbRecordsListener(
     override fun onDeleted(event: DbRecordDeletedEvent) {
         log.debug { "Comment deleted: ${event.record}" }
 
+        val recordAtt = recordsService.getAtt(event.record, "record")
+        if (recordAtt.isNull()) {
+            // record was deleted
+            return
+        }
         val comment = event.toCommentEvent()
         commentEventEmitter.emitCommentDelete(comment)
     }
