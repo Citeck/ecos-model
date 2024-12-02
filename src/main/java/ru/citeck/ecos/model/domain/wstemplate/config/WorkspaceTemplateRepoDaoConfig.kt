@@ -2,9 +2,11 @@ package ru.citeck.ecos.model.domain.wstemplate.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.commons.io.file.mem.EcosMemDir
 import ru.citeck.ecos.commons.json.YamlUtils
+import ru.citeck.ecos.commons.utils.DataUriUtil
 import ru.citeck.ecos.commons.utils.ZipUtils
 import ru.citeck.ecos.context.lib.auth.AuthGroup
 import ru.citeck.ecos.context.lib.auth.AuthRole
@@ -19,6 +21,7 @@ import ru.citeck.ecos.model.domain.wstemplate.listener.WorkspaceTemplateRecordsL
 import ru.citeck.ecos.model.domain.wstemplate.service.WorkspaceTemplateService
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeType
 import ru.citeck.ecos.model.lib.utils.ModelUtils
+import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
 import ru.citeck.ecos.records3.record.atts.schema.ScalarType
@@ -52,17 +55,43 @@ class WorkspaceTemplateRepoDaoConfig {
             }
 
             private fun preProcessTemplateMut(record: LocalRecordAtts): LocalRecordAtts {
-                if (!record.attributes.has(WorkspaceTemplateDesc.ATT_WORKSPACE_REF)) {
-                    return record
+                if (record.attributes.has(WorkspaceTemplateDesc.ATT_WORKSPACE_REF)) {
+
+                    val workspaceRef = record.attributes[WorkspaceTemplateDesc.ATT_WORKSPACE_REF].asText().toEntityRef()
+                    val artifacts = templateService.getWorkspaceArtifactsForTemplate(workspaceRef.getLocalId())
+
+                    val newAtts = record.deepCopy()
+                    newAtts.setAtt(WorkspaceTemplateDesc.ATT_ARTIFACTS, ZipUtils.writeZipAsBytes(artifacts))
+
+                    return newAtts
+
+                } else if (record.attributes.has(RecordConstants.ATT_CONTENT)) {
+
+                    var content = record.getAtt(RecordConstants.ATT_CONTENT)
+                    if (content.isArray()) {
+                        content = content[0]
+                    }
+                    val data = DataUriUtil.parseData(content["url"].asText())
+                    val rootDir = ZipUtils.extractZip(data.data)
+
+                    val dir = rootDir.getChildren().firstOrNull() ?: error("Invalid archive. Content is empty")
+                    val meta = dir.getFile("meta.yml") ?: error("Invalid archive. Meta file is not found")
+
+                    val atts = LocalRecordAtts()
+                    DataValue.of(YamlUtils.read(meta)).forEach { k, v ->
+                        atts.setAtt(k, v)
+                    }
+                    atts.setAtt(RecordConstants.ATT_ID, dir.getName())
+
+                    val artifactsDir = dir.getDir("artifacts")
+                    if (artifactsDir != null) {
+                        atts.setAtt(WorkspaceTemplateDesc.ATT_ARTIFACTS, ZipUtils.writeZipAsBytes(artifactsDir))
+                    }
+                    return atts
                 }
-                val workspaceRef = record.attributes[WorkspaceTemplateDesc.ATT_WORKSPACE_REF].asText().toEntityRef()
-                val artifacts = templateService.getWorkspaceArtifactsForTemplate(workspaceRef.getLocalId())
-
-                val newAtts = record.deepCopy()
-                newAtts.setAtt(WorkspaceTemplateDesc.ATT_ARTIFACTS, ZipUtils.writeZipAsBytes(artifacts))
-
-                return newAtts
+                return record
             }
+
         }
     }
 
@@ -154,7 +183,9 @@ class WorkspaceTemplateRepoDaoConfig {
 
         private fun getData(value: AttValueCtx): ByteArray {
 
-            val result = EcosMemDir()
+            val resultRoot = EcosMemDir()
+            val result = resultRoot.createDir(value.getLocalId())
+
             val artifactsDir = result.createDir("artifacts")
             val artifactsBase64 = value.getAtt("artifacts?str").asText()
             if (artifactsBase64.isNotBlank()) {
@@ -167,7 +198,7 @@ class WorkspaceTemplateRepoDaoConfig {
                 "meta.yml",
                 YamlUtils.toString(getMeta(value))
             )
-            return ZipUtils.writeZipAsBytes(result)
+            return ZipUtils.writeZipAsBytes(resultRoot)
         }
 
         override fun getProvidedAtts(): Collection<String> {
