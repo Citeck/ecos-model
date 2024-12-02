@@ -72,3 +72,10 @@ model:
       name:
         ru: Адрес домашней страницы
         en: Home page link
+    - id: templateRef
+      name:
+        ru: Шаблон
+        en: Template
+      type: ASSOC
+      config:
+        typeRef: emodel/type@workspace-template

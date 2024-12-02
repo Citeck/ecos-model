@@ -8,6 +8,7 @@ import ru.citeck.ecos.data.sql.records.DbRecordsDaoConfig
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
 import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao.Companion.WORKSPACE_REPO_SOURCE_ID
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
+import ru.citeck.ecos.model.domain.workspace.listener.WorkspaceRecordsListener
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.ScalarType
@@ -23,7 +24,8 @@ class WorkspaceRepoDaoConfig {
     fun workspaceRepoDao(
         dbDomainFactory: DbDomainFactory,
         workspaceDbPerms: WorkspaceDbPerms,
-        recordsService: RecordsService
+        recordsService: RecordsService,
+        recsListener: WorkspaceRecordsListener
     ): RecordsDao {
 
         val workspaceTypeRef = ModelUtils.getTypeRef(WorkspaceDesc.TYPE_ID)
@@ -47,6 +49,7 @@ class WorkspaceRepoDaoConfig {
             .build()
 
         recordsDao.addAttributesMixin(DefaultWorkspaceMixin(recordsService))
+        recordsDao.addListener(recsListener)
 
         return recordsDao
     }

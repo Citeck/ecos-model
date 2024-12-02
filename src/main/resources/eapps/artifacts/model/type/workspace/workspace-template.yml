@@ -1,0 +1,44 @@
+---
+id: workspace-template
+name:
+  ru: Шаблон рабочего пространства
+  en: Workspace template
+
+sourceId: 'emodel/workspace-template'
+
+formRef: uiserv/form@workspace-template
+journalRef: uiserv/journal@workspace-templates
+
+inheritForm: false
+
+actions:
+  - uiserv/action@edit
+  - uiserv/action@delete
+  - uiserv/action@update-workspace-template
+  - uiserv/action@download-base64-data-zip
+
+createVariants:
+  - id: create
+    name: { ru: Создать, en: Create }
+    formRef: uiserv/form@workspace-template-create
+  - id: upload
+    name: { ru: Загрузить, en: Upload }
+    formRef: uiserv/form@ecos-module-upload
+
+model:
+  attributes:
+    - id: name
+      name:
+        ru: Имя
+        en: Name
+      type: MLTEXT
+    - id: artifacts
+      name:
+        ru: Артефакты
+        en: Artifacts
+      type: BINARY
+aspects:
+  - ref: emodel/aspect@history-config
+    config:
+      excludedAtts:
+        - artifacts

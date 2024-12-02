@@ -1,0 +1,22 @@
+---
+id: update-workspace-template
+name:
+  ru: Обновить шаблон
+  en: Update template
+type: mutate
+icon: icon-reload
+confirm:
+  formRef: uiserv/form@workspace-template-update
+  attributesMapping:
+    record.attributes.workspaceRef: workspaceRef
+config:
+  record:
+    id: ${?id}
+predicate:
+  t: eq
+  att: $user.authorities._has.GROUP_ECOS_ADMINISTRATORS?bool
+  val: true
+features:
+  execForQuery: false
+  execForRecord: true
+  execForRecords: false

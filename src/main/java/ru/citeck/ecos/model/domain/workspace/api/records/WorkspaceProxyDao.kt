@@ -24,6 +24,7 @@ import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
 import ru.citeck.ecos.records3.record.atts.value.impl.EmptyAttValue
+import ru.citeck.ecos.records3.record.dao.delete.DelStatus
 import ru.citeck.ecos.records3.record.dao.impl.proxy.RecordsDaoProxy
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes
@@ -52,6 +53,12 @@ class WorkspaceProxyDao(
         const val WORKSPACE_ATT_MEMBER_AUTHORITY = "workspaceMembers.authority"
 
         const val USER_WORKSPACES = "user-workspaces"
+
+        private val UNDELETABLE_WORKSPACES = setOf(
+            "admin\$workspace",
+            "default",
+            "personal-workspace"
+        )
 
         private val log = KotlinLogging.logger {}
     }
@@ -154,6 +161,14 @@ class WorkspaceProxyDao(
         }
 
         return processActionsIds
+    }
+
+    override fun delete(recordIds: List<String>): List<DelStatus> {
+        val undeletableIds = recordIds.filter { UNDELETABLE_WORKSPACES.contains(it) }
+        if (undeletableIds.isNotEmpty()) {
+            error("You can't delete this records: $undeletableIds")
+        }
+        return super.delete(recordIds)
     }
 
     override fun getRecordsAtts(recordIds: List<String>): List<*>? {

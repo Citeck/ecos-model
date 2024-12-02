@@ -61,6 +61,15 @@ config:
             type: JOURNAL
             config:
               recordRef: uiserv/journal@workspaces-journal
+          - id: emodel-workspace-templates
+            label:
+              ru: Шаблоны рабочих пространств
+              en: Workspace templates
+            icon: ui/icon@i-leftmenu-tools
+            hidden: false
+            type: JOURNAL
+            config:
+              recordRef: uiserv/journal@workspace-templates
           - id: emodel-number-templates
             label:
               ru: Шаблоны нумерации
