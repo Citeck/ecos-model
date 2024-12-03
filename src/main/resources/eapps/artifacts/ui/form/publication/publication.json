@@ -1,0 +1,116 @@
+{
+  "id": "publication",
+  "formKey": "",
+  "title": {
+    "en": "publication"
+  },
+  "description": {},
+  "customModule": "",
+  "typeRef": "",
+  "width": "lg",
+  "system": false,
+  "i18n": {},
+  "definition": {
+    "components": [
+      {
+        "label": {
+          "ru": "title"
+        },
+        "key": "title",
+        "validate": {
+          "required": true
+        },
+        "defaultValue": "",
+        "refreshOn": [],
+        "optionalWhenDisabled": false,
+        "type": "textfield",
+        "input": true,
+        "inputMasks": [
+          {}
+        ]
+      },
+      {
+        "label": {
+          "ru": "text"
+        },
+        "key": "text",
+        "validate": {
+          "required": true
+        },
+        "defaultValue": "",
+        "refreshOn": [],
+        "optionalWhenDisabled": false,
+        "rows": 20,
+        "type": "textarea",
+        "input": true
+      },
+      {
+        "type": "columns",
+        "key": "buttons-columns",
+        "columns": [
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 0,
+            "components": [],
+            "key": "column"
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 1,
+            "key": "column",
+            "components": []
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 2,
+            "components": [
+              {
+                "type": "button",
+                "key": "cancel",
+                "label": {
+                  "ru": "Отменить",
+                  "en": "Cancel"
+                },
+                "action": "event",
+                "event": "cancel",
+                "block": true,
+                "input": true
+              }
+            ],
+            "key": "column"
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 3,
+            "components": [
+              {
+                "type": "button",
+                "theme": "primary",
+                "key": "submit",
+                "label": {
+                  "ru": "Сохранить",
+                  "en": "Save"
+                },
+                "block": true,
+                "input": true
+              }
+            ],
+            "key": "column"
+          }
+        ],
+        "input": false
+      }
+    ],
+    "formId": "publication"
+  },
+  "attributes": {},
+  "notExists": false
+}

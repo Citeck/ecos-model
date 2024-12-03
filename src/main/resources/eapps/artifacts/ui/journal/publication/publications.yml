@@ -1,0 +1,36 @@
+---
+id: publications
+name:
+  ru: Публикация
+  en: Publication
+
+typeRef: emodel/type@publication
+
+actionsFromType: false
+
+actions:
+  - uiserv/action@view-dashboard
+  - uiserv/action@edit
+  - uiserv/action@delete
+
+columns:
+  - id: _name
+    name:
+      ru: Имя
+      en: Name
+    type: TEXT
+  - id: title
+    name:
+      ru: Заголовок
+      en: Title
+    type: TEXT
+  - id: _creator
+    name:
+      ru: Автор
+      en: Author
+    type: PERSON
+  - id: _created
+    name:
+      ru: Дата создания
+      en: Created date
+    type: DATETIME
