@@ -1,8 +1,8 @@
 ---
 id: publications
 name:
-  ru: Публикация
-  en: Publication
+  ru: Публикации
+  en: Publications
 
 typeRef: emodel/type@publication
 
