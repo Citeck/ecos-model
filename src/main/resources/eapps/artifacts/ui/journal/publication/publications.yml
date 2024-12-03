@@ -14,11 +14,6 @@ actions:
   - uiserv/action@delete
 
 columns:
-  - id: _name
-    name:
-      ru: Имя
-      en: Name
-    type: TEXT
   - id: title
     name:
       ru: Заголовок
