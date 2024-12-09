@@ -23,6 +23,7 @@ import ru.citeck.ecos.records2.predicate.PredicateService
 import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
+import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.atts.value.impl.EmptyAttValue
 import ru.citeck.ecos.records3.record.dao.delete.DelStatus
 import ru.citeck.ecos.records3.record.dao.impl.proxy.RecordsDaoProxy
@@ -200,22 +201,40 @@ class WorkspaceProxyDao(
         for ((idx, id) in virtualUserAttsIdx) {
             val user = id.removePrefix(USER_WORKSPACE_PREFIX)
             result[idx] = if (workspacePermissions.currentAuthCanReadPersonalWorkspaceOf(user)) {
-                defaultConfig.copy()
-                    .withId(id)
-                    .withWorkspaceMembers(
-                        listOf(
-                            WorkspaceMember(
-                                id = user,
-                                authority = AuthorityType.PERSON.getRef(user),
-                                memberRole = WorkspaceMemberRole.MANAGER
+                UserWorkspaceRecord(
+                    defaultConfig.copy()
+                        .withId(id)
+                        .withWorkspaceMembers(
+                            listOf(
+                                WorkspaceMember(
+                                    id = user,
+                                    authority = AuthorityType.PERSON.getRef(user),
+                                    memberRole = WorkspaceMemberRole.MANAGER
+                                )
                             )
-                        )
-                    ).build()
+                        ).build(),
+                    user
+                )
             } else {
                 EmptyAttValue.INSTANCE
             }
         }
 
         return result.toList()
+    }
+
+    class UserWorkspaceRecord(
+        @AttName("...")
+        val workspace: Workspace,
+        val user: String
+    ) {
+
+        fun getIsCurrentUserMember(): Boolean {
+            return user == AuthContext.getCurrentUser()
+        }
+
+        fun getIsCurrentUserManager(): Boolean {
+            return user == AuthContext.getCurrentUser()
+        }
     }
 }

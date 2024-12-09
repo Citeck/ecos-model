@@ -2,6 +2,7 @@ package ru.citeck.ecos.model.domain.workspace.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.data.sql.domain.DbDomainConfig
 import ru.citeck.ecos.data.sql.domain.DbDomainFactory
 import ru.citeck.ecos.data.sql.records.DbRecordsDaoConfig
@@ -10,6 +11,7 @@ import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao.Compa
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.model.domain.workspace.listener.WorkspaceRecordsListener
 import ru.citeck.ecos.model.lib.utils.ModelUtils
+import ru.citeck.ecos.model.lib.workspace.WorkspaceService
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.ScalarType
 import ru.citeck.ecos.records3.record.atts.value.AttValueCtx
@@ -25,6 +27,7 @@ class WorkspaceRepoDaoConfig {
         dbDomainFactory: DbDomainFactory,
         workspaceDbPerms: WorkspaceDbPerms,
         recordsService: RecordsService,
+        workspaceService: WorkspaceService,
         recsListener: WorkspaceRecordsListener
     ): RecordsDao {
 
@@ -48,33 +51,50 @@ class WorkspaceRepoDaoConfig {
             .withPermsComponent(workspaceDbPerms)
             .build()
 
-        recordsDao.addAttributesMixin(DefaultWorkspaceMixin(recordsService))
+        recordsDao.addAttributesMixin(DefaultWorkspaceMixin(recordsService, workspaceService))
         recordsDao.addListener(recsListener)
 
         return recordsDao
     }
 
     private class DefaultWorkspaceMixin(
-        private val recordsService: RecordsService
+        private val recordsService: RecordsService,
+        private val workspaceService: WorkspaceService
     ) : AttMixin {
 
-        val providedAtts = setOf(ScalarType.JSON.mirrorAtt)
+        val providedAtts = setOf(
+            ScalarType.JSON.mirrorAtt,
+            WorkspaceDesc.ATT_IS_CURRENT_USER_MEMBER,
+            WorkspaceDesc.ATT_IS_CURRENT_USER_MANAGER
+        )
 
-        override fun getAtt(path: String, value: AttValueCtx): Any {
+        override fun getAtt(path: String, value: AttValueCtx): Any? {
 
-            val defaultJson = value.getAtt(ScalarType.JSON_SCHEMA)
+            return when (path) {
+                WorkspaceDesc.ATT_IS_CURRENT_USER_MEMBER -> {
+                    workspaceService.isUserMemberOf(AuthContext.getCurrentUser(), value.getLocalId())
+                }
+                WorkspaceDesc.ATT_IS_CURRENT_USER_MANAGER -> {
+                    workspaceService.isUserManagerOf(AuthContext.getCurrentUser(), value.getLocalId())
+                }
+                ScalarType.JSON.mirrorAtt -> {
 
-            val wsMembers = defaultJson[WorkspaceDesc.ATT_WORKSPACE_MEMBERS]
+                    val defaultJson = value.getAtt(ScalarType.JSON_SCHEMA)
 
-            if (wsMembers.isArray() && wsMembers.size() > 0) {
-                val membersRefs = wsMembers.asList(EntityRef::class.java)
-                defaultJson[WorkspaceDesc.ATT_WORKSPACE_MEMBERS] = recordsService.getAtts(
-                    membersRefs,
-                    listOf(ScalarType.JSON_SCHEMA)
-                ).map { it.getAtt(ScalarType.JSON_SCHEMA) }
+                    val wsMembers = defaultJson[WorkspaceDesc.ATT_WORKSPACE_MEMBERS]
+
+                    if (wsMembers.isArray() && wsMembers.size() > 0) {
+                        val membersRefs = wsMembers.asList(EntityRef::class.java)
+                        defaultJson[WorkspaceDesc.ATT_WORKSPACE_MEMBERS] = recordsService.getAtts(
+                            membersRefs,
+                            listOf(ScalarType.JSON_SCHEMA)
+                        ).map { it.getAtt(ScalarType.JSON_SCHEMA) }
+                    }
+
+                    defaultJson
+                }
+                else -> null
             }
-
-            return defaultJson
         }
 
         override fun getProvidedAtts(): Collection<String> {
