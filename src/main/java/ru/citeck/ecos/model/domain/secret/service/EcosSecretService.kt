@@ -10,6 +10,7 @@ import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.events2.EventsService
 import ru.citeck.ecos.events2.emitter.EventsEmitter
+import ru.citeck.ecos.model.domain.secret.dto.EncryptionMeta
 import ru.citeck.ecos.model.domain.secret.repo.EcosSecretEntity
 import ru.citeck.ecos.model.domain.secret.repo.EcosSecretRepo
 import ru.citeck.ecos.records2.predicate.PredicateUtils
@@ -33,7 +34,10 @@ class EcosSecretService(
     private val repo: EcosSecretRepo,
     private val predicateJpaService: JpaSearchConverterFactory,
     private val modelSecretsProvider: ModelEcosSecretsProvider,
-    private val eventsService: EventsService
+    private val eventsService: EventsService,
+    private val ecosSecretEncryption: EcosSecretEncryption,
+    private val encryptionConfig: EcosSecretEncryptionConfigProvider,
+    private val secretKeyEncoder: SecretKeyEncoder
 ) {
 
     private lateinit var searchConverter: JpaSearchConverter<EcosSecretEntity>
@@ -74,7 +78,28 @@ class EcosSecretService(
             return null
         }
 
-        return EcosSecretImpl(id, secretType, data)
+        val decryptedData = if (entity.encryptionKeyHash.isNullOrBlank()) {
+            data
+        } else {
+            val encryptionMeta = parseEncryptInfo(entity) ?: error(
+                "Encryption meta is empty while key hash is not. Secret id: $id"
+            )
+            ecosSecretEncryption.decrypt(
+                EncryptData(
+                    data = data,
+                    key = encryptionConfig.getCurrentSecretKey(),
+                    algorithm = encryptionMeta.algorithm,
+                    ivSize = encryptionMeta.ivSize,
+                    tagSize = encryptionMeta.tagSize
+                )
+            )
+        }
+
+        return EcosSecretImpl(id, secretType, decryptedData)
+    }
+
+    private fun parseEncryptInfo(secretEntity: EcosSecretEntity): EncryptionMeta? {
+        return Json.mapper.read(secretEntity.encryptionMeta, EncryptionMeta::class.java)
     }
 
     fun getById(id: String): EcosSecretDto? {
@@ -146,7 +171,27 @@ class EcosSecretService(
         entity.type = dto.type
         entity.name = Json.mapper.toStringNotNull(dto.name)
         if (dto.data != null && dto.data.isNotEmpty()) {
-            entity.data = Json.mapper.toBytesNotNull(dto.data)
+            val dataBytes = Json.mapper.toBytesNotNull(dto.data)
+
+            val encryptedData = ecosSecretEncryption.encrypt(
+                EncryptData(
+                    data = dataBytes,
+                    key = encryptionConfig.getCurrentSecretKey(),
+                    algorithm = encryptionConfig.getCurrentAlgorithm(),
+                    ivSize = encryptionConfig.getCurrentIvSize(),
+                    tagSize = encryptionConfig.getCurrentTagSize()
+                )
+            )
+            val keyHash = secretKeyEncoder.hashKey(encryptionConfig.getCurrentSecretKeyBase64())
+            val encryptionMeta = EncryptionMeta(
+                algorithm = encryptionConfig.getCurrentAlgorithm(),
+                ivSize = encryptionConfig.getCurrentIvSize(),
+                tagSize = encryptionConfig.getCurrentTagSize()
+            )
+
+            entity.data = encryptedData
+            entity.encryptionKeyHash = keyHash
+            entity.encryptionMeta = Json.mapper.toBytesNotNull(encryptionMeta)
         }
         return entity
     }

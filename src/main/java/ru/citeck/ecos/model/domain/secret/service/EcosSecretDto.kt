@@ -8,7 +8,7 @@ import ru.citeck.ecos.commons.json.serialization.annotation.IncludeNonDefault
 
 @IncludeNonDefault
 @JsonDeserialize(builder = EcosSecretDto.Builder::class)
-class EcosSecretDto(
+data class EcosSecretDto(
     val id: String,
     val name: MLText,
     val type: String,

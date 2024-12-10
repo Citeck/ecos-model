@@ -30,6 +30,10 @@ class EcosSecretEntity : AbstractAuditingEntity() {
 
     var data: ByteArray? = null
 
+    var encryptionKeyHash: String? = null
+
+    var encryptionMeta: ByteArray? = null
+
     override fun equals(other: Any?): Boolean {
         if (other !is EcosSecretEntity) {
             return false

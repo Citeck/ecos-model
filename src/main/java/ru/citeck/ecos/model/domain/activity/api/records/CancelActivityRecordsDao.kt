@@ -92,9 +92,9 @@ class CancelActivityRecordsDao(
     }
 
     private fun sendNotification(activity: ActivityDto) {
-        if (activity.calendarEventSummary == null
-            || activity.activityDate == null
-            || activity.calendarEventUid == null
+        if (activity.calendarEventSummary == null ||
+            activity.activityDate == null ||
+            activity.calendarEventUid == null
         ) {
             return
         }

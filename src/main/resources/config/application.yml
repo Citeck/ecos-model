@@ -28,6 +28,15 @@ ecos:
       cron: '0 0 0/6 ? * *'
     activityStartUserTask:
       cron: '0 */5 * * * *'
+  secret:
+    encryption:
+      previous:
+        key: ${ECOS_SECRET_ENCRYPTION_PREVIOUS_KEY:}
+      current:
+        key: ${ECOS_SECRET_ENCRYPTION_CURRENT_KEY:Cz6ruLL9XkNjn4vaU0/MDQ==}
+        algorithm: ${ECOS_SECRET_ENCRYPTION_CURRENT_ALGORITHM:AES/GCM/NoPadding}
+        ivSize: ${ECOS_SECRET_ENCRYPTION_CURRENT_IV_SIZE:12}
+        tagSize: ${ECOS_SECRET_ENCRYPTION_CURRENT_TAG_SIZE:128}
   webapp:
     task:
       executors:
