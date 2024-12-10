@@ -9,12 +9,6 @@
     {
       "type": "JOURNAL",
       "config": {
-        "journalId": "workspaces-journal"
-      }
-    },
-    {
-      "type": "JOURNAL",
-      "config": {
         "journalId": "ecos-types-def"
       }
     },
@@ -22,6 +16,18 @@
       "type": "JOURNAL",
       "config": {
         "journalId": "ecos-aspects"
+      }
+    },
+    {
+      "type": "JOURNAL",
+      "config": {
+        "journalId": "workspaces-journal"
+      }
+    },
+    {
+      "type": "JOURNAL",
+      "config": {
+        "journalId": "workspace-templates"
       }
     },
     {

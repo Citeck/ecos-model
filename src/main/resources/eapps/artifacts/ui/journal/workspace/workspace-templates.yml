@@ -1,0 +1,23 @@
+---
+id: workspace-templates
+name:
+  ru: Шаблоны рабочих пространств
+  en: Workspace template
+typeRef: emodel/type@workspace-template
+actions:
+  - uiserv/action@download-base64-data-zip
+  - uiserv/action@delete
+  - uiserv/action@edit
+  - uiserv/action@update-workspace-template
+  - uiserv/action@view-dashboard
+editable: false
+columns:
+  - id: id
+    name:
+      ru: Идентификатор
+      en: Identifier
+  - id: name
+    name:
+      ru: Имя
+      en: Name
+    type: TEXT

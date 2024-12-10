@@ -1,0 +1,13 @@
+---
+modelVersion: "1.0"
+
+sourceId: "workspace-template"
+
+name:
+  ru: Шаблон рабочего пространства
+  en: Workspace template
+
+controller:
+  type: script
+  config:
+    script: WorkspaceTemplateController.groovy

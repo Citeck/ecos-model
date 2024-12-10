@@ -1,0 +1,148 @@
+{
+  "id": "workspace-template-update",
+  "formKey": "",
+  "title": {
+    "ru": "Обновить шаблон рабочего пространства",
+    "en": "Update Workspace template"
+  },
+  "description": {},
+  "customModule": "",
+  "typeRef": "emodel/type@workspace-template",
+  "width": "m",
+  "system": false,
+  "i18n": {},
+  "definition": {
+    "components": [
+      {
+        "label": {
+          "ru": "Columns"
+        },
+        "key": "columns",
+        "columns": [
+          {
+            "components": [
+              {
+                "label": {
+                  "ru": "HTML"
+                },
+                "key": "templateRefDefinition",
+                "className": "",
+                "content": {
+                  "ru": "<h6 style=\"color:#000072\">Пожалуйста, выберите рабочее пространство,\nна основе которого будет обновлен шаблон. В шаблон будут включены \nконфигурации меню и дашбордов, связанные с выбранной рабочей областью.</h6> ",
+                  "en": "<h6 style=\"color:#000072\">Please select the workspace from which \nthe template will be updated. The template will include menu and \ndashboard configurations related to the selected workspace.</h6>"
+                },
+                "refreshOnChange": false,
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
+                "type": "htmlelement",
+                "input": false
+              }
+            ],
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 0
+          },
+          {
+            "index": 1,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "components": [
+              {
+                "label": {
+                  "ru": "Рабочее пространство",
+                  "en": "Workspace"
+                },
+                "key": "workspaceRef",
+                "validate": {
+                  "required": true
+                },
+                "modalTitle": "",
+                "journalId": "workspaces-journal",
+                "queryData": "",
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
+                "type": "selectJournal",
+                "input": true
+              }
+            ]
+          }
+        ],
+        "oneColumnInViewMode": false,
+        "type": "columns",
+        "input": false
+      },
+      {
+        "label": {
+          "ru": "Columns"
+        },
+        "key": "columns3",
+        "columns": [
+          {
+            "components": [],
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 0
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 1,
+            "components": []
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 2,
+            "components": [
+              {
+                "type": "button",
+                "key": "cancel",
+                "label": {
+                  "ru": "Отменить",
+                  "en": "Cancel"
+                },
+                "action": "event",
+                "event": "cancel",
+                "block": true,
+                "input": true
+              }
+            ]
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 3,
+            "components": [
+              {
+                "type": "button",
+                "theme": "primary",
+                "key": "submit",
+                "label": {
+                  "ru": "Сохранить",
+                  "en": "Save"
+                },
+                "block": true,
+                "input": true
+              }
+            ]
+          }
+        ],
+        "oneColumnInViewMode": false,
+        "type": "columns",
+        "input": false
+      }
+    ]
+  },
+  "attributes": {},
+  "notExists": false
+}

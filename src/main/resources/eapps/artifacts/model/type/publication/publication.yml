@@ -1,0 +1,31 @@
+---
+id: publication
+name:
+  ru: Публикация
+  en: Publication
+
+dispNameTemplate:
+  ru: '${title}'
+  en: '${title}'
+
+storageType: ECOS_MODEL
+
+formRef: uiserv/form@publication
+journalRef: uiserv/journal@publications
+
+inheritForm: false
+
+workspaceScope: PUBLIC
+
+model:
+  attributes:
+    - id: title
+      name:
+        ru: Заголовок
+        en: Title
+      mandatory: true
+    - id: text
+      name:
+        ru: Текст публикации
+        en: Publication text
+      mandatory: true

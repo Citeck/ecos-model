@@ -10,6 +10,9 @@ object WorkspaceDesc {
     const val SOURCE_ID = "workspace"
 
     const val ATT_WORKSPACE_MEMBERS = "workspaceMembers"
+    const val ATT_TEMPLATE_REF = "templateRef"
+    const val ATT_IS_CURRENT_USER_MANAGER = "isCurrentUserManager"
+    const val ATT_IS_CURRENT_USER_MEMBER = "isCurrentUserMember"
 
     fun getRef(id: String): EntityRef {
         return EntityRef.create(AppName.EMODEL, SOURCE_ID, id)

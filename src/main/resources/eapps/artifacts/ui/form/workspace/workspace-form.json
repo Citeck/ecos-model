@@ -45,6 +45,9 @@
                               "en": "Id"
                             },
                             "key": "id",
+                            "validate": {
+                              "required": true
+                            },
                             "defaultValue": "",
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
@@ -84,7 +87,6 @@
                             "validate": {
                               "required": true
                             },
-                            "dataSrc": "url",
                             "data": {
                               "url": "/citeck/ecos/records/query"
                             },
@@ -136,6 +138,23 @@
                             "type": "tableForm",
                             "input": true,
                             "reorder": false
+                          },
+                          {
+                            "label": {
+                              "ru": "Создатель",
+                              "en": "Creator"
+                            },
+                            "key": "_creator",
+                            "disabled": true,
+                            "disableInlineEdit": true,
+                            "persistent": false,
+                            "allowedAuthorityType": "USER",
+                            "defaultValue": "",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "customConditional": "show = _.get(instance, 'options.formMode') !== 'CREATE';",
+                            "type": "selectOrgstruct",
+                            "input": true
                           }
                         ],
                         "type": "column",
@@ -176,19 +195,37 @@
                           },
                           {
                             "label": {
-                              "ru": "Создатель",
-                              "en": "Creator"
+                              "ru": "Шаблон",
+                              "en": "Template"
                             },
-                            "key": "_creator",
-                            "disabled": true,
-                            "disableInlineEdit": true,
-                            "persistent": false,
-                            "allowedAuthorityType": "USER",
-                            "defaultValue": "",
+                            "key": "templateRef",
+                            "modalTitle": "",
+                            "journalId": "workspace-templates",
+                            "queryData": "",
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
-                            "customConditional": "show = _.get(instance, 'options.formMode') !== 'CREATE';",
-                            "type": "selectOrgstruct",
+                            "logic": [
+                              {
+                                "name": "disable-for-non-create-form",
+                                "trigger": {
+                                  "type": "javascript",
+                                  "javascript": "result = instance.options.formMode !== 'CREATE';"
+                                },
+                                "actions": [
+                                  {
+                                    "name": "disable-for-non-create-form",
+                                    "type": "property",
+                                    "property": {
+                                      "label": "Disabled",
+                                      "value": "disabled",
+                                      "type": "boolean"
+                                    },
+                                    "state": "true"
+                                  }
+                                ]
+                              }
+                            ],
+                            "type": "selectJournal",
                             "input": true
                           }
                         ]

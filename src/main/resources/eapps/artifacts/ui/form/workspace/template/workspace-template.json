@@ -1,0 +1,166 @@
+{
+  "id": "workspace-template",
+  "formKey": "",
+  "title": {
+    "ru": "Шаблон рабочего пространства",
+    "en": "Workspace template"
+  },
+  "description": {},
+  "customModule": "",
+  "typeRef": "emodel/type@workspace-template",
+  "width": "m",
+  "system": false,
+  "i18n": {},
+  "definition": {
+    "components": [
+      {
+        "label": {
+          "ru": "Columns"
+        },
+        "key": "columns2",
+        "columns": [
+          {
+            "components": [
+              {
+                "label": {
+                  "ru": "Id",
+                  "en": "Id"
+                },
+                "key": "id",
+                "validate": {
+                  "required": true
+                },
+                "defaultValue": "",
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
+                "logic": [
+                  {
+                    "name": "disable-on-edit",
+                    "trigger": {
+                      "type": "javascript",
+                      "javascript": "result = instance.options.formMode !== 'CREATE';"
+                    },
+                    "actions": [
+                      {
+                        "name": "disable",
+                        "type": "property",
+                        "property": {
+                          "label": "Disabled",
+                          "value": "disabled",
+                          "type": "boolean"
+                        },
+                        "state": "true"
+                      }
+                    ]
+                  }
+                ],
+                "type": "textfield",
+                "input": true,
+                "inputMasks": [
+                  {}
+                ]
+              }
+            ],
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 0
+          },
+          {
+            "index": 1,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "components": [
+              {
+                "label": {
+                  "ru": "Имя",
+                  "en": "Name"
+                },
+                "key": "name",
+                "validate": {
+                  "required": true
+                },
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
+                "type": "mlText",
+                "input": true
+              }
+            ]
+          }
+        ],
+        "oneColumnInViewMode": false,
+        "type": "columns",
+        "input": false
+      },
+      {
+        "label": {
+          "ru": "Columns"
+        },
+        "key": "columns3",
+        "columns": [
+          {
+            "components": [],
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 0
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 1,
+            "components": []
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 2,
+            "components": [
+              {
+                "type": "button",
+                "key": "cancel",
+                "label": {
+                  "ru": "Отменить",
+                  "en": "Cancel"
+                },
+                "action": "event",
+                "event": "cancel",
+                "block": true,
+                "input": true
+              }
+            ]
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 3,
+            "components": [
+              {
+                "type": "button",
+                "theme": "primary",
+                "key": "submit",
+                "label": {
+                  "ru": "Сохранить",
+                  "en": "Save"
+                },
+                "block": true,
+                "input": true
+              }
+            ]
+          }
+        ],
+        "oneColumnInViewMode": false,
+        "type": "columns",
+        "input": false
+      }
+    ]
+  }
+}
