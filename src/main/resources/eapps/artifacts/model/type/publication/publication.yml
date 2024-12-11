@@ -10,6 +10,8 @@ dispNameTemplate:
 
 storageType: ECOS_MODEL
 
+dashboardType: publication-details
+
 formRef: uiserv/form@publication
 journalRef: uiserv/journal@publications
 
