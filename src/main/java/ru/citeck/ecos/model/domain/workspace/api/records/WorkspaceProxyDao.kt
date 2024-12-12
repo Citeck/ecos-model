@@ -57,7 +57,7 @@ class WorkspaceProxyDao(
 
         private val UNDELETABLE_WORKSPACES = setOf(
             "admin\$workspace",
-            "default",
+            WorkspaceDesc.DEFAULT_WORKSPACE_ID,
             "personal-workspace"
         )
 
@@ -207,7 +207,7 @@ class WorkspaceProxyDao(
                         .withWorkspaceMembers(
                             listOf(
                                 WorkspaceMember(
-                                    id = user,
+                                    memberId = user,
                                     authority = AuthorityType.PERSON.getRef(user),
                                     memberRole = WorkspaceMemberRole.MANAGER
                                 )

@@ -4,9 +4,9 @@ import org.springframework.stereotype.Service
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthGroup
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
-import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceMemberProxyDao.Companion.WORKSPACE_MEMBER_SOURCE_ID
 import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao.Companion.WORKSPACE_ATT_MEMBER_AUTHORITY
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
+import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceMemberDesc
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceVisitDesc
 import ru.citeck.ecos.model.domain.workspace.dto.Workspace
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMember
@@ -155,7 +155,7 @@ class EmodelWorkspaceService(
 
         AuthContext.runAsSystem {
             val workspaceMember = WorkspaceMember(
-                id = "",
+                memberId = "user-join-$currentUser",
                 authority = ecosAuthoritiesApi.getAuthorityRef(currentUser),
                 memberRole = WorkspaceMemberRole.USER
             )
@@ -171,11 +171,11 @@ class EmodelWorkspaceService(
         require(isNewMember) { "Member: ${member.authority} already exists in workspace: $workspace" }
 
         recordsService.mutate(
-            EntityRef.create(AppName.EMODEL, WORKSPACE_MEMBER_SOURCE_ID, ""),
+            WorkspaceMemberDesc.getRef(""),
             mapOf(
-                "id" to member.id,
-                "authority" to member.authority,
-                "memberRole" to member.memberRole,
+                WorkspaceMemberDesc.ATT_MEMBER_ID to member.memberId,
+                WorkspaceMemberDesc.ATT_AUTHORITY to member.authority,
+                WorkspaceMemberDesc.ATT_MEMBER_ROLE to member.memberRole,
                 RecordConstants.ATT_PARENT to workspace,
                 RecordConstants.ATT_PARENT_ATT to "workspaceMembers",
             )

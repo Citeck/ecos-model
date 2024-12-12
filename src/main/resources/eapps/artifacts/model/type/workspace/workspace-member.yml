@@ -15,6 +15,10 @@ queryPermsPolicy: PUBLIC
 
 model:
   attributes:
+    - id: memberId
+      name:
+        ru: Идентификатор участника
+        en: Member identifier
     - id: authority
       name:
         ru: Группа или пользователь

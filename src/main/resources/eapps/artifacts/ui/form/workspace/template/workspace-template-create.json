@@ -118,7 +118,7 @@
                   "required": true
                 },
                 "modalTitle": "",
-                "journalId": "workspaces-journal",
+                "journalId": "workspaces-for-template",
                 "queryData": "",
                 "refreshOn": [],
                 "optionalWhenDisabled": false,

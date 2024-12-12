@@ -14,6 +14,8 @@ object WorkspaceDesc {
     const val ATT_IS_CURRENT_USER_MANAGER = "isCurrentUserManager"
     const val ATT_IS_CURRENT_USER_MEMBER = "isCurrentUserMember"
 
+    const val DEFAULT_WORKSPACE_ID = "default"
+
     fun getRef(id: String): EntityRef {
         return EntityRef.create(AppName.EMODEL, SOURCE_ID, id)
     }

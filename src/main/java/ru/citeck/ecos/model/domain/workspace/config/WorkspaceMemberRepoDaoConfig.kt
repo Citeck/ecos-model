@@ -7,6 +7,7 @@ import ru.citeck.ecos.data.sql.domain.DbDomainFactory
 import ru.citeck.ecos.data.sql.records.DbRecordsDaoConfig
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
 import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceMemberProxyDao.Companion.WORKSPACE_MEMBER_REPO_SOURCE_ID
+import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceMemberDesc
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.records3.record.dao.RecordsDao
 
@@ -15,13 +16,9 @@ class WorkspaceMemberRepoDaoConfig(
     private val dbDomainFactory: DbDomainFactory
 ) {
 
-    companion object {
-        const val WORKSPACE_MEMBER_TYPE = "workspace-member"
-    }
-
     @Bean
     fun workspaceMemberRepoDao(): RecordsDao {
-        val workspaceMemberTypeRef = ModelUtils.getTypeRef(WORKSPACE_MEMBER_TYPE)
+        val workspaceMemberTypeRef = ModelUtils.getTypeRef(WorkspaceMemberDesc.TYPE_ID)
         val recordsDao = dbDomainFactory.create(
             DbDomainConfig.create()
                 .withRecordsDao(

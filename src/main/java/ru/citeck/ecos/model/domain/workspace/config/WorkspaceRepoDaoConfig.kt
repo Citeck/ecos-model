@@ -9,6 +9,7 @@ import ru.citeck.ecos.data.sql.records.DbRecordsDaoConfig
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
 import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao.Companion.WORKSPACE_REPO_SOURCE_ID
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
+import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceMemberDesc
 import ru.citeck.ecos.model.domain.workspace.listener.WorkspaceRecordsListener
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.model.lib.workspace.WorkspaceService
@@ -88,7 +89,15 @@ class WorkspaceRepoDaoConfig {
                         defaultJson[WorkspaceDesc.ATT_WORKSPACE_MEMBERS] = recordsService.getAtts(
                             membersRefs,
                             listOf(ScalarType.JSON_SCHEMA)
-                        ).map { it.getAtt(ScalarType.JSON_SCHEMA) }
+                        ).map { memberAtts ->
+                            val memberData = memberAtts.getAtt(ScalarType.JSON_SCHEMA)
+                            val memberId =  memberData[WorkspaceMemberDesc.ATT_MEMBER_ID].asText()
+                            if (memberId.isNotBlank()) {
+                                memberData["id"] = memberId
+                            }
+                            memberData.remove(WorkspaceMemberDesc.ATT_MEMBER_ID)
+                            memberData
+                        }
                     }
 
                     defaultJson

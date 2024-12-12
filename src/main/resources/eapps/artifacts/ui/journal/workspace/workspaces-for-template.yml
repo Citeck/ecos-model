@@ -1,13 +1,20 @@
 ---
-id: workspaces-journal
+id: workspaces-for-template
 name:
   ru: Рабочие пространства
   en: Workspaces
-
 system: true
 editable: false
 
 typeRef: 'emodel/type@workspace'
+
+predicate:
+  t: 'not-in'
+  a: 'id'
+  v:
+    - 'default'
+    - 'admin$workspace'
+    - 'personal-workspace'
 
 columns:
   - id: id
@@ -22,9 +29,3 @@ columns:
     name:
       ru: Описание
       en: Description
-  - id: visibility
-    name:
-      ru: Видимость
-      en: Visibility
-    editor:
-      type: select

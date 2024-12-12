@@ -21,9 +21,11 @@ createVariants:
   - id: create
     name: { ru: Создать, en: Create }
     formRef: uiserv/form@workspace-template-create
+    allowedFor: ['GROUP_ECOS_ADMINISTRATORS']
   - id: upload
     name: { ru: Загрузить, en: Upload }
     formRef: uiserv/form@ecos-module-upload
+    allowedFor: ['GROUP_ECOS_ADMINISTRATORS']
 
 model:
   attributes:

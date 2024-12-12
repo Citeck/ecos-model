@@ -16,6 +16,7 @@ import ru.citeck.ecos.data.sql.records.DbRecordsDaoConfig
 import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
 import ru.citeck.ecos.data.sql.records.perms.DbRecordPerms
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
+import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.model.domain.wstemplate.desc.WorkspaceTemplateDesc
 import ru.citeck.ecos.model.domain.wstemplate.listener.WorkspaceTemplateRecordsListener
 import ru.citeck.ecos.model.domain.wstemplate.service.WorkspaceTemplateService
@@ -58,6 +59,10 @@ class WorkspaceTemplateRepoDaoConfig {
                 if (record.attributes.has(WorkspaceTemplateDesc.ATT_WORKSPACE_REF)) {
 
                     val workspaceRef = record.attributes[WorkspaceTemplateDesc.ATT_WORKSPACE_REF].asText().toEntityRef()
+                    if (workspaceRef.getLocalId() == WorkspaceDesc.DEFAULT_WORKSPACE_ID) {
+                        error("You can't create template from default workspace")
+                    }
+
                     val artifacts = templateService.getWorkspaceArtifactsForTemplate(workspaceRef.getLocalId())
 
                     val newAtts = record.deepCopy()
