@@ -246,25 +246,73 @@
                 "components": [
                   {
                     "label": {
-                      "ru": "Адрес домашней страницы",
-                      "en": "Home page link"
+                      "en": "Columns"
                     },
-                    "key": "homePageLink",
-                    "tooltip": {
-                      "ru": "Адрес, который будет открываться при переходе в рабочее пространство и при нажатии на логотип в меню.",
-                      "en": "The URL that will open when the workspace is opened and when clicking on the logo in the menu."
-                    },
-                    "placeholder": {
-                      "ru": "/v2/dashboard"
-                    },
-                    "defaultValue": "",
-                    "refreshOn": [],
-                    "optionalWhenDisabled": false,
-                    "type": "textfield",
-                    "input": true,
-                    "inputMasks": [
-                      {}
-                    ]
+                    "key": "columns4",
+                    "columns": [
+                      {
+                        "components": [
+                          {
+                            "label": {
+                              "ru": "Адрес домашней страницы",
+                              "en": "Home page link"
+                            },
+                            "key": "homePageLink",
+                            "tooltip": {
+                              "ru": "Адрес, который будет открываться при переходе в рабочее пространство и при нажатии на логотип в меню.",
+                              "en": "The URL that will open when the workspace is opened and when clicking on the logo in the menu."
+                            },
+                            "placeholder": {
+                              "ru": "/v2/dashboard"
+                            },
+                            "defaultValue": "",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "textfield",
+                            "input": true,
+                            "inputMasks": [
+                              {}
+                            ]
+                          }
+                        ],
+                        "type": "column",
+                        "input": false,
+                        "key": "column",
+                        "index": 0
+                      },
+                      {
+                        "type": "column",
+                        "input": false,
+                        "key": "column",
+                        "index": 1,
+                        "components": [
+                          {
+                            "label": {
+                              "en": "Icon",
+                              "ru": "Иконка"
+                            },
+                            "key": "icon",
+                            "modalTitle": "",
+                            "journalId": "icons",
+                            "source": {
+                              "type": "journal",
+                              "custom": {
+                                "columns": []
+                              },
+                              "customValues": []
+                            },
+                            "queryData": "",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "selectJournal",
+                            "input": true
+                          }
+                        ]
+                      }
+                    ],
+                    "oneColumnInViewMode": false,
+                    "type": "columns",
+                    "input": false
                   }
                 ]
               }
