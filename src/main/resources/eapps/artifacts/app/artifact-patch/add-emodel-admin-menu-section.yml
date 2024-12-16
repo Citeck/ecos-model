@@ -38,7 +38,6 @@ config:
             label:
               ru: Типы данных
               en: Data types
-            icon: ui/icon@i-leftmenu-tools
             hidden: false
             type: JOURNAL
             config:
@@ -47,7 +46,6 @@ config:
             label:
               ru: Аспекты
               en: Aspects
-            icon: ui/icon@i-leftmenu-tools
             hidden: false
             type: JOURNAL
             config:
@@ -56,7 +54,6 @@ config:
             label:
               ru: Рабочие пространства
               en: Workspaces
-            icon: ui/icon@i-leftmenu-tools
             hidden: false
             type: JOURNAL
             config:
@@ -65,7 +62,6 @@ config:
             label:
               ru: Шаблоны рабочих пространств
               en: Workspace templates
-            icon: ui/icon@i-leftmenu-tools
             hidden: false
             type: JOURNAL
             config:
@@ -74,7 +70,6 @@ config:
             label:
               ru: Шаблоны нумерации
               en: Number templates
-            icon: ui/icon@i-leftmenu-tools
             hidden: false
             type: JOURNAL
             config:
@@ -83,7 +78,6 @@ config:
             label:
               ru: Пользователи
               en: Users
-            icon: ui/icon@i-leftmenu-tools
             hidden: false
             type: JOURNAL
             config:
@@ -92,7 +86,6 @@ config:
             label:
               ru: Группы
               en: Groups
-            icon: ui/icon@i-leftmenu-tools
             hidden: false
             type: JOURNAL
             config:
@@ -101,7 +94,6 @@ config:
             label:
               ru: LDAP Синхронизация
               en: LDAP Synchronization
-            icon: ui/icon@i-leftmenu-tools
             hidden: false
             type: JOURNAL
             config:
@@ -110,7 +102,6 @@ config:
             label:
               ru: Конечные точки
               en: Endpoints
-            icon: ui/icon@i-leftmenu-tools
             hidden: false
             type: JOURNAL
             config:
@@ -119,7 +110,6 @@ config:
             label:
               ru: Секреты
               en: Secrets
-            icon: ui/icon@i-leftmenu-tools
             hidden: false
             type: JOURNAL
             config:
@@ -128,7 +118,6 @@ config:
             label:
               ru: Матрицы прав
               en: Permission matrices
-            icon: ui/icon@i-leftmenu-tools
             hidden: false
             type: JOURNAL
             config:
@@ -137,7 +126,6 @@ config:
             label:
               ru: Настройка прав
               en: Permission settings
-            icon: ui/icon@i-leftmenu-tools
             hidden: false
             type: JOURNAL
             config:
@@ -146,7 +134,6 @@ config:
             label:
               ru: Описание права
               en: Permission definition
-            icon: ui/icon@i-leftmenu-tools
             hidden: false
             type: JOURNAL
             config:
@@ -155,7 +142,6 @@ config:
             label:
               ru: Рабочее расписание
               en: Working schedule
-            icon: ui/icon@i-leftmenu-tools
             hidden: false
             type: JOURNAL
             config:
@@ -164,7 +150,6 @@ config:
             label:
               ru: Производственный календарь
               en: Working calendar
-            icon: ui/icon@i-leftmenu-tools
             hidden: false
             type: JOURNAL
             config:
