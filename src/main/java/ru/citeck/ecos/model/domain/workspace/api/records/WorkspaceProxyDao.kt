@@ -17,6 +17,7 @@ import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
 import ru.citeck.ecos.model.domain.workspace.service.WorkspacePermissions
 import ru.citeck.ecos.model.lib.ModelServiceFactory
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
+import ru.citeck.ecos.model.lib.permissions.dto.PermissionType
 import ru.citeck.ecos.model.lib.workspace.USER_WORKSPACE_PREFIX
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.predicate.PredicateService
@@ -24,6 +25,7 @@ import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
+import ru.citeck.ecos.records3.record.atts.value.AttValue
 import ru.citeck.ecos.records3.record.atts.value.impl.EmptyAttValue
 import ru.citeck.ecos.records3.record.dao.delete.DelStatus
 import ru.citeck.ecos.records3.record.dao.impl.proxy.RecordsDaoProxy
@@ -235,6 +237,17 @@ class WorkspaceProxyDao(
 
         fun getIsCurrentUserManager(): Boolean {
             return user == AuthContext.getCurrentUser()
+        }
+
+        fun getPermissions(): UserWorkspacePerms {
+            return UserWorkspacePerms
+        }
+    }
+
+    object UserWorkspacePerms : AttValue {
+
+        override fun has(name: String): Boolean {
+            return PermissionType.READ.name.equals(name, ignoreCase = true)
         }
     }
 }
