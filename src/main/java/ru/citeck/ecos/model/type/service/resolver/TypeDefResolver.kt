@@ -148,6 +148,9 @@ class TypeDefResolver {
         if (resTypeDef.journalRef.getLocalId() == DEFAULT_JOURNAL) {
             resTypeDef.withJournalRef(resTypeDef.journalRef.withLocalId("type$" + resTypeDef.id))
         }
+        if (resTypeDef.workspaceScope == WorkspaceScope.DEFAULT) {
+            resTypeDef.withWorkspaceScope(resolvedParentDef.workspaceScope)
+        }
         val contentConfig = resTypeDef.contentConfig.copy()
         if (contentConfig.path.isBlank()) {
             contentConfig.withPath(resolvedParentDef.contentConfig.path)
