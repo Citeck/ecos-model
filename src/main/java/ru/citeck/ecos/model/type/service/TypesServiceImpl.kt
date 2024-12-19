@@ -15,7 +15,6 @@ import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records2.predicate.model.VoidPredicate
 import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
-import java.time.Instant
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.function.BiConsumer
 import java.util.function.Consumer
@@ -177,10 +176,8 @@ class TypesServiceImpl(
         val result: MutableList<TypeDef> = ArrayList()
         val resultIdsSet: MutableSet<String> = HashSet()
         for (typeId in typeIds) {
-            forEachTypeInDescHierarchy(typeId) { type ->
-                if (resultIdsSet.add(type.extId)) {
-                    result.add(typeConverter.toDto(type))
-                }
+            forEachTypeInDescHierarchy(typeId, { resultIdsSet.add(it.extId) }) { type ->
+                result.add(typeConverter.toDto(type))
             }
         }
         return result
@@ -191,7 +188,7 @@ class TypesServiceImpl(
             return emptyList()
         }
         val attributesHierarchy = mutableListOf<List<AttributeDef>>()
-        forEachTypeInAscHierarchy(typeId) { typeEntity ->
+        forEachTypeInAscHierarchy(typeId, { true }) { typeEntity ->
             val model = Json.mapper.read(typeEntity.model, TypeModelDef::class.java)
             if (model != null) {
                 attributesHierarchy.add(model.attributes)
@@ -206,24 +203,32 @@ class TypesServiceImpl(
         return attributes.values.toList()
     }
 
-    private fun forEachTypeInDescHierarchy(id: String, action: (TypeEntity) -> Unit) {
-        forEachTypeInDescHierarchy(typeRepoDao.findByExtId(id), action)
+    private fun forEachTypeInDescHierarchy(id: String, filter: (TypeEntity) -> Boolean, action: (TypeEntity) -> Unit) {
+        forEachTypeInDescHierarchy(typeRepoDao.findByExtId(id), filter, action)
     }
 
-    private fun forEachTypeInDescHierarchy(type: TypeEntity?, action: (TypeEntity) -> Unit) {
-        if (type == null) {
+    private fun forEachTypeInDescHierarchy(
+        type: TypeEntity?,
+        filter: (TypeEntity) -> Boolean,
+        action: (TypeEntity) -> Unit
+    ) {
+        if (type == null || !filter(type)) {
             return
         }
         action.invoke(type)
         val childrenIds = getChildren(type.extId)
         for (childId in childrenIds) {
-            forEachTypeInDescHierarchy(childId, action)
+            forEachTypeInDescHierarchy(childId, filter, action)
         }
     }
 
-    private fun <T : Any> forEachTypeInAscHierarchy(typeId: String, action: (TypeEntity) -> T?): T? {
+    private fun <T : Any> forEachTypeInAscHierarchy(
+        typeId: String,
+        filter: (TypeEntity) -> Boolean,
+        action: (TypeEntity) -> T?
+    ): T? {
         var typeEntity = typeRepoDao.findByExtId(typeId)
-        while (typeEntity != null) {
+        while (typeEntity != null && filter(typeEntity)) {
             action.invoke(typeEntity)
             typeEntity = typeEntity.parent
         }
@@ -255,6 +260,7 @@ class TypesServiceImpl(
         return typeRepoDao.findByExtId(typeId)?.let { typeConverter.toDto(it) }
     }
 
+    @Transactional
     override fun getOrCreateByExtId(typeId: String): TypeDef {
 
         val byExtId: TypeEntity? = typeRepoDao.findByExtId(typeId)
@@ -288,7 +294,7 @@ class TypesServiceImpl(
 
     @Transactional
     override fun delete(typeId: String) {
-        updateModifiedTimeForLinkedTypes(deleteImpl(typeId), asc = true, desc = false)
+        fireOnTypeHierarchyChangedEvent(deleteImpl(typeId), asc = true, desc = false)
     }
 
     @Transactional
@@ -297,7 +303,7 @@ class TypesServiceImpl(
         children.forEach { childId ->
             deleteWithChildren(childId)
         }
-        updateModifiedTimeForLinkedTypes(deleteImpl(typeId), asc = true, desc = false)
+        fireOnTypeHierarchyChangedEvent(deleteImpl(typeId), asc = true, desc = false)
     }
 
     private fun deleteImpl(typeId: String): String {
@@ -314,12 +320,41 @@ class TypesServiceImpl(
         return parentId
     }
 
+    @Transactional
     override fun save(dto: TypeDef): TypeDef {
         return save(dto, false)
     }
 
     @Transactional
     override fun save(dto: TypeDef, clonedRecord: Boolean): TypeDef {
+        return save(listOf(dto), clonedRecord).first()
+    }
+
+    @Transactional
+    override fun save(types: List<TypeDef>): List<TypeDef> {
+        return save(types, false)
+    }
+
+    private fun save(types: List<TypeDef>, clonedRecord: Boolean): List<TypeDef> {
+
+        if (types.isEmpty()) {
+            return emptyList()
+        }
+
+        val result = ArrayList<TypeDef>()
+        val typesToHierarchyChangedEvent = HashSet<String>()
+        for (type in types) {
+            val typeAfterSave = saveTypeDefImpl(type, clonedRecord)
+            typesToHierarchyChangedEvent.add(typeAfterSave.id)
+            result.add(typeAfterSave)
+        }
+
+        fireOnTypeHierarchyChangedEvent(typesToHierarchyChangedEvent, asc = true, desc = true)
+
+        return result
+    }
+
+    private fun saveTypeDefImpl(dto: TypeDef, clonedRecord: Boolean): TypeDef {
 
         val existingEntity = typeRepoDao.findByExtId(dto.id)
 
@@ -343,33 +378,40 @@ class TypesServiceImpl(
         entity = typeRepoDao.save(entity)
 
         val typeDefAfter = typeConverter.toDtoWithMeta(entity)
+
         onTypeChangedListeners.forEach {
             it.action.invoke(typeDefBefore, typeDefAfter)
         }
 
-        updateModifiedTimeForLinkedTypes(dto.id, asc = true, desc = true)
-
         return typeDefAfter.entity
     }
 
-    private fun updateModifiedTimeForLinkedTypes(typeId: String, asc: Boolean, desc: Boolean) {
+    private fun fireOnTypeHierarchyChangedEvent(typeId: String, asc: Boolean, desc: Boolean) {
         if (typeId.isBlank()) {
+            return
+        }
+        return fireOnTypeHierarchyChangedEvent(listOf(typeId), asc, desc)
+    }
+
+    private fun fireOnTypeHierarchyChangedEvent(typesId: Collection<String>, asc: Boolean, desc: Boolean) {
+        if (typesId.isEmpty()) {
             return
         }
         val types = HashSet<String>()
         val action: (TypeEntity) -> Unit = { typeEntity ->
-            if (typeEntity.extId != typeId) {
-                typeEntity.lastModifiedDate = Instant.now()
-                typeRepoDao.save(typeEntity)
-                types.add(typeEntity.extId)
-            }
             types.add(typeEntity.extId)
         }
         if (desc) {
-            forEachTypeInDescHierarchy(typeId, action)
+            val visited = HashSet<String>()
+            for (typeId in typesId) {
+                forEachTypeInDescHierarchy(typeId, { visited.add(it.extId) }, action)
+            }
         }
         if (asc) {
-            forEachTypeInAscHierarchy(typeId, action)
+            val visited = HashSet<String>()
+            for (typeId in typesId) {
+                forEachTypeInAscHierarchy(typeId, { visited.add(it.extId) }, action)
+            }
         }
         onTypeHierarchyChangedListeners.forEach {
             it.invoke(types)

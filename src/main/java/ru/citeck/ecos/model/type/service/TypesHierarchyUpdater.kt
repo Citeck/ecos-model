@@ -76,7 +76,7 @@ class TypesHierarchyUpdater(
         } else {
             log.debug {
                 "Last modified type is '${lastModifiedType.entity.id}' " +
-                "with modified time: ${lastModifiedType.meta.modified}"
+                    "with modified time: ${lastModifiedType.meta.modified}"
             }
         }
         val lastModifiedFromRegistry = registry.getValueWithMeta(lastModifiedType.entity.id)?.meta?.modified
@@ -84,7 +84,7 @@ class TypesHierarchyUpdater(
         return if (lastModifiedFromRegistry != lastModifiedFromRepo) {
             log.info {
                 "Found unmatched modified time for '${lastModifiedType.entity.id}'. " +
-                "Registry time: $lastModifiedFromRegistry Repo time: $lastModifiedFromRepo"
+                    "Registry time: $lastModifiedFromRegistry Repo time: $lastModifiedFromRepo"
             }
             syncAllTypes()
             true

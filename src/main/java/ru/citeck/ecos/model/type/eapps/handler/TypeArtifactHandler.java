@@ -16,6 +16,8 @@ import java.util.function.Consumer;
 @RequiredArgsConstructor
 public class TypeArtifactHandler implements EcosArtifactHandler<TypeDef> {
 
+    public static final String TYPE = "model/type";
+
     private final TypesService typeService;
 
     @Override
@@ -33,7 +35,7 @@ public class TypeArtifactHandler implements EcosArtifactHandler<TypeDef> {
     @NotNull
     @Override
     public String getArtifactType() {
-        return "model/type";
+        return TYPE;
     }
 
     @Override
