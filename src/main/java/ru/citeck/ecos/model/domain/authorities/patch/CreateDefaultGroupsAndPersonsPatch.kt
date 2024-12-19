@@ -18,7 +18,8 @@ import ru.citeck.ecos.webapp.lib.patch.annotaion.EcosLocalPatch
 import java.util.concurrent.Callable
 
 @Component
-@EcosLocalPatch("default-authorities", "2022-06-29T00:00:03Z")
+// date should be after DeployCoreTypesPatch date
+@EcosLocalPatch("default-authorities", "2025-01-19T00:00:00Z")
 class CreateDefaultGroupsAndPersonsPatch(
     val recordsService: RecordsService
 ) : Callable<List<String>> {
