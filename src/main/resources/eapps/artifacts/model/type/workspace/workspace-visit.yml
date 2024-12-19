@@ -16,6 +16,7 @@ model:
       mandatory: true
       index:
         enabled: true
+  systemAttributes:
     - id: lastVisitTime
       type: DATETIME
     - id: user
