@@ -40,6 +40,15 @@ class DeployCoreTypesPatch(
         log.info { "Found ${artifacts.size} core types in classpath" }
 
         val typesWithDeps = ArrayList<TypeDefWithDeps>()
+        typesWithDeps.add(
+            TypeDefWithDeps(
+                TypeDef.create()
+                    // maybe move ecos-vcs-object to emodel?
+                    .withId("ecos-vcs-object")
+                    .build(), mutableSetOf("base")
+            )
+        )
+
         for (artifact in artifacts) {
             if (artifact !is ObjectData) {
                 continue
@@ -48,17 +57,13 @@ class DeployCoreTypesPatch(
             if (id.isBlank()) {
                 continue
             }
-            val parentRef = artifact["parentRef"].getAs(EntityRef::class.java) ?: ModelUtils.getTypeRef("base")
-            val typeDef = TypeDef.create {
-                withId(id)
-                withName(artifact["name"].getAs(MLText::class.java) ?: MLText.EMPTY)
-                withSourceId(artifact["sourceId"].asText())
-                withDispNameTemplate(artifact["dispNameTemplate"].getAs(MLText::class.java) ?: MLText.EMPTY)
-                withParentRef(parentRef)
-                withNumTemplateRef(artifact["numTemplateRef"].getAs(EntityRef::class.java))
-                withModel(artifact["model"].getAs(TypeModelDef::class.java))
+            val typeDef = artifact.getAs(TypeDef::class.java) ?: continue
+            val deps = if (typeDef.id == "base") {
+                mutableSetOf()
+            } else {
+                mutableSetOf(typeDef.parentRef.getLocalId())
             }
-            typesWithDeps.add(TypeDefWithDeps(typeDef, mutableSetOf(parentRef.getLocalId())))
+            typesWithDeps.add(TypeDefWithDeps(typeDef, deps))
         }
 
         val typesToDeploy = ArrayList<TypeDef>()
@@ -81,6 +86,7 @@ class DeployCoreTypesPatch(
                     typeWithDeps.dependencies.removeAll(resolvedTypes)
                 }
                 resolvedTypes.clear()
+            } else {
                 break
             }
         }
