@@ -4,10 +4,16 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import ru.citeck.ecos.model.type.service.resolver.AspectsProvider
 import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
 import ru.citeck.ecos.model.type.service.resolver.TypesProvider
+import ru.citeck.ecos.records2.RecordConstants
+import ru.citeck.ecos.records2.predicate.model.Predicates
+import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy
 import ru.citeck.ecos.webapp.api.promise.Promise
 import ru.citeck.ecos.webapp.api.promise.Promises
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import ru.citeck.ecos.webapp.lib.registry.MutableEcosRegistry
+import java.time.Duration
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
@@ -20,14 +26,18 @@ class TypesHierarchyUpdater(
     private val rawProv: TypesProvider,
     private val resProv: TypesProvider,
     private val aspectsProv: AspectsProvider,
-    private val registry: MutableEcosRegistry<TypeDef>
+    private val registry: MutableEcosRegistry<TypeDef>,
+    private val syncAllTypes: () -> Unit
 ) {
 
     companion object {
         private val log = KotlinLogging.logger {}
+
+        private val LAST_MODIFIED_TYPE_CHECK_PERIOD: Long = Duration.ofMinutes(10).toMillis()
     }
     private val updaterEnabled = AtomicBoolean()
     private val typesToUpdateQueue = ArrayBlockingQueue<TypesToUpdate>(100)
+    private var lastModifiedTypeCheckedAt: Long = System.currentTimeMillis()
 
     private val shutdownHook = thread(start = false) { updaterEnabled.set(false) }
 
@@ -35,11 +45,52 @@ class TypesHierarchyUpdater(
         updaterEnabled.set(true)
         thread(start = true) {
             while (updaterEnabled.get()) {
-                update(typesToUpdateQueue.poll(1, TimeUnit.SECONDS))
+                if (!checkLastModifiedType()) {
+                    update(typesToUpdateQueue.poll(1, TimeUnit.SECONDS))
+                }
             }
         }
         Runtime.getRuntime().addShutdownHook(shutdownHook)
         return this
+    }
+
+    private fun checkLastModifiedType(): Boolean {
+        if (System.currentTimeMillis() - lastModifiedTypeCheckedAt < LAST_MODIFIED_TYPE_CHECK_PERIOD) {
+            return false
+        }
+        lastModifiedTypeCheckedAt = System.currentTimeMillis()
+        log.debug { "Last modified type checking started" }
+        val lastModifiedType = typesService.getAllWithMeta(
+            1,
+            0,
+            Predicates.le(
+                RecordConstants.ATT_MODIFIED,
+                Instant.now().minus(1, ChronoUnit.MINUTES)
+            ),
+            listOf(SortBy(RecordConstants.ATT_MODIFIED, ascending = false))
+        ).firstOrNull()
+
+        if (lastModifiedType == null) {
+            log.debug { "Last modified type is null" }
+            return false
+        } else {
+            log.debug {
+                "Last modified type is '${lastModifiedType.entity.id}' " +
+                "with modified time: ${lastModifiedType.meta.modified}"
+            }
+        }
+        val lastModifiedFromRegistry = registry.getValueWithMeta(lastModifiedType.entity.id)?.meta?.modified
+        val lastModifiedFromRepo = lastModifiedType.meta.modified
+        return if (lastModifiedFromRegistry != lastModifiedFromRepo) {
+            log.info {
+                "Found unmatched modified time for '${lastModifiedType.entity.id}'. " +
+                "Registry time: $lastModifiedFromRegistry Repo time: $lastModifiedFromRepo"
+            }
+            syncAllTypes()
+            true
+        } else {
+            false
+        }
     }
 
     fun addTypesToUpdate(typesToUpdate: Set<String>): Promise<Unit> {
@@ -61,7 +112,7 @@ class TypesHierarchyUpdater(
         futures.add(nextTypesToUpdate.future)
 
         try {
-            while (updaterEnabled.get() && typesToUpdateQueue.isNotEmpty()) {
+            while (typesToUpdateQueue.isNotEmpty()) {
                 typesToUpdateQueue.poll(1, TimeUnit.SECONDS)?.let {
                     typesIdsToUpdate.addAll(it.types)
                     futures.add(it.future)
@@ -74,11 +125,7 @@ class TypesHierarchyUpdater(
                 aspectsProv
             )
             for (type in resolvedTypes) {
-                if (updaterEnabled.get()) {
-                    registry.setValue(type.entity.id, type)
-                } else {
-                    break
-                }
+                registry.setValue(type.entity.id, type)
             }
             futures.forEach {
                 try {

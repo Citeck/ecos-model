@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.type.service
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.beans.factory.DisposableBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
@@ -30,6 +31,8 @@ class TypesRegistryInitializer(
 
     companion object {
         const val ORDER = -10f
+
+        private val log = KotlinLogging.logger {}
     }
 
     private val resolver = TypeDefResolver()
@@ -37,6 +40,7 @@ class TypesRegistryInitializer(
     private lateinit var aspectsRegistry: EcosRegistry<AspectDef>
     private lateinit var typesHierarchyUpdater: TypesHierarchyUpdater
     private val initialized = AtomicBoolean()
+    private val registeredTypes = HashSet<String>()
 
     override fun init(
         registry: MutableEcosRegistry<TypeDef>,
@@ -44,7 +48,6 @@ class TypesRegistryInitializer(
         props: EcosRegistryProps.Initializer
     ): Promise<*> {
 
-        val types = typesService.getAllWithMeta()
         val rawProv = TypesServiceBasedProv(typesService)
         val resProv = RegistryBasedTypesProv(registry)
         val aspectsProv = AspectsProv()
@@ -56,11 +59,13 @@ class TypesRegistryInitializer(
             resProv,
             aspectsProv,
             registry
-        ).start()
-
-        resolver.getResolvedTypesWithMeta(types, rawProv, EmptyProv(), aspectsProv).forEach {
-            registry.setValue(it.entity.id, it)
+        ) {
+            syncAllTypes(registry, rawProv, aspectsProv)
         }
+
+        syncAllTypes(registry, rawProv, aspectsProv)
+        typesHierarchyUpdater.start()
+
         typesService.addOnDeletedListener {
             TxnContext.doAfterCommit(0f, false) {
                 registry.setValue(it, null)
@@ -94,6 +99,28 @@ class TypesRegistryInitializer(
 
         initialized.set(true)
         return Promises.resolve(Unit)
+    }
+
+    private fun syncAllTypes(
+        registry: MutableEcosRegistry<TypeDef>,
+        rawProv: TypesProvider,
+        aspectsProv: AspectsProvider
+    ) {
+        val types = typesService.getAllWithMeta()
+        log.info { "Types full sync started for ${types.size} types" }
+        val typesToRemove = HashSet(registeredTypes)
+        resolver.getResolvedTypesWithMeta(types, rawProv, EmptyProv(), aspectsProv).forEach {
+            registry.setValue(it.entity.id, it)
+            registeredTypes.add(it.entity.id)
+            typesToRemove.remove(it.entity.id)
+        }
+        if (typesToRemove.isNotEmpty()) {
+            log.info { "Found types to remove: $typesToRemove" }
+            for (typeId in typesToRemove) {
+                registry.setValue(typeId, null)
+            }
+        }
+        log.info { "Types full sync completed" }
     }
 
     private inner class AspectsProv : AspectsProvider {
