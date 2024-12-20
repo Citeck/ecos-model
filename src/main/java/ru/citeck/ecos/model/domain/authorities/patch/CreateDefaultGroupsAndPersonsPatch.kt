@@ -19,7 +19,7 @@ import java.util.concurrent.Callable
 
 @Component
 // date should be after DeployCoreTypesPatch date
-@EcosLocalPatch("default-authorities", "2025-01-19T00:00:00Z")
+@EcosLocalPatch("default-authorities", "2025-01-01T00:00:00Z")
 class CreateDefaultGroupsAndPersonsPatch(
     val recordsService: RecordsService
 ) : Callable<List<String>> {

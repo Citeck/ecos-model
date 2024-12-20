@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import ru.citeck.ecos.apps.app.service.LocalAppService
+import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.model.type.eapps.handler.TypeArtifactHandler
 import ru.citeck.ecos.model.type.service.TypesService
@@ -12,6 +13,7 @@ import ru.citeck.ecos.webapp.lib.patch.annotaion.EcosLocalPatch
 import java.util.concurrent.Callable
 
 @Component
+// date should be before CreateDefaultGroupsAndPersonsPatch date
 @EcosLocalPatch("deploy-core-types", "2024-12-19T00:00:00Z")
 class DeployCoreTypesPatch(
     private val typesService: TypesService,
@@ -19,6 +21,8 @@ class DeployCoreTypesPatch(
 ) : Callable<List<String>> {
 
     companion object {
+        private const val BASE_TYPE_ID = "base"
+
         private val log = KotlinLogging.logger {}
     }
 
@@ -36,14 +40,8 @@ class DeployCoreTypesPatch(
         log.info { "Found ${artifacts.size} core types in classpath" }
 
         val typesWithDeps = ArrayList<TypeDefWithDeps>()
-        typesWithDeps.add(
-            TypeDefWithDeps(
-                TypeDef.create()
-                    // maybe move ecos-vcs-object to emodel?
-                    .withId("ecos-vcs-object")
-                    .build(), mutableSetOf("base")
-            )
-        )
+
+        val allTypesIds = HashSet<String>()
 
         for (artifact in artifacts) {
             if (artifact !is ObjectData) {
@@ -54,18 +52,35 @@ class DeployCoreTypesPatch(
                 continue
             }
             val typeDef = artifact.getAs(TypeDef::class.java) ?: continue
-            val deps = if (typeDef.id == "base") {
+            val deps = if (typeDef.id == BASE_TYPE_ID) {
                 mutableSetOf()
             } else {
                 mutableSetOf(typeDef.parentRef.getLocalId())
             }
+            allTypesIds.add(typeDef.id)
             typesWithDeps.add(TypeDefWithDeps(typeDef, deps))
+        }
+        for (typeWithDeps in typesWithDeps) {
+            for (dependencyTypeId in typeWithDeps.dependencies) {
+                if (allTypesIds.add(dependencyTypeId)) {
+                    // type is not found in resources, but we want it. Add it to types list.
+                    typesWithDeps.add(
+                        TypeDefWithDeps(
+                            TypeDef.create()
+                                .withId(dependencyTypeId)
+                                .withName(MLText(dependencyTypeId))
+                                .build(),
+                            mutableSetOf(BASE_TYPE_ID)
+                        )
+                    )
+                }
+            }
         }
 
         val typesToDeploy = ArrayList<TypeDef>()
         val resolvedTypes = HashSet<String>()
         var maxIterations = 10_000
-        while (maxIterations-- > 0) {
+        while (maxIterations-- > 0 && typesWithDeps.isNotEmpty()) {
             val typesWithDepsIt = typesWithDeps.iterator()
             while (typesWithDepsIt.hasNext()) {
                 val type = typesWithDepsIt.next()
@@ -82,7 +97,11 @@ class DeployCoreTypesPatch(
                     typeWithDeps.dependencies.removeAll(resolvedTypes)
                 }
                 resolvedTypes.clear()
-            } else {
+            } else if (typesWithDeps.isNotEmpty()) {
+                log.warn {
+                    "Resolved types is empty, but typesWithDeps " +
+                    "contains ${typesWithDeps.joinToString { it.typeDef.id }}"
+                }
                 break
             }
         }
