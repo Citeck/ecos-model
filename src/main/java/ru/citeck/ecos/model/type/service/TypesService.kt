@@ -63,6 +63,8 @@ interface TypesService {
 
     fun save(dto: TypeDef): TypeDef
 
+    fun save(types: List<TypeDef>): List<TypeDef>
+
     fun save(dto: TypeDef, clonedRecord: Boolean): TypeDef
 
     fun getCount(predicate: Predicate): Long

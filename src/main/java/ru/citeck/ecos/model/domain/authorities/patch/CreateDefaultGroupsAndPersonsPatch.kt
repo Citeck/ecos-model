@@ -5,18 +5,21 @@ import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.context.lib.i18n.I18nContext
+import ru.citeck.ecos.data.sql.records.DbRecordsControlAtts
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityGroupConstants
 import ru.citeck.ecos.model.domain.authorities.constant.PersonConstants
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records3.RecordsService
+import ru.citeck.ecos.records3.record.atts.dto.RecordAtts
 import ru.citeck.ecos.webapp.api.entity.EntityRef
-import ru.citeck.ecos.webapp.lib.patch.annotaion.EcosPatch
+import ru.citeck.ecos.webapp.lib.patch.annotaion.EcosLocalPatch
 import java.util.concurrent.Callable
 
 @Component
-@EcosPatch("default-authorities", "2022-06-29T00:00:03Z")
+// date should be after DeployCoreTypesPatch date
+@EcosLocalPatch("default-authorities", "2025-01-01T00:00:00Z")
 class CreateDefaultGroupsAndPersonsPatch(
     val recordsService: RecordsService
 ) : Callable<List<String>> {
@@ -141,6 +144,7 @@ class CreateDefaultGroupsAndPersonsPatch(
             logMsg("authority '$id' with type '$type' is not found. Create it")
             val attsToCreate = ObjectData.create(atts)
             attsToCreate["id"] = id
+            attsToCreate[DbRecordsControlAtts.DISABLE_EVENTS] = true
             recordsService.create(type.sourceId, attsToCreate)
         } else {
             logMsg("authority '$id' with type '$type' found")
@@ -158,11 +162,10 @@ class CreateDefaultGroupsAndPersonsPatch(
                 expectedGroups.forEach {
                     if (!actualGroups.contains(it)) {
                         logMsg("Add group for authority '$id'. Group: $it")
-                        recordsService.mutateAtt(
-                            authorityRef,
-                            "att_add_${AuthorityConstants.ATT_AUTHORITY_GROUPS}",
-                            it
-                        )
+                        val mutation = RecordAtts(authorityRef)
+                        mutation.setAtt("att_add_${AuthorityConstants.ATT_AUTHORITY_GROUPS}", it)
+                        mutation.setAtt(DbRecordsControlAtts.DISABLE_EVENTS, true)
+                        recordsService.mutate(mutation)
                     }
                 }
             }

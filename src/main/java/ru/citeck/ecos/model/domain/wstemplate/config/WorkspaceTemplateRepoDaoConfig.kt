@@ -69,7 +69,6 @@ class WorkspaceTemplateRepoDaoConfig {
                     newAtts.setAtt(WorkspaceTemplateDesc.ATT_ARTIFACTS, ZipUtils.writeZipAsBytes(artifacts))
 
                     return newAtts
-
                 } else if (record.attributes.has(RecordConstants.ATT_CONTENT)) {
 
                     var content = record.getAtt(RecordConstants.ATT_CONTENT)
@@ -96,7 +95,6 @@ class WorkspaceTemplateRepoDaoConfig {
                 }
                 return record
             }
-
         }
     }
 
