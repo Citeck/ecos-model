@@ -60,21 +60,25 @@ class DeployCoreTypesPatch(
             allTypesIds.add(typeDef.id)
             typesWithDeps.add(TypeDefWithDeps(typeDef, deps))
         }
+        val missingDepTypes = HashSet<String>()
         for (typeWithDeps in typesWithDeps) {
             for (dependencyTypeId in typeWithDeps.dependencies) {
                 if (allTypesIds.add(dependencyTypeId)) {
                     // type is not found in resources, but we want it. Add it to types list.
-                    typesWithDeps.add(
-                        TypeDefWithDeps(
-                            TypeDef.create()
-                                .withId(dependencyTypeId)
-                                .withName(MLText(dependencyTypeId))
-                                .build(),
-                            mutableSetOf(BASE_TYPE_ID)
-                        )
-                    )
+                    missingDepTypes.add(dependencyTypeId)
                 }
             }
+        }
+        for (missingTypeId in missingDepTypes) {
+            typesWithDeps.add(
+                TypeDefWithDeps(
+                    TypeDef.create()
+                        .withId(missingTypeId)
+                        .withName(MLText(missingTypeId))
+                        .build(),
+                    mutableSetOf(BASE_TYPE_ID)
+                )
+            )
         }
 
         val typesToDeploy = ArrayList<TypeDef>()
