@@ -8,6 +8,7 @@ import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.model.type.eapps.handler.TypeArtifactHandler
 import ru.citeck.ecos.model.type.service.TypesService
+import ru.citeck.ecos.txn.lib.TxnContext
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import ru.citeck.ecos.webapp.lib.patch.annotaion.EcosLocalPatch
 import java.util.concurrent.Callable
@@ -104,7 +105,7 @@ class DeployCoreTypesPatch(
             } else if (typesWithDeps.isNotEmpty()) {
                 log.warn {
                     "Resolved types is empty, but typesWithDeps " +
-                    "contains ${typesWithDeps.joinToString { it.typeDef.id }}"
+                        "contains ${typesWithDeps.joinToString { it.typeDef.id }}"
                 }
                 break
             }
@@ -112,7 +113,9 @@ class DeployCoreTypesPatch(
         val typesToDeployIds = typesToDeploy.map { it.id }
         if (typesToDeploy.isNotEmpty()) {
             log.info { "Deploy core types: ${typesToDeployIds.joinToString()}" }
-            typesService.save(typesToDeploy)
+            TxnContext.doInTxn {
+                typesService.save(typesToDeploy)
+            }
         } else {
             log.info { "Nothing to deploy" }
         }
