@@ -7,6 +7,7 @@ import ru.citeck.ecos.model.type.service.resolver.TypesProvider
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy
+import ru.citeck.ecos.webapp.api.EcosWebAppApi
 import ru.citeck.ecos.webapp.api.promise.Promise
 import ru.citeck.ecos.webapp.api.promise.Promises
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
@@ -27,6 +28,7 @@ class TypesHierarchyUpdater(
     private val resProv: TypesProvider,
     private val aspectsProv: AspectsProvider,
     private val registry: MutableEcosRegistry<TypeDef>,
+    private val webAppApi: EcosWebAppApi,
     private val syncAllTypes: () -> Unit
 ) {
 
@@ -34,6 +36,8 @@ class TypesHierarchyUpdater(
         private val log = KotlinLogging.logger {}
 
         private val LAST_MODIFIED_TYPE_CHECK_PERIOD: Long = Duration.ofMinutes(10).toMillis()
+
+        private const val UPDATER_THREAD_NAME = "types-hierarchy-updater"
     }
     private val updaterEnabled = AtomicBoolean()
     private val typesToUpdateQueue = ArrayBlockingQueue<TypesToUpdate>(100)
@@ -43,7 +47,7 @@ class TypesHierarchyUpdater(
 
     fun start(): TypesHierarchyUpdater {
         updaterEnabled.set(true)
-        thread(start = true) {
+        thread(name = UPDATER_THREAD_NAME, start = true) {
             while (updaterEnabled.get()) {
                 if (!checkLastModifiedType()) {
                     update(typesToUpdateQueue.poll(1, TimeUnit.SECONDS))
@@ -99,7 +103,12 @@ class TypesHierarchyUpdater(
         }
         log.info { "Add types to update: $typesToUpdate" }
         val future = CompletableFuture<Unit>()
-        typesToUpdateQueue.add(TypesToUpdate(typesToUpdate, future))
+        val typesToUpdateWithFuture = TypesToUpdate(typesToUpdate, future)
+        if (!webAppApi.isReady()) {
+            update(typesToUpdateWithFuture)
+        } else {
+            typesToUpdateQueue.add(typesToUpdateWithFuture)
+        }
         return Promises.create(future)
     }
 
@@ -149,7 +158,9 @@ class TypesHierarchyUpdater(
                 }
             }
             typesToUpdateQueue.add(TypesToUpdate(typesIdsToUpdate, future))
-            Thread.sleep(10_000)
+            if (Thread.currentThread().name == UPDATER_THREAD_NAME) {
+                Thread.sleep(10_000)
+            }
         }
     }
 

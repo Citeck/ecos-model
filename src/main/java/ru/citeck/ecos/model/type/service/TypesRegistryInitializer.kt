@@ -11,6 +11,7 @@ import ru.citeck.ecos.model.type.service.resolver.AspectsProvider
 import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
 import ru.citeck.ecos.model.type.service.resolver.TypesProvider
 import ru.citeck.ecos.txn.lib.TxnContext
+import ru.citeck.ecos.webapp.api.EcosWebAppApi
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.api.promise.Promise
 import ru.citeck.ecos.webapp.api.promise.Promises
@@ -39,6 +40,7 @@ class TypesRegistryInitializer(
 
     private lateinit var aspectsRegistry: EcosRegistry<AspectDef>
     private lateinit var typesHierarchyUpdater: TypesHierarchyUpdater
+    private lateinit var webAppApi: EcosWebAppApi
     private val initialized = AtomicBoolean()
     private val registeredTypes = HashSet<String>()
 
@@ -58,7 +60,8 @@ class TypesRegistryInitializer(
             rawProv,
             resProv,
             aspectsProv,
-            registry
+            registry,
+            webAppApi
         ) {
             syncAllTypes(registry, rawProv, aspectsProv)
         }
@@ -72,15 +75,24 @@ class TypesRegistryInitializer(
             }
         }
 
+        fun sendTypesToHierarchyUpdater(types: Collection<String>) {
+            val typesSet = if (types !is Set<String>) types.toSet() else types
+            try {
+                typesHierarchyUpdater.addTypesToUpdate(typesSet)
+                    .get(Duration.ofSeconds(20))
+            } catch (e: TimeoutException) {
+                // do nothing
+            }
+        }
+
         fun updateTypes(typeIds: Collection<String>) {
             val key = this::class.java.simpleName + ".types-to-update"
-            typeIds.forEach { typeId ->
-                TxnContext.processSetAfterCommit(key, typeId) { changedTypes ->
-                    try {
-                        typesHierarchyUpdater.addTypesToUpdate(changedTypes)
-                            .get(Duration.ofSeconds(20))
-                    } catch (e: TimeoutException) {
-                        // do nothing
+            if (!webAppApi.isReady()) {
+                sendTypesToHierarchyUpdater(typeIds)
+            } else {
+                typeIds.forEach { typeId ->
+                    TxnContext.processSetAfterCommit(key, typeId) { changedTypes ->
+                        sendTypesToHierarchyUpdater(changedTypes)
                     }
                 }
             }
@@ -91,10 +103,13 @@ class TypesRegistryInitializer(
         }
 
         aspectsRegistry.listenEvents { id, _, _ ->
-            val changedTypes = typesService.getAll().filter { rec ->
-                rec.aspects.any { it.ref.getLocalId() == id }
-            }.map { it.id }
-            updateTypes(changedTypes)
+            val key = this::class.java.simpleName + ".types-with-aspects-to-update"
+            TxnContext.processSetAfterCommit(key, id) { changedAspects ->
+                val changedTypes = typesService.getAll().filter { rec ->
+                    rec.aspects.any { changedAspects.contains(it.ref.getLocalId()) }
+                }.map { it.id }
+                updateTypes(changedTypes)
+            }
         }
 
         initialized.set(true)
@@ -169,6 +184,11 @@ class TypesRegistryInitializer(
     @Autowired
     fun setAspectsRegistry(aspectsRegistry: EcosRegistry<AspectDef>) {
         this.aspectsRegistry = aspectsRegistry
+    }
+
+    @Autowired
+    fun setWebAppApi(webAppApi: EcosWebAppApi) {
+        this.webAppApi = webAppApi
     }
 
     override fun getOrder(): Float {

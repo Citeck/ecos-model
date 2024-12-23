@@ -113,9 +113,7 @@ class DeployCoreTypesPatch(
         val typesToDeployIds = typesToDeploy.map { it.id }
         if (typesToDeploy.isNotEmpty()) {
             log.info { "Deploy core types: ${typesToDeployIds.joinToString()}" }
-            TxnContext.doInTxn {
-                typesService.save(typesToDeploy)
-            }
+            typesService.save(typesToDeploy)
         } else {
             log.info { "Nothing to deploy" }
         }

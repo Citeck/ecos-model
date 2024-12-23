@@ -14,6 +14,7 @@ import ru.citeck.ecos.model.type.service.dao.TypeRepoDao
 import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records2.predicate.model.VoidPredicate
 import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy
+import ru.citeck.ecos.txn.lib.TxnContext
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.function.BiConsumer
@@ -327,12 +328,12 @@ class TypesServiceImpl(
 
     @Transactional
     override fun save(dto: TypeDef, clonedRecord: Boolean): TypeDef {
-        return save(listOf(dto), clonedRecord).first()
+        return TxnContext.doInTxn { save(listOf(dto), clonedRecord).first() }
     }
 
     @Transactional
     override fun save(types: List<TypeDef>): List<TypeDef> {
-        return save(types, false)
+        return TxnContext.doInTxn { save(types, false) }
     }
 
     private fun save(types: List<TypeDef>, clonedRecord: Boolean): List<TypeDef> {
