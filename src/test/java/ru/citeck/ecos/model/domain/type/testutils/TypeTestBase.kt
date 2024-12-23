@@ -90,6 +90,7 @@ open class TypeTestBase {
                 listOf(AspectArtifactsInitializer(ecosAppsServiceFactory.localAppService))
             )
         )
+        typesRegistryInitializer.setWebAppApi(webAppCtxMock)
 
         val typesRegistry = EcosTypesRegistry(
             AppName.EMODEL,
