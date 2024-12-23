@@ -80,7 +80,7 @@ open class TypeTestBase {
         typesRepo = TypeRepoMock(recordsServices)
         val typeConverter = TypeConverter(typesRepo)
         typeService = TypesServiceImpl(typeConverter, typesRepo)
-        artifactHandler = TypeArtifactHandler(typeService)
+        artifactHandler = TypeArtifactHandler(typeService, webAppCtxMock)
         records = recordsServices.recordsService
 
         val typesRegistryInitializer = TypesRegistryInitializer(typeService)

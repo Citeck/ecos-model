@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.type.eapps.handler;
 
+import kotlin.Unit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -7,6 +8,7 @@ import org.springframework.stereotype.Component;
 import ru.citeck.ecos.apps.app.domain.handler.EcosArtifactHandler;
 import ru.citeck.ecos.context.lib.auth.AuthContext;
 import ru.citeck.ecos.model.type.service.TypesService;
+import ru.citeck.ecos.webapp.api.EcosWebAppApi;
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef;
 
 import java.util.function.Consumer;
@@ -19,6 +21,7 @@ public class TypeArtifactHandler implements EcosArtifactHandler<TypeDef> {
     public static final String TYPE = "model/type";
 
     private final TypesService typeService;
+    private final EcosWebAppApi ecosWebAppApi;
 
     @Override
     public void deployArtifact(@NotNull TypeDef artifact) {
@@ -40,6 +43,10 @@ public class TypeArtifactHandler implements EcosArtifactHandler<TypeDef> {
 
     @Override
     public void listenChanges(@NotNull Consumer<TypeDef> consumer) {
-        typeService.addListener((before, after) -> consumer.accept(after));
+        // delay listener registration to prevent unnecessary commands initiated by DeployCoreTypesPatch
+        ecosWebAppApi.doWhenAppReady(100f, () -> {
+            typeService.addListener((before, after) -> consumer.accept(after));
+            return Unit.INSTANCE;
+        });
     }
 }
