@@ -36,6 +36,7 @@ class TypeEventsTest : TypeTestBase() {
         eventsService.addListener<ObjectData> {
             withEventType(RecordChangedEvent.TYPE)
             withDataClass(ObjectData::class.java)
+            withTransactional(true)
             withAttributes(
                 mapOf(
                     "id" to "diff.list.def.id",

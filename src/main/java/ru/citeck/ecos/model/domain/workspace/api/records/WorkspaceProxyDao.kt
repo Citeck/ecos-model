@@ -57,7 +57,7 @@ class WorkspaceProxyDao(
 
         const val USER_WORKSPACES = "user-workspaces"
 
-        private val UNDELETABLE_WORKSPACES = setOf(
+        val UNDELETABLE_WORKSPACES = setOf(
             "admin\$workspace",
             WorkspaceDesc.DEFAULT_WORKSPACE_ID,
             "personal-workspace"

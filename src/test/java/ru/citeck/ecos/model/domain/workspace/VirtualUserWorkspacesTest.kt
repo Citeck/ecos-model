@@ -1,6 +1,7 @@
 package ru.citeck.ecos.model.domain.workspace
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
@@ -24,7 +25,9 @@ import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMemberRole
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceVisibility
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.workspace.USER_WORKSPACE_PREFIX
+import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
+import ru.citeck.ecos.records3.record.atts.schema.ScalarType
 import ru.citeck.ecos.records3.record.dao.query.dto.query.QueryPage
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.webapp.api.entity.EntityRef
@@ -142,6 +145,21 @@ class VirtualUserWorkspacesTest {
     fun setUp() {
         AuthContext.runAsSystem {
             localAppService.deployLocalArtifacts("model/workspace")
+        }
+    }
+
+    @AfterAll
+    fun tearDown() {
+        AuthContext.runAsSystem {
+            recordsService.delete(
+                recordsService.query(RecordsQuery.create()
+                    .withSourceId(WorkspaceDesc.SOURCE_ID)
+                    .withQuery(Predicates.not(
+                        Predicates.inVals(ScalarType.LOCAL_ID.mirrorAtt, WorkspaceProxyDao.UNDELETABLE_WORKSPACES))
+                    ).withMaxItems(10000)
+                    .build()
+                ).getRecords()
+            )
         }
     }
 

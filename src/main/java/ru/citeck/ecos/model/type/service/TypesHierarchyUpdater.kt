@@ -7,17 +7,16 @@ import ru.citeck.ecos.model.type.service.resolver.TypesProvider
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy
+import ru.citeck.ecos.txn.lib.TxnContext
 import ru.citeck.ecos.webapp.api.EcosWebAppApi
-import ru.citeck.ecos.webapp.api.promise.Promise
-import ru.citeck.ecos.webapp.api.promise.Promises
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import ru.citeck.ecos.webapp.lib.registry.MutableEcosRegistry
 import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.ArrayBlockingQueue
-import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 
@@ -40,7 +39,7 @@ class TypesHierarchyUpdater(
         private const val UPDATER_THREAD_NAME = "types-hierarchy-updater"
     }
     private val updaterEnabled = AtomicBoolean()
-    private val typesToUpdateQueue = ArrayBlockingQueue<TypesToUpdate>(100)
+    private val typesToUpdateQueue = ArrayBlockingQueue<UpdateCommand>(100)
     private var lastModifiedTypeCheckedAt: Long = System.currentTimeMillis()
 
     private val shutdownHook = thread(start = false) { updaterEnabled.set(false) }
@@ -50,7 +49,7 @@ class TypesHierarchyUpdater(
         thread(name = UPDATER_THREAD_NAME, start = true) {
             while (updaterEnabled.get()) {
                 if (!checkLastModifiedType()) {
-                    update(typesToUpdateQueue.poll(1, TimeUnit.SECONDS))
+                    update(typesToUpdateQueue.poll(1, TimeUnit.SECONDS), Duration.ofHours(1))
                 }
             }
         }
@@ -97,68 +96,82 @@ class TypesHierarchyUpdater(
         }
     }
 
-    fun addTypesToUpdate(typesToUpdate: Set<String>): Promise<Unit> {
+    fun updateTypes(types: Set<String>) {
         if (!updaterEnabled.get()) {
-            return Promises.resolve(Unit)
+            return
         }
-        log.info { "Add types to update: $typesToUpdate" }
-        val future = CompletableFuture<Unit>()
-        val typesToUpdateWithFuture = TypesToUpdate(typesToUpdate, future)
-        if (!webAppApi.isReady()) {
-            update(typesToUpdateWithFuture)
-        } else {
-            typesToUpdateQueue.add(typesToUpdateWithFuture)
+        log.info { "Add types to update: $types" }
+        val typesToUpdate = TypesToUpdate(types)
+        try {
+            val timeout = if (!webAppApi.isReady()) {
+                Duration.ofMinutes(5)
+            } else {
+                Duration.ofSeconds(20)
+            }
+            TxnContext.doAfterRollback(0f, false) {
+                try {
+                    update(typesToUpdate, Duration.ofSeconds(20))
+                } catch (e: TimeoutException) {
+                    typesToUpdateQueue.add(typesToUpdate)
+                }
+            }
+            update(typesToUpdate, timeout)
+        } catch (e: TimeoutException) {
+            log.warn {
+                "Updating the types definition takes too much time. " +
+                "Calculation will be done later. Types: $types"
+            }
+            TxnContext.doAfterCommit(0f, false) {
+                typesToUpdateQueue.add(typesToUpdate)
+            }
         }
-        return Promises.create(future)
     }
 
-    private fun update(nextTypesToUpdate: TypesToUpdate?) {
+    private fun fillTypesToUpdate(command: UpdateCommand, types: MutableSet<String>) {
+        when (command) {
+            is UpdateAll -> typesService.getAll().forEach { types.add(it.id) }
+            is TypesToUpdate -> command.types.forEach { types.add(it) }
+        }
+    }
 
-        nextTypesToUpdate ?: return
+    private fun update(updateCommand: UpdateCommand?, timeout: Duration) {
 
-        val typesIdsToUpdate = LinkedHashSet<String>(nextTypesToUpdate.types)
-        val futures = ArrayList<CompletableFuture<Unit>>()
-        futures.add(nextTypesToUpdate.future)
+        updateCommand ?: return
+
+        val isUpdaterThread = Thread.currentThread().name == UPDATER_THREAD_NAME
+
+        val typesIdsToUpdate = LinkedHashSet<String>()
+        fillTypesToUpdate(updateCommand, typesIdsToUpdate)
 
         try {
             while (typesToUpdateQueue.isNotEmpty()) {
-                typesToUpdateQueue.poll(1, TimeUnit.SECONDS)?.let {
-                    typesIdsToUpdate.addAll(it.types)
-                    futures.add(it.future)
-                } ?: break
+                val cmd = typesToUpdateQueue.poll(1, TimeUnit.SECONDS) ?: break
+                fillTypesToUpdate(cmd, typesIdsToUpdate)
+                if (cmd is UpdateAll) {
+                    typesToUpdateQueue.clear()
+                    break
+                }
             }
             val resolvedTypes = resolver.getResolvedTypesWithMeta(
                 typesService.getAllWithMeta(typesIdsToUpdate),
                 rawProv,
                 resProv,
-                aspectsProv
+                aspectsProv,
+                timeout
             )
             for (type in resolvedTypes) {
                 registry.setValue(type.entity.id, type)
             }
-            futures.forEach {
-                try {
-                    it.complete(Unit)
-                } catch (e: Throwable) {
-                    log.error(e) { "Exception while future completion. Types: $typesIdsToUpdate" }
-                }
-            }
         } catch (e: Throwable) {
-            if (!updaterEnabled.get()) {
+            if (!isUpdaterThread && e is TimeoutException) {
+                throw e
+            }
+            if (isUpdaterThread && !updaterEnabled.get()) {
                 return
             }
-            log.error(e) { "Exception while types resolving" }
-            val future = if (futures.size == 1) {
-                futures.first()
-            } else {
-                CompletableFuture<Unit>().thenApply {
-                    futures.forEach { it.complete(Unit) }
-                }.exceptionally { exception ->
-                    futures.forEach { it.completeExceptionally(exception) }
-                }
-            }
-            typesToUpdateQueue.add(TypesToUpdate(typesIdsToUpdate, future))
-            if (Thread.currentThread().name == UPDATER_THREAD_NAME) {
+            log.error(e) { "Exception while types resolving. Command: $updateCommand" }
+            typesToUpdateQueue.add(TypesToUpdate(typesIdsToUpdate))
+            if (isUpdaterThread) {
                 Thread.sleep(10_000)
             }
         }
@@ -169,8 +182,11 @@ class TypesHierarchyUpdater(
         Runtime.getRuntime().removeShutdownHook(shutdownHook)
     }
 
-    private class TypesToUpdate(
-        val types: Set<String>,
-        val future: CompletableFuture<Unit>
-    )
+    private sealed class UpdateCommand
+
+    private data class TypesToUpdate(
+        val types: Set<String>
+    ) : UpdateCommand()
+
+    private data object UpdateAll : UpdateCommand()
 }

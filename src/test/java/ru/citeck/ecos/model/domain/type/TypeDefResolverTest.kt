@@ -15,6 +15,7 @@ import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.model.aspect.dto.AspectDef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import java.nio.file.Path
+import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.min
 
@@ -42,7 +43,8 @@ class TypeDefResolverTest {
                 source.getAll(),
                 source,
                 InMemTypesProvider(),
-                aspects
+                aspects,
+                Duration.ofMinutes(1)
             )
 
             val expected = InMemTypesProvider().loadFrom(test.resolve("expected"))

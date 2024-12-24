@@ -75,27 +75,9 @@ class TypesRegistryInitializer(
             }
         }
 
-        fun sendTypesToHierarchyUpdater(types: Collection<String>) {
-            val typesSet = if (types !is Set<String>) types.toSet() else types
-            try {
-                typesHierarchyUpdater.addTypesToUpdate(typesSet)
-                    .get(Duration.ofSeconds(20))
-            } catch (e: TimeoutException) {
-                // do nothing
-            }
-        }
-
         fun updateTypes(typeIds: Collection<String>) {
-            val key = this::class.java.simpleName + ".types-to-update"
-            if (!webAppApi.isReady()) {
-                sendTypesToHierarchyUpdater(typeIds)
-            } else {
-                typeIds.forEach { typeId ->
-                    TxnContext.processSetAfterCommit(key, typeId) { changedTypes ->
-                        sendTypesToHierarchyUpdater(changedTypes)
-                    }
-                }
-            }
+            val typesSet = if (typeIds !is Set<String>) typeIds.toSet() else typeIds
+            typesHierarchyUpdater.updateTypes(typesSet)
         }
 
         typesService.addListenerTypeHierarchyChangedListener { changedTypes ->
@@ -124,7 +106,13 @@ class TypesRegistryInitializer(
         val types = typesService.getAllWithMeta()
         log.info { "Types full sync started for ${types.size} types" }
         val typesToRemove = HashSet(registeredTypes)
-        resolver.getResolvedTypesWithMeta(types, rawProv, EmptyProv(), aspectsProv).forEach {
+        resolver.getResolvedTypesWithMeta(
+            types,
+            rawProv,
+            EmptyProv(),
+            aspectsProv,
+            Duration.ofHours(1)
+        ).forEach {
             registry.setValue(it.entity.id, it)
             registeredTypes.add(it.entity.id)
             typesToRemove.remove(it.entity.id)

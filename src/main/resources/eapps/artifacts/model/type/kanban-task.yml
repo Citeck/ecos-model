@@ -4,6 +4,7 @@ name:
   ru: Kanban задача
   en: Kanban task
 
+system: true
 workspaceScope: PRIVATE
 storageType: ECOS_MODEL
 
