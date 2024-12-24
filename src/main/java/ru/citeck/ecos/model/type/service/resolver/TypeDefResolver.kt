@@ -16,6 +16,8 @@ import ru.citeck.ecos.model.type.service.utils.EModelTypeUtils
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.model.type.dto.AssocDef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
+import java.time.Duration
+import java.util.concurrent.TimeoutException
 
 @Component
 class TypeDefResolver {
@@ -44,25 +46,35 @@ class TypeDefResolver {
         types: List<EntityWithMeta<TypeDef>>,
         rawProv: TypesProvider,
         resProv: TypesProvider,
-        aspectsProv: AspectsProvider
+        aspectsProv: AspectsProvider,
+        timeout: Duration
     ): List<EntityWithMeta<TypeDef>> {
-        return doWithMeta(types) { getResolvedTypes(it, rawProv, resProv, aspectsProv) }
+        return doWithMeta(types) { getResolvedTypes(it, rawProv, resProv, aspectsProv, timeout) }
     }
 
     fun getResolvedTypes(
         types: List<TypeDef>,
         rawProv: TypesProvider,
         resProv: TypesProvider,
-        aspectsProv: AspectsProvider
+        aspectsProv: AspectsProvider,
+        timeout: Duration
     ): List<TypeDef> {
         val context = ResolveContext(rawProv, resProv, aspectsProv)
-        val resolvedByParentTypes = types.map {
-            getResolvedByParentType(it, context)
+        val calculateUntil = System.currentTimeMillis() + timeout.toMillis()
+        val resolvedByParentTypes = ArrayList<TypeDef.Builder>()
+        for (type in types) {
+            resolvedByParentTypes.add(getResolvedByParentType(type, context))
+            if (System.currentTimeMillis() >= calculateUntil) {
+                throw TimeoutException("Types resolving timeout exceeded: $timeout")
+            }
         }
         context.resetCache()
         resolvedByParentTypes.forEach {
             it.withCreateVariants(getCreateVariants(it.build(), context))
             it.withAssociations(filterAssociations(it, context))
+            if (System.currentTimeMillis() >= calculateUntil) {
+                throw TimeoutException("Types resolving timeout exceeded: $timeout")
+            }
         }
         return resolvedByParentTypes.map { it.build() }
     }
@@ -74,13 +86,12 @@ class TypeDefResolver {
             return resolvedTypeFromContext
         }
 
-        if (typeDef.id.isBlank() || typeDef.id == "base") {
-            val result = typeDef.copy()
-            context.types[typeDef.id] = result
-            return result
-        }
-
         val resTypeDef = typeDef.copy()
+
+        if (typeDef.id.isBlank() || typeDef.id == "base") {
+            context.types[typeDef.id] = resTypeDef
+            return resTypeDef
+        }
 
         if (EntityRef.isEmpty(resTypeDef.parentRef) && resTypeDef.id != "base") {
             resTypeDef.withParentRef(ModelUtils.getTypeRef("base"))

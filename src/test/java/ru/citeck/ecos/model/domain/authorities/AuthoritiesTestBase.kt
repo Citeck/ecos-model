@@ -9,9 +9,11 @@ import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.model.EcosModelApp
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
+import ru.citeck.ecos.model.domain.authorities.constant.AuthorityGroupConstants
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
-import ru.citeck.ecos.records2.predicate.model.VoidPredicate
+import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
+import ru.citeck.ecos.records3.record.atts.schema.ScalarType
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension
@@ -20,6 +22,13 @@ import javax.sql.DataSource
 @ExtendWith(EcosSpringExtension::class)
 @SpringBootTest(classes = [EcosModelApp::class])
 class AuthoritiesTestBase {
+
+    companion object {
+        val DEFAULT_AUTHORITIES = setOf(
+            *AuthorityGroupConstants.DEFAULT_GROUPS.toTypedArray(),
+            "admin"
+        )
+    }
 
     @Autowired
     lateinit var recordsService: RecordsService
@@ -40,7 +49,11 @@ class AuthoritiesTestBase {
         val allRecords = recordsService.query(
             RecordsQuery.create {
                 withSourceId(type.sourceId + "-repo")
-                withQuery(VoidPredicate.INSTANCE)
+                withQuery(
+                    Predicates.not(
+                        Predicates.inVals(ScalarType.LOCAL_ID.mirrorAtt, DEFAULT_AUTHORITIES)
+                    )
+                )
                 withMaxItems(Int.MAX_VALUE)
             }
         ).getRecords()
@@ -69,7 +82,7 @@ class AuthoritiesTestBase {
     fun createAuthority(id: String, type: AuthorityType, props: Map<String, Any?>): EntityRef {
         val authorityAtts = ObjectData.create().set("id", id)
         props.forEach {
-            authorityAtts.set(it.key, it.value)
+            authorityAtts[it.key] = it.value
         }
         return runInAuthCtx {
             recordsService.create(type.sourceId, authorityAtts)

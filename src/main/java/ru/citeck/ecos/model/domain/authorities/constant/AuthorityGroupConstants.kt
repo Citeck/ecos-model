@@ -18,4 +18,14 @@ object AuthorityGroupConstants {
     const val UNIFIED_PRIVATE_GROUP = "UNIFIED_PRIVATE_GROUP"
 
     const val EXTERNAL_USERS_GROUP = "EXTERNAL_USERS"
+
+    val DEFAULT_GROUPS = setOf(
+        ADMIN_GROUP,
+        EVERYONE_GROUP,
+        USERS_PROFILE_ADMIN_GROUP,
+        GROUPS_MANAGERS_GROUP,
+        MANAGED_GROUPS_GROUP,
+        UNIFIED_PRIVATE_GROUP,
+        EXTERNAL_USERS_GROUP
+    )
 }

@@ -8,7 +8,6 @@ import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.model.type.eapps.handler.TypeArtifactHandler
 import ru.citeck.ecos.model.type.service.TypesService
-import ru.citeck.ecos.txn.lib.TxnContext
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import ru.citeck.ecos.webapp.lib.patch.annotaion.EcosLocalPatch
 import java.util.concurrent.Callable

@@ -27,6 +27,9 @@ import ru.citeck.ecos.model.type.service.TypesServiceImpl
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.RecordsServiceFactory
 import ru.citeck.ecos.test.commons.EcosWebAppApiMock
+import ru.citeck.ecos.txn.lib.TxnContext
+import ru.citeck.ecos.txn.lib.manager.TransactionManager
+import ru.citeck.ecos.txn.lib.manager.TransactionManagerImpl
 import ru.citeck.ecos.webapp.api.EcosWebAppApi
 import ru.citeck.ecos.webapp.api.constants.AppName
 import ru.citeck.ecos.webapp.lib.model.aspect.registry.AspectArtifactsInitializer
@@ -53,15 +56,18 @@ open class TypeTestBase {
     @BeforeEach
     fun init() {
 
-        val env = Mockito.mock(Environment::class.java)
-        Mockito.`when`(env.acceptsProfiles("test")).thenReturn(true)
-
         val webAppCtxMock = EcosWebAppApiMock(EcosModelApp.NAME, "123456")
         recordsServices = object : RecordsServiceFactory() {
-            override fun getEcosWebAppApi(): EcosWebAppApi? {
+            override fun getEcosWebAppApi(): EcosWebAppApi {
                 return webAppCtxMock
             }
         }
+
+/*
+        val txnManager = TransactionManagerImpl()
+        txnManager.init(webAppCtxMock)
+        TxnContext.setManager(txnManager)
+*/
 
         val ecosAppsServiceFactory = object : EcosAppsServiceFactory() {
             override fun createArtifactSourceProviders(): List<ArtifactSourceProvider> {
@@ -117,9 +123,6 @@ open class TypeTestBase {
         val typesRepoRecordsDao = TypesRepoRecordsDao(typeService, eventsServiceFactory.recordEventsService)
         records.register(typesRepoRecordsDao)
         records.register(TypeRecordsDao(typesRegistry, modelLibServices))
-
-/*        val resolvedRecordsDao = ResolvedTypeRecordsDao(typeService, typeRepoRecordsDao)
-        records.register(resolvedRecordsDao)*/
 
         TypeInhMixin(typeService, typesRepoRecordsDao)
         TypesConfig().typesMutMetaMixin(typesRepoRecordsDao, typeConverter)
