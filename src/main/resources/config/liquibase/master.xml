@@ -52,4 +52,5 @@
     <include file="config/liquibase/changelog/20231025000000_add_assignable_perms_to_type.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20240923000000_add_ws_scope_to_type.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20241209000000_add_encryption_to_secrets.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20250110000000_add_default_workspace_to_type.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>

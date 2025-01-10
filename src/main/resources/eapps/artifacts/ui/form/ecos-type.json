@@ -428,111 +428,126 @@
                           },
                           {
                             "label": {
-                              "ru": "Дополнительные свойства",
-                              "en": "Additional properties"
+                              "ru": "Columns"
                             },
-                            "key": "properties",
-                            "keyLabel": {
-                              "ru": "Ключ",
-                              "en": "Key"
-                            },
-                            "refreshOn": [],
-                            "optionalWhenDisabled": false,
-                            "type": "datamap",
-                            "valueComponent": {
-                              "label": {
-                                "ru": "Значение",
-                                "en": "Value"
+                            "key": "columns9",
+                            "columns": [
+                              {
+                                "components": [
+                                  {
+                                    "label": {
+                                      "ru": "Тип источника данных",
+                                      "en": "Source Type"
+                                    },
+                                    "key": "storageType",
+                                    "dataSrc": "values",
+                                    "data": {
+                                      "values": [
+                                        {
+                                          "label": "ECOS Model",
+                                          "value": "ECOS_MODEL"
+                                        },
+                                        {
+                                          "label": "Alfresco",
+                                          "value": "ALFRESCO"
+                                        },
+                                        {
+                                          "label": "Default",
+                                          "value": "DEFAULT"
+                                        }
+                                      ]
+                                    },
+                                    "optionalWhenDisabled": false,
+                                    "type": "ecosSelect",
+                                    "input": true,
+                                    "defaultValue": "ECOS_MODEL"
+                                  },
+                                  {
+                                    "label": {
+                                      "ru": "Видимость в рабочих пространствах",
+                                      "en": "Workspace visibility"
+                                    },
+                                    "key": "workspaceScope",
+                                    "dataSrc": "values",
+                                    "data": {
+                                      "values": [
+                                        {
+                                          "label": {
+                                            "en": "Default",
+                                            "ru": "По умолчанию"
+                                          },
+                                          "value": "DEFAULT"
+                                        },
+                                        {
+                                          "label": {
+                                            "en": "Private",
+                                            "ru": "Приватная"
+                                          },
+                                          "value": "PRIVATE"
+                                        },
+                                        {
+                                          "label": {
+                                            "en": "Public",
+                                            "ru": "Публичная"
+                                          },
+                                          "value": "PUBLIC"
+                                        }
+                                      ],
+                                      "headers": [
+                                        {}
+                                      ]
+                                    },
+                                    "defaultValue": "DEFAULT",
+                                    "optionalWhenDisabled": false,
+                                    "type": "ecosSelect",
+                                    "input": true
+                                  }
+                                ],
+                                "type": "column",
+                                "input": false,
+                                "key": "column",
+                                "index": 0
                               },
-                              "key": "value",
-                              "defaultValue": "Value",
-                              "refreshOn": [],
-                              "optionalWhenDisabled": false,
-                              "type": "textfield",
-                              "input": true
-                            },
-                            "input": true
-                          },
-                          {
-                            "label": {
-                              "ru": "Тип источника данных",
-                              "en": "Source Type"
-                            },
-                            "key": "storageType",
-                            "dataSrc": "values",
-                            "data": {
-                              "values": [
-                                {
-                                  "label": "ECOS Model",
-                                  "value": "ECOS_MODEL"
-                                },
-                                {
-                                  "label": "Alfresco",
-                                  "value": "ALFRESCO"
-                                },
-                                {
-                                  "label": "Default",
-                                  "value": "DEFAULT"
-                                }
-                              ]
-                            },
-                            "optionalWhenDisabled": false,
-                            "type": "ecosSelect",
-                            "input": true,
-                            "defaultValue": "ECOS_MODEL"
-                          },
-                          {
-                            "label": {
-                              "ru": "Видимость в рабочих пространствах",
-                              "en": "Workspace visibility"
-                            },
-                            "key": "workspaceScope",
-                            "dataSrc": "values",
-                            "data": {
-                              "values": [
-                                {
-                                  "label": {
-                                    "en": "Default",
-                                    "ru": "По умолчанию"
+                              {
+                                "index": 1,
+                                "type": "column",
+                                "input": false,
+                                "key": "column",
+                                "components": [
+                                  {
+                                    "label": {
+                                      "ru": "ID источника данных",
+                                      "en": "Source ID"
+                                    },
+                                    "key": "sourceId",
+                                    "defaultValue": "",
+                                    "refreshOn": [],
+                                    "optionalWhenDisabled": false,
+                                    "customConditional": "show = data['storageType'] === 'ECOS_MODEL' || data['storageType'] === 'DEFAULT' || !data['storageType'];",
+                                    "type": "textfield",
+                                    "input": true
                                   },
-                                  "value": "DEFAULT"
-                                },
-                                {
-                                  "label": {
-                                    "en": "Private",
-                                    "ru": "Приватная"
-                                  },
-                                  "value": "PRIVATE"
-                                },
-                                {
-                                  "label": {
-                                    "en": "Public",
-                                    "ru": "Публичная"
-                                  },
-                                  "value": "PUBLIC"
-                                }
-                              ],
-                              "headers": [
-                                {}
-                              ]
-                            },
-                            "defaultValue": "DEFAULT",
-                            "optionalWhenDisabled": false,
-                            "type": "ecosSelect",
-                            "input": true
-                          },
-                          {
-                            "label": {
-                              "ru": "ID источника данных",
-                              "en": "Source ID"
-                            },
-                            "key": "sourceId",
-                            "defaultValue": "",
-                            "refreshOn": [],
-                            "optionalWhenDisabled": false,
-                            "customConditional": "show = data['storageType'] === 'ECOS_MODEL' || data['storageType'] === 'DEFAULT' || !data['storageType'];",
-                            "type": "textfield",
-                            "input": true
+                                  {
+                                    "label": {
+                                      "ru": "Рабочее пространство по умолчанию",
+                                      "en": "Default workspace"
+                                    },
+                                    "key": "defaultWorkspace",
+                                    "defaultValue": "",
+                                    "refreshOn": [],
+                                    "optionalWhenDisabled": false,
+                                    "type": "textfield",
+                                    "input": true,
+                                    "inputMasks": [
+                                      {}
+                                    ]
+                                  }
+                                ]
+                              }
+                            ],
+                            "oneColumnInViewMode": false,
+                            "type": "columns",
+                            "input": false
                           },
                           {
                             "label": {
@@ -820,7 +835,9 @@
                                     "type": "button",
                                     "input": true,
                                     "row": "0-3",
-                                    "headers" : [ { } ]
+                                    "headers": [
+                                      {}
+                                    ]
                                   },
                                   {
                                     "label": {
@@ -909,7 +926,9 @@
                                     "optionalWhenDisabled": false,
                                     "type": "button",
                                     "input": true,
-                                    "headers" : [ { } ]
+                                    "headers": [
+                                      {}
+                                    ]
                                   },
                                   {
                                     "label": {
@@ -2430,9 +2449,6 @@
         "input": false
       }
     ],
-    "display": "form",
-    "formId": "ecos-type"
-  },
-  "attributes": {},
-  "notExists": false
+    "display": "form"
+  }
 }
