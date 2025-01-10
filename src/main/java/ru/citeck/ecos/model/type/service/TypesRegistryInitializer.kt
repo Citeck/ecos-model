@@ -22,7 +22,6 @@ import ru.citeck.ecos.webapp.lib.registry.EcosRegistryProps
 import ru.citeck.ecos.webapp.lib.registry.MutableEcosRegistry
 import ru.citeck.ecos.webapp.lib.registry.init.EcosRegistryInitializer
 import java.time.Duration
-import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicBoolean
 
 @Component

@@ -266,9 +266,9 @@ class DocLibRecords @Autowired constructor(
         val innerAtts = recordsService.getAtts(listOf(dlId.entityRef), innerAttsMap, true).first()
 
         val parentRefStr = innerAtts["/$PARENT_ATT_ALIAS/?id"].asText()
-        val parentRef = if (parentRefStr.isBlank()
-            || parentRefStr.endsWith("\$ROOT")
-            || parentRefStr.contains("\$ROOT\$")
+        val parentRef = if (parentRefStr.isBlank() ||
+            parentRefStr.endsWith("\$ROOT") ||
+            parentRefStr.contains("\$ROOT\$")
         ) {
             getDocLibRootForType(dlId.typeId)
         } else {

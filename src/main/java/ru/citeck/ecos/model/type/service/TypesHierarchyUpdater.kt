@@ -119,7 +119,7 @@ class TypesHierarchyUpdater(
         } catch (e: TimeoutException) {
             log.warn {
                 "Updating the types definition takes too much time. " +
-                "Calculation will be done later. Types: $types"
+                    "Calculation will be done later. Types: $types"
             }
             TxnContext.doAfterCommit(0f, false) {
                 typesToUpdateQueue.add(typesToUpdate)

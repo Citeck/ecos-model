@@ -152,12 +152,15 @@ class VirtualUserWorkspacesTest {
     fun tearDown() {
         AuthContext.runAsSystem {
             recordsService.delete(
-                recordsService.query(RecordsQuery.create()
-                    .withSourceId(WorkspaceDesc.SOURCE_ID)
-                    .withQuery(Predicates.not(
-                        Predicates.inVals(ScalarType.LOCAL_ID.mirrorAtt, WorkspaceProxyDao.UNDELETABLE_WORKSPACES))
-                    ).withMaxItems(10000)
-                    .build()
+                recordsService.query(
+                    RecordsQuery.create()
+                        .withSourceId(WorkspaceDesc.SOURCE_ID)
+                        .withQuery(
+                            Predicates.not(
+                                Predicates.inVals(ScalarType.LOCAL_ID.mirrorAtt, WorkspaceProxyDao.UNDELETABLE_WORKSPACES)
+                            )
+                        ).withMaxItems(10000)
+                        .build()
                 ).getRecords()
             )
         }
