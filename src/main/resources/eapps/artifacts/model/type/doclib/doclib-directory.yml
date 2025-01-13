@@ -11,6 +11,11 @@ system: true
 dashboardType: case-details
 storageType: ECOS_MODEL
 
+inheritActions: false
+actions:
+  - uiserv/action@edit
+  - uiserv/action@delete
+
 model:
   attributes:
     - id: name
