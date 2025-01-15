@@ -1,15 +1,15 @@
 {
   "id": "doclib-file-form",
-  "system": true,
   "formKey": "",
   "title": {
     "en": "Edit file",
     "ru": "Редактировать файл"
   },
   "description": {},
-  "customModule": null,
+  "customModule": "",
   "typeRef": "",
   "width": "default",
+  "system": true,
   "i18n": {},
   "definition": {
     "components": [
@@ -24,13 +24,11 @@
         "input": true
       },
       {
-        "input": true,
-        "key": "_content",
         "label": {
           "en": "Content",
           "ru": "Содержимое"
         },
-        "type": "file",
+        "key": "_content",
         "validate": {
           "required": true
         },
@@ -38,7 +36,12 @@
           "ru": "Дождитесь загрузки файла",
           "en": "Wait for the file to upload"
         },
-        "fileMaxSize": "100MB"
+        "onFileClick": "download",
+        "fileMaxSize": "100MB",
+        "refreshOn": [],
+        "optionalWhenDisabled": false,
+        "type": "file",
+        "input": true
       },
       {
         "label": {
@@ -97,5 +100,6 @@
       }
     ]
   },
-  "attributes": {}
+  "attributes": {},
+  "notExists": false
 }
