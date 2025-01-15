@@ -331,19 +331,22 @@
           {
             "components": [
               {
-                "label": "Cancel",
+                "label": {
+                  "ru": "Cancel"
+                },
+                "key": "cancel",
                 "action": "event",
                 "state": "",
                 "showValidations": false,
                 "event": "cancel",
                 "block": true,
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
                 "type": "button",
                 "input": true,
-                "key": "submit2",
-                "conditional": {
-                  "show": null,
-                  "when": null
-                }
+                "headers": [
+                  {}
+                ]
               }
             ],
             "type": "column",
@@ -412,9 +415,113 @@
           }
         ],
         "oneColumnInViewMode": false,
+        "customConditional": "const {options} = instance || {};\nconst {formMode} = options || {};\n\nvar isCreateMode = formMode === 'CREATE';\n\nshow = isCreateMode;",
+        "type": "columns",
+        "input": false
+      },
+      {
+        "label": {
+          "ru": "Columns"
+        },
+        "key": "columns5",
+        "columns": [
+          {
+            "components": [
+              {
+                "label": {
+                  "ru": "Cancel"
+                },
+                "key": "cancel2",
+                "action": "event",
+                "state": "",
+                "showValidations": false,
+                "event": "cancel",
+                "block": true,
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
+                "type": "button",
+                "input": true,
+                "headers": [
+                  {}
+                ]
+              }
+            ],
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "label": "Column",
+            "md": 3,
+            "clearOnHide": true,
+            "conditional": {
+              "show": null,
+              "when": null
+            },
+            "index": 0
+          },
+          {
+            "components": [],
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "label": "Column",
+            "clearOnHide": true,
+            "conditional": {
+              "show": null,
+              "when": null
+            },
+            "index": 1,
+            "md": 3
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "label": "Column",
+            "components": [],
+            "clearOnHide": true,
+            "conditional": {
+              "show": null,
+              "when": null
+            },
+            "index": 2
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 3,
+            "components": [
+              {
+                "label": {
+                  "en": "Save",
+                  "ru": "Сохранить"
+                },
+                "key": "submit3",
+                "state": "",
+                "theme": "primary",
+                "block": true,
+                "disableOnInvalid": true,
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
+                "type": "button",
+                "input": true,
+                "headers": [
+                  {}
+                ]
+              }
+            ]
+          }
+        ],
+        "oneColumnInViewMode": false,
+        "customConditional": "const {options} = instance || {};\nconst {formMode} = options || {};\n\nvar isCreateMode = formMode === 'CREATE';\n\nshow = !isCreateMode;",
         "type": "columns",
         "input": false
       }
-    ]
-  }
+    ],
+    "formId": "workspace-form"
+  },
+  "attributes": {},
+  "notExists": false
 }
