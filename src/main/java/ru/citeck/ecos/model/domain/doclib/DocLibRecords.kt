@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
+import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.model.lib.type.dto.WorkspaceScope
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.records2.RecordConstants
@@ -393,7 +394,10 @@ class DocLibRecords @Autowired constructor(
 
     private fun getInternalRootForType(typeId: String, dirInfo: DocLibDirInfo, workspace: String): EntityRef {
         var id = "$typeId\$ROOT"
-        if (dirInfo.privateWorkspaceScope && workspace.isNotBlank()) {
+        if (dirInfo.privateWorkspaceScope
+            && workspace.isNotBlank()
+            && workspace != WorkspaceDesc.DEFAULT_WORKSPACE_ID
+        ) {
             id += '$' + workspace.trim()
         }
         return EntityRef.create(dirInfo.sourceId, id).withDefaultAppName(AppName.EMODEL)
