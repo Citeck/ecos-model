@@ -162,6 +162,9 @@ class TypeDefResolver {
         if (resTypeDef.workspaceScope == WorkspaceScope.DEFAULT) {
             resTypeDef.withWorkspaceScope(resolvedParentDef.workspaceScope)
         }
+        if (resTypeDef.defaultWorkspace.isBlank()) {
+            resTypeDef.withDefaultWorkspace(resolvedParentDef.defaultWorkspace)
+        }
         val contentConfig = resTypeDef.contentConfig.copy()
         if (contentConfig.path.isBlank()) {
             contentConfig.withPath(resolvedParentDef.contentConfig.path)

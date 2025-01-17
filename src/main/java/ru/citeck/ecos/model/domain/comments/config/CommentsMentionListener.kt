@@ -10,11 +10,14 @@ import ru.citeck.ecos.data.sql.records.listener.DbRecordsListenerAdapter
 import ru.citeck.ecos.events2.EventsService
 import ru.citeck.ecos.events2.emitter.EmitterConfig
 import ru.citeck.ecos.events2.emitter.EventsEmitter
+import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.notifications.lib.Notification
 import ru.citeck.ecos.notifications.lib.NotificationType
 import ru.citeck.ecos.notifications.lib.service.NotificationService
+import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records3.RecordsService
+import ru.citeck.ecos.records3.record.atts.schema.ScalarType
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.webapp.api.constants.AppName
 import ru.citeck.ecos.webapp.api.entity.EntityRef
@@ -76,14 +79,22 @@ class CommentsMentionListener(
             return
         }
 
+        val recordRef = recordsService.getAtt(record, "record?id").asText().toEntityRef()
+        val recWorkspaceId = recordsService.getAtt(
+            recordRef,
+            RecordConstants.ATT_WORKSPACE + ScalarType.LOCAL_ID_SCHEMA
+        ).asText()
+        var recWorkspaceRef = EntityRef.EMPTY
+        if (recWorkspaceId.isNotBlank()) {
+            recWorkspaceRef = WorkspaceDesc.getRef(recWorkspaceId)
+        }
+
         for (mention in newMentions) {
             val userRef = if (mention.startsWith(AppName.EMODEL + EntityRef.APP_NAME_DELIMITER)) {
                 EntityRef.valueOf(mention)
             } else {
                 AuthorityType.PERSON.getRef(mention)
             }
-            val recordRef = recordsService.getAtt(record, "record?id").asText().toEntityRef()
-
             log.debug {
                 "User is mentioned in comment. RecordRef: $recordRef CommentRef: $commentRef Text: $textAfter"
             }
@@ -93,7 +104,8 @@ class CommentsMentionListener(
                 commentRef,
                 userRef,
                 textAfter,
-                userAtts.externalUser
+                userAtts.externalUser,
+                recWorkspaceRef
             )
             if (!userAtts.externalUser && userAtts.email.isNotBlank() && userAtts.email.contains("@")) {
                 notificationService.send(
@@ -137,7 +149,9 @@ class CommentsMentionListener(
         val commentRecord: EntityRef,
         val user: EntityRef,
         val text: String? = null,
-        val externalUser: Boolean
+        val externalUser: Boolean,
+        @AttName(RecordConstants.ATT_WORKSPACE)
+        val workspace: EntityRef
     ) {
         companion object {
             const val TYPE = "user-is-mentioned-in-comment"

@@ -10,3 +10,8 @@ storageType: ECOS_MODEL
 parentRef: emodel/type@doclib-file
 
 workspaceScope: PRIVATE
+
+aspects:
+  - ref: emodel/aspect@doclib
+    config:
+      dirTypeRef: emodel/type@workspace-directory

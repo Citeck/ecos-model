@@ -1,8 +1,6 @@
 package ru.citeck.ecos.model.domain.type.testutils
 
 import org.junit.jupiter.api.BeforeEach
-import org.mockito.Mockito
-import org.springframework.core.env.Environment
 import ru.citeck.ecos.apps.EcosAppsServiceFactory
 import ru.citeck.ecos.apps.app.domain.artifact.source.ArtifactSourceProvider
 import ru.citeck.ecos.apps.app.domain.artifact.source.DirectorySourceProvider
@@ -27,9 +25,6 @@ import ru.citeck.ecos.model.type.service.TypesServiceImpl
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.RecordsServiceFactory
 import ru.citeck.ecos.test.commons.EcosWebAppApiMock
-import ru.citeck.ecos.txn.lib.TxnContext
-import ru.citeck.ecos.txn.lib.manager.TransactionManager
-import ru.citeck.ecos.txn.lib.manager.TransactionManagerImpl
 import ru.citeck.ecos.webapp.api.EcosWebAppApi
 import ru.citeck.ecos.webapp.api.constants.AppName
 import ru.citeck.ecos.webapp.lib.model.aspect.registry.AspectArtifactsInitializer

@@ -1,0 +1,12 @@
+---
+id: workspace-directory
+name:
+  ru: Папка
+  en: Folder
+
+system: true
+
+storageType: ECOS_MODEL
+parentRef: emodel/type@doclib-directory
+
+workspaceScope: PRIVATE

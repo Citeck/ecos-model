@@ -86,6 +86,7 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
         entity.queryPermsPolicy = typeDef.queryPermsPolicy
         entity.assignablePerms = Json.mapper.toString(typeDef.assignablePerms)
         entity.workspaceScope = typeDef.workspaceScope
+        entity.defaultWorkspace = typeDef.defaultWorkspace
 
         checkCyclicDependencies(entity)
 
@@ -157,6 +158,7 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
             .withQueryPermsPolicy(entity.queryPermsPolicy)
             .withAssignablePerms(DataValue.create(entity.assignablePerms).asList(EntityRef::class.java))
             .withWorkspaceScope(entity.workspaceScope)
+            .withDefaultWorkspace(entity.defaultWorkspace)
             .build()
 
         return EntityWithMeta(

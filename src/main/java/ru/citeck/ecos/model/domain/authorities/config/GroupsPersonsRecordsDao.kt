@@ -252,7 +252,7 @@ open class GroupsPersonsRecordsDao(
             var isManaged = false
 
             val authorityId = if (!exists) {
-                if (id != AuthorityGroupConstants.EVERYONE_GROUP &&
+                if (!AuthoritiesSyncService.PROTECTED_FROM_SYNC_GROUPS.contains(id) &&
                     syncService.isNewAuthoritiesManaged(authorityType)
                 ) {
 

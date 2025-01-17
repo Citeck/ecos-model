@@ -50,6 +50,7 @@ class TypeEntity : AbstractAuditingEntity() {
 
     @Enumerated(EnumType.STRING)
     var workspaceScope: WorkspaceScope? = null
+    var defaultWorkspace: String? = null
 
     @ManyToOne(cascade = [CascadeType.DETACH])
     @JoinColumn(name = "parent_id")

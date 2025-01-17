@@ -21,6 +21,8 @@ assignablePerms:
   - emodel/permission-def@read
   - emodel/permission-def@write
 
+workspaceScope: PUBLIC
+
 associations:
 
   - id: assoc:associatedWith

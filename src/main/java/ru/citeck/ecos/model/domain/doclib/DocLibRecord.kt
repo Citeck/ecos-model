@@ -20,6 +20,7 @@ class DocLibRecord(
         const val ATT_PATH = "path"
         const val ATT_CHILDREN = "children"
         const val ATT_HAS_CHILDREN_DIRS = "hasChildrenDirs"
+        const val ATT_WORKSPACE = "_workspace"
     }
 
     override fun getId(): Any {
@@ -43,11 +44,13 @@ class DocLibRecord(
                     ),
                     0,
                     -1,
-                    emptyList()
+                    impl.getAtt(ATT_WORKSPACE) as? String ?: ""
                 )
             }
             ATT_NODE_TYPE -> nodeType
-            ATT_HAS_CHILDREN_DIRS -> docLibRecords.hasChildrenDirs(id, emptyList())
+            ATT_HAS_CHILDREN_DIRS -> {
+                docLibRecords.hasChildrenDirs(id, impl.getAtt(ATT_WORKSPACE) as? String ?: "")
+            }
             else -> super.getAtt(name)
         }
     }
