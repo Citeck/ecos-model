@@ -26,8 +26,21 @@ model:
         ru: Заголовок
         en: Title
       mandatory: true
+    - id: image
+      name:
+        ru: Изображение
+        en: Image
+      type: CONTENT
     - id: text
       name:
         ru: Текст публикации
         en: Publication text
       mandatory: true
+    - id: children
+      name:
+        ru: Дочерние публикации
+        en: Child publications
+      type: ASSOC
+      config:
+        child: true
+        typeRef: emodel/type@publication
