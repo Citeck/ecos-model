@@ -168,7 +168,7 @@ class SearchRecordsDao(
                 }
             } else {
                 val type = docTypesToSearch[idx]
-                log.debug { "Cancel long search query for type '${type.typeRef.getLocalId()}'" }
+                log.warn { "Cancel long search query for type '${type.typeRef.getLocalId()}'" }
                 promise.cancel(true)
             }
         }
