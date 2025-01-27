@@ -1,0 +1,280 @@
+{
+  "id": "global-search-config-form",
+  "formKey": "",
+  "title": {
+    "en": "global-search-config-form"
+  },
+  "description": {},
+  "customModule": "",
+  "typeRef": "",
+  "width": "",
+  "system": false,
+  "i18n": {},
+  "definition": {
+    "components": [
+      {
+        "scrollableContent": true,
+        "key": "panel2",
+        "type": "panel",
+        "input": false,
+        "components": [
+          {
+            "label": {
+              "ru": "Container"
+            },
+            "key": "_value",
+            "hideLabel": true,
+            "refreshOn": [],
+            "optionalWhenDisabled": false,
+            "type": "container",
+            "input": true,
+            "components": [
+              {
+                "label": {
+                  "ru": "Максимальное количество одновременных запросов в одно приложение",
+                  "en": "Maximum concurrent requests in one application"
+                },
+                "key": "maxConcurrentRequestsPerApp",
+                "validate": {
+                  "required": true,
+                  "integer": false
+                },
+                "isBigNumber": false,
+                "delimiterValue": " ",
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
+                "defaultValue": "",
+                "type": "number",
+                "input": true
+              },
+              {
+                "label": {
+                  "en": "Document types to search",
+                  "ru": "Типы документов для поиска"
+                },
+                "key": "documentTypesToSearch",
+                "multiple": true,
+                "validate": {
+                  "minLength": "",
+                  "maxLength": ""
+                },
+                "disableAddingRemovingRows": false,
+                "addAnotherPosition": "bottom",
+                "removePlacement": "col",
+                "defaultOpen": false,
+                "layoutFixed": false,
+                "enableRowGroups": false,
+                "reorder": false,
+                "defaultValue": [
+                  {}
+                ],
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
+                "type": "datagrid",
+                "input": true,
+                "rowGroups": [
+                  {}
+                ],
+                "components": [
+                  {
+                    "label": {
+                      "ru": "Panel"
+                    },
+                    "key": "filterData",
+                    "refreshOn": [],
+                    "optionalWhenDisabled": false,
+                    "type": "panel",
+                    "input": false,
+                    "components": [
+                      {
+                        "label": {
+                          "ru": "Тип"
+                        },
+                        "key": "typeRef",
+                        "modalTitle": "",
+                        "journalId": "ecos-types",
+                        "queryData": "",
+                        "refreshOn": [],
+                        "optionalWhenDisabled": false,
+                        "type": "selectJournal",
+                        "input": true,
+                        "source": {
+                          "custom": {
+                            "columns": []
+                          },
+                          "type": "journal",
+                          "customValues": []
+                        }
+                      }
+                    ],
+                    "row": "0-0"
+                  },
+                  {
+                    "label": {
+                      "ru": "Panel"
+                    },
+                    "key": "panel",
+                    "refreshOn": [],
+                    "optionalWhenDisabled": false,
+                    "type": "panel",
+                    "input": false,
+                    "components": [
+                      {
+                        "label": {
+                          "ru": "Атрибуты для поиска",
+                          "en": "Attributes to search"
+                        },
+                        "key": "attsToSearch",
+                        "multiple": true,
+                        "placeholder": {
+                          "ru": "Отображаемое имя",
+                          "en": "Display name"
+                        },
+                        "reorder": false,
+                        "clearOnHide": false,
+                        "dataSrc": "custom",
+                        "data": {
+                          "custom": "let res = _.get(row, 'typeData.attributes') || [];\nif (!res.length) {\n  res = [];\n} else {\n  res = [...res, { value: '_status', label: 'Статус' }, { value: '_name', label: 'Отображаемое имя' }];\n}\nvalues = res;",
+                          "headers": [
+                            {}
+                          ]
+                        },
+                        "defaultValue": [],
+                        "optionalWhenDisabled": false,
+                        "type": "ecosSelect",
+                        "input": true,
+                        "row": "0-1"
+                      },
+                      {
+                        "label": "Type Data",
+                        "source": {
+                          "type": "record",
+                          "record": {
+                            "id": "{{row.typeRef}}",
+                            "attributes": {
+                              "attributes": "model.attributes[]{label:name!id,value:id}"
+                            }
+                          }
+                        },
+                        "update": {
+                          "type": "any-change",
+                          "rate": 500
+                        },
+                        "refreshOn": [
+                          {
+                            "label": "typeRef",
+                            "value": "typeRef"
+                          }
+                        ],
+                        "key": "typeData",
+                        "type": "asyncData",
+                        "input": true
+                      }
+                    ],
+                    "row": "0-1"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": {
+          "ru": "Columns"
+        },
+        "key": "columns2",
+        "columns": [
+          {
+            "components": [
+              {
+                "label": "Cancel",
+                "action": "event",
+                "state": "",
+                "showValidations": false,
+                "event": "cancel",
+                "block": true,
+                "type": "button",
+                "input": true,
+                "key": "submit2",
+                "conditional": {
+                  "show": null,
+                  "when": null
+                }
+              }
+            ],
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "label": "Column",
+            "md": 3,
+            "clearOnHide": true,
+            "conditional": {
+              "show": null,
+              "when": null
+            },
+            "index": 0
+          },
+          {
+            "components": [],
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "label": "Column",
+            "clearOnHide": true,
+            "conditional": {
+              "show": null,
+              "when": null
+            },
+            "index": 1,
+            "md": 3
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "label": "Column",
+            "components": [],
+            "clearOnHide": true,
+            "conditional": {
+              "show": null,
+              "when": null
+            },
+            "index": 2
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 3,
+            "components": [
+              {
+                "label": {
+                  "ru": "Создать",
+                  "en": "Submit"
+                },
+                "key": "submit",
+                "state": "",
+                "theme": "primary",
+                "block": true,
+                "disableOnInvalid": true,
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
+                "type": "button",
+                "input": true
+              }
+            ]
+          }
+        ],
+        "oneColumnInViewMode": false,
+        "type": "columns",
+        "input": false
+      }
+    ],
+    "formId": "global-search-config-form"
+  },
+  "attributes": {},
+  "notExists": false
+}

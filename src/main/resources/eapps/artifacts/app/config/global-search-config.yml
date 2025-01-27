@@ -1,0 +1,14 @@
+---
+id: global-search-config
+value:
+  maxConcurrentRequestsPerApp: 10
+  documentTypesToSearch: []
+version: 1
+valueDef:
+  formRef: uiserv/form@global-search-config-form
+  attributes:
+    - id: maxConcurrentRequestsPerApp
+      type: NUMBER
+    - id: documentTypesToSearch
+      type: JSON
+      multiple: true
