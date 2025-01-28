@@ -4,7 +4,11 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.config.lib.consumer.bean.EcosConfig
 import ru.citeck.ecos.context.lib.ctx.EcosContext
+import ru.citeck.ecos.model.domain.authorities.constant.PersonConstants
+import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.records2.RecordConstants
+import ru.citeck.ecos.records2.predicate.PredicateService
+import ru.citeck.ecos.records2.predicate.PredicateUtils
 import ru.citeck.ecos.records2.predicate.model.OrPredicate
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
@@ -247,14 +251,47 @@ class SearchRecordsDao(
     }
 
     private fun queryPersons(text: String, maxItems: Int): List<SearchRecord> {
+        val parts = text.split(" ").map { it.trim() }
+        val predicate = if (parts.isEmpty()) {
+            Predicates.alwaysFalse()
+        } else if (parts.size == 1) {
+            Predicates.or(
+                Predicates.contains("id", parts[0]),
+                Predicates.contains(PersonConstants.ATT_FIRST_NAME, parts[0]),
+                Predicates.contains(PersonConstants.ATT_LAST_NAME, parts[0]),
+                Predicates.contains(PersonConstants.ATT_MIDDLE_NAME, parts[0])
+            )
+        } else if (parts.size == 2) {
+            Predicates.or(
+                Predicates.and(
+                    Predicates.contains(PersonConstants.ATT_FIRST_NAME, parts[0]),
+                    Predicates.contains(PersonConstants.ATT_LAST_NAME, parts[1])
+                ),
+                Predicates.and(
+                    Predicates.contains(PersonConstants.ATT_LAST_NAME, parts[0]),
+                    Predicates.contains(PersonConstants.ATT_FIRST_NAME, parts[1])
+                ),
+                Predicates.and(
+                    Predicates.contains(PersonConstants.ATT_FIRST_NAME, parts[0]),
+                    Predicates.contains(PersonConstants.ATT_MIDDLE_NAME, parts[1])
+                )
+            )
+        } else if (parts.size == 3) {
+            Predicates.and(
+                Predicates.contains(PersonConstants.ATT_LAST_NAME, parts[0]),
+                Predicates.contains(PersonConstants.ATT_FIRST_NAME, parts[1]),
+                Predicates.contains(PersonConstants.ATT_MIDDLE_NAME, parts[2])
+            )
+        } else {
+            Predicates.alwaysFalse()
+        }
+        if (PredicateUtils.isAlwaysFalse(predicate)) {
+            return emptyList()
+        }
         return queryImpl(
-            sourceId = "alfresco/people",
-            language = "fts-alfresco",
-            query = "TYPE:\"cm:person\" AND (" +
-                "@cm:userName:\"*$text*\" " +
-                "OR @cm:firstName:\"*$text*\" " +
-                "OR @cm:lastName:\"*$text*\"" +
-                ")",
+            sourceId = AuthorityType.PERSON.sourceId,
+            language = PredicateService.LANGUAGE_PREDICATE,
+            query = predicate,
             maxItems,
             GROUP_TYPE_PEOPLE
         )

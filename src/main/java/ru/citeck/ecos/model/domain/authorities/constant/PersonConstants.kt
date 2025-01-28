@@ -25,6 +25,7 @@ object PersonConstants {
 
     const val ATT_FIRST_NAME = "firstName"
     const val ATT_LAST_NAME = "lastName"
+    const val ATT_MIDDLE_NAME = "middleName"
     const val ATT_EMAIL = "email"
     const val ATT_USER_NAME = "userName"
     const val ATT_EXT_PORTAL_URL = "extPortalUrl"
