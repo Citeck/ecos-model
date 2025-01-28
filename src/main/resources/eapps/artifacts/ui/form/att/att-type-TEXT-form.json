@@ -1,0 +1,31 @@
+{
+  "id": "att-type-TEXT-form",
+  "formKey": "",
+  "title": {
+    "en": "Text form"
+  },
+  "description": {},
+  "customModule": "",
+  "typeRef": "",
+  "width": "",
+  "system": true,
+  "i18n": {},
+  "definition": {
+    "components": [
+      {
+        "label": {
+          "ru": "Уникальный",
+          "en": "Unique"
+        },
+        "key": "unique",
+        "refreshOn": [],
+        "optionalWhenDisabled": false,
+        "type": "checkbox",
+        "input": true
+      }
+    ],
+    "formId": "att-type-TEXT-form"
+  },
+  "attributes": {},
+  "notExists": false
+}
