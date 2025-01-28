@@ -14,6 +14,8 @@ import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.AbstractRecordsDao
 import ru.citeck.ecos.records3.record.dao.atts.RecordAttsDao
+import ru.citeck.ecos.records3.record.dao.delete.DelStatus
+import ru.citeck.ecos.records3.record.dao.delete.RecordDeleteDao
 import ru.citeck.ecos.records3.record.dao.mutate.RecordMutateDao
 import ru.citeck.ecos.records3.record.dao.query.RecordsQueryDao
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
@@ -27,7 +29,7 @@ import java.time.Instant
 @Component
 class EcosSecretRecordsDao(
     private val service: EcosSecretService
-) : AbstractRecordsDao(), RecordsQueryDao, RecordAttsDao, RecordMutateDao {
+) : AbstractRecordsDao(), RecordsQueryDao, RecordDeleteDao, RecordAttsDao, RecordMutateDao {
 
     companion object {
         const val ID = "secret"
@@ -67,6 +69,11 @@ class EcosSecretRecordsDao(
         }
         Json.mapper.applyData(recToMutate, record.getAtts())
         return service.save(recToMutate.build()).id
+    }
+
+    override fun delete(recordId: String): DelStatus {
+        service.delete(recordId)
+        return DelStatus.OK
     }
 
     override fun getId(): String {
