@@ -15,6 +15,8 @@ import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceVisibility
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.workspace.USER_WORKSPACE_PREFIX
 import ru.citeck.ecos.records2.RecordConstants
+import ru.citeck.ecos.records2.predicate.PredicateUtils
+import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.ScalarType
@@ -70,25 +72,35 @@ class EmodelWorkspaceService(
         return managers.any { authorities.contains(it) }
     }
 
-    fun getUserWorkspaces(user: String): Set<String> {
+    fun getUserWorkspaces(
+        user: String,
+        filter: Predicate = Predicates.alwaysTrue(),
+        includePersonal: Boolean = true,
+        maxItems: Int = 1000
+    ): Set<String> {
 
         val userRef = AuthorityType.PERSON.getRef(user)
         val authoritiesToQuery = getUserAuthoritiesRefs(userRef)
 
+        var queryPredicate: Predicate = Predicates.or(
+            Predicates.eq(RecordConstants.ATT_CREATOR, userRef),
+            Predicates.inVals(WORKSPACE_ATT_MEMBER_AUTHORITY, authoritiesToQuery)
+        )
+        if (!PredicateUtils.isAlwaysTrue(filter)) {
+            queryPredicate = Predicates.and(queryPredicate, filter)
+        }
+
         val workspaces = recordsService.query(
             RecordsQuery.create()
                 .withSourceId(WorkspaceDesc.SOURCE_ID)
-                .withQuery(
-                    Predicates.or(
-                        Predicates.eq(RecordConstants.ATT_CREATOR, userRef),
-                        Predicates.inVals(WORKSPACE_ATT_MEMBER_AUTHORITY, authoritiesToQuery)
-                    )
-                )
-                .withMaxItems(1000)
+                .withQuery(queryPredicate)
+                .withMaxItems(maxItems)
                 .build(),
         ).getRecords().mapTo(LinkedHashSet()) { it.getLocalId() }
-        workspaces.add("$USER_WORKSPACE_PREFIX$user")
 
+        if (includePersonal && workspaces.size < maxItems) {
+            workspaces.add("$USER_WORKSPACE_PREFIX$user")
+        }
         val orders = recordsService.query(
             RecordsQuery.create()
                 .withSourceId(WorkspaceVisitDesc.SOURCE_ID)

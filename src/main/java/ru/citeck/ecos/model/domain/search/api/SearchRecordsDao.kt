@@ -3,8 +3,11 @@ package ru.citeck.ecos.model.domain.search.api
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.config.lib.consumer.bean.EcosConfig
+import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.ctx.EcosContext
 import ru.citeck.ecos.model.domain.authorities.constant.PersonConstants
+import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
+import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.predicate.PredicateService
@@ -33,7 +36,8 @@ import kotlin.concurrent.withLock
 class SearchRecordsDao(
     private val recordsService: RecordsService,
     private val typesRegistry: EcosTypesRegistry,
-    private val ecosContext: EcosContext
+    private val ecosContext: EcosContext,
+    private val workspaceService: EmodelWorkspaceService
 ) : RecordsQueryDao {
 
     companion object {
@@ -47,6 +51,7 @@ class SearchRecordsDao(
         private const val GROUP_TYPE_PEOPLE = "PEOPLE"
         private const val GROUP_TYPE_DOCUMENTS = "DOCUMENTS"
         private const val GROUP_TYPE_TASKS = "TASKS"
+        private const val GROUP_TYPE_WORKSPACES = "WORKSPACES"
 
         private const val MAX_ITEMS_FOR_TYPE = 50
 
@@ -83,6 +88,7 @@ class SearchRecordsDao(
                 GROUP_TYPE_PEOPLE -> records.addAll(queryPersons(textToSearch, maxItemsForType))
                 GROUP_TYPE_DOCUMENTS -> records.addAll(queryDocuments(textToSearch, maxItemsForType))
                 GROUP_TYPE_TASKS -> records.addAll(queryTasks(textToSearch, maxItemsForType))
+                GROUP_TYPE_WORKSPACES -> records.addAll(queryWorkspaces(textToSearch, maxItemsForType))
             }
             if (maxItems >= 0 && records.size >= maxItems) {
                 break
@@ -93,6 +99,27 @@ class SearchRecordsDao(
             records.subList(0, maxItems - 1)
         } else {
             records
+        }
+    }
+
+    private fun queryWorkspaces(text: String, maxItems: Int): List<SearchRecord> {
+
+        val workspaces = workspaceService.getUserWorkspaces(
+            AuthContext.getCurrentUser(),
+            Predicates.or(
+                Predicates.contains(WorkspaceDesc.ATT_NAME, text),
+                Predicates.contains(WorkspaceDesc.ATT_DESCRIPTION, text)
+            ),
+            includePersonal = false,
+            maxItems = maxItems
+        ).map { WorkspaceDesc.getRef(it) }
+
+        if (workspaces.isEmpty()) {
+            return emptyList()
+        }
+
+        return recordsService.getAtts(workspaces, BASE_ATTS_TO_REQUEST).map {
+            createSearchRecord(it, GROUP_TYPE_WORKSPACES)
         }
     }
 

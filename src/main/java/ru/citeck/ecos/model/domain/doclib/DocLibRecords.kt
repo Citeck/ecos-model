@@ -394,9 +394,9 @@ class DocLibRecords @Autowired constructor(
 
     private fun getInternalRootForType(typeId: String, dirInfo: DocLibDirInfo, workspace: String): EntityRef {
         var id = "$typeId\$ROOT"
-        if (dirInfo.privateWorkspaceScope
-            && workspace.isNotBlank()
-            && workspace != WorkspaceDesc.DEFAULT_WORKSPACE_ID
+        if (dirInfo.privateWorkspaceScope &&
+            workspace.isNotBlank() &&
+            workspace != WorkspaceDesc.DEFAULT_WORKSPACE_ID
         ) {
             id += '$' + workspace.trim()
         }

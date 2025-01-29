@@ -9,6 +9,8 @@ object WorkspaceDesc {
 
     const val SOURCE_ID = "workspace"
 
+    const val ATT_NAME = "name"
+    const val ATT_DESCRIPTION = "description"
     const val ATT_WORKSPACE_MEMBERS = "workspaceMembers"
     const val ATT_TEMPLATE_REF = "templateRef"
     const val ATT_IS_CURRENT_USER_MANAGER = "isCurrentUserManager"
