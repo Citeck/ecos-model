@@ -5,6 +5,9 @@
     "ru": "Рабочее расписание",
     "en": "Working schedule"
   },
+  "description": {},
+  "customModule": "",
+  "typeRef": "",
   "width": "m",
   "system": true,
   "i18n": {},
@@ -208,10 +211,13 @@
                       "en": "Timezone"
                     },
                     "key": "workingDayTimeZone",
+                    "validate": {
+                      "required": true
+                    },
                     "placeholder": {
                       "ru": "+0"
                     },
-                    "defaultValue": "",
+                    "defaultValue": "+0",
                     "refreshOn": [],
                     "optionalWhenDisabled": false,
                     "type": "textfield",
@@ -381,6 +387,9 @@
         ],
         "input": false
       }
-    ]
-  }
+    ],
+    "formId": "weekly-working-schedule"
+  },
+  "attributes": {},
+  "notExists": false
 }
