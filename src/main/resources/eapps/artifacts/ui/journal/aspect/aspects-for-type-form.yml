@@ -1,0 +1,27 @@
+---
+id: aspects-for-type-form
+name:
+  ru: Аспекты
+  en: Aspects
+
+typeRef: emodel/type@aspect
+
+editable: false
+predicate:
+  t: 'not-in'
+  a: 'id'
+  v: ['listview']
+
+columns:
+  - id: id
+    name:
+      ru: Идентификатор
+      en: Identifier
+  - id: name
+    name:
+      ru: Название
+      en: Name
+  - id: prefix
+    name:
+      ru: Префикс
+      en: Prefix

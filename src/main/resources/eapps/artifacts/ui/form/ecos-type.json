@@ -1289,7 +1289,7 @@
                                 "key": "ref",
                                 "hideEditRowButton": true,
                                 "modalTitle": "",
-                                "journalId": "ecos-aspects",
+                                "journalId": "aspects-for-type-form",
                                 "queryData": "",
                                 "refreshOn": [],
                                 "optionalWhenDisabled": false,

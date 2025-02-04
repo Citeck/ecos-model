@@ -4,6 +4,8 @@ name:
   ru: Аспекты
   en: Aspects
 
+typeRef: emodel/type@aspect
+
 actions:
   - uiserv/action@edit-json
   - uiserv/action@edit
