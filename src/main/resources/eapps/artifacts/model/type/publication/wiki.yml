@@ -1,0 +1,28 @@
+---
+id: wiki
+name:
+  ru: Статья базы знаний
+  en: Wiki article
+
+parentRef: emodel/type@publication
+
+storageType: ECOS_MODEL
+
+dashboardType: wiki
+
+model:
+  attributes:
+    - id: children
+      name:
+        ru: Дочерние статьи
+        en: Child articles
+      type: ASSOC
+      multiple: true
+      config:
+        child: true
+        typeRef: emodel/type@wiki
+aspects:
+  - ref: emodel/aspect@listview
+    config:
+      titleAtt: title
+      textAtt: text

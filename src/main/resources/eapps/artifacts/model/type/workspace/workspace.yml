@@ -79,3 +79,11 @@ model:
       type: ASSOC
       config:
         typeRef: emodel/type@workspace-template
+    - id: wikiRoot
+      name:
+        ru: Корень базы знаний
+        en: Wiki root
+      type: ASSOC
+      config:
+        child: true
+        typeRef: emodel/type@wiki

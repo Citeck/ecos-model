@@ -17,7 +17,7 @@ journalRef: uiserv/journal@publications
 
 inheritForm: false
 
-workspaceScope: PUBLIC
+workspaceScope: PRIVATE
 
 model:
   attributes:
@@ -40,6 +40,7 @@ model:
       name:
         ru: Дочерние публикации
         en: Child publications
+      multiple: true
       type: ASSOC
       config:
         child: true
