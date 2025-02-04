@@ -44,3 +44,8 @@ model:
       config:
         child: true
         typeRef: emodel/type@publication
+aspects:
+  - ref: emodel/aspect@listview
+    config:
+      titleAtt: title
+      textAtt: text

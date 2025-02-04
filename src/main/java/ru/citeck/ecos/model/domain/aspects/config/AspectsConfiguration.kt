@@ -35,6 +35,8 @@ class AspectsConfiguration(
 
         val ASPECT_TYPE_ID = "aspect"
         val ASPECT_TYPE_REF = ModelUtils.getTypeRef(ASPECT_TYPE_ID)
+
+        private val ID_VALIDITY = "^[\\w-]+$".toRegex()
     }
 
     private var aspectsConfig: AspectsRegistryInitializer? = null
@@ -53,6 +55,9 @@ class AspectsConfiguration(
 
         aspectsRepo.addListener(object : DbRecordsListenerAdapter() {
             override fun onCreated(event: DbRecordCreatedEvent) {
+                if (!ID_VALIDITY.matches(event.localRef.getLocalId())) {
+                    error("Invalid aspect id: '${event.localRef.getLocalId()}'")
+                }
                 val aspectDef = recordsService.getAtts(event.record, AspectDef::class.java)
                 aspectArtifactHandler.aspectWasChanged(aspectDef)
                 aspectsConfig?.updateAspect(aspectDef)

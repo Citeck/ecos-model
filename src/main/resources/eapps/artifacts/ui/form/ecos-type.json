@@ -1211,9 +1211,10 @@
                     "source": {
                       "type": "custom",
                       "custom": {
-                        "syncData": "let currentAtts = (data.modelAttributes || []).filter(a => !!a.id).map(a => {\n  return {\n    value: a.id, \n    label: Citeck.helpers.getMLValue(a.name) || a.id\n  };\n});\nlet aspects = (data.aspects || []).filter(a => !!a.ref).map(a => a.ref);\n\nvalue = {\n  parent: data.parentRef,\n  aspects,\n  currentAtts\n};",
-                        "asyncData": "let parentAttsPromise;\nif (data.parent) {\n    parentAttsPromise = Records.get(data.parent).load({\n        attributes: 'model.attributes[]{label:name,value:id}',\n        systemAtts: 'model.systemAttributes[]{label:name,value:id}'\n    });\n} else {\n    parentAttsPromise = Promise.resolve({});\n}\n\nlet aspectsAttsPromise;\nif (data.aspects) {\n    aspectsAttsPromise = Records.get(data.aspects).load({\n        prefix: 'prefix!id',\n        attributes: 'attributes[]{label:name._as.mltext,value:id}',\n        systemAtts: 'systemAttributes[]{label:name._as.mltext,value:id}'\n    }).then(aspectsAtts => {\n        const addPrefix = (prefix, atts) => {\n            let result = [];\n            for (let att of atts) {\n                result.push({\n                    label: att.label,\n                    value: prefix + ':' + att.value\n                });\n            }\n            return result;\n        }\n        const resultAspects = [];\n        for (let aspect of aspectsAtts) {\n            resultAspects.push({\n                attributes: addPrefix(aspect.prefix, aspect.attributes || []),\n                systemAttributes: addPrefix(aspect.prefix, aspect.systemAtts || [])\n            });\n        }\n        return resultAspects;\n    });\n} else {\n    aspectsAttsPromise = Promise.resolve([]);\n}\n\nvalue = Promise.all([parentAttsPromise, aspectsAttsPromise]).then(results => {\n\n    const parentAtts = results[0] || {};\n    const aspectsAtts = results[1] || [];\n\n    const attributes = {};\n    const systemAtts = {};\n    const fillAtts = (attsToFill, target) => {\n        if (!attsToFill || !attsToFill.length) {\n            return;\n        }\n        for (let att of attsToFill) {\n            if (att.value) {\n                let label = att.label\n                if (!label) {\n                    label = target[att.value] || att.value;\n                }\n                target[att.value] = label;\n            }\n        }\n    }\n    fillAtts(parentAtts.systemAtts, systemAtts);\n    fillAtts(parentAtts.attributes, attributes);\n\n    for (let aspectAtts of aspectsAtts) {\n        fillAtts(aspectAtts.systemAtts, systemAtts);\n        fillAtts(aspectAtts.attributes, attributes);\n    }\n\n    fillAtts(data.currentAtts, attributes);\n\n    const fullAtts = {};\n    for (let attId in systemAtts) {\n        fullAtts[attId] = systemAtts[attId];\n    }\n    for (let attId in attributes) {\n        fullAtts[attId] = attributes[attId];\n    }\n\n    const objToArray = (obj) => {\n        const resArr = [];\n        for (let value in obj) {\n            resArr.push({label: obj[value], value});\n        }\n        return resArr;    \n    }\n    \n    return {\n        attributes: objToArray(attributes),\n        systemAtts: objToArray(systemAtts),\n        fullAtts: objToArray(fullAtts)\n    }\n});"
-                      }
+                        "syncData": "let currentAtts = (data.modelAttributes || []).filter(a => !!a.id).map(a => {\n  return {\n    value: a.id, \n    label: Citeck.helpers.getMLValue(a.name) || a.id,\n    type: a.type || 'TEXT'\n  };\n});\nlet aspects = (data.aspects || []).filter(a => !!a.ref).map(a => a.ref);\n\nvalue = {\n  parent: data.parentRef,\n  aspects,\n  currentAtts\n};",
+                        "asyncData": "let parentAttsPromise;\nif (data.parent) {\n    parentAttsPromise = Records.get(data.parent).load({\n        attributes: 'model.attributes[]{label:name,value:id,type}',\n        systemAtts: 'model.systemAttributes[]{label:name,value:id,type}'\n    });\n} else {\n    parentAttsPromise = Promise.resolve({});\n}\n\nlet aspectsAttsPromise;\nif (data.aspects) {\n    aspectsAttsPromise = Records.get(data.aspects).load({\n        prefix: 'prefix!id',\n        attributes: 'attributes[]{label:name._as.mltext,value:id,type}',\n        systemAtts: 'systemAttributes[]{label:name._as.mltext,value:id,type}'\n    }).then(aspectsAtts => {\n        const addPrefix = (prefix, atts) => {\n            let result = [];\n            for (let att of atts) {\n                result.push({\n                    label: att.label,\n                    value: prefix + ':' + att.value,\n                    type: att.type\n                });\n            }\n            return result;\n        }\n        const resultAspects = [];\n        for (let aspect of aspectsAtts) {\n            resultAspects.push({\n                attributes: addPrefix(aspect.prefix, aspect.attributes || []),\n                systemAttributes: addPrefix(aspect.prefix, aspect.systemAtts || [])\n            });\n        }\n        return resultAspects;\n    });\n} else {\n    aspectsAttsPromise = Promise.resolve([]);\n}\n\nvalue = Promise.all([parentAttsPromise, aspectsAttsPromise]).then(results => {\n\n    const parentAtts = results[0] || {};\n    const aspectsAtts = results[1] || [];\n\n    const attributes = {};\n    const systemAtts = {};\n    const fillAtts = (attsToFill, target) => {\n        if (!attsToFill || !attsToFill.length) {\n            return;\n        }\n        for (let att of attsToFill) {\n            if (att.value) {\n                let label = att.label\n                if (!label) {\n                    label = target[att.value] || att.value;\n                }\n                target[att.value] = {label, type: att.type};\n            }\n        }\n    }\n    fillAtts(parentAtts.systemAtts, systemAtts);\n    fillAtts(parentAtts.attributes, attributes);\n\n    for (let aspectAtts of aspectsAtts) {\n        fillAtts(aspectAtts.systemAtts, systemAtts);\n        fillAtts(aspectAtts.attributes, attributes);\n    }\n\n    fillAtts(data.currentAtts, attributes);\n\n    const fullAtts = {};\n    for (let attId in systemAtts) {\n        fullAtts[attId] = systemAtts[attId];\n    }\n    for (let attId in attributes) {\n        fullAtts[attId] = attributes[attId];\n    }\n\n    const objToArray = (obj) => {\n        const resArr = [];\n        for (let value in obj) {\n          resArr.push({\n            value, \n            ...(obj[value])\n          });\n        }\n        return resArr;    \n    }\n    \n    return {\n        attributes: objToArray(attributes),\n        systemAtts: objToArray(systemAtts),\n        fullAtts: objToArray(fullAtts)\n    }\n});"
+                      },
+                      "forceLoad": false
                     },
                     "update": {
                       "type": "any-change",
@@ -1227,7 +1228,8 @@
                     ],
                     "key": "attributesOptions",
                     "type": "asyncData",
-                    "input": true
+                    "input": true,
+                    "tab": 1
                   }
                 ]
               },
@@ -1243,7 +1245,7 @@
                       "en": "Attributes",
                       "ru": "Аспекты"
                     },
-                    "key": "aspects",
+                    "key": "customAspects",
                     "hideLabel": true,
                     "multiple": true,
                     "validate": {
@@ -1257,16 +1259,12 @@
                     "defaultOpen": false,
                     "layoutFixed": false,
                     "enableRowGroups": false,
-                    "rowGroups": [
-                      {
-                        "label": "",
-                        "numberOfRows": ""
-                      }
-                    ],
                     "reorder": true,
                     "defaultValue": [
                       {
-                        "ref": ""
+                        "ref": "",
+                        "inheritConfig": false,
+                        "submit4": false
                       }
                     ],
                     "refreshOn": [],
@@ -1296,7 +1294,14 @@
                                 "refreshOn": [],
                                 "optionalWhenDisabled": false,
                                 "type": "selectJournal",
-                                "input": true
+                                "input": true,
+                                "source": {
+                                  "custom": {
+                                    "columns": []
+                                  },
+                                  "type": "journal",
+                                  "customValues": []
+                                }
                               }
                             ],
                             "type": "column",
@@ -1384,7 +1389,10 @@
                         "row": "0-0"
                       }
                     ],
-                    "tab": 2
+                    "tab": 2,
+                    "rowGroups": [
+                      {}
+                    ]
                   }
                 ]
               },
@@ -1579,7 +1587,8 @@
                     ],
                     "optionalWhenDisabled": false,
                     "type": "ecosSelect",
-                    "input": true
+                    "input": true,
+                    "tab": 4
                   },
                   {
                     "label": {
@@ -1837,7 +1846,8 @@
                     ],
                     "oneColumnInViewMode": false,
                     "type": "columns",
-                    "input": false
+                    "input": false,
+                    "tab": 6
                   },
                   {
                     "label": {
@@ -2333,12 +2343,6 @@
                                 "key": "storageRef",
                                 "modalTitle": "",
                                 "journalId": "content-storages",
-                                "source": {
-                                  "type": "journal",
-                                  "custom": {
-                                    "columns": []
-                                  }
-                                },
                                 "queryData": "",
                                 "refreshOn": [],
                                 "optionalWhenDisabled": false,
@@ -2354,6 +2358,95 @@
                       }
                     ],
                     "tab": 8
+                  }
+                ]
+              },
+              {
+                "label": {
+                  "ru": "Представления",
+                  "en": "Views"
+                },
+                "key": "views",
+                "components": [
+                  {
+                    "label": {
+                      "ru": "Panel"
+                    },
+                    "key": "listview-settings",
+                    "title": {
+                      "ru": "Отображение в виде списка",
+                      "en": "List view"
+                    },
+                    "refreshOn": [],
+                    "optionalWhenDisabled": false,
+                    "type": "panel",
+                    "input": false,
+                    "components": [
+                      {
+                        "label": {
+                          "ru": "Включить режим отображения в виде списка",
+                          "en": "Enable list view mode"
+                        },
+                        "key": "aspectCfg$listview$added",
+                        "refreshOn": [],
+                        "optionalWhenDisabled": false,
+                        "type": "checkbox",
+                        "input": true
+                      },
+                      {
+                        "label": {
+                          "ru": "Panel"
+                        },
+                        "key": "listviewcfg",
+                        "refreshOn": [],
+                        "optionalWhenDisabled": false,
+                        "conditional": {
+                          "show": "true",
+                          "when": "aspectCfg$listview$added",
+                          "eq": "true"
+                        },
+                        "type": "panel",
+                        "input": false,
+                        "components": [
+                          {
+                            "label": {
+                              "ru": "Атрибут с заголовком для элемента списка",
+                              "en": "Attribute with title for list element"
+                            },
+                            "key": "aspectCfg$listview$titleAtt",
+                            "dataSrc": "custom",
+                            "data": {
+                              "custom": "console.log(data);\nvalues = _.get(data, 'attributesOptions.attributes', []).filter(a => a.type === 'TEXT' || a.type === 'MLTEXT');"
+                            },
+                            "defaultValue": "",
+                            "refreshOn": [
+                              "attributesOptions"
+                            ],
+                            "optionalWhenDisabled": false,
+                            "type": "ecosSelect",
+                            "input": true
+                          },
+                          {
+                            "label": {
+                              "ru": "Атрибут с текстом для элемента списка",
+                              "en": "Attribute with text for list element"
+                            },
+                            "key": "aspectCfg$listview$textAtt",
+                            "dataSrc": "custom",
+                            "data": {
+                              "custom": "values = _.get(data, 'attributesOptions.attributes', []).filter(a => a.type === 'TEXT' || a.type === 'MLTEXT');"
+                            },
+                            "defaultValue": "",
+                            "refreshOn": [
+                              "attributesOptions"
+                            ],
+                            "optionalWhenDisabled": false,
+                            "type": "ecosSelect",
+                            "input": true
+                          }
+                        ]
+                      }
+                    ]
                   }
                 ]
               }

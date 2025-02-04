@@ -10,7 +10,9 @@ import ru.citeck.ecos.commons.json.YamlUtils
 import ru.citeck.ecos.events2.type.RecordEventsService
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.permissions.dto.PermissionType
+import ru.citeck.ecos.model.lib.type.dto.TypeAspectDef
 import ru.citeck.ecos.model.lib.utils.ModelUtils
+import ru.citeck.ecos.model.type.service.TypeDesc
 import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
 import ru.citeck.ecos.records2.RecordConstants
@@ -24,6 +26,7 @@ import ru.citeck.ecos.records3.record.dao.query.RecordsQueryDao
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes
 import ru.citeck.ecos.webapp.api.entity.EntityRef
+import ru.citeck.ecos.webapp.lib.model.aspect.dto.AspectDef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import ru.citeck.ecos.webapp.lib.perms.RecordPerms
 import java.nio.charset.StandardCharsets
@@ -67,7 +70,7 @@ class TypesRepoRecordsDao(
                     recsQuery.sortBy
                 )
 
-                result.setRecords(types.map { TypeRecord(it.entity, it.meta, typeService) })
+                result.setRecords(types.map { TypeRecord(it.entity, it.meta) })
                 result.setTotalCount(typeService.getCount(predicate))
             }
             else -> {
@@ -78,7 +81,7 @@ class TypesRepoRecordsDao(
                 } else {
                     typeService.getAllWithMeta(max, recsQuery.page.skipCount)
                 }
-                result.setRecords(types.map { TypeRecord(it.entity, it.meta, typeService) })
+                result.setRecords(types.map { TypeRecord(it.entity, it.meta) })
             }
         }
 
@@ -87,22 +90,39 @@ class TypesRepoRecordsDao(
 
     override fun getRecordAtts(recordId: String): TypeRecord? {
         return typeService.getByIdWithMetaOrNull(recordId)?.let {
-            TypeRecord(it.entity, it.meta, typeService)
+            TypeRecord(it.entity, it.meta)
         }
     }
 
     private fun onTypeDefChanged(before: EntityWithMeta<TypeDef>?, after: EntityWithMeta<TypeDef>) {
         recordEventsService?.emitRecChanged(before, after, getId()) {
-            TypeRecord(it.entity, it.meta, typeService)
+            TypeRecord(it.entity, it.meta)
         }
     }
 
     inner class TypeRecord(
         @AttName("...")
         val typeDef: TypeDef,
-        private val audit: EntityMeta,
-        private val typeService: TypesService
+        private val audit: EntityMeta
     ) {
+
+        fun getCustomAspects(): List<TypeAspectDef> {
+            return typeDef.aspects.filter {
+                !TypeDesc.NON_CUSTOM_ASPECTS.contains(it.ref.getLocalId())
+            }
+        }
+
+        fun getAtt(name: String): Any? {
+            val aspectCfgKey = TypeDesc.parseAspectCfgKey(name) ?: return null
+            val aspectData = typeDef.aspects.find { it.ref.getLocalId() == aspectCfgKey.aspectId }
+            if (aspectCfgKey.configKey == TypeDesc.ASPECT_CONFIG_ADDED_FLAG) {
+                return aspectData != null
+            }
+            if (aspectData == null) {
+                return null
+            }
+            return aspectData.config[aspectCfgKey.configKey]
+        }
 
         fun getFormRef(): EntityRef {
             if (typeDef.id.isNotBlank() && typeDef.formRef.getLocalId() == TypeDefResolver.DEFAULT_FORM) {
