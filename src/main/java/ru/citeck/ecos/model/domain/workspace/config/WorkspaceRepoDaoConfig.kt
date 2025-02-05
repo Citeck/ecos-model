@@ -13,6 +13,7 @@ import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceMemberDesc
 import ru.citeck.ecos.model.domain.workspace.listener.WorkspaceRecordsListener
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.model.lib.workspace.WorkspaceService
+import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.ScalarType
 import ru.citeck.ecos.records3.record.atts.value.AttValueCtx
@@ -66,7 +67,8 @@ class WorkspaceRepoDaoConfig {
         val providedAtts = setOf(
             ScalarType.JSON.mirrorAtt,
             WorkspaceDesc.ATT_IS_CURRENT_USER_MEMBER,
-            WorkspaceDesc.ATT_IS_CURRENT_USER_MANAGER
+            WorkspaceDesc.ATT_IS_CURRENT_USER_MANAGER,
+            RecordConstants.ATT_WORKSPACE
         )
 
         override fun getAtt(path: String, value: AttValueCtx): Any? {
@@ -77,6 +79,9 @@ class WorkspaceRepoDaoConfig {
                 }
                 WorkspaceDesc.ATT_IS_CURRENT_USER_MANAGER -> {
                     workspaceService.isUserManagerOf(AuthContext.getCurrentUser(), value.getLocalId())
+                }
+                RecordConstants.ATT_WORKSPACE -> {
+                    value.getRef()
                 }
                 ScalarType.JSON.mirrorAtt -> {
 

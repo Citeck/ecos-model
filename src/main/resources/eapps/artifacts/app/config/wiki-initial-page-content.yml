@@ -1,0 +1,16 @@
+---
+id: wiki-initial-page-content
+value:
+  title:
+    ru: Добро пожаловать!
+    en: Welcome!
+  text:
+    ru: Добро пожаловать в базу знаний!
+    en: Welcome to wiki!
+valueDef:
+  formRef: uiserv/form@wiki-initial-page-content
+  attributes:
+    - id: title
+      type: MLTEXT
+    - id: text
+      type: MLTEXT
