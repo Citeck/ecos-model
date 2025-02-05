@@ -35,27 +35,16 @@ class WorkspaceRecordsListener(
     }
 
     fun createWikiRoot(workspaceRef: EntityRef) {
-
         val wsId = workspaceRef.getLocalId()
-        val wikiRootRef = recordsService.create(
-            WIKI_SOURCE_ID,
-            mapOf(
-                "id" to "$wsId\$ROOT",
-                "title" to "ROOT",
-                "text" to "ROOT",
-                RecordConstants.ATT_PARENT to workspaceRef,
-                RecordConstants.ATT_PARENT_ATT to WIKI_ROOT_ASSOC,
-                RecordConstants.ATT_WORKSPACE to wsId
-            )
-        )
         val userLocale = Locale.of(I18nContext.getLocale().language)
         recordsService.create(
             WIKI_SOURCE_ID,
             mapOf(
-                RecordConstants.ATT_PARENT to wikiRootRef,
-                RecordConstants.ATT_PARENT_ATT to "children",
+                "id" to "$wsId\$ROOT",
                 "title" to initialPageContent.title.getClosest(userLocale),
                 "text" to initialPageContent.text.getClosest(userLocale),
+                RecordConstants.ATT_PARENT to workspaceRef,
+                RecordConstants.ATT_PARENT_ATT to WIKI_ROOT_ASSOC,
                 RecordConstants.ATT_WORKSPACE to wsId
             )
         )

@@ -11,7 +11,7 @@ import ru.citeck.ecos.webapp.lib.patch.annotaion.EcosPatch
 import java.util.concurrent.Callable
 
 @Component
-@EcosPatch("create-wiki-root-for-workspaces", "2025-01-05T00:00:00Z")
+@EcosPatch("create-wiki-root-for-workspaces", "2025-01-05T00:00:01Z")
 class CreateWikiRootForWorkspaces(
     val recordsService: RecordsService,
     val workspaceRecsListener: WorkspaceRecordsListener
