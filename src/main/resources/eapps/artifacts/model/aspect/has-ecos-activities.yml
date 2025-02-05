@@ -3,6 +3,7 @@ id: has-ecos-activities
 name:
   ru: Имеет активности
   en: Has activities
+configFormRef: uiserv/form@has-ecos-activities-form
 
 attributes:
   - id: ecosActivities

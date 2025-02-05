@@ -87,3 +87,9 @@ model:
       config:
         child: true
         typeRef: emodel/type@wiki
+aspects:
+  - ref: emodel/aspect@has-ecos-activities
+    config:
+      alias: WS
+      searchAtt: id
+    inheritConfig: false
