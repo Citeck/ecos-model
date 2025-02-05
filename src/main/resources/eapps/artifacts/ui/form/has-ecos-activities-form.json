@@ -1,0 +1,177 @@
+{
+  "id": "has-ecos-activities-form",
+  "formKey": "",
+  "title": {
+    "en": "Activity config"
+  },
+  "description": {},
+  "customModule": "",
+  "typeRef": "",
+  "width": "",
+  "system": false,
+  "i18n": {},
+  "definition": {
+    "components": [
+      {
+        "scrollableContent": true,
+        "key": "panel2",
+        "type": "panel",
+        "input": false,
+        "components": [
+          {
+            "label": {
+              "ru": "Panel"
+            },
+            "key": "panel",
+            "title": {
+              "ru": "Конфигурация для синхронизации писем",
+              "en": "Configuration for synchronization of emails"
+            },
+            "refreshOn": [],
+            "optionalWhenDisabled": false,
+            "type": "panel",
+            "input": false,
+            "components": [
+              {
+                "label": {
+                  "en": "Alias",
+                  "ru": "Алиас"
+                },
+                "key": "alias",
+                "tooltip": {
+                  "ru": "По данному алиасу будет осуществляться поиск типа данных в заголовке письма",
+                  "en": "This alias will be used to search for the type in the email title."
+                },
+                "validate": {
+                  "required": true
+                },
+                "defaultValue": "",
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
+                "type": "textfield",
+                "input": true,
+                "inputMasks": [
+                  {}
+                ]
+              },
+              {
+                "label": {
+                  "ru": "Атрибут для поиска",
+                  "en": "Search attribute"
+                },
+                "key": "searchAtt",
+                "dataSrc": "custom",
+                "data": {
+                  "custom": "var modelAtts = _.get(instance, 'root.parentForm.data.attributesOptions.attributes', []);\nif (modelAtts.find((element) => element.value === \"id\") === undefined) {\n  modelAtts.push({\n    value: \"id\",\n    label: \"ID\"\n  });\n}\n\nvalues = modelAtts;",
+                  "headers": [
+                    {}
+                  ]
+                },
+                "defaultValue": "",
+                "optionalWhenDisabled": false,
+                "type": "ecosSelect",
+                "input": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": {
+          "ru": "Columns"
+        },
+        "key": "columns2",
+        "columns": [
+          {
+            "components": [
+              {
+                "label": "Cancel",
+                "action": "event",
+                "state": "",
+                "showValidations": false,
+                "event": "cancel",
+                "block": true,
+                "type": "button",
+                "input": true,
+                "key": "submit2",
+                "conditional": {
+                  "show": null,
+                  "when": null
+                }
+              }
+            ],
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "label": "Column",
+            "md": 3,
+            "clearOnHide": true,
+            "conditional": {
+              "show": null,
+              "when": null
+            },
+            "index": 0
+          },
+          {
+            "components": [],
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "label": "Column",
+            "clearOnHide": true,
+            "conditional": {
+              "show": null,
+              "when": null
+            },
+            "index": 1,
+            "md": 3
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "label": "Column",
+            "components": [],
+            "clearOnHide": true,
+            "conditional": {
+              "show": null,
+              "when": null
+            },
+            "index": 2
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 3,
+            "components": [
+              {
+                "label": {
+                  "ru": "Создать",
+                  "en": "Submit"
+                },
+                "key": "submit",
+                "state": "",
+                "theme": "primary",
+                "block": true,
+                "disableOnInvalid": true,
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
+                "type": "button",
+                "input": true
+              }
+            ]
+          }
+        ],
+        "oneColumnInViewMode": false,
+        "type": "columns",
+        "input": false
+      }
+    ],
+    "formId": "has-ecos-activities-form"
+  },
+  "attributes": {},
+  "notExists": false
+}
