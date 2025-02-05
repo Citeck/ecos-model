@@ -5,8 +5,8 @@ value:
     ru: Добро пожаловать!
     en: Welcome!
   text:
-    ru: Добро пожаловать в базу знаний!
-    en: Welcome to wiki!
+    ru: <p><br></p><p dir="ltr"><span>Добро пожаловать в базу знаний!</span></p>
+    en: <p><br></p><p dir="ltr"><span>Welcome to wiki!</span></p>
 valueDef:
   formRef: uiserv/form@wiki-initial-page-content
   attributes:
