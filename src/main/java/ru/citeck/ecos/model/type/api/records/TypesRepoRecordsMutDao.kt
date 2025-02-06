@@ -40,25 +40,31 @@ class TypesRepoRecordsMutDao(
                 mutAtts[k] = v
             }
         }
-        val customAspects = record.attributes["customAspects"].asList(TypeAspectDef::class.java)
-        val newAspects = ArrayList(customAspects)
-        recToMutate.aspects.forEach {
-            if (TypeDesc.NON_CUSTOM_ASPECTS.contains(it.ref.getLocalId())) {
-                newAspects.add(it)
+        val mutAspects = if (record.attributes.has("customAspects")) {
+            val customAspects = record.attributes["customAspects"].asList(TypeAspectDef::class.java)
+            val newAspects = ArrayList(customAspects)
+            recToMutate.aspects.forEach {
+                if (TypeDesc.NON_CUSTOM_ASPECTS.contains(it.ref.getLocalId())) {
+                    newAspects.add(it)
+                }
             }
+            applyAspectsData(newAspects, aspectsConfigs)
+            newAspects
+        } else if (record.attributes.has("aspects")) {
+            record.attributes["aspects"].asList(TypeAspectDef::class.java)
+        } else {
+            recToMutate.aspects
         }
-        applyAspectsData(recToMutate, newAspects, aspectsConfigs)
 
         val ctx = BeanTypeUtils.getTypeContext(TypeMutRecord::class.java)
         ctx.applyData(recToMutate, mutAtts)
 
-        recToMutate.aspects = newAspects
+        recToMutate.aspects = mutAspects
 
         return saveMutatedRec(recToMutate)
     }
 
     private fun applyAspectsData(
-        record: TypeMutRecord,
         newAspects: MutableList<TypeAspectDef>,
         aspectsConfig: Map<String, ObjectData>
     ) {
