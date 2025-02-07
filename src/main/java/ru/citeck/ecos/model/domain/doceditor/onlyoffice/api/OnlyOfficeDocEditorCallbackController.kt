@@ -2,6 +2,7 @@ package ru.citeck.ecos.model.domain.doceditor.onlyoffice.api
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
@@ -18,6 +19,7 @@ import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.webapp.api.content.EcosContentApi
 import ru.citeck.ecos.webapp.lib.remote.callback.RemoteCallbackService
 import java.net.URI
+import java.nio.charset.StandardCharsets
 
 @RestController
 class OnlyOfficeDocEditorCallbackController(
@@ -52,7 +54,10 @@ class OnlyOfficeDocEditorCallbackController(
 
             response.setHeader(
                 "Content-Disposition",
-                "attachment; filename=${content.getName()}"
+                ContentDisposition.builder("attachment")
+                    .filename(content.getName(), StandardCharsets.UTF_8)
+                    .build()
+                    .toString()
             )
             response.setHeader(HttpHeaders.CONTENT_TYPE, content.getMimeType().toString())
 

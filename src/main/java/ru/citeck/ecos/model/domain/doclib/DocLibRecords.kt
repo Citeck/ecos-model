@@ -47,6 +47,8 @@ class DocLibRecords @Autowired constructor(
         private const val ATT_NOT_EXISTS = RecordConstants.ATT_NOT_EXISTS + ScalarType.BOOL_SCHEMA
         private const val ATT_PARENT_ID = RecordConstants.ATT_PARENT + ScalarType.ID_SCHEMA
         private const val ATT_CHILDREN = "children"
+        private const val ATT_CONTENT_TEMPLATE = "_contentTemplate"
+        private const val TEMPLATED_CONTENT_SRC_ID = "transformations/templated-content"
 
         private const val DEFAULT_DIR_TYPE_ID = "doclib-directory"
         private const val DEFAULT_DIR_SRC_ID = "doclib-directory"
@@ -305,12 +307,28 @@ class DocLibRecords @Autowired constructor(
         }
         val attributes = prepareForMutation(record.attributes)
 
+        val contentTemplate = attributes[ATT_CONTENT_TEMPLATE].asText()
+        attributes.remove(ATT_CONTENT_TEMPLATE)
+
         val newRecordId = if (recordId.entityRef.isEmpty()) {
-            recordId.withEntityRef(createEntity(parentId, attributes))
+            val entityRef = createEntity(parentId, attributes)
+            if (contentTemplate.isNotBlank()) {
+                val templateRef = EntityRef.create(AppName.TRANSFORMATIONS, "template", contentTemplate)
+                recordsService.mutate(
+                    "$TEMPLATED_CONTENT_SRC_ID@",
+                    mapOf(
+                        "record" to entityRef,
+                        "template" to templateRef,
+                        "attribute" to RecordConstants.ATT_CONTENT
+                    )
+                )
+            }
+            recordId.withEntityRef(entityRef)
         } else {
             updateEntity(recordId, attributes)
             recordId
         }
+
         return EntityRef.create(AppName.EMODEL, ID, newRecordId.toString())
     }
 

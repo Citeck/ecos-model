@@ -11,6 +11,31 @@ parentRef: emodel/type@doclib-file
 
 workspaceScope: PRIVATE
 
+defaultCreateVariant: true
+
+createVariants:
+  - id: create-new-docx
+    name:
+      ru: Документ
+      en: Document
+    formRef: uiserv/form@create-empty-doclib-file
+    attributes:
+      _contentTemplate: new-doc-docx
+  - id: create-new-xlsx
+    name:
+      ru: Таблицу
+      en: Spreadsheet
+    formRef: uiserv/form@create-empty-doclib-file
+    attributes:
+      _contentTemplate: new-doc-xlsx
+  - id: create-new-pptx
+    name:
+      ru: Презентацию
+      en: Presentation
+    formRef: uiserv/form@create-empty-doclib-file
+    attributes:
+      _contentTemplate: new-doc-pptx
+
 aspects:
   - ref: emodel/aspect@doclib
     config:
