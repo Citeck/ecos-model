@@ -102,6 +102,11 @@
                             },
                             "key": "workspaceMembers",
                             "multiple": true,
+                            "customButtonName": {
+                              "ru": "Выбрать",
+                              "en": "Select"
+                            },
+                            "reorder": false,
                             "source": {
                               "type": "custom",
                               "custom": {
@@ -136,8 +141,7 @@
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
                             "type": "tableForm",
-                            "input": true,
-                            "reorder": false
+                            "input": true
                           },
                           {
                             "label": {
