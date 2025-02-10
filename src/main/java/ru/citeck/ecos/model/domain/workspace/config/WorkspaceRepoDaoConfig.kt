@@ -2,6 +2,8 @@ package ru.citeck.ecos.model.domain.workspace.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import ru.citeck.ecos.commons.data.DataValue
+import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.data.sql.domain.DbDomainConfig
 import ru.citeck.ecos.data.sql.domain.DbDomainFactory
@@ -10,6 +12,7 @@ import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
 import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao.Companion.WORKSPACE_REPO_SOURCE_ID
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceMemberDesc
+import ru.citeck.ecos.model.domain.workspace.dto.Workspace
 import ru.citeck.ecos.model.domain.workspace.listener.WorkspaceRecordsListener
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.model.lib.workspace.WorkspaceService
@@ -19,7 +22,6 @@ import ru.citeck.ecos.records3.record.atts.schema.ScalarType
 import ru.citeck.ecos.records3.record.atts.value.AttValueCtx
 import ru.citeck.ecos.records3.record.dao.RecordsDao
 import ru.citeck.ecos.records3.record.mixin.AttMixin
-import ru.citeck.ecos.webapp.api.entity.EntityRef
 
 @Configuration
 class WorkspaceRepoDaoConfig {
@@ -84,21 +86,25 @@ class WorkspaceRepoDaoConfig {
                     value.getRef()
                 }
                 ScalarType.JSON.mirrorAtt -> {
-
-                    val defaultJson = value.getAtt(ScalarType.JSON_SCHEMA)
-
-                    val wsMembers = defaultJson[WorkspaceDesc.ATT_WORKSPACE_MEMBERS]
-
-                    if (wsMembers.isArray() && wsMembers.size() > 0) {
-                        val membersRefs = wsMembers.asList(EntityRef::class.java)
-                        defaultJson[WorkspaceDesc.ATT_WORKSPACE_MEMBERS] = recordsService.getAtts(
-                            membersRefs,
-                            listOf(ScalarType.JSON_SCHEMA)
-                        ).map { it.getAtt(ScalarType.JSON_SCHEMA) }
+                    val data = Json.mapper.toNonDefaultData(value.getAtts(Workspace::class.java))
+                    val newMembers = data[WorkspaceDesc.ATT_WORKSPACE_MEMBERS].mapNotNull { memberData ->
+                        val id = memberData[WorkspaceMemberDesc.ATT_MEMBER_ID].asText()
+                        if (id.isNotBlank()) {
+                            val newMemberData = DataValue.createObj().set("id", id)
+                            memberData.forEach { k, v ->
+                                if (k != WorkspaceMemberDesc.ATT_MEMBER_ID) {
+                                    newMemberData[k] = v
+                                }
+                            }
+                            newMemberData
+                        } else {
+                            null
+                        }
                     }
-
-                    defaultJson
+                    data[WorkspaceDesc.ATT_WORKSPACE_MEMBERS] = newMembers
+                    data
                 }
+
                 else -> null
             }
         }
