@@ -104,5 +104,12 @@ class WorkspaceArtifactsHandlerTest {
         val workspaceJson = recordsService.getAtt(ref, "?json")
         assertThat(workspaceJson.getAs(Workspace::class.java))
             .isEqualTo(expectedData.getAs(Workspace::class.java))
+
+        val membersJson = recordsService.getAtt(ref, "workspaceMembers[]?json")
+        assertThat(membersJson.isArray()).isTrue()
+        assertThat(membersJson.size()).isEqualTo(2)
+
+        assertThat(membersJson[0]).isEqualTo(expectedData["workspaceMembers"][0])
+        assertThat(membersJson[1]).isEqualTo(expectedData["workspaceMembers"][1])
     }
 }

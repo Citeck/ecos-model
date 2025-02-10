@@ -94,17 +94,7 @@ class WorkspaceRepoDaoConfig {
                         defaultJson[WorkspaceDesc.ATT_WORKSPACE_MEMBERS] = recordsService.getAtts(
                             membersRefs,
                             listOf(ScalarType.JSON_SCHEMA)
-                        ).map { memberAtts ->
-                            val memberData = memberAtts.getAtt(ScalarType.JSON_SCHEMA)
-                            val memberId = memberData[WorkspaceMemberDesc.ATT_MEMBER_ID].asText()
-                            if (memberId.isNotBlank()) {
-                                memberData["id"] = memberId
-                            }
-                            memberData.remove(WorkspaceMemberDesc.ATT_MEMBER_ID)
-                            // legacy attribute
-                            memberData.remove("authority")
-                            memberData
-                        }
+                        ).map { it.getAtt(ScalarType.JSON_SCHEMA) }
                     }
 
                     defaultJson
