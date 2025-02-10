@@ -101,6 +101,8 @@ class WorkspaceRepoDaoConfig {
                                 memberData["id"] = memberId
                             }
                             memberData.remove(WorkspaceMemberDesc.ATT_MEMBER_ID)
+                            // legacy attribute
+                            memberData.remove("authority")
                             memberData
                         }
                     }

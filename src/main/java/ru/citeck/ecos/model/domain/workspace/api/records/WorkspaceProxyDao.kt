@@ -8,6 +8,7 @@ import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
+import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceMemberDesc
 import ru.citeck.ecos.model.domain.workspace.dto.Workspace
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceAction
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMember
@@ -53,7 +54,7 @@ class WorkspaceProxyDao(
         const val WORKSPACE_QUERY_USER_ATT = "user"
 
         const val WORKSPACE_ATT_VISIBILITY = "visibility"
-        const val WORKSPACE_ATT_MEMBER_AUTHORITY = "workspaceMembers.authority"
+        const val WORKSPACE_ATT_MEMBER_AUTHORITY = "workspaceMembers.${WorkspaceMemberDesc.ATT_AUTHORITIES}"
 
         const val USER_WORKSPACES = "user-workspaces"
 
@@ -210,7 +211,7 @@ class WorkspaceProxyDao(
                             listOf(
                                 WorkspaceMember(
                                     memberId = user,
-                                    authority = AuthorityType.PERSON.getRef(user),
+                                    authorities = listOf(AuthorityType.PERSON.getRef(user)),
                                     memberRole = WorkspaceMemberRole.MANAGER
                                 )
                             )

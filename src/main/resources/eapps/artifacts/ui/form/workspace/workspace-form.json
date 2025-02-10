@@ -112,7 +112,7 @@
                               "custom": {
                                 "columns": [
                                   {
-                                    "name": "authority",
+                                    "name": "authorities",
                                     "formatter": "",
                                     "setAttributesManually": true,
                                     "title": {
@@ -120,7 +120,7 @@
                                       "en": "Authority"
                                     },
                                     "type": "authority",
-                                    "multiple": false
+                                    "multiple": true
                                   },
                                   {
                                     "name": "memberRole",

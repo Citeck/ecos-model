@@ -74,12 +74,12 @@ class WorkspaceArtifactsHandlerTest {
         assertThat(workspace.workspaceMembers).containsExactlyInAnyOrder(
             WorkspaceMember.create {
                 memberId = "test-workspace-member-user-artifact-child"
-                authority = EntityRef.create(AppName.EMODEL, "person", "test-user")
+                authorities = listOf(EntityRef.create(AppName.EMODEL, "person", "test-user"))
                 memberRole = WorkspaceMemberRole.MANAGER
             },
             WorkspaceMember.create {
                 memberId = "test-workspace-member-group-artifact-child"
-                authority = EntityRef.create(AppName.EMODEL, "authority-group", "test-group")
+                authorities = listOf(EntityRef.create(AppName.EMODEL, "authority-group", "test-group"))
                 memberRole = WorkspaceMemberRole.USER
             }
         )

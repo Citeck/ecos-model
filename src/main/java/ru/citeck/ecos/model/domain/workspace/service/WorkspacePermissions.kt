@@ -44,8 +44,8 @@ class WorkspacePermissions(
             return false
         }
 
-        val allowedWorkspaceAuthorityNames = workspace.members.map {
-            ecosAuthoritiesApi.getAuthorityName(it.authority)
+        val allowedWorkspaceAuthorityNames = workspace.members.flatMapTo(HashSet()) {
+            ecosAuthoritiesApi.getAuthorityNames(it.authorities)
         }
 
         return workspace.visibility == WorkspaceVisibility.PUBLIC ||
@@ -66,8 +66,12 @@ class WorkspacePermissions(
             return false
         }
 
-        val authorityNameByRoles = workspace.members.map {
-            ecosAuthoritiesApi.getAuthorityName(it.authority) to it.memberRole
+        val authorityNameByRoles = ArrayList<Pair<String, WorkspaceMemberRole>>()
+        for (member in workspace.members) {
+            val authNames = ecosAuthoritiesApi.getAuthorityNames(member.authorities)
+            for (authName in authNames) {
+                authorityNameByRoles.add(authName to member.memberRole)
+            }
         }
 
         return userAuthorities.contains(AuthRole.ADMIN) ||

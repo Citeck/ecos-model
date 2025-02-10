@@ -23,7 +23,7 @@ enum class WorkspaceAction {
 @JsonDeserialize(builder = WorkspaceMember.Builder::class)
 data class WorkspaceMember(
     val memberId: String,
-    val authority: EntityRef,
+    val authorities: List<EntityRef>,
     val memberRole: WorkspaceMemberRole
 ) {
 
@@ -45,12 +45,12 @@ data class WorkspaceMember(
     class Builder() {
 
         var memberId: String = ""
-        var authority: EntityRef = EntityRef.EMPTY
+        var authorities: List<EntityRef> = emptyList()
         var memberRole: WorkspaceMemberRole = WorkspaceMemberRole.USER
 
         constructor(base: WorkspaceMember) : this() {
             this.memberId = base.memberId
-            this.authority = base.authority
+            this.authorities = base.authorities
             this.memberRole = base.memberRole
         }
 
@@ -64,7 +64,15 @@ data class WorkspaceMember(
         }
 
         fun withAuthority(authority: EntityRef?): Builder {
-            this.authority = authority ?: EntityRef.EMPTY
+            return if (authority == null || authority.isEmpty()) {
+                withAuthorities(emptyList())
+            } else {
+                withAuthorities(listOf(authority))
+            }
+        }
+
+        fun withAuthorities(authorities: List<EntityRef>?): Builder {
+            this.authorities = authorities ?: emptyList()
             return this
         }
 
@@ -74,7 +82,7 @@ data class WorkspaceMember(
         }
 
         fun build(): WorkspaceMember {
-            return WorkspaceMember(memberId, authority, memberRole)
+            return WorkspaceMember(memberId, authorities, memberRole)
         }
     }
 }

@@ -412,7 +412,7 @@ class WorkspacePermissionsTest {
 
             val workspaceInfo = workspaceService.getWorkspace(created)
             val userRef = ecosAuthoritiesApi.getAuthorityRef(userName)
-            val userExistsInMembers = workspaceInfo.workspaceMembers.any { it.authority == userRef }
+            val userExistsInMembers = workspaceInfo.workspaceMembers.any { it.authorities.contains(userRef) }
 
             assertTrue(userExistsInMembers)
         }
@@ -440,7 +440,7 @@ class WorkspacePermissionsTest {
 
             val workspaceInfo = workspaceService.getWorkspace(created)
             val userRef = ecosAuthoritiesApi.getAuthorityRef(userName)
-            val userExistsInMembers = workspaceInfo.workspaceMembers.any { it.authority == userRef }
+            val userExistsInMembers = workspaceInfo.workspaceMembers.any { it.authorities.contains(userRef) }
 
             assertTrue(userExistsInMembers)
         }
@@ -488,7 +488,7 @@ class WorkspacePermissionsTest {
 
             val workspaceInfo = workspaceService.getWorkspace(created)
             val userRef = ecosAuthoritiesApi.getAuthorityRef(userName)
-            val userExistsInMembers = workspaceInfo.workspaceMembers.any { it.authority == userRef }
+            val userExistsInMembers = workspaceInfo.workspaceMembers.any { it.authorities.contains(userRef) }
 
             assertTrue(userExistsInMembers)
         }

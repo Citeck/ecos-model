@@ -10,7 +10,7 @@ object WorkspaceMemberDesc {
     const val SOURCE_ID = "workspace-member"
 
     const val ATT_MEMBER_ID = "memberId"
-    const val ATT_AUTHORITY = "authority"
+    const val ATT_AUTHORITIES = "authorities"
     const val ATT_MEMBER_ROLE = "memberRole"
 
     fun getRef(id: String): EntityRef {

@@ -61,7 +61,7 @@ class EmodelWorkspaceService(
         }
         val managers = workspaceData.workspaceMembers
             ?.filter { it.memberRole == WorkspaceMemberRole.MANAGER }
-            ?.mapNotNull { it.authority }
+            ?.flatMapTo(HashSet()) { it.authorities ?: emptyList() }
 
         if (managers.isNullOrEmpty()) {
             return false
@@ -168,7 +168,7 @@ class EmodelWorkspaceService(
         AuthContext.runAsSystem {
             val workspaceMember = WorkspaceMember(
                 memberId = "user-join-$currentUser",
-                authority = ecosAuthoritiesApi.getAuthorityRef(currentUser),
+                authorities = listOf(ecosAuthoritiesApi.getAuthorityRef(currentUser)),
                 memberRole = WorkspaceMemberRole.USER
             )
 
@@ -176,18 +176,27 @@ class EmodelWorkspaceService(
         }
     }
 
-    fun addMember(workspace: EntityRef, member: WorkspaceMember) {
+    fun addMember(workspace: EntityRef, memberToAdd: WorkspaceMember) {
         val workspaceInfo = getWorkspace(workspace)
 
-        val isNewMember = workspaceInfo.workspaceMembers.none { it.authority == member.authority }
-        require(isNewMember) { "Member: ${member.authority} already exists in workspace: $workspace" }
+        val existentAuthorities = hashSetOf<EntityRef>()
+        for (wsMember in workspaceInfo.workspaceMembers) {
+            for (wsMemberAuthority in wsMember.authorities) {
+                if (memberToAdd.authorities.contains(wsMemberAuthority)) {
+                    existentAuthorities.add(wsMemberAuthority)
+                }
+            }
+        }
+        require(existentAuthorities.isEmpty()) {
+            "Members: ${existentAuthorities.joinToString()} already exists in workspace: $workspace"
+        }
 
         recordsService.mutate(
             WorkspaceMemberDesc.getRef(""),
             mapOf(
-                WorkspaceMemberDesc.ATT_MEMBER_ID to member.memberId,
-                WorkspaceMemberDesc.ATT_AUTHORITY to member.authority,
-                WorkspaceMemberDesc.ATT_MEMBER_ROLE to member.memberRole,
+                WorkspaceMemberDesc.ATT_MEMBER_ID to memberToAdd.memberId,
+                WorkspaceMemberDesc.ATT_AUTHORITIES to memberToAdd.authorities,
+                WorkspaceMemberDesc.ATT_MEMBER_ROLE to memberToAdd.memberRole,
                 RecordConstants.ATT_PARENT to workspace,
                 RecordConstants.ATT_PARENT_ATT to "workspaceMembers",
             )
@@ -204,7 +213,7 @@ class EmodelWorkspaceService(
         val workspaceMembers: List<MemberInfo>?
     ) {
         class MemberInfo(
-            val authority: EntityRef?,
+            val authorities: List<EntityRef>?,
             val memberRole: WorkspaceMemberRole?
         )
     }

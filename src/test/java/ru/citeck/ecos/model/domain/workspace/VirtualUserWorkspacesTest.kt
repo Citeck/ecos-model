@@ -59,12 +59,12 @@ class VirtualUserWorkspacesTest {
             workspaceMembers = listOf(
                 WorkspaceMember(
                     memberId = "default-administrators",
-                    authority = AuthorityType.GROUP.getRef("ECOS_ADMINISTRATORS"),
+                    authorities = listOf(AuthorityType.GROUP.getRef("ECOS_ADMINISTRATORS")),
                     memberRole = WorkspaceMemberRole.MANAGER
                 ),
                 WorkspaceMember(
                     memberId = "default-all-users",
-                    authority = AuthorityType.GROUP.getRef("EVERYONE"),
+                    authorities = listOf(AuthorityType.GROUP.getRef("EVERYONE")),
                     memberRole = WorkspaceMemberRole.USER
                 )
             ),
@@ -82,7 +82,7 @@ class VirtualUserWorkspacesTest {
             workspaceMembers = listOf(
                 WorkspaceMember(
                     memberId = "ron",
-                    authority = AuthorityType.PERSON.getRef("ron"),
+                    authorities = listOf(AuthorityType.PERSON.getRef("ron")),
                     memberRole = WorkspaceMemberRole.MANAGER
                 )
             ),
@@ -100,7 +100,7 @@ class VirtualUserWorkspacesTest {
             workspaceMembers = listOf(
                 WorkspaceMember(
                     memberId = "harry",
-                    authority = AuthorityType.PERSON.getRef("harry"),
+                    authorities = listOf(AuthorityType.PERSON.getRef("harry")),
                     memberRole = WorkspaceMemberRole.MANAGER
                 )
             ),
@@ -122,17 +122,17 @@ class VirtualUserWorkspacesTest {
             workspaceMembers = listOf(
                 WorkspaceMember(
                     memberId = "gryffindor-member-harry",
-                    authority = "emodel/person@harry".toEntityRef(),
+                    authorities = listOf("emodel/person@harry".toEntityRef()),
                     memberRole = WorkspaceMemberRole.MANAGER
                 ),
                 WorkspaceMember(
                     memberId = "gryffindor-member-ron",
-                    authority = "emodel/person@ron".toEntityRef(),
+                    authorities = listOf("emodel/person@ron".toEntityRef()),
                     memberRole = WorkspaceMemberRole.USER
                 ),
                 WorkspaceMember(
                     memberId = "gryffindor-manager-group",
-                    authority = "emodel/authority-group@gryffindor-managers".toEntityRef(),
+                    authorities = listOf("emodel/authority-group@gryffindor-managers".toEntityRef()),
                     memberRole = WorkspaceMemberRole.MANAGER
                 )
             ),

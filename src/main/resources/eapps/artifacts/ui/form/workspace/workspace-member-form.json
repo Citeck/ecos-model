@@ -28,19 +28,21 @@
                 "components": [
                   {
                     "label": {
-                      "ru": "Группа или пользователь",
-                      "en": "Authority"
+                      "ru": "Группы или пользователи",
+                      "en": "Authorities"
                     },
-                    "key": "authority",
+                    "key": "authorities",
+                    "multiple": true,
                     "validate": {
                       "required": true
                     },
                     "allowedGroupType": "ROLE, BRANCH, GROUP",
+                    "defaultValue": "",
                     "refreshOn": [],
                     "optionalWhenDisabled": false,
                     "type": "selectOrgstruct",
                     "input": true,
-                    "defaultValue": ""
+                    "reorder": false
                   }
                 ],
                 "type": "column",

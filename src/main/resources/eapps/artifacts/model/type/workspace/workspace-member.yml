@@ -19,11 +19,18 @@ model:
       name:
         ru: Идентификатор участника
         en: Member identifier
+    - id: authorities
+      name:
+        ru: Группы или пользователи
+        en: Authorities
+      mandatory: true
+      multiple: true
+      type: AUTHORITY
+    # Legacy att. remove it after MakeMemberAuthoritiesAsMultipleAtt execution
     - id: authority
       name:
         ru: Группа или пользователь
         en: Authority
-      mandatory: true
       type: AUTHORITY
     - id: memberRole
       name:
