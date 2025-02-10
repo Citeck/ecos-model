@@ -9,6 +9,7 @@ dispNameTemplate:
   en: '${title}'
 
 storageType: ECOS_MODEL
+system: true
 
 dashboardType: publication-details
 
