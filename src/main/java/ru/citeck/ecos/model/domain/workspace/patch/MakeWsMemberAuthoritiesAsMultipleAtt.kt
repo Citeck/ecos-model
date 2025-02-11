@@ -7,6 +7,7 @@ import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceMemberDesc
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
+import ru.citeck.ecos.txn.lib.TxnContext
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.patch.annotaion.EcosLocalPatch
 import java.util.concurrent.Callable
@@ -39,14 +40,16 @@ class MakeWsMemberAuthoritiesAsMultipleAtt(
 
         for (workspace in workspacesToUpdate) {
             if (EntityRef.isNotEmpty(workspace.authority)) {
-                recordsService.mutate(
-                    workspace.id,
-                    mapOf(
-                        WorkspaceMemberDesc.ATT_AUTHORITIES to listOf(workspace.authority),
-                        DbRecordsControlAtts.DISABLE_AUDIT to true,
-                        DbRecordsControlAtts.DISABLE_EVENTS to true
+                TxnContext.doInNewTxn {
+                    recordsService.mutate(
+                        workspace.id,
+                        mapOf(
+                            WorkspaceMemberDesc.ATT_AUTHORITIES to listOf(workspace.authority),
+                            DbRecordsControlAtts.DISABLE_AUDIT to true,
+                            DbRecordsControlAtts.DISABLE_EVENTS to true
+                        )
                     )
-                )
+                }
             } else {
                 log.warn { "Authority att is empty for ${workspace.id}" }
             }
