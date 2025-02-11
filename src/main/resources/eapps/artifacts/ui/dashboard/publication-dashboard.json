@@ -138,37 +138,17 @@
     "v2": {
       "widgets": [
         {
-          "dndId": "9b8f6180-1a68-4c8f-9e21-249ef2f1143d",
-          "name": "properties",
-          "label": "dashboard-settings.widget.properties",
-          "id": "ecbede90-a55d-423a-9b6b-3ac523600335",
+          "name": "publication",
+          "label": "dashboard-settings.widget.publication",
+          "additionalProps": {},
+          "dndId": "eb52dc73-ead1-486f-95fe-b9411ba55f04",
+          "id": "11719860-ddf9-431b-8321-f423bda182ce",
           "props": {
-            "maxHeightByContent": true,
-            "view": {
-              "options": [
-                {
-                  "value": "VIEW",
-                  "label": "widget-settings.form-condition.view"
-                },
-                {
-                  "value": "EDIT",
-                  "label": "widget-settings.form-condition.edit"
-                }
-              ],
-              "default": "VIEW"
-            },
-            "id": "ecbede90-a55d-423a-9b6b-3ac523600335",
+            "id": "11719860-ddf9-431b-8321-f423bda182ce",
             "config": {
               "widgetDisplayCondition": null,
-              "elementsDisplayCondition": {},
-              "v2": {},
-              "version": "v2",
-              "formMode": "VIEW"
+              "elementsDisplayCondition": {}
             }
-          },
-          "description": {
-            "ru": "Основное",
-            "en": "General"
           }
         },
         {
@@ -203,7 +183,7 @@
           "columns": [
             {
               "widgets": [
-                "ecbede90-a55d-423a-9b6b-3ac523600335",
+                "11719860-ddf9-431b-8321-f423bda182ce",
                 "291afa3a-50c1-4a3a-9700-8b85767926af"
               ]
             }
@@ -224,7 +204,7 @@
           "columns": [
             {
               "widgets": [
-                "ecbede90-a55d-423a-9b6b-3ac523600335"
+                "11719860-ddf9-431b-8321-f423bda182ce"
               ]
             }
           ]
