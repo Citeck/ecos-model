@@ -2,16 +2,17 @@ package ru.citeck.ecos.model.domain.workspace.patch
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
+import ru.citeck.ecos.data.sql.records.DbRecordsControlAtts
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceMemberDesc
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.webapp.api.entity.EntityRef
-import ru.citeck.ecos.webapp.lib.patch.annotaion.EcosPatch
+import ru.citeck.ecos.webapp.lib.patch.annotaion.EcosLocalPatch
 import java.util.concurrent.Callable
 
 @Component
-@EcosPatch("make-ws-member-authorities-as-multiple-att", "2025-02-10T00:00:00Z")
+@EcosLocalPatch("make-ws-member-authorities-as-multiple-att", "2025-02-10T00:00:00Z")
 class MakeWsMemberAuthoritiesAsMultipleAtt(
     val recordsService: RecordsService
 ) : Callable<Any> {
@@ -30,6 +31,7 @@ class MakeWsMemberAuthoritiesAsMultipleAtt(
         ).getRecords()
 
         if (workspacesToUpdate.isEmpty()) {
+            log.info { "Nothing to update" }
             return "[]"
         }
 
@@ -37,10 +39,13 @@ class MakeWsMemberAuthoritiesAsMultipleAtt(
 
         for (workspace in workspacesToUpdate) {
             if (EntityRef.isNotEmpty(workspace.authority)) {
-                recordsService.mutateAtt(
+                recordsService.mutate(
                     workspace.id,
-                    WorkspaceMemberDesc.ATT_AUTHORITIES,
-                    listOf(workspace.authority)
+                    mapOf(
+                        WorkspaceMemberDesc.ATT_AUTHORITIES to listOf(workspace.authority),
+                        DbRecordsControlAtts.DISABLE_AUDIT to true,
+                        DbRecordsControlAtts.DISABLE_EVENTS to true
+                    )
                 )
             } else {
                 log.warn { "Authority att is empty for ${workspace.id}" }

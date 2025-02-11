@@ -26,15 +26,16 @@ model:
       mandatory: true
       multiple: true
       type: AUTHORITY
-    # Legacy att. remove it after MakeMemberAuthoritiesAsMultipleAtt execution
-    - id: authority
-      name:
-        ru: Группа или пользователь
-        en: Authority
-      type: AUTHORITY
     - id: memberRole
       name:
         ru: Роль
         en: Role
       mandatory: true
       type: TEXT
+  systemAttributes:
+    # Legacy att. remove it after MakeWsMemberAuthoritiesAsMultipleAtt execution
+    - id: authority
+      name:
+        ru: Группа или пользователь
+        en: Authority
+      type: AUTHORITY
