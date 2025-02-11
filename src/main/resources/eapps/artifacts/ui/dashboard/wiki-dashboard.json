@@ -138,22 +138,16 @@
     "v2": {
       "widgets": [
         {
-          "name": "html",
-          "label": "HTML",
+          "name": "hierarchical-tree",
+          "label": "dashboard-settings.widget.hierarchical-tree",
           "additionalProps": {},
-          "dndId": "70807372-5751-4153-836e-c872db7759e0",
-          "id": "672ef4f6-58a7-45e9-952e-09ce31ac08f1",
+          "dndId": "82220ba7-a10c-4b61-8321-73cbe0c655c0",
+          "id": "7dc8f609-39b9-4d7e-8043-1ffddb9b786a",
           "props": {
-            "id": "672ef4f6-58a7-45e9-952e-09ce31ac08f1",
+            "id": "7dc8f609-39b9-4d7e-8043-1ffddb9b786a",
             "config": {
               "widgetDisplayCondition": null,
-              "elementsDisplayCondition": {},
-              "87b1db88-55f6-4d6c-b32e-d83df296f7fb": {
-                "title": {
-                  "ru": "Навигация"
-                },
-                "htmlString": "<ul class=\"tree\">\n  <li>\n    <details open>\n      <summary>1. Организационные правила и процедуры</summary>\n      <ul>\n        <li>Организационные регламенты</li>\n        <li>Проектные регламенты</li>\n        <li>Регламент обращений к поставщикам/партнёрам</li>\n        <li>Регламенты внутреннего ИТ</li>\n        <li>Календарь дежурств Инфраструктуры</li>\n      </ul>\n    </details>\n  </li>\n  <li>\n    <details>\n      <summary>2. Разработчику</summary>\n      <ul>\n        <li>Новичкам</li>\n        <li><a href=\"/v2/dashboard?recordRef=emodel/company-wiki@91c9a31d-0704-4e7a-96e5-620c44d8577e&ws=publications-news\">Java Style-guide</a></li>\n        <li>JavaScript Style-guide</li>\n        <li>\n         <details open>\n            <summary>Система грейдов</summary>\n            <ul>\n              <li>Общие правила</li>\n              <li>Проектные регламенты</li>\n              <li>Коробочные регламенты</li>\n            </ul>\n          </details>\n        </li>\n        <li>Полезные скрипты</li>\n      </ul>\n    </details>\n  </li>\n  <li>\n    <details>\n      <summary>3. Специалисту поддержки</summary>\n      <ul>\n        <li>Uranus</li>\n        <li>Neptune</li>\n      </ul>\n    </details>\n   </li>\n   <li>\n    <details>\n      <summary>4. Аналитику</summary>\n      <ul>\n        <li>Uranus</li>\n        <li>Neptune</li>\n      </ul>\n    </details>\n  </li>\n  <li>\n    <details>\n      <summary>5. Администратору/DevOps</summary>\n      <ul>\n        <li>Uranus</li>\n        <li>Neptune</li>\n      </ul>\n    </details>\n  </li>\n  <li>\n    <details open>\n      <summary>6. Пректному менеджеру</summary>\n      <ul>\n        <li>Шаблоны и методики оценки стоимости</li>\n        <li>Чек-лист проектного управления</li>\n        <li>Разработанные прототипы</li>\n        <li>Демонстрационный стенд</li>\n      </ul>\n    </details>\n  </li>\n</ul>\n<style>\n.tree {\n  --spacing: 1.5rem;\n  --radius: 10px;\n}\n\n.tree li {\n  display: block;\n  position: relative;\n  padding-left: calc(2 * var(--spacing) - var(--radius) - 10px);\n}\n\n.tree ul {\n  margin-left: calc(var(--radius) - var(--spacing));\n  padding-left: 0;\n}\n\n.tree a {\n  color: inherit; /* blue colors for links too */\n  text-decoration: inherit; /* no underline */\n}\n\n.tree ul li {\n  border-left: 2px solid #ddd;\n}\n\n.tree ul li:last-child {\n  border-color: transparent;\n}\n\n.tree ul li::before {\n  content: '';\n  display: block;\n  position: absolute;\n  top: calc(var(--spacing) / -2);\n  left: -2px;\n  width: calc(var(--spacing) + 2px);\n  height: calc(var(--spacing) + 1px);\n  border: solid #ddd;\n  border-width: 0 0 2px 2px;\n}\n\n.tree summary {\n  display: block;\n  font-weight: 700;\n  cursor: pointer;\n}\n\n.tree summary::marker,\n.tree summary::-webkit-details-marker {\n  display: none;\n}\n\n.tree summary:focus {\n  outline: none;\n}\n\n.tree summary:focus-visible {\n  outline: 1px dotted #000;\n}\n\n.tree li::after,\n.tree summary::before {\n  content: '';\n  display: block;\n  position: absolute;\n  top: calc(var(--spacing) / 1.4 - var(--radius));\n  left: calc(var(--spacing) - var(--radius));\n  width: calc(1 * var(--radius));\n  height: calc(1 * var(--radius));\n  border-radius: 50%;\n  background: #ddd;\n}\n\n.tree summary::before {\n  z-index: 1;\n  background: #7396cd url('expand-collapse.svg') 0 0;\n}\n\n.tree details[open] > summary::before {\n  background-position: calc(-2 * var(--radius)) 0;\n}\n</style>\n\n\n<h4 style=\"margin-top:60px\">Последние публикации</h4>\n<div class=\"latest-tree\">\n   <ul>\n      <li><a href=\"/v2/dashboard?recordRef=emodel/company-wiki@91c9a31d-0704-4e7a-96e5-620c44d8577e&ws=publications-news\">Java Style-guide</a></li>\n      <li>Регламенты внутреннего ИТ</li>\n      <li>Проектные регламенты</li>\n   </ul>\n</div>\n\n<style>\n   .latest-tree ul {\n     list-style-type: circle;\n   }\n   .latest-tree a {\n      color: inherit; /* blue colors for links too */\n      text-decoration: inherit; /* no underline */\n   }\n</style>"
-              }
+              "elementsDisplayCondition": {}
             }
           },
           "description": {
@@ -207,19 +201,24 @@
             },
             "idLayout": "layout_799ac5e5-9eab-4c08-af80-5ed48d768229"
           },
-          "type": "2-columns-small-big",
+          "type": "3-columns-center-big",
           "columns": [
             {
               "widgets": [
-                "672ef4f6-58a7-45e9-952e-09ce31ac08f1"
+                "7dc8f609-39b9-4d7e-8043-1ffddb9b786a"
               ],
-              "width": "25%"
+              "width": "20%"
             },
             {
               "widgets": [
-                "936b5608-1180-4482-aae0-5781336964da",
-                "291afa3a-50c1-4a3a-9700-8b85767926af"
+                "936b5608-1180-4482-aae0-5781336964da"
               ]
+            },
+            {
+              "widgets": [
+                "291afa3a-50c1-4a3a-9700-8b85767926af"
+              ],
+              "width": "20%"
             }
           ]
         }
