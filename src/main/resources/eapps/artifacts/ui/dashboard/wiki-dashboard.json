@@ -201,24 +201,19 @@
             },
             "idLayout": "layout_799ac5e5-9eab-4c08-af80-5ed48d768229"
           },
-          "type": "3-columns-center-big",
+          "type": "2-columns-small-big",
           "columns": [
             {
               "widgets": [
                 "7dc8f609-39b9-4d7e-8043-1ffddb9b786a"
               ],
-              "width": "20%"
+              "width": "25%"
             },
             {
               "widgets": [
-                "936b5608-1180-4482-aae0-5781336964da"
-              ]
-            },
-            {
-              "widgets": [
+                "936b5608-1180-4482-aae0-5781336964da",
                 "291afa3a-50c1-4a3a-9700-8b85767926af"
-              ],
-              "width": "20%"
+              ]
             }
           ]
         }
