@@ -1801,27 +1801,12 @@
                     "key": "columns3",
                     "columns": [
                       {
-                        "components": [
-                          {
-                            "label": {
-                              "en": "Default create variant",
-                              "ru": "Вариант создания по умолчанию"
-                            },
-                            "key": "defaultCreateVariant",
-                            "labelPosition": "top",
-                            "hasThreeStates": true,
-                            "defaultValue": true,
-                            "refreshOn": [],
-                            "optionalWhenDisabled": false,
-                            "type": "checkbox",
-                            "input": true,
-                            "tab": 6
-                          }
-                        ],
+                        "components": [],
                         "type": "column",
                         "input": false,
                         "key": "column",
-                        "index": 0
+                        "index": 0,
+                        "md": 1
                       },
                       {
                         "index": 1,
@@ -1831,15 +1816,52 @@
                         "components": [
                           {
                             "label": {
+                              "ru": "Действие после создания",
+                              "en": "Action after creation"
+                            },
+                            "key": "postCreateActionRef",
+                            "modalTitle": "",
+                            "journalId": "ui-actions",
+                            "queryData": "",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "selectJournal",
+                            "input": true
+                          }
+                        ],
+                        "md": 4
+                      },
+                      {
+                        "md": 7,
+                        "type": "column",
+                        "input": false,
+                        "key": "column",
+                        "index": 2,
+                        "components": [
+                          {
+                            "label": {
                               "ru": "Добавить варианты создания дочерних типов",
                               "en": "Add create variants for child types"
                             },
                             "key": "createVariantsForChildTypes",
-                            "labelPosition": "top",
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
                             "type": "checkbox",
                             "input": true
+                          },
+                          {
+                            "label": {
+                              "en": "Default create variant",
+                              "ru": "Вариант создания по умолчанию"
+                            },
+                            "key": "defaultCreateVariant",
+                            "hasThreeStates": true,
+                            "defaultValue": true,
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "checkbox",
+                            "input": true,
+                            "tab": 6
                           }
                         ]
                       }
