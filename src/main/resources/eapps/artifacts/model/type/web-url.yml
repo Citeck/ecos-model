@@ -9,6 +9,8 @@ name:
   ru: Веб ссылка
   en: Web URL
 
+postCreateActionRef: uiserv/action@none
+
 dispNameTemplate:
   en: "${url}"
 

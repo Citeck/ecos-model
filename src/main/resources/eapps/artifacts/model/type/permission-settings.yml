@@ -12,6 +12,8 @@ journalRef: uiserv/journal@DEFAULT_JOURNAL
 
 queryPermsPolicy: PUBLIC
 
+postCreateActionRef: uiserv/action@none
+
 actions:
   - uiserv/action@edit-json
   - uiserv/action@edit

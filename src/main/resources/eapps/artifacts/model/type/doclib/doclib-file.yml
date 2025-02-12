@@ -24,6 +24,8 @@ actions:
 
 queryPermsPolicy: OWN
 
+postCreateActionRef: uiserv/action@none
+
 aspects:
   - ref: emodel/aspect@doclib
 

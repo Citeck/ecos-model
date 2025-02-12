@@ -9,6 +9,8 @@ parentRef: emodel/type@user-base
 system: false
 storageType: ECOS_MODEL
 
+postCreateActionRef: uiserv/action@none
+
 inheritActions: false
 actions:
   - uiserv/action@edit

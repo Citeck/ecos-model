@@ -10,3 +10,5 @@ formRef: uiserv/form@directory-form
 system: true
 dashboardType: case-details
 storageType: ECOS_MODEL
+
+postCreateActionRef: uiserv/action@none

@@ -16,6 +16,8 @@ actions:
   - uiserv/action@edit
   - uiserv/action@delete
 
+postCreateActionRef: uiserv/action@none
+
 model:
   attributes:
     - id: name

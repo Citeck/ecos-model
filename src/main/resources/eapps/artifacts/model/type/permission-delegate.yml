@@ -11,6 +11,8 @@ system: true
 
 storageType: ECOS_MODEL
 
+postCreateActionRef: uiserv/action@none
+
 model:
   systemAttributes:
     - id: permissionType

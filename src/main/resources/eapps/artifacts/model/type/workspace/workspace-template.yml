@@ -17,6 +17,8 @@ actions:
   - uiserv/action@update-workspace-template
   - uiserv/action@download-base64-data-zip
 
+postCreateActionRef: uiserv/action@none
+
 createVariants:
   - id: create
     name: { ru: Создать, en: Create }

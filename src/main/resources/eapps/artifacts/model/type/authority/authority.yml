@@ -10,6 +10,8 @@ storageType: ECOS_MODEL
 
 queryPermsPolicy: PUBLIC
 
+postCreateActionRef: uiserv/action@none
+
 properties:
   alfType: cm:authority
 

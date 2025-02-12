@@ -10,6 +10,8 @@ journalRef: uiserv/journal@auth-delegations
 
 system: true
 
+postCreateActionRef: uiserv/action@none
+
 actions:
   - uiserv/action@delete
 

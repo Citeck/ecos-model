@@ -13,6 +13,7 @@ journalRef: uiserv/journal@workspaces-journal
 formRef: uiserv/form@workspace-form
 
 defaultCreateVariant: true
+postCreateActionRef: uiserv/action@none
 
 queryPermsPolicy: PUBLIC
 
