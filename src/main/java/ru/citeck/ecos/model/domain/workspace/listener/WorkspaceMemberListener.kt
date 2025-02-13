@@ -2,6 +2,7 @@ package ru.citeck.ecos.model.domain.workspace.listener
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
+import ru.citeck.ecos.commons.utils.StringUtils
 import ru.citeck.ecos.events2.EventsService
 import ru.citeck.ecos.events2.type.RecordChangedEvent
 import ru.citeck.ecos.events2.type.RecordCreatedEvent
@@ -134,23 +135,28 @@ class WorkspaceMemberListener(
     }
 
     private fun sendNotification(workspaceRef: EntityRef, recipients: Set<String>, templateRef: EntityRef) {
-        notificationService.send(
-            Notification.Builder()
-                .recipients(recipients)
-                .record(workspaceRef)
-                .notificationType(NotificationType.EMAIL_NOTIFICATION)
-                .templateRef(templateRef)
-                .build()
-        )
+        if (recipients.isNotEmpty()) {
+            notificationService.send(
+                Notification.Builder()
+                    .recipients(recipients)
+                    .record(workspaceRef)
+                    .notificationType(NotificationType.EMAIL_NOTIFICATION)
+                    .templateRef(templateRef)
+                    .build()
+            )
+        }
     }
 
     private fun getEmailsFromAuthorities(authorities: List<EntityRef>): Set<String> {
         val emails = mutableSetOf<String>()
-        authorities.forEach {
-            if (it.getSourceId() == AuthorityType.GROUP.sourceId) {
-                emails.addAll(getPersonEmailsFromGroup(it))
+        authorities.forEach { authority ->
+            if (authority.getSourceId() == AuthorityType.GROUP.sourceId) {
+                emails.addAll(getPersonEmailsFromGroup(authority).filter { StringUtils.isNotBlank(it) })
             } else {
-                emails.add(getEmailFromPerson(it))
+                val emailFromPerson = getEmailFromPerson(authority)
+                if (StringUtils.isNotBlank(emailFromPerson)) {
+                    emails.add(emailFromPerson)
+                }
             }
         }
         return emails
