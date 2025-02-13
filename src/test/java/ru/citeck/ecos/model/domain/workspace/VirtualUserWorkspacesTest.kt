@@ -7,8 +7,10 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.MockBean
 import ru.citeck.ecos.apps.app.service.LocalAppService
 import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.data.MLText
@@ -25,6 +27,9 @@ import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMemberRole
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceVisibility
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.workspace.USER_WORKSPACE_PREFIX
+import ru.citeck.ecos.notifications.lib.Notification
+import ru.citeck.ecos.notifications.lib.NotificationType
+import ru.citeck.ecos.notifications.lib.service.NotificationService
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.ScalarType
@@ -45,6 +50,9 @@ class VirtualUserWorkspacesTest {
 
     @Autowired
     private lateinit var localAppService: LocalAppService
+
+    @MockBean
+    private lateinit var notificationService: NotificationService
 
     companion object {
         private val personalWsIconRef = EntityRef.valueOf("uiserv/icon@personal-workspace-icon")
@@ -146,6 +154,21 @@ class VirtualUserWorkspacesTest {
         AuthContext.runAsSystem {
             localAppService.deployLocalArtifacts("model/workspace")
         }
+
+        val notification = Notification.Builder()
+            .record(EntityRef.valueOf("emodel/workspace@default"))
+            .notificationType(NotificationType.EMAIL_NOTIFICATION)
+            .recipients(listOf("admin@admin.ru"))
+            .templateRef(EntityRef.valueOf("notifications/template@workspace-add-member-notification"))
+            .build()
+
+        verify(notificationService).send(
+            org.mockito.kotlin.check {
+                assertThat(it.record).isEqualTo(notification.record)
+                assertThat(it.recipients).isEqualTo(notification.recipients)
+                assertThat(it.templateRef).isEqualTo(notification.templateRef)
+            }
+        )
     }
 
     @AfterAll
