@@ -7,10 +7,8 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
-import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import ru.citeck.ecos.apps.app.service.LocalAppService
 import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.data.MLText
@@ -18,6 +16,7 @@ import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.context.lib.i18n.I18nContext
 import ru.citeck.ecos.model.EcosModelApp
+import ru.citeck.ecos.model.TestNotificationService
 import ru.citeck.ecos.model.domain.workspace.WorkspacePermissionsTest.Companion.GRYFFINDOR_WORKSPACE
 import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
@@ -27,8 +26,6 @@ import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMemberRole
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceVisibility
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.workspace.USER_WORKSPACE_PREFIX
-import ru.citeck.ecos.notifications.lib.Notification
-import ru.citeck.ecos.notifications.lib.NotificationType
 import ru.citeck.ecos.notifications.lib.service.NotificationService
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
@@ -51,7 +48,7 @@ class VirtualUserWorkspacesTest {
     @Autowired
     private lateinit var localAppService: LocalAppService
 
-    @MockBean
+    @Autowired
     private lateinit var notificationService: NotificationService
 
     companion object {
@@ -154,21 +151,6 @@ class VirtualUserWorkspacesTest {
         AuthContext.runAsSystem {
             localAppService.deployLocalArtifacts("model/workspace")
         }
-
-        val notification = Notification.Builder()
-            .record(EntityRef.valueOf("emodel/workspace@default"))
-            .notificationType(NotificationType.EMAIL_NOTIFICATION)
-            .recipients(listOf("admin@admin.ru"))
-            .templateRef(EntityRef.valueOf("notifications/template@workspace-add-member-notification"))
-            .build()
-
-        verify(notificationService).send(
-            org.mockito.kotlin.check {
-                assertThat(it.record).isEqualTo(notification.record)
-                assertThat(it.recipients).isEqualTo(notification.recipients)
-                assertThat(it.templateRef).isEqualTo(notification.templateRef)
-            }
-        )
     }
 
     @AfterAll
@@ -187,6 +169,8 @@ class VirtualUserWorkspacesTest {
                 ).getRecords()
             )
         }
+
+        (notificationService as? TestNotificationService.NotificationServiceTestImpl)?.cleanNotificationStorage()
     }
 
     @Test

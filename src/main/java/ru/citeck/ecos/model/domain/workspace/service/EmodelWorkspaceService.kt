@@ -1,8 +1,10 @@
 package ru.citeck.ecos.model.domain.workspace.service
 
 import org.springframework.stereotype.Service
+import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthGroup
+import ru.citeck.ecos.data.sql.records.DbRecordsControlAtts
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
 import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao.Companion.WORKSPACE_ATT_MEMBER_AUTHORITY
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
@@ -134,8 +136,11 @@ class EmodelWorkspaceService(
         return recordsService.getAtts(workspace, Workspace::class.java)
     }
 
-    fun mutateWorkspace(workspace: Workspace): EntityRef {
-        val workspaceWithoutMembers = workspace.copy(workspaceMembers = emptyList())
+    fun mutateWorkspace(workspace: Workspace, isDeployArtefact: Boolean = false): EntityRef {
+        val workspaceWithoutMembers = ObjectData.create(workspace.copy(workspaceMembers = emptyList()))
+        if (isDeployArtefact) {
+            workspaceWithoutMembers[DbRecordsControlAtts.DISABLE_EVENTS] = true
+        }
 
         val createdWorkspace = recordsService.mutate(
             EntityRef.create(AppName.EMODEL, WorkspaceDesc.SOURCE_ID, ""),
