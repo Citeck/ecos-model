@@ -43,7 +43,9 @@
                   "en": "This alias will be used to search for the type in the email title."
                 },
                 "validate": {
-                  "required": true
+                  "required": true,
+                  "pattern": "^[A-Za-zА-ЯЁа-яё0-9]+$",
+                  "customMessage": "Алиас может содержать только буквы и цифры"
                 },
                 "defaultValue": "",
                 "refreshOn": [],
