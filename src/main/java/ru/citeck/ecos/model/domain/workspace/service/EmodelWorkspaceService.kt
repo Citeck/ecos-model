@@ -136,9 +136,9 @@ class EmodelWorkspaceService(
         return recordsService.getAtts(workspace, Workspace::class.java)
     }
 
-    fun mutateWorkspace(workspace: Workspace, isDeployArtefact: Boolean = false): EntityRef {
+    fun mutateWorkspace(workspace: Workspace, isDeployArtifact: Boolean = false): EntityRef {
         val workspaceWithoutMembers = ObjectData.create(workspace.copy(workspaceMembers = emptyList()))
-        if (isDeployArtefact) {
+        if (isDeployArtifact) {
             workspaceWithoutMembers[DbRecordsControlAtts.DISABLE_EVENTS] = true
         }
 

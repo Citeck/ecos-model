@@ -2,7 +2,6 @@ package ru.citeck.ecos.model.domain.workspace.listener
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
-import ru.citeck.ecos.commons.utils.StringUtils
 import ru.citeck.ecos.events2.EventsService
 import ru.citeck.ecos.events2.type.RecordChangedEvent
 import ru.citeck.ecos.events2.type.RecordCreatedEvent
@@ -89,10 +88,8 @@ class WorkspaceMemberListener(
     }
 
     private fun sendNotificationWhenWorkspaceCreated(workspaceCreated: WorkspaceCreated) {
-        val emails = workspaceCreated.members.flatMap { getEmailsFromAuthorities(it.authorities) }.toSet()
-        if (emails.isNotEmpty()) {
-            sendNotification(workspaceCreated.record, emails, addMemberNotificationTemplate)
-        }
+        val authorities = workspaceCreated.members.flatMapTo(HashSet()) { it.authorities }
+        sendNotification(workspaceCreated.record, authorities, addMemberNotificationTemplate)
     }
 
     private fun sendNotificationWhenWorkspaceChanged(workspaceChanged: WorkspaceChanged) {
@@ -104,8 +101,8 @@ class WorkspaceMemberListener(
 
         if (workspaceMembersDiff.added.isNotEmpty()) {
             val members = recordsService.getAtts(workspaceMembersDiff.added, WorkspaceMember::class.java)
-            val emails = members.flatMap { getEmailsFromAuthorities(it.authorities) }.toSet()
-            sendNotification(workspaceChanged.record, emails, addMemberNotificationTemplate)
+            val authorities = members.flatMapTo(HashSet()) { it.authorities }
+            sendNotification(workspaceChanged.record, authorities, addMemberNotificationTemplate)
         }
     }
 
@@ -117,24 +114,32 @@ class WorkspaceMemberListener(
         }
 
         if (authoritiesDiff.added.isNotEmpty()) {
-            val emails = getEmailsFromAuthorities(authoritiesDiff.added)
-            sendNotification(workspaceMemberChanged.workspaceRef, emails, addMemberNotificationTemplate)
+            sendNotification(
+                workspaceMemberChanged.workspaceRef,
+                authoritiesDiff.added,
+                addMemberNotificationTemplate
+            )
         }
 
         if (authoritiesDiff.removed.isNotEmpty()) {
-            val emails = getEmailsFromAuthorities(authoritiesDiff.removed)
-            sendNotification(workspaceMemberChanged.workspaceRef, emails, removeMemberNotificationTemplate)
+            sendNotification(
+                workspaceMemberChanged.workspaceRef,
+                authoritiesDiff.removed,
+                removeMemberNotificationTemplate
+            )
         }
     }
 
     private fun sendNotificationWhenWorkspaceMemberDeleted(workspaceMemberDeleted: WorkspaceMemberDeleted) {
-        val emails = getEmailsFromAuthorities(workspaceMemberDeleted.authorities)
-        if (emails.isNotEmpty()) {
-            sendNotification(workspaceMemberDeleted.workspaceRef, emails, removeMemberNotificationTemplate)
-        }
+        sendNotification(
+            workspaceMemberDeleted.workspaceRef,
+            workspaceMemberDeleted.authorities,
+            removeMemberNotificationTemplate
+        )
     }
 
-    private fun sendNotification(workspaceRef: EntityRef, recipients: Set<String>, templateRef: EntityRef) {
+    private fun sendNotification(workspaceRef: EntityRef, authorities: Set<EntityRef>, templateRef: EntityRef) {
+        val recipients = getEmailsFromAuthorities(authorities)
         if (recipients.isNotEmpty()) {
             notificationService.send(
                 Notification.Builder()
@@ -147,37 +152,39 @@ class WorkspaceMemberListener(
         }
     }
 
-    private fun getEmailsFromAuthorities(authorities: List<EntityRef>): Set<String> {
-        val emails = mutableSetOf<String>()
+    private fun getEmailsFromAuthorities(authorities: Set<EntityRef>): List<String> {
+        if (authorities.isEmpty()) {
+            return emptyList()
+        }
+
+        val allPersons = mutableSetOf<EntityRef>()
+        val allGroups = mutableSetOf<EntityRef>()
         authorities.forEach { authority ->
             if (authority.getSourceId() == AuthorityType.GROUP.sourceId) {
-                emails.addAll(getPersonEmailsFromGroup(authority).filter { StringUtils.isNotBlank(it) })
+                allGroups.add(authority)
             } else {
-                val emailFromPerson = getEmailFromPerson(authority)
-                if (StringUtils.isNotBlank(emailFromPerson)) {
-                    emails.add(emailFromPerson)
-                }
+                allPersons.add(authority)
             }
         }
-        return emails
+
+        if (allGroups.isNotEmpty()) {
+            allPersons.addAll(getPersonsFromGroups(allGroups))
+        }
+
+        return recordsService.getAtts(allPersons, listOf("email")).map {
+            it.getAtt("email").asText()
+        }.filter {
+            it.isNotBlank()
+        }
     }
 
-    private fun getPersonEmailsFromGroup(group: EntityRef): List<String> {
+    private fun getPersonsFromGroups(groups: Set<EntityRef>): List<EntityRef> {
         return recordsService.query(
             RecordsQuery.create {
                 withSourceId(AuthorityType.PERSON.sourceId)
-                withQuery(Predicates.contains(AuthorityConstants.ATT_AUTHORITY_GROUPS, group.toString()))
-            },
-            mapOf(
-                "email" to "email!"
-            )
-        ).getRecords().map {
-            it.getAtt("email").asText()
-        }
-    }
-
-    private fun getEmailFromPerson(person: EntityRef): String {
-        return recordsService.getAtt(person, "email!").asText()
+                withQuery(Predicates.`in`(AuthorityConstants.ATT_AUTHORITY_GROUPS, groups))
+            }
+        ).getRecords()
     }
 
     private data class WorkspaceCreated(
@@ -193,7 +200,7 @@ class WorkspaceMemberListener(
     )
 
     private data class WorkspaceMember(
-        val authorities: List<EntityRef>
+        val authorities: Set<EntityRef>
     )
 
     private data class WorkspaceMemberChanged(
@@ -205,14 +212,14 @@ class WorkspaceMemberListener(
 
     private data class WorkspaceMemberDeleted(
         @AttName("record.authorities[]?id")
-        val authorities: List<EntityRef>,
+        val authorities: Set<EntityRef>,
         @AttName("record._parent?id")
         val workspaceRef: EntityRef
     )
 
     private data class DiffData(
         val id: String,
-        val added: List<EntityRef> = emptyList(),
-        val removed: List<EntityRef> = emptyList()
+        val added: Set<EntityRef> = emptySet(),
+        val removed: Set<EntityRef> = emptySet()
     )
 }
