@@ -1,0 +1,44 @@
+---
+id: search
+name:
+  ru: Поиск
+  en: Search
+
+system: true
+
+sourceId: 'emodel/search'
+predicate:
+  t: 'in'
+  a: 'types'
+  v: ['PEOPLE', 'DOCUMENTS', 'WORKSPACES' ]
+
+properties:
+  full-search-predicate: '{ "t": "contains", "att": "ALL", "val": "$INPUT" }'
+
+actions:
+  - uiserv/action@delete
+  - uiserv/action@edit
+  - uiserv/action@view-dashboard
+  - uiserv/action@view-dashboard-in-background
+
+columns:
+
+  - id: _disp
+    name: { ru: Название, en: Name }
+    type: TEXT
+    searchable: false
+
+  - id: _type
+    name: { ru: Тип , en: Type }
+    type: ASSOC
+    searchable: false
+
+  - id: _modified
+    name: { ru: Когда изменен, en: Changed time }
+    type: DATETIME
+    searchable: false
+
+  - id: _created
+    name: { ru: Дата создания, en: Created time }
+    type: DATETIME
+    searchable: false

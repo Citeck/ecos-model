@@ -37,7 +37,8 @@
                 "key": "maxConcurrentRequestsPerApp",
                 "validate": {
                   "required": true,
-                  "integer": false
+                  "integer": true,
+                  "min": 1
                 },
                 "isBigNumber": false,
                 "delimiterValue": " ",
@@ -97,14 +98,7 @@
                         "refreshOn": [],
                         "optionalWhenDisabled": false,
                         "type": "selectJournal",
-                        "input": true,
-                        "source": {
-                          "custom": {
-                            "columns": []
-                          },
-                          "type": "journal",
-                          "customValues": []
-                        }
+                        "input": true
                       }
                     ],
                     "row": "0-0"
@@ -134,7 +128,7 @@
                         "clearOnHide": false,
                         "dataSrc": "custom",
                         "data": {
-                          "custom": "let res = _.get(row, 'typeData.attributes') || [];\nif (!res.length) {\n  res = [];\n} else {\n  res = [...res, { value: '_status', label: 'Статус' }, { value: '_name', label: 'Отображаемое имя' }];\n}\nvalues = res;",
+                          "custom": "let res = _.get(row, 'typeData.attributes') || [];\nif (!res.length) {\n  res = [];\n} else {\n  const allowedTypes = ['TEXT', 'MLTEXT', 'OPTIONS'];\n  res = res.filter(a => allowedTypes.indexOf(a.type) !== -1);\n  res = [\n    ...res,\n    { value: '_name', label: 'Отображаемое имя' }\n  ];\n}\nvalues = res;",
                           "headers": [
                             {}
                           ]
@@ -152,20 +146,15 @@
                           "record": {
                             "id": "{{row.typeRef}}",
                             "attributes": {
-                              "attributes": "model.attributes[]{label:name!id,value:id}"
+                              "attributes": "model.attributes[]{label:name!id,value:id,type}"
                             }
-                          }
+                          },
+                          "forceLoad": false
                         },
                         "update": {
                           "type": "any-change",
                           "rate": 500
                         },
-                        "refreshOn": [
-                          {
-                            "label": "typeRef",
-                            "value": "typeRef"
-                          }
-                        ],
                         "key": "typeData",
                         "type": "asyncData",
                         "input": true

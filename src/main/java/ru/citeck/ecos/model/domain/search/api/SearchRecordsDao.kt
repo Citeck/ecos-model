@@ -69,12 +69,30 @@ class SearchRecordsDao(
     private val activeRequestsByAppSemaphore = ConcurrentHashMap<String, Semaphore>()
     private val activeRequestsByAppLock = ReentrantLock()
 
+    private fun readQuery(recsQuery: RecordsQuery): SearchQuery? {
+        val query: SearchQuery?
+        if (recsQuery.language == PredicateService.LANGUAGE_PREDICATE) {
+            var text = ""
+            var types = listOf(GROUP_TYPE_DOCUMENTS)
+            PredicateUtils.mapValuePredicates(recsQuery.getPredicate(), { p ->
+                if (p.getAttribute() == "ALL") {
+                    text = p.getValue().asText()
+                }
+                if (p.getAttribute() == "types") {
+                    types = p.getValue().toStrList()
+                }
+                p
+            }, onlyAnd = true, optimize = false, filterEmptyComposite = true)
+            query = SearchQuery(text, types, recsQuery.page.maxItems)
+        } else {
+            query = recsQuery.getQueryOrNull(SearchQuery::class.java)
+        }
+        return if (query?.text.isNullOrBlank()) null else query
+    }
+
     override fun queryRecords(recsQuery: RecordsQuery): Any? {
 
-        val query = recsQuery.getQueryOrNull(SearchQuery::class.java) ?: return null
-        if (query.text.isBlank()) {
-            return null
-        }
+        val query = readQuery(recsQuery)?: return null
 
         val maxItems = recsQuery.page.maxItems
         val maxItemsForType = query.maxItemsForType.coerceAtMost(MAX_ITEMS_FOR_TYPE)
