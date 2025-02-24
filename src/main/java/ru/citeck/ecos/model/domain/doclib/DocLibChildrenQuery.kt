@@ -6,5 +6,6 @@ import ru.citeck.ecos.webapp.api.entity.EntityRef
 class DocLibChildrenQuery(
     val parentRef: EntityRef? = null,
     val filter: Predicate,
+    val recursive: Boolean = false,
     val nodeType: DocLibNodeType? = null
 )

@@ -159,17 +159,19 @@ class DocLibRecords @Autowired constructor(
         val dirInfo = dirSrcIdCache[parentDocLibId.typeId]
 
         var parentIsRoot = false
-        val parentLocalRef = if (parentDocLibId.entityRef.isEmpty()) {
-            parentIsRoot = true
-            getInternalRootForType(parentDocLibId.typeId, dirInfo, workspace)
-        } else {
-            parentDocLibId.entityRef
-        }
 
+        val filterPredicate = AndPredicate()
         val parentOrPredicates = OrPredicate()
-        parentOrPredicates.addPredicate(Predicates.eq(RecordConstants.ATT_PARENT, parentLocalRef))
-
-        val filterPredicate = AndPredicate.of(parentOrPredicates)
+        if (!query.recursive) {
+            val parentLocalRef = if (parentDocLibId.entityRef.isEmpty()) {
+                parentIsRoot = true
+                getInternalRootForType(parentDocLibId.typeId, dirInfo, workspace)
+            } else {
+                parentDocLibId.entityRef
+            }
+            parentOrPredicates.addPredicate(Predicates.eq(RecordConstants.ATT_PARENT, parentLocalRef))
+            filterPredicate.addPredicate(parentOrPredicates)
+        }
 
         val preProcessedFilterPredicate = PredicateUtils.mapValuePredicates(query.filter) {
             if (it.getAttribute() == "ALL") {
