@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.domain.doclib
+package ru.citeck.ecos.model.domain.doclib.api.records
 
 import com.github.benmanes.caffeine.cache.Caffeine
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -161,16 +161,12 @@ class DocLibRecords @Autowired constructor(
         var parentIsRoot = false
 
         val filterPredicate = AndPredicate()
-        val parentOrPredicates = OrPredicate()
-        if (!query.recursive) {
-            val parentLocalRef = if (parentDocLibId.entityRef.isEmpty()) {
-                parentIsRoot = true
-                getInternalRootForType(parentDocLibId.typeId, dirInfo, workspace)
-            } else {
-                parentDocLibId.entityRef
-            }
-            parentOrPredicates.addPredicate(Predicates.eq(RecordConstants.ATT_PARENT, parentLocalRef))
-            filterPredicate.addPredicate(parentOrPredicates)
+
+        val parentLocalRef = if (parentDocLibId.entityRef.isEmpty()) {
+            parentIsRoot = true
+            getInternalRootForType(parentDocLibId.typeId, dirInfo, workspace)
+        } else {
+            parentDocLibId.entityRef
         }
 
         val preProcessedFilterPredicate = PredicateUtils.mapValuePredicates(query.filter) {
@@ -224,19 +220,46 @@ class DocLibRecords @Autowired constructor(
         val resultRecordsInnerRefs = ArrayList<EntityRef>()
 
         if (query.nodeType == null || query.nodeType == DocLibNodeType.DIR) {
+
+            val dirsFilter = filterPredicate.copy<AndPredicate>()
+            if (query.recursive) {
+                dirsFilter.addPredicate(Predicates.contains("dirPath", parentLocalRef.toString()))
+            } else {
+                dirsFilter.addPredicate(Predicates.eq(RecordConstants.ATT_PARENT, parentLocalRef))
+            }
+
             val dirsQuery = recsQuery.copy()
                 .withSourceId(dirInfo.sourceId)
                 .withEcosType(dirInfo.typeId)
+                .withQuery(dirsFilter)
                 .build()
+
             resultRecordsInnerRefs.addAll(recordsService.query(dirsQuery).getRecords())
         }
         if (query.nodeType == null || query.nodeType == DocLibNodeType.FILE) {
-            if (parentIsRoot) {
-                parentOrPredicates.addPredicate(EmptyPredicate(RecordConstants.ATT_PARENT))
+
+            val filesFilter = filterPredicate.copy<AndPredicate>()
+
+            val parentCondition = OrPredicate.of(
+                Predicates.eq(RecordConstants.ATT_PARENT, parentLocalRef),
+                EmptyPredicate(RecordConstants.ATT_PARENT)
+            )
+            if (query.recursive) {
+                parentCondition.addPredicate(
+                    Predicates.contains("${RecordConstants.ATT_PARENT}.dirPath", parentLocalRef.toString())
+                )
+                filesFilter.addPredicate(
+                    Predicates.eq(
+                        "${RecordConstants.ATT_PARENT}._type",
+                        ModelUtils.getTypeRef(dirInfo.typeId)
+                    )
+                )
             }
+            filesFilter.addPredicate(parentCondition)
+
             recsQuery = recsQuery.copy {
                 withSourceId(docLibTypeDef.sourceId)
-                withQuery(filterPredicate)
+                withQuery(filesFilter)
             }
             resultRecordsInnerRefs.addAll(recordsService.query(recsQuery).getRecords())
         }

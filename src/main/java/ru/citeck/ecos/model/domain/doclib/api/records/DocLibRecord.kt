@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.domain.doclib
+package ru.citeck.ecos.model.domain.doclib.api.records
 
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.predicate.model.VoidPredicate

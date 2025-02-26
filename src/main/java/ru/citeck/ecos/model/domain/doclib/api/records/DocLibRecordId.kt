@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.domain.doclib
+package ru.citeck.ecos.model.domain.doclib.api.records
 
 import org.apache.commons.lang3.StringUtils
 import ru.citeck.ecos.webapp.api.entity.EntityRef
