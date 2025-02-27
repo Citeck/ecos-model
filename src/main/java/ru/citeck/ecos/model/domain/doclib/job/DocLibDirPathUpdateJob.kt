@@ -30,7 +30,7 @@ class DocLibDirPathUpdateJob(
     companion object {
         private val log = KotlinLogging.logger {}
 
-        private val DEFAULT_FULL_UPDATE_DELAY = Duration.ofSeconds(10).toMillis()
+        private val DEFAULT_FULL_UPDATE_DELAY = Duration.ofMinutes(10).toMillis()
 
         private const val LOCK_KEY = "doclib-dir-updater"
         private const val DOCLIB_DIRECTORY_TYPE_ID = "doclib-directory"
