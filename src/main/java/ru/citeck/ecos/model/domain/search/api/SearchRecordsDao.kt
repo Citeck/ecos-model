@@ -124,15 +124,11 @@ class SearchRecordsDao(
             }
         }
 
-        val resultRecords = if (maxItems >= 0 && records.size > maxItems) {
+        return if (maxItems >= 0 && records.size > maxItems) {
             records.subList(0, maxItems - 1)
         } else {
             records
         }
-
-        val queryRes = RecsQueryRes(resultRecords)
-        queryRes.setTotalCount(totalCount)
-        return queryRes
     }
 
     private fun queryWorkspaces(text: String, maxItems: Int): SearchRes {
