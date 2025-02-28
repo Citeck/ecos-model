@@ -17,7 +17,7 @@ class CustomWorkspaceApi(
     }
 
     override fun getUserWorkspaces(user: String): Set<String> {
-        return workspaceService.getUserWorkspaces(user)
+        return workspaceService.getUserWorkspaces(user).workspaces
     }
 
     override fun isUserManagerOf(user: String, workspace: String): Boolean {

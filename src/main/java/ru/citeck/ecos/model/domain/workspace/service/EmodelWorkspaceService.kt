@@ -77,7 +77,7 @@ class EmodelWorkspaceService(
         filter: Predicate = Predicates.alwaysTrue(),
         includePersonal: Boolean = true,
         maxItems: Int = 1000
-    ): Set<String> {
+    ): UserWorkspaces {
 
         val userRef = AuthorityType.PERSON.getRef(user)
         val authoritiesToQuery = getUserAuthoritiesRefs(userRef)
@@ -90,16 +90,22 @@ class EmodelWorkspaceService(
             queryPredicate = Predicates.and(queryPredicate, filter)
         }
 
+        var totalCount = 0L
         val workspaces = recordsService.query(
             RecordsQuery.create()
                 .withSourceId(WorkspaceDesc.SOURCE_ID)
                 .withQuery(queryPredicate)
                 .withMaxItems(maxItems)
                 .build(),
-        ).getRecords().mapTo(LinkedHashSet()) { it.getLocalId() }
+        ).run {
+            totalCount += getTotalCount()
+            getRecords().mapTo(LinkedHashSet()) { it.getLocalId() }
+        }
+
 
         if (includePersonal && workspaces.size < maxItems) {
             workspaces.add("$USER_WORKSPACE_PREFIX$user")
+            totalCount += 1;
         }
         val orders = recordsService.query(
             RecordsQuery.create()
@@ -127,7 +133,7 @@ class EmodelWorkspaceService(
         workspaces.forEach {
             result.add(it)
         }
-        return result
+        return UserWorkspaces(result, totalCount)
     }
 
     fun getWorkspace(workspace: EntityRef): Workspace {

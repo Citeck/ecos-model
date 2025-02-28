@@ -8,6 +8,8 @@ import ru.citeck.ecos.context.lib.ctx.EcosContext
 import ru.citeck.ecos.model.domain.authorities.constant.PersonConstants
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
+import ru.citeck.ecos.model.lib.ModelServiceFactory
+import ru.citeck.ecos.model.lib.attributes.dto.AttributeType
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.predicate.PredicateService
@@ -22,6 +24,7 @@ import ru.citeck.ecos.records3.record.dao.query.RecordsQueryDao
 import ru.citeck.ecos.records3.record.dao.query.dto.query.Consistency
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy
+import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes
 import ru.citeck.ecos.webapp.api.constants.AppName
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.api.promise.Promise
@@ -37,7 +40,8 @@ class SearchRecordsDao(
     private val recordsService: RecordsService,
     private val typesRegistry: EcosTypesRegistry,
     private val ecosContext: EcosContext,
-    private val workspaceService: EmodelWorkspaceService
+    private val workspaceService: EmodelWorkspaceService,
+    modelServiceFactory: ModelServiceFactory
 ) : RecordsQueryDao {
 
     companion object {
@@ -64,6 +68,8 @@ class SearchRecordsDao(
 
         private val log = KotlinLogging.logger {}
     }
+
+    private val computedAttsService = modelServiceFactory.computedAttsService
 
     private var globalSearchConfig: GlobalSearchConfig = GlobalSearchConfig()
     private val activeRequestsByAppSemaphore = ConcurrentHashMap<String, Semaphore>()
@@ -98,31 +104,40 @@ class SearchRecordsDao(
         val maxItemsForType = query.maxItemsForType.coerceAtMost(MAX_ITEMS_FOR_TYPE)
 
         val records = ArrayList<SearchRecord>()
+        var totalCount = 0L
+        fun addResult(searchRes: SearchRes) {
+            records.addAll(searchRes.records)
+            totalCount += searchRes.totalCount
+        }
 
         val textToSearch = query.text.trim()
 
         for (type in query.types) {
             when (type) {
-                GROUP_TYPE_PEOPLE -> records.addAll(queryPersons(textToSearch, maxItemsForType))
-                GROUP_TYPE_DOCUMENTS -> records.addAll(queryDocuments(textToSearch, maxItemsForType))
-                GROUP_TYPE_TASKS -> records.addAll(queryTasks(textToSearch, maxItemsForType))
-                GROUP_TYPE_WORKSPACES -> records.addAll(queryWorkspaces(textToSearch, maxItemsForType))
+                GROUP_TYPE_PEOPLE -> addResult(queryPersons(textToSearch, maxItemsForType))
+                GROUP_TYPE_DOCUMENTS -> addResult(queryDocuments(textToSearch, maxItemsForType))
+                GROUP_TYPE_TASKS -> addResult(queryTasks(textToSearch, maxItemsForType))
+                GROUP_TYPE_WORKSPACES -> addResult(queryWorkspaces(textToSearch, maxItemsForType))
             }
             if (maxItems >= 0 && records.size >= maxItems) {
                 break
             }
         }
 
-        return if (maxItems >= 0 && records.size > maxItems) {
+        val resultRecords = if (maxItems >= 0 && records.size > maxItems) {
             records.subList(0, maxItems - 1)
         } else {
             records
         }
+
+        val queryRes = RecsQueryRes(resultRecords)
+        queryRes.setTotalCount(totalCount)
+        return queryRes
     }
 
-    private fun queryWorkspaces(text: String, maxItems: Int): List<SearchRecord> {
+    private fun queryWorkspaces(text: String, maxItems: Int): SearchRes {
 
-        val workspaces = workspaceService.getUserWorkspaces(
+        val userWorkspaces = workspaceService.getUserWorkspaces(
             AuthContext.getCurrentUser(),
             Predicates.or(
                 Predicates.contains(WorkspaceDesc.ATT_NAME, text),
@@ -130,18 +145,22 @@ class SearchRecordsDao(
             ),
             includePersonal = false,
             maxItems = maxItems
-        ).map { WorkspaceDesc.getRef(it) }
+        )
 
+        val workspaces = userWorkspaces.workspaces.map { WorkspaceDesc.getRef(it) }
         if (workspaces.isEmpty()) {
-            return emptyList()
+            return SearchRes.EMPTY
         }
 
-        return recordsService.getAtts(workspaces, BASE_ATTS_TO_REQUEST).map {
-            createSearchRecord(it, GROUP_TYPE_WORKSPACES)
-        }
+        return SearchRes(
+            recordsService.getAtts(workspaces, BASE_ATTS_TO_REQUEST).map {
+                createSearchRecord(it, GROUP_TYPE_WORKSPACES)
+            },
+            userWorkspaces.totalCount
+        )
     }
 
-    private fun queryTasks(text: String, maxItems: Int): List<SearchRecord> {
+    private fun queryTasks(text: String, maxItems: Int): SearchRes {
 
         val query = RecordsQuery.create()
             .withSourceId("alfresco/")
@@ -177,18 +196,21 @@ class SearchRecordsDao(
         }
         val tasksAtts = recordsService.getAtts(taskRecords, BASE_ATTS_TO_REQUEST)
 
-        return tasksAtts.map { createSearchRecord(it, GROUP_TYPE_TASKS) }
+        return SearchRes(
+            tasksAtts.map { createSearchRecord(it, GROUP_TYPE_TASKS) },
+            tasks.getTotalCount()
+        )
     }
 
-    private fun queryDocuments(text: String, maxItems: Int): List<SearchRecord> {
+    private fun queryDocuments(text: String, maxItems: Int): SearchRes {
 
         val docTypesToSearch = globalSearchConfig.documentTypesToSearch
         if (docTypesToSearch.isEmpty()) {
-            return emptyList()
+            return SearchRes.EMPTY
         }
 
         val scopeData = ecosContext.getScopeData()
-        val searchPromises: List<Promise<List<SearchRecord>>> = docTypesToSearch.map { typeToSearch ->
+        val searchPromises: List<Promise<SearchRes>> = docTypesToSearch.map { typeToSearch ->
             doInExecutor(Executors.newVirtualThreadPerTaskExecutor()) {
                 ecosContext.newScope(scopeData).use {
                     queryDocumentsForType(typeToSearch, text, maxItems)
@@ -196,7 +218,7 @@ class SearchRecordsDao(
             }
         }
 
-        val waitUntil = System.currentTimeMillis() + 30_000
+        val waitUntil = System.currentTimeMillis() + 10_000
         while (System.currentTimeMillis() < waitUntil) {
             if (searchPromises.all { it.isDone() }) {
                 break
@@ -204,6 +226,12 @@ class SearchRecordsDao(
             Thread.sleep(500)
         }
         val results = ArrayList<SearchRecord>(maxItems)
+        var totalCount = 0L
+        fun addResults(searchRes: SearchRes) {
+            results.addAll(searchRes.records)
+            totalCount += searchRes.totalCount
+        }
+
         for ((idx, promise) in searchPromises.withIndex()) {
             if (promise.isDone()) {
                 promise.catch {
@@ -211,9 +239,9 @@ class SearchRecordsDao(
                     log.error(it) {
                         "Exception occurred while query records of type '${type.typeRef.getLocalId()}'"
                     }
-                    emptyList()
+                    SearchRes.EMPTY
                 }.get().let {
-                    results.addAll(it)
+                    addResults(it)
                 }
             } else {
                 val type = docTypesToSearch[idx]
@@ -222,19 +250,19 @@ class SearchRecordsDao(
             }
         }
         results.sortByDescending { it.getCreated() }
-        return results.take(maxItems)
+        return SearchRes(results.take(maxItems), totalCount)
     }
 
     private fun queryDocumentsForType(
         typeToSearch: GlobalSearchConfig.DocumentTypeToSearch,
         text: String,
         maxItems: Int
-    ): List<SearchRecord> {
+    ): SearchRes {
 
         if (typeToSearch.typeRef.isEmpty()) {
-            return emptyList()
+            return SearchRes.EMPTY
         }
-        val typeInfo = typesRegistry.getValue(typeToSearch.typeRef.getLocalId()) ?: return emptyList()
+        val typeInfo = typesRegistry.getValue(typeToSearch.typeRef.getLocalId()) ?: return SearchRes.EMPTY
 
         val appNameDelimIdx = typeInfo.sourceId.indexOf(EntityRef.APP_NAME_DELIMITER)
         val appName = if (appNameDelimIdx != -1) {
@@ -261,10 +289,24 @@ class SearchRecordsDao(
             }
         }
 
+        val optionsAttsById = typeInfo.model.getAllAttributes()
+            .asSequence()
+            .filter { it.type == AttributeType.OPTIONS && typeToSearch.attsToSearch.contains(it.id) }
+            .associate { it.id to computedAttsService.getAttOptions(EntityRef.EMPTY, it.config) }
         val attsToSearch = typeToSearch.attsToSearch.ifEmpty { listOf("_name") }
+
         val predicate = OrPredicate()
         for (att in attsToSearch) {
-            predicate.addPredicate(Predicates.contains(att, text))
+            val variants = optionsAttsById[att]
+            if (!variants.isNullOrEmpty()) {
+                variants.forEach { variant ->
+                    if (variant.label.getValues().values.any { it.contains(text, true) }) {
+                        predicate.addPredicate(Predicates.contains(att, variant.value))
+                    }
+                }
+            } else {
+                predicate.addPredicate(Predicates.contains(att, text))
+            }
         }
 
         semaphore.acquire()
@@ -283,7 +325,7 @@ class SearchRecordsDao(
             semaphore.release()
         }
 
-        return records.getRecords().map {
+        val resRecs = records.getRecords().map {
             SearchRecord(
                 it.getId(),
                 it[DISP_NAME_ALIAS].asText().ifBlank { it.getId().getLocalId() },
@@ -293,9 +335,10 @@ class SearchRecordsDao(
                 it[CREATED_ALIAS].getAsInstantOrEpoch()
             )
         }
+        return SearchRes(resRecs, records.getTotalCount())
     }
 
-    private fun queryPersons(text: String, maxItems: Int): List<SearchRecord> {
+    private fun queryPersons(text: String, maxItems: Int): SearchRes {
         val parts = text.split(" ").map { it.trim() }
         val predicate = if (parts.isEmpty()) {
             Predicates.alwaysFalse()
@@ -304,7 +347,8 @@ class SearchRecordsDao(
                 Predicates.contains("id", parts[0]),
                 Predicates.contains(PersonConstants.ATT_FIRST_NAME, parts[0]),
                 Predicates.contains(PersonConstants.ATT_LAST_NAME, parts[0]),
-                Predicates.contains(PersonConstants.ATT_MIDDLE_NAME, parts[0])
+                Predicates.contains(PersonConstants.ATT_MIDDLE_NAME, parts[0]),
+                Predicates.contains(PersonConstants.ATT_EMAIL, parts[0])
             )
         } else if (parts.size == 2) {
             Predicates.or(
@@ -331,7 +375,7 @@ class SearchRecordsDao(
             Predicates.alwaysFalse()
         }
         if (PredicateUtils.isAlwaysFalse(predicate)) {
-            return emptyList()
+            return SearchRes.EMPTY
         }
         return queryImpl(
             sourceId = AuthorityType.PERSON.sourceId,
@@ -348,7 +392,7 @@ class SearchRecordsDao(
         query: Any,
         maxItems: Int,
         groupType: String
-    ): List<SearchRecord> {
+    ): SearchRes {
 
         val recsQuery = RecordsQuery.create()
             .withQuery(query)
@@ -360,9 +404,10 @@ class SearchRecordsDao(
 
         val results = recordsService.query(recsQuery, BASE_ATTS_TO_REQUEST)
 
-        return results.getRecords().map {
-            createSearchRecord(it, groupType)
-        }
+        return SearchRes(
+            results.getRecords().map { createSearchRecord(it, groupType) },
+            results.getTotalCount()
+        )
     }
 
     private fun createSearchRecord(rec: RecordAtts, groupType: String): SearchRecord {
@@ -464,5 +509,14 @@ class SearchRecordsDao(
             val typeRef: EntityRef = EntityRef.EMPTY,
             val attsToSearch: List<String> = emptyList()
         )
+    }
+
+    private class SearchRes(
+        val records: List<SearchRecord>,
+        val totalCount: Long
+    ) {
+        companion object {
+            val EMPTY = SearchRes(emptyList(), 0)
+        }
     }
 }
