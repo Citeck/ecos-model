@@ -98,9 +98,6 @@
                       "ru": "lastName"
                     },
                     "key": "cm_lastName",
-                    "validate": {
-                      "required": true
-                    },
                     "clearOnHide": false,
                     "defaultValue": "",
                     "refreshOn": [],
@@ -109,7 +106,10 @@
                       "attribute": "lastName"
                     },
                     "type": "textfield",
-                    "input": true
+                    "input": true,
+                    "inputMasks": [
+                      {}
+                    ]
                   },
                   {
                     "label": {
@@ -139,15 +139,6 @@
                       "ru": "middleName"
                     },
                     "key": "cm_middleName",
-                    "validate": {
-                      "required": true
-                    },
-                    "inputMasks": [
-                      {
-                        "label": "",
-                        "mask": ""
-                      }
-                    ],
                     "defaultValue": "",
                     "refreshOn": [],
                     "optionalWhenDisabled": false,
@@ -155,7 +146,10 @@
                       "attribute": "middleName"
                     },
                     "type": "textfield",
-                    "input": true
+                    "input": true,
+                    "inputMasks": [
+                      {}
+                    ]
                   },
                   {
                     "label": {
@@ -176,9 +170,6 @@
                       "ru": "birthDate"
                     },
                     "key": "ecos_birthDate",
-                    "validate": {
-                      "required": true
-                    },
                     "format": "dd-MM-yyyy",
                     "datePicker": {
                       "minDate": "",
@@ -199,9 +190,6 @@
                       "ru": "sex"
                     },
                     "key": "ecos_sex",
-                    "validate": {
-                      "required": true
-                    },
                     "dataSrc": "values",
                     "data": {
                       "values": [
@@ -215,10 +203,7 @@
                         }
                       ],
                       "headers": [
-                        {
-                          "key": "",
-                          "value": ""
-                        }
+                        {}
                       ]
                     },
                     "defaultValue": "",
@@ -234,15 +219,6 @@
                       "ru": "city"
                     },
                     "key": "ecos_city",
-                    "validate": {
-                      "required": true
-                    },
-                    "inputMasks": [
-                      {
-                        "label": "",
-                        "mask": ""
-                      }
-                    ],
                     "defaultValue": "",
                     "refreshOn": [],
                     "optionalWhenDisabled": false,
@@ -250,22 +226,16 @@
                       "attribute": "city"
                     },
                     "type": "textfield",
-                    "input": true
+                    "input": true,
+                    "inputMasks": [
+                      {}
+                    ]
                   },
                   {
                     "label": {
                       "ru": "organization"
                     },
                     "key": "cm_organization",
-                    "validate": {
-                      "required": true
-                    },
-                    "inputMasks": [
-                      {
-                        "label": "",
-                        "mask": ""
-                      }
-                    ],
                     "clearOnHide": false,
                     "defaultValue": "",
                     "refreshOn": [],
@@ -274,7 +244,10 @@
                       "attribute": "organization"
                     },
                     "type": "textfield",
-                    "input": true
+                    "input": true,
+                    "inputMasks": [
+                      {}
+                    ]
                   },
                   {
                     "label": {
@@ -310,9 +283,6 @@
                   "en": "Avatar"
                 },
                 "key": "photo",
-                "validate": {
-                  "required": true
-                },
                 "storage": "base64",
                 "refreshOn": [],
                 "optionalWhenDisabled": false,
