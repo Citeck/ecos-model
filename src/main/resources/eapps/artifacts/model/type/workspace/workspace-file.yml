@@ -24,7 +24,7 @@ createVariants:
       _contentTemplate: new-doc-docx
   - id: create-new-xlsx
     name:
-      ru: Таблицу
+      ru: Таблица
       en: Spreadsheet
     formRef: uiserv/form@create-empty-doclib-file
     postActionRef: uiserv/action@edit-in-onlyoffice-tfm
@@ -32,7 +32,7 @@ createVariants:
       _contentTemplate: new-doc-xlsx
   - id: create-new-pptx
     name:
-      ru: Презентацию
+      ru: Презентация
       en: Presentation
     formRef: uiserv/form@create-empty-doclib-file
     postActionRef: uiserv/action@edit-in-onlyoffice-tfm

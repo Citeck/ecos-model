@@ -13,20 +13,38 @@ object CommentValidator {
     private val ALLOWED_INLINE_STYLES = setOf(
         "font-size",
         "background-color",
-        "color"
+        "color",
+        "white-space"
     ).map { "$it:" }
+
+    private val ALLOWED_ATTS_FOR_ALL = setOf(
+        "style",
+        "class",
+        "role",
+        "tabindex",
+        "aria-checked",
+        "value"
+    )
+    private val ALLOWED_ATTS_FOR_UL = setOf(
+        "__lexicallisttype"
+    )
+
+    private val cleaner = Cleaner(
+        Safelist.relaxed()
+            .addAttributes("p", "dir")
+            .addAttributes("ul", *ALLOWED_ATTS_FOR_UL.toTypedArray())
+            .addAttributes("span", "data-mention")
+            .addAttributes(":all", *ALLOWED_ATTS_FOR_ALL.toTypedArray())
+    )
 
     @JvmStatic
     fun removeVulnerabilities(data: String?): String {
         if (data.isNullOrBlank()) {
             return ""
         }
-        val dirty = Jsoup.parseBodyFragment(removeNonPrintable(StringEscapeUtils.unescapeHtml4(data)), BASIC_URI_TO_REMOVE)
-        val cleaner = Cleaner(
-            Safelist.relaxed()
-                .addAttributes("p", "dir")
-                .addAttributes("span", "data-mention")
-                .addAttributes(":all", "style", "class")
+        val dirty = Jsoup.parseBodyFragment(
+            removeNonPrintable(StringEscapeUtils.unescapeHtml4(data)),
+            BASIC_URI_TO_REMOVE
         )
         val clean = cleanStyles(cleaner.clean(dirty))
         clean.outputSettings().prettyPrint(false)

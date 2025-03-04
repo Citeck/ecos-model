@@ -21,7 +21,10 @@
         },
         "defaultValue": "",
         "type": "textfield",
-        "input": true
+        "input": true,
+        "validate": {
+          "required": true
+        }
       },
       {
         "label": {
