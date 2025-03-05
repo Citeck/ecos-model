@@ -95,7 +95,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
             val notExists = recordsService.getAtt(groupRef, RecordConstants.ATT_NOT_EXISTS).asBoolean()
             if (notExists) {
                 val newGroupAtts = ObjectData.create()
-                newGroupAtts.set("id", groupRef.getLocalId())
+                newGroupAtts["id"] = groupRef.getLocalId()
                 AuthContext.runAsSystem {
                     recordsService.create(AuthorityType.GROUP.sourceId, newGroupAtts)
                 }
@@ -154,29 +154,34 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
             testPersonRef.getLocalId() to true,
             "admin" to false,
             AuthUser.SYSTEM to false
-        ).forEach {
-            println("Check user '${it.first}' exception expected: ${it.second}")
-            val runAs = if (it.first.isEmpty()) {
+        ).forEach { runAsAndExExpected ->
+            val (runAsUser, exceptionExpected) = runAsAndExExpected
+            println("Check user '$runAsUser' exception expected: $exceptionExpected")
+            val runAs = if (runAsUser.isEmpty()) {
                 { action: () -> Unit -> action() }
             } else {
                 { action: () -> Unit ->
-                    if (it.first == "admin") {
-                        AuthContext.runAs(it.first, listOf(AuthRole.ADMIN), action)
+                    if (runAsUser == "admin") {
+                        AuthContext.runAs(runAsUser, listOf(AuthRole.ADMIN), action)
                     } else {
-                        AuthContext.runAs(it.first, action)
+                        AuthContext.runAs(runAsUser, action)
                     }
                 }
             }
             runAs {
-                if (it.second) {
+                var groupId = "other-auth-group"
+                if (runAsUser.isNotBlank()) {
+                    groupId += "-${runAsUser}"
+                }
+                if (exceptionExpected) {
                     val ex = AuthContext.runAs(EmptyAuth) {
                         assertThrows<Exception> {
-                            addGroup("other-auth-group-${it.first}", it.first)
+                            addGroup(groupId, runAsUser)
                         }
                     }
                     assertThat(ex.message).containsAnyOf("Permission denied", "Permissions Denied")
                 } else {
-                    addGroup("other-auth-group-${it.first}", "")
+                    addGroup(groupId, "")
                 }
             }
         }
