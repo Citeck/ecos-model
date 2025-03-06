@@ -65,6 +65,7 @@
                       "ru": "userName"
                     },
                     "key": "cm_userName",
+                    "disabled": true,
                     "validate": {
                       "required": true
                     },
@@ -75,8 +76,32 @@
                     "properties": {
                       "attribute": "_localId"
                     },
+                    "logic": [
+                      {
+                        "name": "enableUserNameField",
+                        "trigger": {
+                          "type": "javascript",
+                          "javascript": "result = instance.options.formMode == 'CREATE';"
+                        },
+                        "actions": [
+                          {
+                            "name": "Enable id field",
+                            "type": "property",
+                            "property": {
+                              "label": "Disabled",
+                              "value": "disabled",
+                              "type": "boolean"
+                            },
+                            "state": "false"
+                          }
+                        ]
+                      }
+                    ],
                     "type": "textfield",
-                    "input": true
+                    "input": true,
+                    "inputMasks": [
+                      {}
+                    ]
                   },
                   {
                     "label": {
