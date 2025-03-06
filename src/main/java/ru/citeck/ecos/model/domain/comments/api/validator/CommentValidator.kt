@@ -10,11 +10,23 @@ import org.jsoup.safety.Safelist
 object CommentValidator {
 
     private const val BASIC_URI_TO_REMOVE = "http://base-url-to-remove"
+
+    private val ALLOWED_TAGS = setOf(
+        "hr", "details", "summary"
+    )
+
     private val ALLOWED_INLINE_STYLES = setOf(
         "font-size",
         "background-color",
         "color",
-        "white-space"
+        "white-space",
+        "grid-template-columns",
+        "width",
+        "height",
+        "border",
+        "vertical-align",
+        "text-align",
+        "padding-inline-start",
     ).map { "$it:" }
 
     private val ALLOWED_ATTS_FOR_ALL = setOf(
@@ -23,7 +35,12 @@ object CommentValidator {
         "role",
         "tabindex",
         "aria-checked",
-        "value"
+        "value",
+        "data-lexical-layout-container",
+        "data-lexical-layout-item",
+        "spellcheck",
+        "data-language",
+        "data-highlight-language"
     )
     private val ALLOWED_ATTS_FOR_UL = setOf(
         "__lexicallisttype"
@@ -31,9 +48,11 @@ object CommentValidator {
 
     private val cleaner = Cleaner(
         Safelist.relaxed()
+            .addTags(*ALLOWED_TAGS.toTypedArray())
             .addAttributes("p", "dir")
             .addAttributes("ul", *ALLOWED_ATTS_FOR_UL.toTypedArray())
             .addAttributes("span", "data-mention")
+            .addAttributes("details", "open")
             .addAttributes(":all", *ALLOWED_ATTS_FOR_ALL.toTypedArray())
     )
 
