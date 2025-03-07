@@ -71,9 +71,6 @@
               "ru": "mobile"
             },
             "key": "cm_mobile2",
-            "validate": {
-              "required": true
-            },
             "inputMasks": [
               {
                 "label": "",
@@ -95,9 +92,6 @@
               "ru": "location"
             },
             "key": "cm_location",
-            "validate": {
-              "required": true
-            },
             "inputMasks": [
               {
                 "label": "",
