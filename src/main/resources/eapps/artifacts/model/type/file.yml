@@ -14,6 +14,10 @@ storageType: ECOS_MODEL
 
 model:
   attributes:
+    - id: name
+      name:
+        ru: Имя
+        en: Name
     - id: content
       name:
         ru: Содержимое
