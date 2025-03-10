@@ -22,6 +22,7 @@ createVariants:
     postActionRef: uiserv/action@edit-in-onlyoffice-tfm
     attributes:
       _contentTemplate: new-doc-docx
+      _fileNameExtension: "docx"
   - id: create-new-xlsx
     name:
       ru: Таблица
@@ -30,6 +31,7 @@ createVariants:
     postActionRef: uiserv/action@edit-in-onlyoffice-tfm
     attributes:
       _contentTemplate: new-doc-xlsx
+      _fileNameExtension: "xlsx"
   - id: create-new-pptx
     name:
       ru: Презентация
@@ -38,6 +40,7 @@ createVariants:
     postActionRef: uiserv/action@edit-in-onlyoffice-tfm
     attributes:
       _contentTemplate: new-doc-pptx
+      _fileNameExtension: "pptx"
 
 aspects:
   - ref: emodel/aspect@doclib

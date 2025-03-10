@@ -47,7 +47,9 @@ class DocLibRecords @Autowired constructor(
         private const val ATT_NOT_EXISTS = RecordConstants.ATT_NOT_EXISTS + ScalarType.BOOL_SCHEMA
         private const val ATT_PARENT_ID = RecordConstants.ATT_PARENT + ScalarType.ID_SCHEMA
         private const val ATT_CHILDREN = "children"
+        private const val ATT_NAME = "name"
         private const val ATT_CONTENT_TEMPLATE = "_contentTemplate"
+        private const val ATT_FILE_NAME_EXTENSION = "_fileNameExtension"
         private const val TEMPLATED_CONTENT_SRC_ID = "transformations/templated-content"
 
         private const val DEFAULT_DIR_TYPE_ID = "doclib-directory"
@@ -334,6 +336,16 @@ class DocLibRecords @Autowired constructor(
 
         val contentTemplate = attributes[ATT_CONTENT_TEMPLATE].asText()
         attributes.remove(ATT_CONTENT_TEMPLATE)
+
+        val extension = attributes[ATT_FILE_NAME_EXTENSION].asText()
+        if (extension.isNotBlank()) {
+            val extensionPostfix = ".$extension"
+            val name = attributes[ATT_NAME].asText()
+            if (name.isNotBlank() && !name.endsWith(extensionPostfix)) {
+                attributes[ATT_NAME] = name + extensionPostfix
+            }
+        }
+        attributes.remove(ATT_FILE_NAME_EXTENSION)
 
         val newRecordId = if (recordId.entityRef.isEmpty()) {
             val entityRef = createEntity(parentId, attributes)
