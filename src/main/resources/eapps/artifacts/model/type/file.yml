@@ -3,15 +3,18 @@ id: file
 name:
   ru: Файл
   en: File
-
+system: true
+storageType: ECOS_MODEL
 parentRef: emodel/type@user-base
 formRef: uiserv/form@file-form
-
-system: true
-
 dashboardType: case-details
-storageType: ECOS_MODEL
-
+inheritActions: false
+actions:
+  - uiserv/action@view-dashboard
+  - uiserv/action@edit
+  - uiserv/action@edit-in-onlyoffice-tfm
+  - uiserv/action@content-download
+  - uiserv/action@delete
 model:
   attributes:
     - id: name
