@@ -4,12 +4,18 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
-import ru.citeck.ecos.context.lib.auth.*
+import ru.citeck.ecos.context.lib.auth.AuthContext
+import ru.citeck.ecos.context.lib.auth.AuthGroup
+import ru.citeck.ecos.context.lib.auth.AuthRole
+import ru.citeck.ecos.context.lib.auth.AuthUser
 import ru.citeck.ecos.context.lib.i18n.I18nContext
 import ru.citeck.ecos.data.sql.domain.DbDomainConfig
 import ru.citeck.ecos.data.sql.domain.DbDomainFactory
 import ru.citeck.ecos.data.sql.records.DbRecordsDaoConfig
-import ru.citeck.ecos.data.sql.records.listener.*
+import ru.citeck.ecos.data.sql.records.listener.DbRecordChangedEvent
+import ru.citeck.ecos.data.sql.records.listener.DbRecordCreatedEvent
+import ru.citeck.ecos.data.sql.records.listener.DbRecordDeletedEvent
+import ru.citeck.ecos.data.sql.records.listener.DbRecordsListenerAdapter
 import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
 import ru.citeck.ecos.data.sql.records.perms.DbRecordPerms
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
@@ -24,6 +30,8 @@ import ru.citeck.ecos.model.domain.authorities.service.PersonEventsService
 import ru.citeck.ecos.model.domain.authorities.service.PrivateGroupsService
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
+import ru.citeck.ecos.model.lib.permissions.service.RecordPermsService
+import ru.citeck.ecos.model.lib.role.service.RoleService
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.model.service.keycloak.KeycloakUserService
 import ru.citeck.ecos.records3.RecordsService
@@ -44,6 +52,8 @@ import kotlin.reflect.jvm.jvmName
 class PersonsConfiguration(
     private val eventsService: PersonEventsService,
     private val recordsService: RecordsService,
+    private val permsService: RecordPermsService,
+    private var roleService: RoleService,
     private val authorityService: AuthorityService,
     private val dbDomainFactory: DbDomainFactory,
     private val authoritiesSyncService: AuthoritiesSyncService,
@@ -132,18 +142,32 @@ class PersonsConfiguration(
         extUsersService: ExtUsersService
     ): RecordsDao {
 
+        val typeRef = ModelUtils.getTypeRef("person")
         val permsComponent = object : DbPermsComponent {
 
             override fun getRecordPerms(user: String, authorities: Set<String>, record: Any): DbRecordPerms {
 
                 val userName = recordsService.getAtt(record, ScalarType.LOCAL_ID_SCHEMA).asText()
+                val attsPerms = permsService.getRecordAttsPerms(record)
+                val roles = AuthContext.runAsSystem {
+                    roleService.getRolesForAuthorities(record, typeRef, authorities).toSet()
+                }
 
                 return object : DbRecordPerms {
                     override fun hasAttReadPerms(name: String): Boolean {
                         return true
                     }
                     override fun hasAttWritePerms(name: String): Boolean {
-                        return hasWritePerms()
+                        if (!hasWritePerms()) {
+                            return false
+                        }
+
+                        if (!isSystem() && attsPerms != null) {
+                            val perms = attsPerms.getPermissions(name)
+                            return perms.isWriteAllowed(roles)
+                        } else {
+                            return true
+                        }
                     }
                     override fun hasReadPerms(): Boolean {
                         return true
@@ -167,15 +191,18 @@ class PersonsConfiguration(
                     }
 
                     private fun isSystemOrAdminOrOwner(): Boolean {
-                        return authorities.contains(AuthRole.SYSTEM) ||
+                        return isSystem() ||
                             authorities.contains(AuthRole.ADMIN) ||
                             userName == user
+                    }
+
+                    private fun isSystem(): Boolean {
+                        return authorities.contains(AuthRole.SYSTEM)
                     }
                 }
             }
         }
 
-        val typeRef = ModelUtils.getTypeRef("person")
         val recordsDao = dbDomainFactory.create(
             DbDomainConfig.create()
                 .withRecordsDao(
