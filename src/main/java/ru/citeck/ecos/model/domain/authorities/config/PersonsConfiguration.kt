@@ -148,12 +148,16 @@ class PersonsConfiguration(
             override fun getRecordPerms(user: String, authorities: Set<String>, record: Any): DbRecordPerms {
 
                 val userName = recordsService.getAtt(record, ScalarType.LOCAL_ID_SCHEMA).asText()
-                val attsPerms = permsService.getRecordAttsPerms(record)
-                val roles = AuthContext.runAsSystem {
-                    roleService.getRolesForAuthorities(record, typeRef, authorities).toSet()
-                }
 
                 return object : DbRecordPerms {
+
+                    private val attsPerms by lazyAsSystem {
+                        permsService.getRecordAttsPerms(record)
+                    }
+                    private val roles by lazyAsSystem {
+                        roleService.getRolesForAuthorities(record, typeRef, authorities).toSet()
+                    }
+
                     override fun hasAttReadPerms(name: String): Boolean {
                         return true
                     }
@@ -161,9 +165,9 @@ class PersonsConfiguration(
                         if (!hasWritePerms()) {
                             return false
                         }
-
-                        if (!isSystem() && attsPerms != null) {
-                            val perms = attsPerms.getPermissions(name)
+                        val localAttPerms = attsPerms
+                        if (!isSystem() && localAttPerms != null) {
+                            val perms = localAttPerms.getPermissions(name)
                             return perms.isWriteAllowed(roles)
                         } else {
                             return true
@@ -198,6 +202,10 @@ class PersonsConfiguration(
 
                     private fun isSystem(): Boolean {
                         return authorities.contains(AuthRole.SYSTEM)
+                    }
+
+                    private fun <T> lazyAsSystem(initializer: () -> T): Lazy<T> {
+                        return lazy { AuthContext.runAsSystem(initializer) }
                     }
                 }
             }
