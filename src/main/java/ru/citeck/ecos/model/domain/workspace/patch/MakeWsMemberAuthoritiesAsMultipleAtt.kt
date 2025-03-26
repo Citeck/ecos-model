@@ -16,7 +16,7 @@ import ru.citeck.ecos.webapp.lib.patch.annotaion.EcosLocalPatch
 import java.util.concurrent.Callable
 
 @Component
-@EcosLocalPatch("make-ws-member-authorities-as-multiple-att", "2025-02-10T00:00:00Z")
+@EcosLocalPatch("make-ws-member-authorities-as-multiple-att", "2025-02-10T00:00:01Z")
 class MakeWsMemberAuthoritiesAsMultipleAtt(
     val recordsService: RecordsService,
     val typesService: TypesService
