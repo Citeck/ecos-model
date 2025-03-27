@@ -195,7 +195,10 @@
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
                             "type": "mlText",
-                            "input": true
+                            "input": true,
+                            "validate": {
+                              "required": true
+                            }
                           },
                           {
                             "label": {
