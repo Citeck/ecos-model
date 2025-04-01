@@ -96,7 +96,23 @@ class ActivityRecordsProxy : RecordsDaoProxy(
         val (commentRecords, activityRecords) = records.partition { record ->
             record.id.startsWith(COMMENT_ID_PREFIX)
         }
-        val result = super.mutate(activityRecords).toMutableList()
+
+        val result = mutableListOf<String>()
+
+        activityRecords.forEach { activity ->
+            // Allow to create child-based activities to the parents, that user does not have write permissions
+            val shouldCreateWithSystemPermissions = activity.isNewRecord() && activity.userHasReadPermsOfParent()
+
+            val mutationResult = if (shouldCreateWithSystemPermissions) {
+                AuthContext.runAsSystem {
+                    super.mutate(listOf(activity))
+                }
+            } else {
+                super.mutate(listOf(activity))
+            }
+
+            result.addAll(mutationResult)
+        }
 
         if (commentRecords.isNotEmpty()) {
             val commentRecordsToMutate = commentRecords.map { record ->
@@ -112,6 +128,15 @@ class ActivityRecordsProxy : RecordsDaoProxy(
             result.addAll(ids)
         }
         return result
+    }
+
+    private fun LocalRecordAtts.isNewRecord(): Boolean {
+        return this.getAtt(RecordConstants.ATT_ID).isEmpty()
+    }
+
+    private fun LocalRecordAtts.userHasReadPermsOfParent(): Boolean {
+        val parent = this.getAtt(RecordConstants.ATT_PARENT).asText()
+        return recordsService.getAtt(parent, "permissions._has.read?bool!").asBoolean()
     }
 
     override fun delete(recordIds: List<String>): List<DelStatus> {
