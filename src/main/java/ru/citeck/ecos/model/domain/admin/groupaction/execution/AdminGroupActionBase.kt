@@ -19,7 +19,7 @@ abstract class AdminGroupActionBase<C : Any, S>(
         val state = getState(config)
         return object : GroupActionExecution<EntityRef> {
             override fun execute(context: GroupActionContext<EntityRef>): ActionResult {
-                context.getBatchedValues(100).forEach { entities ->
+                context.getBatchedValues(30).forEach { entities ->
                     AuthContext.runAsSystem { processImpl(state, entities) }
                 }
                 return ActionResultOk
