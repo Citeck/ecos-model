@@ -1,0 +1,8 @@
+id: model-dev-module
+
+name:
+  en: Model Dev
+
+actions:
+  - uiserv/action@admin-update-permissions
+  - uiserv/action@admin-update-workspace

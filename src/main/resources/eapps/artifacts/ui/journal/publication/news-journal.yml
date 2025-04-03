@@ -1,0 +1,7 @@
+---
+id: news-journal
+name:
+  ru: Новости
+typeRef: emodel/type@news
+actionsFromType: true
+editable: false

@@ -1,0 +1,119 @@
+{
+  "id": "admin-action-records-of-type-params",
+  "title": {
+    "en": "admin-action-records-of-type-params"
+  },
+  "system": true,
+  "definition": {
+    "components": [
+      {
+        "label": {
+          "ru": "Panel"
+        },
+        "key": "panel2",
+        "title": {
+          "ru": "Настройте список записей для обработки",
+          "en": "Set up records for processing"
+        },
+        "refreshOn": [],
+        "optionalWhenDisabled": false,
+        "type": "panel",
+        "input": false,
+        "components": [
+          {
+            "label": {
+              "ru": "Columns"
+            },
+            "key": "columns",
+            "columns": [
+              {
+                "components": [
+                  {
+                    "label": {
+                      "ru": "Тип данных",
+                      "en": "Data type"
+                    },
+                    "key": "typeRef",
+                    "validate": {
+                      "required": true
+                    },
+                    "clearOnHide": false,
+                    "modalTitle": "",
+                    "journalId": "ecos-types",
+                    "refreshOn": [],
+                    "optionalWhenDisabled": false,
+                    "type": "selectJournal",
+                    "input": true,
+                    "queryData": ""
+                  }
+                ],
+                "type": "column",
+                "input": false,
+                "key": "column",
+                "index": 0
+              },
+              {
+                "index": 1,
+                "type": "column",
+                "input": false,
+                "key": "column",
+                "components": [
+                  {
+                    "label": {
+                      "ru": "Рабочие пространства",
+                      "en": "Workspaces"
+                    },
+                    "key": "workspaces",
+                    "modalTitle": "",
+                    "journalId": "workspaces-journal",
+                    "refreshOn": [],
+                    "optionalWhenDisabled": false,
+                    "type": "selectJournal",
+                    "input": true,
+                    "queryData": ""
+                  }
+                ]
+              }
+            ],
+            "oneColumnInViewMode": false,
+            "type": "columns",
+            "input": false
+          },
+          {
+            "label": {
+              "ru": "Panel"
+            },
+            "key": "panel",
+            "title": {
+              "ru": "Предикат",
+              "en": "Predicate"
+            },
+            "collapsible": true,
+            "refreshOn": [],
+            "optionalWhenDisabled": false,
+            "type": "panel",
+            "input": false,
+            "components": [
+              {
+                "label": {
+                  "ru": "Предикат",
+                  "en": "Predicate"
+                },
+                "key": "predicate",
+                "editor": "ace",
+                "wysiwyg": "",
+                "defaultValue": "",
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
+                "type": "textarea",
+                "input": true,
+                "as": "json"
+              }
+            ],
+            "collapsed": true
+          }
+        ]
+      }
+    ]
+  }
+}
