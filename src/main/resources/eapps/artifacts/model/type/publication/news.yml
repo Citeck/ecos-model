@@ -5,7 +5,7 @@ name:
   en: News
 storageType: ECOS_MODEL
 parentRef: emodel/type@publication
-formRef: uiserv/form@DEFAULT_FORM
+formRef: uiserv/form@news-form
 journalRef: uiserv/journal@news-journal
 inheritForm: false
 aspects:
