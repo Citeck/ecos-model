@@ -17,7 +17,7 @@
             <bpmn:outgoing >Flow_0yzsred</bpmn:outgoing>
             <bpmn:outgoing >Flow_0war1ez</bpmn:outgoing>
         </bpmn:exclusiveGateway>
-        <bpmn:scriptTask scriptFormat="javascript" name="Вычисление переменных события календаря" id="Activity_0iaxfer" ecos:documentation="{}" ecos:asyncConfig="{&quot;asyncBefore&quot;:false,&quot;asyncAfter&quot;:false,&quot;exclusive&quot;:false}" ecos:name_ml="{&quot;ru&quot;:&quot;Вычисление переменных события календаря&quot;}" ecos:jobConfig="{&quot;jobPriority&quot;:null,&quot;jobRetryTimeCycle&quot;:null}" ecos:script="const eventAtts = document.load({&#10;    &quot;eventOrganizer&quot;: &quot;_creator?id&quot;,&#10;    &quot;eventDate&quot;: &quot;activityDate&quot;,&#10;    &quot;eventDuration&quot;: &quot;activityDuration&quot;,&#10;    &quot;eventSummary&quot;: &quot;calendarEventSummary&quot;&#10;});&#10;for (const key in eventAtts) {&#10;    execution.setVariable(key, eventAtts[key]);&#10;}&#10;&#10;const atts = document.load({&#10;    &quot;text&quot;: &quot;text&quot;,&#10;    &quot;parentRef&quot;: &quot;_parent?str&quot;,&#10;    &quot;responsible&quot;: &quot;responsible?str&quot;,&#10;    &quot;participants&quot;: &quot;participants[]?str|join()&quot;,&#10;});&#10;const plainText = atts.text.replace(/&lt;\/[^&gt;]+&gt;/g, '\n')&#10;    .replace(/&lt;[^&gt;]+&gt;/g, '')&#10;    .trim();&#10;&#10;let eventDescription = plainText;&#10;const parentRef = atts.parentRef.toString();&#10;if (!parentRef.includes(&quot;emodel/workspace&quot;)) {&#10;    eventDescription += &quot;\n\n&quot; + webUrl + &quot;/v2/dashboard?recordRef=&quot; + parentRef;&#10;}&#10;&#10;execution.setVariable(&quot;eventDescription&quot;, eventDescription);&#10;&#10;let recipients = atts.responsible;&#10;const participants = atts.participants;&#10;if (participants !== &quot;&quot;) {&#10;    recipients += ',' + participants;&#10;}&#10;execution.setVariable(&quot;notificationTo&quot;, recipients);&#10;execution.setVariable(&quot;responsible&quot;, atts.responsible);&#10;&#10;let eventAction = &quot;Приглашение&quot;;&#10;if (execution.getVariable(&quot;eventSequence&quot;) !== null) {&#10;    eventAction = &quot;Обновленное приглашение&quot;;&#10;}&#10;execution.setVariable(&quot;eventAction&quot;, eventAction);">
+        <bpmn:scriptTask scriptFormat="javascript" name="Вычисление переменных события календаря" id="Activity_0iaxfer" ecos:documentation="{}" ecos:asyncConfig="{&quot;asyncBefore&quot;:false,&quot;asyncAfter&quot;:false,&quot;exclusive&quot;:false}" ecos:name_ml="{&quot;ru&quot;:&quot;Вычисление переменных события календаря&quot;}" ecos:jobConfig="{&quot;jobPriority&quot;:null,&quot;jobRetryTimeCycle&quot;:null}" ecos:script="const eventAtts = document.load({&#10;    &quot;eventOrganizer&quot;: &quot;_creator?id&quot;,&#10;    &quot;eventDate&quot;: &quot;activityDate&quot;,&#10;    &quot;eventDuration&quot;: &quot;activityDuration&quot;,&#10;    &quot;eventSummary&quot;: &quot;calendarEventSummary&quot;&#10;});&#10;for (const key in eventAtts) {&#10;    execution.setVariable(key, eventAtts[key]);&#10;}&#10;&#10;const atts = document.load({&#10;    &quot;text&quot;: &quot;text&quot;,&#10;    &quot;parentRef&quot;: &quot;_parent?str&quot;,&#10;    &quot;responsible&quot;: &quot;responsible?str&quot;,&#10;    &quot;participants&quot;: &quot;participants[]?str|join()&quot;,&#10;    &quot;_workspace&quot;: &quot;_workspace.id&quot;&#10;});&#10;const plainText = atts.text.replace(/&lt;\/[^&gt;]+&gt;/g, '\n')&#10;    .replace(/&lt;[^&gt;]+&gt;/g, '')&#10;    .trim();&#10;&#10;let eventDescription = plainText;&#10;const parentRef = atts.parentRef.toString();&#10;if (!parentRef.includes(&quot;emodel/workspace&quot;)) {&#10;    const workspaceId = atts._workspace;&#10;    let documentUrl = webUrl + &quot;/v2/dashboard?recordRef=&quot; + parentRef;&#10;&#10;    if (workspaceId) {&#10;        documentUrl = documentUrl + &quot;&amp;ws=&quot; + workspaceId;&#10;    }&#10;&#10;    eventDescription += &quot;\n\n&quot; + documentUrl&#10;}&#10;&#10;execution.setVariable(&quot;eventDescription&quot;, eventDescription);&#10;&#10;let recipients = atts.responsible;&#10;const participants = atts.participants;&#10;if (participants !== &quot;&quot;) {&#10;    recipients += ',' + participants;&#10;}&#10;execution.setVariable(&quot;notificationTo&quot;, recipients);&#10;execution.setVariable(&quot;responsible&quot;, atts.responsible);&#10;&#10;let eventAction = &quot;Приглашение&quot;;&#10;if (execution.getVariable(&quot;eventSequence&quot;) !== null) {&#10;    eventAction = &quot;Обновленное приглашение&quot;;&#10;}&#10;execution.setVariable(&quot;eventAction&quot;, eventAction);">
             <bpmn:incoming >Flow_0me7ckl</bpmn:incoming>
             <bpmn:outgoing >Flow_11ooquc</bpmn:outgoing>
             <bpmn:script>const eventAtts = document.load({
@@ -35,6 +35,7 @@ const atts = document.load({
     "parentRef": "_parent?str",
     "responsible": "responsible?str",
     "participants": "participants[]?str|join()",
+    "_workspace": "_workspace.id"
 });
 const plainText = atts.text.replace(/&lt;\/[^&gt;]+&gt;/g, '\n')
     .replace(/&lt;[^&gt;]+&gt;/g, '')
@@ -43,7 +44,14 @@ const plainText = atts.text.replace(/&lt;\/[^&gt;]+&gt;/g, '\n')
 let eventDescription = plainText;
 const parentRef = atts.parentRef.toString();
 if (!parentRef.includes("emodel/workspace")) {
-    eventDescription += "\n\n" + webUrl + "/v2/dashboard?recordRef=" + parentRef;
+    const workspaceId = atts._workspace;
+    let documentUrl = webUrl + "/v2/dashboard?recordRef=" + parentRef;
+
+    if (workspaceId) {
+        documentUrl = documentUrl + "&amp;ws=" + workspaceId;
+    }
+
+    eventDescription += "\n\n" + documentUrl
 }
 
 execution.setVariable("eventDescription", eventDescription);
@@ -70,7 +78,7 @@ execution.setVariable("eventAction", eventAction);</bpmn:script>
         <bpmn:intermediateCatchEvent name="Ожидание сигнала запуска задачи ответственного" id="Event_1j5xv36" ecos:documentation="{}" ecos:manualSignalName="activity-start-user-task" ecos:eventFilterByRecordType="DOCUMENT" ecos:eventModel="{}" ecos:asyncConfig="{&quot;asyncBefore&quot;:false,&quot;asyncAfter&quot;:false,&quot;exclusive&quot;:true}" ecos:name_ml="{&quot;ru&quot;:&quot;Ожидание сигнала запуска задачи ответственного&quot;}" ecos:jobConfig="{&quot;jobPriority&quot;:null,&quot;jobRetryTimeCycle&quot;:null}" ecos:eventManualMode="true" ecos:eventFilterByPredicate="{}">
             <bpmn:incoming >Flow_1fwj6yn</bpmn:incoming>
             <bpmn:outgoing >Flow_0badu6r</bpmn:outgoing>
-            <bpmn:signalEventDefinition  signalRef="Signal_xNENyeG" id="SignalEventDefinition_0vgom56"/>
+            <bpmn:signalEventDefinition  signalRef="Signal_hkmEBrb" id="SignalEventDefinition_0vgom56"/>
         </bpmn:intermediateCatchEvent>
         <bpmn:eventBasedGateway name="" id="Gateway_0q09ibx" ecos:documentation="{}" ecos:name_ml="{}">
             <bpmn:incoming >Flow_0zw96dl</bpmn:incoming>
@@ -88,7 +96,7 @@ execution.setVariable("eventAction", eventAction);</bpmn:script>
         <bpmn:intermediateCatchEvent name="Ожидание изменения активности" id="Event_10mldsw" ecos:documentation="{}" ecos:eventFilterByRecordType="DOCUMENT" ecos:eventModel="{}" ecos:asyncConfig="{&quot;asyncBefore&quot;:false,&quot;asyncAfter&quot;:false,&quot;exclusive&quot;:true}" ecos:name_ml="{&quot;ru&quot;:&quot;Ожидание изменения активности&quot;}" ecos:jobConfig="{&quot;jobPriority&quot;:null,&quot;jobRetryTimeCycle&quot;:null}" ecos:eventManualMode="false" ecos:eventType="RECORD_CHANGED" ecos:eventFilterByPredicate="{}">
             <bpmn:incoming >Flow_1l421qx</bpmn:incoming>
             <bpmn:outgoing >Flow_0p8al3v</bpmn:outgoing>
-            <bpmn:signalEventDefinition  signalRef="Signal_chg9chk" id="SignalEventDefinition_1vi1y1a"/>
+            <bpmn:signalEventDefinition  signalRef="Signal_TGTTBXG" id="SignalEventDefinition_1vi1y1a"/>
         </bpmn:intermediateCatchEvent>
         <bpmn:sequenceFlow sourceRef="Activity_04a2cr8" targetRef="Event_1kttqby" name="" id="Flow_1pe3me5" ecos:name_ml="{}" ecos:conditionConfig="{&quot;fn&quot;:&quot;&quot;,&quot;expression&quot;:&quot;&quot;,&quot;outcome&quot;:&quot;&quot;}" ecos:conditionType="NONE"/>
         <bpmn:endEvent name="" id="Event_1kttqby" ecos:documentation="{}" ecos:asyncConfig="{&quot;asyncBefore&quot;:false,&quot;asyncAfter&quot;:false,&quot;exclusive&quot;:true}" ecos:name_ml="{}" ecos:jobConfig="{&quot;jobPriority&quot;:null,&quot;jobRetryTimeCycle&quot;:null}">
@@ -158,7 +166,7 @@ document.save();</bpmn:script>
             <bpmn:outgoing >Flow_19i5n8v</bpmn:outgoing>
         </bpmn:exclusiveGateway>
         <bpmn:sequenceFlow sourceRef="Gateway_0yi4vh3" targetRef="Activity_1ytywvd" name="Комментарий" id="Flow_13809pp" ecos:name_ml="{&quot;ru&quot;:&quot;Комментарий&quot;}" ecos:conditionConfig="{&quot;fn&quot;:&quot;document.load(\&quot;_type.isSubTypeOf.comment-activity?bool!\&quot;) === true;&quot;,&quot;expression&quot;:&quot;&quot;,&quot;outcome&quot;:&quot;&quot;}" ecos:conditionType="SCRIPT"/>
-        <bpmn:scriptTask scriptFormat="javascript" name="Создание комментария" id="Activity_1ytywvd" ecos:documentation="{}" ecos:asyncConfig="{&quot;asyncBefore&quot;:false,&quot;asyncAfter&quot;:false,&quot;exclusive&quot;:true}" ecos:name_ml="{&quot;ru&quot;:&quot;Создание комментария&quot;}" ecos:jobConfig="{&quot;jobPriority&quot;:null,&quot;jobRetryTimeCycle&quot;:null}" ecos:script="var atts = document.load({ &#10;  &quot;record&quot;: &quot;_parent?id&quot;, &#10;  &quot;text&quot;: &quot;text&quot; &#10;}); &#10;&#10;var comment = Records.get('emodel/comment@'); &#10;for (var key in atts) { &#10;  comment.att(key, atts[key]); &#10;} &#10;var newComment = comment.save();&#10;&#10;document.att('comment', newComment.getId());&#10;document.save();">
+        <bpmn:scriptTask scriptFormat="javascript" name="Создание комментария" id="Activity_1ytywvd" ecos:documentation="{}" ecos:asyncConfig="{&quot;asyncBefore&quot;:false,&quot;asyncAfter&quot;:false,&quot;exclusive&quot;:false}" ecos:name_ml="{&quot;ru&quot;:&quot;Создание комментария&quot;}" ecos:jobConfig="{&quot;jobPriority&quot;:null,&quot;jobRetryTimeCycle&quot;:null}" ecos:script="var atts = document.load({ &#10;  &quot;record&quot;: &quot;_parent?id&quot;, &#10;  &quot;text&quot;: &quot;text&quot; &#10;}); &#10;&#10;var comment = Records.get('emodel/comment@'); &#10;for (var key in atts) { &#10;  comment.att(key, atts[key]); &#10;} &#10;var newComment = comment.save();&#10;&#10;document.att('comment', newComment.getId());&#10;document.save();">
             <bpmn:incoming >Flow_13809pp</bpmn:incoming>
             <bpmn:outgoing >Flow_0zegp6n</bpmn:outgoing>
             <bpmn:script>var atts = document.load({
@@ -192,7 +200,7 @@ document.save();</bpmn:script>
         </bpmn:exclusiveGateway>
         <bpmn:sequenceFlow sourceRef="Gateway_0yi4vh3" targetRef="Gateway_06knvn0" name="" id="Flow_19i5n8v" ecos:name_ml="{}" ecos:conditionConfig="{&quot;fn&quot;:&quot; &quot;,&quot;expression&quot;:&quot;&quot;,&quot;outcome&quot;:&quot;&quot;}" ecos:conditionType="NONE"/>
         <bpmn:sequenceFlow sourceRef="Gateway_06knvn0" targetRef="Activity_0n72bya" name="Поручение" id="Flow_1t68h30" ecos:name_ml="{&quot;ru&quot;:&quot;Поручение&quot;}" ecos:conditionConfig="{&quot;fn&quot;:&quot;document.load(\&quot;_type.isSubTypeOf.assignment-activity?bool!\&quot;) === true;&quot;,&quot;expression&quot;:&quot;&quot;,&quot;outcome&quot;:&quot;&quot;}" ecos:conditionType="SCRIPT"/>
-        <bpmn:scriptTask scriptFormat="javascript" name="Создание поручения" id="Activity_0n72bya" ecos:documentation="{}" ecos:asyncConfig="{&quot;asyncBefore&quot;:false,&quot;asyncAfter&quot;:false,&quot;exclusive&quot;:true}" ecos:name_ml="{&quot;ru&quot;:&quot;Создание поручения&quot;}" ecos:jobConfig="{&quot;jobPriority&quot;:null,&quot;jobRetryTimeCycle&quot;:null}" ecos:script="let atts = document.load({&#10;    &quot;title&quot;: &quot;title&quot;,&#10;    &quot;description&quot;: &quot;text&quot; ,&#10;    &quot;dueDate&quot;: &quot;dueDate&quot;,&#10;    &quot;priority&quot;: &quot;priority&quot;,&#10;    &quot;initiator&quot;: &quot;initiator?str&quot;,&#10;    &quot;performer&quot;: &quot;performer?str&quot;,&#10;    &quot;assoc:associatedWith&quot;: &quot;_parent?id&quot;,&#10;    &quot;_workspace&quot;: &quot;_workspace.id&quot;,&#10;});&#10;&#10;var assignment = Records.get('emodel/assignment-type@');&#10;for (var key in atts) {&#10;    assignment.att(key, atts[key]);&#10;}&#10;assignment.att(&quot;verify&quot;, false);&#10;var newAssignment = assignment.save();&#10;&#10;document.att('assignment', newAssignment.getId());&#10;document.save();">
+        <bpmn:scriptTask scriptFormat="javascript" name="Создание поручения" id="Activity_0n72bya" ecos:documentation="{}" ecos:asyncConfig="{&quot;asyncBefore&quot;:false,&quot;asyncAfter&quot;:false,&quot;exclusive&quot;:false}" ecos:name_ml="{&quot;ru&quot;:&quot;Создание поручения&quot;}" ecos:jobConfig="{&quot;jobPriority&quot;:null,&quot;jobRetryTimeCycle&quot;:null}" ecos:script="let atts = document.load({&#10;    &quot;title&quot;: &quot;title&quot;,&#10;    &quot;description&quot;: &quot;text&quot; ,&#10;    &quot;dueDate&quot;: &quot;dueDate&quot;,&#10;    &quot;priority&quot;: &quot;priority&quot;,&#10;    &quot;initiator&quot;: &quot;initiator?str&quot;,&#10;    &quot;performer&quot;: &quot;performer?str&quot;,&#10;    &quot;assoc:associatedWith&quot;: &quot;_parent?id&quot;,&#10;    &quot;_workspace&quot;: &quot;_workspace.id&quot;&#10;});&#10;&#10;var assignment = Records.get('emodel/assignment-type@');&#10;for (var key in atts) {&#10;    assignment.att(key, atts[key]);&#10;}&#10;assignment.att(&quot;verify&quot;, false);&#10;var newAssignment = assignment.save();&#10;&#10;document.att('assignment', newAssignment.getId());&#10;document.save();">
             <bpmn:incoming >Flow_1t68h30</bpmn:incoming>
             <bpmn:outgoing >Flow_1ijuo62</bpmn:outgoing>
             <bpmn:script>let atts = document.load({
@@ -203,7 +211,7 @@ document.save();</bpmn:script>
     "initiator": "initiator?str",
     "performer": "performer?str",
     "assoc:associatedWith": "_parent?id",
-    "_workspace": "_workspace.id",
+    "_workspace": "_workspace.id"
 });
 
 var assignment = Records.get('emodel/assignment-type@');
@@ -235,7 +243,7 @@ document.save();</bpmn:script>
         <bpmn:sequenceFlow sourceRef="Activity_039oxsm" targetRef="Gateway_1jgphp7" name="" id="Flow_0ebxxlh" ecos:name_ml="{}" ecos:conditionConfig="{&quot;fn&quot;:&quot; &quot;,&quot;expression&quot;:&quot;&quot;,&quot;outcome&quot;:&quot;&quot;}" ecos:conditionType="NONE"/>
         <bpmn:boundaryEvent  cancelActivity="true" attachedToRef="Activity_1qkhamb" name="" id="Event_0duj755" ecos:documentation="{}" ecos:eventFilterByRecordType="DOCUMENT" ecos:eventModel="{}" ecos:asyncConfig="{&quot;asyncBefore&quot;:false,&quot;asyncAfter&quot;:false,&quot;exclusive&quot;:true}" ecos:name_ml="{}" ecos:jobConfig="{&quot;jobPriority&quot;:null,&quot;jobRetryTimeCycle&quot;:null}" ecos:eventManualMode="false" ecos:eventType="RECORD_CHANGED" ecos:eventFilterByPredicate="{&quot;t&quot;:&quot;eq&quot;,&quot;att&quot;:&quot;diff._has.activityDate?bool&quot;,&quot;val&quot;:false}">
             <bpmn:outgoing>Flow_1yrmmd7</bpmn:outgoing>
-            <bpmn:signalEventDefinition signalRef="Signal_93SLKJU" id="SignalEventDefinition_0bgpzz6"/>
+            <bpmn:signalEventDefinition signalRef="Signal_QC0Ufed" id="SignalEventDefinition_0bgpzz6"/>
         </bpmn:boundaryEvent>
         <bpmn:sequenceFlow sourceRef="Event_0duj755" targetRef="Activity_0t9z362" name="Изменен документ активности" id="Flow_1yrmmd7" ecos:name_ml="{&quot;ru&quot;:&quot;Изменен документ активности&quot;}" ecos:conditionConfig="{&quot;fn&quot;:&quot;&quot;,&quot;expression&quot;:&quot;&quot;,&quot;outcome&quot;:&quot;&quot;}" ecos:conditionType="NONE"/>
         <bpmn:scriptTask scriptFormat="javascript" name="Отключение ожидания запуска задачи" id="Activity_0t9z362" ecos:documentation="{}" ecos:asyncConfig="{&quot;asyncBefore&quot;:false,&quot;asyncAfter&quot;:false,&quot;exclusive&quot;:true}" ecos:name_ml="{&quot;ru&quot;:&quot;Отключение ожидания запуска задачи&quot;}" ecos:jobConfig="{&quot;jobPriority&quot;:null,&quot;jobRetryTimeCycle&quot;:null}" ecos:script="execution.setVariable(&quot;waitStartTask&quot;, false);">
@@ -273,9 +281,9 @@ document.save();</bpmn:script>
         <bpmn:sequenceFlow sourceRef="Gateway_1xh8gxe" targetRef="Gateway_0q09ibx" name="" id="Flow_0zw96dl" ecos:name_ml="{}" ecos:conditionConfig="{&quot;fn&quot;:&quot;&quot;,&quot;expression&quot;:&quot;&quot;,&quot;outcome&quot;:&quot;&quot;}" ecos:conditionType="NONE"/>
         <bpmn:sequenceFlow sourceRef="Gateway_1xh8gxe" targetRef="Gateway_1kjkd6k" name="Немедленный запуск задачи" id="Flow_1rmxqzn" ecos:name_ml="{&quot;ru&quot;:&quot;Немедленный запуск задачи&quot;}" ecos:conditionConfig="{&quot;fn&quot;:&quot;execution.getVariable(\&quot;waitStartTask\&quot;) === false;&quot;,&quot;expression&quot;:&quot;&quot;,&quot;outcome&quot;:&quot;&quot;}" ecos:conditionType="SCRIPT"/>
     </bpmn:process>
-    <bpmn:signal name="activity-start-user-task;${execution.businessKey};ANY;pr_99914b932bd37a50b983c5e7c90ae93b" id="Signal_xNENyeG"/>
-    <bpmn:signal name="RECORD_CHANGED;${execution.businessKey};ANY;pr_99914b932bd37a50b983c5e7c90ae93b" id="Signal_chg9chk"/>
-    <bpmn:signal name="RECORD_CHANGED;${execution.businessKey};ANY;pr_47572a7790fd7cbeb6633790b7569ae0" id="Signal_93SLKJU"/>
+    <bpmn:signal name="activity-start-user-task;${execution.businessKey};ANY;pr_99914b932bd37a50b983c5e7c90ae93b" id="Signal_hkmEBrb"/>
+    <bpmn:signal name="RECORD_CHANGED;${execution.businessKey};ANY;pr_99914b932bd37a50b983c5e7c90ae93b" id="Signal_TGTTBXG"/>
+    <bpmn:signal name="RECORD_CHANGED;${execution.businessKey};ANY;pr_47572a7790fd7cbeb6633790b7569ae0" id="Signal_QC0Ufed"/>
     <bpmndi:BPMNDiagram id="BPMNDiagram_1">
         <bpmndi:BPMNPlane  bpmnElement="ecos-activity-process" id="BPMNPlane_1">
             <bpmndi:BPMNShape bpmnElement="StartEvent_1ew9rff" isExpanded="false" id="_BPMNShape_StartEvent_2">
