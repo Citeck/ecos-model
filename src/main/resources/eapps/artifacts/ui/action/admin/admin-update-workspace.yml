@@ -1,0 +1,19 @@
+---
+id: admin-update-workspace
+name:
+  ru: Перенести записи в другое рабочее пространство
+  en: Move records to other workspace
+icon: icon-reload
+confirm:
+  formRef: uiserv/form@admin-action-update-workspace-form
+  attributesMapping:
+    valuesParams.config.typeRef: typeRef
+    valuesParams.config.predicate: predicate
+    executionParams.config.targetWorkspace: targetWorkspace
+type: server-group-action-v2
+config:
+  targetApp: emodel
+  valuesParams:
+    type: admin-action-records-of-type
+  executionParams:
+    type: update-workspace

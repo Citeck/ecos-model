@@ -1,0 +1,18 @@
+---
+id: admin-update-permissions
+name:
+  ru: Обновить права на просмотр записей
+  en: Update permissions to read records
+icon: icon-reload
+confirm:
+  formRef: uiserv/form@admin-action-without-exec-params-form
+  attributesMapping:
+    valuesParams.config.typeRef: typeRef
+    valuesParams.config.predicate: predicate
+type: server-group-action-v2
+config:
+  targetApp: emodel
+  valuesParams:
+    type: admin-action-records-of-type
+  executionParams:
+    type: update-permissions

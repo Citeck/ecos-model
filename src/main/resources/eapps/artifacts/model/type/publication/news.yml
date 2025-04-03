@@ -1,0 +1,15 @@
+---
+id: news
+name:
+  ru: Новости
+  en: News
+storageType: ECOS_MODEL
+parentRef: emodel/type@publication
+formRef: uiserv/form@DEFAULT_FORM
+journalRef: uiserv/journal@news-journal
+inheritForm: false
+aspects:
+  - ref: emodel/aspect@listview
+    config:
+      titleAtt: title
+      textAtt: text
