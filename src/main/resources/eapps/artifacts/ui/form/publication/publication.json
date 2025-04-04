@@ -7,7 +7,7 @@
   "description": {},
   "customModule": "",
   "typeRef": "",
-  "width": "lg",
+  "width": "extra-lg",
   "system": false,
   "i18n": {},
   "definition": {
@@ -37,6 +37,8 @@
         "validate": {
           "required": true
         },
+        "editor": "lexical",
+        "clearOnHide": false,
         "defaultValue": "",
         "refreshOn": [],
         "optionalWhenDisabled": false,
