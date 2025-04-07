@@ -10,6 +10,10 @@ queryPermsPolicy: PUBLIC # visibility controlled in DAO
 sourceId: emodel/activity
 parentRef: emodel/type@user-base
 
+dispNameTemplate:
+  en: ${activityTitle.closest.en}
+  ru: ${activityTitle.closest.ru}
+
 defaultStatus: planned
 inheritActions: false
 actions:
@@ -34,7 +38,43 @@ model:
         ru: Отменена
         en: Canceled
   attributes:
+    - id: topic
+      name:
+        ru: Тема
+        en: Topic
     - id: text
       name:
         ru: Текст
         en: Text
+    - id: activityTitle
+      name:
+        ru: Заголовок активности
+        en: Activity title
+      type: MLTEXT
+      computed:
+        type: SCRIPT
+        config:
+          fn: |
+            const typeRu = value.load("_type._disp.closest.ru");
+            const typeEn = value.load("_type._disp.closest.en");
+
+            const topic = value.load("topic");
+            const parentDispRu = value.load("_parent._disp.closest.ru");
+            const parentDispEn = value.load("_parent._disp.closest.en");
+
+            let titleRu = typeRu + ": ";
+            let titleEn = typeEn + ": ";
+
+            if (topic) {
+              titleRu += topic;
+              titleEn += topic;
+            } else {
+              titleRu += parentDispRu;
+              titleEn += parentDispEn;
+            }
+
+            return {
+              ru: titleRu,
+              en: titleEn
+            };
+      storingType: ON_MUTATE
