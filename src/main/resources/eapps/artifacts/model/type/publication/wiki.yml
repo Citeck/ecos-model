@@ -21,8 +21,3 @@ model:
       config:
         child: true
         typeRef: emodel/type@wiki
-aspects:
-  - ref: emodel/aspect@listview
-    config:
-      titleAtt: title
-      textAtt: text
