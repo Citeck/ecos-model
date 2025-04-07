@@ -1,0 +1,116 @@
+{
+  "id": "wiki-form",
+  "title": {
+    "ru": "Статья базы знаний",
+    "en": "Knowledge base article"
+  },
+  "description": {},
+  "customModule": "",
+  "typeRef": "",
+  "width": "extra-lg",
+  "system": false,
+  "i18n": {},
+  "definition": {
+    "components": [
+      {
+        "type": "textfield",
+        "input": true,
+        "key": "title",
+        "label": {
+          "ru": "Заголовок",
+          "en": "Title"
+        },
+        "validate": {
+          "required": true
+        }
+      },
+      {
+        "label": {
+          "ru": "Текст",
+          "en": "Text"
+        },
+        "key": "text",
+        "validate": {
+          "required": true
+        },
+        "editor": "lexical",
+        "clearOnHide": false,
+        "defaultValue": "",
+        "refreshOn": [],
+        "optionalWhenDisabled": false,
+        "type": "textarea",
+        "input": true,
+        "uploadStorage": "",
+        "uploadUrl": "",
+        "uploadOptions": "",
+        "uploadDir": "",
+        "as": "",
+        "reorder": false
+      },
+      {
+        "type": "columns",
+        "key": "buttons-columns",
+        "columns": [
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 0,
+            "components": [],
+            "key": "column"
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 1,
+            "key": "column",
+            "components": []
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 2,
+            "components": [
+              {
+                "type": "button",
+                "key": "cancel",
+                "label": {
+                  "ru": "Отменить",
+                  "en": "Cancel"
+                },
+                "action": "event",
+                "event": "cancel",
+                "block": true,
+                "input": true
+              }
+            ],
+            "key": "column"
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 3,
+            "components": [
+              {
+                "type": "button",
+                "theme": "primary",
+                "key": "submit",
+                "label": {
+                  "ru": "Сохранить",
+                  "en": "Save"
+                },
+                "block": true,
+                "input": true
+              }
+            ],
+            "key": "column"
+          }
+        ],
+        "input": false
+      }
+    ]
+  }
+}

@@ -5,6 +5,7 @@ name:
   en: Wiki article
 
 parentRef: emodel/type@publication
+formRef: uiserv/form@wiki-form
 
 storageType: ECOS_MODEL
 
