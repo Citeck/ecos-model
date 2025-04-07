@@ -47,6 +47,15 @@
         "input": true
       },
       {
+        "type": "file",
+        "input": true,
+        "key": "image",
+        "label": {
+          "ru": "Превью",
+          "en": "Preview"
+        }
+      },
+      {
         "type": "columns",
         "key": "buttons-columns",
         "columns": [
