@@ -1,5 +1,7 @@
 package ru.citeck.ecos.model.domain.workspace.config
 
+import com.google.common.io.BaseEncoding
+import com.google.common.primitives.Longs
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import ru.citeck.ecos.commons.data.DataValue
@@ -22,6 +24,8 @@ import ru.citeck.ecos.records3.record.atts.schema.ScalarType
 import ru.citeck.ecos.records3.record.atts.value.AttValueCtx
 import ru.citeck.ecos.records3.record.dao.RecordsDao
 import ru.citeck.ecos.records3.record.mixin.AttMixin
+import java.util.zip.CRC32
+import kotlin.random.Random
 
 @Configuration
 class WorkspaceRepoDaoConfig {
@@ -87,19 +91,24 @@ class WorkspaceRepoDaoConfig {
                 }
                 ScalarType.JSON.mirrorAtt -> {
                     val data = Json.mapper.toNonDefaultData(value.getAtts(Workspace::class.java))
-                    val newMembers = data[WorkspaceDesc.ATT_WORKSPACE_MEMBERS].mapNotNull { memberData ->
-                        val id = memberData[WorkspaceMemberDesc.ATT_MEMBER_ID].asText()
-                        if (id.isNotBlank()) {
-                            val newMemberData = DataValue.createObj().set("id", id)
-                            memberData.forEach { k, v ->
-                                if (k != WorkspaceMemberDesc.ATT_MEMBER_ID) {
-                                    newMemberData[k] = v
-                                }
-                            }
-                            newMemberData
-                        } else {
-                            null
+                    val existingMemberIds = mutableSetOf<String>()
+                    data[WorkspaceDesc.ATT_WORKSPACE_MEMBERS].forEach {
+                        val memberId = it[WorkspaceMemberDesc.ATT_MEMBER_ID].asText()
+                        if (memberId.isNotBlank()) {
+                            existingMemberIds.add(memberId)
                         }
+                    }
+                    val newMembers = data[WorkspaceDesc.ATT_WORKSPACE_MEMBERS].mapNotNull { memberData ->
+                        val id = memberData[WorkspaceMemberDesc.ATT_MEMBER_ID].asText().ifBlank {
+                            generateSequence { generateMemberId() }.first { existingMemberIds.add(it) }
+                        }
+                        val newMemberData = DataValue.createObj().set("id", id)
+                        memberData.forEach { k, v ->
+                            if (k != WorkspaceMemberDesc.ATT_MEMBER_ID) {
+                                newMemberData[k] = v
+                            }
+                        }
+                        newMemberData
                     }
                     data[WorkspaceDesc.ATT_WORKSPACE_MEMBERS] = newMembers
                     data
@@ -107,6 +116,17 @@ class WorkspaceRepoDaoConfig {
 
                 else -> null
             }
+        }
+
+        private fun generateMemberId(): String {
+
+            val crc = CRC32()
+            val bytes = ByteArray(64)
+            Random.nextBytes(bytes)
+            crc.update(bytes)
+
+            val id = BaseEncoding.base32().encode(Longs.toByteArray(crc.value))
+            return id.lowercase().substringBefore('=').takeLast(6)
         }
 
         override fun getProvidedAtts(): Collection<String> {
