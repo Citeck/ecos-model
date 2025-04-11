@@ -2,18 +2,13 @@ package ru.citeck.ecos.model.domain.workspace.api.records
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
-import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceMemberDesc
-import ru.citeck.ecos.model.domain.workspace.dto.Workspace
-import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceAction
-import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMember
-import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMemberRole
-import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceVisibility
+import ru.citeck.ecos.model.domain.workspace.dto.*
 import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
 import ru.citeck.ecos.model.domain.workspace.service.WorkspacePermissions
 import ru.citeck.ecos.model.lib.ModelServiceFactory
@@ -22,8 +17,10 @@ import ru.citeck.ecos.model.lib.permissions.dto.PermissionType
 import ru.citeck.ecos.model.lib.workspace.USER_WORKSPACE_PREFIX
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.predicate.PredicateService
+import ru.citeck.ecos.records2.predicate.PredicateUtils
 import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records2.predicate.model.Predicates
+import ru.citeck.ecos.records2.predicate.model.ValuePredicate
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.atts.value.AttValue
@@ -96,16 +93,56 @@ class WorkspaceProxyDao(
             }
 
             PredicateService.LANGUAGE_PREDICATE -> {
-                super.queryRecords(getPermissionsPrefilteredQuery(recsQuery))
+                super.queryRecords(
+                    recsQuery.copy()
+                        .withQuery(processQueryPredicate(recsQuery.getPredicate()))
+                        .build()
+                )
             }
 
             else -> error("Unsupported query language: ${recsQuery.language}")
         }
     }
 
-    private fun getPermissionsPrefilteredQuery(recsQuery: RecordsQuery): RecordsQuery {
+    private fun processQueryPredicate(predicate: Predicate): Predicate {
+        val result = PredicateUtils.mapAttributePredicates(
+            predicate,
+            { srcPred ->
+                if (srcPred is ValuePredicate) {
+                    when (srcPred.getAttribute()) {
+                        WorkspaceDesc.ATT_IS_CURRENT_USER_MEMBER -> {
+                            val authoritiesRefs = ecosAuthoritiesApi.getAuthorityRefs(
+                                AuthContext.getCurrentUserWithAuthorities()
+                                    .filter { !it.startsWith(AuthRole.PREFIX) }
+                            )
+                            var targetPred: Predicate = Predicates.or(
+                                Predicates.eq(
+                                    RecordConstants.ATT_CREATOR,
+                                    ecosAuthoritiesApi.getPersonRef(AuthContext.getCurrentUser())
+                                ),
+                                Predicates.inVals(WORKSPACE_ATT_MEMBER_AUTHORITY, authoritiesRefs)
+                            )
+                            if (!srcPred.getValue().asBoolean()) {
+                                targetPred = Predicates.not(targetPred)
+                            }
+                            targetPred
+                        }
+                        else -> srcPred
+                    }
+                } else {
+                    srcPred
+                }
+            },
+            onlyAnd = false,
+            optimize = false,
+            filterEmptyComposite = false
+        ) ?: Predicates.alwaysFalse()
+        return getPermissionsPrefilteredQuery(result)
+    }
+
+    private fun getPermissionsPrefilteredQuery(basePredicate: Predicate): Predicate {
         if (AuthContext.isRunAsSystemOrAdmin()) {
-            return recsQuery
+            return basePredicate
         }
 
         val userRef = AuthorityType.PERSON.getRef(AuthContext.getCurrentUser())
@@ -116,7 +153,6 @@ class WorkspaceProxyDao(
                 ecosAuthoritiesApi.getAuthorityRef(it)
             }
 
-        val basePredicate = recsQuery.getQuery(Predicate::class.java)
         val predicateWithPermsPrefilter = Predicates.and(
             basePredicate,
             Predicates.or(
@@ -128,7 +164,7 @@ class WorkspaceProxyDao(
 
         log.debug { "Query workspaces with predicate: ${Json.mapper.toPrettyString(predicateWithPermsPrefilter)}" }
 
-        return recsQuery.copy(query = DataValue.create(predicateWithPermsPrefilter))
+        return predicateWithPermsPrefilter
     }
 
     override fun mutate(records: List<LocalRecordAtts>): List<String> {
