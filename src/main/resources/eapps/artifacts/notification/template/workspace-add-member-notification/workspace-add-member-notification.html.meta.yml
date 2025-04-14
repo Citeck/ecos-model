@@ -1,0 +1,13 @@
+{
+  "id": "workspace-add-member-notification",
+  "name": "Уведомление о добавлении участника в Рабочее пространство",
+  "notificationTitle": {
+    "ru": "Вас пригласили в рабочее пространство"
+  },
+  "tags": [],
+  "model": {
+    "wsId": "id",
+    "wsName": "name"
+  },
+  "multiTemplateConfig": []
+}

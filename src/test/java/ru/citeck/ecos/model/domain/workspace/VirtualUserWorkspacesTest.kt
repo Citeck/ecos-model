@@ -16,6 +16,7 @@ import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.context.lib.i18n.I18nContext
 import ru.citeck.ecos.model.EcosModelApp
+import ru.citeck.ecos.model.TestNotificationService
 import ru.citeck.ecos.model.domain.workspace.WorkspacePermissionsTest.Companion.GRYFFINDOR_WORKSPACE
 import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
@@ -25,6 +26,7 @@ import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMemberRole
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceVisibility
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.workspace.USER_WORKSPACE_PREFIX
+import ru.citeck.ecos.notifications.lib.service.NotificationService
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.ScalarType
@@ -45,6 +47,9 @@ class VirtualUserWorkspacesTest {
 
     @Autowired
     private lateinit var localAppService: LocalAppService
+
+    @Autowired
+    private lateinit var notificationService: NotificationService
 
     companion object {
         private val personalWsIconRef = EntityRef.valueOf("uiserv/icon@personal-workspace-icon")
@@ -164,6 +169,8 @@ class VirtualUserWorkspacesTest {
                 ).getRecords()
             )
         }
+
+        (notificationService as? TestNotificationService.NotificationServiceTestImpl)?.cleanNotificationStorage()
     }
 
     @Test

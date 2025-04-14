@@ -24,7 +24,7 @@ class WorkspaceArtifactHandler(
 
     override fun deployArtifact(artifact: Workspace) {
         AuthContext.runAsSystem {
-            workspaceService.mutateWorkspace(artifact)
+            workspaceService.mutateWorkspace(artifact, true)
         }
     }
 
