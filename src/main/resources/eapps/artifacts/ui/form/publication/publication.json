@@ -47,13 +47,22 @@
         "input": true
       },
       {
-        "type": "file",
-        "input": true,
-        "key": "image",
         "label": {
           "ru": "Превью",
           "en": "Preview"
-        }
+        },
+        "key": "image",
+        "filePattern": "image/*",
+        "fileMaxSize": "10MB",
+        "refreshOn": [],
+        "optionalWhenDisabled": false,
+        "type": "file",
+        "input": true,
+        "reorder": false,
+        "url": "",
+        "options": "",
+        "webcamSize": "",
+        "imageSize": ""
       },
       {
         "type": "columns",
