@@ -64,6 +64,7 @@
                       "en": "Workspaces"
                     },
                     "key": "workspaces",
+                    "multiple": true,
                     "modalTitle": "",
                     "journalId": "workspaces-journal",
                     "refreshOn": [],
