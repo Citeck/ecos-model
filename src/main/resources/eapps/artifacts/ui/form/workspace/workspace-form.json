@@ -46,7 +46,8 @@
                             },
                             "key": "id",
                             "validate": {
-                              "required": true
+                              "required": true,
+                              "maxLength": 100
                             },
                             "defaultValue": "",
                             "refreshOn": [],
@@ -76,7 +77,9 @@
                             "input": true,
                             "inputMasks": [
                               {}
-                            ]
+                            ],
+                            "reorder": false,
+                            "dataSrc": ""
                           },
                           {
                             "label": {
