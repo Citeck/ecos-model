@@ -49,10 +49,12 @@ class AdminActionRecordsOfTypeValues(
                 .withEcosType(typeDef.id)
                 .withWorkspaces(workspaces)
                 .build()
-            valuesBySourceId[typeDef.sourceId] = recsQueryValuesFactory.getValues(
-                RecordsQueryValuesFactory.Config(query),
-                attributes
-            )
+            valuesBySourceId[typeDef.sourceId] = AuthContext.runAsSystem {
+                recsQueryValuesFactory.getValues(
+                    RecordsQueryValuesFactory.Config(query),
+                    attributes
+                )
+            }
             for (childRef in typesRegistry.getChildren(typeRef)) {
                 registerValuesForTypeRef(childRef)
             }
