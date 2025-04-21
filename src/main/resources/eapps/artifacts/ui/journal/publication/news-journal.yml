@@ -2,6 +2,24 @@
 id: news-journal
 name:
   ru: Новости
+  en: News
 typeRef: emodel/type@news
 actionsFromType: true
 editable: false
+
+columns:
+  - id: title
+    name:
+      ru: Заголовок
+      en: Title
+    type: TEXT
+  - id: _creator
+    name:
+      ru: Автор
+      en: Author
+    type: PERSON
+  - id: _created
+    name:
+      ru: Дата создания
+      en: Created date
+    type: DATETIME
