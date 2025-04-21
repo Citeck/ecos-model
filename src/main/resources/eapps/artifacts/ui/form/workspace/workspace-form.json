@@ -145,23 +145,6 @@
                             "optionalWhenDisabled": false,
                             "type": "tableForm",
                             "input": true
-                          },
-                          {
-                            "label": {
-                              "ru": "Создатель",
-                              "en": "Creator"
-                            },
-                            "key": "_creator",
-                            "disabled": true,
-                            "disableInlineEdit": true,
-                            "persistent": false,
-                            "allowedAuthorityType": "USER",
-                            "defaultValue": "",
-                            "refreshOn": [],
-                            "optionalWhenDisabled": false,
-                            "customConditional": "show = _.get(instance, 'options.formMode') !== 'CREATE';",
-                            "type": "selectOrgstruct",
-                            "input": true
                           }
                         ],
                         "type": "column",
@@ -195,13 +178,14 @@
                               "en": "Description"
                             },
                             "key": "description",
-                            "refreshOn": [],
-                            "optionalWhenDisabled": false,
-                            "type": "mlText",
-                            "input": true,
                             "validate": {
                               "required": true
-                            }
+                            },
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "mlTextarea",
+                            "input": true,
+                            "reorder": false
                           },
                           {
                             "label": {

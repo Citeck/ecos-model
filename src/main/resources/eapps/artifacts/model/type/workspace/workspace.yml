@@ -20,6 +20,8 @@ queryPermsPolicy: PUBLIC
 actions:
   - uiserv/action@edit
   - uiserv/action@delete
+  - uiserv/action@join-workspace
+  - uiserv/action@leave-workspace
   - uiserv/action@view-dashboard
   - uiserv/action@download-text-yml
 

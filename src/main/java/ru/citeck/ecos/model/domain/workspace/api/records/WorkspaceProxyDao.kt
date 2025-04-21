@@ -15,7 +15,6 @@ import ru.citeck.ecos.model.lib.ModelServiceFactory
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.permissions.dto.PermissionType
 import ru.citeck.ecos.model.lib.workspace.USER_WORKSPACE_PREFIX
-import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.predicate.PredicateService
 import ru.citeck.ecos.records2.predicate.PredicateUtils
 import ru.citeck.ecos.records2.predicate.model.Predicate
@@ -115,12 +114,9 @@ class WorkspaceProxyDao(
                                 AuthContext.getCurrentUserWithAuthorities()
                                     .filter { !it.startsWith(AuthRole.PREFIX) }
                             )
-                            var targetPred: Predicate = Predicates.or(
-                                Predicates.eq(
-                                    RecordConstants.ATT_CREATOR,
-                                    ecosAuthoritiesApi.getPersonRef(AuthContext.getCurrentUser())
-                                ),
-                                Predicates.inVals(WORKSPACE_ATT_MEMBER_AUTHORITY, authoritiesRefs)
+                            var targetPred: Predicate = Predicates.inVals(
+                                WORKSPACE_ATT_MEMBER_AUTHORITY,
+                                authoritiesRefs
                             )
                             if (!srcPred.getValue().asBoolean()) {
                                 targetPred = Predicates.not(targetPred)
@@ -141,23 +137,19 @@ class WorkspaceProxyDao(
     }
 
     private fun getPermissionsPrefilteredQuery(basePredicate: Predicate): Predicate {
+
         if (AuthContext.isRunAsSystemOrAdmin()) {
             return basePredicate
         }
 
-        val userRef = AuthorityType.PERSON.getRef(AuthContext.getCurrentUser())
-
         val userAuthoritiesRefs = AuthContext.getCurrentUserWithAuthorities()
             .filter { it.startsWith(AuthRole.PREFIX).not() }
-            .map {
-                ecosAuthoritiesApi.getAuthorityRef(it)
-            }
+            .map { ecosAuthoritiesApi.getAuthorityRef(it) }
 
         val predicateWithPermsPrefilter = Predicates.and(
             basePredicate,
             Predicates.or(
                 Predicates.eq(WORKSPACE_ATT_VISIBILITY, WorkspaceVisibility.PUBLIC.name),
-                Predicates.eq(RecordConstants.ATT_CREATOR, userRef),
                 Predicates.inVals(WORKSPACE_ATT_MEMBER_AUTHORITY, userAuthoritiesRefs)
             )
         )
@@ -189,13 +181,7 @@ class WorkspaceProxyDao(
         records.forEach { record ->
             val action = record.getAtt(WORKSPACE_ACTION_ATT).asText()
             if (action == WorkspaceAction.JOIN.name && record.id.isNotBlank()) {
-                workspaceService.joinCurrentUserToWorkspace(
-                    EntityRef.create(
-                        AppName.EMODEL,
-                        WorkspaceDesc.SOURCE_ID,
-                        record.id
-                    )
-                )
+                workspaceService.joinCurrentUserToWorkspace(record.id)
                 processActionsIds.add(record.id)
             }
         }

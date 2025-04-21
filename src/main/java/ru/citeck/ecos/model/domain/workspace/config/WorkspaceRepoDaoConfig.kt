@@ -16,8 +16,11 @@ import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceMemberDesc
 import ru.citeck.ecos.model.domain.workspace.dto.Workspace
 import ru.citeck.ecos.model.domain.workspace.listener.WorkspaceRecordsListener
+import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
+import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.model.lib.workspace.WorkspaceService
+import ru.citeck.ecos.model.lib.workspace.api.WsMembershipType
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.ScalarType
@@ -36,6 +39,7 @@ class WorkspaceRepoDaoConfig {
         workspaceDbPerms: WorkspaceDbPerms,
         recordsService: RecordsService,
         workspaceService: WorkspaceService,
+        emodelWorkspaceService: EmodelWorkspaceService,
         recsListener: WorkspaceRecordsListener
     ): RecordsDao {
 
@@ -59,21 +63,28 @@ class WorkspaceRepoDaoConfig {
             .withPermsComponent(workspaceDbPerms)
             .build()
 
-        recordsDao.addAttributesMixin(DefaultWorkspaceMixin(recordsService, workspaceService))
+        recordsDao.addAttributesMixin(
+            DefaultWorkspaceMixin(
+                workspaceService,
+                emodelWorkspaceService
+            )
+        )
         recordsDao.addListener(recsListener)
 
         return recordsDao
     }
 
     private class DefaultWorkspaceMixin(
-        private val recordsService: RecordsService,
-        private val workspaceService: WorkspaceService
+        private val workspaceService: WorkspaceService,
+        private val emodelWorkspaceService: EmodelWorkspaceService
     ) : AttMixin {
 
         val providedAtts = setOf(
             ScalarType.JSON.mirrorAtt,
             WorkspaceDesc.ATT_IS_CURRENT_USER_MEMBER,
             WorkspaceDesc.ATT_IS_CURRENT_USER_MANAGER,
+            WorkspaceDesc.ATT_IS_CURRENT_USER_DIRECT_MEMBER,
+            WorkspaceDesc.ATT_IS_CURRENT_USER_LAST_MANAGER,
             RecordConstants.ATT_WORKSPACE
         )
 
@@ -85,6 +96,17 @@ class WorkspaceRepoDaoConfig {
                 }
                 WorkspaceDesc.ATT_IS_CURRENT_USER_MANAGER -> {
                     workspaceService.isUserManagerOf(AuthContext.getCurrentUser(), value.getLocalId())
+                }
+                WorkspaceDesc.ATT_IS_CURRENT_USER_DIRECT_MEMBER -> {
+                    workspaceService.getUserWorkspaces(
+                        AuthContext.getCurrentUser(),
+                        WsMembershipType.DIRECT
+                    ).contains(value.getLocalId())
+                }
+                WorkspaceDesc.ATT_IS_CURRENT_USER_LAST_MANAGER -> {
+                    val currentUserRef = AuthorityType.PERSON.getRef(AuthContext.getCurrentUser())
+                    val managers = emodelWorkspaceService.getWorkspaceManagersRefs(value.getLocalId())
+                    managers.size == 1 && managers.contains(currentUserRef)
                 }
                 RecordConstants.ATT_WORKSPACE -> {
                     value.getRef()

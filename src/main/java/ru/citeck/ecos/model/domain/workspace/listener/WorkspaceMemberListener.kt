@@ -13,6 +13,7 @@ import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.notifications.lib.Notification
 import ru.citeck.ecos.notifications.lib.NotificationType
 import ru.citeck.ecos.notifications.lib.service.NotificationService
+import ru.citeck.ecos.records2.predicate.model.AndPredicate
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
@@ -44,11 +45,20 @@ class WorkspaceMemberListener(
     )
 
     init {
+        val ctxAttCondition = Predicates.notEq(WorkspaceDesc.CTX_ATT_DEPLOY_WORKSPACE_BOOL, true)
+        val commonWsPredicate = AndPredicate.of(
+            Predicates.eq("typeDef.id", WorkspaceDesc.TYPE_ID),
+            ctxAttCondition
+        )
+        val commonWsMemberPredicate = AndPredicate.of(
+            Predicates.eq("typeDef.id", WorkspaceMemberDesc.TYPE_ID),
+            ctxAttCondition
+        )
         eventsService.addListener<WorkspaceCreated> {
             withTransactional(true)
             withEventType(RecordCreatedEvent.TYPE)
             withDataClass(WorkspaceCreated::class.java)
-            withFilter(Predicates.eq("typeDef.id", WorkspaceDesc.TYPE_ID))
+            withFilter(commonWsPredicate)
             withAction { sendNotificationWhenWorkspaceCreated(it) }
         }
 
@@ -58,7 +68,7 @@ class WorkspaceMemberListener(
             withDataClass(WorkspaceChanged::class.java)
             withFilter(
                 Predicates.and(
-                    Predicates.eq("typeDef.id", WorkspaceDesc.TYPE_ID),
+                    commonWsPredicate,
                     Predicates.eq("diff._has.workspaceMembers?bool", true)
                 )
             )
@@ -71,7 +81,7 @@ class WorkspaceMemberListener(
             withDataClass(WorkspaceMemberChanged::class.java)
             withFilter(
                 Predicates.and(
-                    Predicates.eq("typeDef.id", WorkspaceMemberDesc.TYPE_ID),
+                    commonWsMemberPredicate,
                     Predicates.eq("diff._has.authorities?bool", true)
                 )
             )
@@ -82,7 +92,7 @@ class WorkspaceMemberListener(
             withTransactional(true)
             withEventType(RecordDeletedEvent.TYPE)
             withDataClass(WorkspaceMemberDeleted::class.java)
-            withFilter(Predicates.eq("typeDef.id", WorkspaceMemberDesc.TYPE_ID))
+            withFilter(commonWsMemberPredicate)
             withAction { sendNotificationWhenWorkspaceMemberDeleted(it) }
         }
     }

@@ -73,7 +73,7 @@ public class AttributesPermissionRecordsDao extends AbstractRecordsDao
     }
 
     @Override
-    public AttrPermissionsMutRecord getRecToMutate(@NotNull String recordId) throws Exception {
+    public AttrPermissionsMutRecord getRecToMutate(@NotNull String recordId) {
         if (StringUtils.isBlank(recordId)) {
             return new AttrPermissionsMutRecord();
         } else {
