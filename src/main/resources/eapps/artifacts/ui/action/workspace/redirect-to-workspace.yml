@@ -5,5 +5,5 @@ name:
   en: Redirect to Workspace
 type: open-url
 config:
-  withinEcosTab: true
+  target: _self
   url: /v2/dashboard?ws=${id}
