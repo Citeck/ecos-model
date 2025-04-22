@@ -1,0 +1,9 @@
+---
+id: redirect-to-workspace
+name:
+  ru: Перенаправить в Рабочее пространство
+  en: Redirect to Workspace
+type: open-url
+config:
+  target: _self
+  url: /v2/dashboard?ws=${id}
