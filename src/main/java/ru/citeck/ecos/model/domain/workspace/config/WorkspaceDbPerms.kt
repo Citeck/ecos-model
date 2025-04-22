@@ -4,11 +4,16 @@ import org.springframework.stereotype.Component
 import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
 import ru.citeck.ecos.data.sql.records.perms.DbRecordPerms
+import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.model.domain.workspace.service.WorkspacePermissions
+import ru.citeck.ecos.model.lib.workspace.WorkspaceService
+import ru.citeck.ecos.records3.RecordsService
 
 @Component
 class WorkspaceDbPerms(
-    private val workspacePermissions: WorkspacePermissions
+    private val workspacePermissions: WorkspacePermissions,
+    private val recordsService: RecordsService,
+    private val workspaceService: WorkspaceService
 ) : DbPermsComponent {
 
     override fun getRecordPerms(
@@ -17,13 +22,23 @@ class WorkspaceDbPerms(
         record: Any
     ): DbRecordPerms {
 
+        val wsAtts = recordsService.getAtts(
+            record,
+            listOf(WorkspaceDesc.ATT_ID, WorkspaceDesc.ATT_SYSTEM_BOOL)
+        )
+        val workspaceId = wsAtts.getAtt(WorkspaceDesc.ATT_ID).asText()
+        val isSystemWs = wsAtts[WorkspaceDesc.ATT_SYSTEM_BOOL].asBoolean()
+
         return object : DbRecordPerms {
             override fun getAdditionalPerms(): Set<String> {
-                if (workspacePermissions.canJoin(user, authorities)) {
-                    return setOf("Join")
+                val result = mutableSetOf<String>()
+                if (!isSystemWs && workspaceService.isUserManagerOf(user, workspaceId)) {
+                    result.add("delete")
                 }
-
-                return emptySet()
+                if (workspacePermissions.canJoin(user, authorities)) {
+                    result.add("join")
+                }
+                return result
             }
 
             override fun getAuthoritiesWithReadPermission(): Set<String> {

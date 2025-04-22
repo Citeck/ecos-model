@@ -19,7 +19,7 @@ queryPermsPolicy: PUBLIC
 
 actions:
   - uiserv/action@edit
-  - uiserv/action@delete
+  - uiserv/action@delete-workspace
   - uiserv/action@join-workspace
   - uiserv/action@leave-workspace
   - uiserv/action@view-dashboard
@@ -90,6 +90,12 @@ model:
       config:
         child: true
         typeRef: emodel/type@wiki
+  systemAttributes:
+    - id: system
+      name:
+        ru: Системная рабочая область
+        en: System workspace
+      type: BOOLEAN
 aspects:
   - ref: emodel/aspect@has-ecos-activities
     config:

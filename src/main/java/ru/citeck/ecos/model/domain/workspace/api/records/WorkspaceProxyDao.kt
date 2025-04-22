@@ -190,7 +190,13 @@ class WorkspaceProxyDao(
     }
 
     override fun delete(recordIds: List<String>): List<DelStatus> {
-        val undeletableIds = recordIds.filter { UNDELETABLE_WORKSPACES.contains(it) }
+
+        val systemFlag = recordsService.getAtts(
+            recordIds.map { EntityRef.create(WORKSPACE_REPO_SOURCE_ID, it) },
+            listOf(WorkspaceDesc.ATT_SYSTEM_BOOL)
+        ).map { it.getAtt(WorkspaceDesc.ATT_SYSTEM_BOOL).asBoolean() }
+
+        val undeletableIds = recordIds.filterIndexed { idx, _ -> systemFlag[idx] }
         if (undeletableIds.isNotEmpty()) {
             error("You can't delete this records: $undeletableIds")
         }

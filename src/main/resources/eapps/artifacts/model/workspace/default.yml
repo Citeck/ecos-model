@@ -6,6 +6,8 @@ name:
 
 visibility: PUBLIC
 
+system: true
+
 workspaceMembers:
   - id: default-administrators
     authority: emodel/authority-group@ECOS_ADMINISTRATORS
