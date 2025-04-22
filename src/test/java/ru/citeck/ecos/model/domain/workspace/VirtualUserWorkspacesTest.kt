@@ -74,7 +74,8 @@ class VirtualUserWorkspacesTest {
                 )
             ),
             homePageLink = "",
-            icon = EntityRef.EMPTY
+            icon = EntityRef.EMPTY,
+            system = false
         )
 
         private val ronPersonalWorkspace = Workspace(
@@ -92,7 +93,8 @@ class VirtualUserWorkspacesTest {
                 )
             ),
             homePageLink = "",
-            icon = personalWsIconRef
+            icon = personalWsIconRef,
+            system = false
         )
 
         private val harryPersonalWorkspaceDto = Workspace(
@@ -110,7 +112,8 @@ class VirtualUserWorkspacesTest {
                 )
             ),
             homePageLink = "",
-            icon = personalWsIconRef
+            icon = personalWsIconRef,
+            system = false
         )
 
         private val gryffindorWorkspaceDto = Workspace(
@@ -142,7 +145,8 @@ class VirtualUserWorkspacesTest {
                 )
             ),
             homePageLink = "",
-            icon = EntityRef.EMPTY
+            icon = EntityRef.EMPTY,
+            system = false
         )
     }
 
@@ -249,7 +253,8 @@ class VirtualUserWorkspacesTest {
             name = MLText.EMPTY,
             visibility = WorkspaceVisibility.PRIVATE,
             homePageLink = "",
-            icon = EntityRef.EMPTY
+            icon = EntityRef.EMPTY,
+            system = false
         )
     }
 

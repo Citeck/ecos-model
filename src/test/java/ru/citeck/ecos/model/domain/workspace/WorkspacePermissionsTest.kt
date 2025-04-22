@@ -265,7 +265,8 @@ class WorkspacePermissionsTest {
             name = MLText("Test workspace"),
             visibility = WorkspaceVisibility.PUBLIC,
             homePageLink = "",
-            icon = EntityRef.EMPTY
+            icon = EntityRef.EMPTY,
+            system = false
         )
 
         val createdWorkspace = AuthContext.runAs("someUser", listOf(role)) {
@@ -299,7 +300,8 @@ class WorkspacePermissionsTest {
             name = MLText("Test workspace"),
             visibility = WorkspaceVisibility.PRIVATE,
             homePageLink = "",
-            icon = EntityRef.EMPTY
+            icon = EntityRef.EMPTY,
+            system = false
         )
 
         val createdWorkspace = AuthContext.runAs("someUser", listOf(role)) {
@@ -336,7 +338,8 @@ class WorkspacePermissionsTest {
                         name = MLText("Test workspace"),
                         visibility = WorkspaceVisibility.PUBLIC,
                         homePageLink = "",
-                        icon = EntityRef.EMPTY
+                        icon = EntityRef.EMPTY,
+                        system = false
                     )
                 )
             }
@@ -352,7 +355,8 @@ class WorkspacePermissionsTest {
                 name = MLText("Test workspace"),
                 visibility = WorkspaceVisibility.PUBLIC,
                 homePageLink = "",
-                icon = EntityRef.EMPTY
+                icon = EntityRef.EMPTY,
+                system = false
             )
         )
 
@@ -374,7 +378,8 @@ class WorkspacePermissionsTest {
                 name = MLText("Test workspace"),
                 visibility = WorkspaceVisibility.PUBLIC,
                 homePageLink = "",
-                icon = EntityRef.EMPTY
+                icon = EntityRef.EMPTY,
+                system = false
             )
         )
 
@@ -398,7 +403,8 @@ class WorkspacePermissionsTest {
                 name = MLText("Test workspace"),
                 visibility = WorkspaceVisibility.PUBLIC,
                 homePageLink = "",
-                icon = EntityRef.EMPTY
+                icon = EntityRef.EMPTY,
+                system = false
             )
         )
 
@@ -419,7 +425,8 @@ class WorkspacePermissionsTest {
                 name = MLText("Test workspace"),
                 visibility = WorkspaceVisibility.PUBLIC,
                 homePageLink = "",
-                icon = EntityRef.EMPTY
+                icon = EntityRef.EMPTY,
+                system = false
             )
         )
         val userName = "someUserToJoin"
@@ -445,7 +452,8 @@ class WorkspacePermissionsTest {
                 name = MLText("Test workspace"),
                 visibility = WorkspaceVisibility.PUBLIC,
                 homePageLink = "",
-                icon = EntityRef.EMPTY
+                icon = EntityRef.EMPTY,
+                system = false
             )
         )
         val userName = "someUserToJoin"
@@ -474,7 +482,8 @@ class WorkspacePermissionsTest {
                 name = MLText("Test workspace"),
                 visibility = WorkspaceVisibility.PRIVATE,
                 homePageLink = "",
-                icon = EntityRef.EMPTY
+                icon = EntityRef.EMPTY,
+                system = false
             )
         )
 
@@ -495,7 +504,8 @@ class WorkspacePermissionsTest {
                 name = MLText("Test workspace"),
                 visibility = WorkspaceVisibility.PUBLIC,
                 homePageLink = "",
-                icon = EntityRef.EMPTY
+                icon = EntityRef.EMPTY,
+                system = false
             )
         )
         val userName = "someUserToJoin"
@@ -521,7 +531,8 @@ class WorkspacePermissionsTest {
             name = MLText("Test workspace"),
             visibility = WorkspaceVisibility.PRIVATE,
             homePageLink = "",
-            icon = EntityRef.EMPTY
+            icon = EntityRef.EMPTY,
+            system = false
         )
 
         val createdWorkspace = AuthContext.runAs("someUser", listOf(role)) {
@@ -558,7 +569,8 @@ class WorkspacePermissionsTest {
                         name = MLText("Test workspace"),
                         visibility = WorkspaceVisibility.PRIVATE,
                         homePageLink = "",
-                        icon = EntityRef.EMPTY
+                        icon = EntityRef.EMPTY,
+                        system = false
                     )
                 )
             }
@@ -573,7 +585,8 @@ class WorkspacePermissionsTest {
             name = MLText("Test workspace"),
             visibility = visibility,
             homePageLink = "",
-            icon = EntityRef.EMPTY
+            icon = EntityRef.EMPTY,
+            system = false
         )
 
         val createdWorkspace = AuthContext.runAs("someUser", listOf(AuthRole.USER)) {
@@ -595,7 +608,8 @@ class WorkspacePermissionsTest {
             name = MLText("Test workspace"),
             visibility = visibility,
             homePageLink = "",
-            icon = EntityRef.EMPTY
+            icon = EntityRef.EMPTY,
+            system = false
         )
 
         val createdWorkspace = AuthContext.runAs("someUser", listOf(AuthRole.USER)) {
