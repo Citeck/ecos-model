@@ -178,11 +178,33 @@
                               "en": "Description"
                             },
                             "key": "description",
-                            "validate": {
-                              "required": true
-                            },
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
+                            "logic": [
+                              {
+                                "name": "mandatory-for-public",
+                                "trigger": {
+                                  "type": "simple",
+                                  "simple": {
+                                    "show": true,
+                                    "when": "visibility",
+                                    "eq": "PUBLIC"
+                                  }
+                                },
+                                "actions": [
+                                  {
+                                    "name": "mandatory-for-public",
+                                    "type": "property",
+                                    "property": {
+                                      "label": "Required",
+                                      "value": "validate.required",
+                                      "type": "boolean"
+                                    },
+                                    "state": "true"
+                                  }
+                                ]
+                              }
+                            ],
                             "type": "mlTextarea",
                             "input": true,
                             "reorder": false
