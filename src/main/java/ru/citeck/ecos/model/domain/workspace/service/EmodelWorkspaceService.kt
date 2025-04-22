@@ -207,6 +207,9 @@ class EmodelWorkspaceService(
         }
 
         val workspaceAttsToMutate = ObjectData.create(workspace)
+        if (!workspace.system) {
+            workspaceAttsToMutate.remove(WorkspaceDesc.ATT_SYSTEM)
+        }
 
         val isWsExists = recordsService.getAtt(
             WorkspaceDesc.getRef(workspace.id),

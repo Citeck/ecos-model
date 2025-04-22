@@ -29,7 +29,6 @@ import ru.citeck.ecos.model.lib.workspace.USER_WORKSPACE_PREFIX
 import ru.citeck.ecos.notifications.lib.service.NotificationService
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
-import ru.citeck.ecos.records3.record.atts.schema.ScalarType
 import ru.citeck.ecos.records3.record.dao.query.dto.query.QueryPage
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.webapp.api.entity.EntityRef
@@ -75,7 +74,7 @@ class VirtualUserWorkspacesTest {
             ),
             homePageLink = "",
             icon = EntityRef.EMPTY,
-            system = false
+            system = true
         )
 
         private val ronPersonalWorkspace = Workspace(
@@ -94,7 +93,7 @@ class VirtualUserWorkspacesTest {
             ),
             homePageLink = "",
             icon = personalWsIconRef,
-            system = false
+            system = true
         )
 
         private val harryPersonalWorkspaceDto = Workspace(
@@ -113,7 +112,7 @@ class VirtualUserWorkspacesTest {
             ),
             homePageLink = "",
             icon = personalWsIconRef,
-            system = false
+            system = true
         )
 
         private val gryffindorWorkspaceDto = Workspace(
@@ -164,11 +163,8 @@ class VirtualUserWorkspacesTest {
                 recordsService.query(
                     RecordsQuery.create()
                         .withSourceId(WorkspaceDesc.SOURCE_ID)
-                        .withQuery(
-                            Predicates.not(
-                                Predicates.inVals(ScalarType.LOCAL_ID.mirrorAtt, WorkspaceProxyDao.UNDELETABLE_WORKSPACES)
-                            )
-                        ).withMaxItems(10000)
+                        .withQuery(Predicates.notEq(WorkspaceDesc.ATT_SYSTEM, true))
+                        .withMaxItems(10000)
                         .build()
                 ).getRecords()
             )

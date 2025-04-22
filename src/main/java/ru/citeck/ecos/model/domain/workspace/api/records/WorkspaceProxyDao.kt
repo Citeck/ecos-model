@@ -54,12 +54,6 @@ class WorkspaceProxyDao(
 
         const val USER_WORKSPACES = "user-workspaces"
 
-        val UNDELETABLE_WORKSPACES = setOf(
-            "admin\$workspace",
-            WorkspaceDesc.DEFAULT_WORKSPACE_ID,
-            "personal-workspace"
-        )
-
         private val log = KotlinLogging.logger {}
     }
 
