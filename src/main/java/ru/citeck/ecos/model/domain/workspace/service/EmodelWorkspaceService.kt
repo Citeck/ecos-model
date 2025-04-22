@@ -234,6 +234,10 @@ class EmodelWorkspaceService(
     }
 
     fun leaveWorkspaceForCurrentUser(workspaceId: String) {
+        AuthContext.runAsSystem { leaveWorkspaceForCurrentUserImpl(workspaceId) }
+    }
+
+    private fun leaveWorkspaceForCurrentUserImpl(workspaceId: String) {
 
         val currentUserRef = AuthorityType.PERSON.getRef(AuthContext.getCurrentUser())
 
