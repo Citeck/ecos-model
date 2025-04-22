@@ -190,7 +190,10 @@ class WorkspaceProxyDao(
             listOf(WorkspaceDesc.ATT_SYSTEM_BOOL)
         ).map { it.getAtt(WorkspaceDesc.ATT_SYSTEM_BOOL).asBoolean() }
 
-        val undeletableIds = recordIds.filterIndexed { idx, _ -> systemFlag[idx] }
+        val currentUser = AuthContext.getCurrentUser()
+        val undeletableIds = recordIds.filterIndexed { idx, id ->
+            systemFlag[idx] || !workspaceService.isUserManagerOf(currentUser, id)
+        }
         if (undeletableIds.isNotEmpty()) {
             error("You can't delete this records: $undeletableIds")
         }
