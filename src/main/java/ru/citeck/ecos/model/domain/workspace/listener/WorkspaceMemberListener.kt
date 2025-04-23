@@ -2,6 +2,7 @@ package ru.citeck.ecos.model.domain.workspace.listener
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
+import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.events2.EventsService
 import ru.citeck.ecos.events2.type.RecordChangedEvent
 import ru.citeck.ecos.events2.type.RecordCreatedEvent
@@ -9,6 +10,8 @@ import ru.citeck.ecos.events2.type.RecordDeletedEvent
 import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceMemberDesc
+import ru.citeck.ecos.model.domain.workspace.listener.WorkspaceRecordsListener.Companion.CREATOR_MEMBER_ID
+import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService.Companion.USER_JOIN_PREFIX
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.notifications.lib.Notification
 import ru.citeck.ecos.notifications.lib.NotificationType
@@ -29,6 +32,8 @@ class WorkspaceMemberListener(
 ) {
 
     companion object {
+        private const val ATT_IS_EXTERNAL_USER = "authorities._has.GROUP_EXTERNAL_USERS?bool!"
+
         private var log = KotlinLogging.logger {}
     }
 
@@ -111,7 +116,11 @@ class WorkspaceMemberListener(
 
         if (workspaceMembersDiff.added.isNotEmpty()) {
             val members = recordsService.getAtts(workspaceMembersDiff.added, WorkspaceMember::class.java)
-            val authorities = members.flatMapTo(HashSet()) { it.authorities }
+            val authorities = members.filter {
+                !it.isUserJoin() && !it.isCreator()
+            }.flatMapTo(HashSet()) {
+                it.authorities
+            }
             sendNotification(workspaceChanged.record, authorities, addMemberNotificationTemplate)
         }
     }
@@ -141,9 +150,17 @@ class WorkspaceMemberListener(
     }
 
     private fun sendNotificationWhenWorkspaceMemberDeleted(workspaceMemberDeleted: WorkspaceMemberDeleted) {
+        val currentUser = AuthorityType.PERSON.getRef(AuthContext.getCurrentUser())
+        if ((workspaceMemberDeleted.member.isUserJoin() || workspaceMemberDeleted.member.isCreator()) &&
+            workspaceMemberDeleted.member.authorities.size == 1 &&
+            workspaceMemberDeleted.member.authorities.first() == currentUser
+        ) {
+            return
+        }
+
         sendNotification(
             workspaceMemberDeleted.workspaceRef,
-            workspaceMemberDeleted.authorities,
+            workspaceMemberDeleted.member.authorities,
             removeMemberNotificationTemplate
         )
     }
@@ -172,13 +189,16 @@ class WorkspaceMemberListener(
         authorities.forEach { authority ->
             if (authority.getSourceId() == AuthorityType.GROUP.sourceId) {
                 allGroups.add(authority)
-            } else {
+            } else if (isValidUser(authority)) {
                 allPersons.add(authority)
             }
         }
 
         if (allGroups.isNotEmpty()) {
             allPersons.addAll(getPersonsFromGroups(allGroups))
+        }
+        if (allPersons.isEmpty()) {
+            return emptyList()
         }
 
         return recordsService.getAtts(allPersons, listOf("email")).map {
@@ -188,13 +208,30 @@ class WorkspaceMemberListener(
         }
     }
 
+    private fun isValidUser(personRef: EntityRef): Boolean {
+        return !recordsService.getAtt(personRef, ATT_IS_EXTERNAL_USER).asBoolean()
+    }
+
     private fun getPersonsFromGroups(groups: Set<EntityRef>): List<EntityRef> {
         return recordsService.query(
             RecordsQuery.create {
                 withSourceId(AuthorityType.PERSON.sourceId)
-                withQuery(Predicates.`in`(AuthorityConstants.ATT_AUTHORITY_GROUPS, groups))
+                withQuery(
+                    Predicates.and(
+                        Predicates.`in`(AuthorityConstants.ATT_AUTHORITY_GROUPS, groups),
+                        Predicates.eq(ATT_IS_EXTERNAL_USER, false)
+                    )
+                )
             }
         ).getRecords()
+    }
+
+    private fun WorkspaceMember.isUserJoin(): Boolean {
+        return memberId?.startsWith(USER_JOIN_PREFIX) ?: false
+    }
+
+    private fun WorkspaceMember.isCreator(): Boolean {
+        return memberId == CREATOR_MEMBER_ID
     }
 
     private data class WorkspaceCreated(
@@ -210,6 +247,7 @@ class WorkspaceMemberListener(
     )
 
     private data class WorkspaceMember(
+        val memberId: String?,
         val authorities: Set<EntityRef>
     )
 
@@ -221,8 +259,8 @@ class WorkspaceMemberListener(
     )
 
     private data class WorkspaceMemberDeleted(
-        @AttName("record.authorities[]?id")
-        val authorities: Set<EntityRef>,
+        @AttName("record?json")
+        var member: WorkspaceMember,
         @AttName("record._parent?id")
         val workspaceRef: EntityRef
     )

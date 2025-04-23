@@ -38,6 +38,8 @@ class EmodelWorkspaceService(
 ) {
 
     companion object {
+        const val USER_JOIN_PREFIX = "user-join-"
+
         private val log = KotlinLogging.logger {}
     }
 
@@ -298,7 +300,7 @@ class EmodelWorkspaceService(
 
         AuthContext.runAsSystem {
             val workspaceMember = WorkspaceMember(
-                memberId = "user-join-$currentUser",
+                memberId = "$USER_JOIN_PREFIX$currentUser",
                 authorities = listOf(ecosAuthoritiesApi.getAuthorityRef(currentUser)),
                 memberRole = WorkspaceMemberRole.USER
             )
