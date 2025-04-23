@@ -13,6 +13,7 @@ object WorkspaceDesc {
     const val ATT_NAME = "name"
     const val ATT_DESCRIPTION = "description"
     const val ATT_WORKSPACE_MEMBERS = "workspaceMembers"
+    const val ATT_DEFAULT_WORKSPACE_MEMBERS = "defaultWorkspaceMembers"
     const val ATT_TEMPLATE_REF = "templateRef"
     const val ATT_SYSTEM = "system"
     const val ATT_SYSTEM_BOOL = "$ATT_SYSTEM?bool"

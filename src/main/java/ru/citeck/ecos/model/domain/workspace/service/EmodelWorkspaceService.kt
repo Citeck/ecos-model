@@ -216,6 +216,9 @@ class EmodelWorkspaceService(
             RecordConstants.ATT_NOT_EXISTS + "?bool"
         ).asBoolean().not()
 
+        workspaceAttsToMutate[WorkspaceDesc.ATT_DEFAULT_WORKSPACE_MEMBERS] =
+            workspaceAttsToMutate[WorkspaceDesc.ATT_WORKSPACE_MEMBERS]
+
         return if (isWsExists) {
             workspaceAttsToMutate.remove(WorkspaceDesc.ATT_WORKSPACE_MEMBERS)
             recordsService.mutate(WorkspaceDesc.getRef(workspace.id), workspaceAttsToMutate)

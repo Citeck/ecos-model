@@ -54,6 +54,11 @@ model:
       config:
         typeRef: emodel/type@workspace-member
         child: true
+    - id: defaultWorkspaceMembers
+      name:
+        ru: Участники рабочего пространства по умолчанию
+        en: Default workspace members
+      type: JSON
     - id: visibility
       name:
         ru: Видимость

@@ -30,12 +30,12 @@ class WorkspaceArtifactHandler(
 
     override fun listenChanges(listener: Consumer<Workspace>) {
         listOf(RecordChangedEvent.TYPE, RecordCreatedEvent.TYPE).forEach { eventType ->
-            eventsService.addListener<Workspace> {
+            eventsService.addListener<EventAtts> {
                 withEventType(eventType)
-                withDataClass(Workspace::class.java)
+                withDataClass(EventAtts::class.java)
                 withFilter(Predicates.eq("typeDef.id", WorkspaceDesc.TYPE_ID))
                 withAction {
-                    listener.accept(it)
+                    listener.accept(it.record)
                 }
             }
         }
@@ -50,4 +50,8 @@ class WorkspaceArtifactHandler(
     override fun getArtifactType(): String {
         return "model/${WorkspaceDesc.TYPE_ID}"
     }
+
+    class EventAtts(
+        val record: Workspace
+    )
 }
