@@ -418,7 +418,6 @@
                   "en": "Submit"
                 },
                 "key": "submit",
-                "action": "custom",
                 "state": "",
                 "theme": "primary",
                 "block": true,
@@ -428,8 +427,8 @@
                 "type": "button",
                 "input": true,
                 "showValidations": false,
-                "custom": "form.submit().then(() => {\r\n  const { WorkspaceService = {} } = window.Citeck;\r\n  WorkspaceService && WorkspaceService.emitter.emit(WorkspaceService.Events.UPDATE_LIST);\r\n});",
                 "event": "",
+                "custom": "",
                 "url": "",
                 "headers": [
                   {}
@@ -527,6 +526,8 @@
                 "key": "submit3",
                 "action": "custom",
                 "state": "",
+                "showValidations": false,
+                "custom": "if (form.errors.length) {\r\n  return;\r\n}\r\n\r\ntry {\r\n  form.submit().then(() => {\r\n    const { WorkspaceService = {} } = window.Citeck;\r\n    WorkspaceService && WorkspaceService.emitter.emit(WorkspaceService.Events.UPDATE_LIST);\r\n  });\r\n} catch(e) {\r\n  console.log(\"Form error\", e);\r\n}",
                 "theme": "primary",
                 "block": true,
                 "disableOnInvalid": true,
@@ -534,8 +535,6 @@
                 "optionalWhenDisabled": false,
                 "type": "button",
                 "input": true,
-                "showValidations": false,
-                "custom": "form.submit().then(() => {\r\n  const { WorkspaceService = {} } = window.Citeck;\r\n  WorkspaceService && WorkspaceService.emitter.emit(WorkspaceService.Events.UPDATE_LIST);\r\n});",
                 "event": "",
                 "url": "",
                 "headers": [
