@@ -58,6 +58,7 @@ model:
       name:
         ru: Участники рабочего пространства по умолчанию
         en: Default workspace members
+      multiple: true
       type: JSON
     - id: visibility
       name:
