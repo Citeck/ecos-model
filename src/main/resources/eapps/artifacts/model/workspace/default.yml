@@ -4,14 +4,8 @@ name:
   ru: По умолчанию
   en: Default
 
-visibility: PUBLIC
+visibility: PRIVATE
 
 system: true
 
-workspaceMembers:
-  - id: default-administrators
-    authority: emodel/authority-group@ECOS_ADMINISTRATORS
-    memberRole: MANAGER
-  - id: default-all-users
-    authority: emodel/authority-group@EVERYONE
-    memberRole: USER
+workspaceMembers: []
