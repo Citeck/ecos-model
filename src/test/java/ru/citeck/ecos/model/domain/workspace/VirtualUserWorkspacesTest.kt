@@ -60,18 +60,7 @@ class VirtualUserWorkspacesTest {
                 I18nContext.ENGLISH to "Default"
             ),
             visibility = WorkspaceVisibility.PUBLIC,
-            workspaceMembers = listOf(
-                WorkspaceMember(
-                    memberId = "default-administrators",
-                    authorities = listOf(AuthorityType.GROUP.getRef("ECOS_ADMINISTRATORS")),
-                    memberRole = WorkspaceMemberRole.MANAGER
-                ),
-                WorkspaceMember(
-                    memberId = "default-all-users",
-                    authorities = listOf(AuthorityType.GROUP.getRef("EVERYONE")),
-                    memberRole = WorkspaceMemberRole.USER
-                )
-            ),
+            workspaceMembers = emptyList(),
             homePageLink = "",
             icon = EntityRef.EMPTY,
             system = true
@@ -183,8 +172,7 @@ class VirtualUserWorkspacesTest {
         assertThat(workspaces).containsExactlyInAnyOrderElementsOf(
             listOf(
                 gryffindorWorkspaceDto,
-                ronPersonalWorkspace,
-                defaultWorkspace
+                ronPersonalWorkspace
             )
         )
     }
