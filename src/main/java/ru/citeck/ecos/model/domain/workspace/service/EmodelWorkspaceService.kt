@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.data.ObjectData
+import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthGroup
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
@@ -23,6 +24,7 @@ import ru.citeck.ecos.records2.predicate.PredicateUtils
 import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
+import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy
 import ru.citeck.ecos.records3.record.request.RequestContext
@@ -218,8 +220,10 @@ class EmodelWorkspaceService(
             RecordConstants.ATT_NOT_EXISTS + "?bool"
         ).asBoolean().not()
 
-        workspaceAttsToMutate[WorkspaceDesc.ATT_DEFAULT_WORKSPACE_MEMBERS] =
-            workspaceAttsToMutate[WorkspaceDesc.ATT_WORKSPACE_MEMBERS]
+        workspaceAttsToMutate[WorkspaceDesc.ATT_DEFAULT_WORKSPACE_MEMBERS] = Json.mapper.toNonDefaultJson(
+            workspace.workspaceMembers,
+            WorkspaceMember::class.java
+        )
 
         return if (isWsExists) {
             workspaceAttsToMutate.remove(WorkspaceDesc.ATT_WORKSPACE_MEMBERS)
@@ -308,20 +312,46 @@ class EmodelWorkspaceService(
         }
     }
 
-    fun addMember(workspaceId: String, memberToAdd: WorkspaceMember) {
+    fun resetMembersToDefault(workspaceId: String) {
 
-        val workspaceInfo = getWorkspace(workspaceId)
+        if (AuthContext.isNotRunAsSystemOrAdmin()) {
+            error("Permission denied")
+        }
 
-        val existentAuthorities = hashSetOf<EntityRef>()
-        for (wsMember in workspaceInfo.workspaceMembers) {
-            for (wsMemberAuthority in wsMember.authorities) {
-                if (memberToAdd.authorities.contains(wsMemberAuthority)) {
-                    existentAuthorities.add(wsMemberAuthority)
-                }
+        AuthContext.runAsSystem {
+            val workspaceAtts = recordsService.getAtts(
+                WorkspaceDesc.getRef(workspaceId),
+                ResetToDefaultMembersWsAtts::class.java
+            )
+            workspaceAtts.currentMembers?.let {
+                recordsService.delete(it)
+            }
+            workspaceAtts.defaultWorkspaceMembers?.forEach {
+                addMember(workspaceId, it, checkExistingMembers = false)
             }
         }
-        require(existentAuthorities.isEmpty()) {
-            "Members: ${existentAuthorities.joinToString()} already exists in workspace: '$workspaceId'"
+    }
+
+    fun addMember(workspaceId: String, memberToAdd: WorkspaceMember) {
+        addMember(workspaceId, memberToAdd, checkExistingMembers = true)
+    }
+
+    private fun addMember(workspaceId: String, memberToAdd: WorkspaceMember, checkExistingMembers: Boolean) {
+
+        if (checkExistingMembers) {
+            val workspaceInfo = getWorkspace(workspaceId)
+
+            val existentAuthorities = hashSetOf<EntityRef>()
+            for (wsMember in workspaceInfo.workspaceMembers) {
+                for (wsMemberAuthority in wsMember.authorities) {
+                    if (memberToAdd.authorities.contains(wsMemberAuthority)) {
+                        existentAuthorities.add(wsMemberAuthority)
+                    }
+                }
+            }
+            require(existentAuthorities.isEmpty()) {
+                "Members: ${existentAuthorities.joinToString()} already exists in workspace: '$workspaceId'"
+            }
         }
 
         recordsService.mutate(
@@ -348,4 +378,10 @@ class EmodelWorkspaceService(
             val memberRole: WorkspaceMemberRole?
         )
     }
+
+    private class ResetToDefaultMembersWsAtts(
+        @AttName(WorkspaceDesc.ATT_WORKSPACE_MEMBERS + "[]?id")
+        val currentMembers: List<EntityRef>?,
+        val defaultWorkspaceMembers: List<WorkspaceMember>?
+    )
 }

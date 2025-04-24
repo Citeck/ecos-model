@@ -28,6 +28,9 @@ class WorkspaceServiceRecordsDao(
             ActionType.LEAVE -> {
                 workspaceService.leaveWorkspaceForCurrentUser(workspaceId)
             }
+            ActionType.RESET_MEMBERS_TO_DEFAULT -> {
+                workspaceService.resetMembersToDefault(workspaceId)
+            }
         }
         return DataValue.createObj()
     }
@@ -38,6 +41,8 @@ class WorkspaceServiceRecordsDao(
     )
 
     enum class ActionType {
-        JOIN, LEAVE
+        JOIN,
+        LEAVE,
+        RESET_MEMBERS_TO_DEFAULT
     }
 }
