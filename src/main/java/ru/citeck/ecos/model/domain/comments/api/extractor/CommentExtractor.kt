@@ -25,15 +25,21 @@ class CommentExtractor {
 
         val fragment = Jsoup.parseBodyFragment(text)
 
-        val images = fragment.getElementsByTag("img")
+        listOf(
+            "img" to "src",
+            "a" to "href"
+        ).forEach { (tag, attribute) ->
 
-        for (image in images) {
-            val src = image.attribute("src").value
-            val urlArgs = src.substringAfter("?", "").split("&")
-            for (argument in urlArgs) {
-                if (argument.startsWith(REF_URL_PARAM_PREFIX)) {
-                    val refValue = argument.substring(REF_URL_PARAM_PREFIX.length)
-                    result[refValue] = EntityRef.valueOf(URLDecoder.decode(refValue, StandardCharsets.UTF_8))
+            val images = fragment.getElementsByTag(tag)
+
+            for (image in images) {
+                val src = image.attribute(attribute).value
+                val urlArgs = src.substringAfter("?", "").split("&")
+                for (argument in urlArgs) {
+                    if (argument.startsWith(REF_URL_PARAM_PREFIX)) {
+                        val refValue = argument.substring(REF_URL_PARAM_PREFIX.length)
+                        result[refValue] = EntityRef.valueOf(URLDecoder.decode(refValue, StandardCharsets.UTF_8))
+                    }
                 }
             }
         }
