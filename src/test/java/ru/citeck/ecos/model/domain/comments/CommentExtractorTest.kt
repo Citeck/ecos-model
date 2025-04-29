@@ -34,7 +34,11 @@ class CommentExtractorTest {
         class="PlaygroundEditorTheme__paragraph" dir="ltr"><span class="LEd__embedBlock" style="white-space: pre-wrap;">text</span>
 </p><p class="PlaygroundEditorTheme__paragraph" dir="ltr"><br><span class="LEd__embedBlock"
                                                                     style="white-space: pre-wrap;">text</span></p><p
-        class="PlaygroundEditorTheme__paragraph" dir="ltr"><span class="LEd__embedBlock" style="white-space: pre-wrap;">text</span>
+        class="PlaygroundEditorTheme__paragraph" dir="ltr">
+        <p class="PlaygroundEditorTheme__paragraph"><a
+        href="/gateway/emodel/api/ecos/webapp/content?ref=emodel/temp-file@c5a75903-d886-4c88-ae1b-9ac6ce1b4385"
+        style="">Screenshot_6.png</a></p>
+        <span class="LEd__embedBlock" style="white-space: pre-wrap;">text</span>
 </p><p class="PlaygroundEditorTheme__paragraph" dir="ltr"><span class="LEd__embedBlock" style="white-space: pre-wrap;">text</span>
 </p><p class="PlaygroundEditorTheme__paragraph" dir="ltr"><span class="LEd__embedBlock" style="white-space: pre-wrap;">text</span>
 </p><p class="PlaygroundEditorTheme__paragraph"><img class="PlaygroundEditorTheme__image editor-image"
@@ -69,6 +73,7 @@ class CommentExtractorTest {
 
         assertThat(attachmentsRefs2).containsAllEntriesOf(mapOf(
             "temp-file%4031ca7535-9b3d-4fa9-9556-ea101925abb0" to EntityRef.valueOf("temp-file@31ca7535-9b3d-4fa9-9556-ea101925abb0"),
+            "emodel/temp-file@c5a75903-d886-4c88-ae1b-9ac6ce1b4385" to EntityRef.valueOf("emodel/temp-file@c5a75903-d886-4c88-ae1b-9ac6ce1b4385"),
             "temp-file%401c00dce5-b34d-4cb5-8706-f6393a9ff822" to EntityRef.valueOf("temp-file@1c00dce5-b34d-4cb5-8706-f6393a9ff822"),
         ))
     }
