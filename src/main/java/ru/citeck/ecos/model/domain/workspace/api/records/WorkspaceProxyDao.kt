@@ -170,9 +170,13 @@ class WorkspaceProxyDao(
         }
 
         if (AuthContext.isNotRunAsSystem()) {
-            val invalidIds = records.filter {
-                it.id.isEmpty() &&
-                    !isValidWorkspaceIdForNewRecord(it.attributes["id"].asText())
+            val invalidIds = records.mapNotNull {
+                val idAtt = it.attributes["id"].asText()
+                if (it.id.isEmpty() && !isValidWorkspaceIdForNewRecord(idAtt)) {
+                    idAtt
+                } else {
+                    null
+                }
             }
             if (invalidIds.isNotEmpty()) {
                 error("Invalid workspace identifiers: ${invalidIds.joinToString { "'$it'" }}")
