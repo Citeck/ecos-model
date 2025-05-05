@@ -1250,7 +1250,6 @@
                                     "leftIcon": "icon-decision-tables",
                                     "block": true,
                                     "key": "submit3",
-                                    "customConditional": "show = _.get(data, 'ecosEdition.isEnterprise', false)",
                                     "type": "button",
                                     "input": true,
                                     "row": "0-4"
@@ -1831,11 +1830,8 @@
                       "ru": "Panel"
                     },
                     "key": "panel11",
-                    "refreshOn": [
-                      "ecosEdition"
-                    ],
+                    "refreshOn": [],
                     "optionalWhenDisabled": false,
-                    "customConditional": "const isEnterprise = _.get(data, 'ecosEdition.isEnterprise', false);\nconst isWebform = _.get(instance, 'root.constructor.name') === 'Webform';\n\nshow = isWebform ? isEnterprise : true;",
                     "type": "panel",
                     "input": false,
                     "components": [
