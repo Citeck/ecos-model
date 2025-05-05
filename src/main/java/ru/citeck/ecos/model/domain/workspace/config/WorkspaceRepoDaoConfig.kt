@@ -51,6 +51,7 @@ class WorkspaceRepoDaoConfig {
                     DbRecordsDaoConfig.create {
                         withId(WORKSPACE_REPO_SOURCE_ID)
                         withTypeRef(workspaceTypeRef)
+                        withAllowedRecordIdPattern(WorkspaceDesc.VALID_WS_ID_PATTERN)
                     }
                 )
                 .withDataService(
