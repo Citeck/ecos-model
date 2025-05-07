@@ -1,6 +1,9 @@
 package ru.citeck.ecos.model.domain.comments.api.extractor
 
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Element
+import org.jsoup.nodes.Node
+import org.jsoup.select.NodeVisitor
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.webapp.api.entity.EntityRef
@@ -13,6 +16,10 @@ class CommentExtractor {
 
     companion object {
         private const val REF_URL_PARAM_PREFIX = "ref="
+        private val LOCAL_REF_ELEMENTS = listOf(
+            "img" to "src",
+            "a" to "href"
+        )
     }
 
     fun extractAttachRefsFromText(text: String): Map<String, EntityRef> {
@@ -25,15 +32,15 @@ class CommentExtractor {
 
         val fragment = Jsoup.parseBodyFragment(text)
 
-        listOf(
-            "img" to "src",
-            "a" to "href"
-        ).forEach { (tag, attribute) ->
+        LOCAL_REF_ELEMENTS.forEach { (tag, attribute) ->
 
-            val images = fragment.getElementsByTag(tag)
+            val elements = fragment.getElementsByTag(tag)
 
-            for (image in images) {
-                val src = image.attribute(attribute).value
+            for (element in elements) {
+                val src = element.attribute(attribute).value
+                if (!src.startsWith("/gateway/")) {
+                    continue
+                }
                 val urlArgs = src.substringAfter("?", "").split("&")
                 for (argument in urlArgs) {
                     if (argument.startsWith(REF_URL_PARAM_PREFIX)) {
@@ -45,6 +52,42 @@ class CommentExtractor {
         }
 
         return result
+    }
+
+    /**
+     * Remove tags with local references
+     */
+    private fun simplifyHtmlContentWithoutLocalRefs(text: String): String {
+
+        val document = Jsoup.parse(text)
+
+        fun isNodeWithLocalRef(node: Element): Boolean {
+            for ((tag, att) in LOCAL_REF_ELEMENTS) {
+                if (tag != node.tagName()) {
+                    continue
+                }
+                val attValue = node.attr(att) ?: ""
+                if (attValue.isEmpty() || attValue.startsWith("/gateway/")) {
+                    return true
+                }
+            }
+            return false
+        }
+
+        document.body().traverse(object : NodeVisitor {
+            override fun head(node: Node, depth: Int) {
+                if (node is Element && node.tagName() == "body") {
+                    return
+                }
+                if (node is Element) {
+                    if (isNodeWithLocalRef(node)) {
+                        node.remove()
+                    }
+                }
+            }
+        })
+        document.outputSettings().prettyPrint(false)
+        return document.body().html().replace("&nbsp;", " ")
     }
 
     fun extractJsonStrings(text: String?): List<String> {
@@ -70,9 +113,13 @@ class CommentExtractor {
         }
     }
 
-    fun extractCommentText(jsonStrings: List<String>, text: String): String {
-        return jsonStrings.fold(text) { acc, jsonString ->
+    fun extractCommentTextForEvent(text: String): String {
+
+        val jsonStrings = extractJsonStrings(text)
+
+        val textWithoutJson = jsonStrings.fold(text) { acc, jsonString ->
             acc.replace(jsonString, "")
         }
+        return simplifyHtmlContentWithoutLocalRefs(textWithoutJson)
     }
 }

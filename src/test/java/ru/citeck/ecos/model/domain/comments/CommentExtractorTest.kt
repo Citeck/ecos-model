@@ -1,13 +1,9 @@
 package ru.citeck.ecos.model.domain.comments
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.boot.test.context.SpringBootTest
-import ru.citeck.ecos.model.EcosModelApp
 import ru.citeck.ecos.model.domain.comments.api.extractor.CommentExtractor
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.api.entity.toEntityRef
-import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -41,9 +37,11 @@ class CommentExtractorTest {
         <span class="LEd__embedBlock" style="white-space: pre-wrap;">text</span>
 </p><p class="PlaygroundEditorTheme__paragraph" dir="ltr"><span class="LEd__embedBlock" style="white-space: pre-wrap;">text</span>
 </p><p class="PlaygroundEditorTheme__paragraph" dir="ltr"><span class="LEd__embedBlock" style="white-space: pre-wrap;">text</span>
-</p><p class="PlaygroundEditorTheme__paragraph"><img class="PlaygroundEditorTheme__image editor-image"
+</p><p class="PlaygroundEditorTheme__paragraph">
+<img class="PlaygroundEditorTheme__image editor-image"
                                                      src="/gateway/emodel/api/ecos/webapp/content?ref=temp-file%401c00dce5-b34d-4cb5-8706-f6393a9ff822&amp;att=content"
-                                                     alt="image.png" width="inherit" height="inherit"></p><p
+                                                     alt="image.png" width="inherit" height="inherit">
+                                                     </p><p
         class="PlaygroundEditorTheme__paragraph" dir="ltr"><br></p>
         """
     }
@@ -80,8 +78,11 @@ class CommentExtractorTest {
 
     @Test
     fun extractCommentTextWithoutAttachments() {
-        val text = extractor.extractCommentText(jsonStrings, COMMENT_EVENT_TEXT)
+        val text = extractor.extractCommentTextForEvent(COMMENT_EVENT_TEXT)
 
         assertEquals(text, "test-attachment")
+
+        val text2 = extractor.extractCommentTextForEvent(LEXICAL_TEXT_WITH_IMAGES)
+        assertThat(text2).doesNotContainIgnoringCase("/gateway/")
     }
 }
