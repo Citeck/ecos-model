@@ -9,7 +9,7 @@ parentRef: emodel/type@ecos-vcs-object
 system: true
 storageType: ECOS_MODEL
 
-formRef: uiserv/form@DEFAULT_FORM
+formRef: uiserv/form@working-calendar-form
 journalRef: uiserv/journal@working-calendar
 queryPermsPolicy: PUBLIC
 
