@@ -84,7 +84,13 @@ class EmodelWorkspaceService(
         return managers.any { authorities.contains(it) }
     }
 
-    fun getWorkspaceManagersRefs(workspaceId: String): Set<EntityRef> {
+    /**
+     * Retrieves references to managers associated with the specified workspace.
+     *
+     * @param workspaceId ID of the workspace.
+     * @return a set of manager references, or `null` if the workspace does not exist.
+     */
+    fun getWorkspaceManagersRefs(workspaceId: String): Set<EntityRef>? {
 
         if (workspaceId.startsWith(USER_WORKSPACE_PREFIX)) {
             return setOf(
@@ -94,6 +100,9 @@ class EmodelWorkspaceService(
 
         val workspaceRef = EntityRef.create(WorkspaceDesc.SOURCE_ID, workspaceId)
         val workspaceData = recordsService.getAtts(workspaceRef, WorkspaceMembersAtts::class.java)
+        if (workspaceData.notExists) {
+            return null
+        }
 
         val managers = LinkedHashSet<EntityRef>()
 
@@ -250,7 +259,7 @@ class EmodelWorkspaceService(
 
         val currentUserRef = AuthorityType.PERSON.getRef(AuthContext.getCurrentUser())
 
-        val wsManagers = getWorkspaceManagersRefs(workspaceId)
+        val wsManagers = getWorkspaceManagersRefs(workspaceId) ?: emptySet()
         if (wsManagers.size == 1 && wsManagers.contains(currentUserRef)) {
             error("You can't leave workspace when you are last manager")
         }
@@ -371,6 +380,8 @@ class EmodelWorkspaceService(
     )
 
     private class WorkspaceMembersAtts(
+        @AttName(RecordConstants.ATT_NOT_EXISTS + "?bool!")
+        val notExists: Boolean,
         val workspaceMembers: List<MemberInfo>?
     ) {
         class MemberInfo(

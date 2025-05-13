@@ -106,7 +106,7 @@ class WorkspaceRepoDaoConfig {
                 }
                 WorkspaceDesc.ATT_IS_CURRENT_USER_LAST_MANAGER -> {
                     val currentUserRef = AuthorityType.PERSON.getRef(AuthContext.getCurrentUser())
-                    val managers = emodelWorkspaceService.getWorkspaceManagersRefs(value.getLocalId())
+                    val managers = emodelWorkspaceService.getWorkspaceManagersRefs(value.getLocalId()) ?: emptySet()
                     managers.size == 1 && managers.contains(currentUserRef)
                 }
                 RecordConstants.ATT_WORKSPACE -> {

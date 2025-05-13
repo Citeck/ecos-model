@@ -58,7 +58,7 @@ class WorkspaceMembersValidator(
 
     private fun validateWorkspacesManagersImpl(workspaces: Collection<String>) {
         for (workspace in workspaces) {
-            if (workspaceService.getWorkspaceManagersRefs(workspace).isEmpty()) {
+            if (workspaceService.getWorkspaceManagersRefs(workspace)?.isEmpty() == true) {
                 error(
                     "Workspace '$workspace' must have at least one manager. " +
                         "If you want to remove all managers, consider deleting the workspace instead."
