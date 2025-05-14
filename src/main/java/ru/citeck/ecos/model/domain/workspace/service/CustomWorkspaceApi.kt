@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.model.lib.ModelServiceFactory
 import ru.citeck.ecos.model.lib.workspace.api.WorkspaceApi
+import ru.citeck.ecos.model.lib.workspace.api.WsMembershipType
 
 @Component
 class CustomWorkspaceApi(
@@ -16,8 +17,8 @@ class CustomWorkspaceApi(
         modelServiceFactory.setWorkspaceApi(this)
     }
 
-    override fun getUserWorkspaces(user: String): Set<String> {
-        return workspaceService.getUserWorkspaces(user).workspaces
+    override fun getUserWorkspaces(user: String, membershipType: WsMembershipType): Set<String> {
+        return workspaceService.getUserWorkspaces(user, membershipType).workspaces
     }
 
     override fun isUserManagerOf(user: String, workspace: String): Boolean {

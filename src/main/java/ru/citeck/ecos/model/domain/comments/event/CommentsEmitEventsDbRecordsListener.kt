@@ -57,23 +57,14 @@ class CommentsEmitEventsDbRecordsListener(
     }
 
     private fun DbRecordCreatedEvent.toCommentEvent(): CommentCreateEvent {
+
         val commentAtts = recordsService.getAtts(this.record, CommentAtts::class.java)
-
-        val textWithoutTags = Jsoup.parse(commentAtts.text.toString()).text()
-        val jsonStrings = extractor.extractJsonStrings(textWithoutTags)
-
-        val attachments = extractor.extractAttachmentsRefs(jsonStrings)
-
-        val commentText = if (attachments.isNotEmpty()) {
-            extractor.extractCommentText(jsonStrings, textWithoutTags)
-        } else {
-            textWithoutTags
-        }
+        val attachments = extractor.extractAttachRefsFromText(commentAtts.text ?: "").values.toList()
 
         return CommentCreateEvent(
             record = commentAtts.record,
             commentRecord = commentAtts.commentRecord,
-            text = commentText,
+            text = extractor.extractCommentTextForEvent(commentAtts.text ?: ""),
             attachments = attachments
         )
     }

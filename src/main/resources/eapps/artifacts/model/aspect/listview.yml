@@ -3,9 +3,3 @@ id: listview
 name:
   ru: Отображение в виде списка
   en: List view
-attributes:
-  - id: preview
-    name:
-      ru: Превью
-      en: Preview
-    type: CONTENT

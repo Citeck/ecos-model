@@ -38,10 +38,11 @@ model:
         ru: Calendar Event Summary
         en: Calendar Event Summary
       computed:
-        type: SCRIPT
+        type: ATTRIBUTE
         config:
-          fn: 'return value.load("_type?disp") + ": " + value.load("_parent?disp");'
-        storingType: ON_MUTATE
+          attribute: _disp
+        storingType: NONE
+      type: MLTEXT
     - id: calendarEventUid
       name:
         ru: Calendar Event UID

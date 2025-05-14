@@ -1,8 +1,8 @@
 {
-  "id": "publication",
-  "formKey": "",
+  "id": "wiki-form",
   "title": {
-    "en": "publication"
+    "ru": "Статья базы знаний",
+    "en": "Knowledge base article"
   },
   "description": {},
   "customModule": "",
@@ -13,25 +13,21 @@
   "definition": {
     "components": [
       {
-        "label": {
-          "ru": "title"
-        },
-        "key": "title",
-        "validate": {
-          "required": true
-        },
-        "defaultValue": "",
-        "refreshOn": [],
-        "optionalWhenDisabled": false,
         "type": "textfield",
         "input": true,
-        "inputMasks": [
-          {}
-        ]
+        "key": "title",
+        "label": {
+          "ru": "Заголовок",
+          "en": "Title"
+        },
+        "validate": {
+          "required": true
+        }
       },
       {
         "label": {
-          "ru": "text"
+          "ru": "Текст",
+          "en": "Text"
         },
         "key": "text",
         "validate": {
@@ -42,27 +38,14 @@
         "defaultValue": "",
         "refreshOn": [],
         "optionalWhenDisabled": false,
-        "rows": 20,
         "type": "textarea",
-        "input": true
-      },
-      {
-        "label": {
-          "ru": "Превью",
-          "en": "Preview"
-        },
-        "key": "image",
-        "filePattern": "image/*",
-        "fileMaxSize": "10MB",
-        "refreshOn": [],
-        "optionalWhenDisabled": false,
-        "type": "file",
         "input": true,
-        "reorder": false,
-        "url": "",
-        "options": "",
-        "webcamSize": "",
-        "imageSize": ""
+        "uploadStorage": "",
+        "uploadUrl": "",
+        "uploadOptions": "",
+        "uploadDir": "",
+        "as": "",
+        "reorder": false
       },
       {
         "type": "columns",
@@ -128,9 +111,6 @@
         ],
         "input": false
       }
-    ],
-    "formId": "publication"
-  },
-  "attributes": {},
-  "notExists": false
+    ]
+  }
 }

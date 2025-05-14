@@ -73,15 +73,13 @@ class CommentsRecordsProxy(
 
     private fun createDocumentAttachmentsFromTempFiles(text: String, commentAtts: CommentAtts): String {
 
-        val attachments = commentExtractor.extractAttachmentsRefs(
-            commentExtractor.extractJsonStrings(text)
-        )
+        val attachments = commentExtractor.extractAttachRefsFromText(text)
         if (attachments.isEmpty()) {
             return text
         }
 
-        val tempFilesRefs = attachments.filter { it.getSourceId() == TEMP_FILE_SRC_ID }
-        if (tempFilesRefs.isEmpty()) {
+        val tempFilesRefsEntries = attachments.entries.filter { it.value.getSourceId() == TEMP_FILE_SRC_ID }
+        if (tempFilesRefsEntries.isEmpty()) {
             return text
         }
 
@@ -91,7 +89,7 @@ class CommentsRecordsProxy(
         var resText = text
         val isInternalComment = commentAtts.tags.any { it == INTERNAL_TAG_TYPE }
 
-        for (tempFileRef in tempFilesRefs) {
+        for ((srcString, tempFileRef) in tempFilesRefsEntries) {
             val mutationAtts = RecordAtts(EntityRef.create(AppName.EMODEL, ATTACHMENT_SRC_ID, ""))
             if (isInternalComment) {
                 mutationAtts[ATT_ADD_ASPECTS] = INTERNAL_DOC_ASPECT_REF
@@ -100,7 +98,12 @@ class CommentsRecordsProxy(
             mutationAtts[RecordConstants.ATT_PARENT] = commentAtts.record
             mutationAtts[RecordConstants.ATT_PARENT_ATT] = DOCS_ASSOC
             val newDocRef = recordsService.mutate(mutationAtts)
-            resText = resText.replace(tempFileRef.toString(), newDocRef.toString())
+            val newDocRefStr = if (tempFileRef.getAppName().isEmpty()) {
+                newDocRef.withoutAppName()
+            } else {
+                newDocRef
+            }.toString()
+            resText = resText.replace(srcString, newDocRefStr)
         }
 
         return resText

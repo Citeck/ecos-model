@@ -14,7 +14,7 @@ class GetUserWorkspacesWebExecutor(
 
     override fun execute(request: EcosWebExecutorReq, response: EcosWebExecutorResp) {
         val req = request.getBodyReader().readDto(WorkspaceWebApi.GetUserWorkspacesReq::class.java)
-        val result = customApi.getUserWorkspaces(req.user)
+        val result = customApi.getUserWorkspaces(req.user, req.membershipType)
         response.getBodyWriter().writeDto(WorkspaceWebApi.GetUserWorkspacesResp(result))
     }
 

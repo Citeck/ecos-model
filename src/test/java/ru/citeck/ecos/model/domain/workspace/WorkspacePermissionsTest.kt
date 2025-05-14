@@ -7,7 +7,7 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -22,10 +22,9 @@ import ru.citeck.ecos.model.EcosModelApp
 import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao
 import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao.Companion.WORKSPACE_ACTION_ATT
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
-import ru.citeck.ecos.model.domain.workspace.dto.Workspace
-import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceAction
-import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceVisibility
+import ru.citeck.ecos.model.domain.workspace.dto.*
 import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
+import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.records2.predicate.PredicateService
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
@@ -36,7 +35,6 @@ import ru.citeck.ecos.webapp.api.authority.EcosAuthoritiesApi
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension
 import java.util.UUID
-import java.util.stream.Stream
 import kotlin.test.assertTrue
 
 @ExtendWith(EcosSpringExtension::class)
@@ -69,11 +67,6 @@ class WorkspacePermissionsTest {
             SLYTHERIN_WORKSPACE.toWorkspaceRef(),
             DIAGON_ALLEY_WORKSPACE.toWorkspaceRef()
         )
-
-        @JvmStatic
-        fun workspaceVisibilityProvider(): Stream<WorkspaceVisibility> {
-            return Stream.of(*WorkspaceVisibility.entries.toTypedArray())
-        }
     }
 
     @BeforeAll
@@ -272,17 +265,29 @@ class WorkspacePermissionsTest {
             name = MLText("Test workspace"),
             visibility = WorkspaceVisibility.PUBLIC,
             homePageLink = "",
-            icon = EntityRef.EMPTY
+            icon = EntityRef.EMPTY,
+            system = false
         )
 
         val createdWorkspace = AuthContext.runAs("someUser", listOf(role)) {
-            workspaceService.mutateWorkspace(
-                workspace
-            )
+            workspaceService.deployWorkspace(workspace)
         }
         val createdWorkspaceDto = workspaceService.getWorkspace(createdWorkspace)
 
-        assertThat(createdWorkspaceDto).isEqualTo(workspace)
+        val expectedWs = if (role != AuthRole.SYSTEM) {
+            workspace.copy().withWorkspaceMembers(
+                listOf(
+                    WorkspaceMember(
+                        memberId = "creator",
+                        authorities = listOf(AuthorityType.PERSON.getRef("someUser")),
+                        memberRole = WorkspaceMemberRole.MANAGER
+                    )
+                )
+            ).build()
+        } else {
+            workspace
+        }
+        assertThat(createdWorkspaceDto).isEqualTo(expectedWs)
 
         workspaceService.deleteWorkspace(createdWorkspace)
     }
@@ -295,15 +300,29 @@ class WorkspacePermissionsTest {
             name = MLText("Test workspace"),
             visibility = WorkspaceVisibility.PRIVATE,
             homePageLink = "",
-            icon = EntityRef.EMPTY
+            icon = EntityRef.EMPTY,
+            system = false
         )
 
         val createdWorkspace = AuthContext.runAs("someUser", listOf(role)) {
-            workspaceService.mutateWorkspace(workspace)
+            workspaceService.deployWorkspace(workspace)
         }
         val createdWorkspaceDto = workspaceService.getWorkspace(createdWorkspace)
 
-        assertThat(createdWorkspaceDto).isEqualTo(workspace)
+        val expectedWs = if (role != AuthRole.SYSTEM) {
+            workspace.copy().withWorkspaceMembers(
+                listOf(
+                    WorkspaceMember(
+                        memberId = "creator",
+                        authorities = listOf(AuthorityType.PERSON.getRef("someUser")),
+                        memberRole = WorkspaceMemberRole.MANAGER
+                    )
+                )
+            ).build()
+        } else {
+            workspace
+        }
+        assertThat(createdWorkspaceDto).isEqualTo(expectedWs)
 
         workspaceService.deleteWorkspace(createdWorkspace)
     }
@@ -313,13 +332,14 @@ class WorkspacePermissionsTest {
     fun `not authenticated auth should not allow to create workspaces`(role: String) {
         assertThrows<IllegalStateException> {
             AuthContext.runAs("someUser", listOf(role)) {
-                workspaceService.mutateWorkspace(
+                workspaceService.deployWorkspace(
                     Workspace(
                         id = UUID.randomUUID().toString(),
                         name = MLText("Test workspace"),
                         visibility = WorkspaceVisibility.PUBLIC,
                         homePageLink = "",
-                        icon = EntityRef.EMPTY
+                        icon = EntityRef.EMPTY,
+                        system = false
                     )
                 )
             }
@@ -329,13 +349,14 @@ class WorkspacePermissionsTest {
     @ParameterizedTest
     @ValueSource(strings = [AuthRole.ANONYMOUS, AuthRole.GUEST, AuthRole.SYSTEM, AuthRole.ADMIN])
     fun `check blocking auth role join to workspace`(role: String) {
-        val created = workspaceService.mutateWorkspace(
+        val created = workspaceService.deployWorkspace(
             Workspace(
                 id = UUID.randomUUID().toString(),
                 name = MLText("Test workspace"),
                 visibility = WorkspaceVisibility.PUBLIC,
                 homePageLink = "",
-                icon = EntityRef.EMPTY
+                icon = EntityRef.EMPTY,
+                system = false
             )
         )
 
@@ -351,19 +372,20 @@ class WorkspacePermissionsTest {
     @ParameterizedTest
     @ValueSource(strings = [AuthRole.ANONYMOUS, AuthRole.GUEST, AuthRole.SYSTEM, AuthRole.ADMIN])
     fun `check blocking auth role join to workspace via records`(role: String) {
-        val created = workspaceService.mutateWorkspace(
+        val created = workspaceService.deployWorkspace(
             Workspace(
                 id = UUID.randomUUID().toString(),
                 name = MLText("Test workspace"),
                 visibility = WorkspaceVisibility.PUBLIC,
                 homePageLink = "",
-                icon = EntityRef.EMPTY
+                icon = EntityRef.EMPTY,
+                system = false
             )
         )
 
         assertThrows<IllegalArgumentException> {
             AuthContext.runAs("someUser", listOf(role)) {
-                val workspaceAtts = RecordAtts(created)
+                val workspaceAtts = RecordAtts(WorkspaceDesc.getRef(created))
                 workspaceAtts[WORKSPACE_ACTION_ATT] = WorkspaceAction.JOIN.name
                 recordsService.mutate(workspaceAtts)
             }
@@ -375,13 +397,14 @@ class WorkspacePermissionsTest {
     @ParameterizedTest
     @ValueSource(strings = [AuthUser.SYSTEM, AuthUser.GUEST, AuthUser.ANONYMOUS])
     fun `check blocking auth user join to workspace`(user: String) {
-        val created = workspaceService.mutateWorkspace(
+        val created = workspaceService.deployWorkspace(
             Workspace(
                 id = UUID.randomUUID().toString(),
                 name = MLText("Test workspace"),
                 visibility = WorkspaceVisibility.PUBLIC,
                 homePageLink = "",
-                icon = EntityRef.EMPTY
+                icon = EntityRef.EMPTY,
+                system = false
             )
         )
 
@@ -396,13 +419,14 @@ class WorkspacePermissionsTest {
 
     @Test
     fun `user role should allow to join public workspace`() {
-        val created = workspaceService.mutateWorkspace(
+        val created = workspaceService.deployWorkspace(
             Workspace(
                 id = UUID.randomUUID().toString(),
                 name = MLText("Test workspace"),
                 visibility = WorkspaceVisibility.PUBLIC,
                 homePageLink = "",
-                icon = EntityRef.EMPTY
+                icon = EntityRef.EMPTY,
+                system = false
             )
         )
         val userName = "someUserToJoin"
@@ -422,19 +446,20 @@ class WorkspacePermissionsTest {
 
     @Test
     fun `user role should allow to join public workspace via records`() {
-        val created = workspaceService.mutateWorkspace(
+        val created = workspaceService.deployWorkspace(
             Workspace(
                 id = UUID.randomUUID().toString(),
                 name = MLText("Test workspace"),
                 visibility = WorkspaceVisibility.PUBLIC,
                 homePageLink = "",
-                icon = EntityRef.EMPTY
+                icon = EntityRef.EMPTY,
+                system = false
             )
         )
         val userName = "someUserToJoin"
 
         AuthContext.runAs(userName, listOf(AuthRole.USER)) {
-            val workspaceAtts = RecordAtts(created)
+            val workspaceAtts = RecordAtts(WorkspaceDesc.getRef(created))
             workspaceAtts[WORKSPACE_ACTION_ATT] = WorkspaceAction.JOIN.name
             recordsService.mutate(workspaceAtts)
 
@@ -451,13 +476,14 @@ class WorkspacePermissionsTest {
     @ParameterizedTest
     @ValueSource(strings = [AuthRole.ANONYMOUS, AuthRole.GUEST, AuthRole.SYSTEM, AuthRole.ADMIN, AuthRole.USER])
     fun `no one role should not allow to join private workspace`(role: String) {
-        val created = workspaceService.mutateWorkspace(
+        val created = workspaceService.deployWorkspace(
             Workspace(
                 id = UUID.randomUUID().toString(),
                 name = MLText("Test workspace"),
                 visibility = WorkspaceVisibility.PRIVATE,
                 homePageLink = "",
-                icon = EntityRef.EMPTY
+                icon = EntityRef.EMPTY,
+                system = false
             )
         )
 
@@ -472,13 +498,14 @@ class WorkspacePermissionsTest {
 
     @Test
     fun `admin user with admin and user roles should allow join to public workspaces`() {
-        val created = workspaceService.mutateWorkspace(
+        val created = workspaceService.deployWorkspace(
             Workspace(
                 id = UUID.randomUUID().toString(),
                 name = MLText("Test workspace"),
                 visibility = WorkspaceVisibility.PUBLIC,
                 homePageLink = "",
-                icon = EntityRef.EMPTY
+                icon = EntityRef.EMPTY,
+                system = false
             )
         )
         val userName = "someUserToJoin"
@@ -504,15 +531,29 @@ class WorkspacePermissionsTest {
             name = MLText("Test workspace"),
             visibility = WorkspaceVisibility.PRIVATE,
             homePageLink = "",
-            icon = EntityRef.EMPTY
+            icon = EntityRef.EMPTY,
+            system = false
         )
 
         val createdWorkspace = AuthContext.runAs("someUser", listOf(role)) {
-            workspaceService.mutateWorkspace(workspace)
+            workspaceService.deployWorkspace(workspace)
         }
         val createdWorkspaceDto = workspaceService.getWorkspace(createdWorkspace)
 
-        assertThat(createdWorkspaceDto).isEqualTo(workspace)
+        val expectedWs = if (role != AuthRole.SYSTEM) {
+            workspace.copy().withWorkspaceMembers(
+                listOf(
+                    WorkspaceMember(
+                        memberId = "creator",
+                        authorities = listOf(AuthorityType.PERSON.getRef("someUser")),
+                        memberRole = WorkspaceMemberRole.MANAGER
+                    )
+                )
+            ).build()
+        } else {
+            workspace
+        }
+        assertThat(createdWorkspaceDto).isEqualTo(expectedWs)
 
         workspaceService.deleteWorkspace(createdWorkspace)
     }
@@ -522,13 +563,14 @@ class WorkspacePermissionsTest {
     fun `check blocking to create new workspaces`(role: String) {
         assertThrows<IllegalStateException> {
             AuthContext.runAs("someUser", listOf(role)) {
-                workspaceService.mutateWorkspace(
+                workspaceService.deployWorkspace(
                     Workspace(
                         id = UUID.randomUUID().toString(),
                         name = MLText("Test workspace"),
                         visibility = WorkspaceVisibility.PRIVATE,
                         homePageLink = "",
-                        icon = EntityRef.EMPTY
+                        icon = EntityRef.EMPTY,
+                        system = false
                     )
                 )
             }
@@ -536,44 +578,49 @@ class WorkspacePermissionsTest {
     }
 
     @ParameterizedTest
-    @MethodSource("workspaceVisibilityProvider")
+    @EnumSource(WorkspaceVisibility::class)
     fun `user should see own created workspace`(visibility: WorkspaceVisibility) {
         val workspace = Workspace(
             id = UUID.randomUUID().toString(),
             name = MLText("Test workspace"),
             visibility = visibility,
             homePageLink = "",
-            icon = EntityRef.EMPTY
+            icon = EntityRef.EMPTY,
+            system = false
         )
 
         val createdWorkspace = AuthContext.runAs("someUser", listOf(AuthRole.USER)) {
-            workspaceService.mutateWorkspace(workspace)
+            workspaceService.deployWorkspace(workspace)
         }
 
         val workspaces = queryWorkspacesFor("someUser", listOf(AuthRole.USER))
 
-        assertThat(workspaces).contains(createdWorkspace)
+        assertThat(workspaces).contains(WorkspaceDesc.getRef(createdWorkspace))
 
         workspaceService.deleteWorkspace(createdWorkspace)
     }
 
     @ParameterizedTest
-    @MethodSource("workspaceVisibilityProvider")
+    @EnumSource(WorkspaceVisibility::class)
     fun `user should allow edit own created workspace`(visibility: WorkspaceVisibility) {
         val workspace = Workspace(
             id = UUID.randomUUID().toString(),
             name = MLText("Test workspace"),
             visibility = visibility,
             homePageLink = "",
-            icon = EntityRef.EMPTY
+            icon = EntityRef.EMPTY,
+            system = false
         )
 
         val createdWorkspace = AuthContext.runAs("someUser", listOf(AuthRole.USER)) {
-            workspaceService.mutateWorkspace(workspace)
+            workspaceService.deployWorkspace(workspace)
         }
 
         AuthContext.runAs("someUser", listOf(AuthRole.USER)) {
-            val allowWrite = recordsService.getAtt(createdWorkspace, "permissions._has.Write?bool!").asBoolean()
+            val allowWrite = recordsService.getAtt(
+                WorkspaceDesc.getRef(createdWorkspace),
+                "permissions._has.Write?bool!"
+            ).asBoolean()
             assertTrue(allowWrite)
         }
 

@@ -46,7 +46,8 @@
                             },
                             "key": "id",
                             "validate": {
-                              "required": true
+                              "required": true,
+                              "maxLength": 100
                             },
                             "defaultValue": "",
                             "refreshOn": [],
@@ -76,7 +77,9 @@
                             "input": true,
                             "inputMasks": [
                               {}
-                            ]
+                            ],
+                            "reorder": false,
+                            "dataSrc": ""
                           },
                           {
                             "label": {
@@ -142,23 +145,6 @@
                             "optionalWhenDisabled": false,
                             "type": "tableForm",
                             "input": true
-                          },
-                          {
-                            "label": {
-                              "ru": "Создатель",
-                              "en": "Creator"
-                            },
-                            "key": "_creator",
-                            "disabled": true,
-                            "disableInlineEdit": true,
-                            "persistent": false,
-                            "allowedAuthorityType": "USER",
-                            "defaultValue": "",
-                            "refreshOn": [],
-                            "optionalWhenDisabled": false,
-                            "customConditional": "show = _.get(instance, 'options.formMode') !== 'CREATE';",
-                            "type": "selectOrgstruct",
-                            "input": true
                           }
                         ],
                         "type": "column",
@@ -194,11 +180,34 @@
                             "key": "description",
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
-                            "type": "mlText",
+                            "logic": [
+                              {
+                                "name": "mandatory-for-public",
+                                "trigger": {
+                                  "type": "simple",
+                                  "simple": {
+                                    "show": true,
+                                    "when": "visibility",
+                                    "eq": "PUBLIC"
+                                  }
+                                },
+                                "actions": [
+                                  {
+                                    "name": "mandatory-for-public",
+                                    "type": "property",
+                                    "property": {
+                                      "label": "Required",
+                                      "value": "validate.required",
+                                      "type": "boolean"
+                                    },
+                                    "state": "true"
+                                  }
+                                ]
+                              }
+                            ],
+                            "type": "mlTextarea",
                             "input": true,
-                            "validate": {
-                              "required": true
-                            }
+                            "reorder": false
                           },
                           {
                             "label": {
@@ -416,7 +425,16 @@
                 "refreshOn": [],
                 "optionalWhenDisabled": false,
                 "type": "button",
-                "input": true
+                "input": true,
+                "showValidations": false,
+                "event": "",
+                "custom": "",
+                "url": "",
+                "headers": [
+                  {}
+                ],
+                "reorder": false,
+                "dataGridLabel": false
               }
             ]
           }
@@ -506,7 +524,10 @@
                   "ru": "Сохранить"
                 },
                 "key": "submit3",
+                "action": "custom",
                 "state": "",
+                "showValidations": false,
+                "custom": "if (form.errors.length) {\r\n  return;\r\n}\r\n\r\ntry {\r\n  form.submit().then(() => {\r\n    const { WorkspaceService = {} } = window.Citeck;\r\n    WorkspaceService && WorkspaceService.emitter.emit(WorkspaceService.Events.UPDATE_LIST);\r\n  });\r\n} catch(e) {\r\n  console.log(\"Form error\", e);\r\n}",
                 "theme": "primary",
                 "block": true,
                 "disableOnInvalid": true,
@@ -514,9 +535,13 @@
                 "optionalWhenDisabled": false,
                 "type": "button",
                 "input": true,
+                "event": "",
+                "url": "",
                 "headers": [
                   {}
-                ]
+                ],
+                "reorder": false,
+                "dataGridLabel": false
               }
             ]
           }

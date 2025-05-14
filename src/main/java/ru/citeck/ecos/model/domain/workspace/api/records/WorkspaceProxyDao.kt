@@ -1,19 +1,15 @@
 package ru.citeck.ecos.model.domain.workspace.api.records
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
-import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.data.sql.records.perms.DbPermsComponent
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceMemberDesc
-import ru.citeck.ecos.model.domain.workspace.dto.Workspace
-import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceAction
-import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMember
-import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMemberRole
-import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceVisibility
+import ru.citeck.ecos.model.domain.workspace.dto.*
 import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
 import ru.citeck.ecos.model.domain.workspace.service.WorkspacePermissions
 import ru.citeck.ecos.model.lib.ModelServiceFactory
@@ -22,8 +18,10 @@ import ru.citeck.ecos.model.lib.permissions.dto.PermissionType
 import ru.citeck.ecos.model.lib.workspace.USER_WORKSPACE_PREFIX
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.predicate.PredicateService
+import ru.citeck.ecos.records2.predicate.PredicateUtils
 import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records2.predicate.model.Predicates
+import ru.citeck.ecos.records2.predicate.model.ValuePredicate
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.atts.value.AttValue
@@ -58,12 +56,6 @@ class WorkspaceProxyDao(
 
         const val USER_WORKSPACES = "user-workspaces"
 
-        val UNDELETABLE_WORKSPACES = setOf(
-            "admin\$workspace",
-            WorkspaceDesc.DEFAULT_WORKSPACE_ID,
-            "personal-workspace"
-        )
-
         private val log = KotlinLogging.logger {}
     }
 
@@ -96,39 +88,72 @@ class WorkspaceProxyDao(
             }
 
             PredicateService.LANGUAGE_PREDICATE -> {
-                super.queryRecords(getPermissionsPrefilteredQuery(recsQuery))
+                super.queryRecords(
+                    recsQuery.copy()
+                        .withQuery(processQueryPredicate(recsQuery.getPredicate()))
+                        .build()
+                )
             }
 
             else -> error("Unsupported query language: ${recsQuery.language}")
         }
     }
 
-    private fun getPermissionsPrefilteredQuery(recsQuery: RecordsQuery): RecordsQuery {
-        if (AuthContext.isRunAsSystemOrAdmin()) {
-            return recsQuery
-        }
+    private fun processQueryPredicate(predicate: Predicate): Predicate {
+        val result = PredicateUtils.mapAttributePredicates(
+            predicate,
+            { srcPred ->
+                if (srcPred is ValuePredicate) {
+                    when (srcPred.getAttribute()) {
+                        WorkspaceDesc.ATT_IS_CURRENT_USER_MEMBER -> {
+                            val authoritiesRefs = ecosAuthoritiesApi.getAuthorityRefs(
+                                AuthContext.getCurrentUserWithAuthorities()
+                                    .filter { !it.startsWith(AuthRole.PREFIX) }
+                            )
+                            var targetPred: Predicate = Predicates.inVals(
+                                WORKSPACE_ATT_MEMBER_AUTHORITY,
+                                authoritiesRefs
+                            )
+                            if (!srcPred.getValue().asBoolean()) {
+                                targetPred = Predicates.not(targetPred)
+                            }
+                            targetPred
+                        }
 
-        val userRef = AuthorityType.PERSON.getRef(AuthContext.getCurrentUser())
+                        else -> srcPred
+                    }
+                } else {
+                    srcPred
+                }
+            },
+            onlyAnd = false,
+            optimize = false,
+            filterEmptyComposite = false
+        ) ?: Predicates.alwaysFalse()
+        return getPermissionsPrefilteredQuery(result)
+    }
+
+    private fun getPermissionsPrefilteredQuery(basePredicate: Predicate): Predicate {
+
+        if (AuthContext.isRunAsSystemOrAdmin()) {
+            return basePredicate
+        }
 
         val userAuthoritiesRefs = AuthContext.getCurrentUserWithAuthorities()
             .filter { it.startsWith(AuthRole.PREFIX).not() }
-            .map {
-                ecosAuthoritiesApi.getAuthorityRef(it)
-            }
+            .map { ecosAuthoritiesApi.getAuthorityRef(it) }
 
-        val basePredicate = recsQuery.getQuery(Predicate::class.java)
         val predicateWithPermsPrefilter = Predicates.and(
             basePredicate,
             Predicates.or(
                 Predicates.eq(WORKSPACE_ATT_VISIBILITY, WorkspaceVisibility.PUBLIC.name),
-                Predicates.eq(RecordConstants.ATT_CREATOR, userRef),
                 Predicates.inVals(WORKSPACE_ATT_MEMBER_AUTHORITY, userAuthoritiesRefs)
             )
         )
 
         log.debug { "Query workspaces with predicate: ${Json.mapper.toPrettyString(predicateWithPermsPrefilter)}" }
 
-        return recsQuery.copy(query = DataValue.create(predicateWithPermsPrefilter))
+        return predicateWithPermsPrefilter
     }
 
     override fun mutate(records: List<LocalRecordAtts>): List<String> {
@@ -144,7 +169,38 @@ class WorkspaceProxyDao(
             "Current user has no permissions to mutate workspaces"
         }
 
+        if (AuthContext.isNotRunAsSystem()) {
+            val invalidIds = records.mapNotNull {
+                val idAtt = it.attributes["id"].asText()
+                if (it.id.isEmpty() && !isValidWorkspaceIdForNewRecord(idAtt)) {
+                    idAtt
+                } else {
+                    null
+                }
+            }
+            if (invalidIds.isNotEmpty()) {
+                error("Invalid workspace identifiers: ${invalidIds.joinToString { "'$it'" }}")
+            }
+        }
+
         return super.mutate(records)
+    }
+
+    private fun isValidWorkspaceIdForNewRecord(workspaceId: String): Boolean {
+        if (workspaceId.isBlank()) {
+            return false
+        }
+        if (!WorkspaceDesc.VALID_WS_ID_REGEX.matches(workspaceId)) {
+            return false
+        }
+        val dollarsCount = workspaceId.count { it == '$' }
+        if (dollarsCount == 0) {
+            return true
+        }
+        if (dollarsCount == 1 && workspaceId.startsWith("admin$")) {
+            return AuthContext.isRunAsSystemOrAdmin()
+        }
+        return false
     }
 
     private fun processJoinAction(records: List<LocalRecordAtts>): List<String> {
@@ -153,13 +209,7 @@ class WorkspaceProxyDao(
         records.forEach { record ->
             val action = record.getAtt(WORKSPACE_ACTION_ATT).asText()
             if (action == WorkspaceAction.JOIN.name && record.id.isNotBlank()) {
-                workspaceService.joinCurrentUserToWorkspace(
-                    EntityRef.create(
-                        AppName.EMODEL,
-                        WorkspaceDesc.SOURCE_ID,
-                        record.id
-                    )
-                )
+                workspaceService.joinCurrentUserToWorkspace(record.id)
                 processActionsIds.add(record.id)
             }
         }
@@ -168,7 +218,17 @@ class WorkspaceProxyDao(
     }
 
     override fun delete(recordIds: List<String>): List<DelStatus> {
-        val undeletableIds = recordIds.filter { UNDELETABLE_WORKSPACES.contains(it) }
+
+        val systemFlag = recordsService.getAtts(
+            recordIds.map { EntityRef.create(WORKSPACE_REPO_SOURCE_ID, it) },
+            listOf(WorkspaceDesc.ATT_SYSTEM_BOOL)
+        ).map { it.getAtt(WorkspaceDesc.ATT_SYSTEM_BOOL).asBoolean() }
+
+        val isRunAsSystem = AuthContext.isRunAsSystem()
+        val currentUser = AuthContext.getCurrentUser()
+        val undeletableIds = recordIds.filterIndexed { idx, workspaceId ->
+            systemFlag[idx] || (!isRunAsSystem && !workspaceService.isUserManagerOf(currentUser, workspaceId))
+        }
         if (undeletableIds.isNotEmpty()) {
             error("You can't delete this records: $undeletableIds")
         }
@@ -242,6 +302,12 @@ class WorkspaceProxyDao(
 
         fun getPermissions(): UserWorkspacePerms {
             return UserWorkspacePerms
+        }
+
+        @JsonIgnore
+        @AttName(RecordConstants.ATT_WORKSPACE)
+        fun getWorkspaceRef(): EntityRef {
+            return WorkspaceDesc.getRef(workspace.id)
         }
     }
 
