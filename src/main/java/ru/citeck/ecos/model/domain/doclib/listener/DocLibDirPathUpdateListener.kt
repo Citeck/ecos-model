@@ -25,17 +25,21 @@ class DocLibDirPathUpdateListener(
 ) {
     @PostConstruct
     fun init() {
-        eventsService.addListener(ListenerConfig.create<ChildrenAssocsChangedEvent> {
-            withEventType(RecordChangedEvent.TYPE)
-            withTransactional(true)
-            withDataClass(ChildrenAssocsChangedEvent::class.java)
-            withLocal(true)
-            withFilter(Predicates.and(
-                Predicates.eq("record._type.isSubTypeOf.doclib-directory?bool", true),
-                Predicates.eq("diff._has.children?bool", true)
-            ))
-            withAction { event -> processEvent(event) }
-        })
+        eventsService.addListener(
+            ListenerConfig.create<ChildrenAssocsChangedEvent> {
+                withEventType(RecordChangedEvent.TYPE)
+                withTransactional(true)
+                withDataClass(ChildrenAssocsChangedEvent::class.java)
+                withLocal(true)
+                withFilter(
+                    Predicates.and(
+                        Predicates.eq("record._type.isSubTypeOf.doclib-directory?bool", true),
+                        Predicates.eq("diff._has.children?bool", true)
+                    )
+                )
+                withAction { event -> processEvent(event) }
+            }
+        )
     }
 
     private fun processEvent(event: ChildrenAssocsChangedEvent) {

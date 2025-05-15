@@ -11,6 +11,8 @@ metaRecord: emodel/type-2@
 aspects:
   - ref: emodel/aspect@aspect-1
 
+inheritCreateVariants: true
+
 model:
   attributes:
     - id: aspect-1:aspect-1-att

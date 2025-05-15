@@ -171,7 +171,7 @@ class AuthoritiesCommonTest : AuthoritiesTestBase() {
             runAs {
                 var groupId = "other-auth-group"
                 if (runAsUser.isNotBlank()) {
-                    groupId += "-${runAsUser}"
+                    groupId += "-$runAsUser"
                 }
                 if (exceptionExpected) {
                     val ex = AuthContext.runAs(EmptyAuth) {

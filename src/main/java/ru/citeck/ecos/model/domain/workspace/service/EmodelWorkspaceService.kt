@@ -269,18 +269,21 @@ class EmodelWorkspaceService(
             val authorities: List<EntityRef>
         )
 
-        val membersToUpdate = recordsService.query(RecordsQuery.create()
-            .withSourceId(WorkspaceMemberDesc.SOURCE_ID)
-            .withMaxItems(10000)
-            .withQuery(Predicates.and(
-                Predicates.eq(RecordConstants.ATT_PARENT, WorkspaceDesc.getRef(workspaceId)),
-                Predicates.contains(WorkspaceMemberDesc.ATT_AUTHORITIES, currentUserRef.toString())
-            )).build(),
+        val membersToUpdate = recordsService.query(
+            RecordsQuery.create()
+                .withSourceId(WorkspaceMemberDesc.SOURCE_ID)
+                .withMaxItems(10000)
+                .withQuery(
+                    Predicates.and(
+                        Predicates.eq(RecordConstants.ATT_PARENT, WorkspaceDesc.getRef(workspaceId)),
+                        Predicates.contains(WorkspaceMemberDesc.ATT_AUTHORITIES, currentUserRef.toString())
+                    )
+                ).build(),
             MembersAtts::class.java
         ).getRecords()
 
         if (membersToUpdate.isEmpty()) {
-            log.debug { "User ${currentUserRef.getLocalId()} is not member of workspace '$workspaceId'"}
+            log.debug { "User ${currentUserRef.getLocalId()} is not member of workspace '$workspaceId'" }
             return
         }
 

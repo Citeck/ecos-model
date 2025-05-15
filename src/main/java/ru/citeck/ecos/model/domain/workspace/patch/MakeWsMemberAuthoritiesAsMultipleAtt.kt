@@ -28,10 +28,11 @@ class MakeWsMemberAuthoritiesAsMultipleAtt(
 
     override fun call(): Any {
 
-        val workspacesToUpdate = recordsService.query(RecordsQuery.create()
-            .withSourceId(WorkspaceMemberDesc.SOURCE_ID)
-            .withQuery(Predicates.empty(WorkspaceMemberDesc.ATT_AUTHORITIES))
-            .build(),
+        val workspacesToUpdate = recordsService.query(
+            RecordsQuery.create()
+                .withSourceId(WorkspaceMemberDesc.SOURCE_ID)
+                .withQuery(Predicates.empty(WorkspaceMemberDesc.ATT_AUTHORITIES))
+                .build(),
             WorkspaceMemberAtts::class.java
         ).getRecords()
 
@@ -47,17 +48,18 @@ class MakeWsMemberAuthoritiesAsMultipleAtt(
             // ensure authorities attribute exists
             log.info { "Add authorities attribute to type" }
             val updatedType = memberType.copy()
-                .withModel(memberType.model.copy()
-                    .withAttributes(
-                        listOf(
-                            *memberType.model.attributes.toTypedArray(),
-                            AttributeDef.create()
-                                .withId(WorkspaceMemberDesc.ATT_AUTHORITIES)
-                                .withType(AttributeType.AUTHORITY)
-                                .withMultiple(true)
-                                .build()
-                        )
-                    ).build()
+                .withModel(
+                    memberType.model.copy()
+                        .withAttributes(
+                            listOf(
+                                *memberType.model.attributes.toTypedArray(),
+                                AttributeDef.create()
+                                    .withId(WorkspaceMemberDesc.ATT_AUTHORITIES)
+                                    .withType(AttributeType.AUTHORITY)
+                                    .withMultiple(true)
+                                    .build()
+                            )
+                        ).build()
                 ).build()
             typesService.save(updatedType)
         }
@@ -80,7 +82,7 @@ class MakeWsMemberAuthoritiesAsMultipleAtt(
         }
 
         log.info { "Updating completed" }
-        return "[" + workspacesToUpdate.joinToString { "\"$it\""} + "]"
+        return "[" + workspacesToUpdate.joinToString { "\"$it\"" } + "]"
     }
 
     data class WorkspaceMemberAtts(

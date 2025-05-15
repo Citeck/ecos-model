@@ -37,8 +37,7 @@ class AuthoritiesHelper(
             authorityAtts[it.key] = it.value
         }
         return recordsService.create(type.sourceId, authorityAtts)
-                .withAppName(EcosModelApp.NAME)
-                .withSourceId(type.sourceId)
+            .withAppName(EcosModelApp.NAME)
+            .withSourceId(type.sourceId)
     }
-
 }

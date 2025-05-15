@@ -2,6 +2,8 @@
 id: type-1
 parentRef: emodel/type@type-0
 
+inheritCreateVariants: true
+
 createVariants:
   - id: type-1-cv
     formRef: uiserv/form@abcdef

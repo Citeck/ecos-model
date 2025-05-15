@@ -1,10 +1,8 @@
 ---
-id: type-3
+id: type-4
+name: {"en":"type-4"}
+parentRef: emodel/type@type-3
 
-name:
-  en: type-3
-
-parentRef: emodel/type@type-2
 sourceId: emodel/type-2
 metaRecord: emodel/type-2@
 

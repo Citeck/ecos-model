@@ -13,6 +13,7 @@ workspaceScope: PRIVATE
 
 defaultCreateVariant: true
 
+inheritCreateVariants: true
 createVariants:
   - id: create-new-docx
     name:

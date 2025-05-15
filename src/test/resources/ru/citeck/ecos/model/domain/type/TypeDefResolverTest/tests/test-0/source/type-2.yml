@@ -3,5 +3,7 @@ id: type-2
 
 sourceType: ECOS_MODEL
 
+inheritCreateVariants: true
+
 aspects:
   - ref: emodel/aspect@aspect-1
