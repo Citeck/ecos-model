@@ -111,7 +111,7 @@ class AuthoritiesSyncService(
     @Synchronized
     fun updateSynchronizations() {
 
-        log.info { "Update synchronizations started" }
+        log.debug { "Update synchronizations started" }
 
         val allSyncs = recordsService.query(
             RecordsQuery.create {
@@ -121,7 +121,7 @@ class AuthoritiesSyncService(
             AuthoritiesSyncDef::class.java
         )
 
-        log.info { "Found ${allSyncs.getRecords().size} synchronizations" }
+        log.debug { "Found ${allSyncs.getRecords().size} synchronizations" }
 
         var removedSyncCount = 0
         var registeredSyncCount = 0
@@ -134,7 +134,7 @@ class AuthoritiesSyncService(
         syncInstances.keys.filter {
             !records.containsKey(it)
         }.forEach {
-            log.info { "Remove $it synchronization" }
+            log.debug { "Remove $it synchronization" }
             syncInstances.remove(it)?.sync?.stop()
             scheduledTasks[it]?.cancel()
             removedSyncCount++
@@ -235,7 +235,7 @@ class AuthoritiesSyncService(
         }
         this.newAuthoritiesManagers = newAuthoritiesManagers
 
-        log.info {
+        log.debug {
             "Synchronizations initialization completed. " +
                 "Removed: $removedSyncCount Registered: $registeredSyncCount"
         }
