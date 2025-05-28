@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.domain.workspace.api.records
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.json.Json
@@ -15,6 +16,7 @@ import ru.citeck.ecos.model.lib.ModelServiceFactory
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.permissions.dto.PermissionType
 import ru.citeck.ecos.model.lib.workspace.USER_WORKSPACE_PREFIX
+import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.predicate.PredicateService
 import ru.citeck.ecos.records2.predicate.PredicateUtils
 import ru.citeck.ecos.records2.predicate.model.Predicate
@@ -117,6 +119,7 @@ class WorkspaceProxyDao(
                             }
                             targetPred
                         }
+
                         else -> srcPred
                     }
                 } else {
@@ -166,7 +169,38 @@ class WorkspaceProxyDao(
             "Current user has no permissions to mutate workspaces"
         }
 
+        if (AuthContext.isNotRunAsSystem()) {
+            val invalidIds = records.mapNotNull {
+                val idAtt = it.attributes["id"].asText()
+                if (it.id.isEmpty() && !isValidWorkspaceIdForNewRecord(idAtt)) {
+                    idAtt
+                } else {
+                    null
+                }
+            }
+            if (invalidIds.isNotEmpty()) {
+                error("Invalid workspace identifiers: ${invalidIds.joinToString { "'$it'" }}")
+            }
+        }
+
         return super.mutate(records)
+    }
+
+    private fun isValidWorkspaceIdForNewRecord(workspaceId: String): Boolean {
+        if (workspaceId.isBlank()) {
+            return false
+        }
+        if (!WorkspaceDesc.VALID_WS_ID_REGEX.matches(workspaceId)) {
+            return false
+        }
+        val dollarsCount = workspaceId.count { it == '$' }
+        if (dollarsCount == 0) {
+            return true
+        }
+        if (dollarsCount == 1 && workspaceId.startsWith("admin$")) {
+            return AuthContext.isRunAsSystemOrAdmin()
+        }
+        return false
     }
 
     private fun processJoinAction(records: List<LocalRecordAtts>): List<String> {
@@ -268,6 +302,12 @@ class WorkspaceProxyDao(
 
         fun getPermissions(): UserWorkspacePerms {
             return UserWorkspacePerms
+        }
+
+        @JsonIgnore
+        @AttName(RecordConstants.ATT_WORKSPACE)
+        fun getWorkspaceRef(): EntityRef {
+            return WorkspaceDesc.getRef(workspace.id)
         }
     }
 

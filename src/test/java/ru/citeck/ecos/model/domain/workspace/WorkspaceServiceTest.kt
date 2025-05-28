@@ -24,6 +24,7 @@ import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceServiceRecords
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceMemberDesc
 import ru.citeck.ecos.model.domain.workspace.dto.Workspace
+import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMember
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMemberRole
 import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
@@ -151,6 +152,49 @@ class WorkspaceServiceTest {
         assertMember(USER_0_AUTH, direct = false, expected = true)
 
         assertUserLastManager(true)
+
+        recordsService.delete(workspaceRef)
+    }
+
+    @Test
+    fun removeLastManagerTest() {
+
+        val workspaceId = workspaceService.deployWorkspace(
+            Workspace.create().withId("test-ws")
+                .withName(MLText("test-ws"))
+                .withWorkspaceMembers(
+                    listOf(
+                        WorkspaceMember.create()
+                            .withMemberId("member-0")
+                            .withAuthorities(listOf(AuthorityType.PERSON.getRef("user-0")))
+                            .withMemberRole(WorkspaceMemberRole.MANAGER)
+                            .build()
+                    )
+                ).build()
+        )
+
+        val workspaceRef = WorkspaceDesc.getRef(workspaceId)
+
+        val members = recordsService.getAtt(workspaceRef, "workspaceMembers[]?id")
+            .asList(EntityRef::class.java)
+
+        assertThat(members).hasSize(1)
+
+        val lastManagerErrorMsgPart = "must have at least one manager"
+
+        fun assertLastManagerThrows(action: () -> Unit) {
+            val exception = assertThrows<RuntimeException>(action)
+            assertThat(exception.message).containsIgnoringCase(lastManagerErrorMsgPart)
+        }
+        assertLastManagerThrows {
+            recordsService.mutateAtt(workspaceRef, "workspaceMembers", null)
+        }
+        assertLastManagerThrows {
+            recordsService.mutateAtt(members[0], "memberRole", "USER")
+        }
+        assertLastManagerThrows {
+            recordsService.delete(members[0])
+        }
 
         recordsService.delete(workspaceRef)
     }

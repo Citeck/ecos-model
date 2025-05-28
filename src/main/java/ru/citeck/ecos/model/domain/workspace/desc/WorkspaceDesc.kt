@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.domain.workspace.desc
 
+import ru.citeck.ecos.data.sql.records.DbRecordsDaoConfig
 import ru.citeck.ecos.webapp.api.constants.AppName
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 
@@ -26,6 +27,9 @@ object WorkspaceDesc {
     const val CTX_ATT_DEPLOY_WORKSPACE_BOOL = "\$$CTX_ATT_DEPLOY_WORKSPACE?bool"
 
     const val DEFAULT_WORKSPACE_ID = "default"
+
+    val VALID_WS_ID_PATTERN = DbRecordsDaoConfig.create().allowedRecordIdPattern
+    val VALID_WS_ID_REGEX = VALID_WS_ID_PATTERN.toRegex()
 
     fun getRef(id: String): EntityRef {
         return EntityRef.create(AppName.EMODEL, SOURCE_ID, id)

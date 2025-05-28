@@ -1,0 +1,280 @@
+{
+  "id": "working-calendar-form",
+  "formKey": "",
+  "title": {
+    "ru": "Производственный календарь",
+    "en": "Working calendar"
+  },
+  "description": {},
+  "customModule": "",
+  "typeRef": "emodel/type@working-calendar",
+  "width": "m",
+  "system": false,
+  "i18n": {},
+  "definition": {
+    "components": [
+      {
+        "type": "selectJournal",
+        "input": true,
+        "journalId": "working-calendar",
+        "key": "extensionFor",
+        "label": {
+          "ru": "Эти настройки являются расширением для указанного календаря",
+          "en": "These settings are an extension for the specified calendar"
+        }
+      },
+      {
+        "type": "datetime",
+        "input": true,
+        "enableTime": false,
+        "key": "from",
+        "label": {
+          "ru": "Календарь действует начиная с",
+          "en": "Calendar starts from"
+        },
+        "suffix": true,
+        "format": "yyyy-MM-dd"
+      },
+      {
+        "type": "datetime",
+        "input": true,
+        "enableTime": false,
+        "key": "until",
+        "label": {
+          "ru": "Календарь действует до",
+          "en": "Calendar ends at"
+        },
+        "suffix": true,
+        "format": "yyyy-MM-dd"
+      },
+      {
+        "type": "checkbox",
+        "input": true,
+        "key": "enabled",
+        "label": {
+          "ru": "Календарь включен",
+          "en": "Calendar is active"
+        }
+      },
+      {
+        "label": {
+          "ru": "Даты",
+          "en": "Dates"
+        },
+        "key": "dates",
+        "multiple": true,
+        "validate": {
+          "minLength": "",
+          "maxLength": ""
+        },
+        "disableAddingRemovingRows": false,
+        "addAnotherPosition": "bottom",
+        "removePlacement": "col",
+        "defaultOpen": false,
+        "layoutFixed": false,
+        "enableRowGroups": false,
+        "reorder": false,
+        "defaultValue": [],
+        "refreshOn": [],
+        "optionalWhenDisabled": false,
+        "type": "datagrid",
+        "input": true,
+        "components": [
+          {
+            "label": {
+              "ru": "Дата",
+              "en": "Date"
+            },
+            "key": "date",
+            "validate": {
+              "required": true
+            },
+            "datePicker": {
+              "minDate": "",
+              "maxDate": ""
+            },
+            "enableTime": false,
+            "timePicker": {
+              "showMeridian": false
+            },
+            "defaultValue": "",
+            "refreshOn": [],
+            "optionalWhenDisabled": false,
+            "type": "datetime",
+            "input": true,
+            "suffix": true,
+            "row": "0-0",
+            "format": "yyyy-MM-dd"
+          },
+          {
+            "label": {
+              "ru": "До",
+              "en": "Until"
+            },
+            "key": "until",
+            "datePicker": {
+              "minDate": "",
+              "maxDate": ""
+            },
+            "enableTime": false,
+            "timePicker": {
+              "showMeridian": false
+            },
+            "defaultValue": "",
+            "refreshOn": [],
+            "optionalWhenDisabled": false,
+            "type": "datetime",
+            "input": true,
+            "suffix": true,
+            "row": "0-1",
+            "format": "yyyy-MM-dd"
+          },
+          {
+            "label": {
+              "ru": "Тип",
+              "en": "Type"
+            },
+            "key": "type",
+            "validate": {
+              "required": true,
+              "select": false
+            },
+            "dataSrc": "values",
+            "data": {
+              "values": [
+                {
+                  "label": {
+                    "ru": "Рабочий день",
+                    "en": "Working day"
+                  },
+                  "value": "WORKING"
+                },
+                {
+                  "label": {
+                    "ru": "Праздничный день",
+                    "en": "Holiday"
+                  },
+                  "value": "HOLIDAY"
+                },
+                {
+                  "label": {
+                    "ru": "Сокращенный день",
+                    "en": "Short day"
+                  },
+                  "value": "SHORTDAY"
+                },
+                {
+                  "label": {
+                    "ru": "Выходной",
+                    "en": "Weekend"
+                  },
+                  "value": "WEEKEND"
+                },
+                {
+                  "label": {
+                    "ru": "Не рабочий день",
+                    "en": "Non working day"
+                  },
+                  "value": "NON_WORKING"
+                }
+              ],
+              "headers": [
+                {}
+              ]
+            },
+            "defaultValue": "",
+            "optionalWhenDisabled": false,
+            "type": "ecosSelect",
+            "input": true,
+            "row": "0-2",
+            "reorder": false,
+            "reference": false
+          },
+          {
+            "label": {
+              "ru": "Описание",
+              "en": "Description"
+            },
+            "key": "description",
+            "refreshOn": [],
+            "optionalWhenDisabled": false,
+            "type": "mlText",
+            "input": true,
+            "reorder": false,
+            "row": "0-3"
+          }
+        ],
+        "rowGroups": [
+          {}
+        ],
+        "groupToggle": false
+      },
+      {
+        "type": "columns",
+        "key": "buttons-columns",
+        "columns": [
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 0,
+            "components": [
+              {
+                "type": "button",
+                "key": "cancel",
+                "label": {
+                  "ru": "Отменить",
+                  "en": "Cancel"
+                },
+                "action": "event",
+                "event": "cancel",
+                "block": true,
+                "input": true
+              }
+            ],
+            "key": "column"
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 1,
+            "key": "column",
+            "components": []
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 2,
+            "components": [],
+            "key": "column"
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "index": 3,
+            "components": [
+              {
+                "type": "button",
+                "theme": "primary",
+                "key": "submit",
+                "label": {
+                  "ru": "Сохранить",
+                  "en": "Save"
+                },
+                "block": true,
+                "input": true
+              }
+            ],
+            "key": "column"
+          }
+        ],
+        "input": false
+      }
+    ]
+  },
+  "attributes": {},
+  "notExists": false
+}

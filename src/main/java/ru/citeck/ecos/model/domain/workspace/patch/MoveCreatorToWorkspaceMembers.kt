@@ -3,6 +3,7 @@ package ru.citeck.ecos.model.domain.workspace.patch
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.context.lib.auth.AuthUser
+import ru.citeck.ecos.data.sql.records.DbRecordsControlAtts
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceMemberDesc
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMemberRole
@@ -54,7 +55,8 @@ class MoveCreatorToWorkspaceMembers(
                     RecordConstants.ATT_PARENT to workspace.id,
                     RecordConstants.ATT_PARENT_ATT to WorkspaceDesc.ATT_WORKSPACE_MEMBERS,
                     WorkspaceMemberDesc.ATT_AUTHORITIES to workspace.creator,
-                    WorkspaceMemberDesc.ATT_MEMBER_ROLE to WorkspaceMemberRole.MANAGER
+                    WorkspaceMemberDesc.ATT_MEMBER_ROLE to WorkspaceMemberRole.MANAGER,
+                    DbRecordsControlAtts.DISABLE_EVENTS to true
                 )
             )
         }
