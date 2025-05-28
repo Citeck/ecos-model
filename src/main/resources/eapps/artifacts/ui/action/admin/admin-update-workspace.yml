@@ -9,6 +9,7 @@ confirm:
   attributesMapping:
     valuesParams.config.typeRef: typeRef
     valuesParams.config.predicate: predicate
+    valuesParams.config.workspaces: workspaces
     executionParams.config.targetWorkspace: targetWorkspace
 type: server-group-action-v2
 config:

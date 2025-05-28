@@ -2465,6 +2465,24 @@
                             "optionalWhenDisabled": false,
                             "type": "ecosSelect",
                             "input": true
+                          },
+                          {
+                            "label": {
+                              "ru": "Атрибут с изображением для превью (по умолчанию listview:preview)",
+                              "en": "Attribute with preview image (listview:preview by default)"
+                            },
+                            "key": "aspectCfg$listview$previewAtt",
+                            "dataSrc": "custom",
+                            "data": {
+                              "custom": "values = _.get(data, 'attributesOptions.attributes', []).filter(a => a.type === 'CONTENT');"
+                            },
+                            "defaultValue": "",
+                            "refreshOn": [
+                              "attributesOptions"
+                            ],
+                            "optionalWhenDisabled": false,
+                            "type": "ecosSelect",
+                            "input": true
                           }
                         ]
                       }

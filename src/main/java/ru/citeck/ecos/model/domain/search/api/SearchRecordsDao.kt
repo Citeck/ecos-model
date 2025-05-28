@@ -11,6 +11,7 @@ import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
 import ru.citeck.ecos.model.lib.ModelServiceFactory
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeType
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
+import ru.citeck.ecos.model.lib.workspace.api.WsMembershipType
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.predicate.PredicateService
 import ru.citeck.ecos.records2.predicate.PredicateUtils
@@ -135,6 +136,7 @@ class SearchRecordsDao(
 
         val userWorkspaces = workspaceService.getUserWorkspaces(
             AuthContext.getCurrentUser(),
+            WsMembershipType.ALL,
             Predicates.or(
                 Predicates.contains(WorkspaceDesc.ATT_NAME, text),
                 Predicates.contains(WorkspaceDesc.ATT_DESCRIPTION, text)

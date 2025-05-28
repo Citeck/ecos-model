@@ -51,3 +51,4 @@ aspects:
     config:
       titleAtt: title
       textAtt: text
+      previewAtt: image

@@ -1,0 +1,12 @@
+---
+id: delete-workspace
+name:
+  ru: Удалить рабочее пространство
+  en: Delete workspace
+type: delete
+predicate:
+  t: and
+  v:
+    - { t: eq, a: permissions._has.delete?bool, v: true }
+features:
+  execForRecord: true

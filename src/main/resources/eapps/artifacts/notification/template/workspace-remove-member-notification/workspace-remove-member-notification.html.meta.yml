@@ -1,0 +1,13 @@
+{
+  "id": "workspace-remove-member-notification",
+  "name": "Уведомление об удалении участника из Рабочего пространства",
+  "notificationTitle": {
+    "ru": "Изменения в списке рабочих пространств"
+  },
+  "tags": [],
+  "model": {
+    "wsId": "id",
+    "wsName": "name"
+  },
+  "multiTemplateConfig": []
+}

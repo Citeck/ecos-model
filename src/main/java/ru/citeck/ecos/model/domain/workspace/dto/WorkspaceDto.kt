@@ -96,7 +96,8 @@ data class Workspace(
     val workspaceMembers: List<WorkspaceMember> = emptyList(),
     val visibility: WorkspaceVisibility,
     val homePageLink: String,
-    val icon: EntityRef
+    val icon: EntityRef,
+    val system: Boolean
 ) {
 
     companion object {
@@ -127,6 +128,7 @@ data class Workspace(
         var visibility: WorkspaceVisibility = WorkspaceVisibility.PUBLIC
         var homePageLink: String = ""
         var icon: EntityRef = EntityRef.EMPTY
+        var system: Boolean = false
 
         constructor(base: Workspace) : this() {
             this.id = base.id
@@ -136,6 +138,7 @@ data class Workspace(
             this.visibility = base.visibility
             this.homePageLink = base.homePageLink
             this.icon = base.icon
+            this.system = base.system
         }
 
         fun withId(id: String?): Builder {
@@ -173,6 +176,11 @@ data class Workspace(
             return this
         }
 
+        fun withSystem(system: Boolean?): Builder {
+            this.system = system ?: false
+            return this
+        }
+
         fun build(): Workspace {
             return Workspace(
                 id,
@@ -181,7 +189,8 @@ data class Workspace(
                 workspaceMembers,
                 visibility,
                 homePageLink,
-                icon
+                icon,
+                system
             )
         }
     }

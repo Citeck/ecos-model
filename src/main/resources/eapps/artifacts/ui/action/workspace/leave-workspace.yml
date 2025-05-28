@@ -1,0 +1,20 @@
+---
+id: leave-workspace
+name:
+  ru: Выйти из рабочей области
+  en: Leave workspace
+icon: icon-exit
+type: mutate
+config:
+  record:
+    id: emodel/workspace-service@
+    attributes:
+      type: LEAVE
+      workspace: ${?id}
+predicate:
+  t: and
+  v:
+    - { t: eq, a: isCurrentUserMember?bool, v: true }
+    - { t: eq, a: isCurrentUserLastManager?bool, v: false }
+features:
+  execForRecord: true

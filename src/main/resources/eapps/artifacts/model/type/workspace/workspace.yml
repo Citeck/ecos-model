@@ -13,13 +13,15 @@ journalRef: uiserv/journal@workspaces-journal
 formRef: uiserv/form@workspace-form
 
 defaultCreateVariant: true
-postCreateActionRef: uiserv/action@none
+postCreateActionRef: uiserv/action@redirect-to-workspace
 
 queryPermsPolicy: PUBLIC
 
 actions:
   - uiserv/action@edit
-  - uiserv/action@delete
+  - uiserv/action@delete-workspace
+  - uiserv/action@join-workspace
+  - uiserv/action@leave-workspace
   - uiserv/action@view-dashboard
   - uiserv/action@download-text-yml
 
@@ -52,6 +54,12 @@ model:
       config:
         typeRef: emodel/type@workspace-member
         child: true
+    - id: defaultWorkspaceMembers
+      name:
+        ru: Участники рабочего пространства по умолчанию
+        en: Default workspace members
+      multiple: true
+      type: JSON
     - id: visibility
       name:
         ru: Видимость
@@ -88,6 +96,12 @@ model:
       config:
         child: true
         typeRef: emodel/type@wiki
+  systemAttributes:
+    - id: system
+      name:
+        ru: Системная рабочая область
+        en: System workspace
+      type: BOOLEAN
 aspects:
   - ref: emodel/aspect@has-ecos-activities
     config:

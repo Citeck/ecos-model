@@ -1,0 +1,20 @@
+---
+id: join-workspace
+name:
+  ru: Присоединиться к рабочей области
+  en: Join workspace
+icon: icon-plus
+type: mutate
+config:
+  record:
+    id: emodel/workspace-service@
+    attributes:
+      type: JOIN
+      workspace: ${?id}
+predicate:
+  t: and
+  v:
+    - { t: eq, a: visibility?str, v: PUBLIC }
+    - { t: eq, a: isCurrentUserMember?bool, v: false }
+features:
+  execForRecord: true

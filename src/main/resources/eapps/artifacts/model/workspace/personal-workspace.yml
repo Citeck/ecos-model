@@ -6,4 +6,6 @@ name:
 
 visibility: PRIVATE
 
+system: true
+
 icon: uiserv/icon@personal-workspace-icon

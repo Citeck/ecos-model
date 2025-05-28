@@ -7,9 +7,7 @@ import ru.citeck.ecos.context.lib.auth.AuthUser
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMember
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMemberRole
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceVisibility
-import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records3.RecordsService
-import ru.citeck.ecos.records3.record.atts.schema.ScalarType
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.webapp.api.authority.EcosAuthoritiesApi
 
@@ -30,8 +28,7 @@ class WorkspacePermissions(
     }
 
     private fun allowReadForWorkspace(user: String, userAuthorities: Set<String>, workspace: WorkspaceInfo): Boolean {
-        if (workspace.creator == user ||
-            userAuthorities.contains(AuthRole.ADMIN) ||
+        if (userAuthorities.contains(AuthRole.ADMIN) ||
             userAuthorities.contains(AuthRole.SYSTEM)
         ) {
             return true
@@ -43,15 +40,15 @@ class WorkspacePermissions(
         ) {
             return false
         }
-
-        val allowedWorkspaceAuthorityNames = workspace.members.flatMapTo(HashSet()) {
-            ecosAuthoritiesApi.getAuthorityNames(it.authorities)
+        if (workspace.visibility == WorkspaceVisibility.PUBLIC) {
+            return true
         }
 
-        return workspace.visibility == WorkspaceVisibility.PUBLIC ||
-            allowedWorkspaceAuthorityNames.any {
-                userAuthorities.contains(it)
-            }
+        val allowedWorkspaceAuthorityRefs = workspace.members.flatMapTo(HashSet()) { it.authorities }.toList()
+        val allowedWorkspaceAuthorityNames = ecosAuthoritiesApi.getAuthorityNames(allowedWorkspaceAuthorityRefs)
+
+        return allowedWorkspaceAuthorityNames.contains(user) ||
+            userAuthorities.any { allowedWorkspaceAuthorityNames.contains(it) }
     }
 
     fun currentAuthCanReadPersonalWorkspaceOf(user: String): Boolean {
@@ -76,7 +73,6 @@ class WorkspacePermissions(
 
         return userAuthorities.contains(AuthRole.ADMIN) ||
             userAuthorities.contains(AuthRole.SYSTEM) ||
-            workspace.creator == user ||
             authorityNameByRoles.any {
                 val (authorityName, role) = it
                 role == WorkspaceMemberRole.MANAGER && userAuthorities.contains(authorityName)
@@ -100,8 +96,5 @@ private data class WorkspaceInfo(
     val visibility: WorkspaceVisibility,
 
     @AttName("workspaceMembers")
-    val members: List<WorkspaceMember> = emptyList(),
-
-    @AttName(RecordConstants.ATT_CREATOR + ScalarType.LOCAL_ID_SCHEMA)
-    val creator: String
+    val members: List<WorkspaceMember> = emptyList()
 )
