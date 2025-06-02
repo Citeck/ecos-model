@@ -5,6 +5,7 @@ name:
 
 formRef: uiserv/form@form-0
 parentRef: emodel/type@base
+inheritCreateVariants: false
 
 properties:
   type-0-prop: value-0

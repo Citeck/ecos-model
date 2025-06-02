@@ -23,10 +23,11 @@ class CreateWikiRootForWorkspaces(
 
     override fun call(): Any {
 
-        val workspacesToUpdate = recordsService.query(RecordsQuery.create()
-            .withSourceId(WorkspaceDesc.SOURCE_ID)
-            .withQuery(Predicates.empty("wikiRoot"))
-            .build()
+        val workspacesToUpdate = recordsService.query(
+            RecordsQuery.create()
+                .withSourceId(WorkspaceDesc.SOURCE_ID)
+                .withQuery(Predicates.empty("wikiRoot"))
+                .build()
         ).getRecords()
 
         if (workspacesToUpdate.isEmpty()) {
@@ -40,6 +41,6 @@ class CreateWikiRootForWorkspaces(
         }
 
         log.info { "Updating completed" }
-        return "[" + workspacesToUpdate.joinToString { "\"$it\""} + "]"
+        return "[" + workspacesToUpdate.joinToString { "\"$it\"" } + "]"
     }
 }

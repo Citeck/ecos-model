@@ -69,11 +69,13 @@ class CommentExtractorTest {
 
         val attachmentsRefs2 = extractor.extractAttachRefsFromText(LEXICAL_TEXT_WITH_IMAGES)
 
-        assertThat(attachmentsRefs2).containsAllEntriesOf(mapOf(
-            "temp-file%4031ca7535-9b3d-4fa9-9556-ea101925abb0" to EntityRef.valueOf("temp-file@31ca7535-9b3d-4fa9-9556-ea101925abb0"),
-            "emodel/temp-file@c5a75903-d886-4c88-ae1b-9ac6ce1b4385" to EntityRef.valueOf("emodel/temp-file@c5a75903-d886-4c88-ae1b-9ac6ce1b4385"),
-            "temp-file%401c00dce5-b34d-4cb5-8706-f6393a9ff822" to EntityRef.valueOf("temp-file@1c00dce5-b34d-4cb5-8706-f6393a9ff822"),
-        ))
+        assertThat(attachmentsRefs2).containsAllEntriesOf(
+            mapOf(
+                "temp-file%4031ca7535-9b3d-4fa9-9556-ea101925abb0" to EntityRef.valueOf("temp-file@31ca7535-9b3d-4fa9-9556-ea101925abb0"),
+                "emodel/temp-file@c5a75903-d886-4c88-ae1b-9ac6ce1b4385" to EntityRef.valueOf("emodel/temp-file@c5a75903-d886-4c88-ae1b-9ac6ce1b4385"),
+                "temp-file%401c00dce5-b34d-4cb5-8706-f6393a9ff822" to EntityRef.valueOf("temp-file@1c00dce5-b34d-4cb5-8706-f6393a9ff822"),
+            )
+        )
     }
 
     @Test

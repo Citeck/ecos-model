@@ -4,6 +4,7 @@ name: type-0
 sourceId: emodel/type-0-src
 metaRecord: emodel/type-0-src@
 createVariantsForChildTypes: true
+inheritCreateVariants: false
 createVariants:
   - id: type-0-cv
     formRef: uiserv/form@abc

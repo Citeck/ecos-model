@@ -33,13 +33,15 @@ class MoveCreatorToWorkspaceMembers(
         val workspacesToMigrate = recordsService.query(
             RecordsQuery.create()
                 .withSourceId(WorkspaceDesc.SOURCE_ID)
-                .withQuery(Predicates.and(
-                    Predicates.notEq(RecordConstants.ATT_CREATOR, AuthorityType.PERSON.getRef(AuthUser.SYSTEM)),
-                    Predicates.notContains(
-                        "workspaceMembers.memberId",
-                        WorkspaceRecordsListener.CREATOR_MEMBER_ID
+                .withQuery(
+                    Predicates.and(
+                        Predicates.notEq(RecordConstants.ATT_CREATOR, AuthorityType.PERSON.getRef(AuthUser.SYSTEM)),
+                        Predicates.notContains(
+                            "workspaceMembers.memberId",
+                            WorkspaceRecordsListener.CREATOR_MEMBER_ID
+                        )
                     )
-                ))
+                )
                 .withMaxItems(10000)
                 .build(),
             WorkspaceAtts::class.java

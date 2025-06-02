@@ -25,7 +25,6 @@ import ru.citeck.ecos.records3.record.dao.query.RecordsQueryDao
 import ru.citeck.ecos.records3.record.dao.query.dto.query.Consistency
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy
-import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes
 import ru.citeck.ecos.webapp.api.constants.AppName
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.api.promise.Promise
@@ -99,7 +98,7 @@ class SearchRecordsDao(
 
     override fun queryRecords(recsQuery: RecordsQuery): Any? {
 
-        val query = readQuery(recsQuery)?: return null
+        val query = readQuery(recsQuery) ?: return null
 
         val maxItems = recsQuery.page.maxItems
         val maxItemsForType = query.maxItemsForType.coerceAtMost(MAX_ITEMS_FOR_TYPE)
@@ -275,10 +274,12 @@ class SearchRecordsDao(
                 val it = activeRequestsByAppSemaphore.entries.iterator()
                 while (it.hasNext()) {
                     val next = it.next()
-                    if (next.key != appName
-                        && next.value.availablePermits() == globalSearchConfig.maxConcurrentRequestsPerApp
-                        && !next.value.hasQueuedThreads()
-                    ) { it.remove() }
+                    if (next.key != appName &&
+                        next.value.availablePermits() == globalSearchConfig.maxConcurrentRequestsPerApp &&
+                        !next.value.hasQueuedThreads()
+                    ) {
+                        it.remove()
+                    }
                 }
                 log.warn { "Cleaning completed. Semaphores after cleaning: ${activeRequestsByAppSemaphore.size}" }
             }

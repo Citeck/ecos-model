@@ -42,8 +42,8 @@ class DocLibDirPathUpdateJob(
 
     @Scheduled(fixedDelayString = "PT30S")
     fun update() {
-        if (!fullUpdateRequired.compareAndSet(true, false)
-            && (System.currentTimeMillis() - lastFullUpdateCompletedAt.get()) < DEFAULT_FULL_UPDATE_DELAY
+        if (!fullUpdateRequired.compareAndSet(true, false) &&
+            (System.currentTimeMillis() - lastFullUpdateCompletedAt.get()) < DEFAULT_FULL_UPDATE_DELAY
         ) {
             return
         }
@@ -97,7 +97,7 @@ class DocLibDirPathUpdateJob(
                 }
                 log.debug {
                     "Manual updating completed. Elapsed time: ${System.currentTimeMillis() - startedAt}. " +
-                    "Lock acquisition time: ${lockAcquiredAt - startedAt}"
+                        "Lock acquisition time: ${lockAcquiredAt - startedAt}"
                 }
             }
         } finally {

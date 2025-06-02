@@ -109,7 +109,9 @@ class TypeDefResolverTest {
         expectedData.forEach { k, v ->
             if (actualData[k] != v) {
                 val (newExpected, newActual) = evalDiff(v, actualData[k])
-                failMsg += "\n $k expected $newExpected \n but was $newActual"
+                failMsg += "\n$k doesn't match. Diff:"
+                failMsg += "\nexpected: $newExpected \nbut was:  $newActual"
+                failMsg += "\nfull actual value: ${actualData[k]}"
             }
         }
         fail(failMsg)

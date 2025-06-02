@@ -23,7 +23,8 @@ class TypeRecordsAspectsTest : TypeTestBase() {
         )
 
         records.create(
-            "emodel/types-repo", ObjectData.create()
+            "emodel/types-repo",
+            ObjectData.create()
                 .set("id", "test")
                 .set("aspects", srcAspectsList)
         )
@@ -95,7 +96,7 @@ class TypeRecordsAspectsTest : TypeTestBase() {
                     "customAspects",
                     listOf(createAspectDef("hij"))
                 )
-                //
+            //
         )
         assertThat(getTypeAspects("test")).containsExactly(
             createAspectDef("hij", "value-hij")
@@ -164,7 +165,8 @@ class TypeRecordsAspectsTest : TypeTestBase() {
             val dataBytes = YamlUtils.toString(data).toByteArray()
             return ObjectData.create()
                 .set(
-                    ".att(n:\"_self\"){as(n:\"content-data\"){json}}", ObjectData.create()
+                    ".att(n:\"_self\"){as(n:\"content-data\"){json}}",
+                    ObjectData.create()
                         .set("storage", "base64")
                         .set("name", "type-def.yml")
                         .set("url", "data:application/x-yaml;base64," + Base64.getEncoder().encodeToString(dataBytes))

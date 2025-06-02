@@ -26,7 +26,6 @@ import ru.citeck.ecos.records3.record.dao.query.RecordsQueryDao
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes
 import ru.citeck.ecos.webapp.api.entity.EntityRef
-import ru.citeck.ecos.webapp.lib.model.aspect.dto.AspectDef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import ru.citeck.ecos.webapp.lib.perms.RecordPerms
 import java.nio.charset.StandardCharsets

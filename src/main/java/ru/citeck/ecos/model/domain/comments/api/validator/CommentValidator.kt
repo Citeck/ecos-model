@@ -12,7 +12,9 @@ object CommentValidator {
     private const val BASIC_URI_TO_REMOVE = "http://base-url-to-remove"
 
     private val ALLOWED_TAGS = setOf(
-        "hr", "details", "summary"
+        "hr",
+        "details",
+        "summary"
     )
 
     private val ALLOWED_INLINE_STYLES = setOf(

@@ -70,7 +70,7 @@ class TypeDefResolver {
         }
         context.resetCache()
         resolvedByParentTypes.forEach {
-            it.withCreateVariants(getCreateVariants(it.build(), context))
+            it.withCreateVariants(fillCreateVariants(it.build(), context))
             it.withAssociations(filterAssociations(it, context))
             if (System.currentTimeMillis() >= calculateUntil) {
                 throw TimeoutException("Types resolving timeout exceeded: $timeout")
@@ -239,6 +239,28 @@ class TypeDefResolver {
             resTypeDef.withAssignablePerms(assignablePerms)
         }
 
+        if (resTypeDef.inheritCreateVariants == null) {
+            resTypeDef.withInheritCreateVariants(resolvedParentDef.inheritCreateVariants ?: false)
+        }
+        if (resTypeDef.inheritCreateVariants == true) {
+
+            val inheritedVariants = ArrayList<CreateVariantDef>()
+            val existingVariantsIds = HashSet<String>()
+            resTypeDef.createVariants.forEach { existingVariantsIds.add(it.id) }
+
+            resolvedParentDef.createVariants.forEach {
+                if (existingVariantsIds.add(it.id)) {
+                    inheritedVariants.add(it)
+                }
+            }
+            context.getInheritedCreateVariants(resolvedParentDef.id).forEach {
+                if (existingVariantsIds.add(it.id)) {
+                    inheritedVariants.add(it)
+                }
+            }
+            context.setInheritedCreateVariants(resTypeDef.id, inheritedVariants)
+        }
+
         context.types[resTypeDef.id] = resTypeDef
         return resTypeDef
     }
@@ -374,11 +396,11 @@ class TypeDefResolver {
 
     /* TYPES POSTPROCESSING */
 
-    private fun getCreateVariants(
+    private fun fillCreateVariants(
         resolvedTypeDef: TypeDef?,
         context: ResolveContext,
         result: MutableList<CreateVariantDef> = ArrayList(),
-        addTypeInId: Boolean = false
+        variantsForChildType: Boolean = false
     ): List<CreateVariantDef> {
 
         resolvedTypeDef ?: return result
@@ -402,11 +424,14 @@ class TypeDefResolver {
         }
 
         variants.addAll(rawTypeDef.createVariants)
+        if (!variantsForChildType) {
+            variants.addAll(context.getInheritedCreateVariants(rawTypeDef.id))
+        }
 
         variants.forEach { cv ->
 
             val variant = cv.copy()
-            if (addTypeInId) {
+            if (variantsForChildType) {
                 variant.withId(typeId + "__" + variant.id)
             }
 
@@ -429,13 +454,13 @@ class TypeDefResolver {
             if (variant.sourceId.isNotEmpty()) {
                 result.add(variant.build())
             } else {
-                log.debug("Create variant without sourceId will be ignored: " + variant.build())
+                log.debug { "Create variant without sourceId will be ignored: " + variant.build() }
             }
         }
 
         if (resolvedTypeDef.createVariantsForChildTypes) {
             context.getChildrenByParentId(resolvedTypeDef.id).forEach { childId ->
-                getCreateVariants(context.getResolvedType(childId), context, result, true)
+                fillCreateVariants(context.getResolvedType(childId), context, result, true)
             }
         }
 
@@ -540,8 +565,20 @@ class TypeDefResolver {
 
         private val childrenById: MutableMap<String, List<String>> = HashMap()
         private val resolvedTypes: MutableMap<String, TypeDef> = HashMap()
+        private val inheritedCreateVariantsByTypeId: MutableMap<String, List<CreateVariantDef>> = HashMap()
 
         private val cache = HashMap<Any, Any>()
+
+        fun getInheritedCreateVariants(typeId: String): List<CreateVariantDef> {
+            return inheritedCreateVariantsByTypeId[typeId] ?: emptyList()
+        }
+
+        fun setInheritedCreateVariants(typeId: String, variants: List<CreateVariantDef>) {
+            if (variants.isEmpty()) {
+                return
+            }
+            inheritedCreateVariantsByTypeId[typeId] = variants
+        }
 
         @Suppress("UNCHECKED_CAST")
         fun <K : Any, V : Any> getFromCacheOrCompute(key: K, action: (K) -> V): V {

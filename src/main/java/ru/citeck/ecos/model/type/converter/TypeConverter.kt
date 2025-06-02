@@ -68,6 +68,7 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
         entity.inheritForm = typeDef.inheritForm
         entity.inheritActions = typeDef.inheritActions
         entity.inheritNumTemplate = typeDef.inheritNumTemplate
+        entity.inheritCreateVariants = typeDef.inheritCreateVariants
         entity.dispNameTemplate = Json.mapper.toString(typeDef.dispNameTemplate)
         entity.numTemplateRef = typeDef.numTemplateRef.toString()
         entity.actions = Json.mapper.toString(typeDef.actions)
@@ -140,6 +141,7 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
             .withInheritForm(entity.inheritForm)
             .withInheritActions(entity.inheritActions)
             .withInheritNumTemplate(entity.inheritNumTemplate)
+            .withInheritCreateVariants(entity.inheritCreateVariants)
             .withDispNameTemplate(Json.mapper.read(entity.dispNameTemplate, MLText::class.java))
             .withNumTemplateRef(EntityRef.valueOf(entity.numTemplateRef))
             .withActions(DataValue.create(entity.actions).asList(EntityRef::class.java))

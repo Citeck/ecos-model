@@ -120,12 +120,14 @@ class WorkspaceServiceTest {
         assertUserLastManager(false)
 
         val groupMember = recordsService.create(
-            WorkspaceMemberDesc.SOURCE_ID, mapOf(
+            WorkspaceMemberDesc.SOURCE_ID,
+            mapOf(
                 RecordConstants.ATT_PARENT to workspaceRef,
                 RecordConstants.ATT_PARENT_ATT to WorkspaceDesc.ATT_WORKSPACE_MEMBERS,
                 WorkspaceMemberDesc.ATT_AUTHORITIES to AuthorityType.GROUP.getRef(GROUP_0_ID),
                 WorkspaceMemberDesc.ATT_MEMBER_ROLE to WorkspaceMemberRole.MANAGER
-            ))
+            )
+        )
 
         assertMember(USER_0_AUTH, direct = true, expected = false)
         assertMember(USER_0_AUTH, direct = false, expected = true)
@@ -133,7 +135,8 @@ class WorkspaceServiceTest {
         assertUserLastManager(false)
 
         recordsService.create(
-            WorkspaceMemberDesc.SOURCE_ID, mapOf(
+            WorkspaceMemberDesc.SOURCE_ID,
+            mapOf(
                 RecordConstants.ATT_PARENT to workspaceRef,
                 RecordConstants.ATT_PARENT_ATT to WorkspaceDesc.ATT_WORKSPACE_MEMBERS,
                 WorkspaceMemberDesc.ATT_AUTHORITIES to AuthorityType.PERSON.getRef(USER_0_AUTH.getUser()),
@@ -252,12 +255,14 @@ class WorkspaceServiceTest {
         assertThat(exception2.message).contains("You can't leave workspace when you are last manager")
 
         recordsService.create(
-            WorkspaceMemberDesc.SOURCE_ID, mapOf(
-            RecordConstants.ATT_PARENT to WorkspaceDesc.getRef(workspaceId),
-            RecordConstants.ATT_PARENT_ATT to WorkspaceDesc.ATT_WORKSPACE_MEMBERS,
-            WorkspaceMemberDesc.ATT_AUTHORITIES to AuthorityType.PERSON.getRef(testUser2),
-            WorkspaceMemberDesc.ATT_MEMBER_ROLE to WorkspaceMemberRole.MANAGER
-        ))
+            WorkspaceMemberDesc.SOURCE_ID,
+            mapOf(
+                RecordConstants.ATT_PARENT to WorkspaceDesc.getRef(workspaceId),
+                RecordConstants.ATT_PARENT_ATT to WorkspaceDesc.ATT_WORKSPACE_MEMBERS,
+                WorkspaceMemberDesc.ATT_AUTHORITIES to AuthorityType.PERSON.getRef(testUser2),
+                WorkspaceMemberDesc.ATT_MEMBER_ROLE to WorkspaceMemberRole.MANAGER
+            )
+        )
 
         val managers3 = workspaceService.getWorkspaceManagersRefs(workspaceId)
         assertThat(managers3).containsExactlyInAnyOrder(
