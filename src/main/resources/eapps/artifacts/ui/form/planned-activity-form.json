@@ -26,6 +26,7 @@
             "key": "_parent",
             "disabled": true,
             "modalTitle": "",
+            "linkFormatter": "function(ref) {\n  if (!ref) {\n    throw 'ref is required\\n';\n  }\n  \n  if (ref.includes('emodel/workspace@')) {\n    const workspaceId = ref.split('@')[1];\n    return '/v2/dashboard?ws=' + workspaceId;\n  }\n  \n  return ref;\n}",
             "journalId": "search",
             "refreshOn": [],
             "optionalWhenDisabled": false,
