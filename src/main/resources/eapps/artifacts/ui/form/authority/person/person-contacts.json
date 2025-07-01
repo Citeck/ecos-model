@@ -31,7 +31,6 @@
   "definition": {
     "components": [
       {
-        "title": "Contacts",
         "key": "panel2",
         "type": "panel",
         "input": false,
@@ -143,6 +142,19 @@
             },
             "type": "textfield",
             "input": true
+          },
+          {
+            "label": {
+              "ru": "Дополнительный EMail",
+              "en": "Additional EMail"
+            },
+            "key": "additionalEmail",
+            "defaultValue": "",
+            "refreshOn": [],
+            "optionalWhenDisabled": false,
+            "type": "email",
+            "input": true,
+            "reorder": false
           },
           {
             "state": "",
