@@ -8,6 +8,9 @@
   "model" : {
     "titleEventAction" : "$process.eventAction",
     "titleEventSummary" : "$process.eventSummary",
+    "eventDisp" : "$process.eventDisp",
+    "eventDate": "$process.eventDate | fmt('dd.MM.yyyy')",
+    "eventTime": "$process.eventDate | fmt('HH:mm')",
     "body" : "text",
     "docRef" : "_parent?id"
   },
