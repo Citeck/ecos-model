@@ -34,7 +34,6 @@
   "definition": {
     "components": [
       {
-        "title": "Additional",
         "key": "panel2",
         "type": "panel",
         "input": false,
