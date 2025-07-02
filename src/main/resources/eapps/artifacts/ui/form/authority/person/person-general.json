@@ -55,7 +55,6 @@
           {
             "components": [
               {
-                "title": "Basic Information",
                 "key": "panel",
                 "type": "panel",
                 "input": false,

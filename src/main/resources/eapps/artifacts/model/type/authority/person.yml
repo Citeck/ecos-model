@@ -40,6 +40,10 @@ model:
       name:
         ru: EMail
         en: EMail
+    - id: additionalEmail
+      name:
+        ru: Дополнительный EMail
+        en: Additional EMail
     - id: jobTitle
       name:
         ru: Должность
