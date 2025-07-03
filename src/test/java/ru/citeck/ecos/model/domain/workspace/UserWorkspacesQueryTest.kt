@@ -66,13 +66,14 @@ class UserWorkspacesQueryTest {
             wsId
         }
         fun assertQuery(condition: Predicate, max: Int, skip: Int, expectedWorkspaces: List<String>, expectedTotalCount: Int) {
-            val queryRes = recordsService.query(RecordsQuery.create()
-                .withSourceId("workspace")
-                .withMaxItems(max)
-                .withSkipCount(skip)
-                .withQuery(condition)
-                .withSortBy(SortBy("_created", true))
-                .build()
+            val queryRes = recordsService.query(
+                RecordsQuery.create()
+                    .withSourceId("workspace")
+                    .withMaxItems(max)
+                    .withSkipCount(skip)
+                    .withQuery(condition)
+                    .withSortBy(SortBy("_created", true))
+                    .build()
             )
             val recs = queryRes.getRecords().map { it.getLocalId() }
             assertThat(recs).containsExactlyInAnyOrderElementsOf(expectedWorkspaces)
@@ -83,49 +84,57 @@ class UserWorkspacesQueryTest {
         AuthContext.runAs("user-0", listOf(AuthRole.USER)) {
             assertQuery(
                 currentUserMemberPredicate,
-                100, 0,
+                100,
+                0,
                 listOf("user\$user-0", *workspacesIds.toTypedArray()),
                 11
             )
             assertQuery(
                 currentUserMemberPredicate,
-                2, 0,
+                2,
+                0,
                 listOf("user\$user-0", workspacesIds.first()),
                 11
             )
             assertQuery(
                 currentUserMemberPredicate,
-                2, 2,
+                2,
+                2,
                 listOf(workspacesIds[1], workspacesIds[2]),
                 11
             )
             assertQuery(
                 currentUserMemberPredicate,
-                2, 4,
+                2,
+                4,
                 listOf(workspacesIds[3], workspacesIds[4]),
                 11
             )
             assertQuery(
                 currentUserMemberPredicate,
-                4, 10,
+                4,
+                10,
                 listOf(workspacesIds[9]),
                 11
             )
             assertQuery(
                 Predicates.and(currentUserMemberPredicate, Predicates.contains("name", "перс")),
-                4, 0,
+                4,
+                0,
                 listOf("user\$user-0"),
                 1
             )
             assertQuery(
                 Predicates.and(currentUserMemberPredicate, Predicates.contains("name", "test-ws")),
-                4, 0,
+                4,
+                0,
                 workspacesIds.take(4),
                 10
             )
             assertQuery(
                 Predicates.and(currentUserMemberPredicate, Predicates.contains("name", "test-ws")),
-                10, 10,
+                10,
+                10,
                 emptyList(),
                 10
             )

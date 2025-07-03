@@ -128,9 +128,10 @@ class WorkspaceProxyDao(
 
         val personalWsRecord = getUserWorkspaceRecord(AuthContext.getCurrentUser())
         if (!predicateService.isMatch(
-            personalWsRecord,
-            query.query.getAs(Predicate::class.java) ?: Predicates.alwaysTrue()
-        )) {
+                personalWsRecord,
+                query.query.getAs(Predicate::class.java) ?: Predicates.alwaysTrue()
+            )
+        ) {
             return super.queryRecords(query.build())
         }
 
