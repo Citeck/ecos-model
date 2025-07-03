@@ -3,6 +3,7 @@ package ru.citeck.ecos.model.domain.admin.groupaction
 import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.groupactions.GroupActionsService
+import ru.citeck.ecos.model.domain.admin.groupaction.execution.UpdateCalculatedAttsAdminAction
 import ru.citeck.ecos.model.domain.admin.groupaction.execution.UpdatePermissionsAdminAction
 import ru.citeck.ecos.model.domain.admin.groupaction.execution.UpdateWorkspaceAdminAction
 import ru.citeck.ecos.model.domain.admin.groupaction.values.AdminActionRecordsOfTypeValues
@@ -26,6 +27,9 @@ class GroupActionsConfigurator(
         )
         this.groupActionsService.registerExecutionFactory(
             UpdateWorkspaceAdminAction(recordsService)
+        )
+        this.groupActionsService.registerExecutionFactory(
+            UpdateCalculatedAttsAdminAction(recordsService)
         )
     }
 }

@@ -37,7 +37,7 @@ class CommentExtractor {
             val elements = fragment.getElementsByTag(tag)
 
             for (element in elements) {
-                val src = element.attribute(attribute).value
+                val src = element.attribute(attribute)?.value ?: ""
                 if (!src.startsWith("/gateway/")) {
                     continue
                 }

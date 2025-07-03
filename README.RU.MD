@@ -32,7 +32,7 @@
 
 Для сборки приложения в production-режиме выполните:
 ```
-./mvnw -Pprod clean package jib:dockerBuild -Djib.docker.image.tag=custom 
+./mvnw -Pprod clean package jib:dockerBuild -Djib.docker.image.tag=custom
 ```
 
 Чтобы убедиться, что всё работает, остановите оригинальный контейнер ecos-model и запустите ecos-model:custom вместо него.

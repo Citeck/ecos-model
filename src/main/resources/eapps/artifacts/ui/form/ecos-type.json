@@ -1932,6 +1932,15 @@
                             "type": "ecosSelect",
                             "input": true,
                             "row": "0-1"
+                          },
+                          {
+                            "key": "id",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "hidden",
+                            "input": true,
+                            "row": "0-2",
+                            "reorder": false
                           }
                         ],
                         "tab": 4
