@@ -29,6 +29,7 @@ import ru.citeck.ecos.model.domain.authorities.service.ExtUsersService
 import ru.citeck.ecos.model.domain.authorities.service.PersonEventsService
 import ru.citeck.ecos.model.domain.authorities.service.PrivateGroupsService
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
+import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.permissions.service.RecordPermsService
 import ru.citeck.ecos.model.lib.role.service.RoleService
@@ -42,6 +43,8 @@ import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.RecordsDao
 import ru.citeck.ecos.records3.record.dao.impl.proxy.MutateProxyProcessor
 import ru.citeck.ecos.records3.record.dao.impl.proxy.ProxyProcContext
+import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
+import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes
 import ru.citeck.ecos.txn.lib.TxnContext
 import ru.citeck.ecos.webapp.api.authority.EcosAuthoritiesApi
 import ru.citeck.ecos.webapp.api.entity.EntityRef
@@ -73,7 +76,9 @@ class PersonsConfiguration(
     }
 
     @Bean
-    fun personDao(): RecordsDao {
+    fun personDao(
+        workspaceService: EmodelWorkspaceService
+    ): RecordsDao {
         val recordsDao = object : GroupsPersonsRecordsDao(
             "person",
             AuthorityType.PERSON,
@@ -103,6 +108,40 @@ class PersonsConfiguration(
                 }
             }
         ) {
+            override fun queryRecords(recsQuery: RecordsQuery): RecsQueryRes<*>? {
+                val isQueryWithWorkspaces = recsQuery.workspaces.isNotEmpty()
+                var query = recsQuery
+                if (isQueryWithWorkspaces) {
+                    query = recsQuery.copy {
+                        withWorkspaces(null)
+                    }
+                }
+                val queryRes = super.queryRecords(query)
+
+                if (isQueryWithWorkspaces && queryRes != null) {
+                    val allUsersFromWorkspaces = workspaceService.getAllUsersFromWorkspaces(recsQuery.workspaces).map {
+                        it.withoutAppName()
+                    }
+                    val records = queryRes.getRecords().map {
+                        serviceFactory.attValuesConverter.toAttValue(it)?.id ?: EntityRef.EMPTY
+                    }.filter { recordId ->
+                        if (recordId is EntityRef) {
+                            allUsersFromWorkspaces.contains(recordId)
+                        } else {
+                            val recordRef = EntityRef.valueOf(recordId.toString())
+                            allUsersFromWorkspaces.contains(recordRef)
+                        }
+                    }
+
+                    val queryResWithWorkspaces = RecsQueryRes<Any>()
+                    queryResWithWorkspaces.setHasMore(queryRes.getHasMore())
+                    queryResWithWorkspaces.setRecords(records)
+                    queryResWithWorkspaces.setTotalCount(records.size.toLong())
+                    return queryResWithWorkspaces
+                }
+                return queryRes
+            }
+
             override fun setRecordsServiceFactory(serviceFactory: RecordsServiceFactory) {
                 serviceFactory.recordsResolver.registerVirtualRecord(
                     EntityRef.create(AuthorityType.PERSON.sourceId, AuthUser.SYSTEM),

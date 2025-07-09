@@ -7,6 +7,7 @@ import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthGroup
+import ru.citeck.ecos.model.domain.authorities.constant.AuthorityGroupConstants
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
 import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao.Companion.WORKSPACE_ATT_MEMBER_AUTHORITY
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
@@ -195,6 +196,32 @@ class EmodelWorkspaceService(
             result.add(it)
         }
         return UserWorkspaces(result, totalCount)
+    }
+
+    fun getAllUsersFromWorkspaces(workspaces: List<String>): Set<EntityRef> {
+        val allUsersFromWorkspaces = mutableSetOf<EntityRef>()
+        val groups = mutableSetOf<EntityRef>()
+        workspaces.forEach { workspace ->
+            val workspaceRef = EntityRef.create(WorkspaceDesc.SOURCE_ID, workspace)
+            val workspaceData = recordsService.getAtts(workspaceRef, WorkspaceMembersAtts::class.java)
+            if (!workspaceData.notExists) {
+                workspaceData.workspaceMembers?.forEach {
+                    it.authorities?.forEach { authority ->
+                        if (authority.getSourceId() == AuthorityGroupConstants.TYPE_ID) {
+                            groups.add(authority)
+                        } else {
+                            allUsersFromWorkspaces.add(authority)
+                        }
+                    }
+                }
+            }
+        }
+
+        val usersFromGroup = recordsService.getAtts(groups, GroupInfo::class.java)
+            .map { it.containedUsers }
+            .flatten()
+        allUsersFromWorkspaces.addAll(usersFromGroup)
+        return allUsersFromWorkspaces
     }
 
     fun getWorkspace(workspaceId: String): Workspace {
@@ -397,5 +424,10 @@ class EmodelWorkspaceService(
         @AttName(WorkspaceDesc.ATT_WORKSPACE_MEMBERS + "[]?id")
         val currentMembers: List<EntityRef>?,
         val defaultWorkspaceMembers: List<WorkspaceMember>?
+    )
+
+    private data class GroupInfo(
+        @AttName("containedUsers")
+        val containedUsers: List<EntityRef> = emptyList()
     )
 }
