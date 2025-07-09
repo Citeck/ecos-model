@@ -30,9 +30,6 @@
           "en": "Text"
         },
         "key": "text",
-        "validate": {
-          "required": true
-        },
         "editor": "lexical",
         "clearOnHide": false,
         "defaultValue": "",
