@@ -47,13 +47,29 @@ class CommentsRecordsProxy(
     override fun mutate(records: List<LocalRecordAtts>): List<String> {
         for (record in records) {
             val text = record.getAtt(CommentDesc.ATT_TEXT).asText()
-            if (text.isNotBlank()) {
+            val hasDocs = isMutAttsHasDocs(record)
+            if (text.isNotBlank() || hasDocs) {
                 val commentAtts = getCommentAtts(record)
-                val commentText = createDocumentAttachmentsFromTempFiles(text, commentAtts)
-                record.setAtt(CommentDesc.ATT_TEXT, CommentValidator.removeVulnerabilities(commentText))
+                if (text.isNotBlank()) {
+                    val commentText = createDocumentAttachmentsFromTempFiles(text, commentAtts)
+                    record.setAtt(CommentDesc.ATT_TEXT, CommentValidator.removeVulnerabilities(commentText))
+                }
+                if (hasDocs && commentAtts.record.isNotEmpty()) {
+                    recordsService.mutateAtt(
+                        commentAtts.record,
+                        CommentDesc.ATT_ADD_DOCUMENTS,
+                        record.getAtt(CommentDesc.ATT_ADD_DOCUMENTS)
+                    )
+                    record.attributes.remove(CommentDesc.ATT_ADD_DOCUMENTS)
+                }
             }
         }
         return super.mutate(records)
+    }
+
+    private fun isMutAttsHasDocs(record: LocalRecordAtts): Boolean {
+        val docs = record.getAtt(CommentDesc.ATT_ADD_DOCUMENTS)
+        return docs.isArray() && docs.isNotEmpty() || docs.isTextual() && docs.asText().isNotBlank()
     }
 
     private fun getCommentAtts(recordAtts: LocalRecordAtts): CommentAtts {

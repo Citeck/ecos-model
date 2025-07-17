@@ -1,0 +1,32 @@
+---
+id: user-workspaces
+name:
+  ru: Рабочие пространства пользователя
+  en: User Workspaces
+
+system: true
+editable: false
+
+typeRef: 'emodel/type@workspace'
+
+predicate: { t: eq, a: isCurrentUserMember, v: true }
+
+columns:
+  - id: id
+    name:
+      ru: Идентификатор
+      en: Identifier
+  - id: name
+    name:
+      ru: Имя
+      en: Name
+  - id: description
+    name:
+      ru: Описание
+      en: Description
+  - id: visibility
+    name:
+      ru: Видимость
+      en: Visibility
+    editor:
+      type: select
