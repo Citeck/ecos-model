@@ -1,9 +1,14 @@
 package ru.citeck.ecos.model.service.keycloak
 
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.annotation.PostConstruct
 import lombok.extern.slf4j.Slf4j
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder
+import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider
 import org.keycloak.admin.client.Keycloak
+import org.keycloak.admin.client.KeycloakBuilder
 import org.keycloak.admin.client.resource.RealmResource
 import org.keycloak.representations.idm.CredentialRepresentation
 import org.keycloak.representations.idm.UserRepresentation
@@ -14,7 +19,6 @@ import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.webapp.lib.env.EcosWebAppEnvironment
-import java.util.*
 
 @Slf4j
 @Service
@@ -38,16 +42,28 @@ class KeycloakUserService(
     fun init() {
         props = ecosEnv.getValue("ecos.integrations.keycloakAdmin", KeycloakAdminProps::class.java)
         if (props.enabled) {
-            keycloak = Keycloak.getInstance(
-                props.url,
-                "master",
-                props.user,
-                props.password,
-                "admin-cli"
-            )
+
+            val jacksonProvider = CustomResteasyJackson2Provider()
+            // Disable this feature to let the old client library work with newer Keycloak versions
+            jacksonProvider.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+
+            val client = ResteasyClientBuilder()
+                .register(jacksonProvider, 100)
+                .build()
+
+            keycloak = KeycloakBuilder.builder()
+                .serverUrl(props.url)
+                .realm("master")
+                .username(props.user)
+                .password(props.password)
+                .clientId("admin-cli")
+                .resteasyClient(client)
+                .build()
+
             realmResource = keycloak.realm(defaultRealm)
+
         } else {
-            log.info("Keycloak integration is disabled. Skipping Keycloak initialization.")
+            log.info { "Keycloak integration is disabled. Skipping Keycloak initialization." }
         }
     }
 
@@ -167,4 +183,11 @@ class KeycloakUserService(
         val password: String,
         val enabled: Boolean
     )
+
+    /**
+     * ResteasyClient registers its own ResteasyJackson2Provider by default,
+     * so our custom provider gets ignored.
+     * To apply a custom ObjectMapper configuration, we create a dedicated subclass.
+     */
+    private class CustomResteasyJackson2Provider : ResteasyJackson2Provider()
 }
