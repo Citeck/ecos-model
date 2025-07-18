@@ -34,10 +34,12 @@ class ActivityTypeRecordDao(
 
         val activities = recordsService.getAtts(activityIds, ActivityDto::class.java)
         val query = recsQuery.getQueryOrNull(QueryDto::class.java)
-        if (query?.typeRef != null && !query.typeRef.isEmpty()) {
+        val typeRef = query?.typeRef ?: typeRefService.getTypeRef(query?.recordRef)
+        if (typeRef.isNotEmpty()) {
             val result = activities.filter { activity ->
                 val config = activity.config
-                config == null || config.availableTypes.isEmpty() || config.availableTypes.contains(query.typeRef)
+                config == null || config.availableTypes.isEmpty() ||
+                    config.availableTypes.find { typeRefService.isSubType(typeRef, it) } != null
             }.map { it.id }
             return result
         }
@@ -45,6 +47,7 @@ class ActivityTypeRecordDao(
     }
 
     private data class QueryDto(
+        val recordRef: EntityRef? = null,
         val typeRef: EntityRef? = null
     )
 
