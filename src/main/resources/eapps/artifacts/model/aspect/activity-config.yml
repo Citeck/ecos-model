@@ -1,0 +1,7 @@
+---
+id: activity-config
+name:
+  ru: Конфигурация активности
+  en: Activity config
+
+configFormRef: uiserv/form@activity-config-form
