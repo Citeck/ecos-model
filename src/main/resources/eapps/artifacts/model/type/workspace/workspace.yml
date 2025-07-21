@@ -54,6 +54,14 @@ model:
       config:
         typeRef: emodel/type@workspace-member
         child: true
+    - id: nestedWorkspaces
+      name:
+        ru: Вложенные рабочие области
+        en: Nested workspaces
+      type: ASSOC
+      multiple: true
+      config:
+        typeRef: emodel/type@workspace
     - id: defaultWorkspaceMembers
       name:
         ru: Участники рабочего пространства по умолчанию
@@ -102,6 +110,11 @@ model:
         ru: Системная рабочая область
         en: System workspace
       type: BOOLEAN
+    - id: workspaceManagedBy
+      name:
+        ru: Управляется через
+        en: Managed by
+      type: ASSOC
 aspects:
   - ref: emodel/aspect@has-ecos-activities
     config:

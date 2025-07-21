@@ -22,6 +22,7 @@ object WorkspaceDesc {
     const val ATT_IS_CURRENT_USER_MEMBER = "isCurrentUserMember"
     const val ATT_IS_CURRENT_USER_DIRECT_MEMBER = "isCurrentUserDirectMember"
     const val ATT_IS_CURRENT_USER_LAST_MANAGER = "isCurrentUserLastManager"
+    const val ATT_NESTED_WORKSPACES = "nestedWorkspaces"
 
     const val CTX_ATT_DEPLOY_WORKSPACE = "deployWorkspace"
     const val CTX_ATT_DEPLOY_WORKSPACE_BOOL = "\$$CTX_ATT_DEPLOY_WORKSPACE?bool"

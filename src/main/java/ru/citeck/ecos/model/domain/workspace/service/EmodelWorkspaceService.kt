@@ -61,6 +61,33 @@ class EmodelWorkspaceService(
         return authoritiesRefs
     }
 
+    /**
+     * Returns nested workspaces for the given list of workspaces.
+     *
+     * The returned list has the same size as the input.
+     * Each element at index `i` contains the nested workspaces
+     * for the workspace at index `i` in the input.
+     *
+     * @param workspaces the list of workspace identifiers to get nested workspaces for
+     * @return a list where each element contains the nested workspaces for the corresponding input workspace
+     */
+    fun getNestedWorkspaces(workspaces: Collection<String>): List<Set<String>> {
+        if (workspaces.isEmpty()) {
+            return emptyList()
+        }
+        val results = ArrayList<MutableSet<String>>()
+        for (workspaceId in workspaces) {
+            val nestedForWorkspace = LinkedHashSet(
+                recordsService.getAtt(
+                    WorkspaceDesc.getRef(workspaceId),
+                    WorkspaceDesc.ATT_NESTED_WORKSPACES + "[]?localId"
+                ).toStrList()
+            )
+            results.add(nestedForWorkspace)
+        }
+        return results
+    }
+
     fun isUserManagerOf(user: String, workspace: String): Boolean {
 
         if (workspace.startsWith(USER_WORKSPACE_PREFIX)) {
@@ -130,9 +157,11 @@ class EmodelWorkspaceService(
             WsMembershipType.ALL -> {
                 Predicates.inVals(WORKSPACE_ATT_MEMBER_AUTHORITY, getUserAuthoritiesRefs(userRef, true))
             }
+
             WsMembershipType.INDIRECT -> {
                 Predicates.inVals(WORKSPACE_ATT_MEMBER_AUTHORITY, getUserAuthoritiesRefs(userRef, false))
             }
+
             WsMembershipType.DIRECT -> {
                 Predicates.and(
                     Predicates.eq(WORKSPACE_ATT_MEMBER_AUTHORITY, userRef),

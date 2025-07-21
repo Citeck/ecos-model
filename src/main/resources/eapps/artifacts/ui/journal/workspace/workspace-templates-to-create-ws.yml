@@ -1,0 +1,21 @@
+---
+id: workspace-templates-to-create-ws
+name:
+  ru: Шаблоны рабочих пространств
+  en: Workspace template
+typeRef: emodel/type@workspace-template
+editable: false
+predicate:
+  t: not-eq
+  a: system
+  v: true
+columns:
+  - id: id
+    name:
+      ru: Идентификатор
+      en: Identifier
+  - id: name
+    name:
+      ru: Имя
+      en: Name
+    type: TEXT

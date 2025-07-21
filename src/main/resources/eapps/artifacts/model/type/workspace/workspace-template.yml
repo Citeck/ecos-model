@@ -41,6 +41,12 @@ model:
         ru: Артефакты
         en: Artifacts
       type: BINARY
+  systemAttributes:
+    - id: system
+      name:
+        ru: Системный шаблон
+        en: System template
+      type: BOOLEAN
 aspects:
   - ref: emodel/aspect@history-config
     config:

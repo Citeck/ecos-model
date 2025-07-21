@@ -216,7 +216,7 @@
                             },
                             "key": "templateRef",
                             "modalTitle": "",
-                            "journalId": "workspace-templates",
+                            "journalId": "workspace-templates-to-create-ws",
                             "queryData": "",
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
@@ -289,6 +289,30 @@
                             "inputMasks": [
                               {}
                             ]
+                          },
+                          {
+                            "label": {
+                              "ru": "Вложенные рабочие области",
+                              "en": "Nested workspaces"
+                            },
+                            "key": "nestedWorkspaces",
+                            "multiple": true,
+                            "modalTitle": "",
+                            "linkFormatter": "",
+                            "journalId": "workspaces-journal",
+                            "source": {
+                              "type": "journal",
+                              "custom": {
+                                "columns": []
+                              },
+                              "customValues": "",
+                              "viewMode": "default"
+                            },
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "selectJournal",
+                            "input": true,
+                            "queryData": ""
                           }
                         ],
                         "type": "column",

@@ -17,6 +17,10 @@ class CustomWorkspaceApi(
         modelServiceFactory.setWorkspaceApi(this)
     }
 
+    override fun getNestedWorkspaces(workspaces: Collection<String>): List<Set<String>> {
+        return workspaceService.getNestedWorkspaces(workspaces)
+    }
+
     override fun getUserWorkspaces(user: String, membershipType: WsMembershipType): Set<String> {
         return workspaceService.getUserWorkspaces(user, membershipType).workspaces
     }
