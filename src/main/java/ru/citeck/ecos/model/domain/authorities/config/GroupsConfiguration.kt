@@ -13,6 +13,7 @@ import ru.citeck.ecos.model.domain.authorities.constant.AuthorityConstants
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
 import ru.citeck.ecos.model.domain.authorities.service.PrivateGroupsService
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
+import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.records3.RecordsService
@@ -28,7 +29,8 @@ class GroupsConfiguration(
     private val authorityService: AuthorityService,
     private val recordsService: RecordsService,
     private val privateGroupsService: PrivateGroupsService,
-    private val authoritiesApi: EcosAuthoritiesApi
+    private val authoritiesApi: EcosAuthoritiesApi,
+    private val workspaceService: EmodelWorkspaceService
 ) {
 
     @Bean
@@ -39,7 +41,8 @@ class GroupsConfiguration(
             authoritiesSyncService,
             authorityService,
             privateGroupsService,
-            authoritiesApi
+            authoritiesApi,
+            workspaceService
         )
     }
 
