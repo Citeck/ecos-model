@@ -11,6 +11,7 @@ import ru.citeck.ecos.model.domain.authorities.constant.PersonConstants
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
 import ru.citeck.ecos.model.domain.authorities.service.PrivateGroupsService
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
+import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.predicate.PredicateService
@@ -37,6 +38,7 @@ open class GroupsPersonsRecordsDao(
     private val authorityService: AuthorityService,
     private val privateGroupsService: PrivateGroupsService,
     private val authoritiesApi: EcosAuthoritiesApi,
+    private val workspaceService: EmodelWorkspaceService,
     proxyProcessor: ProxyProcessor? = null
 ) : RecordsDaoProxy(id, "$id-repo", proxyProcessor), RecordsMutateWithAnyResDao {
 
@@ -84,6 +86,9 @@ open class GroupsPersonsRecordsDao(
         if (authConditions != Predicates.alwaysTrue()) {
             predicate = AndPredicate.of(predicate, authConditions)
         }
+
+        predicate = mapWorkspacePredicate(predicate)
+
         predicate = PredicateUtils.mapValuePredicates(predicate) { pred ->
 
             var result: Predicate? = if (pred.getType() == ValuePredicate.Type.CONTAINS &&
@@ -161,6 +166,48 @@ open class GroupsPersonsRecordsDao(
             )
         }
         return predicate
+    }
+
+    private fun mapWorkspacePredicate(predicate: Predicate): Predicate {
+        return PredicateUtils.mapValuePredicates(predicate) { pred ->
+            if (pred.getAttribute() == RecordConstants.ATT_WORKSPACE &&
+                pred.getType() == ValuePredicate.Type.EQ
+            ) {
+                val workspace = pred.getValue().asText()
+                val workspaceUsers = mutableSetOf<EntityRef>()
+                val workspaceGroups = mutableSetOf<EntityRef>()
+                val authorities = workspaceService.getWorkspaceAuthorities(workspace)
+                authorities.forEach { authority ->
+                    if (authority.getSourceId() == AuthorityGroupConstants.TYPE_ID) {
+                        if (authority.getLocalId() == AuthorityGroupConstants.EVERYONE_GROUP) {
+                            return@mapValuePredicates null
+                        }
+                        workspaceGroups.add(authority)
+                    } else {
+                        workspaceUsers.add(authority)
+                    }
+                }
+
+                val newPredicate = OrPredicate()
+                if (workspaceGroups.isNotEmpty()) {
+                    val groupPredicate = ValuePredicate.contains(ATT_AUTHORITY_GROUPS_FULL, workspaceGroups)
+                    newPredicate.addPredicate(groupPredicate)
+                }
+                if (authorityType == AuthorityType.PERSON && workspaceUsers.isNotEmpty()) {
+                    val userPredicate =
+                        Predicates.`in`(RecordConstants.ATT_ID, workspaceUsers.map { it.getLocalId() })
+                    newPredicate.addPredicate(userPredicate)
+                }
+
+                if (newPredicate.getPredicates().isEmpty()) {
+                    null
+                } else {
+                    newPredicate
+                }
+            } else {
+                pred
+            }
+        } ?: Predicates.alwaysTrue()
     }
 
     private fun preProcessPersonSortBy(sortBy: SortBy): SortBy {

@@ -226,6 +226,16 @@ class EmodelWorkspaceService(
         return UserWorkspaces(result, totalCount)
     }
 
+    fun getWorkspaceAuthorities(workspace: String): Set<EntityRef> {
+        val workspaceRef = EntityRef.create(WorkspaceDesc.SOURCE_ID, workspace)
+        val workspaceData = recordsService.getAtts(workspaceRef, WorkspaceMembersAtts::class.java)
+        if (workspaceData.notExists) {
+            return emptySet()
+        }
+
+        return workspaceData.workspaceMembers?.flatMapTo(HashSet()) { it.authorities ?: emptyList() } ?: emptySet()
+    }
+
     fun getWorkspace(workspaceId: String): Workspace {
         return getWorkspace(WorkspaceDesc.getRef(workspaceId))
     }

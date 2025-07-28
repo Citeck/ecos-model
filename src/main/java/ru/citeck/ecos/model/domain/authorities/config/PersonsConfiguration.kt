@@ -29,6 +29,7 @@ import ru.citeck.ecos.model.domain.authorities.service.ExtUsersService
 import ru.citeck.ecos.model.domain.authorities.service.PersonEventsService
 import ru.citeck.ecos.model.domain.authorities.service.PrivateGroupsService
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
+import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.permissions.service.RecordPermsService
 import ru.citeck.ecos.model.lib.role.service.RoleService
@@ -59,7 +60,8 @@ class PersonsConfiguration(
     private val authoritiesSyncService: AuthoritiesSyncService,
     private val keycloakUserService: KeycloakUserService,
     private val privateGroupsService: PrivateGroupsService,
-    private val authoritiesApi: EcosAuthoritiesApi
+    private val authoritiesApi: EcosAuthoritiesApi,
+    private val workspaceService: EmodelWorkspaceService
 ) {
 
     companion object {
@@ -81,6 +83,7 @@ class PersonsConfiguration(
             authorityService,
             privateGroupsService,
             authoritiesApi,
+            workspaceService,
             object : MutateProxyProcessor {
 
                 override fun mutatePreProcess(
