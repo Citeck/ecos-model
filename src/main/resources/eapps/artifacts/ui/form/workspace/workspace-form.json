@@ -20,6 +20,26 @@
         "components": [
           {
             "label": {
+              "ru": "HTML"
+            },
+            "key": "html",
+            "className": "",
+            "content": {
+              "ru": "<div style=\"padding-left:16px\">\n<span>Следующие поля формы заблокированы, так как управляются извне:\n<b>{{data.managedByInfo.managedAttsDisp}}</b>\n</span>\n<p>\n<span>Чтобы отредактировать эти поля, перейдите по ссылке:</span>\n<a href=\"{{data.managedByInfo.urlToEditManagedAtts}}\">{{data.managedByInfo.urlToEditManagedAttsDisp}}</a>\n</p>\n</div>",
+              "en": "<div style=\"padding-left:16px\">\n<span>The following form fields are locked because they are managed externally:\n<b>{{data.managedByInfo.managedAttsDisp}}</b>\n</span>\n<p>\n<span>To edit the locked fields, please follow this link:</span>\n<a href=\"{{data.managedByInfo.urlToEditManagedAtts}}\">{{data.managedByInfo.urlToEditManagedAttsDisp}}</a>\n</p>\n</div>"
+            },
+            "refreshOnChange": true,
+            "refreshOn": [
+              "managedByInfo"
+            ],
+            "optionalWhenDisabled": false,
+            "customConditional": "show = !!_.get(data, 'managedByInfo.managedAttsDisp');",
+            "type": "htmlelement",
+            "input": false,
+            "reorder": false
+          },
+          {
+            "label": {
               "ru": "Tabs"
             },
             "key": "tabs",
@@ -145,6 +165,41 @@
                             "optionalWhenDisabled": false,
                             "type": "tableForm",
                             "input": true
+                          },
+                          {
+                            "label": {
+                              "ru": "workspaceManagedBy"
+                            },
+                            "key": "workspaceManagedBy",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "hidden",
+                            "input": true,
+                            "reorder": false
+                          },
+                          {
+                            "label": "ManagedByInfo",
+                            "source": {
+                              "type": "custom",
+                              "custom": {
+                                "syncData": "value = {\n  \"workspaceManagedBy\": data.workspaceManagedBy\n};",
+                                "asyncData": "if (!data.workspaceManagedBy) {\n    value = {}\n} else {\n    value = Records.get(data.workspaceManagedBy).load(\n        {\n            \"typeId\": \"_type?localId\",\n            \"journalId\": \"_type.journalRef?localId\",\n            \"journalDisp\": \"_type.journalRef?disp\",\n            \"disp\": \"?disp!_type.name\"\n        },\n        true\n    ).then(managedByAtts => {\n        const managedAtts = [];\n        if (managedByAtts.typeId === \"ept-project\") {\n            managedAtts.push(\"name\");\n            managedAtts.push(\"nestedWorkspaces\");\n        }\n        \n        const managedAttsDisp = managedAtts.map(att => {\n          let component = util.getComponent(form.components, att) || {};\n          if (component.label) {\n            return Citeck.helpers.getMLValue(component.label);\n          } else {\n            return att;\n          }\n        }).join(\", \");\n        \n        return {\n            dispOfManager: managedByAtts.disp,\n            managedAtts,\n            managedAttsDisp,\n            urlToEditManagedAtts: \"/v2/journals?journalId=\" + managedByAtts.journalId,\n            urlToEditManagedAttsDisp: managedByAtts.journalDisp || 'Journal'\n          \n        }\n    });\n}"
+                              },
+                              "forceLoad": false
+                            },
+                            "update": {
+                              "type": "once"
+                            },
+                            "refreshOn": [
+                              {
+                                "label": "workspaceManagedBy",
+                                "value": "workspaceManagedBy"
+                              }
+                            ],
+                            "key": "managedByInfo",
+                            "type": "asyncData",
+                            "input": true,
+                            "triggerEventOnChange": false
                           }
                         ],
                         "type": "column",
@@ -167,10 +222,34 @@
                             "validate": {
                               "required": true
                             },
-                            "refreshOn": [],
+                            "refreshOn": [
+                              "managedByInfo"
+                            ],
                             "optionalWhenDisabled": false,
+                            "logic": [
+                              {
+                                "name": "disable-when-protected",
+                                "trigger": {
+                                  "type": "javascript",
+                                  "javascript": "result = _.get(data, 'managedByInfo.managedAtts', []).indexOf('name') !== -1;"
+                                },
+                                "actions": [
+                                  {
+                                    "name": "disable",
+                                    "type": "property",
+                                    "property": {
+                                      "label": "Disabled",
+                                      "value": "disabled",
+                                      "type": "boolean"
+                                    },
+                                    "state": "true"
+                                  }
+                                ]
+                              }
+                            ],
                             "type": "mlText",
-                            "input": true
+                            "input": true,
+                            "reorder": false
                           },
                           {
                             "label": {
@@ -305,14 +384,37 @@
                               "custom": {
                                 "columns": []
                               },
-                              "customValues": "",
-                              "viewMode": "default"
+                              "customValues": ""
                             },
-                            "refreshOn": [],
+                            "queryData": "",
+                            "defaultValue": [],
+                            "refreshOn": [
+                              "managedByInfo"
+                            ],
                             "optionalWhenDisabled": false,
+                            "logic": [
+                              {
+                                "name": "disable-when-protected",
+                                "trigger": {
+                                  "type": "javascript",
+                                  "javascript": "result = _.get(data, 'managedByInfo.managedAtts', []).indexOf('nestedWorkspaces') !== -1;"
+                                },
+                                "actions": [
+                                  {
+                                    "name": "disable",
+                                    "type": "property",
+                                    "property": {
+                                      "label": "Disabled",
+                                      "value": "disabled",
+                                      "type": "boolean"
+                                    },
+                                    "state": "true"
+                                  }
+                                ]
+                              }
+                            ],
                             "type": "selectJournal",
-                            "input": true,
-                            "queryData": ""
+                            "input": true
                           }
                         ],
                         "type": "column",
@@ -334,18 +436,18 @@
                             "key": "icon",
                             "modalTitle": "",
                             "journalId": "icons",
-                            "source": {
-                              "type": "journal",
-                              "custom": {
-                                "columns": []
-                              },
-                              "customValues": []
-                            },
                             "queryData": "",
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
                             "type": "selectJournal",
-                            "input": true
+                            "input": true,
+                            "source": {
+                              "custom": {
+                                "columns": []
+                              },
+                              "type": "journal",
+                              "customValues": []
+                            }
                           }
                         ]
                       }
