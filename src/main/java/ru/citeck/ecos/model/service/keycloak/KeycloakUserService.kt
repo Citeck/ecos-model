@@ -68,7 +68,7 @@ class KeycloakUserService(
         val personRef = AuthorityType.PERSON.getRef(userName)
         val userAtts = recordsService.getAtts(personRef, KeycloakUserAttributes::class.java)
 
-        val users = realmResource.users().search(userName)
+        val users = realmResource.users().search(userName, true)
         if (users.isEmpty()) {
 
             val user = UserRepresentation()
@@ -110,7 +110,7 @@ class KeycloakUserService(
             throw IllegalStateException("Cannot delete user '$userName'. User does not have permissions.")
         }
 
-        val users = realmResource.users().search(userName)
+        val users = realmResource.users().search(userName, true)
         if (users.isNotEmpty()) {
             val userId = users[0].id
             realmResource.users().delete(userId)
@@ -132,7 +132,7 @@ class KeycloakUserService(
             )
         }
 
-        val users = realmResource.users().search(userName)
+        val users = realmResource.users().search(userName,true)
         if (users.isNotEmpty()) {
             val userToUpdate = users[0]
             val credential = CredentialRepresentation()
