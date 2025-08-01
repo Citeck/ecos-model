@@ -73,11 +73,12 @@ class WorkspaceRecordsListener(
         if (nestedWorkspacesIds.contains(workspaceId)) {
             error("The current workspace cannot be selected as a nested workspace.")
         }
-        val isCurrentWorkspaceNestedInOther = recordsService.query(RecordsQuery.create()
-            .withSourceId(WorkspaceDesc.SOURCE_ID)
-            .withQuery(ValuePredicate.contains(WorkspaceDesc.ATT_NESTED_WORKSPACES, WorkspaceDesc.getRef(workspaceId)))
-            .withMaxItems(1)
-            .build()
+        val isCurrentWorkspaceNestedInOther = recordsService.query(
+            RecordsQuery.create()
+                .withSourceId(WorkspaceDesc.SOURCE_ID)
+                .withQuery(ValuePredicate.contains(WorkspaceDesc.ATT_NESTED_WORKSPACES, WorkspaceDesc.getRef(workspaceId)))
+                .withMaxItems(1)
+                .build()
         ).getRecords().isNotEmpty()
         if (isCurrentWorkspaceNestedInOther) {
             error("The current workspace is already nested within another workspace. Deep nesting is not supported.")

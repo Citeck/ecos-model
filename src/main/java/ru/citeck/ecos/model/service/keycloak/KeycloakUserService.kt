@@ -1,7 +1,6 @@
 package ru.citeck.ecos.model.service.keycloak
 
 import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.annotation.PostConstruct
 import lombok.extern.slf4j.Slf4j
@@ -61,7 +60,6 @@ class KeycloakUserService(
                 .build()
 
             realmResource = keycloak.realm(defaultRealm)
-
         } else {
             log.info { "Keycloak integration is disabled. Skipping Keycloak initialization." }
         }
@@ -148,7 +146,7 @@ class KeycloakUserService(
             )
         }
 
-        val users = realmResource.users().search(userName,true)
+        val users = realmResource.users().search(userName, true)
         if (users.isNotEmpty()) {
             val userToUpdate = users[0]
             val credential = CredentialRepresentation()
