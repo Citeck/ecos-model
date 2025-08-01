@@ -36,7 +36,6 @@ model:
       name:
         ru: Текст публикации
         en: Publication text
-      mandatory: true
     - id: children
       name:
         ru: Дочерние публикации
