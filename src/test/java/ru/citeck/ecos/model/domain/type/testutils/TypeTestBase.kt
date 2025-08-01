@@ -84,7 +84,7 @@ open class TypeTestBase {
         artifactHandler = TypeArtifactHandler(typeService, webAppCtxMock)
         records = recordsServices.recordsService
 
-        val typesRegistryInitializer = TypesRegistryInitializer(typeService)
+        val typesRegistryInitializer = TypesRegistryInitializer(typeService, ecosAppsServiceFactory.localAppService)
         typesRegistryInitializer.setAspectsRegistry(
             EcosAspectsRegistry(
                 EcosRegistryProps.DEFAULT,

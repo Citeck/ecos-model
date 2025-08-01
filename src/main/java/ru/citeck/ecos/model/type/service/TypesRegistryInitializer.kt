@@ -113,7 +113,7 @@ class TypesRegistryInitializer(
             if (typeArtifact !is ObjectData) {
                 continue
             }
-            val typeDef = typeArtifact.getAs(TypeDef::class.java)?: continue
+            val typeDef = typeArtifact.getAs(TypeDef::class.java) ?: continue
             if (typeDef.id.isNotBlank()) {
                 result.add(typeDef)
             }
@@ -208,15 +208,8 @@ class TypesRegistryInitializer(
 
         override fun get(id: String): TypeDef? {
 
-            val typeFromRepo = typesService.getByIdOrNull(id)
-            val predefinedType = predefinedTypesInfo[id]
-
-            if (typeFromRepo == null) {
-                return predefinedType?.typeDef
-            }
-            if (predefinedType == null) {
-                return typeFromRepo
-            }
+            val typeFromRepo = typesService.getByIdOrNull(id) ?: return null
+            val predefinedType = predefinedTypesInfo[id] ?: return typeFromRepo
 
             // Add missing predefined attributes to the type model loaded from the database.
             // This is needed to protect against potential bugs when a new attribute is added
