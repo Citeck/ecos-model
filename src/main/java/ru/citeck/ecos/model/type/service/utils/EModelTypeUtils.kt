@@ -9,6 +9,14 @@ import java.util.zip.CRC32
 
 object EModelTypeUtils {
 
+    private val ABSTRACT_TYPES = setOf(
+        "base",
+        "user-base",
+        "case",
+        "data-list",
+        "authority"
+    )
+
     const val STORAGE_TYPE_EMODEL = "ECOS_MODEL"
     const val STORAGE_TYPE_ALFRESCO = "ALFRESCO"
     const val STORAGE_TYPE_DEFAULT = "DEFAULT"
@@ -23,6 +31,9 @@ object EModelTypeUtils {
 
     fun getEmodelSourceId(typeDef: TypeDef?): String {
         if (typeDef == null) {
+            return ""
+        }
+        if (ABSTRACT_TYPES.contains(typeDef.id)) {
             return ""
         }
         val srcId = typeDef.sourceId
