@@ -74,7 +74,7 @@ class WorkspacePermissions(
         return hasPermissionWithTxnCaching(
             PermsTxnKey(user, userAuthorities, workspace.id, "WRITE")
         ) {
-            val authorityNameByRoles = ArrayList<Pair<String, WorkspaceMemberRole>>()
+            val authorityNameByRoles = ArrayList<Pair<String, String>>()
             for (member in workspace.members) {
                 val authNames = ecosAuthoritiesApi.getAuthorityNames(member.authorities)
                 for (authName in authNames) {

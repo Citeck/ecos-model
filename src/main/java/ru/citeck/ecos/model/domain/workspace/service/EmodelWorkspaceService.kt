@@ -428,7 +428,7 @@ class EmodelWorkspaceService(
     ) {
         class MemberInfo(
             val authorities: List<EntityRef>?,
-            val memberRole: WorkspaceMemberRole?
+            val memberRole: String?
         )
     }
 
