@@ -7,8 +7,11 @@ import ru.citeck.ecos.context.lib.i18n.I18nContext
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceMemberDesc
 import ru.citeck.ecos.model.lib.ModelServiceFactory
 import ru.citeck.ecos.model.lib.attributes.computed.ComputedAttsService
+import ru.citeck.ecos.records2.predicate.model.Predicate
+import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.AbstractRecordsDao
+import ru.citeck.ecos.records3.record.dao.atts.RecordAttsDao
 import ru.citeck.ecos.records3.record.dao.query.RecordsQueryDao
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.webapp.api.entity.EntityRef
@@ -16,13 +19,13 @@ import ru.citeck.ecos.webapp.lib.model.type.registry.EcosTypesRegistry
 import java.time.Instant
 
 @Component
-class AuthRoleDao(
+class AuthorityDao(
     private val typesRegistry: EcosTypesRegistry,
     modelServices: ModelServiceFactory
-) : RecordsQueryDao, AbstractRecordsDao() {
+) : RecordsQueryDao, RecordAttsDao, AbstractRecordsDao() {
 
     companion object {
-        const val SRC_ID = "auth-role"
+        const val SRC_ID = "authority"
     }
 
     private var defaultRoles = listOf(
@@ -40,9 +43,31 @@ class AuthRoleDao(
     private var wsMemberTypeChangedAt = Instant.EPOCH
     private var cachedWsRoles = emptyList<RoleValue>()
 
-    override fun queryRecords(recsQuery: RecordsQuery): Any? {
+    override fun getRecordAtts(recordId: String): Any? {
+        if (recordId.startsWith(AuthRole.PREFIX)) {
+            return getRoles().filter { it.value == recordId }
+        }
+        return null
+    }
 
-        val queryRes = ArrayList<RoleValue>(defaultRoles)
+    override fun queryRecords(recsQuery: RecordsQuery): Any? {
+        val query = recsQuery.getQuery(Query::class.java)
+        val queryRes = ArrayList<Any>()
+        if (query.types.contains(QueryAuthType.ROLE)) {
+            queryRes.addAll(getRoles())
+        }
+        return predicateService.filterAndSort(
+            queryRes,
+            recsQuery.getPredicate(),
+            recsQuery.sortBy,
+            recsQuery.page.skipCount,
+            recsQuery.page.maxItems
+        )
+    }
+
+    private fun getRoles(): List<RoleValue> {
+
+        val rolesRes = ArrayList<RoleValue>(defaultRoles)
 
         val memberType = typesRegistry.getValueWithMeta(WorkspaceMemberDesc.TYPE_ID)
 
@@ -58,19 +83,23 @@ class AuthRoleDao(
             }
             wsMemberTypeChangedAt = memberType.meta.modified
         }
-        queryRes.addAll(cachedWsRoles)
+        rolesRes.addAll(cachedWsRoles)
 
-        return predicateService.filterAndSort(
-            queryRes,
-            recsQuery.getPredicate(),
-            recsQuery.sortBy,
-            recsQuery.page.skipCount,
-            recsQuery.page.maxItems
-        )
+        return rolesRes
     }
 
     override fun getId(): String {
         return SRC_ID
+    }
+
+    private class Query(
+        val scope: String = "",
+        val types: List<QueryAuthType> = emptyList(),
+        val predicate: Predicate = Predicates.alwaysTrue()
+    )
+
+    enum class QueryAuthType {
+        PERSON, GROUP, ROLE
     }
 
     @Suppress("unused")

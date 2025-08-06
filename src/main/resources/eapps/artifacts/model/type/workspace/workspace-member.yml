@@ -31,18 +31,7 @@ model:
         ru: Роль
         en: Role
       mandatory: true
-      type: OPTIONS
-      config:
-        source: values
-        values:
-          - value: USER
-            label:
-              ru: Участник рабочего пространства
-              en: Workspace member
-          - value: MANAGER
-            label:
-              ru: Менеджер рабочего пространства
-              en: Workspace Manager
+      type: TEXT
   systemAttributes:
     # Legacy att. remove it after MakeWsMemberAuthoritiesAsMultipleAtt execution
     - id: authority
