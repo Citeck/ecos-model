@@ -326,6 +326,7 @@
                               "en": "Additional config form"
                             },
                             "key": "configFormRef",
+                            "hidden": true,
                             "modalTitle": "",
                             "journalId": "ecos-forms",
                             "refreshOn": [],

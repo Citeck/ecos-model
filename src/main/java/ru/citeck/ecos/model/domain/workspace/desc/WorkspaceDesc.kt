@@ -17,6 +17,7 @@ object WorkspaceDesc {
     const val ATT_DEFAULT_WORKSPACE_MEMBERS = "defaultWorkspaceMembers"
     const val ATT_TEMPLATE_REF = "templateRef"
     const val ATT_SYSTEM = "system"
+    const val ATT_SYSTEM_ID = "systemId"
     const val ATT_SYSTEM_BOOL = "$ATT_SYSTEM?bool"
     const val ATT_IS_CURRENT_USER_MANAGER = "isCurrentUserManager"
     const val ATT_IS_CURRENT_USER_MEMBER = "isCurrentUserMember"
