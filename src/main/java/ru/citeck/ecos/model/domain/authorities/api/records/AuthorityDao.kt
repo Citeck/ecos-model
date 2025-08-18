@@ -81,7 +81,9 @@ class AuthorityDao : RecordsQueryDao, RecordAttsDao, AbstractRecordsDao() {
     )
 
     enum class QueryAuthType {
-        PERSON, GROUP, ROLE
+        PERSON,
+        GROUP,
+        ROLE
     }
 
     @Suppress("unused")
