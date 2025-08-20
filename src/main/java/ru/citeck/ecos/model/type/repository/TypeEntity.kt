@@ -49,6 +49,7 @@ class TypeEntity : AbstractAuditingEntity() {
     var postCreateActionRef: String? = null
     var associations: String? = null
 
+    var workspace: String = ""
     @Enumerated(EnumType.STRING)
     var workspaceScope: WorkspaceScope? = null
     var defaultWorkspace: String? = null

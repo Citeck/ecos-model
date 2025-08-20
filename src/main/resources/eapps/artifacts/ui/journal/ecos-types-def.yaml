@@ -17,7 +17,7 @@ actions:
 
 columns:
 
-  - id: moduleId
+  - id: localIdInWorkspace
     name: { ru: Идентификатор, en: Id }
     type: text
 

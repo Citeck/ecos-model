@@ -11,7 +11,7 @@ import ru.citeck.ecos.webapp.lib.patch.annotaion.EcosPatch
 import java.util.concurrent.Callable
 
 @Component
-@EcosPatch("fill-system-id-for-workspaces", "2025-08-13T00:00:02Z")
+@EcosPatch("fill-system-id-for-workspaces", "2025-08-13T00:00:03Z")
 class FillSystemIdForWorkspaces(
     val recordsService: RecordsService,
     val workspaceRecsListener: WorkspaceRecordsListener

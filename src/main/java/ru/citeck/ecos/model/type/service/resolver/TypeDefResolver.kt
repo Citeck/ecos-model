@@ -118,6 +118,24 @@ class TypeDefResolver {
             resTypeDef.withDefaultStatus(resolvedParentDef.defaultStatus)
         }
 
+        if (resolvedParentDef.workspace.isNotEmpty()) {
+            resTypeDef.withWorkspace(resolvedParentDef.workspace)
+        }
+
+        if (resTypeDef.workspace.isNotEmpty()) {
+            resTypeDef.withSourceId("")
+            resTypeDef.withStorageType(EModelTypeUtils.STORAGE_TYPE_EMODEL)
+            resTypeDef.withWorkspaceScope(WorkspaceScope.PRIVATE)
+            resTypeDef.withDefaultWorkspace(resTypeDef.workspace)
+        } else {
+            if (resTypeDef.workspaceScope == WorkspaceScope.DEFAULT) {
+                resTypeDef.withWorkspaceScope(resolvedParentDef.workspaceScope)
+            }
+            if (resTypeDef.defaultWorkspace.isBlank()) {
+                resTypeDef.withDefaultWorkspace(resolvedParentDef.defaultWorkspace)
+            }
+        }
+
         when ((resTypeDef.storageType)) {
             EModelTypeUtils.STORAGE_TYPE_REFERENCE, // todo: set sourceId based on source ref
             EModelTypeUtils.STORAGE_TYPE_DEFAULT,
@@ -159,12 +177,7 @@ class TypeDefResolver {
         if (resTypeDef.journalRef.getLocalId() == DEFAULT_JOURNAL) {
             resTypeDef.withJournalRef(resTypeDef.journalRef.withLocalId("type$" + resTypeDef.id))
         }
-        if (resTypeDef.workspaceScope == WorkspaceScope.DEFAULT) {
-            resTypeDef.withWorkspaceScope(resolvedParentDef.workspaceScope)
-        }
-        if (resTypeDef.defaultWorkspace.isBlank()) {
-            resTypeDef.withDefaultWorkspace(resolvedParentDef.defaultWorkspace)
-        }
+
         val contentConfig = resTypeDef.contentConfig.copy()
         if (contentConfig.path.isBlank()) {
             contentConfig.withPath(resolvedParentDef.contentConfig.path)
