@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.commons.json.Json
+import ru.citeck.ecos.model.domain.workspace.utils.WorkspaceSystemIdUtils
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.model.lib.utils.ModelUtils
@@ -371,7 +372,12 @@ class TypesServiceImpl(
                 return typeDefBefore.entity
             }
         } else if (!VALID_ID_PATTERN.matcher(dto.id).matches()) {
-            error("Invalid type id: '${dto.id}'. Valid name pattern: '$VALID_ID_PATTERN_TXT'")
+            val idToError = if (dto.workspace.isNotBlank()) {
+                WorkspaceSystemIdUtils.removeWsPrefixFromId(dto.id)
+            } else {
+                dto.id
+            }
+            error("Invalid type id: '$idToError'. Valid name pattern: '$VALID_ID_PATTERN_TXT'")
         }
 
         var entity = typeConverter.toEntity(dto, existingEntity)

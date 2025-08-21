@@ -1350,7 +1350,7 @@
                     },
                     "key": "panel9",
                     "title": {
-                      "ru": "Настройка прав для тип данных",
+                      "ru": "Настройка прав для типа данных",
                       "en": "Type Permissions"
                     },
                     "collapsible": true,

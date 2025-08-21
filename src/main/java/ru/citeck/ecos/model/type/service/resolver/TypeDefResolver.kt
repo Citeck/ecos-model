@@ -163,7 +163,7 @@ class TypeDefResolver {
             resTypeDef.withMetaRecord(EntityRef.valueOf(resTypeDef.sourceId + "@"))
         }
         if (MLText.isEmpty(resTypeDef.name)) {
-            resTypeDef.withName(MLText(resTypeDef.id))
+            resTypeDef.withName(MLText(resTypeDef.id.substringAfterLast("/")))
         }
         if (EntityRef.isEmpty(resTypeDef.numTemplateRef) && resTypeDef.inheritNumTemplate) {
             resTypeDef.withNumTemplate(resolvedParentDef.numTemplateRef)

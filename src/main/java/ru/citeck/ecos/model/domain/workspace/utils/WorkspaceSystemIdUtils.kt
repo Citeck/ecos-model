@@ -16,7 +16,7 @@ object WorkspaceSystemIdUtils {
         if (!id.startsWith(SYS_ID_PREFIX_PREFIX)) {
             return id
         }
-        return id.substringAfter(SYS_ID_PREFIX_DELIM)
+        return id.substringAfterLast(SYS_ID_PREFIX_DELIM)
     }
 
     fun addWsPrefixToId(localId: String, wsSysId: String): String {
