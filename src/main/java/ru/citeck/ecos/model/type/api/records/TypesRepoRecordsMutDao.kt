@@ -3,6 +3,7 @@ package ru.citeck.ecos.model.type.api.records
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
+import ru.citeck.ecos.model.domain.workspace.utils.WorkspaceSystemIdUtils
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
 import ru.citeck.ecos.model.lib.procstages.dto.ProcStageDef
 import ru.citeck.ecos.model.lib.role.dto.RoleDef
@@ -73,7 +74,9 @@ class TypesRepoRecordsMutDao(
             if (localIdInWorkspace.isNotEmpty()) {
                 val systemId = emodelWorkspaceService?.getSystemId(recToMutate.workspace) ?: ""
                 if (systemId.isNotBlank()) {
-                    recToMutate.withId("ws_$systemId$$localIdInWorkspace")
+                    recToMutate.withId(WorkspaceSystemIdUtils.addWsPrefixToId(localIdInWorkspace, systemId))
+                } else {
+                    recToMutate.withId(localIdInWorkspace)
                 }
             }
         }

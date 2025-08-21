@@ -10,6 +10,7 @@ import ru.citeck.ecos.commons.json.YamlUtils
 import ru.citeck.ecos.events2.type.RecordEventsService
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
+import ru.citeck.ecos.model.domain.workspace.utils.WorkspaceSystemIdUtils
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.permissions.dto.PermissionType
 import ru.citeck.ecos.model.lib.type.dto.TypeAspectDef
@@ -138,12 +139,7 @@ class TypesRepoRecordsDao(
     ) {
 
         fun getLocalIdInWorkspace(): String {
-            val systemId = emodelWorkspaceService?.getSystemId(typeDef.workspace) ?: ""
-            var id = typeDef.id
-            if (systemId.isNotBlank() && id.startsWith("ws_")) {
-                id = id.replaceFirst("ws_$systemId$", "")
-            }
-            return id
+            return WorkspaceSystemIdUtils.removeWsPrefixFromId(typeDef.id)
         }
 
         fun getCustomAspects(): List<TypeAspectDef> {
