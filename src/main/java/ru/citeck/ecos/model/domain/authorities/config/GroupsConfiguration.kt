@@ -19,6 +19,7 @@ import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.ScalarType
 import ru.citeck.ecos.records3.record.dao.RecordsDao
+import ru.citeck.ecos.webapp.api.EcosWebAppApi
 import ru.citeck.ecos.webapp.api.authority.EcosAuthoritiesApi
 import javax.sql.DataSource
 
@@ -30,7 +31,8 @@ class GroupsConfiguration(
     private val recordsService: RecordsService,
     private val privateGroupsService: PrivateGroupsService,
     private val authoritiesApi: EcosAuthoritiesApi,
-    private val workspaceService: EmodelWorkspaceService
+    private val workspaceService: EmodelWorkspaceService,
+    private val webAppApi: EcosWebAppApi
 ) {
 
     @Bean
@@ -42,7 +44,8 @@ class GroupsConfiguration(
             authorityService,
             privateGroupsService,
             authoritiesApi,
-            workspaceService
+            workspaceService,
+            webAppApi
         )
     }
 

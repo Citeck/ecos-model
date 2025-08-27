@@ -44,6 +44,7 @@ import ru.citeck.ecos.records3.record.dao.RecordsDao
 import ru.citeck.ecos.records3.record.dao.impl.proxy.MutateProxyProcessor
 import ru.citeck.ecos.records3.record.dao.impl.proxy.ProxyProcContext
 import ru.citeck.ecos.txn.lib.TxnContext
+import ru.citeck.ecos.webapp.api.EcosWebAppApi
 import ru.citeck.ecos.webapp.api.authority.EcosAuthoritiesApi
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import javax.sql.DataSource
@@ -61,7 +62,8 @@ class PersonsConfiguration(
     private val keycloakUserService: KeycloakUserService,
     private val privateGroupsService: PrivateGroupsService,
     private val authoritiesApi: EcosAuthoritiesApi,
-    private val workspaceService: EmodelWorkspaceService
+    private val workspaceService: EmodelWorkspaceService,
+    private val ecosWebAppApi: EcosWebAppApi
 ) {
 
     companion object {
@@ -84,6 +86,7 @@ class PersonsConfiguration(
             privateGroupsService,
             authoritiesApi,
             workspaceService,
+            ecosWebAppApi,
             object : MutateProxyProcessor {
 
                 override fun mutatePreProcess(

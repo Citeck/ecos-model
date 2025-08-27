@@ -26,6 +26,7 @@ import ru.citeck.ecos.records3.record.dao.mutate.RecordsMutateWithAnyResDao
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes
+import ru.citeck.ecos.webapp.api.EcosWebAppApi
 import ru.citeck.ecos.webapp.api.authority.EcosAuthoritiesApi
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import java.time.Instant
@@ -39,6 +40,7 @@ open class GroupsPersonsRecordsDao(
     private val privateGroupsService: PrivateGroupsService,
     private val authoritiesApi: EcosAuthoritiesApi,
     private val workspaceService: EmodelWorkspaceService,
+    private val webAppApi: EcosWebAppApi,
     proxyProcessor: ProxyProcessor? = null
 ) : RecordsDaoProxy(id, "$id-repo", proxyProcessor), RecordsMutateWithAnyResDao {
 
@@ -299,7 +301,8 @@ open class GroupsPersonsRecordsDao(
             var isManaged = false
 
             val authorityId = if (!exists) {
-                if (!AuthoritiesSyncService.PROTECTED_FROM_SYNC_GROUPS.contains(id) &&
+                if (webAppApi.isReady() &&
+                    !AuthoritiesSyncService.PROTECTED_FROM_SYNC_GROUPS.contains(id) &&
                     syncService.isNewAuthoritiesManaged(authorityType)
                 ) {
 
