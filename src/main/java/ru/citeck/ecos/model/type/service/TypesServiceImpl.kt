@@ -5,10 +5,10 @@ import org.springframework.transaction.annotation.Transactional
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.commons.json.Json
-import ru.citeck.ecos.model.domain.workspace.utils.WorkspaceSystemIdUtils
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.model.lib.utils.ModelUtils
+import ru.citeck.ecos.model.lib.workspace.WsScopedArtifactUtils
 import ru.citeck.ecos.model.type.converter.TypeConverter
 import ru.citeck.ecos.model.type.repository.TypeEntity
 import ru.citeck.ecos.model.type.service.dao.TypeRepoDao
@@ -373,7 +373,7 @@ class TypesServiceImpl(
             }
         } else if (!VALID_ID_PATTERN.matcher(dto.id).matches()) {
             val idToError = if (dto.workspace.isNotBlank()) {
-                WorkspaceSystemIdUtils.removeWsPrefixFromId(dto.id)
+                WsScopedArtifactUtils.removeWsPrefixFromId(dto.id)
             } else {
                 dto.id
             }

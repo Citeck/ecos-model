@@ -533,7 +533,7 @@
                                         "name": "enable-for-admin",
                                         "trigger": {
                                           "type": "javascript",
-                                          "javascript": "result = _.get(data, 'currentUserAtts.isAdmin', false);"
+                                          "javascript": "result = instance.options.formMode === 'CREATE' && _.get(data, 'currentUserAtts.isAdmin', false);"
                                         },
                                         "actions": [
                                           {

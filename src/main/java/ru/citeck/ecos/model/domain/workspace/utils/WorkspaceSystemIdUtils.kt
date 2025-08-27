@@ -6,22 +6,8 @@ import kotlin.random.Random
 
 object WorkspaceSystemIdUtils {
 
-    private const val SYS_ID_PREFIX_PREFIX = "ws_"
-    private const val SYS_ID_PREFIX_DELIM = "/"
-
     private const val SRC_ID_SIZE_LIMIT = 25
     private val INVALID_CHARS_REGEX = "[^a-zA-Z0-9_-]".toRegex()
-
-    fun removeWsPrefixFromId(id: String): String {
-        if (!id.startsWith(SYS_ID_PREFIX_PREFIX)) {
-            return id
-        }
-        return id.substringAfterLast(SYS_ID_PREFIX_DELIM)
-    }
-
-    fun addWsPrefixToId(localId: String, wsSysId: String): String {
-        return SYS_ID_PREFIX_PREFIX + wsSysId  + SYS_ID_PREFIX_DELIM + localId
-    }
 
     fun createId(workspaceId: String, checkExisting: (String) -> Boolean): String {
 
