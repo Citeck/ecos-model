@@ -66,12 +66,15 @@ class WorkspaceRecordsListener(
         val workspaceRef = WorkspaceDesc.getRef(workspaceId)
 
         val workspaceSystemId = WorkspaceSystemIdUtils.createId(workspaceId) { wsIdToCheck ->
-            recordsService.query(RecordsQuery.create()
-                .withSourceId(WorkspaceDesc.SOURCE_ID)
-                .withQuery(Predicates.and(
-                    Predicates.notEq("id", workspaceId),
-                    Predicates.eq(WorkspaceDesc.ATT_SYSTEM_ID, wsIdToCheck)
-                )).withMaxItems(1).build()
+            recordsService.query(
+                RecordsQuery.create()
+                    .withSourceId(WorkspaceDesc.SOURCE_ID)
+                    .withQuery(
+                        Predicates.and(
+                            Predicates.notEq("id", workspaceId),
+                            Predicates.eq(WorkspaceDesc.ATT_SYSTEM_ID, wsIdToCheck)
+                        )
+                    ).withMaxItems(1).build()
             ).getRecords().isNotEmpty()
         }
 

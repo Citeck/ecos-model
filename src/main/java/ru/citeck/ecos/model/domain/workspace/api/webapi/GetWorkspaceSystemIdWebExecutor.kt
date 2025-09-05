@@ -1,7 +1,6 @@
 package ru.citeck.ecos.model.domain.workspace.api.webapi
 
 import org.springframework.stereotype.Component
-import ru.citeck.ecos.model.domain.workspace.service.CustomWorkspaceApi
 import ru.citeck.ecos.model.lib.workspace.WorkspaceService
 import ru.citeck.ecos.model.lib.workspace.api.WorkspaceWebApi
 import ru.citeck.ecos.webapp.api.web.executor.EcosWebExecutor

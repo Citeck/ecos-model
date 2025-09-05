@@ -26,7 +26,7 @@ import java.util.regex.Pattern
 class TypesServiceImpl(
     private val typeConverter: TypeConverter,
     private val typeRepoDao: TypeRepoDao,
-    private val workspaceService: WorkspaceService
+    private val workspaceService: WorkspaceService? = null
 ) : TypesService {
 
     companion object {
@@ -373,7 +373,7 @@ class TypesServiceImpl(
                 return typeDefBefore.entity
             }
         } else if (!VALID_ID_PATTERN.matcher(dto.id).matches()) {
-            val idToError = if (dto.workspace.isNotBlank()) {
+            val idToError = if (dto.workspace.isNotBlank() && workspaceService != null) {
                 workspaceService.removeWsPrefixFromId(dto.id)
             } else {
                 dto.id

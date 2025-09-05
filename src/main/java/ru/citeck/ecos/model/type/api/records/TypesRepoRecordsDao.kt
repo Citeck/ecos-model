@@ -84,9 +84,12 @@ class TypesRepoRecordsDao(
                 if (recsQuery.workspaces.isNotEmpty()) {
                     predicate = Predicates.and(
                         predicate,
-                        Predicates.inVals("workspace", recsQuery.workspaces.map {
-                            if (it.startsWith("admin$")) "" else it
-                        })
+                        Predicates.inVals(
+                            "workspace",
+                            recsQuery.workspaces.map {
+                                if (it.startsWith("admin$")) "" else it
+                            }
+                        )
                     )
                 }
 

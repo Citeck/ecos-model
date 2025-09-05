@@ -18,11 +18,6 @@ class TestNotificationService {
     class NotificationServiceTestImpl : NotificationService {
         private val inMemNotificationStorage = Collections.synchronizedList(ArrayList<Notification>())
 
-        override fun sendSync(notification: Notification): SendNotificationResult {
-            inMemNotificationStorage.add(notification)
-            return SendNotificationResult("ok", "ok")
-        }
-
         override fun send(notification: Notification) {
             inMemNotificationStorage.add(notification)
         }
