@@ -1,0 +1,20 @@
+POST http://localhost/gateway/api/records/query
+Authorization: Basic admin admin
+Content-Type: application/json
+
+{
+    "query": {
+        "sourceId": "emodel/gantt-project-management",
+        "query": {
+            "linkedWithType": "emodel/type@some-type",
+            "linkedWithRef": "emodel/some-type@123",
+            "currentRef": "emodel/contract@23",
+            "workspace": "current_workspace"
+        }
+    },
+    "attributes": {
+        "activities": "activities?json",
+        "dependencies": "dependencies?json"
+    }
+}
+

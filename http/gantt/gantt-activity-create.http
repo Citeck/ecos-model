@@ -1,0 +1,26 @@
+POST http://localhost/gateway/api/records/mutate
+Authorization: Basic admin admin
+Content-Type: application/json
+
+{
+    "records": [
+        {
+            "id": "emodel/gantt-activity@",
+            "attributes": {
+                "activity:title": "Купить молоко",
+                "activity:description": "В магазине у дома",
+                "activity:start": "2026-07-16T12:30:00Z",
+                "activity:end": "2026-07-20T15:00:00Z",
+                "activity:duration": 4,
+                "activity:progress": 0.5,
+                "activity:type": "task",
+                "activity:lazy": false,
+                "activity:parent": "emodel/gantt-activity@df443-ff392jf",
+                "activity:baseStart": "2026-07-16T00:30:00Z",
+                "activity:baseEnd": "2026-07-20T00:00:00Z",
+                "activity:baseDuration": 2,
+                "activity:open": false
+            }
+        }
+    ]
+}
