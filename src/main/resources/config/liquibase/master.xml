@@ -54,4 +54,5 @@
     <include file="config/liquibase/changelog/20241209000000_add_encryption_to_secrets.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20250110000000_add_default_workspace_to_type.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20250515000000_add_cv_inherit_flag_to_types.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20250818000000_add_ws_to_types.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>

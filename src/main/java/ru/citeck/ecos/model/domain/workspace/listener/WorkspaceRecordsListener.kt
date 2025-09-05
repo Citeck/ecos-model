@@ -12,9 +12,11 @@ import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceMemberDesc
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMemberRole
 import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
+import ru.citeck.ecos.model.domain.workspace.utils.WorkspaceSystemIdUtils
 import ru.citeck.ecos.model.domain.wstemplate.service.WorkspaceTemplateService
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.records2.RecordConstants
+import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records2.predicate.model.ValuePredicate
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.ScalarType
@@ -55,7 +57,25 @@ class WorkspaceRecordsListener(
             applyTemplate(event)
             createWikiRoot(event.globalRef)
             createCreatorMember(event.globalRef)
+            generateAndUpdateSystemId(event.globalRef.getLocalId())
         }
+    }
+
+    fun generateAndUpdateSystemId(workspaceId: String) {
+
+        val workspaceRef = WorkspaceDesc.getRef(workspaceId)
+
+        val workspaceSystemId = WorkspaceSystemIdUtils.createId(workspaceId) { wsIdToCheck ->
+            recordsService.query(RecordsQuery.create()
+                .withSourceId(WorkspaceDesc.SOURCE_ID)
+                .withQuery(Predicates.and(
+                    Predicates.notEq("id", workspaceId),
+                    Predicates.eq(WorkspaceDesc.ATT_SYSTEM_ID, wsIdToCheck)
+                )).withMaxItems(1).build()
+            ).getRecords().isNotEmpty()
+        }
+
+        recordsService.mutateAtt(workspaceRef, WorkspaceDesc.ATT_SYSTEM_ID, workspaceSystemId)
     }
 
     override fun onChanged(event: DbRecordChangedEvent) {

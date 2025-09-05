@@ -8,6 +8,7 @@ import ru.citeck.ecos.model.lib.role.dto.RoleDef
 import ru.citeck.ecos.model.lib.status.dto.StatusDef
 import ru.citeck.ecos.model.lib.type.dto.TypeAspectDef
 import ru.citeck.ecos.model.lib.utils.ModelUtils
+import ru.citeck.ecos.model.lib.workspace.WorkspaceService
 import ru.citeck.ecos.model.type.service.TypeDesc
 import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
@@ -21,7 +22,8 @@ import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 @Component
 class TypesRepoRecordsMutDao(
     private val typeService: TypesService,
-    private val typesRepoPermsService: TypesRepoPermsService? = null
+    private val typesRepoPermsService: TypesRepoPermsService? = null,
+    private val workspaceService: WorkspaceService? = null
 ) : RecordMutateWithAnyResDao, RecordDeleteDao {
 
     override fun getId() = "types-repo"
@@ -56,10 +58,26 @@ class TypesRepoRecordsMutDao(
             recToMutate.aspects
         }
 
+        val isNewRec = record.id.isEmpty()
+        if (!isNewRec) {
+            mutAtts.remove("workspace")
+        }
+
         val ctx = BeanTypeUtils.getTypeContext(TypeMutRecord::class.java)
         ctx.applyData(recToMutate, mutAtts)
 
         recToMutate.aspects = mutAspects
+
+        if (isNewRec) {
+            val localIdInWorkspace = record.attributes["localIdInWorkspace"].asText()
+            if (localIdInWorkspace.isNotEmpty()) {
+                var newId = localIdInWorkspace
+                if (workspaceService != null) {
+                    newId = workspaceService.addWsPrefixToId(newId, recToMutate.workspace)
+                }
+                recToMutate.withId(newId)
+            }
+        }
 
         return saveMutatedRec(recToMutate)
     }
