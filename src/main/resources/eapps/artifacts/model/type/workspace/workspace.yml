@@ -105,6 +105,14 @@ model:
         child: true
         typeRef: emodel/type@wiki
   systemAttributes:
+    - id: systemId
+      name:
+        ru: Системный ID
+        en: System ID
+      index:
+        enabled: true
+      config:
+        unique: true
     - id: system
       name:
         ru: Системная рабочая область

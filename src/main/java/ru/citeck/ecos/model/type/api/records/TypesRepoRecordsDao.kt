@@ -8,16 +8,21 @@ import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.commons.json.Json.mapper
 import ru.citeck.ecos.commons.json.YamlUtils
 import ru.citeck.ecos.events2.type.RecordEventsService
+import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.permissions.dto.PermissionType
 import ru.citeck.ecos.model.lib.type.dto.TypeAspectDef
 import ru.citeck.ecos.model.lib.utils.ModelUtils
+import ru.citeck.ecos.model.lib.workspace.WorkspaceService
 import ru.citeck.ecos.model.type.service.TypeDesc
 import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.predicate.PredicateService
+import ru.citeck.ecos.records2.predicate.PredicateUtils
 import ru.citeck.ecos.records2.predicate.model.Predicate
+import ru.citeck.ecos.records2.predicate.model.Predicates
+import ru.citeck.ecos.records2.predicate.model.ValuePredicate
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.atts.value.AttValue
 import ru.citeck.ecos.records3.record.dao.AbstractRecordsDao
@@ -35,7 +40,8 @@ import java.time.Instant
 class TypesRepoRecordsDao(
     private val typeService: TypesService,
     private val recordEventsService: RecordEventsService? = null,
-    private val typesRepoPermsService: TypesRepoPermsService? = null
+    private val typesRepoPermsService: TypesRepoPermsService? = null,
+    private val workspaceService: WorkspaceService? = null
 ) : AbstractRecordsDao(), RecordsQueryDao, RecordAttsDao {
 
     companion object {
@@ -60,7 +66,32 @@ class TypesRepoRecordsDao(
 
             PredicateService.LANGUAGE_PREDICATE -> {
 
-                val predicate = recsQuery.getQuery(Predicate::class.java)
+                var predicate = recsQuery.getQuery(Predicate::class.java)
+                predicate = PredicateUtils.mapValuePredicates(predicate, {
+                    if (it.getAttribute() == "localIdInWorkspace") {
+                        val newPred = it.copy<ValuePredicate>()
+                        newPred.setAtt("id")
+                        if (newPred.getType() == ValuePredicate.Type.EQ) {
+                            newPred.setType(ValuePredicate.Type.LIKE)
+                            newPred.setValue("%$" + newPred.getValue().asText())
+                        }
+                        newPred
+                    } else {
+                        it
+                    }
+                }, onlyAnd = false, optimize = false) ?: Predicates.alwaysTrue()
+
+                if (recsQuery.workspaces.isNotEmpty()) {
+                    predicate = Predicates.and(
+                        predicate,
+                        Predicates.inVals(
+                            "workspace",
+                            recsQuery.workspaces.map {
+                                if (it.startsWith("admin$")) "" else it
+                            }
+                        )
+                    )
+                }
 
                 val types = typeService.getAllWithMeta(
                     recsQuery.page.maxItems,
@@ -69,7 +100,7 @@ class TypesRepoRecordsDao(
                     recsQuery.sortBy
                 )
 
-                result.setRecords(types.map { TypeRecord(it.entity, it.meta) })
+                result.setRecords(types.map { buildTypeRecord(it) })
                 result.setTotalCount(typeService.getCount(predicate))
             }
             else -> {
@@ -80,7 +111,7 @@ class TypesRepoRecordsDao(
                 } else {
                     typeService.getAllWithMeta(max, recsQuery.page.skipCount)
                 }
-                result.setRecords(types.map { TypeRecord(it.entity, it.meta) })
+                result.setRecords(types.map { buildTypeRecord(it) })
             }
         }
 
@@ -89,14 +120,18 @@ class TypesRepoRecordsDao(
 
     override fun getRecordAtts(recordId: String): TypeRecord? {
         return typeService.getByIdWithMetaOrNull(recordId)?.let {
-            TypeRecord(it.entity, it.meta)
+            buildTypeRecord(it)
         }
     }
 
     private fun onTypeDefChanged(before: EntityWithMeta<TypeDef>?, after: EntityWithMeta<TypeDef>) {
         recordEventsService?.emitRecChanged(before, after, getId()) {
-            TypeRecord(it.entity, it.meta)
+            buildTypeRecord(it)
         }
+    }
+
+    private fun buildTypeRecord(entity: EntityWithMeta<TypeDef>): TypeRecord {
+        return TypeRecord(entity.entity, entity.meta)
     }
 
     inner class TypeRecord(
@@ -104,6 +139,10 @@ class TypesRepoRecordsDao(
         val typeDef: TypeDef,
         private val audit: EntityMeta
     ) {
+
+        fun getLocalIdInWorkspace(): String {
+            return workspaceService?.removeWsPrefixFromId(typeDef.id) ?: typeDef.id
+        }
 
         fun getCustomAspects(): List<TypeAspectDef> {
             return typeDef.aspects.filter {
@@ -121,6 +160,14 @@ class TypesRepoRecordsDao(
                 return null
             }
             return aspectData.config[aspectCfgKey.configKey]
+        }
+
+        fun getWorkspaceRef(): EntityRef {
+            return if (typeDef.workspace.isEmpty()) {
+                EntityRef.EMPTY
+            } else {
+                WorkspaceDesc.getRef(typeDef.workspace)
+            }
         }
 
         fun getFormRef(): EntityRef {
@@ -151,7 +198,7 @@ class TypesRepoRecordsDao(
             if (!MLText.isEmpty(typeDef.name)) {
                 return typeDef.name
             }
-            return typeDef.id
+            return getLocalIdInWorkspace()
         }
 
         @AttName("_type")

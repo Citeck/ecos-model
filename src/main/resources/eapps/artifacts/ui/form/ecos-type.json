@@ -45,7 +45,7 @@
                             "label": {
                               "ru": "Id"
                             },
-                            "key": "moduleId",
+                            "key": "localIdInWorkspace",
                             "validate": {
                               "required": true
                             },
@@ -326,6 +326,7 @@
                               "en": "Additional config form"
                             },
                             "key": "configFormRef",
+                            "hidden": true,
                             "modalTitle": "",
                             "journalId": "ecos-forms",
                             "refreshOn": [],
@@ -400,34 +401,6 @@
                           },
                           {
                             "label": {
-                              "ru": "Действия",
-                              "en": "Actions"
-                            },
-                            "key": "actions",
-                            "multiple": true,
-                            "reorder": false,
-                            "modalTitle": "",
-                            "journalId": "ui-actions",
-                            "defaultValue": [],
-                            "refreshOn": [],
-                            "optionalWhenDisabled": false,
-                            "type": "selectJournal",
-                            "input": true
-                          },
-                          {
-                            "label": {
-                              "ru": "Наследовать действия",
-                              "en": "Inherit actions"
-                            },
-                            "key": "inheritActions",
-                            "defaultValue": true,
-                            "refreshOn": [],
-                            "optionalWhenDisabled": false,
-                            "type": "checkbox",
-                            "input": true
-                          },
-                          {
-                            "label": {
                               "ru": "Columns"
                             },
                             "key": "columns9",
@@ -436,10 +409,41 @@
                                 "components": [
                                   {
                                     "label": {
+                                      "ru": "Действия",
+                                      "en": "Actions"
+                                    },
+                                    "key": "actions",
+                                    "multiple": true,
+                                    "reorder": false,
+                                    "modalTitle": "",
+                                    "journalId": "ui-actions",
+                                    "defaultValue": [],
+                                    "refreshOn": [],
+                                    "optionalWhenDisabled": false,
+                                    "type": "selectJournal",
+                                    "input": true
+                                  },
+                                  {
+                                    "label": {
+                                      "ru": "Наследовать действия",
+                                      "en": "Inherit actions"
+                                    },
+                                    "key": "inheritActions",
+                                    "defaultValue": true,
+                                    "refreshOn": [],
+                                    "optionalWhenDisabled": false,
+                                    "type": "checkbox",
+                                    "input": true
+                                  },
+                                  {
+                                    "label": {
                                       "ru": "Тип источника данных",
                                       "en": "Source Type"
                                     },
                                     "key": "storageType",
+                                    "validate": {
+                                      "select": false
+                                    },
                                     "dataSrc": "values",
                                     "data": {
                                       "values": [
@@ -455,12 +459,116 @@
                                           "label": "Default",
                                           "value": "DEFAULT"
                                         }
+                                      ],
+                                      "headers": [
+                                        {}
                                       ]
                                     },
+                                    "defaultValue": "ECOS_MODEL",
                                     "optionalWhenDisabled": false,
+                                    "customConditional": "show = !data.workspaceRef;",
                                     "type": "ecosSelect",
                                     "input": true,
-                                    "defaultValue": "ECOS_MODEL"
+                                    "reorder": false,
+                                    "reference": false
+                                  },
+                                  {
+                                    "label": {
+                                      "ru": "ID источника данных",
+                                      "en": "Source ID"
+                                    },
+                                    "key": "sourceId",
+                                    "defaultValue": "",
+                                    "refreshOn": [],
+                                    "optionalWhenDisabled": false,
+                                    "customConditional": "show = !data.workspaceRef && (data['storageType'] === 'ECOS_MODEL' || data['storageType'] === 'DEFAULT' || !data['storageType']);",
+                                    "type": "textfield",
+                                    "input": true,
+                                    "inputMasks": [
+                                      {}
+                                    ],
+                                    "reorder": false,
+                                    "dataSrc": ""
+                                  }
+                                ],
+                                "type": "column",
+                                "input": false,
+                                "key": "column",
+                                "index": 0
+                              },
+                              {
+                                "index": 1,
+                                "type": "column",
+                                "input": false,
+                                "key": "column",
+                                "components": [
+                                  {
+                                    "label": {
+                                      "ru": "Рабочее пространство",
+                                      "en": "Workspace"
+                                    },
+                                    "key": "workspaceRef",
+                                    "tooltip": {
+                                      "ru": "Рабочее пространство, к которому относится данный тип.\nЕсли указано значение, тип считается «ограниченным» и может использоваться только внутри заданного воркспейса.\nЕсли значение не задано, тип считается глобальным и доступен во всех воркспейсах.",
+                                      "en": "Workspace to which this type belongs. If defined, the type is considered scoped and can only be used within the specified workspace. Types without a workspace are treated as global and available across all workspaces."
+                                    },
+                                    "disabled": true,
+                                    "modalTitle": "",
+                                    "linkFormatter": "",
+                                    "journalId": "workspaces-journal",
+                                    "source": {
+                                      "type": "journal",
+                                      "custom": {
+                                        "columns": []
+                                      },
+                                      "customValues": "",
+                                      "viewMode": "default"
+                                    },
+                                    "queryData": "",
+                                    "refreshOn": [],
+                                    "customDefaultValue": "const currentWs = Citeck.Navigator.getWorkspaceId() || '';\nif (currentWs.indexOf('admin$') === 0) {\n  value = null;  \n} else {\n  value = \"emodel/workspace@\" + currentWs;\n}",
+                                    "optionalWhenDisabled": false,
+                                    "logic": [
+                                      {
+                                        "name": "enable-for-admin",
+                                        "trigger": {
+                                          "type": "javascript",
+                                          "javascript": "result = instance.options.formMode === 'CREATE' && _.get(data, 'currentUserAtts.isAdmin', false);"
+                                        },
+                                        "actions": [
+                                          {
+                                            "name": "enable",
+                                            "type": "property",
+                                            "property": {
+                                              "label": "Disabled",
+                                              "value": "disabled",
+                                              "type": "boolean"
+                                            },
+                                            "state": "false"
+                                          }
+                                        ]
+                                      }
+                                    ],
+                                    "type": "selectJournal",
+                                    "input": true
+                                  },
+                                  {
+                                    "label": {
+                                      "ru": "Рабочее пространство по умолчанию",
+                                      "en": "Default workspace"
+                                    },
+                                    "key": "defaultWorkspace",
+                                    "defaultValue": "",
+                                    "refreshOn": [],
+                                    "optionalWhenDisabled": false,
+                                    "customConditional": "show = !data.workspaceRef;",
+                                    "type": "textfield",
+                                    "input": true,
+                                    "inputMasks": [
+                                      {}
+                                    ],
+                                    "reorder": false,
+                                    "dataSrc": ""
                                   },
                                   {
                                     "label": {
@@ -468,6 +576,9 @@
                                       "en": "Workspace visibility"
                                     },
                                     "key": "workspaceScope",
+                                    "validate": {
+                                      "select": false
+                                    },
                                     "dataSrc": "values",
                                     "data": {
                                       "values": [
@@ -499,48 +610,11 @@
                                     },
                                     "defaultValue": "DEFAULT",
                                     "optionalWhenDisabled": false,
+                                    "customConditional": "show = !data.workspaceRef;",
                                     "type": "ecosSelect",
-                                    "input": true
-                                  }
-                                ],
-                                "type": "column",
-                                "input": false,
-                                "key": "column",
-                                "index": 0
-                              },
-                              {
-                                "index": 1,
-                                "type": "column",
-                                "input": false,
-                                "key": "column",
-                                "components": [
-                                  {
-                                    "label": {
-                                      "ru": "ID источника данных",
-                                      "en": "Source ID"
-                                    },
-                                    "key": "sourceId",
-                                    "defaultValue": "",
-                                    "refreshOn": [],
-                                    "optionalWhenDisabled": false,
-                                    "customConditional": "show = data['storageType'] === 'ECOS_MODEL' || data['storageType'] === 'DEFAULT' || !data['storageType'];",
-                                    "type": "textfield",
-                                    "input": true
-                                  },
-                                  {
-                                    "label": {
-                                      "ru": "Рабочее пространство по умолчанию",
-                                      "en": "Default workspace"
-                                    },
-                                    "key": "defaultWorkspace",
-                                    "defaultValue": "",
-                                    "refreshOn": [],
-                                    "optionalWhenDisabled": false,
-                                    "type": "textfield",
                                     "input": true,
-                                    "inputMasks": [
-                                      {}
-                                    ]
+                                    "reorder": false,
+                                    "reference": false
                                   }
                                 ]
                               }
@@ -1276,7 +1350,7 @@
                     },
                     "key": "panel9",
                     "title": {
-                      "ru": "Настройка прав для тип данных",
+                      "ru": "Настройка прав для типа данных",
                       "en": "Type Permissions"
                     },
                     "collapsible": true,
@@ -2671,6 +2745,78 @@
                         ]
                       }
                     ]
+                  },
+                  {
+                    "label": {
+                      "ru": "Panel"
+                    },
+                    "key": "doclib-settings",
+                    "title": {
+                      "ru": "Отображение в виде DocLib",
+                      "en": "DocLib view"
+                    },
+                    "refreshOn": [],
+                    "optionalWhenDisabled": false,
+                    "type": "panel",
+                    "input": false,
+                    "components": [
+                      {
+                        "label": {
+                          "ru": "Включить режим отображения в виде DocLib",
+                          "en": "Enable DocLib mode"
+                        },
+                        "key": "aspectCfg$doclib$added",
+                        "refreshOn": [],
+                        "optionalWhenDisabled": false,
+                        "type": "checkbox",
+                        "input": true,
+                        "reorder": false,
+                        "dataGridLabel": false
+                      },
+                      {
+                        "label": {
+                          "ru": "Panel"
+                        },
+                        "key": "doclibviewcfg",
+                        "refreshOn": [],
+                        "optionalWhenDisabled": false,
+                        "conditional": {
+                          "show": "true",
+                          "when": "aspectCfg$doclib$added",
+                          "eq": "true"
+                        },
+                        "type": "panel",
+                        "input": false,
+                        "components": [
+                          {
+                            "label": {
+                              "ru": "Тип для папок (по умолчанию \"directory\")",
+                              "en": "Directory type (\"directory\" by default)"
+                            },
+                            "key": "aspectCfg$doclib$dirTypeRef",
+                            "modalTitle": "",
+                            "linkFormatter": "",
+                            "journalId": "ecos-types",
+                            "source": {
+                              "type": "journal",
+                              "custom": {
+                                "columns": []
+                              },
+                              "customValues": ""
+                            },
+                            "queryData": "",
+                            "refreshOn": [
+                              "aspectCfg$doclib$added"
+                            ],
+                            "optionalWhenDisabled": false,
+                            "type": "selectJournal",
+                            "input": true
+                          }
+                        ]
+                      }
+                    ],
+                    "collapsed": false,
+                    "reorder": false
                   }
                 ]
               }
@@ -2764,8 +2910,30 @@
         "key": "columns2",
         "type": "columns",
         "input": false
+      },
+      {
+        "label": "currentUserAtts",
+        "source": {
+          "type": "record",
+          "record": {
+            "id": "emodel/person@{{user}}",
+            "attributes": {
+              "isAdmin": "isAdmin?bool!"
+            }
+          },
+          "forceLoad": false
+        },
+        "update": {
+          "type": "once"
+        },
+        "key": "currentUserAtts",
+        "type": "asyncData",
+        "input": true,
+        "triggerEventOnChange": false
       }
     ],
     "display": "form"
-  }
+  },
+  "attributes": {},
+  "notExists": false
 }

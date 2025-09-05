@@ -3,6 +3,7 @@ package ru.citeck.ecos.model.type.api.records
 import org.springframework.stereotype.Service
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthRole
+import ru.citeck.ecos.model.lib.workspace.WorkspaceService
 import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records3.record.atts.schema.ScalarType
@@ -20,13 +21,15 @@ import ru.citeck.ecos.webapp.lib.perms.component.RecordPermsData
 class TypesRepoPermsService(
     val typesService: TypesService,
     val webAppProps: EcosWebAppProps,
-    ecosPermissionsService: EcosPermissionsService
+    ecosPermissionsService: EcosPermissionsService,
+    private val workspaceService: WorkspaceService
 ) {
 
     companion object {
         private const val PERMISSION_CREATE_CHILDREN = "create-children"
         private const val PERMISSION_DELETE = "delete"
         private const val PERMISSION_WRITE = "write"
+        private const val PERMISSION_CREATE_OR_EDIT_TYPES = "create-or-edit-types"
 
         private const val ATT_CREATOR_USERNAME = RecordConstants.ATT_CREATOR + ScalarType.LOCAL_ID_SCHEMA
     }
@@ -67,6 +70,13 @@ class TypesRepoPermsService(
 
         if (AuthContext.isRunAsSystemOrAdmin()) {
             return
+        }
+        if (record.workspace.isNotEmpty()) {
+            if (workspaceService.isUserManagerOf(AuthContext.getCurrentUser(), record.workspace)) {
+                return
+            } else {
+                throwPermissionDenied(PERMISSION_CREATE_OR_EDIT_TYPES)
+            }
         }
 
         val parentBefore = getRepoRef(record.baseTypeDef.parentRef)

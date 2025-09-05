@@ -86,6 +86,7 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
         entity.aspects = Json.mapper.toString(typeDef.aspects)
         entity.queryPermsPolicy = typeDef.queryPermsPolicy
         entity.assignablePerms = Json.mapper.toString(typeDef.assignablePerms)
+        entity.workspace = typeDef.workspace
         entity.workspaceScope = typeDef.workspaceScope
         entity.defaultWorkspace = typeDef.defaultWorkspace
 
@@ -159,6 +160,7 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
             .withAspects(DataValue.create(entity.aspects).asList(TypeAspectDef::class.java))
             .withQueryPermsPolicy(entity.queryPermsPolicy)
             .withAssignablePerms(DataValue.create(entity.assignablePerms).asList(EntityRef::class.java))
+            .withWorkspace(entity.workspace)
             .withWorkspaceScope(entity.workspaceScope)
             .withDefaultWorkspace(entity.defaultWorkspace)
             .build()

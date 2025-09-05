@@ -243,9 +243,12 @@ class DocLibRecords @Autowired constructor(
             val filesFilter = filterPredicate.copy<AndPredicate>()
 
             val parentCondition = OrPredicate.of(
-                Predicates.eq(RecordConstants.ATT_PARENT, parentLocalRef),
-                EmptyPredicate(RecordConstants.ATT_PARENT)
+                Predicates.eq(RecordConstants.ATT_PARENT, parentLocalRef)
             )
+            if (parentIsRoot) {
+                parentCondition.addPredicate(Predicates.empty(RecordConstants.ATT_PARENT))
+            }
+
             if (query.recursive) {
                 parentCondition.addPredicate(
                     Predicates.contains("${RecordConstants.ATT_PARENT}.dirPath", parentLocalRef.toString())

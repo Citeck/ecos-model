@@ -28,4 +28,8 @@ class CustomWorkspaceApi(
     override fun isUserManagerOf(user: String, workspace: String): Boolean {
         return workspaceService.isUserManagerOf(user, workspace)
     }
+
+    override fun getWorkspaceSysId(workspaces: List<String>): List<String> {
+        return workspaces.map { workspaceService.getSystemId(it) }
+    }
 }

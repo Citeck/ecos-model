@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.domain.workspace.service
 
+import com.hazelcast.hibernate.shaded.caffeine.cache.Caffeine
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 import ru.citeck.ecos.commons.data.DataValue
@@ -30,6 +31,7 @@ import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy
 import ru.citeck.ecos.records3.record.request.RequestContext
 import ru.citeck.ecos.webapp.api.authority.EcosAuthoritiesApi
 import ru.citeck.ecos.webapp.api.entity.EntityRef
+import java.time.Duration
 
 @Service
 class EmodelWorkspaceService(
@@ -45,6 +47,13 @@ class EmodelWorkspaceService(
         private val log = KotlinLogging.logger {}
     }
 
+    private val wsSystemIdCache = Caffeine.newBuilder()
+        .expireAfterWrite(Duration.ofMinutes(30))
+        .maximumSize(1000)
+        .build<String, String> {
+            recordsService.getAtt(WorkspaceDesc.getRef(it), WorkspaceDesc.ATT_SYSTEM_ID).asText().ifBlank { null }
+        }
+
     private fun getUserAuthoritiesRefs(userRef: EntityRef, withUserRef: Boolean = true): Set<EntityRef> {
         val authoritiesRefs = authorityService.getAuthoritiesForPerson(userRef.getLocalId()).mapNotNullTo(HashSet()) {
             if (it.startsWith(AuthGroup.PREFIX)) {
@@ -59,6 +68,13 @@ class EmodelWorkspaceService(
             authoritiesRefs.remove(userRef)
         }
         return authoritiesRefs
+    }
+
+    fun getSystemId(workspaceId: String): String {
+        if (workspaceId.isBlank()) {
+            return ""
+        }
+        return wsSystemIdCache.get(workspaceId) ?: ""
     }
 
     /**
