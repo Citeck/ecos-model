@@ -2,14 +2,13 @@ package ru.citeck.ecos.model.type.api.records
 
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.data.ObjectData
-import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
 import ru.citeck.ecos.model.lib.procstages.dto.ProcStageDef
 import ru.citeck.ecos.model.lib.role.dto.RoleDef
 import ru.citeck.ecos.model.lib.status.dto.StatusDef
 import ru.citeck.ecos.model.lib.type.dto.TypeAspectDef
 import ru.citeck.ecos.model.lib.utils.ModelUtils
-import ru.citeck.ecos.model.lib.workspace.WsScopedArtifactUtils
+import ru.citeck.ecos.model.lib.workspace.WorkspaceService
 import ru.citeck.ecos.model.type.service.TypeDesc
 import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
@@ -24,7 +23,7 @@ import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 class TypesRepoRecordsMutDao(
     private val typeService: TypesService,
     private val typesRepoPermsService: TypesRepoPermsService? = null,
-    private val emodelWorkspaceService: EmodelWorkspaceService? = null
+    private val workspaceService: WorkspaceService? = null
 ) : RecordMutateWithAnyResDao, RecordDeleteDao {
 
     override fun getId() = "types-repo"
@@ -72,12 +71,11 @@ class TypesRepoRecordsMutDao(
         if (isNewRec) {
             val localIdInWorkspace = record.attributes["localIdInWorkspace"].asText()
             if (localIdInWorkspace.isNotEmpty()) {
-                val systemId = emodelWorkspaceService?.getSystemId(recToMutate.workspace) ?: ""
-                if (systemId.isNotBlank()) {
-                    recToMutate.withId(WsScopedArtifactUtils.addWsPrefixToId(localIdInWorkspace, systemId))
-                } else {
-                    recToMutate.withId(localIdInWorkspace)
+                var newId = localIdInWorkspace
+                if (workspaceService != null) {
+                    newId = workspaceService.addWsPrefixToId(newId, recToMutate.workspace)
                 }
+                recToMutate.withId(newId)
             }
         }
 

@@ -8,7 +8,7 @@ import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.model.lib.utils.ModelUtils
-import ru.citeck.ecos.model.lib.workspace.WsScopedArtifactUtils
+import ru.citeck.ecos.model.lib.workspace.WorkspaceService
 import ru.citeck.ecos.model.type.converter.TypeConverter
 import ru.citeck.ecos.model.type.repository.TypeEntity
 import ru.citeck.ecos.model.type.service.dao.TypeRepoDao
@@ -25,7 +25,8 @@ import java.util.regex.Pattern
 @Service
 class TypesServiceImpl(
     private val typeConverter: TypeConverter,
-    private val typeRepoDao: TypeRepoDao
+    private val typeRepoDao: TypeRepoDao,
+    private val workspaceService: WorkspaceService
 ) : TypesService {
 
     companion object {
@@ -373,7 +374,7 @@ class TypesServiceImpl(
             }
         } else if (!VALID_ID_PATTERN.matcher(dto.id).matches()) {
             val idToError = if (dto.workspace.isNotBlank()) {
-                WsScopedArtifactUtils.removeWsPrefixFromId(dto.id)
+                workspaceService.removeWsPrefixFromId(dto.id)
             } else {
                 dto.id
             }

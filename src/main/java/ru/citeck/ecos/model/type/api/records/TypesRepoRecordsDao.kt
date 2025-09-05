@@ -9,12 +9,11 @@ import ru.citeck.ecos.commons.json.Json.mapper
 import ru.citeck.ecos.commons.json.YamlUtils
 import ru.citeck.ecos.events2.type.RecordEventsService
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
-import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.permissions.dto.PermissionType
 import ru.citeck.ecos.model.lib.type.dto.TypeAspectDef
 import ru.citeck.ecos.model.lib.utils.ModelUtils
-import ru.citeck.ecos.model.lib.workspace.WsScopedArtifactUtils
+import ru.citeck.ecos.model.lib.workspace.WorkspaceService
 import ru.citeck.ecos.model.type.service.TypeDesc
 import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
@@ -42,7 +41,7 @@ class TypesRepoRecordsDao(
     private val typeService: TypesService,
     private val recordEventsService: RecordEventsService? = null,
     private val typesRepoPermsService: TypesRepoPermsService? = null,
-    private val emodelWorkspaceService: EmodelWorkspaceService? = null
+    private val workspaceService: WorkspaceService? = null
 ) : AbstractRecordsDao(), RecordsQueryDao, RecordAttsDao {
 
     companion object {
@@ -139,7 +138,7 @@ class TypesRepoRecordsDao(
     ) {
 
         fun getLocalIdInWorkspace(): String {
-            return WsScopedArtifactUtils.removeWsPrefixFromId(typeDef.id)
+            return workspaceService?.removeWsPrefixFromId(typeDef.id) ?: typeDef.id
         }
 
         fun getCustomAspects(): List<TypeAspectDef> {
