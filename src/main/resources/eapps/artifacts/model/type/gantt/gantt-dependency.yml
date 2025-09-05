@@ -1,0 +1,13 @@
+---
+id: gantt-dependency
+name:
+    ru: Зависимости диаграммы Ганта
+    en: Gantt chart dependencies
+parentRef: emodel/type@data-list
+formRef: uiserv/form@DEFAULT_FORM
+journalRef: uiserv/journal@DEFAULT_JOURNAL
+inheritForm: false
+defaultCreateVariant: true
+storageType: ECOS_MODEL
+aspects:
+  - ref: emodel/aspect@dependency-atts

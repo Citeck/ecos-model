@@ -1,0 +1,9 @@
+---
+id: gantt-data
+name:
+  ru: Данные диаграммы Ганта
+  en: Gantt chart data
+parentRef: emodel/type@ecos-vcs-object
+storageType: ECOS_MODEL
+aspects:
+  - ref: emodel/aspect@timeline-bundle-atts

@@ -1,0 +1,16 @@
+POST http://localhost/gateway/api/records/mutate
+Authorization: Basic admin admin
+Content-Type: application/json
+
+{
+    "records": [
+        {
+            "id": "emodel/gantt-dependency@",
+            "attributes": {
+                "dependency:source": "emodel/gantt-activity@df443-ff392jf",
+                "dependency:target": "emodel/gantt-activity@d903f-3fddd33",
+                "dependency:type": "e2e"
+            }
+        }
+    ]
+}

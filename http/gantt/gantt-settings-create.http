@@ -1,0 +1,17 @@
+POST http://localhost/gateway/api/records/mutate
+Authorization: Basic admin admin
+Content-Type: application/json
+
+{
+    "records": [
+        {
+            "id": "emodel/gantt-settings@",
+            "attributes": {
+                "name": {
+                    "ru": "Диаграмма проекта Пузырь"
+                },
+                "dataType": "STANDALONE"
+            }
+        }
+    ]
+}

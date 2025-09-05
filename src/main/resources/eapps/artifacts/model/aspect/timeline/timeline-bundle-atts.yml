@@ -1,0 +1,29 @@
+---
+id: timeline-bundle-atts
+name:
+  ru: Атрибуты временной шкалы
+  en: Timeline attributes
+prefix: 'timeline'
+attributes:
+  - id: activities
+    name:
+      en: Activities
+      ru: Активности
+    type: ASSOC
+    multiple: true
+    config:
+      child: true
+      typeRef: emodel/type@activity
+  - id: dependencies
+    name:
+      en: Dependencies
+      ru: Зависимости
+    type: ASSOC
+    multiple: true
+    config:
+      child: true
+      typeRef: emodel/type@dependency
+
+
+
+
