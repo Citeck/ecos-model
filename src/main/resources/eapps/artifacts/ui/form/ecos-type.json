@@ -2690,6 +2690,19 @@
                         "components": [
                           {
                             "label": {
+                              "ru": "Включить режим отображения контента в виде плиток",
+                              "en": "Enable the mode of displaying content in the form of tiles"
+                            },
+                            "key": "aspectCfg$listview$isTilesContent",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "checkbox",
+                            "input": true,
+                            "reorder": false,
+                            "dataGridLabel": false
+                          },
+                          {
+                            "label": {
                               "ru": "Атрибут с заголовком для элемента списка",
                               "en": "Attribute with title for list element"
                             },
