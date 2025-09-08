@@ -45,7 +45,7 @@
                             "label": {
                               "ru": "Id"
                             },
-                            "key": "localIdInWorkspace",
+                            "key": "id",
                             "validate": {
                               "required": true
                             },
@@ -526,14 +526,14 @@
                                     },
                                     "queryData": "",
                                     "refreshOn": [],
-                                    "customDefaultValue": "const currentWs = Citeck.Navigator.getWorkspaceId() || '';\nif (currentWs.indexOf('admin$') === 0) {\n  value = null;  \n} else {\n  value = \"emodel/workspace@\" + currentWs;\n}",
+                                    "customDefaultValue": "",
                                     "optionalWhenDisabled": false,
                                     "logic": [
                                       {
                                         "name": "enable-for-admin",
                                         "trigger": {
                                           "type": "javascript",
-                                          "javascript": "result = instance.options.formMode === 'CREATE' && _.get(data, 'currentUserAtts.isAdmin', false);"
+                                          "javascript": "result = false;"
                                         },
                                         "actions": [
                                           {
