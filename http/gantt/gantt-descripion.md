@@ -45,7 +45,7 @@ graph TB
 
 **dataSourceId** - Источник данных, выбор из существующих источников:
 
-- `emodel/gantt-project-management` - Управление проектами
+- `ecos-project-tracker/gantt-project-management` - Управление проектами
 
 **manualDataSourceId** - Источник данных, ввод вручную. Текстовое поле.
 
