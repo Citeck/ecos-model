@@ -4,7 +4,7 @@ Content-Type: application/json
 
 {
     "query": {
-        "sourceId": "emodel/gantt-project-management",
+        "sourceId": "ecos-project-tracker/gantt-project-management",
         "query": {
             "linkedWithType": "emodel/type@some-type",
             "linkedWithRef": "emodel/some-type@123",
