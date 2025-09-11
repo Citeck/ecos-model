@@ -45,7 +45,7 @@ graph TB
 
 **dataSourceId** - Источник данных, выбор из существующих источников:
 
-- `ecos-project-tracker/gantt-project-management` - Управление проектами
+- `ecos-project-tracker/gantt-pm` - Управление проектами
 
 **manualDataSourceId** - Источник данных, ввод вручную. Текстовое поле.
 
@@ -92,14 +92,80 @@ graph TB
 указанного в `dataSourceId` или `manualDataSourceId`.
 
 При загрузке диаграммы, на сервер должен отправить query запрос на получение данных диаграммы, обязательно при каждом query
-необходимо передавать информацию:
+необходимо передавать информацию (если она есть) о текущем контексте, в котором открывается диаграмма:
 
 - `linkedWithType`
 - `linkedWithRef`
 - `currentRef` - recordRef текущего документа
 - `workspace` - текущий workspace
 
-[Пример запроса по получению данных диаграммы c linked sourceId](./gantt-linked-query.http)
+#### Примеры запросов
 
-В ответе в атрибутах `activities` и `dependencies` должны быть возвращены массивы данных для построения диаграммы.
-Дальнейшая работа должна осуществляться с этими объектами.
+##### Получение данных для отображения диаграммы
+
+[gantt-linked-query.http](./gantt-linked-query.http)
+
+Ответа сервера:
+
+```json
+{
+    "messages": [],
+    "records": [
+        {
+            "id": "ecos-project-tracker/gantt-pm@f5aa520b-9746-4f71-bc72-fa27c36322c7",
+            "attributes": {
+                "title": "Задача 1",
+                "description": "<p>описание 1</p>",
+                "type": "task"
+            }
+        },
+        {
+            "id": "ecos-project-tracker/gantt-pm@8defa6a0-4995-45a9-a856-4931c8aef39e",
+            "attributes": {
+                "title": "Задача 2",
+                "description": "<p>описание 2</p>",
+                "type": "task"
+            }
+        },
+        {
+            "id": "ecos-project-tracker/gantt-pm@bd000c6b-1c77-4fdf-9fef-ec36857a95f2",
+            "attributes": {
+                "title": "Задача 3",
+                "description": "<p>33</p>",
+                "type": "task"
+            }
+        },
+        {
+            "id": "ecos-project-tracker/gantt-pm@cf386401-16cd-45e8-841c-0fee83faf35b",
+            "attributes": {
+                "title": "Этап 1",
+                "description": null,
+                "type": "summary"
+            }
+        },
+        {
+            "id": "ecos-project-tracker/gantt-pm@1778499d-fd7f-49ad-886a-5a0752444d49",
+            "attributes": {
+                "title": "Проработка",
+                "description": null,
+                "type": "milestone"
+            }
+        }
+    ],
+    "hasMore": false,
+    "totalCount": 5,
+    "version": 1
+}
+```
+
+##### Создание новой активности (задачи/этапа/вехи) 
+
+[gantt-linked-activity-create.http](./gantt-linked-activity-create.http)
+
+##### Обновление активности (задачи/этапа/вехи)
+
+[gantt-linked-activity-mutate.http](./gantt-linked-activity-mutate.http)
+
+##### Удаление активности (задачи/этапа/вехи)
+
+[gantt-linked-activity-delete.http](./gantt-linked-activity-delete.http)
