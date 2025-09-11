@@ -8,13 +8,13 @@ import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.commons.json.Json.mapper
 import ru.citeck.ecos.commons.json.YamlUtils
 import ru.citeck.ecos.events2.type.RecordEventsService
-import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.permissions.dto.PermissionType
 import ru.citeck.ecos.model.lib.type.dto.TypeAspectDef
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.model.lib.workspace.WorkspaceService
 import ru.citeck.ecos.model.type.service.TypeDesc
+import ru.citeck.ecos.model.type.service.TypeId.Companion.convertToTypeId
 import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
 import ru.citeck.ecos.records2.RecordConstants
@@ -119,7 +119,7 @@ class TypesRepoRecordsDao(
     }
 
     override fun getRecordAtts(recordId: String): TypeRecord? {
-        return typeService.getByIdWithMetaOrNull(recordId)?.let {
+        return typeService.getByIdWithMetaOrNull(workspaceService.convertToTypeId(recordId))?.let {
             buildTypeRecord(it)
         }
     }
@@ -140,8 +140,19 @@ class TypesRepoRecordsDao(
         private val audit: EntityMeta
     ) {
 
-        fun getLocalIdInWorkspace(): String {
-            return workspaceService?.removeWsPrefixFromId(typeDef.id) ?: typeDef.id
+        fun getId(): String {
+            return typeDef.id
+        }
+
+        @AttName("?id")
+        fun getRef(): EntityRef {
+            val localIdForRef = workspaceService?.addWsPrefixToId(typeDef.id, typeDef.workspace) ?: typeDef.id
+            return EntityRef.create(ID, localIdForRef)
+        }
+
+        @AttName(RecordConstants.ATT_WORKSPACE)
+        fun getWorkspaceRef(): EntityRef {
+            return ModelUtils.getWorkspaceRef(typeDef.workspace)
         }
 
         fun getCustomAspects(): List<TypeAspectDef> {
@@ -162,14 +173,6 @@ class TypesRepoRecordsDao(
             return aspectData.config[aspectCfgKey.configKey]
         }
 
-        fun getWorkspaceRef(): EntityRef {
-            return if (typeDef.workspace.isEmpty()) {
-                EntityRef.EMPTY
-            } else {
-                WorkspaceDesc.getRef(typeDef.workspace)
-            }
-        }
-
         fun getFormRef(): EntityRef {
             if (typeDef.id.isNotBlank() && typeDef.formRef.getLocalId() == TypeDefResolver.DEFAULT_FORM) {
                 return typeDef.formRef.withLocalId("type$" + typeDef.id)
@@ -185,12 +188,13 @@ class TypesRepoRecordsDao(
         }
 
         fun getData(): ByteArray {
-            return YamlUtils.toNonDefaultString(typeDef).toByteArray(StandardCharsets.UTF_8)
+            return YamlUtils.toNonDefaultString(typeDef.copy().withWorkspace("").build())
+                .toByteArray(StandardCharsets.UTF_8)
         }
 
         @AttName("?json")
         fun getJson(): JsonNode {
-            return mapper.toNonDefaultJson(typeDef)
+            return mapper.toNonDefaultJson(typeDef.copy().withWorkspace("").build())
         }
 
         @AttName("?disp")
@@ -198,7 +202,7 @@ class TypesRepoRecordsDao(
             if (!MLText.isEmpty(typeDef.name)) {
                 return typeDef.name
             }
-            return getLocalIdInWorkspace()
+            return getId()
         }
 
         @AttName("_type")

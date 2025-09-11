@@ -22,6 +22,7 @@ import ru.citeck.ecos.model.type.repository.TypeEntity
 import ru.citeck.ecos.model.type.service.TypesRegistryInitializer
 import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.model.type.service.TypesServiceImpl
+import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.RecordsServiceFactory
 import ru.citeck.ecos.test.commons.EcosWebAppApiMock
@@ -84,7 +85,11 @@ open class TypeTestBase {
         artifactHandler = TypeArtifactHandler(typeService, webAppCtxMock)
         records = recordsServices.recordsService
 
-        val typesRegistryInitializer = TypesRegistryInitializer(typeService, ecosAppsServiceFactory.localAppService)
+        val typesRegistryInitializer = TypesRegistryInitializer(
+            typeService,
+            ecosAppsServiceFactory.localAppService,
+            TypeDefResolver()
+        )
         typesRegistryInitializer.setAspectsRegistry(
             EcosAspectsRegistry(
                 EcosRegistryProps.DEFAULT,

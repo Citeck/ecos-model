@@ -23,7 +23,8 @@ class EModelTypeUtilsTest {
         "very long type very long type very long type very long type, " +
             "very-long-type-very-long-type-very-gpw5krc, " +
             "t_very_long_type_very_long_type_very_gpw5krc",
-        "%aa---bb##$, aa-bb, t_aa_bb"
+        "%aa---bb##$, aa-bb, t_aa_bb",
+        "aa:bb--_-=1, aa:bb-1, t_aa__bb_1"
     )
     fun generatedSrcIdAndTableNameTest(typeId: String, expectedSourceId: String, expectedTableId: String) {
 

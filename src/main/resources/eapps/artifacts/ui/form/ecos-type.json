@@ -466,7 +466,7 @@
                                     },
                                     "defaultValue": "ECOS_MODEL",
                                     "optionalWhenDisabled": false,
-                                    "customConditional": "show = !data.workspaceRef;",
+                                    "customConditional": "show = !data._workspace;",
                                     "type": "ecosSelect",
                                     "input": true,
                                     "reorder": false,
@@ -481,7 +481,7 @@
                                     "defaultValue": "",
                                     "refreshOn": [],
                                     "optionalWhenDisabled": false,
-                                    "customConditional": "show = !data.workspaceRef && (data['storageType'] === 'ECOS_MODEL' || data['storageType'] === 'DEFAULT' || !data['storageType']);",
+                                    "customConditional": "show = !data._workspace && (data['storageType'] === 'ECOS_MODEL' || data['storageType'] === 'DEFAULT' || !data['storageType']);",
                                     "type": "textfield",
                                     "input": true,
                                     "inputMasks": [
@@ -507,7 +507,7 @@
                                       "ru": "Рабочее пространство",
                                       "en": "Workspace"
                                     },
-                                    "key": "workspaceRef",
+                                    "key": "_workspace",
                                     "tooltip": {
                                       "ru": "Рабочее пространство, к которому относится данный тип.\nЕсли указано значение, тип считается «ограниченным» и может использоваться только внутри заданного воркспейса.\nЕсли значение не задано, тип считается глобальным и доступен во всех воркспейсах.",
                                       "en": "Workspace to which this type belongs. If defined, the type is considered scoped and can only be used within the specified workspace. Types without a workspace are treated as global and available across all workspaces."
@@ -526,14 +526,14 @@
                                     },
                                     "queryData": "",
                                     "refreshOn": [],
-                                    "customDefaultValue": "",
+                                    "customDefaultValue": "const currentWs = Citeck.Navigator.getWorkspaceId() || '';\nif (currentWs.indexOf('admin$') === 0) {\n  value = null;  \n} else {\n  value = \"emodel/workspace@\" + currentWs;\n}",
                                     "optionalWhenDisabled": false,
                                     "logic": [
                                       {
                                         "name": "enable-for-admin",
                                         "trigger": {
                                           "type": "javascript",
-                                          "javascript": "result = false;"
+                                          "javascript": "result = instance.options.formMode === 'CREATE' && _.get(data, 'currentUserAtts.isAdmin', false);"
                                         },
                                         "actions": [
                                           {
@@ -561,7 +561,7 @@
                                     "defaultValue": "",
                                     "refreshOn": [],
                                     "optionalWhenDisabled": false,
-                                    "customConditional": "show = !data.workspaceRef;",
+                                    "customConditional": "show = !data._workspace;",
                                     "type": "textfield",
                                     "input": true,
                                     "inputMasks": [
@@ -610,7 +610,7 @@
                                     },
                                     "defaultValue": "DEFAULT",
                                     "optionalWhenDisabled": false,
-                                    "customConditional": "show = !data.workspaceRef;",
+                                    "customConditional": "show = !data._workspace;",
                                     "type": "ecosSelect",
                                     "input": true,
                                     "reorder": false,

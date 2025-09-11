@@ -9,7 +9,10 @@ import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.model.lib.type.dto.*
 import ru.citeck.ecos.model.lib.utils.ModelUtils
+import ru.citeck.ecos.model.lib.workspace.WorkspaceService
 import ru.citeck.ecos.model.type.repository.TypeEntity
+import ru.citeck.ecos.model.type.service.TypeId.Companion.convertToTypeId
+import ru.citeck.ecos.model.type.service.TypeId.Companion.getTypeId
 import ru.citeck.ecos.model.type.service.dao.TypeRepoDao
 import ru.citeck.ecos.records3.record.mixin.impl.mutmeta.MutMeta
 import ru.citeck.ecos.records3.record.mixin.impl.mutmeta.MutMetaMixin
@@ -21,12 +24,15 @@ import java.util.*
 import kotlin.collections.LinkedHashSet
 
 @Component
-class TypeConverter(private val typeRepoDao: TypeRepoDao) {
+class TypeConverter(
+    private val typeRepoDao: TypeRepoDao,
+    private val workspaceService: WorkspaceService? = null
+) {
 
     var mutMetaMixin: MutMetaMixin? = null
 
     fun toEntity(dto: TypeDef): TypeEntity {
-        return toEntity(dto, typeRepoDao.findByExtId(dto.id))
+        return toEntity(dto, typeRepoDao.findByExtId(dto.getTypeId()))
     }
 
     fun toEntity(dto: TypeDef, entityToUpdate: TypeEntity?): TypeEntity {
@@ -48,7 +54,7 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
             entity.parent = null
         } else {
 
-            val parentEntity = typeRepoDao.findByExtId(typeDef.parentRef.getLocalId())
+            val parentEntity = typeRepoDao.findByExtId(workspaceService.convertToTypeId(typeDef.parentRef.getLocalId()))
                 ?: error("Parent type is not found: ${typeDef.parentRef.getLocalId()}")
             entity.parent = parentEntity
         }

@@ -29,7 +29,15 @@ class CustomWorkspaceApi(
         return workspaceService.isUserManagerOf(user, workspace)
     }
 
-    override fun getWorkspaceSysId(workspaces: List<String>): List<String> {
-        return workspaces.map { workspaceService.getSystemId(it) }
+    override fun mapIdentifiers(identifiers: List<String>, mappingType: WorkspaceApi.IdMappingType): List<String> {
+        return when (mappingType) {
+            WorkspaceApi.IdMappingType.WS_SYS_ID_TO_ID -> identifiers.map {
+                workspaceService.getWorkspaceIdBySystemId(it)
+            }
+            WorkspaceApi.IdMappingType.WS_ID_TO_SYS_ID -> identifiers.map {
+                workspaceService.getSystemId(it)
+            }
+            WorkspaceApi.IdMappingType.NO_MAPPING -> identifiers
+        }
     }
 }

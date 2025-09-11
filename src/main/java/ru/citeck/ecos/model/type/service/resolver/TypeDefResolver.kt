@@ -12,6 +12,7 @@ import ru.citeck.ecos.model.lib.role.dto.RoleDef
 import ru.citeck.ecos.model.lib.status.dto.StatusDef
 import ru.citeck.ecos.model.lib.type.dto.*
 import ru.citeck.ecos.model.lib.utils.ModelUtils
+import ru.citeck.ecos.model.lib.workspace.WorkspaceService
 import ru.citeck.ecos.model.type.service.utils.EModelTypeUtils
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.model.type.dto.AssocDef
@@ -20,7 +21,9 @@ import java.time.Duration
 import java.util.concurrent.TimeoutException
 
 @Component
-class TypeDefResolver {
+class TypeDefResolver(
+    val workspaceService: WorkspaceService? = null
+) {
 
     companion object {
 
@@ -91,6 +94,12 @@ class TypeDefResolver {
         if (typeDef.id.isBlank() || typeDef.id == "base") {
             context.types[typeDef.id] = resTypeDef
             return resTypeDef
+        }
+
+        if (resTypeDef.workspace.isNotBlank()) {
+            workspaceService?.addWsPrefixToId(resTypeDef.id, resTypeDef.workspace)?.let {
+                resTypeDef.withId(it)
+            }
         }
 
         if (EntityRef.isEmpty(resTypeDef.parentRef) && resTypeDef.id != "base") {

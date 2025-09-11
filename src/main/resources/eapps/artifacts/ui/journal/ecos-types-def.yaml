@@ -17,7 +17,7 @@ actions:
 
 columns:
 
-  - id: localIdInWorkspace
+  - id: id
     name: { ru: Идентификатор, en: Id }
     type: TEXT
 

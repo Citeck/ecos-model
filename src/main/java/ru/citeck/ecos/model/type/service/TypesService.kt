@@ -10,11 +10,11 @@ import java.util.function.Consumer
 
 interface TypesService {
 
-    fun addOnDeletedListener(listener: (String) -> Unit)
+    fun addOnDeletedListener(listener: (TypeId) -> Unit)
 
     fun addListenerWithMeta(onTypeChangedListener: BiConsumer<EntityWithMeta<TypeDef>?, EntityWithMeta<TypeDef>?>)
 
-    fun addListenerTypeHierarchyChangedListener(onTypeChangedListener: Consumer<Set<String>>)
+    fun addListenerTypeHierarchyChangedListener(onTypeChangedListener: Consumer<Set<TypeId>>)
 
     fun addListener(order: Float, onTypeChangedListener: BiConsumer<TypeDef?, TypeDef?>)
 
@@ -30,36 +30,34 @@ interface TypesService {
 
     fun getAllWithMeta(): List<EntityWithMeta<TypeDef>>
 
-    fun getAll(typeIds: Collection<String>): List<TypeDef>
-
-    fun getAllWithMeta(typeIds: Collection<String>): List<EntityWithMeta<TypeDef>>
+    fun getAllWithMeta(typeIds: Collection<TypeId>): List<EntityWithMeta<TypeDef>>
 
     fun getAllWithMeta(max: Int, skip: Int, predicate: Predicate, sort: List<SortBy>): List<EntityWithMeta<TypeDef>>
 
     fun getAll(max: Int, skip: Int, predicate: Predicate, sort: List<SortBy>): List<TypeDef>
 
-    fun getById(typeId: String): TypeDef
+    fun getById(typeId: TypeId): TypeDef
 
-    fun getByIdWithMetaOrNull(typeId: String): EntityWithMeta<TypeDef>?
+    fun getByIdWithMetaOrNull(typeId: TypeId): EntityWithMeta<TypeDef>?
 
-    fun getByIdOrNull(typeId: String): TypeDef?
+    fun getByIdOrNull(typeId: TypeId): TypeDef?
 
-    fun getOrCreateByExtId(typeId: String): TypeDef
+    fun getOrCreateByExtId(typeId: TypeId): TypeDef
 
-    fun getParentIds(id: String): List<String>
+    fun getParentIds(id: TypeId): List<TypeId>
 
-    fun getChildren(typeId: String): List<String>
+    fun getChildren(typeId: TypeId): List<TypeId>
 
-    fun expandTypes(typeIds: Collection<String>): List<TypeDef>
+    fun expandTypes(typeIds: Collection<TypeId>): List<TypeDef>
 
-    fun getInhAttributes(typeId: String): List<AttributeDef>
+    fun getInhAttributes(typeId: TypeId): List<AttributeDef>
 
-    fun delete(typeId: String)
+    fun delete(typeId: TypeId)
 
     /**
      * Delete type with its children
      */
-    fun deleteWithChildren(typeId: String)
+    fun deleteWithChildren(typeId: TypeId)
 
     fun save(dto: TypeDef): TypeDef
 

@@ -1,6 +1,7 @@
 package ru.citeck.ecos.model.domain.type
 
 import ru.citeck.ecos.model.type.repository.TypeEntity
+import ru.citeck.ecos.model.type.service.TypeId
 import ru.citeck.ecos.model.type.service.dao.TypeRepoDao
 import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records3.RecordsServiceFactory
@@ -34,16 +35,18 @@ class TypeRepoMock(recordsServiceFactory: RecordsServiceFactory) : TypeRepoDao {
         data.remove(entity.extId)
     }
 
-    override fun findByExtId(extId: String): TypeEntity? {
-        return data[extId]
+    override fun findByExtId(typeId: TypeId): TypeEntity? {
+        return data[typeId.id]
     }
 
-    override fun findAllByExtIds(extIds: Set<String>): Set<TypeEntity> {
-        return extIds.mapNotNull { findByExtId(it) }.toSet()
+    override fun findAllByTypeIds(typeIds: Collection<TypeId>): Set<TypeEntity> {
+        return typeIds.mapNotNullTo(LinkedHashSet()) { findByExtId(it) }
     }
 
-    override fun getChildrenIds(parentId: String): Set<String> {
-        return data.values.filter { it.parent?.extId == parentId }.map { it.extId }.toSet()
+    override fun getChildrenIds(parentId: TypeId): Set<TypeId> {
+        return data.values.filter { it.parent?.extId == parentId.id }
+            .map { TypeId.create(it.extId) }
+            .toSet()
     }
 
     override fun findAll(predicate: Predicate, max: Int, skip: Int, sort: List<SortBy>): List<TypeEntity> {

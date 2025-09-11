@@ -3,6 +3,7 @@ package ru.citeck.ecos.model.type.service.utils
 import com.google.common.primitives.Longs
 import org.apache.commons.codec.binary.Base32
 import ru.citeck.ecos.model.EcosModelApp
+import ru.citeck.ecos.model.type.service.TypeId
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import java.util.zip.CRC32
@@ -22,8 +23,8 @@ object EModelTypeUtils {
     const val STORAGE_TYPE_DEFAULT = "DEFAULT"
     const val STORAGE_TYPE_REFERENCE = "REFERENCE"
 
-    private val INVALID_TABLE_SYMBOLS_REGEX = "[^a-z\\d_]+".toRegex()
-    private val INVALID_SOURCE_ID_SYMBOLS_REGEX = "[^a-z\\d-]+".toRegex()
+    private val INVALID_TABLE_SYMBOLS_REGEX = "[^a-z\\d:_]+".toRegex()
+    private val INVALID_SOURCE_ID_SYMBOLS_REGEX = "[^a-z\\d:-]+".toRegex()
 
     private val CAMEL_REGEX = "(?<=[a-z])[A-Z]".toRegex()
 
@@ -55,11 +56,25 @@ object EModelTypeUtils {
     }
 
     fun getEmodelSourceId(typeId: String): String {
-        return createId(typeId, INVALID_SOURCE_ID_SYMBOLS_REGEX, "-", 42, false)
+        return createId(
+            typeId = typeId,
+            invalidSymbolsRegex = INVALID_SOURCE_ID_SYMBOLS_REGEX,
+            delimiter = "-",
+            maxLen = 42,
+            addPrefix = false,
+            replaceWsDelim = false
+        )
     }
 
     fun getEmodelSourceTableId(typeId: String): String {
-        return createId(typeId, INVALID_TABLE_SYMBOLS_REGEX, "_", 42, true)
+        return createId(
+            typeId = typeId,
+            invalidSymbolsRegex = INVALID_TABLE_SYMBOLS_REGEX,
+            delimiter = "_",
+            maxLen = 42,
+            addPrefix = true,
+            replaceWsDelim = true
+        )
     }
 
     private fun createId(
@@ -67,7 +82,8 @@ object EModelTypeUtils {
         invalidSymbolsRegex: Regex,
         delimiter: String,
         maxLen: Int,
-        addPrefix: Boolean
+        addPrefix: Boolean,
+        replaceWsDelim: Boolean
     ): String {
         var result = CAMEL_REGEX.replace(typeId) { "_${it.value}" }.lowercase()
         result = result.replace(invalidSymbolsRegex, delimiter)
@@ -79,6 +95,9 @@ object EModelTypeUtils {
         val doubleDelim = delimiter.repeat(2)
         while (result.contains(doubleDelim)) {
             result = result.replace(doubleDelim, delimiter)
+        }
+        if (replaceWsDelim) {
+            result = result.replace(TypeId.WS_DELIM, doubleDelim)
         }
         if (result.endsWith(delimiter)) {
             result = result.substring(0, result.length - 1)

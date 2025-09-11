@@ -11,9 +11,12 @@ interface TypeRepository : JpaRepository<TypeEntity, Long>, JpaSpecificationExec
     @Query("SELECT TYPE FROM TypeEntity TYPE WHERE TYPE.extId = ?1")
     fun findByExtId(extId: String): TypeEntity?
 
-    @Query("SELECT TYPE FROM TypeEntity TYPE WHERE TYPE.extId IN ?1")
-    fun findAllByExtIds(extIds: Set<String>): Set<TypeEntity>
+    @Query("SELECT TYPE FROM TypeEntity TYPE WHERE TYPE.workspace = ?1 AND TYPE.extId = ?2")
+    fun findByExtIdInWs(workspace: String, extId: String): TypeEntity?
 
-    @Query("SELECT TYPE.extId FROM TypeEntity TYPE WHERE TYPE.parent.extId = ?1")
-    fun getChildrenIds(parentId: String): Set<String>
+    @Query("SELECT TYPE FROM TypeEntity TYPE WHERE TYPE.workspace = ?1 AND TYPE.extId IN ?2")
+    fun findAllByExtIdInWs(workspace: String, extId: List<String>): List<TypeEntity>
+
+    @Query("SELECT TYPE FROM TypeEntity TYPE WHERE TYPE.workspace = ?1 AND TYPE.parent.workspace = ?1 AND TYPE.parent.extId = ?2")
+    fun getChildren(parentWorkspace: String, parentId: String): List<TypeEntity>
 }
