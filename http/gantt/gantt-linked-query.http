@@ -4,17 +4,18 @@ Content-Type: application/json
 
 {
     "query": {
-        "sourceId": "ecos-project-tracker/gantt-project-management",
+        "sourceId": "ecos-project-tracker/gantt-pm",
         "query": {
-            "linkedWithType": "emodel/type@some-type",
-            "linkedWithRef": "emodel/some-type@123",
-            "currentRef": "emodel/contract@23",
-            "workspace": "current_workspace"
+            "linkedWithType": null,
+            "linkedWithRef": null,
+            "currentRef": "emodel/project@068a6fe8-2265-4f24-9d24-b972e7fdebb7",
+            "workspace": "PROJECT1"
         }
     },
     "attributes": {
-        "activities": "activities?json",
-        "dependencies": "dependencies?json"
+        "title": "activity:title",
+        "description": "activity:description",
+        "type": "activity:type"
     }
 }
 

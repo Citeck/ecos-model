@@ -1,0 +1,14 @@
+POST http://localhost/gateway/api/records/mutate
+Authorization: Basic admin admin
+Content-Type: application/json
+
+{
+    "records": [
+        {
+            "id": "ecos-project-tracker/gantt-pm@181f1e6f-3d13-4d13-a78b-17357652efff",
+            "attributes": {
+                "activity:description": "Срочно!"
+            }
+        }
+    ]
+}
