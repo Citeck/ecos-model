@@ -41,3 +41,16 @@ model:
     - id: roleSubType
     - id: roleIsManager
       type: BOOLEAN
+aspects:
+  - ref: emodel/aspect@import-data-config
+    config:
+      enabledDefaultVariant: false
+      variants:
+        - variantId: authority-group
+          name:
+            ru: Группы
+            en: Groups
+          camelDslRef: integrations/camel-dsl@authority-group-import-data
+          allowedFor:
+            - GROUP_ECOS_ADMINISTRATORS
+    inheritConfig: false
