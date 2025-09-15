@@ -146,6 +146,7 @@ class AuthoritiesSyncService(
                 v.config,
                 v.enabled,
                 v.version,
+                v.priority,
                 v.authorityType,
                 v.manageNewAuthorities,
                 v.repeatDelayDuration
@@ -295,11 +296,11 @@ class AuthoritiesSyncService(
 
     private fun createContext(syncId: String): AuthoritiesSyncContext<Any> {
 
-        val ref = EntityRef.create(EcosModelApp.NAME, SOURCE_ID, syncId)
+        val syncRef = EntityRef.create(EcosModelApp.NAME, SOURCE_ID, syncId)
 
         return object : AuthoritiesSyncContext<Any> {
             override fun setState(state: Any?) {
-                recordsService.mutateAtt(ref, "state", state)
+                recordsService.mutateAtt(syncRef, "state", state)
             }
 
             override fun updateAuthorities(type: AuthorityType, authorities: List<ObjectData>) {
@@ -330,14 +331,41 @@ class AuthoritiesSyncService(
                     }
                     syncContext.set(true)
                     try {
-                        val isEmptyManagedBySync = EntityRef.isEmpty(currentAuthorityAtts.managedBySync)
-                        if (currentAuthorityAtts.notExists == true || isEmptyManagedBySync) {
-                            attsCopy["managedBySync"] = ref
+                        var managedBySyncShouldBeUpdated = currentAuthorityAtts.notExists == true ||
+                            EntityRef.isEmpty(currentAuthorityAtts.managedBySync)
+
+                        if (!managedBySyncShouldBeUpdated && currentAuthorityAtts.managedBySync != syncRef) {
+                            val syncBefore = syncInstances[currentAuthorityAtts.managedBySync?.getLocalId() ?: ""]
+                            val currentSync = syncInstances[syncRef.getLocalId()]
+                            if (syncBefore != null && currentSync != null) {
+                                if (syncBefore.config.priority < currentSync.config.priority) {
+                                    log.debug {
+                                        "Update sync ${syncBefore.id} -> ${currentSync.id} for record $authorityRef"
+                                    }
+                                    managedBySyncShouldBeUpdated = true
+                                }
+                            } else {
+                                log.debug {
+                                    "Current sync or before sync is null and priority checking will be skipped. " +
+                                    "Before sync: $syncBefore Current sync: $currentSync"
+                                }
+                            }
                         }
+
+                        if (currentAuthorityAtts.notExists == true || managedBySyncShouldBeUpdated) {
+                            attsCopy["managedBySync"] = syncRef
+                        }
+
                         if (currentAuthorityAtts.notExists == true) {
                             recordsService.create(type.sourceId, attsCopy)
-                        } else if (isEmptyManagedBySync || currentAuthorityAtts.managedBySync == ref) {
+                        } else if (managedBySyncShouldBeUpdated || currentAuthorityAtts.managedBySync == syncRef) {
                             recordsService.mutate(RecordAtts(EntityRef.create(type.sourceId, ""), attsCopy))
+                        } else {
+                            log.debug {
+                                "Sync '${syncRef.getLocalId()}' can't update authority $authorityRef " +
+                                    "because it is managed by other synchronization with same or " +
+                                    "higher priority: '${currentAuthorityAtts.managedBySync?.getLocalId()}'"
+                            }
                         }
                     } finally {
                         syncContext.remove()
@@ -395,6 +423,7 @@ class AuthoritiesSyncService(
         val config: ObjectData,
         val enabled: Boolean,
         val version: Int,
+        val priority: Int,
         val authorityType: AuthorityType,
         val manageNewAuthorities: Boolean,
         val repeatDelayDuration: String

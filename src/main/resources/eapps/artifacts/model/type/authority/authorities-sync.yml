@@ -30,6 +30,11 @@ model:
         ru: Включено
         en: Enabled
       type: BOOLEAN
+    - id: priority
+      name:
+        ru: Приоритет
+        en: Priority
+      type: NUMBER
     - id: config
       name:
         ru: Конфигурация
