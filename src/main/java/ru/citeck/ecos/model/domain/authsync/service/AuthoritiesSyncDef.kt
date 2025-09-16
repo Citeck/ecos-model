@@ -14,6 +14,7 @@ class AuthoritiesSyncDef(
     val version: Int,
     val type: String,
     val enabled: Boolean,
+    val priority: Int,
     val authorityType: AuthorityType,
     val manageNewAuthorities: Boolean,
     val repeatDelayDuration: String,
@@ -44,6 +45,7 @@ class AuthoritiesSyncDef(
         var version: Int = 0
         var type: String = ""
         var enabled: Boolean = false
+        var priority: Int = 0
         var authorityType: AuthorityType = AuthorityType.PERSON
         var manageNewAuthorities: Boolean = false
         var repeatDelayDuration: String = ""
@@ -55,6 +57,7 @@ class AuthoritiesSyncDef(
             this.version = base.version
             this.type = base.type
             this.enabled = base.enabled
+            this.priority = base.priority
             this.authorityType = base.authorityType
             this.manageNewAuthorities = base.manageNewAuthorities
             this.repeatDelayDuration = base.repeatDelayDuration
@@ -86,6 +89,11 @@ class AuthoritiesSyncDef(
             return this
         }
 
+        fun withPriority(priority: Int?): Builder {
+            this.priority = priority ?: 0
+            return this
+        }
+
         fun withAuthorityType(authorityType: AuthorityType?): Builder {
             this.authorityType = authorityType ?: AuthorityType.PERSON
             return this
@@ -113,6 +121,7 @@ class AuthoritiesSyncDef(
                 version = version,
                 type = type,
                 enabled = enabled,
+                priority = priority,
                 authorityType = authorityType,
                 manageNewAuthorities = manageNewAuthorities,
                 repeatDelayDuration = repeatDelayDuration,
