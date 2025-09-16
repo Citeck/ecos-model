@@ -1,10 +1,9 @@
-package ru.citeck.ecos.model.domain.doclib.job
+package ru.citeck.ecos.model.domain.treesearch
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import jakarta.annotation.PostConstruct
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import ru.citeck.ecos.model.domain.doclib.desc.DocLibDirDesc
-import ru.citeck.ecos.model.domain.doclib.service.DocLibDirUtils
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.predicate.model.Predicates
@@ -12,19 +11,24 @@ import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.txn.lib.TxnContext
+import ru.citeck.ecos.webapp.api.EcosWebAppApi
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.lock.EcosAppLockService
+import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import ru.citeck.ecos.webapp.lib.model.type.registry.EcosTypesRegistry
 import java.time.Duration
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.locks.ReentrantLock
 import kotlin.math.max
 
 @Component
-class DocLibDirPathUpdateJob(
+class TreeSearchPathUpdateJob(
     private val appLockService: EcosAppLockService,
     private val recordsService: RecordsService,
-    private val typesRegistry: EcosTypesRegistry
+    private val typesRegistry: EcosTypesRegistry,
+    private val webAppApi: EcosWebAppApi
 ) {
 
     companion object {
@@ -32,13 +36,58 @@ class DocLibDirPathUpdateJob(
 
         private val DEFAULT_FULL_UPDATE_DELAY = Duration.ofMinutes(10).toMillis()
 
-        private const val LOCK_KEY = "doclib-dir-updater"
-        private const val DOCLIB_DIRECTORY_TYPE_ID = "doclib-directory"
+        private const val LOCK_KEY = "tree-search-updater"
     }
 
     private val manualUpdateUntil = AtomicLong(0L)
     private val fullUpdateRequired = AtomicBoolean()
     private val lastFullUpdateCompletedAt = AtomicLong(0L)
+
+    @Volatile
+    private var typesWithTreeSearchAspect: Set<String> = emptySet()
+    private val typesWithTreeSearchUpdateLock = ReentrantLock()
+
+    @PostConstruct
+    fun init() {
+        webAppApi.doWhenAppReady {
+            updateTypesWithTreeSearchAspect()
+            typesRegistry.listenEvents(this::handleTypeUpdateEvent)
+        }
+    }
+
+    private fun handleTypeUpdateEvent(id: String, before: TypeDef?, after: TypeDef?) {
+        fun hasTreeSearchAspect(typeDef: TypeDef?): Boolean {
+            typeDef ?: return false
+            return typeDef.aspects.any { it.ref.getLocalId() == TreeSearchDesc.ASPECT_ID }
+        }
+        val hasBefore = hasTreeSearchAspect(before)
+        val hasAfter = hasTreeSearchAspect(after)
+
+        if (hasBefore != hasAfter) {
+            if (typesWithTreeSearchUpdateLock.tryLock(5, TimeUnit.SECONDS)) {
+                try {
+                    val newTypesSet = HashSet(typesWithTreeSearchAspect)
+                    if (hasAfter) {
+                        if (newTypesSet.all { !typesRegistry.isSubType(id, it) }) {
+                            log.info { "Type '$id' was registered to tree search update job" }
+                            newTypesSet.add(id)
+                        }
+                    } else {
+                        log.info { "Type '$id' was unregistered from tree search update job" }
+                        newTypesSet.remove(id)
+                    }
+                    typesWithTreeSearchAspect = newTypesSet
+                } finally {
+                    typesWithTreeSearchUpdateLock.unlock()
+                }
+            } else {
+                log.info {
+                    "typesWithTreeSearchUpdateLock can't be acquired in 5 seconds. " +
+                        "Type '$id' with tree search aspect will be registered later"
+                }
+            }
+        }
+    }
 
     @Scheduled(fixedDelayString = "PT30S")
     fun update() {
@@ -63,19 +112,68 @@ class DocLibDirPathUpdateJob(
         lastFullUpdateCompletedAt.set(System.currentTimeMillis())
     }
 
+    @Scheduled(fixedDelayString = "PT10S")
+    fun updateTypesWithTreeSearchAspect() {
+        if (!typesWithTreeSearchUpdateLock.tryLock(30, TimeUnit.SECONDS)) {
+            log.warn { "typesWithTreeSearchUpdateLock can't be acquired after 30 seconds." }
+            return
+        }
+        try {
+            val typesWithAspect = typesRegistry.getAllValues().values.filter { entry ->
+                entry.entity.aspects.any { it.ref.getLocalId() == TreeSearchDesc.ASPECT_ID }
+            }
+            val typeIdsWithAspect = typesWithAspect.mapTo(HashSet()) { it.entity.id }
+            val checkedPath = ArrayList<TypeDef>()
+            val filteredTypeIds = HashSet<String>()
+
+            // filter children types if parent already registered to update
+            for (typeDefWithMeta in typesWithAspect) {
+                val typeId = typeDefWithMeta.entity.id
+                if (!typeIdsWithAspect.contains(typeId) || filteredTypeIds.contains(typeId)) {
+                    continue
+                }
+                checkedPath.clear()
+                checkedPath.add(typeDefWithMeta.entity)
+
+                var parentTypeId = typeDefWithMeta.entity.parentRef.getLocalId()
+                while (parentTypeId.isNotBlank() && parentTypeId != "base") {
+                    if (typeIdsWithAspect.contains(parentTypeId) || filteredTypeIds.contains(parentTypeId)) {
+                        checkedPath.forEach {
+                            filteredTypeIds.add(it.id)
+                            typeIdsWithAspect.remove(it.id)
+                        }
+                        break
+                    } else {
+                        val parentDef = typesRegistry.getValue(parentTypeId) ?: break
+                        checkedPath.add(parentDef)
+                        parentTypeId = parentDef.parentRef.getLocalId()
+                    }
+                }
+            }
+            typesWithTreeSearchAspect = typeIdsWithAspect
+        } finally {
+            typesWithTreeSearchUpdateLock.unlock()
+        }
+    }
+
     private fun updateAllByJob(timeoutMs: Long): Boolean {
         log.debug { "Full updating started" }
         val updatingStartedAt = System.currentTimeMillis()
         return appLockService.doInSyncOrSkip(LOCK_KEY, Duration.ofMillis(timeoutMs)) {
             val lockAcquiredAt = System.currentTimeMillis()
-            updateAllForTypeImpl(
-                DOCLIB_DIRECTORY_TYPE_ID,
-                true,
-                System.currentTimeMillis() + Duration.ofMinutes(30).toMillis()
-            )
+            val updateUntilMs = System.currentTimeMillis() + Duration.ofMinutes(30).toMillis()
+            var jobDone = true
+            log.debug { "Update types: " + typesWithTreeSearchAspect.joinToString() }
+            for (typeId in typesWithTreeSearchAspect) {
+                jobDone = updateAllForTypeImpl(typeId, processChildTypes = true, updateUntilMs)
+                if (!jobDone) {
+                    log.warn { "Tree updating interrupted by timeout after 30 minutes. Type: '$typeId'" }
+                    break
+                }
+            }
             log.debug {
                 "Job completed in ${System.currentTimeMillis() - lockAcquiredAt}ms. " +
-                    "Lock waiting: ${lockAcquiredAt - updatingStartedAt}ms"
+                    "Lock waiting: ${lockAcquiredAt - updatingStartedAt}ms. Job done: $jobDone"
             }
         }
     }
@@ -88,8 +186,9 @@ class DocLibDirPathUpdateJob(
         try {
             appLockService.doInSyncOrSkip(LOCK_KEY, timeout) {
                 val lockAcquiredAt = System.currentTimeMillis()
+                val processedSourceIds = HashSet<String>()
                 for (typeId in types) {
-                    if (!updateAllForTypeImpl(typeId, false, updateUntilMs)) {
+                    if (!updateAllForTypeImpl(typeId, false, updateUntilMs, processedSourceIds)) {
                         fullUpdateRequired.set(true)
                         log.debug { "Manual updating doesn't completed in $timeout. Full updating will be performed." }
                         break
@@ -131,13 +230,13 @@ class DocLibDirPathUpdateJob(
                         Predicates.eq("${RecordConstants.ATT_PARENT}.${RecordConstants.ATT_TYPE}", typeRef),
                         Predicates.or(
                             Predicates.eq(
-                                "(${RecordConstants.ATT_PARENT}.${DocLibDirDesc.ATT_DIR_PATH_HASH} " +
-                                    "= ${DocLibDirDesc.ATT_PARENT_DIR_PATH_HASH})",
+                                "(${RecordConstants.ATT_PARENT}.\"${TreeSearchDesc.ATT_PATH_HASH}\" " +
+                                    "= \"${TreeSearchDesc.ATT_PARENT_PATH_HASH}\")",
                                 false
                             ),
                             Predicates.and(
                                 Predicates.notEmpty(RecordConstants.ATT_PARENT),
-                                Predicates.empty(DocLibDirDesc.ATT_DIR_PATH_HASH)
+                                Predicates.empty(TreeSearchDesc.ATT_PATH_HASH)
                             )
                         )
                     )
@@ -156,14 +255,14 @@ class DocLibDirPathUpdateJob(
             while (directoriesToUpdate.isNotEmpty()) {
                 log.info { "Found ${directoriesToUpdate.size} directories to update for type $typeId" }
                 for (directoryAtts in directoriesToUpdate.values) {
-                    val newPath = listOf(*directoryAtts.parentDirPath.toTypedArray(), directoryAtts.parentRef)
+                    val newPath = listOf(*directoryAtts.parentTreePath.toTypedArray(), directoryAtts.parentRef)
                     TxnContext.doInNewTxn {
                         recordsService.mutate(
                             directoryAtts.id,
                             mapOf(
-                                DocLibDirDesc.ATT_DIR_PATH to newPath,
-                                DocLibDirDesc.ATT_PARENT_DIR_PATH_HASH to directoryAtts.parentDirPathHash,
-                                DocLibDirDesc.ATT_DIR_PATH_HASH to DocLibDirUtils.calculatePathHash(newPath)
+                                TreeSearchDesc.ATT_PATH to newPath,
+                                TreeSearchDesc.ATT_PARENT_PATH_HASH to directoryAtts.parentTreePathHash,
+                                TreeSearchDesc.ATT_PATH_HASH to TreeSearchDesc.calculatePathHash(newPath)
                             )
                         )
                     }
@@ -191,9 +290,9 @@ class DocLibDirPathUpdateJob(
         val id: EntityRef,
         @AttName("_parent?id!")
         val parentRef: EntityRef,
-        @AttName("_parent.dirPath[]?id!")
-        val parentDirPath: List<EntityRef>,
-        @AttName("_parent.dirPathHash!")
-        val parentDirPathHash: String
+        @AttName("_parent.${TreeSearchDesc.ATT_PATH}[]?id!")
+        val parentTreePath: List<EntityRef>,
+        @AttName("_parent.${TreeSearchDesc.ATT_PATH_HASH}!")
+        val parentTreePathHash: String
     )
 }

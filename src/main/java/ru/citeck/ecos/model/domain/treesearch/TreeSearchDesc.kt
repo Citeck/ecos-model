@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.domain.doclib.service
+package ru.citeck.ecos.model.domain.treesearch
 
 import com.google.common.primitives.Longs
 import org.apache.commons.codec.digest.MurmurHash3
@@ -6,7 +6,14 @@ import org.apache.commons.io.output.ByteArrayOutputStream
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import java.util.*
 
-object DocLibDirUtils {
+object TreeSearchDesc {
+
+    const val ASPECT_ID = "tree-search"
+    const val ASPECT_PREFIX = ASPECT_ID
+
+    const val ATT_PATH = "$ASPECT_PREFIX:path"
+    const val ATT_PATH_HASH = "$ASPECT_PREFIX:pathHash"
+    const val ATT_PARENT_PATH_HASH = "$ASPECT_PREFIX:parentPathHash"
 
     fun calculatePathHash(path: List<EntityRef>): String {
         if (path.isEmpty()) {

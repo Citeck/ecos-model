@@ -1,4 +1,4 @@
-package ru.citeck.ecos.model.domain.doclib.listener
+package ru.citeck.ecos.model.domain.treesearch
 
 import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Component
@@ -6,9 +6,6 @@ import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.events2.EventsService
 import ru.citeck.ecos.events2.listener.ListenerConfig
 import ru.citeck.ecos.events2.type.RecordChangedEvent
-import ru.citeck.ecos.model.domain.doclib.desc.DocLibDirDesc
-import ru.citeck.ecos.model.domain.doclib.job.DocLibDirPathUpdateJob
-import ru.citeck.ecos.model.domain.doclib.service.DocLibDirUtils
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.dto.RecordAtts
@@ -18,10 +15,10 @@ import ru.citeck.ecos.webapp.api.entity.EntityRef
 import java.time.Duration
 
 @Component
-class DocLibDirPathUpdateListener(
+class TreeSearchPathUpdateListener(
     private val eventsService: EventsService,
     private val recordsService: RecordsService,
-    private val pathUpdateJob: DocLibDirPathUpdateJob
+    private val pathUpdateJob: TreeSearchPathUpdateJob
 ) {
     @PostConstruct
     fun init() {
@@ -30,10 +27,9 @@ class DocLibDirPathUpdateListener(
                 withEventType(RecordChangedEvent.TYPE)
                 withTransactional(true)
                 withDataClass(ChildrenAssocsChangedEvent::class.java)
-                withLocal(true)
                 withFilter(
                     Predicates.and(
-                        Predicates.eq("record._type.isSubTypeOf.doclib-directory?bool", true),
+                        Predicates.eq("record._aspects._has.tree-search?bool", true),
                         Predicates.eq("diff._has.children?bool", true)
                     )
                 )
@@ -45,13 +41,13 @@ class DocLibDirPathUpdateListener(
     private fun processEvent(event: ChildrenAssocsChangedEvent) {
         val childrenAssocDiff = event.assocs.find { it.assocId == "children" } ?: return
         val mutAtts = mutableListOf<RecordAtts>()
-        val newPath = listOf(*event.dirPath.toTypedArray(), event.ref)
-        val newPathHash = DocLibDirUtils.calculatePathHash(newPath)
+        val newPath = listOf(*event.treePath.toTypedArray(), event.ref)
+        val newPathHash = TreeSearchDesc.calculatePathHash(newPath)
         childrenAssocDiff.added.forEach {
             val atts = RecordAtts(it)
-            atts[DocLibDirDesc.ATT_DIR_PATH] = newPath
-            atts[DocLibDirDesc.ATT_DIR_PATH_HASH] = newPathHash
-            atts[DocLibDirDesc.ATT_PARENT_DIR_PATH_HASH] = event.dirPathHash
+            atts[TreeSearchDesc.ATT_PATH] = newPath
+            atts[TreeSearchDesc.ATT_PATH_HASH] = newPathHash
+            atts[TreeSearchDesc.ATT_PARENT_PATH_HASH] = event.treePathHash
             mutAtts.add(atts)
         }
         AuthContext.runAsSystem {
@@ -69,10 +65,10 @@ class DocLibDirPathUpdateListener(
         val typeId: String,
         @AttName("assocs[]?json!")
         val assocs: List<AssocsDiff>,
-        @AttName("record.dirPath[]?id!")
-        val dirPath: List<EntityRef>,
-        @AttName("record.dirPathHash?str!")
-        val dirPathHash: String
+        @AttName("record.${TreeSearchDesc.ATT_PATH}[]?id!")
+        val treePath: List<EntityRef>,
+        @AttName("record.${TreeSearchDesc.ATT_PATH_HASH}?str!")
+        val treePathHash: String
     )
 
     class AssocsDiff(
