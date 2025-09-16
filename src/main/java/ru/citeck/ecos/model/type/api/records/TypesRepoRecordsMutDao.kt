@@ -45,8 +45,11 @@ class TypesRepoRecordsMutDao(
             typeService.getById(workspaceService.convertToTypeId(record.id))
         } else {
             val customId = record.attributes["id"].asText()
-            val workspace = record.attributes[WORKSPACE_ATT].asText().ifBlank {
+            var workspace = record.attributes[WORKSPACE_ATT].asText().ifBlank {
                 record.attributes[RecordConstants.ATT_WORKSPACE].asText().toEntityRef().getLocalId()
+            }
+            if (!isWorkspaceShouldHasScopedTypes(workspace)) {
+                workspace = ""
             }
             val existingDef = typeService.getByIdOrNull(TypeId.create(workspace, customId))
             if (existingDef != null) {
@@ -96,7 +99,10 @@ class TypesRepoRecordsMutDao(
             !mutAtts.has(WORKSPACE_ATT) &&
             mutAtts.has(RecordConstants.ATT_WORKSPACE)
         ) {
-            mutAtts[WORKSPACE_ATT] = mutAtts[RecordConstants.ATT_WORKSPACE].asText().toEntityRef().getLocalId()
+            val workspaceId = mutAtts[RecordConstants.ATT_WORKSPACE].asText().toEntityRef().getLocalId()
+            if (isWorkspaceShouldHasScopedTypes(workspaceId)) {
+                mutAtts[WORKSPACE_ATT] = workspaceId
+            }
             mutAtts.remove(RecordConstants.ATT_WORKSPACE)
         }
 
@@ -106,6 +112,10 @@ class TypesRepoRecordsMutDao(
         recToMutate.aspects = mutAspects
 
         return saveMutatedRec(recToMutate)
+    }
+
+    private fun isWorkspaceShouldHasScopedTypes(workspaceId: String): Boolean {
+        return workspaceId != ModelUtils.DEFAULT_WORKSPACE_ID && !workspaceId.startsWith("admin$")
     }
 
     private fun applyAspectsData(
