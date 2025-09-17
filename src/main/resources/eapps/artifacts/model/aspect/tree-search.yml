@@ -1,0 +1,12 @@
+---
+id: tree-search
+name:
+  ru: Рекурсивный поиск по дереву
+  en: Recursive tree search
+system: true
+systemAttributes:
+    - id: parentPathHash
+    - id: pathHash
+    - id: path
+      type: ASSOC
+      multiple: true

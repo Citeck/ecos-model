@@ -1,0 +1,34 @@
+---
+id: category
+name:
+  ru: Категория
+  en: Category
+
+system: true
+
+storageType: ECOS_MODEL
+parentRef: emodel/type@user-base
+
+workspaceScope: PRIVATE
+
+queryPermsPolicy: PUBLIC
+
+model:
+  attributes:
+    - id: name
+      name:
+        ru: Имя
+        en: Name
+      type: MLTEXT
+    - id: children
+      multiple: true
+      name:
+        ru: Вложенные категории
+        en: Inner categories
+      type: ASSOC
+      config:
+        child: true
+        typeRef: emodel/type@category
+
+aspects:
+  - ref: emodel/aspect@tree-search
