@@ -1,7 +1,7 @@
 ---
 id: category
 name:
-  ru: Категория2
+  ru: Категория
   en: Category
 
 system: true
@@ -21,6 +21,7 @@ model:
         en: Name
       type: MLTEXT
     - id: children
+      multiple: true
       name:
         ru: Вложенные категории
         en: Inner categories

@@ -6,6 +6,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.records2.RecordConstants
+import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
@@ -56,10 +57,12 @@ class TreeSearchPathUpdateJob(
     }
 
     private fun handleTypeUpdateEvent(id: String, before: TypeDef?, after: TypeDef?) {
+
         fun hasTreeSearchAspect(typeDef: TypeDef?): Boolean {
             typeDef ?: return false
             return typeDef.aspects.any { it.ref.getLocalId() == TreeSearchDesc.ASPECT_ID }
         }
+
         val hasBefore = hasTreeSearchAspect(before)
         val hasAfter = hasTreeSearchAspect(after)
 
@@ -83,7 +86,7 @@ class TreeSearchPathUpdateJob(
             } else {
                 log.info {
                     "typesWithTreeSearchUpdateLock can't be acquired in 5 seconds. " +
-                        "Type '$id' with tree search aspect will be registered later"
+                            "Type '$id' with tree search aspect will be registered later"
                 }
             }
         }
@@ -165,7 +168,12 @@ class TreeSearchPathUpdateJob(
             var jobDone = true
             log.debug { "Update types: " + typesWithTreeSearchAspect.joinToString() }
             for (typeId in typesWithTreeSearchAspect) {
-                jobDone = updateAllForTypeImpl(typeId, processChildTypes = true, updateUntilMs)
+                jobDone = updateAllForTypeImpl(
+                    typeId = typeId,
+                    processTreeRoots = true,
+                    processChildTypes = true,
+                    updateUntilMs = updateUntilMs
+                )
                 if (!jobDone) {
                     log.warn { "Tree updating interrupted by timeout after 30 minutes. Type: '$typeId'" }
                     break
@@ -173,7 +181,7 @@ class TreeSearchPathUpdateJob(
             }
             log.debug {
                 "Job completed in ${System.currentTimeMillis() - lockAcquiredAt}ms. " +
-                    "Lock waiting: ${lockAcquiredAt - updatingStartedAt}ms. Job done: $jobDone"
+                        "Lock waiting: ${lockAcquiredAt - updatingStartedAt}ms. Job done: $jobDone"
             }
         }
     }
@@ -188,7 +196,14 @@ class TreeSearchPathUpdateJob(
                 val lockAcquiredAt = System.currentTimeMillis()
                 val processedSourceIds = HashSet<String>()
                 for (typeId in types) {
-                    if (!updateAllForTypeImpl(typeId, false, updateUntilMs, processedSourceIds)) {
+                    if (!updateAllForTypeImpl(
+                            typeId = typeId,
+                            processTreeRoots = false,
+                            processChildTypes = false,
+                            updateUntilMs = updateUntilMs,
+                            processedSourceIds = processedSourceIds
+                        )
+                    ) {
                         fullUpdateRequired.set(true)
                         log.debug { "Manual updating doesn't completed in $timeout. Full updating will be performed." }
                         break
@@ -196,7 +211,7 @@ class TreeSearchPathUpdateJob(
                 }
                 log.debug {
                     "Manual updating completed. Elapsed time: ${System.currentTimeMillis() - startedAt}. " +
-                        "Lock acquisition time: ${lockAcquiredAt - startedAt}"
+                            "Lock acquisition time: ${lockAcquiredAt - startedAt}"
                 }
             }
         } finally {
@@ -210,6 +225,7 @@ class TreeSearchPathUpdateJob(
      */
     private fun updateAllForTypeImpl(
         typeId: String,
+        processTreeRoots: Boolean,
         processChildTypes: Boolean,
         updateUntilMs: Long,
         processedSourceIds: MutableSet<String> = HashSet()
@@ -222,38 +238,63 @@ class TreeSearchPathUpdateJob(
         val typeDef = typesRegistry.getValue(typeId) ?: return true
         val typeRef = ModelUtils.getTypeRef(typeDef.id)
         if (processedSourceIds.add(typeDef.sourceId)) {
-            val query = RecordsQuery.create()
+            val baseQuery = RecordsQuery.create()
                 .withEcosType(typeDef.id)
                 .withSourceId(typeDef.sourceId)
-                .withQuery(
+                .withMaxItems(100)
+                .build()
+
+            var queryIdx = 0
+            val queryPredicates = ArrayList<Predicate>()
+            if (processTreeRoots) {
+                queryPredicates.add(
                     Predicates.and(
-                        Predicates.eq("${RecordConstants.ATT_PARENT}.${RecordConstants.ATT_TYPE}", typeRef),
-                        Predicates.or(
-                            Predicates.eq(
-                                "(${RecordConstants.ATT_PARENT}.\"${TreeSearchDesc.ATT_PATH_HASH}\" " +
+                        Predicates.notEmpty(RecordConstants.ATT_PARENT),
+                        Predicates.notEq("${RecordConstants.ATT_PARENT}.${RecordConstants.ATT_TYPE}", typeRef),
+                        Predicates.empty(TreeSearchDesc.ATT_PATH_HASH)
+                    )
+                )
+            }
+            queryPredicates.add(
+                Predicates.and(
+                    Predicates.eq("${RecordConstants.ATT_PARENT}.${RecordConstants.ATT_TYPE}", typeRef),
+                    Predicates.or(
+                        Predicates.eq(
+                            "(${RecordConstants.ATT_PARENT}.\"${TreeSearchDesc.ATT_PATH_HASH}\" " +
                                     "= \"${TreeSearchDesc.ATT_PARENT_PATH_HASH}\")",
-                                false
-                            ),
-                            Predicates.and(
-                                Predicates.notEmpty(RecordConstants.ATT_PARENT),
-                                Predicates.empty(TreeSearchDesc.ATT_PATH_HASH)
-                            )
+                            false
+                        ),
+                        Predicates.and(
+                            Predicates.notEmpty(RecordConstants.ATT_PARENT),
+                            Predicates.empty(TreeSearchDesc.ATT_PATH_HASH)
                         )
                     )
-                ).withMaxItems(100).build()
+                )
+            )
+            val recordsQueries = queryPredicates.map { baseQuery.copy().withQuery(it).build() }
 
             fun queryNext(): Map<EntityRef, DirToUpdateAtts> {
                 return TxnContext.doInNewTxn {
-                    recordsService.query(query, DirToUpdateAtts::class.java)
-                        .getRecords()
-                        .filter { it.parentRef.isNotEmpty() }
-                        .associateBy { it.id }
+                    var result: Map<EntityRef, DirToUpdateAtts> = emptyMap()
+                    while (queryIdx < recordsQueries.size) {
+                        result = recordsService.query(recordsQueries[queryIdx], DirToUpdateAtts::class.java)
+                            .getRecords()
+                            .filter { it.parentRef.isNotEmpty() }
+                            .associateBy { it.id }
+                        if (result.isNotEmpty()) {
+                            log.trace { "Found ${result.size} records by query ${recordsQueries[queryIdx]}" }
+                            break
+                        } else {
+                            queryIdx++
+                        }
+                    }
+                    result
                 }
             }
 
             var directoriesToUpdate = queryNext()
             while (directoriesToUpdate.isNotEmpty()) {
-                log.info { "Found ${directoriesToUpdate.size} directories to update for type $typeId" }
+                log.info { "Found ${directoriesToUpdate.size} records to update for type '$typeId'" }
                 for (directoryAtts in directoriesToUpdate.values) {
                     val newPath = listOf(*directoryAtts.parentTreePath.toTypedArray(), directoryAtts.parentRef)
                     TxnContext.doInNewTxn {
@@ -278,7 +319,14 @@ class TreeSearchPathUpdateJob(
         }
         if (processChildTypes) {
             typesRegistry.getChildren(typeRef).forEach {
-                if (!updateAllForTypeImpl(it.getLocalId(), true, updateUntilMs, processedSourceIds)) {
+                if (!updateAllForTypeImpl(
+                        typeId = it.getLocalId(),
+                        processTreeRoots = processTreeRoots,
+                        processChildTypes = true,
+                        updateUntilMs = updateUntilMs,
+                        processedSourceIds = processedSourceIds
+                    )
+                ) {
                     return false
                 }
             }
