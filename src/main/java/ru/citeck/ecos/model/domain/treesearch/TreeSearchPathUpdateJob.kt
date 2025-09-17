@@ -112,7 +112,7 @@ class TreeSearchPathUpdateJob(
         lastFullUpdateCompletedAt.set(System.currentTimeMillis())
     }
 
-    @Scheduled(fixedDelayString = "PT10S")
+    @Scheduled(fixedDelayString = "PT10M")
     fun updateTypesWithTreeSearchAspect() {
         if (!typesWithTreeSearchUpdateLock.tryLock(30, TimeUnit.SECONDS)) {
             log.warn { "typesWithTreeSearchUpdateLock can't be acquired after 30 seconds." }
