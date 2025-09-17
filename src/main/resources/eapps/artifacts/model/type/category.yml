@@ -9,7 +9,7 @@ system: true
 storageType: ECOS_MODEL
 parentRef: emodel/type@user-base
 
-workspaceScope: PRIVATE
+workspaceScope: PUBLIC
 
 queryPermsPolicy: PUBLIC
 
