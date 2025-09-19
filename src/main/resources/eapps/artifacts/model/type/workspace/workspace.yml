@@ -12,9 +12,6 @@ parentRef: emodel/type@ecos-vcs-object
 journalRef: uiserv/journal@workspaces-journal
 formRef: uiserv/form@workspace-form
 
-defaultCreateVariant: true
-postCreateActionRef: uiserv/action@redirect-to-workspace
-
 queryPermsPolicy: PUBLIC
 
 actions:
