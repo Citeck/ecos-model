@@ -7,6 +7,9 @@ system: true
 systemAttributes:
     - id: parentPathHash
     - id: pathHash
+    - id: leafAssocsToUpdate
+      type: TEXT
+      multiple: true
     - id: path
       type: ASSOC
       multiple: true

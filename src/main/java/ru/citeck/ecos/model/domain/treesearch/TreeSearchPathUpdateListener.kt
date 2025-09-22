@@ -18,10 +18,13 @@ import java.time.Duration
 class TreeSearchPathUpdateListener(
     private val eventsService: EventsService,
     private val recordsService: RecordsService,
-    private val pathUpdateJob: TreeSearchPathUpdateJob
+    private val pathUpdateJob: TreeSearchPathUpdateJob,
+    private val treeSearchComponent: TreeSearchComponent
 ) {
+
     @PostConstruct
     fun init() {
+
         eventsService.addListener(
             ListenerConfig.create<ChildrenAssocsChangedEvent> {
                 withEventType(RecordChangedEvent.TYPE)
@@ -29,7 +32,7 @@ class TreeSearchPathUpdateListener(
                 withDataClass(ChildrenAssocsChangedEvent::class.java)
                 withFilter(
                     Predicates.and(
-                        Predicates.eq("record._aspects._has.tree-search?bool", true),
+                        Predicates.eq("record._aspects._has.${TreeSearchDesc.ASPECT_ID}?bool", true),
                         Predicates.eq("diff._has.children?bool", true)
                     )
                 )
@@ -43,7 +46,7 @@ class TreeSearchPathUpdateListener(
                 withDataClass(ParentChangedEvent::class.java)
                 withFilter(
                     Predicates.and(
-                        Predicates.eq("record._aspects._has.tree-search?bool", true),
+                        Predicates.eq("record._aspects._has.${TreeSearchDesc.ASPECT_ID}?bool", true),
                         Predicates.eq("diff._has._parent?bool", true)
                     )
                 )
@@ -56,6 +59,50 @@ class TreeSearchPathUpdateListener(
                  }
             }
         )
+        eventsService.addListener(
+            ListenerConfig.create<LeafAssocsChangedEvent> {
+                withEventType(RecordChangedEvent.TYPE)
+                withTransactional(true)
+                withDataClass(LeafAssocsChangedEvent::class.java)
+                withFilter(
+                    Predicates.and(
+                        Predicates.or(
+                            treeSearchComponent.treeLeafAspects.map {
+                                Predicates.eq("record._aspects._has.$it?bool", true)
+                            }
+                        ),
+                        Predicates.or(
+                            treeSearchComponent.treeLeafAssocs.map {
+                                Predicates.eq("diff._has.$it?bool", true)
+                            }
+                        )
+                    )
+                )
+                withAction { event -> processEvent(event, treeSearchComponent.treeLeafAssocs) }
+            }
+        )
+    }
+
+    private fun processEvent(event: LeafAssocsChangedEvent, leafAssocs: Set<String>) {
+        val assoc = event.assocs.find { leafAssocs.contains(it.assocId) } ?: return
+
+        val atts = RecordAtts(event.ref)
+
+        if (assoc.added.isNotEmpty()) {
+            val newTreeNode = assoc.added[0]
+            val treeNodeAtts = recordsService.getAtts(newTreeNode, TreeNodeAtts::class.java)
+            val leafPath = listOf(*treeNodeAtts.path.toTypedArray(), newTreeNode)
+            atts[TreeSearchDesc.ATT_PATH] = leafPath
+            atts[TreeSearchDesc.ATT_PATH_HASH] = TreeSearchDesc.calculatePathHash(leafPath)
+            atts[TreeSearchDesc.ATT_PARENT_PATH_HASH] = treeNodeAtts.pathHash
+        } else if (assoc.removed.isNotEmpty()) {
+            atts[TreeSearchDesc.ATT_PATH] = emptyList<EntityRef>()
+            atts[TreeSearchDesc.ATT_PATH_HASH] = TreeSearchDesc.calculatePathHash(emptyList())
+            atts[TreeSearchDesc.ATT_PARENT_PATH_HASH] = TreeSearchDesc.calculatePathHash(emptyList())
+        }
+        AuthContext.runAsSystem {
+            recordsService.mutate(atts)
+        }
     }
 
     private fun processEvent(event: ParentChangedEvent) {
@@ -66,6 +113,7 @@ class TreeSearchPathUpdateListener(
         atts[TreeSearchDesc.ATT_PATH] = newPath
         atts[TreeSearchDesc.ATT_PATH_HASH] = TreeSearchDesc.calculatePathHash(newPath)
         atts[TreeSearchDesc.ATT_PARENT_PATH_HASH] = TreeSearchDesc.calculatePathHash(emptyList())
+        atts[TreeSearchDesc.ATT_LEAF_ASSOCS_TO_UPDATE] = treeSearchComponent.getNonEmptyLeafSourceAssocs(event.ref)
 
         AuthContext.runAsSystem {
             recordsService.mutate(atts)
@@ -80,11 +128,13 @@ class TreeSearchPathUpdateListener(
         val mutAtts = mutableListOf<RecordAtts>()
         val newPath = listOf(*event.treePath.toTypedArray(), event.ref)
         val newPathHash = TreeSearchDesc.calculatePathHash(newPath)
-        childrenAssocDiff.added.forEach {
-            val atts = RecordAtts(it)
+        val nonEmptyLeafSourceAssocs = treeSearchComponent.getNonEmptyLeafSourceAssocs(childrenAssocDiff.added)
+        childrenAssocDiff.added.forEachIndexed { idx, ref ->
+            val atts = RecordAtts(ref)
             atts[TreeSearchDesc.ATT_PATH] = newPath
             atts[TreeSearchDesc.ATT_PATH_HASH] = newPathHash
             atts[TreeSearchDesc.ATT_PARENT_PATH_HASH] = event.treePathHash
+            atts[TreeSearchDesc.ATT_LEAF_ASSOCS_TO_UPDATE] = nonEmptyLeafSourceAssocs[idx]
             mutAtts.add(atts)
         }
         AuthContext.runAsSystem {
@@ -117,8 +167,25 @@ class TreeSearchPathUpdateListener(
         val parentAfter: EntityRef
     )
 
+    class LeafAssocsChangedEvent(
+        @AttName("record?id")
+        val ref: EntityRef,
+        @AttName("typeDef.id!")
+        val typeId: String,
+        @AttName("assocs[]?json!")
+        val assocs: List<AssocsDiff>
+    )
+
     class AssocsDiff(
         val assocId: String,
-        val added: List<EntityRef>
+        val added: List<EntityRef>,
+        val removed: List<EntityRef>
+    )
+
+    class TreeNodeAtts(
+        @AttName("${TreeSearchDesc.ATT_PATH_HASH}!")
+        val pathHash: String,
+        @AttName("${TreeSearchDesc.ATT_PATH}[]?id!")
+        val path: List<EntityRef>
     )
 }
