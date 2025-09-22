@@ -79,3 +79,14 @@ attributes:
           name:
             en: Milestone
             ru: Этап
+  - id: position
+    name:
+      en: Position
+      ru: Позиция
+    type: NUMBER
+    computed:
+      type: SCRIPT
+      config:
+        fn: |-
+          return 1;
+      storingType: ON_EMPTY
