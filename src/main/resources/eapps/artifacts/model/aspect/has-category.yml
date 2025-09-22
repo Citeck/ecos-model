@@ -1,0 +1,14 @@
+---
+id: has-category
+name:
+  ru: Имеет категорию
+  en: Has category
+
+attributes:
+  - id: category
+    name:
+      ru: Категория
+      en: Category
+    type: ASSOC
+    config:
+      typeRef: emodel/type@category

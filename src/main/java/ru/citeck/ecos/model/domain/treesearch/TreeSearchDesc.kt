@@ -15,6 +15,8 @@ object TreeSearchDesc {
     const val ATT_PATH_HASH = "$ASPECT_PREFIX:pathHash"
     const val ATT_PARENT_PATH_HASH = "$ASPECT_PREFIX:parentPathHash"
 
+    const val ATT_LEAF_ASSOCS_TO_UPDATE = "$ASPECT_PREFIX:leafAssocsToUpdate"
+
     fun calculatePathHash(path: List<EntityRef>): String {
         if (path.isEmpty()) {
             return ""

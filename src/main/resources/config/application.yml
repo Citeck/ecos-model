@@ -2,11 +2,6 @@
 server:
   port: 8094
 
-ecos-app:
-  id: ecos-model
-  version: 1.2.0
-  name: ECOS Model
-
 spring:
   datasource:
     url: jdbc:postgresql://localhost:14523/ecos_model
@@ -21,6 +16,7 @@ spring:
       max-file-size: 100MB
       max-request-size: 100MB
 ecos:
+  treeSearchLeafAssocs: 'has-category:category'
   idp:
     default-realm: ecos-app
   job:
