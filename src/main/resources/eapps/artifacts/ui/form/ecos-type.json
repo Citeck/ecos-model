@@ -343,7 +343,7 @@
                             "action": "custom",
                             "state": "",
                             "showValidations": false,
-                            "custom": "var ownerId = Math.random().toString();\nvar currentRecord = Citeck.Records.get(instance.options.recordId);\n\nvar configFormRef = data.configFormRef;\nif (Array.isArray(configFormRef)) {\n    configFormRef = configFormRef[0];\n}\n\nif (!configFormRef && data.parentRef) {\n    configFormRef = Citeck.Records.get(data.parentRef).load('inhConfigFormRef?id', true);\n}\n\nPromise.all([configFormRef, currentRecord.load('config?json')])\n    .then(function(formAndConfig) {\n\n        var formRef = formAndConfig[0];\n        var config = formAndConfig[1];\n\n        if (formRef == null) {\n            throw new Error(\"Config form is not set\");\n        }\n\n        if (!config) {\n            config = {};\n        }\n\n        var configRecord = Citeck.Records.create(config, ownerId);\n\n        Citeck.forms.eform(configRecord.id, {\n            params: {\n                formId: formRef,\n                onSubmit: function (record) {\n                    var data = record.toJson().attributes;\n                    var resData = {};\n                    for (var key in data) {\n                        if (key[0] !== '_' && key !== 'pendingUpdate') {\n                            resData[key] = data[key];\n                        }\n                    }\n                    currentRecord.att(\"config?json\", resData);\n                    Citeck.Records.release(configRecord.id, ownerId);\n                },\n                onCancel: function () {\n                    Citeck.Records.release(configRecord.id, ownerId);\n                },\n                saveOnSubmit: false\n            },\n            class: 'ecos-modal_width-lg',\n            isBigHeader: true\n        });\n    })",
+                            "custom": "var ownerId = Math.random().toString();\nvar currentRecord = Citeck.Records.get(instance.options.recordId);\n\nvar configFormRef = data.configFormRef;\nif (Array.isArray(configFormRef)) {\n    configFormRef = configFormRef[0];\n}\n\nif (!configFormRef && data.parentRef) {\n    configFormRef = Citeck.Records.get(data.parentRef).load('inhConfigFormRef?id', true);\n}\n\nPromise.all([configFormRef, currentRecord.load('config?json')])\n    .then(function(formAndConfig) {\n\n        var formRef = formAndConfig[0];\n        var config = formAndConfig[1];\n\n        if (formRef == null) {\n            throw new Error(\"Config form is not set\");\n        }\n\n        if (!config) {\n            config = {};\n        }\n\n        var configRecord = Citeck.Records.create(config, ownerId);\n         window.initEventTypeId = data.id;\n         Citeck.forms.eform(configRecord.id, {\n            params: {\n                formId: formRef,\n                onSubmit: function (record) {\n                    var data = record.toJson().attributes;\n                    var resData = {};\n                    for (var key in data) {\n                        if (key[0] !== '_' && key !== 'pendingUpdate') {\n                            resData[key] = data[key];\n                        }\n                    }\n                    currentRecord.att(\"config?json\", resData);\n                    Citeck.Records.release(configRecord.id, ownerId);\n                    delete window.initEventTypeId;\n                },\n                onCancel: function () {\n                    Citeck.Records.release(configRecord.id, ownerId);\n                    delete window.initEventTypeId;\n                },\n                saveOnSubmit: false\n            },\n            class: 'ecos-modal_width-lg',\n            isBigHeader: true\n        });\n    })",
                             "block": true,
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
@@ -974,7 +974,7 @@
                                     "action": "custom",
                                     "state": "",
                                     "showValidations": false,
-                                    "custom": "var mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = 'emodel/type@' + data.moduleId;\nvar customProps = {\n  roles: (data.modelRoles || []).map(mapToSingleLang),\n  statuses: (data.modelStatuses || []).map(mapToSingleLang),\n  attributeName: Citeck.helpers.getMLValue(row.name)\n};\n\nvar typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypeAttPermissions(\n  typeRef, \n  row.id, \n  customProps\n)",
+                                    "custom": "var mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nlet typeRef = data.selectedWorkspaceData.typeRef;\n\nvar customProps = {\n  roles: (data.modelRoles || []).map(mapToSingleLang),\n  statuses: (data.modelStatuses || []).map(mapToSingleLang),\n  attributeName: Citeck.helpers.getMLValue(row.name)\n};\n\nvar typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypeAttPermissions(\n  typeRef, \n  row.id, \n  customProps\n)",
                                     "hideLabel": true,
                                     "leftIcon": "icon-decision-tables",
                                     "block": true,
@@ -982,7 +982,14 @@
                                     "optionalWhenDisabled": false,
                                     "type": "button",
                                     "input": true,
-                                    "row": "0-4"
+                                    "row": "0-4",
+                                    "event": "",
+                                    "url": "",
+                                    "headers": [
+                                      {}
+                                    ],
+                                    "reorder": false,
+                                    "dataGridLabel": false
                                   },
                                   {
                                     "label": {
@@ -1162,7 +1169,7 @@
                                     "action": "custom",
                                     "state": "",
                                     "showValidations": false,
-                                    "custom": "var mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = 'emodel/type@' + data.moduleId;\nvar customProps = {\n  roles: (data.modelRoles || []).map(mapToSingleLang),\n  statuses: (data.modelStatuses || []).map(mapToSingleLang),\n  attributeName: Citeck.helpers.getMLValue(row.label)\n};\n\nvar typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypeAttPermissions(\n  typeRef, \n  row.value, \n  customProps\n)",
+                                    "custom": "var mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = data.selectedWorkspaceData.typeRef;\nvar customProps = {\n  roles: (data.modelRoles || []).map(mapToSingleLang),\n  statuses: (data.modelStatuses || []).map(mapToSingleLang),\n  attributeName: Citeck.helpers.getMLValue(row.label)\n};\n\nvar typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypeAttPermissions(\n  typeRef, \n  row.value, \n  customProps\n)",
                                     "hideLabel": true,
                                     "leftIcon": "icon-decision-tables",
                                     "block": true,
@@ -1316,17 +1323,26 @@
                                     "label": {
                                       "en": "Permissions"
                                     },
-                                    "hideLabel": true,
+                                    "key": "submit3",
                                     "action": "custom",
                                     "state": "",
                                     "showValidations": false,
-                                    "custom": "\nvar mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = 'emodel/type@' + data.moduleId;\nvar customProps = {\n  roles: (data.modelRoles || []).map(mapToSingleLang),\n  statuses: (data.modelStatuses || []).map(mapToSingleLang),\n  attributeName: Citeck.helpers.getMLValue(row.name)\n};\n\nvar typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypeAttPermissions(\n  typeRef, \n  row.id, \n  customProps\n)",
+                                    "custom": "var mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = data.selectedWorkspaceData.typeRef;\nvar customProps = {\n  roles: (data.modelRoles || []).map(mapToSingleLang),\n  statuses: (data.modelStatuses || []).map(mapToSingleLang),\n  attributeName: Citeck.helpers.getMLValue(row.name)\n};\n\nvar typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypeAttPermissions(\n  typeRef, \n  row.id, \n  customProps\n)",
+                                    "hideLabel": true,
                                     "leftIcon": "icon-decision-tables",
                                     "block": true,
-                                    "key": "submit3",
+                                    "refreshOn": [],
+                                    "optionalWhenDisabled": false,
                                     "type": "button",
                                     "input": true,
-                                    "row": "0-4"
+                                    "row": "0-4",
+                                    "event": "",
+                                    "url": "",
+                                    "headers": [
+                                      {}
+                                    ],
+                                    "reorder": false,
+                                    "dataGridLabel": false
                                   }
                                 ],
                                 "md": 4
@@ -1373,12 +1389,19 @@
                                 "action": "custom",
                                 "state": "",
                                 "showValidations": false,
-                                "custom": "var mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = 'emodel/type@' + data.moduleId;\nvar customProps = {\n  roles: (data.modelRoles || []).map(mapToSingleLang),\n  statuses: (data.modelStatuses || []).map(mapToSingleLang)\n};\n\nvar typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypePermissions(\n  typeRef,\n  customProps\n);",
+                                "custom": "let mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nlet typeRef = data.selectedWorkspaceData.typeRef;\n\nlet customProps = {\n  roles: (data.modelRoles || []).map(mapToSingleLang),\n  statuses: (data.modelStatuses || []).map(mapToSingleLang)\n};\n\nlet typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypePermissions(\n  typeRef,\n  customProps\n);",
                                 "block": true,
                                 "refreshOn": [],
                                 "optionalWhenDisabled": false,
                                 "type": "button",
-                                "input": true
+                                "input": true,
+                                "event": "",
+                                "url": "",
+                                "headers": [
+                                  {}
+                                ],
+                                "reorder": false,
+                                "dataGridLabel": false
                               }
                             ],
                             "md": 4,
@@ -1403,12 +1426,19 @@
                                 "action": "custom",
                                 "state": "",
                                 "showValidations": false,
-                                "custom": "var mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = 'emodel/type@' + data.moduleId;\nvar roles = (data.modelRoles || []).map(mapToSingleLang);\nvar statuses = (data.modelStatuses || []).map(mapToSingleLang);\nvar attributes = (data.modelAttributes || []).map(mapToSingleLang);\n\nCiteck.TypePermissionsService.downloadPermissionsConfig(typeRef, roles, statuses, attributes);",
+                                "custom": "var mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = data.selectedWorkspaceData.typeRef;\nvar roles = (data.modelRoles || []).map(mapToSingleLang);\nvar statuses = (data.modelStatuses || []).map(mapToSingleLang);\nvar attributes = (data.modelAttributes || []).map(mapToSingleLang);\n\nCiteck.TypePermissionsService.downloadPermissionsConfig(typeRef, roles, statuses, attributes);",
                                 "block": true,
                                 "refreshOn": [],
                                 "optionalWhenDisabled": false,
                                 "type": "button",
-                                "input": true
+                                "input": true,
+                                "event": "",
+                                "url": "",
+                                "headers": [
+                                  {}
+                                ],
+                                "reorder": false,
+                                "dataGridLabel": false
                               }
                             ]
                           },
@@ -1428,12 +1458,19 @@
                                 "action": "custom",
                                 "state": "",
                                 "showValidations": false,
-                                "custom": "var typeRef = 'emodel/type@' + data.moduleId;\nCiteck.TypePermissionsService.deletePermissionsConfig(typeRef);",
+                                "custom": "var typeRef = data.selectedWorkspaceData.typeRef;\nCiteck.TypePermissionsService.deletePermissionsConfig(typeRef);",
                                 "block": true,
                                 "refreshOn": [],
                                 "optionalWhenDisabled": false,
                                 "type": "button",
-                                "input": true
+                                "input": true,
+                                "event": "",
+                                "url": "",
+                                "headers": [
+                                  {}
+                                ],
+                                "reorder": false,
+                                "dataGridLabel": false
                               }
                             ]
                           }
@@ -2815,7 +2852,8 @@
                               "custom": {
                                 "columns": []
                               },
-                              "customValues": ""
+                              "customValues": "",
+                              "viewMode": "default"
                             },
                             "queryData": "",
                             "refreshOn": [
@@ -2943,10 +2981,36 @@
         "type": "asyncData",
         "input": true,
         "triggerEventOnChange": false
+      },
+      {
+        "label": "selectedWorkspaceData",
+        "source": {
+          "type": "custom",
+          "custom": {
+            "syncData": "value = {\n  \"typeId\": data.id,\n  \"workspaceRef\": data._workspace\n};",
+            "asyncData": "if (!data.typeId || !data.workspaceRef) {\n  value = {\n    typeRef: 'emodel/type@' + data.typeId,\n    systemId: ''\n  };\n} else {\n  value = Records.get(data.workspaceRef).load('systemId!').then(systemId => {\n    return {\n      typeRef: 'emodel/type@' + systemId + \":\" + data.typeId,\n      systemId\n    };\n  });\n}"
+          },
+          "forceLoad": false
+        },
+        "update": {
+          "type": "once"
+        },
+        "refreshOn": [
+          {
+            "label": "_workspace",
+            "value": "_workspace"
+          },
+          {
+            "label": "id",
+            "value": "id"
+          }
+        ],
+        "key": "selectedWorkspaceData",
+        "type": "asyncData",
+        "input": true,
+        "triggerEventOnChange": false
       }
     ],
     "display": "form"
-  },
-  "attributes": {},
-  "notExists": false
+  }
 }
