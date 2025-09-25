@@ -7,8 +7,8 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.apps.app.domain.handler.EcosArtifactHandler;
 import ru.citeck.ecos.context.lib.auth.AuthContext;
+import ru.citeck.ecos.model.lib.workspace.IdInWs;
 import ru.citeck.ecos.model.lib.workspace.WorkspaceService;
-import ru.citeck.ecos.model.type.service.TypeId;
 import ru.citeck.ecos.model.type.service.TypesService;
 import ru.citeck.ecos.webapp.api.EcosWebAppApi;
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef;
@@ -34,7 +34,7 @@ public class TypeArtifactHandler implements EcosArtifactHandler<TypeDef> {
 
     @Override
     public void deleteArtifact(@NotNull String s) {
-        typeService.delete(TypeId.create(s));
+        typeService.delete(IdInWs.create(s));
     }
 
     @NotNull

@@ -2,9 +2,9 @@ package ru.citeck.ecos.model.type.service.dao
 
 import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Component
+import ru.citeck.ecos.model.lib.workspace.IdInWs
 import ru.citeck.ecos.model.type.repository.TypeEntity
 import ru.citeck.ecos.model.type.repository.TypeRepository
-import ru.citeck.ecos.model.type.service.TypeId
 import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy
 import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverter
@@ -33,11 +33,11 @@ class TypeRepoDaoImpl(
         return repo.delete(entity)
     }
 
-    override fun findByExtId(typeId: TypeId): TypeEntity? {
+    override fun findByExtId(typeId: IdInWs): TypeEntity? {
         return repo.findByExtIdInWs(typeId.workspace, typeId.id)
     }
 
-    override fun findAllByTypeIds(typeIds: Collection<TypeId>): Set<TypeEntity> {
+    override fun findAllByTypeIds(typeIds: Collection<IdInWs>): Set<TypeEntity> {
         val result = LinkedHashSet<TypeEntity>()
         val extIdsByWorkspace = HashMap<String, MutableList<String>>()
         for (typeId in typeIds) {
@@ -51,9 +51,9 @@ class TypeRepoDaoImpl(
         return result
     }
 
-    override fun getChildrenIds(parentId: TypeId): Set<TypeId> {
+    override fun getChildrenIds(parentId: IdInWs): Set<IdInWs> {
         return repo.getChildren(parentId.workspace, parentId.id).mapTo(LinkedHashSet()) {
-            TypeId.create(it.workspace, it.extId)
+            IdInWs.create(it.workspace, it.extId)
         }
     }
 

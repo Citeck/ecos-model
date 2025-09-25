@@ -1,30 +1,63 @@
-package ru.citeck.ecos.model.num.dto;
+package ru.citeck.ecos.model.num.dto
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import ru.citeck.ecos.model.lib.num.dto.NumTemplateDef;
+import ru.citeck.ecos.commons.json.serialization.annotation.IncludeNonDefault
+import ru.citeck.ecos.model.lib.num.dto.NumTemplateDef
 
-@Data
-@NoArgsConstructor
-public class NumTemplateDto {
+@IncludeNonDefault
+open class NumTemplateDto {
 
-    private String id;
-    private String name;
-    private String counterKey;
+    var id = ""
+    var name = ""
+    var workspace = ""
+    var counterKey = ""
 
-    public NumTemplateDto(String id) {
-        this.id = id;
+    constructor()
+
+    constructor(id: String) {
+        this.id = id
     }
 
-    public NumTemplateDto(NumTemplateDef other) {
-        this.id = other.getId();
-        this.name = other.getName();
-        this.counterKey = other.getCounterKey();
+    constructor(other: NumTemplateDef) {
+        this.id = other.id
+        this.name = other.name
+        this.workspace = other.workspace
+        this.counterKey = other.counterKey
     }
 
-    public NumTemplateDto(NumTemplateDto other) {
-        this.id = other.id;
-        this.name = other.name;
-        this.counterKey = other.counterKey;
+    constructor(other: NumTemplateDto) {
+        this.id = other.id
+        this.name = other.name
+        this.workspace = other.workspace
+        this.counterKey = other.counterKey
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
+            return true
+        }
+        if (javaClass != other?.javaClass) {
+            return false
+        }
+        other as NumTemplateDto
+        return id == other.id &&
+            name == other.name &&
+            workspace == other.workspace &&
+            counterKey == other.counterKey
+    }
+
+    override fun hashCode(): Int {
+        var result = id.hashCode()
+        result = 31 * result + name.hashCode()
+        result = 31 * result + workspace.hashCode()
+        result = 31 * result + counterKey.hashCode()
+        return result
+    }
+
+    override fun toString(): String {
+        return "NumTemplateDto(" +
+            "id='$id', " +
+            "name='$name', " +
+            "workspace='$workspace', " +
+            "counterKey='$counterKey')"
     }
 }

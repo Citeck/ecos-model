@@ -1,7 +1,7 @@
 package ru.citeck.ecos.model.domain.type
 
+import ru.citeck.ecos.model.lib.workspace.IdInWs
 import ru.citeck.ecos.model.type.repository.TypeEntity
-import ru.citeck.ecos.model.type.service.TypeId
 import ru.citeck.ecos.model.type.service.dao.TypeRepoDao
 import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records3.RecordsServiceFactory
@@ -35,17 +35,17 @@ class TypeRepoMock(recordsServiceFactory: RecordsServiceFactory) : TypeRepoDao {
         data.remove(entity.extId)
     }
 
-    override fun findByExtId(typeId: TypeId): TypeEntity? {
+    override fun findByExtId(typeId: IdInWs): TypeEntity? {
         return data[typeId.id]
     }
 
-    override fun findAllByTypeIds(typeIds: Collection<TypeId>): Set<TypeEntity> {
+    override fun findAllByTypeIds(typeIds: Collection<IdInWs>): Set<TypeEntity> {
         return typeIds.mapNotNullTo(LinkedHashSet()) { findByExtId(it) }
     }
 
-    override fun getChildrenIds(parentId: TypeId): Set<TypeId> {
+    override fun getChildrenIds(parentId: IdInWs): Set<IdInWs> {
         return data.values.filter { it.parent?.extId == parentId.id }
-            .map { TypeId.create(it.extId) }
+            .map { IdInWs.create(it.extId) }
             .toSet()
     }
 

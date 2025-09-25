@@ -1,44 +1,32 @@
-package ru.citeck.ecos.model.num.apps;
+package ru.citeck.ecos.model.num.apps
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Component;
-import ru.citeck.ecos.apps.app.domain.handler.EcosArtifactHandler;
-import ru.citeck.ecos.model.num.dto.NumTemplateDto;
-import ru.citeck.ecos.model.num.service.NumTemplateService;
+import org.springframework.stereotype.Component
+import ru.citeck.ecos.apps.app.domain.handler.EcosArtifactHandler
+import ru.citeck.ecos.model.lib.workspace.IdInWs
+import ru.citeck.ecos.model.num.dto.NumTemplateDto
+import ru.citeck.ecos.model.num.service.NumTemplateService
+import java.util.function.Consumer
 
-import java.util.function.Consumer;
-
-@Slf4j
 @Component
-@RequiredArgsConstructor
-public class NumTemplateArtifactHandler implements EcosArtifactHandler<NumTemplateDto> {
+class NumTemplateArtifactHandler(val numTemplateService: NumTemplateService) : EcosArtifactHandler<NumTemplateDto> {
 
-    private final NumTemplateService numTemplateService;
-
-    @Override
-    public void deployArtifact(@NotNull NumTemplateDto module) {
-        numTemplateService.save(module);
+    override fun deployArtifact(artifact: NumTemplateDto) {
+        numTemplateService.save(artifact)
     }
 
-    @Override
-    public void deleteArtifact(@NotNull String s) {
-        numTemplateService.delete(s);
+    override fun deleteArtifact(artifactId: String) {
+        numTemplateService.delete(IdInWs.create(artifactId))
     }
 
-    @NotNull
-    @Override
-    public String getArtifactType() {
-        return "model/num-template";
+    override fun getArtifactType(): String {
+        return "model/num-template"
     }
 
-    @Override
-    public void listenChanges(@NotNull Consumer<NumTemplateDto> consumer) {
-        numTemplateService.addListener((before, after) -> {
-            if (after != null) {
-                consumer.accept(new NumTemplateDto(after.getEntity()));
+    override fun listenChanges(listener: Consumer<NumTemplateDto>) {
+        numTemplateService.addListener { _, after ->
+            if (after.entity.workspace.isBlank()) {
+                listener.accept(NumTemplateDto(after.entity))
             }
-        });
+        }
     }
 }

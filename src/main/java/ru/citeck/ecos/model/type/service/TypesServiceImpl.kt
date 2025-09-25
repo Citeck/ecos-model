@@ -8,9 +8,9 @@ import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.model.lib.utils.ModelUtils
+import ru.citeck.ecos.model.lib.workspace.IdInWs
 import ru.citeck.ecos.model.type.converter.TypeConverter
 import ru.citeck.ecos.model.type.repository.TypeEntity
-import ru.citeck.ecos.model.type.service.TypeId.Companion.getTypeId
 import ru.citeck.ecos.model.type.service.dao.TypeRepoDao
 import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records2.predicate.model.VoidPredicate
@@ -47,11 +47,11 @@ class TypesServiceImpl(
 
     private var onTypeChangedListeners = CopyOnWriteArrayList<TypeDefListener>()
 
-    private var onDeletedListeners: MutableList<(TypeId) -> Unit> = CopyOnWriteArrayList()
+    private var onDeletedListeners: MutableList<(IdInWs) -> Unit> = CopyOnWriteArrayList()
 
-    private var onTypeHierarchyChangedListeners: MutableList<(Set<TypeId>) -> Unit> = CopyOnWriteArrayList()
+    private var onTypeHierarchyChangedListeners: MutableList<(Set<IdInWs>) -> Unit> = CopyOnWriteArrayList()
 
-    override fun getChildren(typeId: TypeId): List<TypeId> {
+    override fun getChildren(typeId: IdInWs): List<IdInWs> {
         return typeRepoDao.getChildrenIds(typeId).toList()
     }
 
@@ -108,7 +108,7 @@ class TypesServiceImpl(
         return typeRepoDao.count(predicate)
     }
 
-    override fun addListenerTypeHierarchyChangedListener(onTypeChangedListener: Consumer<Set<TypeId>>) {
+    override fun addListenerTypeHierarchyChangedListener(onTypeChangedListener: Consumer<Set<IdInWs>>) {
         onTypeHierarchyChangedListeners.add { onTypeChangedListener.accept(it) }
     }
 
@@ -143,7 +143,7 @@ class TypesServiceImpl(
         addListenerWithMeta(0f, onTypeChangedListener)
     }
 
-    override fun addOnDeletedListener(listener: (TypeId) -> Unit) {
+    override fun addOnDeletedListener(listener: (IdInWs) -> Unit) {
         onDeletedListeners.add(listener)
     }
 
@@ -157,21 +157,21 @@ class TypesServiceImpl(
             .map { typeConverter.toDtoWithMeta(it) }
     }
 
-    override fun getParentIds(id: TypeId): List<TypeId> {
+    override fun getParentIds(id: IdInWs): List<IdInWs> {
 
         var typeEntity = typeRepoDao.findByExtId(id)
-        val parents = mutableListOf<TypeId>()
+        val parents = mutableListOf<IdInWs>()
         while (typeEntity != null) {
             parents.add(typeEntity.getTypeId())
             typeEntity = typeEntity.parent
         }
         if (parents.isEmpty() || parents.last().id != "base") {
-            parents.add(TypeId.create("base"))
+            parents.add(IdInWs.create("base"))
         }
         return parents
     }
 
-    override fun expandTypes(typeIds: Collection<TypeId>): List<TypeDef> {
+    override fun expandTypes(typeIds: Collection<IdInWs>): List<TypeDef> {
         if (typeIds.isEmpty()) {
             return emptyList()
         }
@@ -185,7 +185,7 @@ class TypesServiceImpl(
         return result
     }
 
-    override fun getInhAttributes(typeId: TypeId): List<AttributeDef> {
+    override fun getInhAttributes(typeId: IdInWs): List<AttributeDef> {
         if (typeId.isEmpty()) {
             return emptyList()
         }
@@ -206,7 +206,7 @@ class TypesServiceImpl(
     }
 
     private fun forEachTypeInDescHierarchy(
-        id: TypeId,
+        id: IdInWs,
         filter: (TypeEntity) -> Boolean,
         action: (TypeEntity) -> Unit
     ) {
@@ -229,7 +229,7 @@ class TypesServiceImpl(
     }
 
     private fun <T : Any> forEachTypeInAscHierarchy(
-        typeId: TypeId,
+        typeId: IdInWs,
         filter: (TypeEntity) -> Boolean,
         action: (TypeEntity) -> T?
     ): T? {
@@ -241,26 +241,26 @@ class TypesServiceImpl(
         return null
     }
 
-    override fun getAllWithMeta(typeIds: Collection<TypeId>): List<EntityWithMeta<TypeDef>> {
+    override fun getAllWithMeta(typeIds: Collection<IdInWs>): List<EntityWithMeta<TypeDef>> {
         return typeRepoDao.findAllByTypeIds(typeIds)
             .map { typeConverter.toDtoWithMeta(it) }
     }
 
-    override fun getById(typeId: TypeId): TypeDef {
+    override fun getById(typeId: IdInWs): TypeDef {
         return typeRepoDao.findByExtId(typeId)?.let { typeConverter.toDto(it) }
             ?: error("Type is not found: '$typeId'")
     }
 
-    override fun getByIdWithMetaOrNull(typeId: TypeId): EntityWithMeta<TypeDef>? {
+    override fun getByIdWithMetaOrNull(typeId: IdInWs): EntityWithMeta<TypeDef>? {
         return typeRepoDao.findByExtId(typeId)?.let { typeConverter.toDtoWithMeta(it) }
     }
 
-    override fun getByIdOrNull(typeId: TypeId): TypeDef? {
+    override fun getByIdOrNull(typeId: IdInWs): TypeDef? {
         return typeRepoDao.findByExtId(typeId)?.let { typeConverter.toDto(it) }
     }
 
     @Transactional
-    override fun getOrCreateByExtId(typeId: TypeId): TypeDef {
+    override fun getOrCreateByExtId(typeId: IdInWs): TypeDef {
 
         val byExtId: TypeEntity? = typeRepoDao.findByExtId(typeId)
         if (byExtId != null) {
@@ -286,12 +286,12 @@ class TypesServiceImpl(
     }
 
     @Transactional
-    override fun delete(typeId: TypeId) {
+    override fun delete(typeId: IdInWs) {
         fireOnTypeHierarchyChangedEvent(deleteImpl(typeId), asc = true, desc = false)
     }
 
     @Transactional
-    override fun deleteWithChildren(typeId: TypeId) {
+    override fun deleteWithChildren(typeId: IdInWs) {
         val children = typeRepoDao.getChildrenIds(typeId)
         children.forEach { childId ->
             deleteWithChildren(childId)
@@ -299,15 +299,15 @@ class TypesServiceImpl(
         fireOnTypeHierarchyChangedEvent(deleteImpl(typeId), asc = true, desc = false)
     }
 
-    private fun deleteImpl(typeId: TypeId): TypeId {
+    private fun deleteImpl(typeId: IdInWs): IdInWs {
         if (PROTECTED_TYPES.contains(typeId.id)) {
             throw RuntimeException("Type '$typeId' is protected")
         }
-        val typeEntity = typeRepoDao.findByExtId(typeId) ?: return TypeId.EMPTY
+        val typeEntity = typeRepoDao.findByExtId(typeId) ?: return IdInWs.EMPTY
         if (typeRepoDao.getChildrenIds(typeId).isNotEmpty()) {
             error("Type $typeId contains children and can't be deleted")
         }
-        val parentId = typeEntity.parent?.getTypeId() ?: TypeId.EMPTY
+        val parentId = typeEntity.parent?.getTypeId() ?: IdInWs.EMPTY
         typeRepoDao.delete(typeEntity)
         onDeletedListeners.forEach { it(typeId) }
         return parentId
@@ -335,7 +335,7 @@ class TypesServiceImpl(
         }
 
         val result = ArrayList<TypeDef>()
-        val typesToHierarchyChangedEvent = HashSet<TypeId>()
+        val typesToHierarchyChangedEvent = HashSet<IdInWs>()
         for (type in types) {
             val typeAfterSave = saveTypeDefImpl(type, clonedRecord)
             typesToHierarchyChangedEvent.add(typeAfterSave.getTypeId())
@@ -379,29 +379,29 @@ class TypesServiceImpl(
         return typeDefAfter.entity
     }
 
-    private fun fireOnTypeHierarchyChangedEvent(typeId: TypeId, asc: Boolean, desc: Boolean) {
+    private fun fireOnTypeHierarchyChangedEvent(typeId: IdInWs, asc: Boolean, desc: Boolean) {
         if (typeId.isEmpty()) {
             return
         }
         return fireOnTypeHierarchyChangedEvent(listOf(typeId), asc, desc)
     }
 
-    private fun fireOnTypeHierarchyChangedEvent(typesId: Collection<TypeId>, asc: Boolean, desc: Boolean) {
+    private fun fireOnTypeHierarchyChangedEvent(typesId: Collection<IdInWs>, asc: Boolean, desc: Boolean) {
         if (typesId.isEmpty()) {
             return
         }
-        val types = HashSet<TypeId>()
+        val types = HashSet<IdInWs>()
         val action: (TypeEntity) -> Unit = { typeEntity ->
             types.add(typeEntity.getTypeId())
         }
         if (desc) {
-            val visited = HashSet<TypeId>()
+            val visited = HashSet<IdInWs>()
             for (typeId in typesId) {
                 forEachTypeInDescHierarchy(typeId, { visited.add(it.getTypeId()) }, action)
             }
         }
         if (asc) {
-            val visited = HashSet<TypeId>()
+            val visited = HashSet<IdInWs>()
             for (typeId in typesId) {
                 forEachTypeInAscHierarchy(typeId, {
                     it.workspace == typeId.workspace && visited.add(it.getTypeId())

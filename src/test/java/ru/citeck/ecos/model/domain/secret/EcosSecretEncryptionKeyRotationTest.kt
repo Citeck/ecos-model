@@ -6,7 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.commons.json.Json
@@ -44,7 +44,7 @@ class EcosSecretEncryptionKeyRotationTest {
     @Autowired
     private lateinit var ecosSecretEncryption: EcosSecretEncryption
 
-    @SpyBean
+    @MockitoSpyBean
     private lateinit var ecosSecretEncryptionConfigProvider: EcosSecretEncryptionConfigProvider
 
     companion object {

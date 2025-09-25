@@ -7,7 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import ru.citeck.ecos.model.EcosModelApp;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
 import ru.citeck.ecos.records2.predicate.model.Predicates;
@@ -36,7 +36,7 @@ import static org.mockito.Mockito.when;
 @SpringBootTest(classes = EcosModelApp.class)
 public class AttrPermissionsRecordsDaoTest {
 
-    @MockBean
+    @MockitoBean
     private AttributesPermissionsService service;
     @Autowired
     private RecordsService recordsService;

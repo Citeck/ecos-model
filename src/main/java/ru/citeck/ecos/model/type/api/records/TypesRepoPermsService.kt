@@ -3,10 +3,9 @@ package ru.citeck.ecos.model.type.api.records
 import org.springframework.stereotype.Service
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthRole
+import ru.citeck.ecos.model.lib.workspace.IdInWs
 import ru.citeck.ecos.model.lib.workspace.WorkspaceService
-import ru.citeck.ecos.model.type.service.TypeId
-import ru.citeck.ecos.model.type.service.TypeId.Companion.convertToStrId
-import ru.citeck.ecos.model.type.service.TypeId.Companion.convertToTypeId
+import ru.citeck.ecos.model.lib.workspace.convertToIdInWsSafe
 import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records3.record.atts.schema.ScalarType
@@ -93,11 +92,11 @@ class TypesRepoPermsService(
         }
 
         if (!record.isNewRec()) {
-            val perms = permsCalculator.getPermissions(getRepoRef(TypeId.create(record.workspace, record.id)))
+            val perms = permsCalculator.getPermissions(getRepoRef(IdInWs.create(record.workspace, record.id)))
             if (perms.hasWritePerms()) {
                 return
             }
-            val currentDef = typesService.getByIdWithMetaOrNull(TypeId.create(record.workspace, record.id))
+            val currentDef = typesService.getByIdWithMetaOrNull(IdInWs.create(record.workspace, record.id))
             val creator = currentDef?.meta?.creator ?: ""
             if (creator.isBlank() || creator != AuthContext.getCurrentUser()) {
                 throwPermissionDenied(PERMISSION_WRITE)
@@ -114,7 +113,7 @@ class TypesRepoPermsService(
         if (perms.hasWritePerms()) {
             return
         }
-        val ecosTypeId = workspaceService.convertToTypeId(typeId)
+        val ecosTypeId = workspaceService.convertToIdInWsSafe(typeId)
         val currentDef = typesService.getByIdWithMetaOrNull(ecosTypeId)
         if (currentDef == null) {
             throwPermissionDenied(PERMISSION_DELETE)
@@ -132,7 +131,7 @@ class TypesRepoPermsService(
         val typeId = when (ref) {
             is EntityRef -> ref.getLocalId().ifBlank { "base" }
             is String -> ref
-            is TypeId -> workspaceService.convertToStrId(ref)
+            is IdInWs -> workspaceService.convertToStrId(ref)
             else -> error("invalid ref: $ref")
         }
         return EntityRef.create(webAppProps.appName, TypesRepoRecordsDao.ID, typeId)

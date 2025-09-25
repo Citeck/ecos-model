@@ -3,7 +3,7 @@ package ru.citeck.ecos.model.type.service.utils
 import com.google.common.primitives.Longs
 import org.apache.commons.codec.binary.Base32
 import ru.citeck.ecos.model.EcosModelApp
-import ru.citeck.ecos.model.type.service.TypeId
+import ru.citeck.ecos.model.lib.workspace.IdInWs
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import java.util.zip.CRC32
@@ -97,7 +97,7 @@ object EModelTypeUtils {
             result = result.replace(doubleDelim, delimiter)
         }
         if (replaceWsDelim) {
-            result = result.replace(TypeId.WS_DELIM, doubleDelim)
+            result = result.replace(IdInWs.WS_DELIM, doubleDelim)
         }
         if (result.endsWith(delimiter)) {
             result = result.substring(0, result.length - 1)

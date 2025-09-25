@@ -84,7 +84,9 @@ class TypeDefResolver(
 
     private fun getResolvedByParentType(typeDef: TypeDef, context: ResolveContext): TypeDef.Builder {
 
-        val resolvedTypeFromContext = context.types[typeDef.id]
+        val idInWs = workspaceService?.addWsPrefixToId(typeDef.id, typeDef.workspace) ?: typeDef.id
+
+        val resolvedTypeFromContext = context.types[idInWs]
         if (resolvedTypeFromContext != null) {
             return resolvedTypeFromContext
         }
@@ -97,9 +99,7 @@ class TypeDefResolver(
         }
 
         if (resTypeDef.workspace.isNotBlank()) {
-            workspaceService?.addWsPrefixToId(resTypeDef.id, resTypeDef.workspace)?.let {
-                resTypeDef.withId(it)
-            }
+            resTypeDef.withId(idInWs)
         }
 
         if (EntityRef.isEmpty(resTypeDef.parentRef) && resTypeDef.id != "base") {

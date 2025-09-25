@@ -1,286 +1,260 @@
-package ru.citeck.ecos.model.num.service;
+package ru.citeck.ecos.model.num.service
 
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.cp.lock.FencedLock;
-import kotlin.jvm.functions.Function0;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.transaction.support.TransactionTemplate;
-import ru.citeck.ecos.commons.data.ObjectData;
-import ru.citeck.ecos.commons.data.entity.EntityMeta;
-import ru.citeck.ecos.commons.data.entity.EntityWithMeta;
-import ru.citeck.ecos.commons.utils.TmplUtils;
-import ru.citeck.ecos.model.lib.num.dto.NumTemplateDef;
-import ru.citeck.ecos.model.num.domain.NumCounterEntity;
-import ru.citeck.ecos.model.num.domain.NumTemplateEntity;
-import ru.citeck.ecos.model.num.dto.NumTemplateDto;
-import ru.citeck.ecos.model.num.repository.EcosNumCounterRepository;
-import ru.citeck.ecos.model.num.repository.NumTemplateRepository;
-import ru.citeck.ecos.records2.predicate.model.Predicate;
-import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy;
-import ru.citeck.ecos.webapp.api.entity.EntityRef;
-import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverter;
-import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverterFactory;
-
-import jakarta.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
+import com.hazelcast.core.HazelcastInstance
+import io.github.oshai.kotlinlogging.KotlinLogging
+import jakarta.annotation.PostConstruct
+import lombok.RequiredArgsConstructor
+import lombok.extern.slf4j.Slf4j
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
+import org.springframework.stereotype.Service
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.TransactionDefinition
+import org.springframework.transaction.TransactionStatus
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.DefaultTransactionDefinition
+import org.springframework.transaction.support.TransactionTemplate
+import ru.citeck.ecos.commons.data.ObjectData
+import ru.citeck.ecos.commons.data.entity.EntityMeta
+import ru.citeck.ecos.commons.data.entity.EntityWithMeta
+import ru.citeck.ecos.commons.utils.TmplUtils.applyAtts
+import ru.citeck.ecos.commons.utils.TmplUtils.getAtts
+import ru.citeck.ecos.model.lib.num.dto.NumTemplateDef
+import ru.citeck.ecos.model.lib.workspace.IdInWs
+import ru.citeck.ecos.model.lib.workspace.WorkspaceService
+import ru.citeck.ecos.model.num.domain.NumCounterEntity
+import ru.citeck.ecos.model.num.domain.NumTemplateEntity
+import ru.citeck.ecos.model.num.dto.NumTemplateDto
+import ru.citeck.ecos.model.num.repository.EcosNumCounterRepository
+import ru.citeck.ecos.model.num.repository.NumTemplateRepository
+import ru.citeck.ecos.records2.predicate.model.Predicate
+import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy
+import ru.citeck.ecos.webapp.api.entity.EntityRef
+import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverter
+import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverterFactory
+import java.util.*
+import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.TimeUnit
+import java.util.stream.Collectors
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class NumTemplateService {
+class NumTemplateService(
+    private val templateRepo: NumTemplateRepository,
+    private val counterRepo: EcosNumCounterRepository,
+    private val transactionManager: PlatformTransactionManager,
+    private val hazelcast: HazelcastInstance,
+    private val predicateToJpaConvFactory: JpaSearchConverterFactory,
+    private val workspaceService: WorkspaceService
+) {
 
-    private final NumTemplateRepository templateRepo;
-    private final EcosNumCounterRepository counterRepo;
+    companion object {
+        private val log = KotlinLogging.logger {}
+    }
 
-    private final PlatformTransactionManager transactionManager;
-    private TransactionTemplate doInNewTxnTemplate;
+    private lateinit var doInNewTxnTemplate: TransactionTemplate
+    private lateinit var searchConverter: JpaSearchConverter<NumTemplateEntity>
 
-    private final HazelcastInstance hazelcast;
-
-    private final JpaSearchConverterFactory predicateToJpaConvFactory;
-    private JpaSearchConverter<NumTemplateEntity> searchConverter;
-
-    private final List<BiConsumer<EntityWithMeta<NumTemplateDef>, EntityWithMeta<NumTemplateDef>>> listeners =
-        new CopyOnWriteArrayList<>();
+    private val listeners: MutableList<(EntityWithMeta<NumTemplateDef>?, EntityWithMeta<NumTemplateDef>) -> Unit> =
+        CopyOnWriteArrayList()
 
     @PostConstruct
-    public void init() {
-        searchConverter = predicateToJpaConvFactory.createConverter(NumTemplateEntity.class)
+    fun init() {
+        searchConverter = predicateToJpaConvFactory.createConverter(NumTemplateEntity::class.java)
             .withDefaultPageSize(10000)
-            .build();
+            .build()
 
-        DefaultTransactionDefinition txnDef = new DefaultTransactionDefinition();
-        txnDef.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-        doInNewTxnTemplate = new TransactionTemplate(transactionManager, txnDef);
+        val txnDef = DefaultTransactionDefinition()
+        txnDef.propagationBehavior = TransactionDefinition.PROPAGATION_REQUIRES_NEW
+        doInNewTxnTemplate = TransactionTemplate(transactionManager, txnDef)
     }
 
     @Transactional
-    public void setNextNumber(EntityRef templateRef, String counterKey, long nextNumber) {
-
-        NumTemplateEntity numTemplateEntity = templateRepo.findByExtId(templateRef.getLocalId());
+    fun setNextNumber(templateRef: EntityRef, counterKey: String, nextNumber: Long) {
+        val idInWs = workspaceService.convertToIdInWs(templateRef.getLocalId())
+        var numTemplateEntity = templateRepo.findByWorkspaceAndExtId(idInWs.workspace, idInWs.id)
         if (numTemplateEntity == null) {
-            numTemplateEntity = new NumTemplateEntity();
-            numTemplateEntity.setExtId(templateRef.getLocalId());
-            numTemplateEntity.setName(templateRef.getLocalId());
-            numTemplateEntity.setCounterKey(counterKey);
-            numTemplateEntity = templateRepo.save(numTemplateEntity);
+            numTemplateEntity = NumTemplateEntity()
+            numTemplateEntity.extId = templateRef.getLocalId()
+            numTemplateEntity.name = templateRef.getLocalId()
+            numTemplateEntity.counterKey = counterKey
+            numTemplateEntity = templateRepo.save<NumTemplateEntity>(numTemplateEntity)
         }
 
-        NumCounterEntity counterEntity = counterRepo.findByTemplateAndKey(numTemplateEntity, counterKey);
+        var counterEntity = counterRepo.findByTemplateAndKey(numTemplateEntity, counterKey)
         if (counterEntity == null) {
-            counterEntity = new NumCounterEntity();
-            counterEntity.setTemplate(numTemplateEntity);
-            counterEntity.setKey(counterKey);
+            counterEntity = NumCounterEntity()
+            counterEntity.template = numTemplateEntity
+            counterEntity.key = counterKey
         }
-        counterEntity.setCounter(nextNumber - 1L);
-        counterRepo.save(counterEntity);
+        counterEntity.counter = nextNumber - 1L
+        counterRepo.save(counterEntity)
     }
 
-    public List<EntityWithMeta<NumTemplateDef>> getAll() {
-        return templateRepo.findAll()
-            .stream()
-            .map(this::toDto)
-            .collect(Collectors.toList());
+    fun getAll(): List<EntityWithMeta<NumTemplateDef>> {
+        return templateRepo.findAll().map(this::toDto)
     }
 
-    public List<EntityWithMeta<NumTemplateDef>> getAll(int max, int skip) {
-
-        Sort sort = Sort.by(Sort.Direction.DESC, "id");
-        PageRequest page = PageRequest.of(skip / max, max, sort);
+    fun getAll(max: Int, skip: Int): List<EntityWithMeta<NumTemplateDef>> {
+        val sort = Sort.by(Sort.Direction.DESC, "id")
+        val page = PageRequest.of(skip / max, max, sort)
 
         return templateRepo.findAll(page)
             .stream()
             .map(this::toDto)
-            .collect(Collectors.toList());
+            .collect(Collectors.toList())
     }
 
-    public List<EntityWithMeta<NumTemplateDef>> getAll(int max, int skip, Predicate predicate, List<SortBy> sort) {
+    fun getAll(max: Int, skip: Int, predicate: Predicate, sort: List<SortBy>): List<EntityWithMeta<NumTemplateDef>> {
         return searchConverter.findAll(templateRepo, predicate, max, skip, sort).stream()
             .map(this::toDto)
-            .collect(Collectors.toList());
+            .collect(Collectors.toList())
     }
 
-    public int getCount(Predicate predicate) {
-        return (int) searchConverter.getCount(templateRepo, predicate);
+    fun getCount(predicate: Predicate): Long {
+        return searchConverter.getCount(templateRepo, predicate)
     }
 
-    public int getCount() {
-        return (int) templateRepo.count();
+    fun getCount(): Long {
+        return templateRepo.count()
     }
 
-    public EntityWithMeta<NumTemplateDef> save(NumTemplateDto dto) {
+    fun save(dto: NumTemplateDto): EntityWithMeta<NumTemplateDef> {
 
-        EntityWithMeta<NumTemplateDef> before = getByIdOrNull(dto.getId());
+        val before = getByIdOrNull(IdInWs.create(dto.workspace, dto.id))
 
-        NumTemplateEntity entity = toEntity(dto);
-        entity = templateRepo.save(entity);
-        EntityWithMeta<NumTemplateDef> changedDto = toDto(entity);
+        var entity = toEntity(dto)
+        entity = templateRepo.save(entity)
+        val changedDto = toDto(entity)
 
-        listeners.forEach(l -> l.accept(before, changedDto));
-        return changedDto;
+        listeners.forEach { it(before, changedDto) }
+        return changedDto
     }
 
-    public Optional<EntityWithMeta<NumTemplateDef>> getById(String id) {
-        return Optional.ofNullable(getByIdOrNull(id));
+    fun getByIdOrNull(id: IdInWs): EntityWithMeta<NumTemplateDef>? {
+        val entity = templateRepo.findByWorkspaceAndExtId(id.workspace, id.id) ?: return null
+        return toDto(entity)
     }
 
-    public EntityWithMeta<NumTemplateDef> getByIdOrNull(String id) {
-        NumTemplateEntity entity = templateRepo.findByExtId(id);
-        if (entity == null) {
-            return null;
-        }
-        return toDto(entity);
+    fun getNextNumber(templateRef: EntityRef, model: ObjectData): Long {
+        return getNextNumber(templateRef, model, true)
     }
 
-    public long getNextNumber(EntityRef templateRef, ObjectData model) {
-        return getNextNumber(templateRef, model, true);
+    fun getNextNumber(templateRef: EntityRef, counterKey: String, increment: Boolean): Long {
+        val numTemplateEntity = getNumTemplateEntity(templateRef)
+
+        return getNextNumber(numTemplateEntity, counterKey, increment)
     }
 
-    public long getNextNumber(EntityRef templateRef, String counterKey, boolean increment) {
+    fun getNextNumber(templateRef: EntityRef, model: ObjectData, increment: Boolean): Long {
+        val numTemplateEntity = getNumTemplateEntity(templateRef)
+        val counterKey = applyAtts(numTemplateEntity.counterKey, model).asText()
 
-        NumTemplateEntity numTemplateEntity = getNumTemplateEntity(templateRef);
-
-        return getNextNumber(numTemplateEntity, counterKey, increment);
+        return getNextNumber(numTemplateEntity, counterKey, increment)
     }
 
-    public long getNextNumber(EntityRef templateRef, ObjectData model, boolean increment) {
-
-        NumTemplateEntity numTemplateEntity = getNumTemplateEntity(templateRef);
-        String counterKey = TmplUtils.applyAtts(numTemplateEntity.getCounterKey(), model).asText();
-
-        return getNextNumber(numTemplateEntity, counterKey, increment);
+    private fun getNumTemplateEntity(templateRef: EntityRef): NumTemplateEntity {
+        val idInWs = workspaceService.convertToIdInWs(templateRef.getLocalId())
+        val numTemplateEntity = templateRepo.findByWorkspaceAndExtId(idInWs.workspace, idInWs.id)
+        requireNotNull(numTemplateEntity) { "Number template doesn't exists: $templateRef" }
+        return numTemplateEntity
     }
 
-    @NotNull
-    private NumTemplateEntity getNumTemplateEntity(EntityRef templateRef) {
-        NumTemplateEntity numTemplateEntity = templateRepo.findByExtId(templateRef.getLocalId());
-        if (numTemplateEntity == null) {
-            throw new IllegalArgumentException("Number template doesn't exists: " + templateRef);
-        }
-        return numTemplateEntity;
-    }
-
-    private long getNextNumber(NumTemplateEntity numTemplateEntity, String counterKey, boolean increment) {
+    private fun getNextNumber(numTemplateEntity: NumTemplateEntity, counterKey: String, increment: Boolean): Long {
 
         if (!increment) {
-            NumCounterEntity counterEntity = counterRepo.findByTemplateAndKey(numTemplateEntity, counterKey);
-            if (counterEntity == null) {
-                return 1;
+            val counterEntity = counterRepo.findByTemplateAndKey(numTemplateEntity, counterKey)
+            return if (counterEntity == null) {
+                1
             } else {
-                return counterEntity.getCounter() + 1;
+                counterEntity.counter + 1
             }
         }
 
-        long lockingStartedAt = System.currentTimeMillis();
+        val lockingStartedAt = System.currentTimeMillis()
 
-        FencedLock lock = hazelcast.getCPSubsystem().getLock("num-tlt-" + numTemplateEntity.getExtId() + "-" + counterKey);
-        if (!lock.tryLock(10, TimeUnit.MINUTES)) {
-            throw new IllegalStateException("Number template lock can't be locked");
-        }
+        val lock = hazelcast.cpSubsystem.getLock("num-tlt-" + numTemplateEntity.extId + "-" + counterKey)
+        check(lock.tryLock(10, TimeUnit.MINUTES)) { "Number template lock can't be locked" }
         try {
-            long lockingTime = System.currentTimeMillis() - lockingStartedAt;
+            val lockingTime = System.currentTimeMillis() - lockingStartedAt
             if (lockingTime > 1000) {
-                log.warn("Too high lockingTime: "  + lockingTime);
+                log.warn { "Too high lockingTime: $lockingTime" }
             }
-            return doInNewTxn(() -> getNextNumberAndIncrement(numTemplateEntity, counterKey));
+            return doInNewTxn { getNextNumberAndIncrement(numTemplateEntity, counterKey) }
         } finally {
-            lock.unlock();
+            lock.unlock()
         }
     }
 
-    private long getNextNumberAndIncrement(NumTemplateEntity numTemplateEntity, String counterKey) {
+    private fun getNextNumberAndIncrement(numTemplateEntity: NumTemplateEntity, counterKey: String): Long {
 
-        NumCounterEntity counterEntity = counterRepo.findByTemplateAndKey(numTemplateEntity, counterKey);
+        var counterEntity = counterRepo.findByTemplateAndKey(numTemplateEntity, counterKey)
 
         if (counterEntity == null) {
-            counterEntity = new NumCounterEntity();
-            counterEntity.setKey(counterKey);
-            counterEntity.setCounter(1L);
-            counterEntity.setTemplate(numTemplateEntity);
+            counterEntity = NumCounterEntity()
+            counterEntity.key = counterKey
+            counterEntity.counter = 1L
+            counterEntity.template = numTemplateEntity
         } else {
-            counterEntity.setCounter(counterEntity.getCounter() + 1);
+            counterEntity.counter += 1
         }
-        return counterRepo.save(counterEntity).getCounter();
+        return counterRepo.save(counterEntity).counter
     }
 
-    private <T> T doInNewTxn(Function0<T> action) {
-        return doInNewTxnTemplate.execute(status -> {
-            T res = action.invoke();
-            status.flush();
-            return res;
-        });
+    private fun <T : Any> doInNewTxn(action: () -> T): T {
+        return doInNewTxnTemplate.execute<T> { status: TransactionStatus ->
+            val res = action.invoke()
+            status.flush()
+            res
+        }!!
     }
 
     @Transactional
-    public void delete(String id) {
+    fun delete(id: IdInWs) {
 
-        NumTemplateEntity template = templateRepo.findByExtId(id);
-        if (template == null) {
-            return;
-        }
-        List<NumCounterEntity> counters = counterRepo.findAllByTemplate(template);
-        log.info("Delete counters: " + counters);
+        val template = templateRepo.findByWorkspaceAndExtId(id.workspace, id.id) ?: return
+        val counters = counterRepo.findAllByTemplate(template)
+        log.info { "Delete counters: $counters" }
 
-        counterRepo.deleteAll(counters);
-        templateRepo.delete(template);
+        counterRepo.deleteAll(counters)
+        templateRepo.delete(template)
     }
 
-    public void addListener(BiConsumer<EntityWithMeta<NumTemplateDef>, EntityWithMeta<NumTemplateDef>> listener) {
-        this.listeners.add(listener);
+    fun addListener(listener: (EntityWithMeta<NumTemplateDef>?, EntityWithMeta<NumTemplateDef>) -> Unit) {
+        listeners.add(listener)
     }
 
-    private NumTemplateEntity toEntity(NumTemplateDto dto) {
-
-        NumTemplateEntity entity = templateRepo.findByExtId(dto.getId());
+    private fun toEntity(dto: NumTemplateDto): NumTemplateEntity {
+        var entity = templateRepo.findByWorkspaceAndExtId(dto.workspace, dto.id)
         if (entity == null) {
-            entity = new NumTemplateEntity();
-            entity.setExtId(dto.getId());
+            entity = NumTemplateEntity()
+            entity.extId = dto.id
+            entity.workspace = dto.workspace
         }
 
-        entity.setCounterKey(dto.getCounterKey());
-        entity.setName(dto.getName());
+        entity.counterKey = dto.counterKey
+        entity.name = dto.name
 
-        return entity;
+        return entity
     }
 
-    private EntityWithMeta<NumTemplateDef> toDto(NumTemplateEntity entity) {
+    private fun toDto(entity: NumTemplateEntity): EntityWithMeta<NumTemplateDef> {
+        val numTemplateDef = NumTemplateDef.create()
+            .withId(entity.extId)
+            .withCounterKey(entity.counterKey)
+            .withName(entity.name)
+            .withWorkspace(entity.workspace)
+            .withModelAttributes(ArrayList(getAtts(entity.counterKey)))
+            .build()
 
-        NumTemplateDef numTemplateDef = NumTemplateDef.create()
-            .withId(entity.getExtId())
-            .withCounterKey(entity.getCounterKey())
-            .withName(entity.getName())
-            .withModelAttributes(new ArrayList<>(TmplUtils.getAtts(entity.getCounterKey())))
-            .build();
+        val meta = EntityMeta.create()
+            .withCreated(entity.createdDate)
+            .withCreator(entity.createdBy)
+            .withModified(entity.lastModifiedDate)
+            .withModifier(entity.lastModifiedBy)
+            .build()
 
-        EntityMeta meta = EntityMeta.create()
-            .withCreated(entity.getCreatedDate())
-            .withCreator(entity.getCreatedBy())
-            .withModified(entity.getLastModifiedDate())
-            .withModifier(entity.getLastModifiedBy())
-            .build();
-
-        return new EntityWithMeta<>(numTemplateDef, meta);
-    }
-
-    @Data
-    public static class PredicateDto {
-        private String name;
-        private String moduleId;
+        return EntityWithMeta(numTemplateDef, meta)
     }
 }

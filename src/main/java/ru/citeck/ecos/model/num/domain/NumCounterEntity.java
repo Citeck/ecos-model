@@ -27,4 +27,36 @@ public class NumCounterEntity implements Serializable {
     @ManyToOne(cascade = {CascadeType.DETACH})
     @JoinColumn(name = "num_template_id")
     private NumTemplateEntity template;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public Long getCounter() {
+        return counter;
+    }
+
+    public void setCounter(Long counter) {
+        this.counter = counter;
+    }
+
+    public NumTemplateEntity getTemplate() {
+        return template;
+    }
+
+    public void setTemplate(NumTemplateEntity template) {
+        this.template = template;
+    }
 }

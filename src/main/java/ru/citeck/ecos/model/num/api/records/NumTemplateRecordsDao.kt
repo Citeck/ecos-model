@@ -1,206 +1,213 @@
-package ru.citeck.ecos.model.num.api.records;
+package ru.citeck.ecos.model.num.api.records
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.springframework.stereotype.Component;
-import ru.citeck.ecos.commons.data.ObjectData;
-import ru.citeck.ecos.commons.data.entity.EntityWithMeta;
-import ru.citeck.ecos.commons.json.Json;
-import ru.citeck.ecos.commons.json.YamlUtils;
-import ru.citeck.ecos.commons.utils.TmplUtils;
-import ru.citeck.ecos.events2.type.RecordEventsService;
-import ru.citeck.ecos.model.EcosModelApp;
-import ru.citeck.ecos.model.lib.num.dto.NumTemplateDef;
-import ru.citeck.ecos.model.num.dto.NumTemplateDto;
-import ru.citeck.ecos.model.num.dto.NumTemplateWithMetaDto;
-import ru.citeck.ecos.model.num.service.NumTemplateService;
-import ru.citeck.ecos.records3.record.dao.AbstractRecordsDao;
-import ru.citeck.ecos.records3.record.dao.atts.RecordAttsDao;
-import ru.citeck.ecos.records3.record.dao.delete.DelStatus;
-import ru.citeck.ecos.records3.record.dao.delete.RecordsDeleteDao;
-import ru.citeck.ecos.records3.record.dao.mutate.RecordMutateDtoDao;
-import ru.citeck.ecos.records3.record.dao.query.RecordsQueryDao;
-import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery;
-import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes;
-import ru.citeck.ecos.webapp.api.entity.EntityRef;
-import ru.citeck.ecos.records2.predicate.model.Predicate;
-import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName;
-import ru.citeck.ecos.webapp.api.entity.EntityRef;
-
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonValue
+import org.springframework.stereotype.Component
+import ru.citeck.ecos.commons.data.ObjectData
+import ru.citeck.ecos.commons.data.entity.EntityWithMeta
+import ru.citeck.ecos.commons.json.Json.mapper
+import ru.citeck.ecos.commons.json.YamlUtils.toNonDefaultString
+import ru.citeck.ecos.commons.utils.TmplUtils.getAtts
+import ru.citeck.ecos.events2.type.RecordEventsService
+import ru.citeck.ecos.model.lib.num.dto.NumTemplateDef
+import ru.citeck.ecos.model.lib.workspace.IdInWs
+import ru.citeck.ecos.model.lib.workspace.WorkspaceService
+import ru.citeck.ecos.model.num.dto.NumTemplateDto
+import ru.citeck.ecos.model.num.dto.NumTemplateWithMetaDto
+import ru.citeck.ecos.model.num.service.NumTemplateService
+import ru.citeck.ecos.records2.RecordConstants
+import ru.citeck.ecos.records2.predicate.model.AndPredicate
+import ru.citeck.ecos.records2.predicate.model.Predicate
+import ru.citeck.ecos.records2.predicate.model.Predicates
+import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
+import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
+import ru.citeck.ecos.records3.record.atts.value.factory.bean.BeanTypeUtils
+import ru.citeck.ecos.records3.record.dao.AbstractRecordsDao
+import ru.citeck.ecos.records3.record.dao.atts.RecordAttsDao
+import ru.citeck.ecos.records3.record.dao.delete.DelStatus
+import ru.citeck.ecos.records3.record.dao.delete.RecordsDeleteDao
+import ru.citeck.ecos.records3.record.dao.mutate.RecordMutateDao
+import ru.citeck.ecos.records3.record.dao.query.RecordsQueryDao
+import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
+import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes
+import ru.citeck.ecos.webapp.api.constants.AppName
+import ru.citeck.ecos.webapp.api.entity.EntityRef
+import java.nio.charset.StandardCharsets
 
 @Component
-public class NumTemplateRecordsDao extends AbstractRecordsDao
-    implements RecordAttsDao,
+class NumTemplateRecordsDao(
+    private val numTemplateService: NumTemplateService,
+    private val recordEventsService: RecordEventsService,
+    private val workspaceService: WorkspaceService
+) : AbstractRecordsDao(),
+    RecordAttsDao,
     RecordsQueryDao,
     RecordsDeleteDao,
-    RecordMutateDtoDao<NumTemplateRecordsDao.NumTemplateRecord> {
+    RecordMutateDao {
 
-    private static final String ID = "num-template";
-    private final NumTemplateService numTemplateService;
-    private final RecordEventsService recordEventsService;
-
-    public NumTemplateRecordsDao(NumTemplateService numTemplateService, RecordEventsService recordEventsService) {
-        this.numTemplateService = numTemplateService;
-        this.recordEventsService = recordEventsService;
-
-        numTemplateService.addListener(this::onTemplateChanged);
+    companion object {
+        private const val ID = "num-template"
     }
 
-    @Override
-    public NumTemplateRecord getRecToMutate(@NotNull String recordId) throws Exception {
-        return getRecordAtts(recordId);
+    init {
+        numTemplateService.addListener { before, after ->
+            this.onTemplateChanged(before, after)
+        }
     }
 
-    @Nullable
-    @Override
-    public Object queryRecords(@NotNull RecordsQuery recordsQuery) throws Exception {
+    override fun queryRecords(recsQuery: RecordsQuery): Any? {
+        val result = RecsQueryRes<NumTemplateRecord>()
 
-        RecsQueryRes<NumTemplateRecord> result = new RecsQueryRes<>();
+        if ("predicate" == recsQuery.language) {
+            var predicate = recsQuery.getQuery(
+                Predicate::class.java
+            )
+            if (recsQuery.workspaces.isNotEmpty()) {
+                val newPredicate = AndPredicate()
+                newPredicate.addPredicate(predicate)
+                newPredicate.addPredicate(
+                    Predicates.inVals(
+                        "workspace",
+                        recsQuery.workspaces.map {
+                            if (workspaceService.isWorkspaceWithGlobalArtifacts(it)) "" else it
+                        }
+                    )
+                )
+                predicate = newPredicate
+            }
 
-        if ("predicate".equals(recordsQuery.getLanguage())) {
-
-            Predicate predicate = recordsQuery.getQuery(Predicate.class);
-
-            Collection<EntityWithMeta<NumTemplateDef>> types = numTemplateService.getAll(
-                recordsQuery.getPage().getMaxItems(),
-                recordsQuery.getPage().getSkipCount(),
+            val types = numTemplateService.getAll(
+                recsQuery.page.maxItems,
+                recsQuery.page.skipCount,
                 predicate,
-                recordsQuery.getSortBy()
-            );
+                recsQuery.sortBy
+            )
 
-            result.setRecords(types.stream()
-                .map(NumTemplateRecord::new)
-                .collect(Collectors.toList()));
-            result.setTotalCount(numTemplateService.getCount(predicate));
-            return result;
+            result.setRecords(types.map { NumTemplateRecord(it) })
+            result.setTotalCount(numTemplateService.getCount(predicate))
+            return result
         }
 
-        if ("criteria".equals(recordsQuery.getLanguage())) {
-
+        if ("criteria" == recsQuery.language) {
             result.setRecords(
                 numTemplateService.getAll(
-                    recordsQuery.getPage().getMaxItems(),
-                    recordsQuery.getPage().getSkipCount()
-                ).stream()
-                .map(NumTemplateRecord::new)
-                .collect(Collectors.toList())
-            );
-            result.setTotalCount(numTemplateService.getCount());
+                    recsQuery.page.maxItems,
+                    recsQuery.page.skipCount
+                ).map { NumTemplateRecord(it) }
+            )
 
-            return result;
+            result.setTotalCount(numTemplateService.getCount())
+
+            return result
         }
 
-        return new RecsQueryRes<>();
+        return RecsQueryRes<Any>()
     }
 
-    @NotNull
-    @Override
-    public String saveMutatedRec(NumTemplateRecord dto) throws Exception {
-        if (StringUtils.isBlank(dto.getId())) {
-            throw new IllegalArgumentException("Attribute 'id' is mandatory");
+    override fun mutate(record: LocalRecordAtts): String {
+        val dto = getRecordAtts(record.id)
+
+        val dtoCtx = BeanTypeUtils.getTypeContext(dto::class.java)
+        dtoCtx.applyData(dto, record.attributes)
+
+        val ctxWorkspace = record.getAtt(RecordConstants.ATT_WORKSPACE).asText()
+        if (ctxWorkspace.isNotBlank() && dto.workspace.isBlank()) {
+            dto.workspace = ctxWorkspace
         }
-        return numTemplateService.save(dto).getEntity().getId();
+
+        require(dto.id.isNotBlank()) { "Attribute 'id' is mandatory" }
+
+        val resEntity = numTemplateService.save(dto).entity
+        return workspaceService.addWsPrefixToId(resEntity.id, resEntity.workspace)
     }
 
-    @NotNull
-    @Override
-    public List<DelStatus> delete(@NotNull List<String> recordIds) throws Exception {
-        List<DelStatus> results = new ArrayList<>();
+    override fun delete(recordIds: List<String>): List<DelStatus> {
+        val results: MutableList<DelStatus> = ArrayList()
 
-        for (String recordId : recordIds) {
-            numTemplateService.delete(recordId);
-            results.add(DelStatus.OK);
+        for (recordId in recordIds) {
+            numTemplateService.delete(workspaceService.convertToIdInWs(recordId))
+            results.add(DelStatus.OK)
         }
-        return results;
+        return results
     }
 
-    @Nullable
-    @Override
-    public NumTemplateRecord getRecordAtts(@NotNull String recordId) throws Exception {
+    override fun getRecordAtts(recordId: String): NumTemplateRecord {
+        val idInWs = workspaceService.convertToIdInWs(recordId)
+        val dto = numTemplateService.getByIdOrNull(idInWs)?.let {
+            NumTemplateWithMetaDto(it)
+        } ?: NumTemplateWithMetaDto(recordId)
 
-        NumTemplateWithMetaDto dto = numTemplateService.getById(recordId).map(NumTemplateWithMetaDto::new)
-            .orElseGet(() -> new NumTemplateWithMetaDto(recordId));
-
-        return new NumTemplateRecord(dto);
+        return NumTemplateRecord(dto)
     }
 
-    private void onTemplateChanged(@Nullable EntityWithMeta<NumTemplateDef> before,
-                                   @Nullable EntityWithMeta<NumTemplateDef> after) {
+    private fun onTemplateChanged(
+        before: EntityWithMeta<NumTemplateDef>?,
+        after: EntityWithMeta<NumTemplateDef>?
+    ) {
         if (after != null) {
             recordEventsService.emitRecChanged(
                 before,
                 after,
-                getId(),
-                dto -> new NumTemplateRecord(new NumTemplateWithMetaDto(dto))
-            );
+                getId()
+            ) { dto -> NumTemplateRecord(NumTemplateWithMetaDto(dto)) }
         }
     }
 
-    @NotNull
-    @Override
-    public String getId() {
-        return ID;
+    override fun getId(): String {
+        return ID
     }
 
-    @NoArgsConstructor
-    public static class NumTemplateRecord extends NumTemplateWithMetaDto {
+    inner class NumTemplateRecord : NumTemplateWithMetaDto {
 
-        @Getter @Setter
-        private List<String> modelAttributes;
+        private var modelAttributes: List<String>
 
-        public NumTemplateRecord(NumTemplateWithMetaDto model) {
-            super(model);
-            modelAttributes = new ArrayList<>(TmplUtils.getAtts(this.getCounterKey()));
+        constructor(model: NumTemplateWithMetaDto) : super(model) {
+            modelAttributes = ArrayList(getAtts(this.counterKey))
         }
 
-        public NumTemplateRecord(EntityWithMeta<NumTemplateDef> model) {
-            super(model);
-            modelAttributes = model.getEntity().getModelAttributes();
+        constructor(model: EntityWithMeta<NumTemplateDef>) : super(model) {
+            modelAttributes = model.entity.modelAttributes
+        }
+
+        fun getModelAttributes(): List<String> {
+            return modelAttributes
+        }
+
+        @AttName("?id")
+        fun getRef(): EntityRef {
+            return EntityRef.create(
+                AppName.EMODEL,
+                ID,
+                workspaceService.convertToStrId(IdInWs.create(workspace, id))
+            )
         }
 
         @AttName("_type")
-        public EntityRef getEcosType() {
-            return EntityRef.create(EcosModelApp.NAME, "type", "number-template");
-        }
-
-        public String getModuleId() {
-            return getId();
-        }
-
-        public void setModuleId(String value) {
-            setId(value);
+        fun getEcosType(): EntityRef {
+            return EntityRef.create(AppName.EMODEL, "type", "number-template")
         }
 
         @AttName("?disp")
-        public String getDisplayName() {
-            return getId();
+        fun getDispName(): String {
+            return name.ifBlank { id }
         }
 
         @JsonProperty("_content")
-        public void setContent(List<ObjectData> content) {
-
-            String dataUriContent = content.get(0).get("url", "");
-            ObjectData data = Json.getMapper().read(dataUriContent, ObjectData.class);
-
-            Json.getMapper().applyData(this, data);
+        fun setContent(content: List<ObjectData>) {
+            val dataUriContent: String = content.first().get("url", "")
+            val data = mapper.read(dataUriContent, ObjectData::class.java)
+            mapper.applyData(this, data)
         }
 
         @JsonValue
-        public NumTemplateDto toJson() {
-            return new NumTemplateDto(this);
+        fun toJson(): NumTemplateDto {
+            val dto = NumTemplateDto(this)
+            dto.workspace = ""
+            return dto
         }
 
-        public byte[] getData() {
-            return YamlUtils.toNonDefaultString(toJson()).getBytes(StandardCharsets.UTF_8);
+        fun getData(): ByteArray {
+            return toNonDefaultString(toJson()).toByteArray(StandardCharsets.UTF_8)
         }
     }
 }

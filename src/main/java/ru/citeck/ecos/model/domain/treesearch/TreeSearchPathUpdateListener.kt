@@ -56,7 +56,7 @@ class TreeSearchPathUpdateListener(
                     if (event.ref.withoutLocalId() != event.parentAfter.withoutLocalId()) {
                         processEvent(event)
                     }
-                 }
+                }
             }
         )
         eventsService.addListener(

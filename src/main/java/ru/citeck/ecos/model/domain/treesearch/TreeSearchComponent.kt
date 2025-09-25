@@ -35,11 +35,13 @@ class TreeSearchComponent(
     }
 
     fun getAttsWithNonEmptyLeafAssocsToLoad(dto: KClass<*>): Map<String, String> {
-        val baseAtts = LinkedHashMap(attsByDto.computeIfAbsent(dto) {
-            recordsServiceFactory.attSchemaWriter.writeToMap(
-                recordsServiceFactory.dtoSchemaReader.read(dto.java)
-            )
-        })
+        val baseAtts = LinkedHashMap(
+            attsByDto.computeIfAbsent(dto) {
+                recordsServiceFactory.attSchemaWriter.writeToMap(
+                    recordsServiceFactory.dtoSchemaReader.read(dto.java)
+                )
+            }
+        )
         treeLeafAssocs.forEach {
             baseAtts[HAS_TREE_LEAF_ASSOC_ALIAS_PREFIX + it] = "_has.src_assoc_$it?bool!"
         }

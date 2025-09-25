@@ -216,7 +216,7 @@ class TreeSearchPathUpdateJob(
             }
             log.debug {
                 "Job completed in ${System.currentTimeMillis() - lockAcquiredAt}ms. " +
-                        "Lock waiting: ${lockAcquiredAt - updatingStartedAt}ms. Job done: $jobDone"
+                    "Lock waiting: ${lockAcquiredAt - updatingStartedAt}ms. Job done: $jobDone"
             }
         }
     }
@@ -246,7 +246,7 @@ class TreeSearchPathUpdateJob(
                 }
                 log.debug {
                     "Manual updating completed. Elapsed time: ${System.currentTimeMillis() - startedAt}. " +
-                            "Lock acquisition time: ${lockAcquiredAt - startedAt}"
+                        "Lock acquisition time: ${lockAcquiredAt - startedAt}"
                 }
             }
         } finally {
@@ -296,7 +296,7 @@ class TreeSearchPathUpdateJob(
                     Predicates.or(
                         Predicates.eq(
                             "(${RecordConstants.ATT_PARENT}.\"${TreeSearchDesc.ATT_PATH_HASH}\" " +
-                                    "= \"${TreeSearchDesc.ATT_PARENT_PATH_HASH}\")",
+                                "= \"${TreeSearchDesc.ATT_PARENT_PATH_HASH}\")",
                             false
                         ),
                         Predicates.and(
@@ -418,8 +418,11 @@ class TreeSearchPathUpdateJob(
                             .withQuery(
                                 Predicates.and(
                                     Predicates.notEq(TreeSearchDesc.ATT_PARENT_PATH_HASH, node.pathHash),
-                                Predicates.or(node.leafAssocsToUpdate.map { Predicates.eq(it, node.id) }
-                                ))).build()
+                                    Predicates.or(
+                                        node.leafAssocsToUpdate.map { Predicates.eq(it, node.id) }
+                                    )
+                                )
+                            ).build()
 
                         var leafsToUpdate = recordsService.query(leafsQuery).getRecords()
                         while (leafsToUpdate.isNotEmpty() && System.currentTimeMillis() <= updateUntilMs) {
@@ -444,7 +447,8 @@ class TreeSearchPathUpdateJob(
                     }
                     if (System.currentTimeMillis() <= updateUntilMs) {
                         recordsService.mutate(
-                            node.id, mapOf(
+                            node.id,
+                            mapOf(
                                 TreeSearchDesc.ATT_LEAF_ASSOCS_TO_UPDATE to emptyList<String>(),
                             )
                         )

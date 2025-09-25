@@ -11,11 +11,8 @@ import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.model.lib.aspect.dto.AspectInfo
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
-import ru.citeck.ecos.model.lib.workspace.WorkspaceService
+import ru.citeck.ecos.model.lib.workspace.*
 import ru.citeck.ecos.model.type.eapps.handler.TypeArtifactHandler
-import ru.citeck.ecos.model.type.service.TypeId.Companion.convertToStrId
-import ru.citeck.ecos.model.type.service.TypeId.Companion.convertToTypeId
-import ru.citeck.ecos.model.type.service.TypeId.Companion.getTypeId
 import ru.citeck.ecos.model.type.service.resolver.AspectsProvider
 import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
 import ru.citeck.ecos.model.type.service.resolver.TypesProvider
@@ -72,7 +69,8 @@ class TypesRegistryInitializer(
             resProv,
             aspectsProv,
             registry,
-            webAppApi
+            webAppApi,
+            workspaceService
         ) {
             syncAllTypes(registry, rawProv, aspectsProv, FullSyncType.ALL)
         }
@@ -85,12 +83,12 @@ class TypesRegistryInitializer(
 
         typesService.addOnDeletedListener {
             TxnContext.doAfterCommit(0f, false) {
-                registry.setValue(workspaceService.convertToStrId(it), null)
+                registry.setValue(workspaceService.convertToStrIdSafe(it), null)
             }
         }
 
-        fun updateTypes(typeIds: Collection<TypeId>) {
-            val typesSet = if (typeIds !is Set<TypeId>) typeIds.toSet() else typeIds
+        fun updateTypes(typeIds: Collection<IdInWs>) {
+            val typesSet = if (typeIds !is Set<IdInWs>) typeIds.toSet() else typeIds
             typesHierarchyUpdater.updateTypes(typesSet)
         }
 
@@ -234,7 +232,7 @@ class TypesRegistryInitializer(
 
         override fun get(id: String): TypeDef? {
 
-            val typeFromRepo = typesService.getByIdOrNull(workspaceService.convertToTypeId(id)) ?: return null
+            val typeFromRepo = typesService.getByIdOrNull(workspaceService.convertToIdInWsSafe(id)) ?: return null
             val predefinedType = predefinedTypesInfo[id] ?: return typeFromRepo
 
             // Add missing predefined attributes to the type model loaded from the database.
@@ -279,8 +277,8 @@ class TypesRegistryInitializer(
         }
 
         override fun getChildren(typeId: String): List<String> {
-            return typesService.getChildren(workspaceService.convertToTypeId(typeId)).map {
-                workspaceService.convertToStrId(it)
+            return typesService.getChildren(workspaceService.convertToIdInWsSafe(typeId)).map {
+                workspaceService.convertToStrIdSafe(it)
             }
         }
 
@@ -321,7 +319,7 @@ class TypesRegistryInitializer(
         val isMatch: (String) -> Boolean
     ) {
         ALL({ true }),
-        WITHOUT_WS({ !it.contains(TypeId.WS_DELIM) }),
-        WITH_WS({ it.contains(TypeId.WS_DELIM) })
+        WITHOUT_WS({ !it.contains(IdInWs.WS_DELIM) }),
+        WITH_WS({ it.contains(IdInWs.WS_DELIM) })
     }
 }

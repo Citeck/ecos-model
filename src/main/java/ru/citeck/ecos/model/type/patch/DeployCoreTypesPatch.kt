@@ -6,8 +6,8 @@ import org.springframework.transaction.annotation.Transactional
 import ru.citeck.ecos.apps.app.service.LocalAppService
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
+import ru.citeck.ecos.model.lib.workspace.IdInWs
 import ru.citeck.ecos.model.type.eapps.handler.TypeArtifactHandler
-import ru.citeck.ecos.model.type.service.TypeId
 import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import ru.citeck.ecos.webapp.lib.patch.annotaion.EcosLocalPatch
@@ -90,7 +90,7 @@ class DeployCoreTypesPatch(
             while (typesWithDepsIt.hasNext()) {
                 val type = typesWithDepsIt.next()
                 if (type.dependencies.isEmpty()) {
-                    if (typesService.getByIdOrNull(TypeId.create(type.typeDef.id)) == null) {
+                    if (typesService.getByIdOrNull(IdInWs.create(type.typeDef.id)) == null) {
                         typesToDeploy.add(type.typeDef)
                     }
                     typesWithDepsIt.remove()

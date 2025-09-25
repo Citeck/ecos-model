@@ -13,8 +13,8 @@ import ru.citeck.ecos.model.lib.permissions.dto.PermissionType
 import ru.citeck.ecos.model.lib.type.dto.TypeAspectDef
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.model.lib.workspace.WorkspaceService
+import ru.citeck.ecos.model.lib.workspace.convertToIdInWsSafe
 import ru.citeck.ecos.model.type.service.TypeDesc
-import ru.citeck.ecos.model.type.service.TypeId.Companion.convertToTypeId
 import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
 import ru.citeck.ecos.records2.RecordConstants
@@ -119,7 +119,7 @@ class TypesRepoRecordsDao(
     }
 
     override fun getRecordAtts(recordId: String): TypeRecord? {
-        return typeService.getByIdWithMetaOrNull(workspaceService.convertToTypeId(recordId))?.let {
+        return typeService.getByIdWithMetaOrNull(workspaceService.convertToIdInWsSafe(recordId))?.let {
             buildTypeRecord(it)
         }
     }

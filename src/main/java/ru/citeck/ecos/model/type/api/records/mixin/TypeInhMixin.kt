@@ -3,8 +3,8 @@ package ru.citeck.ecos.model.type.api.records.mixin
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef
 import ru.citeck.ecos.model.lib.workspace.WorkspaceService
+import ru.citeck.ecos.model.lib.workspace.convertToIdInWsSafe
 import ru.citeck.ecos.model.type.api.records.TypesRepoRecordsDao
-import ru.citeck.ecos.model.type.service.TypeId.Companion.convertToTypeId
 import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.records3.record.atts.value.AttValue
 import ru.citeck.ecos.records3.record.atts.value.AttValueCtx
@@ -66,7 +66,7 @@ final class TypeInhMixin(
                 typeDef.model.attributes
             }
             "parentModelAttributes" -> {
-                typesService.getInhAttributes(workspaceService.convertToTypeId(typeDef.parentRef.getLocalId()))
+                typesService.getInhAttributes(workspaceService.convertToIdInWsSafe(typeDef.parentRef.getLocalId()))
             }
             "docLibEnabled" -> {
                 typeDef.docLib.enabled

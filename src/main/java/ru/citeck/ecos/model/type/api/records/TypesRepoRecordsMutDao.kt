@@ -9,10 +9,10 @@ import ru.citeck.ecos.model.lib.role.dto.RoleDef
 import ru.citeck.ecos.model.lib.status.dto.StatusDef
 import ru.citeck.ecos.model.lib.type.dto.TypeAspectDef
 import ru.citeck.ecos.model.lib.utils.ModelUtils
+import ru.citeck.ecos.model.lib.workspace.IdInWs
 import ru.citeck.ecos.model.lib.workspace.WorkspaceService
+import ru.citeck.ecos.model.lib.workspace.convertToIdInWsSafe
 import ru.citeck.ecos.model.type.service.TypeDesc
-import ru.citeck.ecos.model.type.service.TypeId
-import ru.citeck.ecos.model.type.service.TypeId.Companion.convertToTypeId
 import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
@@ -42,7 +42,7 @@ class TypesRepoRecordsMutDao(
     override fun mutateForAnyRes(record: LocalRecordAtts): Any? {
 
         val recToMutate = if (record.id.isNotBlank()) {
-            typeService.getById(workspaceService.convertToTypeId(record.id))
+            typeService.getById(workspaceService.convertToIdInWsSafe(record.id))
         } else {
             val customId = record.attributes["id"].asText()
             var workspace = record.attributes[WORKSPACE_ATT].asText().ifBlank {
@@ -51,7 +51,7 @@ class TypesRepoRecordsMutDao(
             if (!isWorkspaceShouldHasScopedTypes(workspace)) {
                 workspace = ""
             }
-            val existingDef = typeService.getByIdOrNull(TypeId.create(workspace, customId))
+            val existingDef = typeService.getByIdOrNull(IdInWs.create(workspace, customId))
             if (existingDef != null) {
                 if (AuthContext.isNotRunAsSystem()) {
                     val formId = record.getAtt("/_formInfo/formId").asText()
@@ -170,7 +170,7 @@ class TypesRepoRecordsMutDao(
 
     override fun delete(recordId: String): DelStatus {
         typesRepoPermsService?.checkDeletePermissions(recordId)
-        typeService.delete(workspaceService.convertToTypeId(recordId))
+        typeService.delete(workspaceService.convertToIdInWsSafe(recordId))
         return DelStatus.OK
     }
 

@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.apps.app.domain.ecostype.service.ModelTypeArtifactResolver
 import ru.citeck.ecos.model.lib.workspace.WorkspaceService
-import ru.citeck.ecos.model.type.service.TypeId.Companion.convertToTypeId
+import ru.citeck.ecos.model.lib.workspace.convertToIdInWsSafe
 import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 
@@ -26,7 +26,7 @@ class TypeArtifactsResolverImpl(
 
     private fun getTypeArtifactsImpl(typeRef: EntityRef): List<EntityRef> {
 
-        val type = typeService.getByIdOrNull(workspaceService.convertToTypeId(typeRef.getLocalId()))
+        val type = typeService.getByIdOrNull(workspaceService.convertToIdInWsSafe(typeRef.getLocalId()))
         val result = mutableListOf<EntityRef>()
 
         if (type == null) {
