@@ -51,19 +51,23 @@ class EmodelWorkspaceService(
         .expireAfterWrite(Duration.ofMinutes(30))
         .maximumSize(1000)
         .build<String, String> {
-            recordsService.getAtt(WorkspaceDesc.getRef(it), WorkspaceDesc.ATT_SYSTEM_ID).asText().ifBlank { null }
+            AuthContext.runAsSystem {
+                recordsService.getAtt(WorkspaceDesc.getRef(it), WorkspaceDesc.ATT_SYSTEM_ID).asText().ifBlank { null }
+            }
         }
 
     private val wsIdBySysIdCache = Caffeine.newBuilder()
         .expireAfterWrite(Duration.ofMinutes(30))
         .maximumSize(1000)
         .build<String, String> {
-            recordsService.queryOne(
-                RecordsQuery.create()
-                    .withSourceId(WorkspaceDesc.SOURCE_ID)
-                    .withQuery(Predicates.eq(WorkspaceDesc.ATT_SYSTEM_ID, it))
-                    .build()
-            )?.getLocalId()
+            AuthContext.runAsSystem {
+                recordsService.queryOne(
+                    RecordsQuery.create()
+                        .withSourceId(WorkspaceDesc.SOURCE_ID)
+                        .withQuery(Predicates.eq(WorkspaceDesc.ATT_SYSTEM_ID, it))
+                        .build()
+                )?.getLocalId()
+            }
         }
 
     private fun getUserAuthoritiesRefs(userRef: EntityRef, withUserRef: Boolean = true): Set<EntityRef> {
