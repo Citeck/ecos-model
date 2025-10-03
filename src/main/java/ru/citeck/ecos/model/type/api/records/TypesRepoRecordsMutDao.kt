@@ -77,6 +77,7 @@ class TypesRepoRecordsMutDao(
         }
         val mutAspects = if (record.attributes.has("customAspects")) {
             val customAspects = record.attributes["customAspects"].asList(TypeAspectDef::class.java)
+                .filter { it.ref.getLocalId().isNotEmpty() }
             val newAspects = ArrayList(customAspects)
             recToMutate.aspects.forEach {
                 if (TypeDesc.NON_CUSTOM_ASPECTS.contains(it.ref.getLocalId())) {
@@ -127,9 +128,9 @@ class TypesRepoRecordsMutDao(
             return
         }
         for ((aspectId, config) in aspectsConfig) {
-            val added = config.get(TypeDesc.ASPECT_CONFIG_ADDED_FLAG, true)
-            config.remove(TypeDesc.ASPECT_CONFIG_ADDED_FLAG)
             val idxOfExistingAspect = newAspects.indexOfFirst { it.ref.getLocalId() == aspectId }
+            val added = config.get(TypeDesc.ASPECT_CONFIG_ADDED_FLAG, idxOfExistingAspect > -1)
+            config.remove(TypeDesc.ASPECT_CONFIG_ADDED_FLAG)
             if (idxOfExistingAspect == -1) {
                 if (added) {
                     newAspects.add(
