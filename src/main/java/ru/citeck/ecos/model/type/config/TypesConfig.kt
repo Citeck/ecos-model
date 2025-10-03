@@ -3,20 +3,16 @@ package ru.citeck.ecos.model.type.config
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import ru.citeck.ecos.data.sql.domain.DbDomainConfig
 import ru.citeck.ecos.data.sql.domain.DbDomainFactory
 import ru.citeck.ecos.data.sql.records.DbRecordsDaoConfig
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
 import ru.citeck.ecos.model.lib.utils.ModelUtils
-import ru.citeck.ecos.model.type.api.records.TypesRepoRecordsDao
-import ru.citeck.ecos.model.type.converter.TypeConverter
 import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.model.type.service.utils.EModelTypeUtils
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.dao.RecordsDao
-import ru.citeck.ecos.records3.record.mixin.impl.mutmeta.MutMetaMixin
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import ru.citeck.ecos.webapp.lib.model.type.registry.EcosTypesRegistry
 
@@ -79,17 +75,6 @@ class TypesConfig {
                 }
             }
         }
-    }
-
-    @Bean("typesMutMetaMixin")
-    fun typesMutMetaMixin(
-        typesRepoRecordsDao: TypesRepoRecordsDao,
-        typeConverter: TypeConverter
-    ): MutMetaMixin {
-        val mixin = MutMetaMixin("emodel/type")
-        typesRepoRecordsDao.addAttributesMixin(mixin)
-        typeConverter.mutMetaMixin = mixin
-        return mixin
     }
 
     private fun createRecordsDao(dbDomainFactory: DbDomainFactory, typeDef: TypeDef): RecordsDao {

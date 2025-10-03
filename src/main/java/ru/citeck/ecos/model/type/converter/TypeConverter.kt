@@ -14,12 +14,9 @@ import ru.citeck.ecos.model.lib.workspace.convertToIdInWsSafe
 import ru.citeck.ecos.model.type.repository.TypeEntity
 import ru.citeck.ecos.model.type.service.dao.TypeRepoDao
 import ru.citeck.ecos.model.type.service.getTypeId
-import ru.citeck.ecos.records3.record.mixin.impl.mutmeta.MutMeta
-import ru.citeck.ecos.records3.record.mixin.impl.mutmeta.MutMetaMixin
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.model.type.dto.AssocDef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
-import java.time.Instant
 import java.util.*
 import kotlin.collections.LinkedHashSet
 
@@ -28,8 +25,6 @@ class TypeConverter(
     private val typeRepoDao: TypeRepoDao,
     private val workspaceService: WorkspaceService? = null
 ) {
-
-    var mutMetaMixin: MutMetaMixin? = null
 
     fun toEntity(dto: TypeDef): TypeEntity {
         return toEntity(dto, typeRepoDao.findByExtId(dto.getTypeId()))
@@ -120,7 +115,7 @@ class TypeConverter(
 
     fun toDtoWithMeta(entity: TypeEntity): EntityWithMeta<TypeDef> {
 
-        mutMetaMixin?.addCtxMeta(
+        /*mutMetaMixin?.addCtxMeta(
             entity.extId,
             MutMeta(
                 entity.createdBy ?: "anonymous",
@@ -128,7 +123,7 @@ class TypeConverter(
                 entity.lastModifiedBy ?: "anonymous",
                 entity.lastModifiedDate ?: Instant.EPOCH
             )
-        )
+        )*/
 
         val typeDef = TypeDef.create()
             .withId(entity.extId)

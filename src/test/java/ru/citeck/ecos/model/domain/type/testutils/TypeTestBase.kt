@@ -15,7 +15,6 @@ import ru.citeck.ecos.model.lib.type.repo.TypesRepo
 import ru.citeck.ecos.model.type.api.records.TypesRepoRecordsDao
 import ru.citeck.ecos.model.type.api.records.TypesRepoRecordsMutDao
 import ru.citeck.ecos.model.type.api.records.mixin.TypeInhMixin
-import ru.citeck.ecos.model.type.config.TypesConfig
 import ru.citeck.ecos.model.type.converter.TypeConverter
 import ru.citeck.ecos.model.type.eapps.handler.TypeArtifactHandler
 import ru.citeck.ecos.model.type.repository.TypeEntity
@@ -125,7 +124,6 @@ open class TypeTestBase {
         records.register(TypeRecordsDao(typesRegistry, modelLibServices))
 
         TypeInhMixin(typeService, typesRepoRecordsDao)
-        TypesConfig().typesMutMetaMixin(typesRepoRecordsDao, typeConverter)
 
         records.register(TypesRepoRecordsMutDao(typeService))
 
