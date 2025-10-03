@@ -8,6 +8,7 @@ import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.commons.json.Json.mapper
 import ru.citeck.ecos.commons.json.YamlUtils.toNonDefaultString
 import ru.citeck.ecos.commons.utils.TmplUtils.getAtts
+import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.events2.type.RecordEventsService
 import ru.citeck.ecos.model.lib.num.dto.NumTemplateDef
 import ru.citeck.ecos.model.lib.workspace.IdInWs
@@ -32,6 +33,7 @@ import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes
 import ru.citeck.ecos.webapp.api.constants.AppName
 import ru.citeck.ecos.webapp.api.entity.EntityRef
+import ru.citeck.ecos.webapp.api.entity.toEntityRef
 import java.nio.charset.StandardCharsets
 
 @Component
@@ -110,15 +112,32 @@ class NumTemplateRecordsDao(
         val dtoCtx = BeanTypeUtils.getTypeContext(dto::class.java)
         dtoCtx.applyData(dto, record.attributes)
 
-        val ctxWorkspace = record.getAtt(RecordConstants.ATT_WORKSPACE).asText()
-        if (ctxWorkspace.isNotBlank() && dto.workspace.isBlank()) {
+        val ctxWorkspace = record.getAtt(RecordConstants.ATT_WORKSPACE).asText().toEntityRef().getLocalId()
+        if (!workspaceService.isWorkspaceWithGlobalArtifacts(ctxWorkspace) && dto.workspace.isBlank()) {
             dto.workspace = ctxWorkspace
         }
 
         require(dto.id.isNotBlank()) { "Attribute 'id' is mandatory" }
 
+        checkMutPerms(dto)
+
         val resEntity = numTemplateService.save(dto).entity
         return workspaceService.addWsPrefixToId(resEntity.id, resEntity.workspace)
+    }
+
+    private fun checkMutPerms(record: NumTemplateRecord) {
+        if (AuthContext.isRunAsSystemOrAdmin()) {
+            return
+        }
+        if (record.workspace.isNotBlank()) {
+            if (workspaceService.isUserManagerOf(AuthContext.getCurrentUser(), record.workspace)) {
+                return
+            } else {
+                error("Permission denied. You can't create number templates in workspace '${record.workspace}'")
+            }
+        } else {
+            error("Permission denied. You can't create number templates in global scope.")
+        }
     }
 
     override fun delete(recordIds: List<String>): List<DelStatus> {

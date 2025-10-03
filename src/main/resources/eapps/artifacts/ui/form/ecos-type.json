@@ -528,27 +528,6 @@
                                     "refreshOn": [],
                                     "customDefaultValue": "const currentWs = Citeck.Navigator.getWorkspaceId() || '';\nif (currentWs.indexOf('admin$') === 0) {\n  value = null;  \n} else {\n  value = \"emodel/workspace@\" + currentWs;\n}",
                                     "optionalWhenDisabled": false,
-                                    "logic": [
-                                      {
-                                        "name": "enable-for-admin",
-                                        "trigger": {
-                                          "type": "javascript",
-                                          "javascript": "result = instance.options.formMode === 'CREATE' && _.get(data, 'currentUserAtts.isAdmin', false);"
-                                        },
-                                        "actions": [
-                                          {
-                                            "name": "enable",
-                                            "type": "property",
-                                            "property": {
-                                              "label": "Disabled",
-                                              "value": "disabled",
-                                              "type": "boolean"
-                                            },
-                                            "state": "false"
-                                          }
-                                        ]
-                                      }
-                                    ],
                                     "type": "selectJournal",
                                     "input": true
                                   },
