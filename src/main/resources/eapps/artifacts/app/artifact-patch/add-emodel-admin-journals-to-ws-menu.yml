@@ -1,0 +1,33 @@
+---
+id: add-emodel-admin-journals-to-ws-menu
+name:
+  ru: Добавить журналы администрирования model в меню рабочей области
+  en: Add model admin journals to default workspace menu
+
+target: 'ui/menu$default-ws-admin-menu-items'
+system: true
+order: 100
+
+type: json
+config:
+  operations:
+    - op: add
+      path: '$.subMenu.left.items'
+      value:
+        - id: ecos-types-def
+          label:
+            ru: Типы данных
+            en: Data types
+          icon: ui/icon@i-leftmenu-app
+          hidden: false
+          type: JOURNAL
+          config:
+            recordRef: uiserv/journal@ecos-types-def
+        - id: number-templates
+          label:
+            en: Шаблоны нумерации
+          icon: ui/icon@i-leftmenu-new-tasks
+          hidden: false
+          type: JOURNAL
+          config:
+            recordRef: uiserv/journal@number-templates
