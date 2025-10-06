@@ -46,7 +46,7 @@ class AuthorityDao : RecordsQueryDao, RecordAttsDao, AbstractRecordsDao() {
 
     override fun getRecordAtts(recordId: String): Any? {
         if (recordId.startsWith(AuthRole.PREFIX)) {
-            return getRoles().filter { it.value == recordId }
+            return getRoles().find { it.value == recordId }
         }
         return null
     }
