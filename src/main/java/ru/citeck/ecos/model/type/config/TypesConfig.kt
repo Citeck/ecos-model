@@ -17,7 +17,9 @@ import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import ru.citeck.ecos.webapp.lib.model.type.registry.EcosTypesRegistry
 
 @Configuration
-class TypesConfig {
+class TypesConfig(
+    val emodelTypeUtils: EModelTypeUtils
+) {
 
     companion object {
         private val log = KotlinLogging.logger {}
@@ -35,14 +37,14 @@ class TypesConfig {
         val typesRegistry = typesRegistry ?: return
 
         typesRegistry.getAllValues().values.forEach { typeDef ->
-            if (EModelTypeUtils.getEmodelSourceId(typeDef.entity).isNotBlank()) {
+            if (emodelTypeUtils.getEmodelSourceId(typeDef.entity).isNotBlank()) {
                 recordsService.register(createRecordsDao(dbDomainFactory, typeDef.entity))
             }
         }
 
         typesService.addListener(-100f) { before, after ->
-            val emodelSrcIdBefore = EModelTypeUtils.getEmodelSourceId(before)
-            val emodelSrcIdAfter = EModelTypeUtils.getEmodelSourceId(after)
+            val emodelSrcIdBefore = emodelTypeUtils.getEmodelSourceId(before)
+            val emodelSrcIdAfter = emodelTypeUtils.getEmodelSourceId(after)
             if (emodelSrcIdAfter.isNotEmpty() &&
                 emodelSrcIdAfter != emodelSrcIdBefore &&
                 recordsService.getRecordsDao(emodelSrcIdAfter) != null
@@ -57,8 +59,8 @@ class TypesConfig {
 
         typesRegistry.listenEvents { _, before, after ->
 
-            val emodelSrcIdBefore = EModelTypeUtils.getEmodelSourceId(before)
-            val emodelSrcIdAfter = EModelTypeUtils.getEmodelSourceId(after)
+            val emodelSrcIdBefore = emodelTypeUtils.getEmodelSourceId(before)
+            val emodelSrcIdAfter = emodelTypeUtils.getEmodelSourceId(after)
 
             if (emodelSrcIdBefore.isNotBlank() && (after == null || emodelSrcIdBefore != emodelSrcIdAfter)) {
                 log.info { "Unregister records DAO with sourceId '$emodelSrcIdBefore'" }
@@ -79,11 +81,11 @@ class TypesConfig {
 
     private fun createRecordsDao(dbDomainFactory: DbDomainFactory, typeDef: TypeDef): RecordsDao {
 
-        val sourceId = EModelTypeUtils.getEmodelSourceId(typeDef)
+        val sourceId = emodelTypeUtils.getEmodelSourceId(typeDef)
 
         log.info { "Create new Records DAO for type '${typeDef.id}' with sourceId: '$sourceId'" }
 
-        val tableId = EModelTypeUtils.getEmodelSourceTableId(typeDef.id)
+        val tableId = emodelTypeUtils.getEmodelSourceTableId(typeDef.id, typeDef.workspace)
         if (tableId.isEmpty() || sourceId.isEmpty()) {
             error(
                 "Table ID or Source ID is empty. " +

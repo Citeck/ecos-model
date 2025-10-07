@@ -22,7 +22,8 @@ import java.util.concurrent.TimeoutException
 
 @Component
 class TypeDefResolver(
-    val workspaceService: WorkspaceService? = null
+    val workspaceService: WorkspaceService? = null,
+    val emodelTypeUtils: EModelTypeUtils
 ) {
 
     companion object {
@@ -158,7 +159,7 @@ class TypeDefResolver(
             }
             EModelTypeUtils.STORAGE_TYPE_EMODEL -> {
                 if (resTypeDef.sourceId.isBlank()) {
-                    resTypeDef.withSourceId(EModelTypeUtils.getEmodelSourceId(resTypeDef.id))
+                    resTypeDef.withSourceId(emodelTypeUtils.getEmodelSourceId(resTypeDef.id, resTypeDef.workspace))
                 }
             }
             EModelTypeUtils.STORAGE_TYPE_ALFRESCO -> {
