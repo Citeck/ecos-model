@@ -1,0 +1,40 @@
+---
+id: dependency-atts
+name:
+  ru: Атрибуты зависимостей
+  en: Dependency attributes
+prefix: 'dependency'
+attributes:
+  - id: source
+    name:
+      ru: Исходная задача
+      en: Source task
+    type: ASSOC
+  - id: target
+    name:
+      ru: Целевая задача
+      en: Target task
+    type: ASSOC
+  - id: type
+    name:
+      ru: Тип связи
+      en: Link type
+    type: OPTIONS
+    config:
+      values:
+        - value: e2s
+          label:
+            ru: Окончание - начало
+            en: End to start
+        - value: s2s
+          label:
+            ru: Начало - начало
+            en: Start to start
+        - value: e2e
+          label:
+            ru: Окончание - окончание
+            en: End to end
+        - value: s2e
+          label:
+            ru: Начало - окончание
+            en: Start to end

@@ -1,0 +1,92 @@
+---
+id: activity-atts
+name:
+  ru: Атрибуты активности
+  en: Activity attributes
+prefix: activity
+attributes:
+  - id: start
+    name:
+      en: Start
+      ru: Начало
+    type: DATETIME
+  - id: end
+    name:
+      en: End
+      ru: Окончание
+    type: DATETIME
+  - id: duration
+    name:
+      en: Duration
+      ru: Продолжительность
+    type: NUMBER
+  - id: baseStart
+    name:
+      en: Baseline start
+      ru: Начало базовой линии
+    type: DATETIME
+  - id: baseEnd
+    name:
+      en: Baseline end
+      ru: Окончание базовой линии
+    type: DATETIME
+  - id: baseDuration
+    name:
+      en: Baseline duration
+      ru: Продолжительность базовой линии
+    type: NUMBER
+  - id: open
+    name:
+      en: Open
+      ru: Открыта
+    type: BOOLEAN
+  - id: lazy
+    name:
+      en: Lazy
+      ru: Lazy
+    type: BOOLEAN
+  - id: title
+    name:
+      en: Title
+      ru: Заголовок
+    type: TEXT
+  - id: description
+    name:
+      en: Description
+      ru: Описание
+    type: TEXT
+  - id: parent
+    name:
+      en: Parent
+      ru: Родитель
+    type: ASSOC
+  - id: type
+    name:
+      en: Type
+      ru: Тип
+    type: OPTIONS
+    config:
+      values:
+        - value: task
+          name:
+            en: Task
+            ru: Задача
+        - value: summary
+          name:
+            en: Summary
+            ru: Сводная
+        - value: milestone
+          name:
+            en: Milestone
+            ru: Этап
+  - id: position
+    name:
+      en: Position
+      ru: Позиция
+    type: NUMBER
+    computed:
+      type: SCRIPT
+      config:
+        fn: |-
+          return 1;
+      storingType: ON_EMPTY

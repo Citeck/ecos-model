@@ -1,0 +1,21 @@
+POST http://localhost/gateway/api/records/query
+Authorization: Basic admin admin
+Content-Type: application/json
+
+{
+    "query": {
+        "sourceId": "ecos-project-tracker/gantt-pm",
+        "query": {
+            "linkedWithType": null,
+            "linkedWithRef": null,
+            "currentRef": "emodel/project@068a6fe8-2265-4f24-9d24-b972e7fdebb7",
+            "workspace": "PROJECT1"
+        }
+    },
+    "attributes": {
+        "title": "activity:title",
+        "description": "activity:description",
+        "type": "activity:type"
+    }
+}
+

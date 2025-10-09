@@ -1,0 +1,28 @@
+---
+id: gantt-settings-journal
+name:
+  ru: Диаграммы Ганта
+  en: Gantt charts
+
+system: true
+
+typeRef: emodel/type@gantt-settings
+
+actions:
+  - uiserv/action@ecos-module-download
+  - uiserv/action@delete
+  - uiserv/action@edit-json
+
+editable: false
+
+columns:
+
+  - id: name
+  - id: dataType
+  - id: linkedWithType
+  - id: linkedWithRef
+  - id: dataSource
+  - id: _creator
+    name:
+      en: Creator
+      ru: Создатель

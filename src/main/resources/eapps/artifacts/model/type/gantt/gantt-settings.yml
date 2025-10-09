@@ -1,0 +1,62 @@
+---
+id: gantt-settings
+name:
+  ru: Настройки диаграмм Ганта
+  en: Gantt chart settings
+parentRef: emodel/type@ecos-vcs-object
+formRef: uiserv/form@DEFAULT_FORM
+journalRef: uiserv/journal@gantt-settings-journal
+system: true
+inheritForm: false
+defaultCreateVariant: false
+storageType: ECOS_MODEL
+model:
+  attributes:
+    - id: name
+      name:
+        en: Name
+        ru: Наименование
+      type: MLTEXT
+    - id: dataType
+      name:
+        en: Data type
+        ru: Тип данных
+      type: OPTIONS
+      mandatory: true
+      config:
+        values:
+          - value: STANDALONE
+            label:
+              en: Standalone (diagram-only)
+              ru: Автономный (только диаграмма)
+          - value: LINKED
+            label:
+              en: Linked (business entities)
+              ru: Связанный (бизнес-сущности)
+    - id: linkedWithType
+      name:
+        en: Linked with type
+        ru: Связан с типом
+      type: ASSOC
+    - id: linkedWithRef
+      name:
+        en: Link with document
+        ru: Связь с документом
+      type: ASSOC
+    - id: dataSourceId
+      name:
+        en: SourceId of data source
+        ru: SourceId источника данных
+    - id: manualDataSourceId
+      name:
+        en: SourceId of data source (manual input)
+        ru: SourceId источника данных (ручной ввод)
+      type: TEXT
+    - id: data
+      name:
+        en: Data
+        ru: Данные
+      type: ASSOC
+      multiple: false
+      config:
+        typeRef: emodel/type@gantt-data

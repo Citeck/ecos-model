@@ -154,3 +154,11 @@ config:
             type: JOURNAL
             config:
               recordRef: uiserv/journal@working-calendar
+          - id: emodel-gantt-settings-journal
+            label:
+              ru: Диаграммы Ганта
+              en: Gantt charts
+            hidden: false
+            type: JOURNAL
+            config:
+              recordRef: uiserv/journal@gantt-settings-journal

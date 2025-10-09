@@ -1,0 +1,13 @@
+---
+id: gantt-activity
+name:
+  ru: Активность диаграммы Ганта
+  en: Gantt chart activity
+parentRef: emodel/type@data-list
+formRef: uiserv/form@DEFAULT_FORM
+journalRef: uiserv/journal@DEFAULT_JOURNAL
+inheritForm: false
+defaultCreateVariant: true
+storageType: ECOS_MODEL
+aspects:
+  - ref: emodel/aspect@activity-atts
