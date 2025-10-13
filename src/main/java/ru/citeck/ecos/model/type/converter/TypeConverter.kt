@@ -115,15 +115,10 @@ class TypeConverter(
 
     fun toDtoWithMeta(entity: TypeEntity): EntityWithMeta<TypeDef> {
 
-        /*mutMetaMixin?.addCtxMeta(
-            entity.extId,
-            MutMeta(
-                entity.createdBy ?: "anonymous",
-                entity.createdDate ?: Instant.EPOCH,
-                entity.lastModifiedBy ?: "anonymous",
-                entity.lastModifiedDate ?: Instant.EPOCH
-            )
-        )*/
+        val parentRef = entity.parent?.let {
+            val extId = workspaceService?.addWsPrefixToId(it.extId, it.workspace) ?: it.extId
+            ModelUtils.getTypeRef(extId)
+        } ?: EntityRef.EMPTY
 
         val typeDef = TypeDef.create()
             .withId(entity.extId)
@@ -134,7 +129,7 @@ class TypeConverter(
             .withSourceId(entity.sourceId)
             .withSourceRef(EntityRef.valueOf(entity.sourceRef))
             .withMetaRecord(EntityRef.valueOf(entity.metaRecord))
-            .withParentRef(EntityRef.valueOf(ModelUtils.getTypeRef(entity.parent?.extId ?: "")))
+            .withParentRef(parentRef)
             .withFormRef(EntityRef.valueOf(entity.form))
             .withJournalRef(EntityRef.valueOf(entity.journal))
             .withDefaultStatus(entity.defaultStatus)
