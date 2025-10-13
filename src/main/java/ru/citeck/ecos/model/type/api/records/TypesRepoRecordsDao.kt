@@ -175,14 +175,16 @@ class TypesRepoRecordsDao(
 
         fun getFormRef(): EntityRef {
             if (typeDef.id.isNotBlank() && typeDef.formRef.getLocalId() == TypeDefResolver.DEFAULT_FORM) {
-                return typeDef.formRef.withLocalId("type$" + typeDef.id)
+                val localId = workspaceService?.addWsPrefixToId(typeDef.id, typeDef.workspace) ?: typeDef.id
+                return typeDef.formRef.withLocalId("type$$localId")
             }
             return typeDef.formRef
         }
 
         fun getJournalRef(): EntityRef {
             if (typeDef.id.isNotBlank() && typeDef.journalRef.getLocalId() == TypeDefResolver.DEFAULT_JOURNAL) {
-                return typeDef.journalRef.withLocalId("type$" + typeDef.id)
+                val localId = workspaceService?.addWsPrefixToId(typeDef.id, typeDef.workspace) ?: typeDef.id
+                return typeDef.journalRef.withLocalId("type$$localId")
             }
             return typeDef.journalRef
         }
