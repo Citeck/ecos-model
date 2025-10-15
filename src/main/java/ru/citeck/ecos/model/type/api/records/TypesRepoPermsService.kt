@@ -34,6 +34,7 @@ class TypesRepoPermsService(
         private const val PERMISSION_CREATE_OR_EDIT_TYPES = "create-or-edit-types"
 
         private const val ATT_CREATOR_USERNAME = RecordConstants.ATT_CREATOR + ScalarType.LOCAL_ID_SCHEMA
+        private const val ATT_WORKSPACE_ID = RecordConstants.ATT_WORKSPACE + ScalarType.LOCAL_ID_SCHEMA
     }
 
     private val permsCalculator = ecosPermissionsService.createCalculator()
@@ -53,12 +54,22 @@ class TypesRepoPermsService(
             private fun evalPerms(context: RecordPermsContext): DefaultPerms {
                 return context.computeIfAbsent(this::class) {
                     val authorities = context.getAuthorities()
-                    val creator = context.getRecord().getAtt(ATT_CREATOR_USERNAME).asText()
-                    DefaultPerms(
-                        authorities.contains(AuthRole.ADMIN) ||
-                            authorities.contains(AuthRole.SYSTEM) ||
-                            creator == context.getUser()
-                    )
+                    var hasWritePerms = authorities.contains(AuthRole.ADMIN) ||
+                        authorities.contains(AuthRole.SYSTEM)
+                    if (!hasWritePerms) {
+                        val recordAtts = context.getRecord().getAtts(listOf(ATT_CREATOR_USERNAME, ATT_WORKSPACE_ID))
+                        if (recordAtts[ATT_CREATOR_USERNAME].asText() == context.getUser()) {
+                            hasWritePerms = true
+                        } else {
+                            val workspaceId = recordAtts[ATT_WORKSPACE_ID].asText()
+                            if (workspaceId.isNotBlank()
+                                && workspaceService.isUserManagerOf(context.getUser(), workspaceId)
+                            ) {
+                                hasWritePerms = true
+                            }
+                        }
+                    }
+                    DefaultPerms(hasWritePerms)
                 }
             }
         })
