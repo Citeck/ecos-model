@@ -1732,17 +1732,25 @@
                           "ru": "Атрибуты",
                           "en": "Attributes"
                         },
-                        "multiple": true,
                         "key": "attributes",
+                        "multiple": true,
+                        "validate": {
+                          "select": false
+                        },
+                        "reorder": false,
                         "dataSrc": "custom",
                         "data": {
-                          "custom": "values = (data['modelAttributes'] || []).filter(att => {\n  return !!att.id;\n}).map(function(att) {\n  return {\n    value: att.id,\n    label: Citeck.helpers.getMLValue(att.name)\n  };\n});\n\n"
+                          "custom": "const variants = (data['modelAttributes'] || []).filter(att => {\n  return !!att.id;\n}).map(function(att) {\n  return {\n    value: att.id,\n    label: Citeck.helpers.getMLValue(att.name)\n  };\n});\nvalues = [\n  ...variants,\n  {\n    label: Citeck.helpers.getMLValue({\n      ru: 'Создатель',\n      en: 'Creator'\n    }),\n    value: \"_creator\"\n  }\n];",
+                          "headers": [
+                            {}
+                          ]
                         },
+                        "defaultValue": [],
+                        "optionalWhenDisabled": false,
                         "type": "ecosSelect",
                         "input": true,
                         "row": "0-3",
-                        "defaultValue": "",
-                        "reorder": false
+                        "reference": false
                       },
                       {
                         "label": {
@@ -2723,9 +2731,15 @@
                               "en": "Attribute with title for list element"
                             },
                             "key": "aspectCfg$listview$titleAtt",
+                            "validate": {
+                              "select": false
+                            },
                             "dataSrc": "custom",
                             "data": {
-                              "custom": "console.log(data);\nvalues = _.get(data, 'attributesOptions.attributes', []).filter(a => a.type === 'TEXT' || a.type === 'MLTEXT');"
+                              "custom": "values = _.get(data, 'attributesOptions.attributes', []).filter(a => a.type === 'TEXT' || a.type === 'MLTEXT');",
+                              "headers": [
+                                {}
+                              ]
                             },
                             "defaultValue": "",
                             "refreshOn": [
@@ -2733,7 +2747,9 @@
                             ],
                             "optionalWhenDisabled": false,
                             "type": "ecosSelect",
-                            "input": true
+                            "input": true,
+                            "reorder": false,
+                            "reference": false
                           },
                           {
                             "label": {
