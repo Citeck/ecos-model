@@ -25,7 +25,8 @@ config:
             recordRef: uiserv/journal@ecos-types-def
         - id: number-templates
           label:
-            en: Шаблоны нумерации
+            ru: Шаблоны нумерации
+            en: Number templates
           icon: ui/icon@i-leftmenu-new-tasks
           hidden: false
           type: JOURNAL

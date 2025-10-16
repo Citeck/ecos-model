@@ -2941,6 +2941,7 @@
                   "en": "Submit"
                 },
                 "key": "submit",
+                "action": "custom",
                 "state": "",
                 "theme": "primary",
                 "block": true,
@@ -2948,7 +2949,16 @@
                 "refreshOn": [],
                 "optionalWhenDisabled": false,
                 "type": "button",
-                "input": true
+                "input": true,
+                "showValidations": false,
+                "custom": "return form.ecosButtonSubmit().then(() => {\n  Citeck.MenuService.emitter.emit(Citeck.MenuService.Events.UPDATE_MENU);\n});",
+                "event": "",
+                "url": "",
+                "headers": [
+                  {}
+                ],
+                "reorder": false,
+                "dataGridLabel": false
               }
             ]
           }
