@@ -71,7 +71,7 @@ class NumTemplateRecordsDao(
                     Predicates.inVals(
                         "workspace",
                         recsQuery.workspaces.map {
-                            if (workspaceService.isWorkspaceWithGlobalArtifacts(it)) "" else it
+                            if (workspaceService.isWorkspaceWithGlobalEntities(it)) "" else it
                         }
                     )
                 )
@@ -113,7 +113,7 @@ class NumTemplateRecordsDao(
         dtoCtx.applyData(dto, record.attributes)
 
         val ctxWorkspace = record.getAtt(RecordConstants.ATT_WORKSPACE).asText().toEntityRef().getLocalId()
-        if (!workspaceService.isWorkspaceWithGlobalArtifacts(ctxWorkspace) && dto.workspace.isBlank()) {
+        if (!workspaceService.isWorkspaceWithGlobalEntities(ctxWorkspace) && dto.workspace.isBlank()) {
             dto.workspace = ctxWorkspace
         }
 

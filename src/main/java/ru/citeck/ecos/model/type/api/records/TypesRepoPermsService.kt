@@ -62,8 +62,8 @@ class TypesRepoPermsService(
                             hasWritePerms = true
                         } else {
                             val workspaceId = recordAtts[ATT_WORKSPACE_ID].asText()
-                            if (workspaceId.isNotBlank()
-                                && workspaceService.isUserManagerOf(context.getUser(), workspaceId)
+                            if (workspaceId.isNotBlank() &&
+                                workspaceService.isUserManagerOf(context.getUser(), workspaceId)
                             ) {
                                 hasWritePerms = true
                             }
