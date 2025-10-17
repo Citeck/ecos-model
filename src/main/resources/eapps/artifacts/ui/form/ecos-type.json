@@ -45,7 +45,7 @@
                             "label": {
                               "ru": "Id"
                             },
-                            "key": "moduleId",
+                            "key": "id",
                             "validate": {
                               "required": true
                             },
@@ -326,6 +326,7 @@
                               "en": "Additional config form"
                             },
                             "key": "configFormRef",
+                            "hidden": true,
                             "modalTitle": "",
                             "journalId": "ecos-forms",
                             "refreshOn": [],
@@ -342,7 +343,7 @@
                             "action": "custom",
                             "state": "",
                             "showValidations": false,
-                            "custom": "var ownerId = Math.random().toString();\nvar currentRecord = Citeck.Records.get(instance.options.recordId);\n\nvar configFormRef = data.configFormRef;\nif (Array.isArray(configFormRef)) {\n    configFormRef = configFormRef[0];\n}\n\nif (!configFormRef && data.parentRef) {\n    configFormRef = Citeck.Records.get(data.parentRef).load('inhConfigFormRef?id', true);\n}\n\nPromise.all([configFormRef, currentRecord.load('config?json')])\n    .then(function(formAndConfig) {\n\n        var formRef = formAndConfig[0];\n        var config = formAndConfig[1];\n\n        if (formRef == null) {\n            throw new Error(\"Config form is not set\");\n        }\n\n        if (!config) {\n            config = {};\n        }\n\n        var configRecord = Citeck.Records.create(config, ownerId);\n\n        Citeck.forms.eform(configRecord.id, {\n            params: {\n                formId: formRef,\n                onSubmit: function (record) {\n                    var data = record.toJson().attributes;\n                    var resData = {};\n                    for (var key in data) {\n                        if (key[0] !== '_' && key !== 'pendingUpdate') {\n                            resData[key] = data[key];\n                        }\n                    }\n                    currentRecord.att(\"config?json\", resData);\n                    Citeck.Records.release(configRecord.id, ownerId);\n                },\n                onCancel: function () {\n                    Citeck.Records.release(configRecord.id, ownerId);\n                },\n                saveOnSubmit: false\n            },\n            class: 'ecos-modal_width-lg',\n            isBigHeader: true\n        });\n    })",
+                            "custom": "var ownerId = Math.random().toString();\nvar currentRecord = Citeck.Records.get(instance.options.recordId);\n\nvar configFormRef = data.configFormRef;\nif (Array.isArray(configFormRef)) {\n    configFormRef = configFormRef[0];\n}\n\nif (!configFormRef && data.parentRef) {\n    configFormRef = Citeck.Records.get(data.parentRef).load('inhConfigFormRef?id', true);\n}\n\nPromise.all([configFormRef, currentRecord.load('config?json')])\n    .then(function(formAndConfig) {\n\n        var formRef = formAndConfig[0];\n        var config = formAndConfig[1];\n\n        if (formRef == null) {\n            throw new Error(\"Config form is not set\");\n        }\n\n        if (!config) {\n            config = {};\n        }\n\n        var configRecord = Citeck.Records.create(config, ownerId);\n         window.initEventTypeId = data.id;\n         Citeck.forms.eform(configRecord.id, {\n            params: {\n                formId: formRef,\n                onSubmit: function (record) {\n                    var data = record.toJson().attributes;\n                    var resData = {};\n                    for (var key in data) {\n                        if (key[0] !== '_' && key !== 'pendingUpdate') {\n                            resData[key] = data[key];\n                        }\n                    }\n                    currentRecord.att(\"config?json\", resData);\n                    Citeck.Records.release(configRecord.id, ownerId);\n                    delete window.initEventTypeId;\n                },\n                onCancel: function () {\n                    Citeck.Records.release(configRecord.id, ownerId);\n                    delete window.initEventTypeId;\n                },\n                saveOnSubmit: false\n            },\n            class: 'ecos-modal_width-lg',\n            isBigHeader: true\n        });\n    })",
                             "block": true,
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
@@ -400,34 +401,6 @@
                           },
                           {
                             "label": {
-                              "ru": "Действия",
-                              "en": "Actions"
-                            },
-                            "key": "actions",
-                            "multiple": true,
-                            "reorder": false,
-                            "modalTitle": "",
-                            "journalId": "ui-actions",
-                            "defaultValue": [],
-                            "refreshOn": [],
-                            "optionalWhenDisabled": false,
-                            "type": "selectJournal",
-                            "input": true
-                          },
-                          {
-                            "label": {
-                              "ru": "Наследовать действия",
-                              "en": "Inherit actions"
-                            },
-                            "key": "inheritActions",
-                            "defaultValue": true,
-                            "refreshOn": [],
-                            "optionalWhenDisabled": false,
-                            "type": "checkbox",
-                            "input": true
-                          },
-                          {
-                            "label": {
                               "ru": "Columns"
                             },
                             "key": "columns9",
@@ -436,10 +409,41 @@
                                 "components": [
                                   {
                                     "label": {
+                                      "ru": "Действия",
+                                      "en": "Actions"
+                                    },
+                                    "key": "actions",
+                                    "multiple": true,
+                                    "reorder": false,
+                                    "modalTitle": "",
+                                    "journalId": "ui-actions",
+                                    "defaultValue": [],
+                                    "refreshOn": [],
+                                    "optionalWhenDisabled": false,
+                                    "type": "selectJournal",
+                                    "input": true
+                                  },
+                                  {
+                                    "label": {
+                                      "ru": "Наследовать действия",
+                                      "en": "Inherit actions"
+                                    },
+                                    "key": "inheritActions",
+                                    "defaultValue": true,
+                                    "refreshOn": [],
+                                    "optionalWhenDisabled": false,
+                                    "type": "checkbox",
+                                    "input": true
+                                  },
+                                  {
+                                    "label": {
                                       "ru": "Тип источника данных",
                                       "en": "Source Type"
                                     },
                                     "key": "storageType",
+                                    "validate": {
+                                      "select": false
+                                    },
                                     "dataSrc": "values",
                                     "data": {
                                       "values": [
@@ -455,12 +459,95 @@
                                           "label": "Default",
                                           "value": "DEFAULT"
                                         }
+                                      ],
+                                      "headers": [
+                                        {}
                                       ]
                                     },
+                                    "defaultValue": "ECOS_MODEL",
                                     "optionalWhenDisabled": false,
+                                    "customConditional": "show = !data._workspace;",
                                     "type": "ecosSelect",
                                     "input": true,
-                                    "defaultValue": "ECOS_MODEL"
+                                    "reorder": false,
+                                    "reference": false
+                                  },
+                                  {
+                                    "label": {
+                                      "ru": "ID источника данных",
+                                      "en": "Source ID"
+                                    },
+                                    "key": "sourceId",
+                                    "defaultValue": "",
+                                    "refreshOn": [],
+                                    "optionalWhenDisabled": false,
+                                    "customConditional": "show = !data._workspace && (data['storageType'] === 'ECOS_MODEL' || data['storageType'] === 'DEFAULT' || !data['storageType']);",
+                                    "type": "textfield",
+                                    "input": true,
+                                    "inputMasks": [
+                                      {}
+                                    ],
+                                    "reorder": false,
+                                    "dataSrc": ""
+                                  }
+                                ],
+                                "type": "column",
+                                "input": false,
+                                "key": "column",
+                                "index": 0
+                              },
+                              {
+                                "index": 1,
+                                "type": "column",
+                                "input": false,
+                                "key": "column",
+                                "components": [
+                                  {
+                                    "label": {
+                                      "ru": "Рабочее пространство",
+                                      "en": "Workspace"
+                                    },
+                                    "key": "_workspace",
+                                    "tooltip": {
+                                      "ru": "Рабочее пространство, к которому относится данный тип.\nЕсли указано значение, тип считается «ограниченным» и может использоваться только внутри заданного воркспейса.\nЕсли значение не задано, тип считается глобальным и доступен во всех воркспейсах.",
+                                      "en": "Workspace to which this type belongs. If defined, the type is considered scoped and can only be used within the specified workspace. Types without a workspace are treated as global and available across all workspaces."
+                                    },
+                                    "disabled": true,
+                                    "modalTitle": "",
+                                    "linkFormatter": "",
+                                    "journalId": "workspaces-journal",
+                                    "source": {
+                                      "type": "journal",
+                                      "custom": {
+                                        "columns": []
+                                      },
+                                      "customValues": "",
+                                      "viewMode": "default"
+                                    },
+                                    "queryData": "",
+                                    "refreshOn": [],
+                                    "customDefaultValue": "const currentWs = Citeck.Navigator.getWorkspaceId() || '';\nif (currentWs.indexOf('admin$') === 0) {\n  value = null;  \n} else {\n  value = \"emodel/workspace@\" + currentWs;\n}",
+                                    "optionalWhenDisabled": false,
+                                    "type": "selectJournal",
+                                    "input": true
+                                  },
+                                  {
+                                    "label": {
+                                      "ru": "Рабочее пространство по умолчанию",
+                                      "en": "Default workspace"
+                                    },
+                                    "key": "defaultWorkspace",
+                                    "defaultValue": "",
+                                    "refreshOn": [],
+                                    "optionalWhenDisabled": false,
+                                    "customConditional": "show = !data._workspace;",
+                                    "type": "textfield",
+                                    "input": true,
+                                    "inputMasks": [
+                                      {}
+                                    ],
+                                    "reorder": false,
+                                    "dataSrc": ""
                                   },
                                   {
                                     "label": {
@@ -468,6 +555,9 @@
                                       "en": "Workspace visibility"
                                     },
                                     "key": "workspaceScope",
+                                    "validate": {
+                                      "select": false
+                                    },
                                     "dataSrc": "values",
                                     "data": {
                                       "values": [
@@ -499,48 +589,11 @@
                                     },
                                     "defaultValue": "DEFAULT",
                                     "optionalWhenDisabled": false,
+                                    "customConditional": "show = !data._workspace;",
                                     "type": "ecosSelect",
-                                    "input": true
-                                  }
-                                ],
-                                "type": "column",
-                                "input": false,
-                                "key": "column",
-                                "index": 0
-                              },
-                              {
-                                "index": 1,
-                                "type": "column",
-                                "input": false,
-                                "key": "column",
-                                "components": [
-                                  {
-                                    "label": {
-                                      "ru": "ID источника данных",
-                                      "en": "Source ID"
-                                    },
-                                    "key": "sourceId",
-                                    "defaultValue": "",
-                                    "refreshOn": [],
-                                    "optionalWhenDisabled": false,
-                                    "customConditional": "show = data['storageType'] === 'ECOS_MODEL' || data['storageType'] === 'DEFAULT' || !data['storageType'];",
-                                    "type": "textfield",
-                                    "input": true
-                                  },
-                                  {
-                                    "label": {
-                                      "ru": "Рабочее пространство по умолчанию",
-                                      "en": "Default workspace"
-                                    },
-                                    "key": "defaultWorkspace",
-                                    "defaultValue": "",
-                                    "refreshOn": [],
-                                    "optionalWhenDisabled": false,
-                                    "type": "textfield",
                                     "input": true,
-                                    "inputMasks": [
-                                      {}
-                                    ]
+                                    "reorder": false,
+                                    "reference": false
                                   }
                                 ]
                               }
@@ -900,7 +953,7 @@
                                     "action": "custom",
                                     "state": "",
                                     "showValidations": false,
-                                    "custom": "var mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = 'emodel/type@' + data.moduleId;\nvar customProps = {\n  roles: (data.modelRoles || []).map(mapToSingleLang),\n  statuses: (data.modelStatuses || []).map(mapToSingleLang),\n  attributeName: Citeck.helpers.getMLValue(row.name)\n};\n\nvar typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypeAttPermissions(\n  typeRef, \n  row.id, \n  customProps\n)",
+                                    "custom": "var mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nlet typeRef = data.selectedWorkspaceData.typeRef;\n\nvar customProps = {\n  roles: (data.modelRoles || []).map(mapToSingleLang),\n  statuses: (data.modelStatuses || []).map(mapToSingleLang),\n  attributeName: Citeck.helpers.getMLValue(row.name)\n};\n\nvar typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypeAttPermissions(\n  typeRef, \n  row.id, \n  customProps\n)",
                                     "hideLabel": true,
                                     "leftIcon": "icon-decision-tables",
                                     "block": true,
@@ -908,7 +961,14 @@
                                     "optionalWhenDisabled": false,
                                     "type": "button",
                                     "input": true,
-                                    "row": "0-4"
+                                    "row": "0-4",
+                                    "event": "",
+                                    "url": "",
+                                    "headers": [
+                                      {}
+                                    ],
+                                    "reorder": false,
+                                    "dataGridLabel": false
                                   },
                                   {
                                     "label": {
@@ -1088,7 +1148,7 @@
                                     "action": "custom",
                                     "state": "",
                                     "showValidations": false,
-                                    "custom": "var mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = 'emodel/type@' + data.moduleId;\nvar customProps = {\n  roles: (data.modelRoles || []).map(mapToSingleLang),\n  statuses: (data.modelStatuses || []).map(mapToSingleLang),\n  attributeName: Citeck.helpers.getMLValue(row.label)\n};\n\nvar typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypeAttPermissions(\n  typeRef, \n  row.value, \n  customProps\n)",
+                                    "custom": "var mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = data.selectedWorkspaceData.typeRef;\nvar customProps = {\n  roles: (data.modelRoles || []).map(mapToSingleLang),\n  statuses: (data.modelStatuses || []).map(mapToSingleLang),\n  attributeName: Citeck.helpers.getMLValue(row.label)\n};\n\nvar typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypeAttPermissions(\n  typeRef, \n  row.value, \n  customProps\n)",
                                     "hideLabel": true,
                                     "leftIcon": "icon-decision-tables",
                                     "block": true,
@@ -1242,17 +1302,26 @@
                                     "label": {
                                       "en": "Permissions"
                                     },
-                                    "hideLabel": true,
+                                    "key": "submit3",
                                     "action": "custom",
                                     "state": "",
                                     "showValidations": false,
-                                    "custom": "\nvar mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = 'emodel/type@' + data.moduleId;\nvar customProps = {\n  roles: (data.modelRoles || []).map(mapToSingleLang),\n  statuses: (data.modelStatuses || []).map(mapToSingleLang),\n  attributeName: Citeck.helpers.getMLValue(row.name)\n};\n\nvar typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypeAttPermissions(\n  typeRef, \n  row.id, \n  customProps\n)",
+                                    "custom": "var mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = data.selectedWorkspaceData.typeRef;\nvar customProps = {\n  roles: (data.modelRoles || []).map(mapToSingleLang),\n  statuses: (data.modelStatuses || []).map(mapToSingleLang),\n  attributeName: Citeck.helpers.getMLValue(row.name)\n};\n\nvar typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypeAttPermissions(\n  typeRef, \n  row.id, \n  customProps\n)",
+                                    "hideLabel": true,
                                     "leftIcon": "icon-decision-tables",
                                     "block": true,
-                                    "key": "submit3",
+                                    "refreshOn": [],
+                                    "optionalWhenDisabled": false,
                                     "type": "button",
                                     "input": true,
-                                    "row": "0-4"
+                                    "row": "0-4",
+                                    "event": "",
+                                    "url": "",
+                                    "headers": [
+                                      {}
+                                    ],
+                                    "reorder": false,
+                                    "dataGridLabel": false
                                   }
                                 ],
                                 "md": 4
@@ -1276,7 +1345,7 @@
                     },
                     "key": "panel9",
                     "title": {
-                      "ru": "Настройка прав для тип данных",
+                      "ru": "Настройка прав для типа данных",
                       "en": "Type Permissions"
                     },
                     "collapsible": true,
@@ -1299,12 +1368,19 @@
                                 "action": "custom",
                                 "state": "",
                                 "showValidations": false,
-                                "custom": "var mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = 'emodel/type@' + data.moduleId;\nvar customProps = {\n  roles: (data.modelRoles || []).map(mapToSingleLang),\n  statuses: (data.modelStatuses || []).map(mapToSingleLang)\n};\n\nvar typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypePermissions(\n  typeRef,\n  customProps\n);",
+                                "custom": "let mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nlet typeRef = data.selectedWorkspaceData.typeRef;\n\nlet customProps = {\n  roles: (data.modelRoles || []).map(mapToSingleLang),\n  statuses: (data.modelStatuses || []).map(mapToSingleLang)\n};\n\nlet typeDispName = Citeck.helpers.getMLValue(data.name);\nif (typeDispName) {\n\tcustomProps.typeDispName = typeDispName;\n}\n\nCiteck.TypePermissionsService.editTypePermissions(\n  typeRef,\n  customProps\n);",
                                 "block": true,
                                 "refreshOn": [],
                                 "optionalWhenDisabled": false,
                                 "type": "button",
-                                "input": true
+                                "input": true,
+                                "event": "",
+                                "url": "",
+                                "headers": [
+                                  {}
+                                ],
+                                "reorder": false,
+                                "dataGridLabel": false
                               }
                             ],
                             "md": 4,
@@ -1329,12 +1405,19 @@
                                 "action": "custom",
                                 "state": "",
                                 "showValidations": false,
-                                "custom": "var mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = 'emodel/type@' + data.moduleId;\nvar roles = (data.modelRoles || []).map(mapToSingleLang);\nvar statuses = (data.modelStatuses || []).map(mapToSingleLang);\nvar attributes = (data.modelAttributes || []).map(mapToSingleLang);\n\nCiteck.TypePermissionsService.downloadPermissionsConfig(typeRef, roles, statuses, attributes);",
+                                "custom": "var mapToSingleLang = function (value) {\n  return {\n    id: value.id,\n    name: Citeck.helpers.getMLValue(value.name)\n  };\n};\n\nvar typeRef = data.selectedWorkspaceData.typeRef;\nvar roles = (data.modelRoles || []).map(mapToSingleLang);\nvar statuses = (data.modelStatuses || []).map(mapToSingleLang);\nvar attributes = (data.modelAttributes || []).map(mapToSingleLang);\n\nCiteck.TypePermissionsService.downloadPermissionsConfig(typeRef, roles, statuses, attributes);",
                                 "block": true,
                                 "refreshOn": [],
                                 "optionalWhenDisabled": false,
                                 "type": "button",
-                                "input": true
+                                "input": true,
+                                "event": "",
+                                "url": "",
+                                "headers": [
+                                  {}
+                                ],
+                                "reorder": false,
+                                "dataGridLabel": false
                               }
                             ]
                           },
@@ -1354,12 +1437,19 @@
                                 "action": "custom",
                                 "state": "",
                                 "showValidations": false,
-                                "custom": "var typeRef = 'emodel/type@' + data.moduleId;\nCiteck.TypePermissionsService.deletePermissionsConfig(typeRef);",
+                                "custom": "var typeRef = data.selectedWorkspaceData.typeRef;\nCiteck.TypePermissionsService.deletePermissionsConfig(typeRef);",
                                 "block": true,
                                 "refreshOn": [],
                                 "optionalWhenDisabled": false,
                                 "type": "button",
-                                "input": true
+                                "input": true,
+                                "event": "",
+                                "url": "",
+                                "headers": [
+                                  {}
+                                ],
+                                "reorder": false,
+                                "dataGridLabel": false
                               }
                             ]
                           }
@@ -1642,17 +1732,25 @@
                           "ru": "Атрибуты",
                           "en": "Attributes"
                         },
-                        "multiple": true,
                         "key": "attributes",
+                        "multiple": true,
+                        "validate": {
+                          "select": false
+                        },
+                        "reorder": false,
                         "dataSrc": "custom",
                         "data": {
-                          "custom": "values = (data['modelAttributes'] || []).filter(att => {\n  return !!att.id;\n}).map(function(att) {\n  return {\n    value: att.id,\n    label: Citeck.helpers.getMLValue(att.name)\n  };\n});\n\n"
+                          "custom": "const variants = (data['modelAttributes'] || []).filter(att => {\n  return !!att.id;\n}).map(function(att) {\n  return {\n    value: att.id,\n    label: Citeck.helpers.getMLValue(att.name)\n  };\n});\nvalues = [\n  ...variants,\n  {\n    label: Citeck.helpers.getMLValue({\n      ru: 'Создатель',\n      en: 'Creator'\n    }),\n    value: \"_creator\"\n  }\n];",
+                          "headers": [
+                            {}
+                          ]
                         },
+                        "defaultValue": [],
+                        "optionalWhenDisabled": false,
                         "type": "ecosSelect",
                         "input": true,
                         "row": "0-3",
-                        "defaultValue": "",
-                        "reorder": false
+                        "reference": false
                       },
                       {
                         "label": {
@@ -2616,13 +2714,32 @@
                         "components": [
                           {
                             "label": {
+                              "ru": "Включить режим отображения контента в виде плиток",
+                              "en": "Enable the mode of displaying content in the form of tiles"
+                            },
+                            "key": "aspectCfg$listview$isTilesContent",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "checkbox",
+                            "input": true,
+                            "reorder": false,
+                            "dataGridLabel": false
+                          },
+                          {
+                            "label": {
                               "ru": "Атрибут с заголовком для элемента списка",
                               "en": "Attribute with title for list element"
                             },
                             "key": "aspectCfg$listview$titleAtt",
+                            "validate": {
+                              "select": false
+                            },
                             "dataSrc": "custom",
                             "data": {
-                              "custom": "console.log(data);\nvalues = _.get(data, 'attributesOptions.attributes', []).filter(a => a.type === 'TEXT' || a.type === 'MLTEXT');"
+                              "custom": "values = _.get(data, 'attributesOptions.attributes', []).filter(a => a.type === 'TEXT' || a.type === 'MLTEXT');",
+                              "headers": [
+                                {}
+                              ]
                             },
                             "defaultValue": "",
                             "refreshOn": [
@@ -2630,7 +2747,9 @@
                             ],
                             "optionalWhenDisabled": false,
                             "type": "ecosSelect",
-                            "input": true
+                            "input": true,
+                            "reorder": false,
+                            "reference": false
                           },
                           {
                             "label": {
@@ -2671,6 +2790,79 @@
                         ]
                       }
                     ]
+                  },
+                  {
+                    "label": {
+                      "ru": "Panel"
+                    },
+                    "key": "doclib-settings",
+                    "title": {
+                      "ru": "Отображение в виде DocLib",
+                      "en": "DocLib view"
+                    },
+                    "refreshOn": [],
+                    "optionalWhenDisabled": false,
+                    "type": "panel",
+                    "input": false,
+                    "components": [
+                      {
+                        "label": {
+                          "ru": "Включить режим отображения в виде DocLib",
+                          "en": "Enable DocLib mode"
+                        },
+                        "key": "aspectCfg$doclib$added",
+                        "refreshOn": [],
+                        "optionalWhenDisabled": false,
+                        "type": "checkbox",
+                        "input": true,
+                        "reorder": false,
+                        "dataGridLabel": false
+                      },
+                      {
+                        "label": {
+                          "ru": "Panel"
+                        },
+                        "key": "doclibviewcfg",
+                        "refreshOn": [],
+                        "optionalWhenDisabled": false,
+                        "conditional": {
+                          "show": "true",
+                          "when": "aspectCfg$doclib$added",
+                          "eq": "true"
+                        },
+                        "type": "panel",
+                        "input": false,
+                        "components": [
+                          {
+                            "label": {
+                              "ru": "Тип для папок (по умолчанию \"directory\")",
+                              "en": "Directory type (\"directory\" by default)"
+                            },
+                            "key": "aspectCfg$doclib$dirTypeRef",
+                            "modalTitle": "",
+                            "linkFormatter": "",
+                            "journalId": "ecos-types",
+                            "source": {
+                              "type": "journal",
+                              "custom": {
+                                "columns": []
+                              },
+                              "customValues": "",
+                              "viewMode": "default"
+                            },
+                            "queryData": "",
+                            "refreshOn": [
+                              "aspectCfg$doclib$added"
+                            ],
+                            "optionalWhenDisabled": false,
+                            "type": "selectJournal",
+                            "input": true
+                          }
+                        ]
+                      }
+                    ],
+                    "collapsed": false,
+                    "reorder": false
                   }
                 ]
               }
@@ -2749,6 +2941,7 @@
                   "en": "Submit"
                 },
                 "key": "submit",
+                "action": "custom",
                 "state": "",
                 "theme": "primary",
                 "block": true,
@@ -2756,7 +2949,16 @@
                 "refreshOn": [],
                 "optionalWhenDisabled": false,
                 "type": "button",
-                "input": true
+                "input": true,
+                "showValidations": false,
+                "custom": "return form.ecosButtonSubmit().then(() => {\n  Citeck.MenuService.emitter.emit(Citeck.MenuService.Events.UPDATE_MENU);\n});",
+                "event": "",
+                "url": "",
+                "headers": [
+                  {}
+                ],
+                "reorder": false,
+                "dataGridLabel": false
               }
             ]
           }
@@ -2764,6 +2966,54 @@
         "key": "columns2",
         "type": "columns",
         "input": false
+      },
+      {
+        "label": "currentUserAtts",
+        "source": {
+          "type": "record",
+          "record": {
+            "id": "emodel/person@{{user}}",
+            "attributes": {
+              "isAdmin": "isAdmin?bool!"
+            }
+          },
+          "forceLoad": false
+        },
+        "update": {
+          "type": "once"
+        },
+        "key": "currentUserAtts",
+        "type": "asyncData",
+        "input": true,
+        "triggerEventOnChange": false
+      },
+      {
+        "label": "selectedWorkspaceData",
+        "source": {
+          "type": "custom",
+          "custom": {
+            "syncData": "value = {\n  \"typeId\": data.id,\n  \"workspaceRef\": data._workspace\n};",
+            "asyncData": "if (!data.typeId || !data.workspaceRef) {\n  value = {\n    typeRef: 'emodel/type@' + data.typeId,\n    systemId: ''\n  };\n} else {\n  value = Records.get(data.workspaceRef).load('systemId!').then(systemId => {\n    return {\n      typeRef: 'emodel/type@' + systemId + \":\" + data.typeId,\n      systemId\n    };\n  });\n}"
+          },
+          "forceLoad": false
+        },
+        "update": {
+          "type": "once"
+        },
+        "refreshOn": [
+          {
+            "label": "_workspace",
+            "value": "_workspace"
+          },
+          {
+            "label": "id",
+            "value": "id"
+          }
+        ],
+        "key": "selectedWorkspaceData",
+        "type": "asyncData",
+        "input": true,
+        "triggerEventOnChange": false
       }
     ],
     "display": "form"

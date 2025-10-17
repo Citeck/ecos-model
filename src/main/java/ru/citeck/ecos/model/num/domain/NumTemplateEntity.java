@@ -27,6 +27,49 @@ public class NumTemplateEntity extends AbstractAuditingEntity {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
+    private String workspace;
+
     @Column(name = "counter_key", nullable = false)
     private String counterKey;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getExtId() {
+        return extId;
+    }
+
+    public void setExtId(String extId) {
+        this.extId = extId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getWorkspace() {
+        return workspace;
+    }
+
+    public void setWorkspace(String workspace) {
+        this.workspace = workspace;
+    }
+
+    public String getCounterKey() {
+        return counterKey;
+    }
+
+    public void setCounterKey(String counterKey) {
+        this.counterKey = counterKey;
+    }
 }

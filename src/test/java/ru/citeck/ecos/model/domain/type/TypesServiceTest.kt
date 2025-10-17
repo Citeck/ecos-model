@@ -18,8 +18,8 @@ import ru.citeck.ecos.model.lib.type.dto.CreateVariantDef
 import ru.citeck.ecos.model.lib.type.dto.DocLibDef
 import ru.citeck.ecos.model.lib.type.dto.TypeContentConfig
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
-import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils
 import ru.citeck.ecos.model.lib.utils.ModelUtils
+import ru.citeck.ecos.model.lib.workspace.IdInWs
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.model.type.dto.AssocDef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
@@ -188,7 +188,7 @@ class TypesServiceTest : TypeTestBase() {
             .build()
 
         testType(childType)
-        val childRef = TypeUtils.getTypeRef(childType.id)
+        val childRef = ModelUtils.getTypeRef(childType.id)
 
         assertEquals("", records.getAtt(childRef.withSourceId("types-repo"), "formRef?id").asText())
         assertEquals(fullType.formRef.toString(), records.getAtt(childRef, "inhFormRef?id").asText())
@@ -212,7 +212,7 @@ class TypesServiceTest : TypeTestBase() {
 
         artifactHandler.deployArtifact(typeDef)
 
-        val typeFromService = typeService.getById(typeDef.id)
+        val typeFromService = typeService.getById(IdInWs.create(typeDef.id))
         assertEquals(typeDef, typeFromService)
 
         val typeRef = ModelUtils.getTypeRef(typeDef.id).withSourceId("types-repo")
@@ -237,9 +237,9 @@ class TypesServiceTest : TypeTestBase() {
         while (assocsTypeDef != null) {
             assocsCount += assocsTypeDef.associations.size
             val currentId = assocsTypeDef.id
-            assocsTypeDef = typeService.getByIdOrNull(assocsTypeDef.parentRef.getLocalId())
+            assocsTypeDef = typeService.getByIdOrNull(IdInWs.create(assocsTypeDef.parentRef.getLocalId()))
             if (assocsTypeDef == null && currentId != "base") {
-                assocsTypeDef = typeService.getById("base")
+                assocsTypeDef = typeService.getById(IdInWs.create("base"))
             }
         }
 

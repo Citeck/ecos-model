@@ -6,6 +6,7 @@ import ru.citeck.ecos.data.sql.records.DbRecordsControlAtts
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceMemberDesc
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeType
+import ru.citeck.ecos.model.lib.workspace.IdInWs
 import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
@@ -43,7 +44,7 @@ class MakeWsMemberAuthoritiesAsMultipleAtt(
 
         log.info { "Workspaces to update: $workspacesToUpdate" }
 
-        val memberType = typesService.getByIdOrNull(WorkspaceMemberDesc.TYPE_ID)
+        val memberType = typesService.getByIdOrNull(IdInWs.create("", WorkspaceMemberDesc.TYPE_ID))
         if (memberType != null && memberType.model.attributes.all { it.id != WorkspaceMemberDesc.ATT_AUTHORITIES }) {
             // ensure authorities attribute exists
             log.info { "Add authorities attribute to type" }

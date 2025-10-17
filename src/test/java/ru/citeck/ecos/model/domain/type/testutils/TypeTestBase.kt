@@ -15,13 +15,14 @@ import ru.citeck.ecos.model.lib.type.repo.TypesRepo
 import ru.citeck.ecos.model.type.api.records.TypesRepoRecordsDao
 import ru.citeck.ecos.model.type.api.records.TypesRepoRecordsMutDao
 import ru.citeck.ecos.model.type.api.records.mixin.TypeInhMixin
-import ru.citeck.ecos.model.type.config.TypesConfig
 import ru.citeck.ecos.model.type.converter.TypeConverter
 import ru.citeck.ecos.model.type.eapps.handler.TypeArtifactHandler
 import ru.citeck.ecos.model.type.repository.TypeEntity
 import ru.citeck.ecos.model.type.service.TypesRegistryInitializer
 import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.model.type.service.TypesServiceImpl
+import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
+import ru.citeck.ecos.model.type.service.utils.EModelTypeUtils
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.RecordsServiceFactory
 import ru.citeck.ecos.test.commons.EcosWebAppApiMock
@@ -84,7 +85,13 @@ open class TypeTestBase {
         artifactHandler = TypeArtifactHandler(typeService, webAppCtxMock)
         records = recordsServices.recordsService
 
-        val typesRegistryInitializer = TypesRegistryInitializer(typeService, ecosAppsServiceFactory.localAppService)
+        val emodelTypeUtils = EModelTypeUtils()
+
+        val typesRegistryInitializer = TypesRegistryInitializer(
+            typeService,
+            ecosAppsServiceFactory.localAppService,
+            TypeDefResolver(emodelTypeUtils = emodelTypeUtils)
+        )
         typesRegistryInitializer.setAspectsRegistry(
             EcosAspectsRegistry(
                 EcosRegistryProps.DEFAULT,
@@ -109,6 +116,7 @@ open class TypeTestBase {
             }
         }
         modelLibServices.setRecordsServices(recordsServices)
+        emodelTypeUtils.workspaceService = modelLibServices.workspaceService
 
         eventsServiceFactory = EventsServiceFactory()
         eventsServiceFactory.recordsServices = recordsServices
@@ -120,7 +128,6 @@ open class TypeTestBase {
         records.register(TypeRecordsDao(typesRegistry, modelLibServices))
 
         TypeInhMixin(typeService, typesRepoRecordsDao)
-        TypesConfig().typesMutMetaMixin(typesRepoRecordsDao, typeConverter)
 
         records.register(TypesRepoRecordsMutDao(typeService))
 

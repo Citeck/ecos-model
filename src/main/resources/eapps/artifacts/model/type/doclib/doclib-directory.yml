@@ -32,11 +32,6 @@ model:
       config:
         child: true
       multiple: true
-  systemAttributes:
-    - id: parentDirPathHash
-    - id: dirPathHash
-    - id: dirPath
-      type: ASSOC
-      multiple: true
-      config:
-        typeRef: emodel/type@doclib-directory
+
+aspects:
+  - ref: emodel/aspect@tree-search

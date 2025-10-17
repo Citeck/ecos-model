@@ -12,6 +12,7 @@ import ru.citeck.ecos.model.lib.role.dto.RoleDef
 import ru.citeck.ecos.model.lib.status.dto.StatusDef
 import ru.citeck.ecos.model.lib.type.dto.*
 import ru.citeck.ecos.model.lib.utils.ModelUtils
+import ru.citeck.ecos.model.lib.workspace.WorkspaceService
 import ru.citeck.ecos.model.type.service.utils.EModelTypeUtils
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.model.type.dto.AssocDef
@@ -20,7 +21,10 @@ import java.time.Duration
 import java.util.concurrent.TimeoutException
 
 @Component
-class TypeDefResolver {
+class TypeDefResolver(
+    val workspaceService: WorkspaceService? = null,
+    val emodelTypeUtils: EModelTypeUtils
+) {
 
     companion object {
 
@@ -81,7 +85,9 @@ class TypeDefResolver {
 
     private fun getResolvedByParentType(typeDef: TypeDef, context: ResolveContext): TypeDef.Builder {
 
-        val resolvedTypeFromContext = context.types[typeDef.id]
+        val idInWs = workspaceService?.addWsPrefixToId(typeDef.id, typeDef.workspace) ?: typeDef.id
+
+        val resolvedTypeFromContext = context.types[idInWs]
         if (resolvedTypeFromContext != null) {
             return resolvedTypeFromContext
         }
@@ -91,6 +97,10 @@ class TypeDefResolver {
         if (typeDef.id.isBlank() || typeDef.id == "base") {
             context.types[typeDef.id] = resTypeDef
             return resTypeDef
+        }
+
+        if (resTypeDef.workspace.isNotBlank()) {
+            resTypeDef.withId(idInWs)
         }
 
         if (EntityRef.isEmpty(resTypeDef.parentRef) && resTypeDef.id != "base") {
@@ -118,6 +128,24 @@ class TypeDefResolver {
             resTypeDef.withDefaultStatus(resolvedParentDef.defaultStatus)
         }
 
+        if (resolvedParentDef.workspace.isNotEmpty()) {
+            resTypeDef.withWorkspace(resolvedParentDef.workspace)
+        }
+
+        if (resTypeDef.workspace.isNotEmpty()) {
+            resTypeDef.withSourceId("")
+            resTypeDef.withStorageType(EModelTypeUtils.STORAGE_TYPE_EMODEL)
+            resTypeDef.withWorkspaceScope(WorkspaceScope.PRIVATE)
+            resTypeDef.withDefaultWorkspace(resTypeDef.workspace)
+        } else {
+            if (resTypeDef.workspaceScope == WorkspaceScope.DEFAULT) {
+                resTypeDef.withWorkspaceScope(resolvedParentDef.workspaceScope)
+            }
+            if (resTypeDef.defaultWorkspace.isBlank()) {
+                resTypeDef.withDefaultWorkspace(resolvedParentDef.defaultWorkspace)
+            }
+        }
+
         when ((resTypeDef.storageType)) {
             EModelTypeUtils.STORAGE_TYPE_REFERENCE, // todo: set sourceId based on source ref
             EModelTypeUtils.STORAGE_TYPE_DEFAULT,
@@ -131,7 +159,7 @@ class TypeDefResolver {
             }
             EModelTypeUtils.STORAGE_TYPE_EMODEL -> {
                 if (resTypeDef.sourceId.isBlank()) {
-                    resTypeDef.withSourceId(EModelTypeUtils.getEmodelSourceId(resTypeDef.id))
+                    resTypeDef.withSourceId(emodelTypeUtils.getEmodelSourceId(resTypeDef.id, resTypeDef.workspace))
                 }
             }
             EModelTypeUtils.STORAGE_TYPE_ALFRESCO -> {
@@ -145,7 +173,7 @@ class TypeDefResolver {
             resTypeDef.withMetaRecord(EntityRef.valueOf(resTypeDef.sourceId + "@"))
         }
         if (MLText.isEmpty(resTypeDef.name)) {
-            resTypeDef.withName(MLText(resTypeDef.id))
+            resTypeDef.withName(MLText(resTypeDef.id.substringAfterLast("/")))
         }
         if (EntityRef.isEmpty(resTypeDef.numTemplateRef) && resTypeDef.inheritNumTemplate) {
             resTypeDef.withNumTemplate(resolvedParentDef.numTemplateRef)
@@ -159,12 +187,7 @@ class TypeDefResolver {
         if (resTypeDef.journalRef.getLocalId() == DEFAULT_JOURNAL) {
             resTypeDef.withJournalRef(resTypeDef.journalRef.withLocalId("type$" + resTypeDef.id))
         }
-        if (resTypeDef.workspaceScope == WorkspaceScope.DEFAULT) {
-            resTypeDef.withWorkspaceScope(resolvedParentDef.workspaceScope)
-        }
-        if (resTypeDef.defaultWorkspace.isBlank()) {
-            resTypeDef.withDefaultWorkspace(resolvedParentDef.defaultWorkspace)
-        }
+
         val contentConfig = resTypeDef.contentConfig.copy()
         if (contentConfig.path.isBlank()) {
             contentConfig.withPath(resolvedParentDef.contentConfig.path)

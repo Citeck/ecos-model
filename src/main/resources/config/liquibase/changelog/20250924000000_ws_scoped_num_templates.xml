@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <changeSet author="citeck" id="20250924000000">
+
+        <addColumn tableName="ecos_num_template">
+            <column name="workspace" type="VARCHAR"/>
+        </addColumn>
+
+        <sql>UPDATE ecos_num_template SET workspace='' where workspace is null</sql>
+        <addNotNullConstraint tableName="ecos_num_template" columnName="workspace" />
+
+        <dropUniqueConstraint tableName="ecos_num_template" constraintName="ecos_num_template_ext_id_key" uniqueColumns="ext_id"/>
+        <addUniqueConstraint tableName="ecos_num_template" columnNames="workspace,ext_id"/>
+
+    </changeSet>
+
+</databaseChangeLog>

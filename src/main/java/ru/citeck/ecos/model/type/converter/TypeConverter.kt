@@ -9,24 +9,25 @@ import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.model.lib.type.dto.*
 import ru.citeck.ecos.model.lib.utils.ModelUtils
+import ru.citeck.ecos.model.lib.workspace.WorkspaceService
+import ru.citeck.ecos.model.lib.workspace.convertToIdInWsSafe
 import ru.citeck.ecos.model.type.repository.TypeEntity
 import ru.citeck.ecos.model.type.service.dao.TypeRepoDao
-import ru.citeck.ecos.records3.record.mixin.impl.mutmeta.MutMeta
-import ru.citeck.ecos.records3.record.mixin.impl.mutmeta.MutMetaMixin
+import ru.citeck.ecos.model.type.service.getTypeId
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.model.type.dto.AssocDef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
-import java.time.Instant
 import java.util.*
 import kotlin.collections.LinkedHashSet
 
 @Component
-class TypeConverter(private val typeRepoDao: TypeRepoDao) {
-
-    var mutMetaMixin: MutMetaMixin? = null
+class TypeConverter(
+    private val typeRepoDao: TypeRepoDao,
+    private val workspaceService: WorkspaceService? = null
+) {
 
     fun toEntity(dto: TypeDef): TypeEntity {
-        return toEntity(dto, typeRepoDao.findByExtId(dto.id))
+        return toEntity(dto, typeRepoDao.findByExtId(dto.getTypeId()))
     }
 
     fun toEntity(dto: TypeDef, entityToUpdate: TypeEntity?): TypeEntity {
@@ -48,7 +49,7 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
             entity.parent = null
         } else {
 
-            val parentEntity = typeRepoDao.findByExtId(typeDef.parentRef.getLocalId())
+            val parentEntity = typeRepoDao.findByExtId(workspaceService.convertToIdInWsSafe(typeDef.parentRef.getLocalId()))
                 ?: error("Parent type is not found: ${typeDef.parentRef.getLocalId()}")
             entity.parent = parentEntity
         }
@@ -86,6 +87,7 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
         entity.aspects = Json.mapper.toString(typeDef.aspects)
         entity.queryPermsPolicy = typeDef.queryPermsPolicy
         entity.assignablePerms = Json.mapper.toString(typeDef.assignablePerms)
+        entity.workspace = typeDef.workspace
         entity.workspaceScope = typeDef.workspaceScope
         entity.defaultWorkspace = typeDef.defaultWorkspace
 
@@ -113,15 +115,10 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
 
     fun toDtoWithMeta(entity: TypeEntity): EntityWithMeta<TypeDef> {
 
-        mutMetaMixin?.addCtxMeta(
-            entity.extId,
-            MutMeta(
-                entity.createdBy ?: "anonymous",
-                entity.createdDate ?: Instant.EPOCH,
-                entity.lastModifiedBy ?: "anonymous",
-                entity.lastModifiedDate ?: Instant.EPOCH
-            )
-        )
+        val parentRef = entity.parent?.let {
+            val extId = workspaceService?.addWsPrefixToId(it.extId, it.workspace) ?: it.extId
+            ModelUtils.getTypeRef(extId)
+        } ?: EntityRef.EMPTY
 
         val typeDef = TypeDef.create()
             .withId(entity.extId)
@@ -132,7 +129,7 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
             .withSourceId(entity.sourceId)
             .withSourceRef(EntityRef.valueOf(entity.sourceRef))
             .withMetaRecord(EntityRef.valueOf(entity.metaRecord))
-            .withParentRef(EntityRef.valueOf(ModelUtils.getTypeRef(entity.parent?.extId ?: "")))
+            .withParentRef(parentRef)
             .withFormRef(EntityRef.valueOf(entity.form))
             .withJournalRef(EntityRef.valueOf(entity.journal))
             .withDefaultStatus(entity.defaultStatus)
@@ -159,6 +156,7 @@ class TypeConverter(private val typeRepoDao: TypeRepoDao) {
             .withAspects(DataValue.create(entity.aspects).asList(TypeAspectDef::class.java))
             .withQueryPermsPolicy(entity.queryPermsPolicy)
             .withAssignablePerms(DataValue.create(entity.assignablePerms).asList(EntityRef::class.java))
+            .withWorkspace(entity.workspace)
             .withWorkspaceScope(entity.workspaceScope)
             .withDefaultWorkspace(entity.defaultWorkspace)
             .build()

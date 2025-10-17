@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.domain.workspace.service
 
+import com.hazelcast.hibernate.shaded.caffeine.cache.Caffeine
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 import ru.citeck.ecos.commons.data.DataValue
@@ -30,6 +31,7 @@ import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy
 import ru.citeck.ecos.records3.record.request.RequestContext
 import ru.citeck.ecos.webapp.api.authority.EcosAuthoritiesApi
 import ru.citeck.ecos.webapp.api.entity.EntityRef
+import java.time.Duration
 
 @Service
 class EmodelWorkspaceService(
@@ -45,6 +47,29 @@ class EmodelWorkspaceService(
         private val log = KotlinLogging.logger {}
     }
 
+    private val wsSystemIdCache = Caffeine.newBuilder()
+        .expireAfterWrite(Duration.ofMinutes(30))
+        .maximumSize(1000)
+        .build<String, String> {
+            AuthContext.runAsSystem {
+                recordsService.getAtt(WorkspaceDesc.getRef(it), WorkspaceDesc.ATT_SYSTEM_ID).asText().ifBlank { null }
+            }
+        }
+
+    private val wsIdBySysIdCache = Caffeine.newBuilder()
+        .expireAfterWrite(Duration.ofMinutes(30))
+        .maximumSize(1000)
+        .build<String, String> {
+            AuthContext.runAsSystem {
+                recordsService.queryOne(
+                    RecordsQuery.create()
+                        .withSourceId(WorkspaceDesc.SOURCE_ID)
+                        .withQuery(Predicates.eq(WorkspaceDesc.ATT_SYSTEM_ID, it))
+                        .build()
+                )?.getLocalId()
+            }
+        }
+
     private fun getUserAuthoritiesRefs(userRef: EntityRef, withUserRef: Boolean = true): Set<EntityRef> {
         val authoritiesRefs = authorityService.getAuthoritiesForPerson(userRef.getLocalId()).mapNotNullTo(HashSet()) {
             if (it.startsWith(AuthGroup.PREFIX)) {
@@ -59,6 +84,20 @@ class EmodelWorkspaceService(
             authoritiesRefs.remove(userRef)
         }
         return authoritiesRefs
+    }
+
+    fun getSystemId(workspaceId: String): String {
+        if (workspaceId.isBlank()) {
+            return ""
+        }
+        return wsSystemIdCache.get(workspaceId) ?: ""
+    }
+
+    fun getWorkspaceIdBySystemId(wsSysId: String): String {
+        if (wsSysId.isBlank()) {
+            return ""
+        }
+        return wsIdBySysIdCache.get(wsSysId) ?: ""
     }
 
     /**
@@ -224,6 +263,16 @@ class EmodelWorkspaceService(
             result.add(it)
         }
         return UserWorkspaces(result, totalCount)
+    }
+
+    fun getWorkspaceAuthorities(workspace: String): Set<EntityRef> {
+        val workspaceRef = EntityRef.create(WorkspaceDesc.SOURCE_ID, workspace)
+        val workspaceData = recordsService.getAtts(workspaceRef, WorkspaceMembersAtts::class.java)
+        if (workspaceData.notExists) {
+            return emptySet()
+        }
+
+        return workspaceData.workspaceMembers?.flatMapTo(HashSet()) { it.authorities ?: emptyList() } ?: emptySet()
     }
 
     fun getWorkspace(workspaceId: String): Workspace {
@@ -418,7 +467,7 @@ class EmodelWorkspaceService(
     ) {
         class MemberInfo(
             val authorities: List<EntityRef>?,
-            val memberRole: WorkspaceMemberRole?
+            val memberRole: String?
         )
     }
 

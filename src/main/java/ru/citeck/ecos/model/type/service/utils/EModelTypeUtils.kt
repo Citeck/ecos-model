@@ -2,27 +2,48 @@ package ru.citeck.ecos.model.type.service.utils
 
 import com.google.common.primitives.Longs
 import org.apache.commons.codec.binary.Base32
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 import ru.citeck.ecos.model.EcosModelApp
+import ru.citeck.ecos.model.lib.workspace.IdInWs
+import ru.citeck.ecos.model.lib.workspace.WorkspaceService
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import java.util.zip.CRC32
 
-object EModelTypeUtils {
+@Component
+class EModelTypeUtils {
 
-    const val STORAGE_TYPE_EMODEL = "ECOS_MODEL"
-    const val STORAGE_TYPE_ALFRESCO = "ALFRESCO"
-    const val STORAGE_TYPE_DEFAULT = "DEFAULT"
-    const val STORAGE_TYPE_REFERENCE = "REFERENCE"
+    companion object {
+        private val ABSTRACT_TYPES = setOf(
+            "base",
+            "user-base",
+            "case",
+            "data-list",
+            "authority"
+        )
 
-    private val INVALID_TABLE_SYMBOLS_REGEX = "[^a-z\\d_]+".toRegex()
-    private val INVALID_SOURCE_ID_SYMBOLS_REGEX = "[^a-z\\d-]+".toRegex()
+        const val STORAGE_TYPE_EMODEL = "ECOS_MODEL"
+        const val STORAGE_TYPE_ALFRESCO = "ALFRESCO"
+        const val STORAGE_TYPE_DEFAULT = "DEFAULT"
+        const val STORAGE_TYPE_REFERENCE = "REFERENCE"
 
-    private val CAMEL_REGEX = "(?<=[a-z])[A-Z]".toRegex()
+        private val INVALID_TABLE_SYMBOLS_REGEX = "[^a-z\\d:_]+".toRegex()
+        private val INVALID_SOURCE_ID_SYMBOLS_REGEX = "[^a-z\\d:-]+".toRegex()
 
-    private val EMODEL_SOURCE_ID_PREFIX = EcosModelApp.NAME + EntityRef.APP_NAME_DELIMITER
+        private val CAMEL_REGEX = "(?<=[a-z])[A-Z]".toRegex()
+
+        private val EMODEL_SOURCE_ID_PREFIX = EcosModelApp.NAME + EntityRef.APP_NAME_DELIMITER
+    }
+
+    @Autowired
+    lateinit var workspaceService: WorkspaceService
 
     fun getEmodelSourceId(typeDef: TypeDef?): String {
         if (typeDef == null) {
+            return ""
+        }
+        if (ABSTRACT_TYPES.contains(typeDef.id)) {
             return ""
         }
         val srcId = typeDef.sourceId
@@ -31,43 +52,69 @@ object EModelTypeUtils {
                 srcId.substring(EMODEL_SOURCE_ID_PREFIX.length)
             } else if (srcId.isNotBlank()) {
                 if (srcId.contains("/")) {
-                    getEmodelSourceId(typeDef.id)
+                    getEmodelSourceId(typeDef.id, typeDef.workspace)
                 } else {
                     srcId
                 }
             } else {
-                getEmodelSourceId(typeDef.id)
+                getEmodelSourceId(typeDef.id, typeDef.workspace)
             }
         } else {
             ""
         }
     }
 
-    fun getEmodelSourceId(typeId: String): String {
-        return createId(typeId, INVALID_SOURCE_ID_SYMBOLS_REGEX, "-", 42, false)
+    fun getEmodelSourceId(typeId: String, workspace: String): String {
+        return createId(
+            typeId = typeId,
+            workspace = workspace,
+            invalidSymbolsRegex = INVALID_SOURCE_ID_SYMBOLS_REGEX,
+            delimiter = "-",
+            maxLen = 42,
+            addPrefix = false,
+            replaceWsDelim = false
+        )
     }
 
-    fun getEmodelSourceTableId(typeId: String): String {
-        return createId(typeId, INVALID_TABLE_SYMBOLS_REGEX, "_", 42, true)
+    fun getEmodelSourceTableId(typeId: String, workspace: String): String {
+        return createId(
+            typeId = typeId,
+            workspace = workspace,
+            invalidSymbolsRegex = INVALID_TABLE_SYMBOLS_REGEX,
+            delimiter = "_",
+            maxLen = 42,
+            addPrefix = true,
+            replaceWsDelim = true
+        )
     }
 
     private fun createId(
         typeId: String,
+        workspace: String,
         invalidSymbolsRegex: Regex,
         delimiter: String,
         maxLen: Int,
-        addPrefix: Boolean
+        addPrefix: Boolean,
+        replaceWsDelim: Boolean
     ): String {
-        var result = CAMEL_REGEX.replace(typeId) { "_${it.value}" }.lowercase()
+        val scopedTypeId = if (!typeId.contains(IdInWs.WS_DELIM)) {
+            workspaceService.addWsPrefixToId(typeId, workspace)
+        } else {
+            typeId
+        }
+        var result = CAMEL_REGEX.replace(scopedTypeId) { "_${it.value}" }.lowercase()
         result = result.replace(invalidSymbolsRegex, delimiter)
         if (result.length > maxLen) {
             val crcBeginIdx = maxLen - 8
-            val crc = getCrcStr(typeId.substring(crcBeginIdx))
+            val crc = getCrcStr(scopedTypeId.substring(crcBeginIdx))
             result = result.substring(0, crcBeginIdx) + delimiter + crc
         }
         val doubleDelim = delimiter.repeat(2)
         while (result.contains(doubleDelim)) {
             result = result.replace(doubleDelim, delimiter)
+        }
+        if (replaceWsDelim) {
+            result = result.replace(IdInWs.WS_DELIM, doubleDelim)
         }
         if (result.endsWith(delimiter)) {
             result = result.substring(0, result.length - 1)

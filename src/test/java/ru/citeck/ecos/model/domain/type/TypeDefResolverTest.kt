@@ -7,10 +7,12 @@ import org.springframework.util.ResourceUtils
 import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.io.file.std.EcosStdFile
 import ru.citeck.ecos.commons.json.Json
+import ru.citeck.ecos.model.lib.ModelServiceFactory
 import ru.citeck.ecos.model.lib.aspect.dto.AspectInfo
 import ru.citeck.ecos.model.type.service.resolver.AspectsProvider
 import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
 import ru.citeck.ecos.model.type.service.resolver.TypesProvider
+import ru.citeck.ecos.model.type.service.utils.EModelTypeUtils
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.model.aspect.dto.AspectDef
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
@@ -28,7 +30,10 @@ class TypeDefResolverTest {
     @Test
     fun test() {
 
-        val resolver = TypeDefResolver()
+        val workspaceService = ModelServiceFactory().workspaceService
+        val eModelTypeUtils = EModelTypeUtils()
+        eModelTypeUtils.workspaceService = workspaceService
+        val resolver = TypeDefResolver(workspaceService, eModelTypeUtils)
 
         val tests = getTests()
         log.info { "Found tests: \n${tests.joinToString("\n")}" }

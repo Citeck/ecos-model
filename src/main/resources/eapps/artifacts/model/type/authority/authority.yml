@@ -6,7 +6,6 @@ name:
 
 system: true
 journalRef: uiserv/journal@authority
-storageType: ECOS_MODEL
 
 queryPermsPolicy: PUBLIC
 

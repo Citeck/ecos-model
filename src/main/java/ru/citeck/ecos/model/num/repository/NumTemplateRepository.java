@@ -8,5 +8,5 @@ public interface NumTemplateRepository
     extends JpaRepository<NumTemplateEntity, Long>,
             JpaSpecificationExecutor<NumTemplateEntity> {
 
-    NumTemplateEntity findByExtId(String extId);
+    NumTemplateEntity findByWorkspaceAndExtId(String workspace, String extId);
 }

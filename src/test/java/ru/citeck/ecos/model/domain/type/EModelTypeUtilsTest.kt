@@ -1,14 +1,24 @@
 package ru.citeck.ecos.model.domain.type
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import ru.citeck.ecos.commons.json.Json
+import ru.citeck.ecos.model.lib.ModelServiceFactory
 import ru.citeck.ecos.model.type.service.utils.EModelTypeUtils
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 
 class EModelTypeUtilsTest {
+
+    private lateinit var emodelTypeUtils: EModelTypeUtils
+
+    @BeforeEach
+    fun beforeEach() {
+        emodelTypeUtils = EModelTypeUtils()
+        emodelTypeUtils.workspaceService = ModelServiceFactory().workspaceService
+    }
 
     @ParameterizedTest
     @CsvSource(
@@ -23,12 +33,13 @@ class EModelTypeUtilsTest {
         "very long type very long type very long type very long type, " +
             "very-long-type-very-long-type-very-gpw5krc, " +
             "t_very_long_type_very_long_type_very_gpw5krc",
-        "%aa---bb##$, aa-bb, t_aa_bb"
+        "%aa---bb##$, aa-bb, t_aa_bb",
+        "aa:bb--_-=1, aa:bb-1, t_aa__bb_1"
     )
     fun generatedSrcIdAndTableNameTest(typeId: String, expectedSourceId: String, expectedTableId: String) {
 
-        val srcId = EModelTypeUtils.getEmodelSourceId(typeId)
-        val tableId = EModelTypeUtils.getEmodelSourceTableId(typeId)
+        val srcId = emodelTypeUtils.getEmodelSourceId(typeId, "")
+        val tableId = emodelTypeUtils.getEmodelSourceTableId(typeId, "")
 
         assertThat(srcId).isEqualTo(expectedSourceId)
         assertThat(tableId).isEqualTo(expectedTableId)
@@ -37,13 +48,13 @@ class EModelTypeUtilsTest {
     @Test
     fun sourceIdFromTypeDefTest() {
 
-        assertThat(EModelTypeUtils.getEmodelSourceId(null)).isEmpty()
+        assertThat(emodelTypeUtils.getEmodelSourceId(null)).isEmpty()
 
         val type01 = getTypeDef("""{"id":"test"}""")
-        assertThat(EModelTypeUtils.getEmodelSourceId(type01)).isEqualTo("")
+        assertThat(emodelTypeUtils.getEmodelSourceId(type01)).isEqualTo("")
 
         val type02 = getTypeDef("""{"id":"test","sourceId":"abc"}""")
-        assertThat(EModelTypeUtils.getEmodelSourceId(type02)).isEqualTo("")
+        assertThat(emodelTypeUtils.getEmodelSourceId(type02)).isEqualTo("")
 
         val type1 = getTypeDef(
             """
@@ -52,7 +63,7 @@ class EModelTypeUtilsTest {
                 "storageType":"ECOS_MODEL"
             }"""
         )
-        assertThat(EModelTypeUtils.getEmodelSourceId(type1)).isEqualTo("test")
+        assertThat(emodelTypeUtils.getEmodelSourceId(type1)).isEqualTo("test")
 
         val type2 = getTypeDef(
             """
@@ -62,7 +73,7 @@ class EModelTypeUtilsTest {
                 "sourceId":"abc"
             }"""
         )
-        assertThat(EModelTypeUtils.getEmodelSourceId(type2)).isEqualTo("abc")
+        assertThat(emodelTypeUtils.getEmodelSourceId(type2)).isEqualTo("abc")
 
         val type3 = getTypeDef(
             """
@@ -72,7 +83,7 @@ class EModelTypeUtilsTest {
                 "sourceId":"emodel/abc"
             }"""
         )
-        assertThat(EModelTypeUtils.getEmodelSourceId(type3)).isEqualTo("abc")
+        assertThat(emodelTypeUtils.getEmodelSourceId(type3)).isEqualTo("abc")
 
         val type4 = getTypeDef(
             """
@@ -82,7 +93,7 @@ class EModelTypeUtilsTest {
                 "sourceId":"transformations/abc"
             }"""
         )
-        assertThat(EModelTypeUtils.getEmodelSourceId(type4)).isEqualTo("test")
+        assertThat(emodelTypeUtils.getEmodelSourceId(type4)).isEqualTo("test")
     }
 
     private fun getTypeDef(content: String): TypeDef {

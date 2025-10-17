@@ -3,6 +3,9 @@ package ru.citeck.ecos.model.type.api.records
 import org.springframework.stereotype.Service
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthRole
+import ru.citeck.ecos.model.lib.workspace.IdInWs
+import ru.citeck.ecos.model.lib.workspace.WorkspaceService
+import ru.citeck.ecos.model.lib.workspace.convertToIdInWsSafe
 import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records3.record.atts.schema.ScalarType
@@ -20,15 +23,18 @@ import ru.citeck.ecos.webapp.lib.perms.component.RecordPermsData
 class TypesRepoPermsService(
     val typesService: TypesService,
     val webAppProps: EcosWebAppProps,
-    ecosPermissionsService: EcosPermissionsService
+    ecosPermissionsService: EcosPermissionsService,
+    private val workspaceService: WorkspaceService
 ) {
 
     companion object {
         private const val PERMISSION_CREATE_CHILDREN = "create-children"
         private const val PERMISSION_DELETE = "delete"
         private const val PERMISSION_WRITE = "write"
+        private const val PERMISSION_CREATE_OR_EDIT_TYPES = "create-or-edit-types"
 
         private const val ATT_CREATOR_USERNAME = RecordConstants.ATT_CREATOR + ScalarType.LOCAL_ID_SCHEMA
+        private const val ATT_WORKSPACE_ID = RecordConstants.ATT_WORKSPACE + ScalarType.LOCAL_ID_SCHEMA
     }
 
     private val permsCalculator = ecosPermissionsService.createCalculator()
@@ -48,12 +54,22 @@ class TypesRepoPermsService(
             private fun evalPerms(context: RecordPermsContext): DefaultPerms {
                 return context.computeIfAbsent(this::class) {
                     val authorities = context.getAuthorities()
-                    val creator = context.getRecord().getAtt(ATT_CREATOR_USERNAME).asText()
-                    DefaultPerms(
-                        authorities.contains(AuthRole.ADMIN) ||
-                            authorities.contains(AuthRole.SYSTEM) ||
-                            creator == context.getUser()
-                    )
+                    var hasWritePerms = authorities.contains(AuthRole.ADMIN) ||
+                        authorities.contains(AuthRole.SYSTEM)
+                    if (!hasWritePerms) {
+                        val recordAtts = context.getRecord().getAtts(listOf(ATT_CREATOR_USERNAME, ATT_WORKSPACE_ID))
+                        if (recordAtts[ATT_CREATOR_USERNAME].asText() == context.getUser()) {
+                            hasWritePerms = true
+                        } else {
+                            val workspaceId = recordAtts[ATT_WORKSPACE_ID].asText()
+                            if (workspaceId.isNotBlank() &&
+                                workspaceService.isUserManagerOf(context.getUser(), workspaceId)
+                            ) {
+                                hasWritePerms = true
+                            }
+                        }
+                    }
+                    DefaultPerms(hasWritePerms)
                 }
             }
         })
@@ -68,6 +84,13 @@ class TypesRepoPermsService(
         if (AuthContext.isRunAsSystemOrAdmin()) {
             return
         }
+        if (record.workspace.isNotEmpty()) {
+            if (workspaceService.isUserManagerOf(AuthContext.getCurrentUser(), record.workspace)) {
+                return
+            } else {
+                throwPermissionDenied(PERMISSION_CREATE_OR_EDIT_TYPES)
+            }
+        }
 
         val parentBefore = getRepoRef(record.baseTypeDef.parentRef)
         val parentAfter = getRepoRef(record.parentRef)
@@ -80,11 +103,11 @@ class TypesRepoPermsService(
         }
 
         if (!record.isNewRec()) {
-            val perms = permsCalculator.getPermissions(getRepoRef(record.id))
+            val perms = permsCalculator.getPermissions(getRepoRef(IdInWs.create(record.workspace, record.id)))
             if (perms.hasWritePerms()) {
                 return
             }
-            val currentDef = typesService.getByIdWithMetaOrNull(record.id)
+            val currentDef = typesService.getByIdWithMetaOrNull(IdInWs.create(record.workspace, record.id))
             val creator = currentDef?.meta?.creator ?: ""
             if (creator.isBlank() || creator != AuthContext.getCurrentUser()) {
                 throwPermissionDenied(PERMISSION_WRITE)
@@ -96,11 +119,13 @@ class TypesRepoPermsService(
         if (AuthContext.isRunAsSystemOrAdmin()) {
             return
         }
+
         val perms = permsCalculator.getPermissions(getRepoRef(typeId))
         if (perms.hasWritePerms()) {
             return
         }
-        val currentDef = typesService.getByIdWithMetaOrNull(typeId)
+        val ecosTypeId = workspaceService.convertToIdInWsSafe(typeId)
+        val currentDef = typesService.getByIdWithMetaOrNull(ecosTypeId)
         if (currentDef == null) {
             throwPermissionDenied(PERMISSION_DELETE)
         } else if (currentDef.meta.creator == AuthContext.getCurrentUser()) {
@@ -117,6 +142,7 @@ class TypesRepoPermsService(
         val typeId = when (ref) {
             is EntityRef -> ref.getLocalId().ifBlank { "base" }
             is String -> ref
+            is IdInWs -> workspaceService.convertToStrId(ref)
             else -> error("invalid ref: $ref")
         }
         return EntityRef.create(webAppProps.appName, TypesRepoRecordsDao.ID, typeId)

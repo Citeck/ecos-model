@@ -347,7 +347,7 @@ class AuthoritiesSyncService(
                             } else {
                                 log.debug {
                                     "Current sync or before sync is null and priority checking will be skipped. " +
-                                    "Before sync: $syncBefore Current sync: $currentSync"
+                                        "Before sync: $syncBefore Current sync: $currentSync"
                                 }
                             }
                         }

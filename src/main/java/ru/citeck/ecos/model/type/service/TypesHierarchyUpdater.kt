@@ -1,6 +1,8 @@
 package ru.citeck.ecos.model.type.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import ru.citeck.ecos.model.lib.workspace.IdInWs
+import ru.citeck.ecos.model.lib.workspace.WorkspaceService
 import ru.citeck.ecos.model.type.service.resolver.AspectsProvider
 import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
 import ru.citeck.ecos.model.type.service.resolver.TypesProvider
@@ -28,6 +30,7 @@ class TypesHierarchyUpdater(
     private val aspectsProv: AspectsProvider,
     private val registry: MutableEcosRegistry<TypeDef>,
     private val webAppApi: EcosWebAppApi,
+    private val workspaceService: WorkspaceService?,
     private val syncAllTypes: () -> Unit
 ) {
 
@@ -82,7 +85,9 @@ class TypesHierarchyUpdater(
                     "with modified time: ${lastModifiedType.meta.modified}"
             }
         }
-        val lastModifiedFromRegistry = registry.getValueWithMeta(lastModifiedType.entity.id)?.meta?.modified
+        val lmEntity = lastModifiedType.entity
+        val typeIdInWs = workspaceService?.addWsPrefixToId(lmEntity.id, lmEntity.workspace) ?: lmEntity.id
+        val lastModifiedFromRegistry = registry.getValueWithMeta(typeIdInWs)?.meta?.modified
         val lastModifiedFromRepo = lastModifiedType.meta.modified
         return if (lastModifiedFromRegistry != lastModifiedFromRepo) {
             log.info {
@@ -96,7 +101,7 @@ class TypesHierarchyUpdater(
         }
     }
 
-    fun updateTypes(types: Set<String>) {
+    fun updateTypes(types: Set<IdInWs>) {
         if (!updaterEnabled.get()) {
             return
         }
@@ -127,9 +132,9 @@ class TypesHierarchyUpdater(
         }
     }
 
-    private fun fillTypesToUpdate(command: UpdateCommand, types: MutableSet<String>) {
+    private fun fillTypesToUpdate(command: UpdateCommand, types: MutableSet<IdInWs>) {
         when (command) {
-            is UpdateAll -> typesService.getAll().forEach { types.add(it.id) }
+            is UpdateAll -> typesService.getAll().forEach { types.add(it.getTypeId()) }
             is TypesToUpdate -> command.types.forEach { types.add(it) }
         }
     }
@@ -140,7 +145,7 @@ class TypesHierarchyUpdater(
 
         val isUpdaterThread = Thread.currentThread().name == UPDATER_THREAD_NAME
 
-        val typesIdsToUpdate = LinkedHashSet<String>()
+        val typesIdsToUpdate = LinkedHashSet<IdInWs>()
         fillTypesToUpdate(updateCommand, typesIdsToUpdate)
 
         try {
@@ -185,7 +190,7 @@ class TypesHierarchyUpdater(
     private sealed class UpdateCommand
 
     private data class TypesToUpdate(
-        val types: Set<String>
+        val types: Set<IdInWs>
     ) : UpdateCommand()
 
     private data object UpdateAll : UpdateCommand()

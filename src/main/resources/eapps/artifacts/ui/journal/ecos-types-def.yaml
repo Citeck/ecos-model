@@ -17,17 +17,17 @@ actions:
 
 columns:
 
-  - id: moduleId
+  - id: id
     name: { ru: Идентификатор, en: Id }
-    type: text
+    type: TEXT
 
   - id: name
     name: { ru: Имя, en: Name }
-    type: text
+    type: TEXT
 
   - id: description
     name: { ru: Описание, en: Description }
-    type: text
+    type: TEXT
 
   - id: _modified
     type: DATETIME

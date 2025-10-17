@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
+import ru.citeck.ecos.model.domain.treesearch.TreeSearchDesc
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.model.lib.type.dto.WorkspaceScope
 import ru.citeck.ecos.model.lib.utils.ModelUtils
@@ -225,7 +226,7 @@ class DocLibRecords @Autowired constructor(
 
             val dirsFilter = filterPredicate.copy<AndPredicate>()
             if (query.recursive) {
-                dirsFilter.addPredicate(Predicates.contains("dirPath", parentLocalRef.toString()))
+                dirsFilter.addPredicate(Predicates.contains(TreeSearchDesc.ATT_PATH, parentLocalRef.toString()))
             } else {
                 dirsFilter.addPredicate(Predicates.eq(RecordConstants.ATT_PARENT, parentLocalRef))
             }
@@ -243,12 +244,15 @@ class DocLibRecords @Autowired constructor(
             val filesFilter = filterPredicate.copy<AndPredicate>()
 
             val parentCondition = OrPredicate.of(
-                Predicates.eq(RecordConstants.ATT_PARENT, parentLocalRef),
-                EmptyPredicate(RecordConstants.ATT_PARENT)
+                Predicates.eq(RecordConstants.ATT_PARENT, parentLocalRef)
             )
+            if (parentIsRoot) {
+                parentCondition.addPredicate(Predicates.empty(RecordConstants.ATT_PARENT))
+            }
+
             if (query.recursive) {
                 parentCondition.addPredicate(
-                    Predicates.contains("${RecordConstants.ATT_PARENT}.dirPath", parentLocalRef.toString())
+                    Predicates.contains("${RecordConstants.ATT_PARENT}.${TreeSearchDesc.ATT_PATH}", parentLocalRef.toString())
                 )
                 filesFilter.addPredicate(
                     Predicates.eq(

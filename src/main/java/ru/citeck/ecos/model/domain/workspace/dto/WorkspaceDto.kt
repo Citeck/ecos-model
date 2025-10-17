@@ -10,13 +10,13 @@ enum class WorkspaceVisibility {
     PRIVATE
 }
 
-enum class WorkspaceMemberRole {
-    USER,
-    MANAGER
-}
-
 enum class WorkspaceAction {
     JOIN
+}
+
+object WorkspaceMemberRole {
+    const val USER = "USER"
+    const val MANAGER = "MANAGER"
 }
 
 @IncludeNonDefault
@@ -24,7 +24,7 @@ enum class WorkspaceAction {
 data class WorkspaceMember(
     val memberId: String,
     val authorities: List<EntityRef>,
-    val memberRole: WorkspaceMemberRole
+    val memberRole: String
 ) {
 
     companion object {
@@ -46,7 +46,7 @@ data class WorkspaceMember(
 
         var memberId: String = ""
         var authorities: List<EntityRef> = emptyList()
-        var memberRole: WorkspaceMemberRole = WorkspaceMemberRole.USER
+        var memberRole: String = WorkspaceMemberRole.USER
 
         constructor(base: WorkspaceMember) : this() {
             this.memberId = base.memberId
@@ -76,8 +76,12 @@ data class WorkspaceMember(
             return this
         }
 
-        fun withMemberRole(memberRole: WorkspaceMemberRole?): Builder {
-            this.memberRole = memberRole ?: WorkspaceMemberRole.USER
+        fun withMemberRole(memberRole: String?): Builder {
+            if (memberRole.isNullOrBlank()) {
+                this.memberRole = WorkspaceMemberRole.USER
+            } else {
+                this.memberRole = memberRole
+            }
             return this
         }
 

@@ -3,6 +3,7 @@ package ru.citeck.ecos.model.type.service
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.beans.factory.DisposableBean
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.DependsOn
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.apps.app.service.LocalAppService
@@ -10,10 +11,12 @@ import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.model.lib.aspect.dto.AspectInfo
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
+import ru.citeck.ecos.model.lib.workspace.*
 import ru.citeck.ecos.model.type.eapps.handler.TypeArtifactHandler
 import ru.citeck.ecos.model.type.service.resolver.AspectsProvider
 import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
 import ru.citeck.ecos.model.type.service.resolver.TypesProvider
+import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.txn.lib.TxnContext
 import ru.citeck.ecos.webapp.api.EcosWebAppApi
 import ru.citeck.ecos.webapp.api.entity.EntityRef
@@ -29,9 +32,12 @@ import java.time.Duration
 import java.util.concurrent.atomic.AtomicBoolean
 
 @Component
+@DependsOn("workspaceRepoDao")
 class TypesRegistryInitializer(
     private val typesService: TypesService,
-    private val localAppService: LocalAppService
+    private val localAppService: LocalAppService,
+    private val resolver: TypeDefResolver,
+    private val workspaceService: WorkspaceService? = null
 ) : EcosRegistryInitializer<TypeDef>, DisposableBean {
 
     companion object {
@@ -39,8 +45,6 @@ class TypesRegistryInitializer(
 
         private val log = KotlinLogging.logger {}
     }
-
-    private val resolver = TypeDefResolver()
 
     private lateinit var aspectsRegistry: EcosRegistry<AspectDef>
     private lateinit var typesHierarchyUpdater: TypesHierarchyUpdater
@@ -54,7 +58,7 @@ class TypesRegistryInitializer(
         props: EcosRegistryProps.Initializer
     ): Promise<*> {
 
-        val rawProv = TypesServiceBasedProv(typesService, loadClasspathTypes())
+        val rawProv = TypesServiceBasedProv(typesService, loadClasspathTypes(), workspaceService)
         val resProv = RegistryBasedTypesProv(registry)
         val aspectsProv = AspectsProv()
 
@@ -65,22 +69,26 @@ class TypesRegistryInitializer(
             resProv,
             aspectsProv,
             registry,
-            webAppApi
+            webAppApi,
+            workspaceService
         ) {
-            syncAllTypes(registry, rawProv, aspectsProv)
+            syncAllTypes(registry, rawProv, aspectsProv, FullSyncType.ALL)
         }
 
-        syncAllTypes(registry, rawProv, aspectsProv)
+        syncAllTypes(registry, rawProv, aspectsProv, FullSyncType.WITHOUT_WS)
+        webAppApi.doBeforeAppReady {
+            syncAllTypes(registry, rawProv, aspectsProv, FullSyncType.WITH_WS)
+        }
         typesHierarchyUpdater.start()
 
         typesService.addOnDeletedListener {
             TxnContext.doAfterCommit(0f, false) {
-                registry.setValue(it, null)
+                registry.setValue(workspaceService.convertToStrIdSafe(it), null)
             }
         }
 
-        fun updateTypes(typeIds: Collection<String>) {
-            val typesSet = if (typeIds !is Set<String>) typeIds.toSet() else typeIds
+        fun updateTypes(typeIds: Collection<IdInWs>) {
+            val typesSet = if (typeIds !is Set<IdInWs>) typeIds.toSet() else typeIds
             typesHierarchyUpdater.updateTypes(typesSet)
         }
 
@@ -93,7 +101,7 @@ class TypesRegistryInitializer(
             TxnContext.processSetAfterCommit(key, id) { changedAspects ->
                 val changedTypes = typesService.getAll().filter { rec ->
                     rec.aspects.any { changedAspects.contains(it.ref.getLocalId()) }
-                }.map { it.id }
+                }.map { it.getTypeId() }
                 updateTypes(changedTypes)
             }
         }
@@ -124,11 +132,25 @@ class TypesRegistryInitializer(
     private fun syncAllTypes(
         registry: MutableEcosRegistry<TypeDef>,
         rawProv: TypesProvider,
-        aspectsProv: AspectsProvider
+        aspectsProv: AspectsProvider,
+        syncType: FullSyncType
     ) {
-        val types = typesService.getAllWithMeta()
+        val predicate = when (syncType) {
+            FullSyncType.ALL -> Predicates.alwaysTrue()
+            FullSyncType.WITHOUT_WS -> Predicates.empty("workspace")
+            FullSyncType.WITH_WS -> Predicates.notEmpty("workspace")
+        }
+        val types = typesService.getAllWithMeta(100_000, 0, predicate, listOf())
         log.info { "Types full sync started for ${types.size} types" }
         val typesToRemove = HashSet(registeredTypes)
+        if (syncType != FullSyncType.ALL) {
+            val typesToRemoveIt = typesToRemove.iterator()
+            while (typesToRemoveIt.hasNext()) {
+                if (!syncType.isMatch(typesToRemoveIt.next())) {
+                    typesToRemoveIt.remove()
+                }
+            }
+        }
         resolver.getResolvedTypesWithMeta(
             types,
             rawProv,
@@ -159,6 +181,7 @@ class TypesRegistryInitializer(
         override fun get(id: String): TypeDef? {
             return null
         }
+
         override fun getChildren(typeId: String): List<String> {
             return emptyList()
         }
@@ -178,7 +201,8 @@ class TypesRegistryInitializer(
 
     private class TypesServiceBasedProv(
         val typesService: TypesService,
-        predefinedTypes: List<TypeDef>
+        predefinedTypes: List<TypeDef>,
+        val workspaceService: WorkspaceService?
     ) : TypesProvider {
 
         private val predefinedTypesInfo: Map<String, PredefinedTypeInfo> = predefinedTypes.associate {
@@ -208,7 +232,7 @@ class TypesRegistryInitializer(
 
         override fun get(id: String): TypeDef? {
 
-            val typeFromRepo = typesService.getByIdOrNull(id) ?: return null
+            val typeFromRepo = typesService.getByIdOrNull(workspaceService.convertToIdInWsSafe(id)) ?: return null
             val predefinedType = predefinedTypesInfo[id] ?: return typeFromRepo
 
             // Add missing predefined attributes to the type model loaded from the database.
@@ -253,7 +277,9 @@ class TypesRegistryInitializer(
         }
 
         override fun getChildren(typeId: String): List<String> {
-            return typesService.getChildren(typeId)
+            return typesService.getChildren(workspaceService.convertToIdInWsSafe(typeId)).map {
+                workspaceService.convertToStrIdSafe(it)
+            }
         }
 
         private class PredefinedTypeInfo(
@@ -287,5 +313,13 @@ class TypesRegistryInitializer(
 
     override fun getKey(): String {
         return "ecos-model-app-types"
+    }
+
+    private enum class FullSyncType(
+        val isMatch: (String) -> Boolean
+    ) {
+        ALL({ true }),
+        WITHOUT_WS({ !it.contains(IdInWs.WS_DELIM) }),
+        WITH_WS({ it.contains(IdInWs.WS_DELIM) })
     }
 }

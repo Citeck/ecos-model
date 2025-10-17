@@ -3,12 +3,15 @@ package ru.citeck.ecos.model.type.artifacts
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.apps.app.domain.ecostype.service.ModelTypeArtifactResolver
+import ru.citeck.ecos.model.lib.workspace.WorkspaceService
+import ru.citeck.ecos.model.lib.workspace.convertToIdInWsSafe
 import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 
 @Component
 class TypeArtifactsResolverImpl(
-    private val typeService: TypesService
+    private val typeService: TypesService,
+    private val workspaceService: WorkspaceService? = null
 ) : ModelTypeArtifactResolver {
 
     companion object {
@@ -17,13 +20,13 @@ class TypeArtifactsResolverImpl(
 
     override fun getTypeArtifacts(typeRef: EntityRef): List<EntityRef> {
         val artifacts = getTypeArtifactsImpl(typeRef)
-        log.info("GetTypeArtifacts result: $artifacts")
+        log.info { "GetTypeArtifacts result: $artifacts" }
         return artifacts
     }
 
     private fun getTypeArtifactsImpl(typeRef: EntityRef): List<EntityRef> {
 
-        val type = typeService.getByIdOrNull(typeRef.getLocalId())
+        val type = typeService.getByIdOrNull(workspaceService.convertToIdInWsSafe(typeRef.getLocalId()))
         val result = mutableListOf<EntityRef>()
 
         if (type == null) {

@@ -3,7 +3,6 @@ id: number-templates
 name: { ru: Шаблоны нумерации, en: Number templates }
 
 system: true
-properties: {}
 
 actions:
   - uiserv/action@download-base64-data-yml
@@ -13,14 +12,14 @@ actions:
 
 columns:
 
-  - id: moduleId
-    type: text
+  - id: id
+    type: TEXT
     name: { ru: Идентификатор, en: Id }
 
   - id: name
-    type: text
+    type: TEXT
     name: { ru: Имя, en: Name }
 
   - id: counterKey
-    type: text
+    type: TEXT
     name: { ru: Ключ счетчика, en: Counter key }

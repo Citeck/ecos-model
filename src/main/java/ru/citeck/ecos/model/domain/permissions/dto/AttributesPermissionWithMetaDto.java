@@ -2,10 +2,12 @@ package ru.citeck.ecos.model.domain.permissions.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.time.Instant;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class AttributesPermissionWithMetaDto extends AttributesPermissionDto {
 
     @JsonIgnore

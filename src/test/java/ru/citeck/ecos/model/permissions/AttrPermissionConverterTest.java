@@ -5,11 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import ru.citeck.ecos.model.EcosModelApp;
-import ru.citeck.ecos.model.type.converter.TypeConverter;
 import ru.citeck.ecos.model.type.eapps.handler.TypeArtifactHandler;
-import ru.citeck.ecos.model.type.repository.TypeEntity;
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef;
 import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension;
 import ru.citeck.ecos.commons.json.Json;
@@ -38,7 +36,7 @@ public class AttrPermissionConverterTest {
     @Autowired
     private TypeArtifactHandler typeArtifactsHandler;
 
-    @MockBean
+    @MockitoBean
     private AttributesPermissionsRepository attributesPermissionsRepository;
 
     private AttributesPermissionConverter converter;
