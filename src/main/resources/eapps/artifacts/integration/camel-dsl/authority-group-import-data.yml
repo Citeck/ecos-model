@@ -1,0 +1,38 @@
+---
+id: authority-group-import-data
+type: YAML
+state: STOPPED
+content: |-
+  ---
+  - beans:
+      - name: "prepareToMutateProcessor"
+        type: ru.citeck.ecos.camel.importdata.processor.PrepareToMutateProcessor
+      - name: "reverseArrayProcessor"
+        type: ru.citeck.ecos.camel.processor.data.ReverseArrayProcessor
+
+  - route:
+      from:
+        uri: "ecos-excel-stream-read:{{inputFileRef}}"
+        parameters:
+          customAttNames:
+            Идентификатор группы: id
+            Имя группы: name
+            Описание: description
+            Родительские группы: authorityGroups
+            Приватная группа: privateGroup
+        steps:
+          - to: ecos-attributes-mapper:{{typeId}}
+          - setHeader:
+              name: PrepareToMutateProcessorConfig
+              constant:
+                workspace: "{{workspace}}"
+                typeId: "{{typeId}}"
+          - process:
+              ref: prepareToMutateProcessor
+
+          #This is required to maintain the data import order
+          - process:
+              ref: reverseArrayProcessor
+          - to: ecos-records-mutate:?sourceId=emodel/authority-group
+file: null
+startupType: IMPORT_DATA

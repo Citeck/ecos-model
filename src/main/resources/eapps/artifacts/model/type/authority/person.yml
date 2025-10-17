@@ -75,6 +75,17 @@ model:
       name:
         ru: Пол
         en: Sex
+      type: OPTIONS
+      config:
+        values:
+          - value: male
+            label:
+              ru: Мужской
+              en: Male
+          - value: female
+            label:
+              ru: Женский
+              en: Female
     - id: photo
       name:
         ru: Фото
@@ -187,3 +198,16 @@ model:
       name:
         ru: Создан при регистрации
         en: Created by registration
+  aspects:
+    - ref: emodel/aspect@import-data-config
+      config:
+        enabledDefaultVariant: false
+        variants:
+          - variantId: person
+            name:
+              ru: Пользователь
+              en: Person
+            camelDslRef: integrations/camel-dsl@person-import-data
+            allowedFor:
+              - GROUP_ECOS_ADMINISTRATORS
+      inheritConfig: false

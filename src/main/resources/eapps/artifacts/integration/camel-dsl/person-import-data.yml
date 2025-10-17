@@ -1,0 +1,48 @@
+---
+id: person-import-data
+type: YAML
+state: STOPPED
+content: |-
+  ---
+  - beans:
+      - name: "prepareToMutateProcessor"
+        type: ru.citeck.ecos.camel.importdata.processor.PrepareToMutateProcessor
+      - name: "reverseArrayProcessor"
+        type: ru.citeck.ecos.camel.processor.data.ReverseArrayProcessor
+
+  - route:
+      from:
+        uri: "ecos-excel-stream-read:{{inputFileRef}}"
+        parameters:
+          customAttNames:
+            Системное имя: id
+            Email: email
+            Имя: firstName
+            Фамилия: lastName
+            Отчество: middleName
+            ФИО в родительном падеже: nameInGenitiveCase
+            Дата рождения: birthDate
+            Пол: sex
+            Компания: organization
+            Должность: jobTitle
+            Табельный номер: employeeId
+            Город: city
+            Линейный руководитель: manager
+            Группы: authorityGroups
+            Учетная запись отключена: personDisabled
+        steps:
+          - to: ecos-attributes-mapper:{{typeId}}
+          - setHeader:
+              name: PrepareToMutateProcessorConfig
+              constant:
+                workspace: "{{workspace}}"
+                typeId: "{{typeId}}"
+          - process:
+              ref: prepareToMutateProcessor
+
+          #This is required to maintain the data import order
+          - process:
+              ref: reverseArrayProcessor
+          - to: ecos-records-mutate:?sourceId=emodel/person
+file: null
+startupType: IMPORT_DATA
