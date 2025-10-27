@@ -198,16 +198,16 @@ model:
       name:
         ru: Создан при регистрации
         en: Created by registration
-  aspects:
-    - ref: emodel/aspect@import-data-config
-      config:
-        enabledDefaultVariant: false
-        variants:
-          - variantId: person
-            name:
-              ru: Пользователь
-              en: Person
-            camelDslRef: integrations/camel-dsl@person-import-data
-            allowedFor:
-              - GROUP_ECOS_ADMINISTRATORS
-      inheritConfig: false
+aspects:
+  - ref: emodel/aspect@import-data-config
+    config:
+      enabledDefaultVariant: false
+      variants:
+        - variantId: person
+          name:
+            ru: Пользователь
+            en: Person
+          camelDslRef: integrations/camel-dsl@person-import-data
+          allowedFor:
+            - GROUP_ECOS_ADMINISTRATORS
+    inheritConfig: false
