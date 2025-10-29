@@ -55,11 +55,13 @@ class CommentsRecordsProxy(
                     record.setAtt(CommentDesc.ATT_TEXT, CommentValidator.removeVulnerabilities(commentText))
                 }
                 if (hasDocs && commentAtts.record.isNotEmpty()) {
-                    recordsService.mutateAtt(
-                        commentAtts.record,
-                        CommentDesc.ATT_ADD_DOCUMENTS,
-                        record.getAtt(CommentDesc.ATT_ADD_DOCUMENTS)
-                    )
+                    AuthContext.runAsSystem {
+                        recordsService.mutateAtt(
+                            commentAtts.record,
+                            CommentDesc.ATT_ADD_DOCUMENTS,
+                            record.getAtt(CommentDesc.ATT_ADD_DOCUMENTS)
+                        )
+                    }
                     record.attributes.remove(CommentDesc.ATT_ADD_DOCUMENTS)
                 }
             }
