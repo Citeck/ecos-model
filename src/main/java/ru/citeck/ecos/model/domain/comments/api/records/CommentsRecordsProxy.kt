@@ -50,16 +50,28 @@ class CommentsRecordsProxy(
             val hasDocs = isMutAttsHasDocs(record)
             if (text.isNotBlank() || hasDocs) {
                 val commentAtts = getCommentAtts(record)
+                val isInternalComment = commentAtts.tags.any { it == INTERNAL_TAG_TYPE }
                 if (text.isNotBlank()) {
-                    val commentText = createDocumentAttachmentsFromTempFiles(text, commentAtts)
+                    val commentText = createDocumentAttachmentsFromTempFiles(text, commentAtts, isInternalComment)
                     record.setAtt(CommentDesc.ATT_TEXT, CommentValidator.removeVulnerabilities(commentText))
                 }
                 if (hasDocs && commentAtts.record.isNotEmpty()) {
                     AuthContext.runAsSystem {
+                        val attachments = record.getAtt(CommentDesc.ATT_ADD_DOCUMENTS).asStrList()
+                        if (isInternalComment) {
+                            for (attachment in attachments) {
+                                recordsService.mutateAtt(
+                                    attachment,
+                                    ATT_ADD_ASPECTS,
+                                    INTERNAL_DOC_ASPECT_REF
+                                )
+                            }
+                        }
+
                         recordsService.mutateAtt(
                             commentAtts.record,
                             CommentDesc.ATT_ADD_DOCUMENTS,
-                            record.getAtt(CommentDesc.ATT_ADD_DOCUMENTS)
+                            attachments
                         )
                     }
                     record.attributes.remove(CommentDesc.ATT_ADD_DOCUMENTS)
@@ -89,7 +101,7 @@ class CommentsRecordsProxy(
         }
     }
 
-    private fun createDocumentAttachmentsFromTempFiles(text: String, commentAtts: CommentAtts): String {
+    private fun createDocumentAttachmentsFromTempFiles(text: String, commentAtts: CommentAtts, isInternalComment: Boolean): String {
 
         val attachments = commentExtractor.extractAttachRefsFromText(text)
         if (attachments.isEmpty()) {
@@ -105,7 +117,6 @@ class CommentsRecordsProxy(
             error("Comment record is empty")
         }
         var resText = text
-        val isInternalComment = commentAtts.tags.any { it == INTERNAL_TAG_TYPE }
 
         for ((srcString, tempFileRef) in tempFilesRefsEntries) {
             val mutationAtts = RecordAtts(EntityRef.create(AppName.EMODEL, ATTACHMENT_SRC_ID, ""))
