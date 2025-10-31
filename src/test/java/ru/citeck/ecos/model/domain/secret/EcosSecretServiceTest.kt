@@ -2,12 +2,15 @@ package ru.citeck.ecos.model.domain.secret
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.commons.json.Json
+import ru.citeck.ecos.context.lib.auth.AuthContext
+import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.model.EcosModelApp
 import ru.citeck.ecos.model.domain.secret.dto.EncryptionMeta
 import ru.citeck.ecos.model.domain.secret.repo.EcosSecretRepo
@@ -78,6 +81,99 @@ class EcosSecretServiceTest {
         assertThat(encryptionMeta.algorithm).isEqualTo(secretEncryptionInfoProvider.getCurrentAlgorithm())
         assertThat(encryptionMeta.ivSize).isEqualTo(secretEncryptionInfoProvider.getCurrentIvSize())
         assertThat(encryptionMeta.tagSize).isEqualTo(secretEncryptionInfoProvider.getCurrentTagSize())
+    }
+
+    @Test
+    fun `delete secret should fail when not run as system or admin`() {
+        val id = "delete-auth-test-secret"
+        val secret = createTestSecret(id)
+
+        AuthContext.runAsSystem {
+            ecosSecretService.save(secret)
+        }
+
+        assertThrows<IllegalStateException> {
+            AuthContext.runAs("user") {
+                ecosSecretService.delete(id)
+            }
+        }
+    }
+
+    @Test
+    fun `delete secret should succeed when run as system`() {
+        val id = "delete-as-system-test-secret"
+        val secret = createTestSecret(id)
+
+        AuthContext.runAsSystem {
+            ecosSecretService.save(secret)
+
+            assertThat(ecosSecretRepo.findByExtId(id)).isNotNull
+
+            ecosSecretService.delete(id)
+
+            assertThat(ecosSecretRepo.findByExtId(id)).isNull()
+        }
+    }
+
+    @Test
+    fun `delete secret should succeed when run as admin`() {
+        val id = "delete-as-admin-test-secret"
+        val secret = createTestSecret(id)
+
+        AuthContext.runAsSystem {
+            ecosSecretService.save(secret)
+        }
+        // Delete as admin should work
+        AuthContext.runAs("admin-user", listOf(AuthRole.ADMIN)) {
+            ecosSecretService.delete(id)
+        }
+
+        // Verify secret is deleted
+        AuthContext.runAsSystem {
+            assertThat(ecosSecretRepo.findByExtId(id)).isNull()
+        }
+    }
+
+    @Test
+    fun `get secret should fail when not run as system`() {
+        val id = "get-auth-test-secret"
+        val secret = createTestSecret(id)
+
+        AuthContext.runAsSystem {
+            ecosSecretService.save(secret)
+        }
+
+        assertThrows<IllegalStateException> {
+            AuthContext.runAs("user") {
+                ecosSecretService.getSecret(id)
+            }
+        }
+    }
+
+    @Test
+    fun `save secret should fail when not run as system or admin`() {
+        val id = "save-auth-test-secret"
+        val secret = createTestSecret(id)
+
+        assertThrows<IllegalStateException> {
+            AuthContext.runAs("user") {
+                ecosSecretService.save(secret)
+            }
+        }
+    }
+
+    @Test
+    fun `save secret should succeed when run as admin`() {
+        val id = "save-as-admin-auth-test-secret"
+        val secret = createTestSecret(id)
+
+        AuthContext.runAs("admin-user", listOf(AuthRole.ADMIN)) {
+            val savedSecret = ecosSecretService.save(secret)
+
+            assertThat(savedSecret).isNotNull
+            assertThat(savedSecret.id).isEqualTo(id)
+            assertThat(savedSecret.type).isEqualTo(EcosSecretType.BASIC.name)
+        }
     }
 
     private fun createTestSecret(id: String): EcosSecretDto {

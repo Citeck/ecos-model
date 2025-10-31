@@ -111,6 +111,9 @@ class EcosSecretService(
     }
 
     fun delete(id: String) {
+        if (!AuthContext.isRunAsSystemOrAdmin()) {
+            error("Permission denied. You can't delete secret '$id'")
+        }
         repo.deleteByExtId(id)
     }
 
