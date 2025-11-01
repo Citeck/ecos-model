@@ -25,6 +25,7 @@ import ru.citeck.ecos.records2.predicate.PredicateUtils
 import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
+import ru.citeck.ecos.records3.record.atts.schema.ScalarType
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy
@@ -273,6 +274,19 @@ class EmodelWorkspaceService(
         }
 
         return workspaceData.workspaceMembers?.flatMapTo(HashSet()) { it.authorities ?: emptyList() } ?: emptySet()
+    }
+
+    fun isWorkspaceNotExists(workspaceId: String): Boolean {
+        return isWorkspaceNotExists(WorkspaceDesc.getRef(workspaceId))
+    }
+
+    fun isWorkspaceNotExists(workspace: EntityRef): Boolean {
+        return AuthContext.runAsSystem {
+            recordsService.getAtt(
+                workspace,
+                RecordConstants.ATT_NOT_EXISTS + ScalarType.BOOL_SCHEMA
+            ).asBoolean()
+        }
     }
 
     fun getWorkspace(workspaceId: String): Workspace {

@@ -2,6 +2,7 @@ package ru.citeck.ecos.model.domain.workspace
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
@@ -24,6 +25,7 @@ import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao.Compa
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.model.domain.workspace.dto.*
 import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
+import ru.citeck.ecos.model.domain.workspace.service.WorkspacePermissions
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.records2.predicate.PredicateService
 import ru.citeck.ecos.records2.predicate.model.Predicates
@@ -54,6 +56,9 @@ class WorkspacePermissionsTest {
     @Autowired
     private lateinit var ecosAuthoritiesApi: EcosAuthoritiesApi
 
+    @Autowired
+    private lateinit var workspacePermissions: WorkspacePermissions
+
     companion object {
 
         const val HOGWARTS_WORKSPACE = "hogwarts-workspace"
@@ -74,6 +79,11 @@ class WorkspacePermissionsTest {
         AuthContext.runAsSystem {
             localAppService.deployLocalArtifacts(ResourceUtils.getFile("classpath:eapps/artifacts"))
         }
+    }
+
+    @BeforeEach
+    fun resetPermissionsConfig() {
+        workspacePermissions.setIsAllowedCreateForAllUsers(true)
     }
 
     @Test
@@ -259,7 +269,7 @@ class WorkspacePermissionsTest {
 
     @ParameterizedTest
     @ValueSource(strings = [AuthRole.USER, AuthRole.ADMIN, AuthRole.SYSTEM])
-    fun `all authenticated users can create public workspaces`(role: String) {
+    fun `all authenticated users can create public workspaces when config workspaces-allow-create-for-all-users is enable`(role: String) {
         val workspace = Workspace(
             id = UUID.randomUUID().toString(),
             name = MLText("Test workspace"),
@@ -294,7 +304,7 @@ class WorkspacePermissionsTest {
 
     @ParameterizedTest
     @ValueSource(strings = [AuthRole.USER, AuthRole.ADMIN, AuthRole.SYSTEM])
-    fun `all authenticated users can create private workspaces`(role: String) {
+    fun `all authenticated users can create private workspaces when config workspaces-allow-create-for-all-users is enable`(role: String) {
         val workspace = Workspace(
             id = UUID.randomUUID().toString(),
             name = MLText("Test workspace"),
@@ -344,6 +354,104 @@ class WorkspacePermissionsTest {
                 )
             }
         }
+    }
+
+    @Test
+    fun `user role should not create workspace when config workspaces-allow-create-for-all-users is disabled`() {
+        workspacePermissions.setIsAllowedCreateForAllUsers(false)
+
+        assertThrows<IllegalStateException> {
+            AuthContext.runAs("someUser", listOf(AuthRole.USER)) {
+                workspaceService.deployWorkspace(
+                    Workspace(
+                        id = UUID.randomUUID().toString(),
+                        name = MLText("Test workspace"),
+                        visibility = WorkspaceVisibility.PUBLIC,
+                        homePageLink = "",
+                        icon = EntityRef.EMPTY,
+                        system = false
+                    )
+                )
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = [AuthRole.ADMIN, AuthRole.SYSTEM])
+    fun `admin and system can create workspace when config workspaces-allow-create-for-all-users is disabled`(role: String) {
+        workspacePermissions.setIsAllowedCreateForAllUsers(false)
+
+        val workspace = Workspace(
+            id = UUID.randomUUID().toString(),
+            name = MLText("Test workspace"),
+            visibility = WorkspaceVisibility.PUBLIC,
+            homePageLink = "",
+            icon = EntityRef.EMPTY,
+            system = false
+        )
+
+        val createdWorkspace = AuthContext.runAs("someUser", listOf(role)) {
+            workspaceService.deployWorkspace(workspace)
+        }
+        val createdWorkspaceDto = workspaceService.getWorkspace(createdWorkspace)
+
+        val expectedWs = if (role != AuthRole.SYSTEM) {
+            workspace.copy().withWorkspaceMembers(
+                listOf(
+                    WorkspaceMember(
+                        memberId = "creator",
+                        authorities = listOf(AuthorityType.PERSON.getRef("someUser")),
+                        memberRole = WorkspaceMemberRole.MANAGER
+                    )
+                )
+            ).build()
+        } else {
+            workspace
+        }
+        assertThat(createdWorkspaceDto).isEqualTo(expectedWs)
+
+        workspaceService.deleteWorkspace(createdWorkspace)
+    }
+
+    @Test
+    fun `user can edit own workspace but cannot create new when config workspaces-allow-create-for-all-users is disabled`() {
+        val workspace = Workspace(
+            id = UUID.randomUUID().toString(),
+            name = MLText("Test workspace"),
+            visibility = WorkspaceVisibility.PUBLIC,
+            homePageLink = "",
+            icon = EntityRef.EMPTY,
+            system = false
+        )
+
+        val createdWorkspace = AuthContext.runAs("someUser", listOf(AuthRole.USER)) {
+            workspaceService.deployWorkspace(workspace)
+        }
+
+        workspacePermissions.setIsAllowedCreateForAllUsers(false)
+
+        AuthContext.runAs("someUser", listOf(AuthRole.USER)) {
+            val allowWrite = recordsService.getAtt(
+                WorkspaceDesc.getRef(createdWorkspace),
+                "permissions._has.Write?bool!"
+            ).asBoolean()
+            assertTrue(allowWrite)
+
+            assertThrows<IllegalStateException> {
+                workspaceService.deployWorkspace(
+                    Workspace(
+                        id = UUID.randomUUID().toString(),
+                        name = MLText("Another workspace"),
+                        visibility = WorkspaceVisibility.PUBLIC,
+                        homePageLink = "",
+                        icon = EntityRef.EMPTY,
+                        system = false
+                    )
+                )
+            }
+        }
+
+        workspaceService.deleteWorkspace(createdWorkspace)
     }
 
     @ParameterizedTest
