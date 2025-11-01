@@ -1,0 +1,6 @@
+---
+id: workspaces-allow-create-for-all-users
+name:
+  ru: Включить/Выключить возможность создания рабочих пространств всем пользователям
+  en: Turn on/Switch off the ability to create workspaces for all users
+value: true
