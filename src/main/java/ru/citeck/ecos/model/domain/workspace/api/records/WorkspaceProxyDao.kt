@@ -226,15 +226,22 @@ class WorkspaceProxyDao(
 
         // Check allowing to create new workspace on proxy,
         // because DbPermsComponent perms write not used for creation case
-        check(workspacePermissions.currentAuthCanCreateWorkspace()) {
+        check(workspacePermissions.currentAuthCanMutateWorkspace()) {
             "Current user has no permissions to mutate workspaces"
         }
 
         if (AuthContext.isNotRunAsSystem()) {
-            val invalidIds = records.mapNotNull {
+            val invalidIds = mutableListOf<String>()
+            records.mapNotNull {
                 val idAtt = it.attributes["id"].asText()
+                if (workspaceService.isWorkspaceNotExists(idAtt)) {
+                    check(workspacePermissions.currentAuthCanCreateWorkspace()) {
+                        "Current user has no permissions to create workspace id: $idAtt"
+                    }
+                }
+
                 if (it.id.isEmpty() && !isValidWorkspaceIdForNewRecord(idAtt)) {
-                    idAtt
+                    invalidIds.add(idAtt)
                 } else {
                     null
                 }

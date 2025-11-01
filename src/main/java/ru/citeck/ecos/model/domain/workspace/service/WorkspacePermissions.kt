@@ -1,6 +1,7 @@
 package ru.citeck.ecos.model.domain.workspace.service
 
 import org.springframework.stereotype.Component
+import ru.citeck.ecos.config.lib.consumer.bean.EcosConfig
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.context.lib.auth.AuthUser
@@ -24,6 +25,8 @@ class WorkspacePermissions(
 
         private val TXN_PERMS_KEY = Any()
     }
+
+    private var isAllowedCreateForAllUsers: Boolean = true
 
     fun allowRead(user: String, userAuthorities: Set<String>, record: Any): Boolean {
         val workspace = recordsService.getAtts(record, WorkspaceInfo::class.java)
@@ -91,9 +94,13 @@ class WorkspacePermissions(
         }
     }
 
-    fun currentAuthCanCreateWorkspace(): Boolean {
+    fun currentAuthCanMutateWorkspace(): Boolean {
         val currentAuthorities = AuthContext.getCurrentAuthorities()
         return currentAuthorities.none { it == AuthRole.ANONYMOUS || it == AuthRole.GUEST }
+    }
+
+    fun currentAuthCanCreateWorkspace(): Boolean {
+        return isAllowedCreateForAllUsers || AuthContext.isRunAsSystemOrAdmin()
     }
 
     fun canJoin(user: String, authorities: Collection<String>): Boolean {
@@ -119,6 +126,11 @@ class WorkspacePermissions(
             cache.add(key)
         }
         return hasPerms
+    }
+
+    @EcosConfig("workspaces-allow-create-for-all-users")
+    fun setIsAllowedCreateForAllUsers(value: Boolean) {
+        isAllowedCreateForAllUsers = value
     }
 
     private data class PermsTxnKey(
