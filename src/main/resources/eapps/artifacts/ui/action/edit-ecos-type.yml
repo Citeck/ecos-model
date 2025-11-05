@@ -1,8 +1,8 @@
 ---
 id: edit-ecos-type
 name:
-  ru: Редактировать Ecos-тип
-  en: Edit ecos-type
+  ru: Редактировать тип
+  en: Edit type
 type: edit
 config:
   recordId: emodel/types-repo@${?localId}
