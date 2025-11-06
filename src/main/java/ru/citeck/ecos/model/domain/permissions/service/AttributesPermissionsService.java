@@ -7,6 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.citeck.ecos.context.lib.auth.AuthContext;
 import ru.citeck.ecos.model.converter.DtoConverter;
 import ru.citeck.ecos.model.domain.permissions.repo.AttributesPermissionEntity;
 import ru.citeck.ecos.model.domain.permissions.dto.AttributesPermissionDto;
@@ -74,6 +75,9 @@ public class AttributesPermissionsService {
     }
 
     public AttributesPermissionWithMetaDto save(AttributesPermissionDto dto) {
+        if (!AuthContext.isRunAsSystemOrAdmin()) {
+            throw new SecurityException("Permission denied. You can't modify permissions");
+        }
 
         AttributesPermissionEntity entity = toEntity(new AttributesPermissionWithMetaDto(dto));
 
@@ -97,6 +101,10 @@ public class AttributesPermissionsService {
 
     @Transactional
     public void delete(String id) {
+        if (!AuthContext.isRunAsSystemOrAdmin()) {
+            throw new SecurityException("Permission denied. You can't modify permissions");
+        }
+
         AttributesPermissionEntity template = attributesPermissionsRepository.findByExtId(id).orElse(null);
         if (template == null) {
             return;
