@@ -14,6 +14,7 @@ import ru.citeck.ecos.commons.data.entity.EntityMeta;
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.commons.json.JsonMapper;
+import ru.citeck.ecos.context.lib.auth.AuthContext;
 import ru.citeck.ecos.model.domain.perms.dto.TypePermsMeta;
 import ru.citeck.ecos.model.domain.perms.repo.TypePermsEntity;
 import ru.citeck.ecos.model.domain.perms.repo.TypePermsRepository;
@@ -104,6 +105,9 @@ public class TypePermsService {
 
     @NotNull
     public TypePermsDef save(TypePermsDef permissions) {
+        if (!AuthContext.isRunAsSystemOrAdmin()) {
+            throw new SecurityException("Permission denied. You can't modify permissions");
+        }
 
         if (EntityRef.isEmpty(permissions.getTypeRef())) {
             throw new IllegalStateException("TypeRef is a mandatory parameter!");
@@ -133,6 +137,10 @@ public class TypePermsService {
     }
 
     public void delete(String id) {
+        if (!AuthContext.isRunAsSystemOrAdmin()) {
+            throw new SecurityException("Permission denied. You can't modify permissions");
+        }
+
         TypePermsEntity typePerms = repository.findByExtId(id);
         if (typePerms != null) {
             EntityWithMeta<TypePermsDef> permsDefBefore = toDtoWithMeta(typePerms);
