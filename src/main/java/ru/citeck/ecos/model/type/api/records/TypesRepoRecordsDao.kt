@@ -67,19 +67,6 @@ class TypesRepoRecordsDao(
             PredicateService.LANGUAGE_PREDICATE -> {
 
                 var predicate = recsQuery.getQuery(Predicate::class.java)
-                predicate = PredicateUtils.mapValuePredicates(predicate, {
-                    if (it.getAttribute() == "localIdInWorkspace") {
-                        val newPred = it.copy<ValuePredicate>()
-                        newPred.setAtt("id")
-                        if (newPred.getType() == ValuePredicate.Type.EQ) {
-                            newPred.setType(ValuePredicate.Type.LIKE)
-                            newPred.setValue("%$" + newPred.getValue().asText())
-                        }
-                        newPred
-                    } else {
-                        it
-                    }
-                }, onlyAnd = false, optimize = false) ?: Predicates.alwaysTrue()
 
                 if (recsQuery.workspaces.isNotEmpty()) {
                     predicate = Predicates.and(
@@ -87,7 +74,7 @@ class TypesRepoRecordsDao(
                         Predicates.inVals(
                             "workspace",
                             recsQuery.workspaces.map {
-                                if (it.startsWith("admin$")) "" else it
+                                if (workspaceService?.isWorkspaceWithGlobalEntities(it) == true) "" else it
                             }
                         )
                     )
