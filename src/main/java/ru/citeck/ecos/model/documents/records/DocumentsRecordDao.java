@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.commons.data.DataValue;
+import ru.citeck.ecos.config.lib.consumer.bean.EcosConfig;
 import ru.citeck.ecos.model.lib.type.service.utils.TypeUtils;
 import ru.citeck.ecos.records2.RecordConstants;
 import ru.citeck.ecos.webapp.api.entity.EntityRef;
@@ -38,6 +39,16 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
     private final static String ALF_NODES_SOURCE_ID = AppName.ALFRESCO + EntityRef.APP_NAME_DELIMITER;
     private final static Map<String, String> SOURCE_ID_MAPPING;
 
+    @EcosConfig("app/alfresco$alfresco-enabled")
+    private Boolean alfrescoEnabled = false;
+
+    private boolean isAlfrescoEnabled() {
+        if (alfrescoEnabled != null) {
+            return alfrescoEnabled;
+        }
+        return false;
+    }
+
     static {
         SOURCE_ID_MAPPING = new HashMap<>();
         SOURCE_ID_MAPPING.put(ALF_NODES_SOURCE_ID + "@", ALF_NODES_SOURCE_ID);
@@ -64,13 +75,7 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
 
     private Object getDocumentTypes(RecordsQuery recordsQuery) {
 
-        if (!ecosWebAppsApi.isAppAvailable(AppName.ALFRESCO)) {
-            return Collections.emptyList();
-        }
-
-        EntityRef recordRef = EntityRef.valueOf(recordsQuery.getQuery().get("recordRef").asText());
-
-        if (!AppName.ALFRESCO.equals(recordRef.getAppName())) {
+        if (!isAlfrescoEnabled()) {
             return Collections.emptyList();
         }
 
@@ -113,7 +118,7 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
         });
 
         sortedTypesRefs.forEach((sourceId, typesList) -> {
-            if (ALF_NODES_SOURCE_ID.equals(sourceId)) {
+            if (isAlfrescoEnabled() && ALF_NODES_SOURCE_ID.equals(sourceId)) {
                 DataValue query = recordsQuery.getQuery();
                 query.set("types", typesList);
 
@@ -132,7 +137,7 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
                 if (typesList.size() != records.size()) {
                     throw new RuntimeException(
                         "Invalid alfresco documents query response. " +
-                        "Expected count: " + typesList.size() + " but received: " + records.size()
+                            "Expected count: " + typesList.size() + " but received: " + records.size()
                     );
                 }
                 for (int idx = 0; idx < records.size(); idx++) {
