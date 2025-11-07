@@ -432,7 +432,7 @@ class TypeDefResolver(
         if (TYPES_WITHOUT_CREATE_VARIANTS.contains(typeId)) {
             return emptyList()
         }
-        val rawTypeDef = context.rawProv.get(resolvedTypeDef.id) ?: return result
+        val rawTypeDef = context.rawProv.get(typeId) ?: return result
 
         val variants = ArrayList<CreateVariantDef>()
 
@@ -448,7 +448,7 @@ class TypeDefResolver(
 
         variants.addAll(rawTypeDef.createVariants)
         if (!variantsForChildType) {
-            variants.addAll(context.getInheritedCreateVariants(rawTypeDef.id))
+            variants.addAll(context.getInheritedCreateVariants(typeId))
         }
 
         variants.forEach { cv ->
@@ -459,7 +459,7 @@ class TypeDefResolver(
             }
 
             if (EntityRef.isEmpty(variant.typeRef)) {
-                variant.withTypeRef(ModelUtils.getTypeRef(resolvedTypeDef.id))
+                variant.withTypeRef(ModelUtils.getTypeRef(typeId))
             }
 
             if (MLText.isEmpty(variant.name)) {
@@ -482,7 +482,7 @@ class TypeDefResolver(
         }
 
         if (resolvedTypeDef.createVariantsForChildTypes) {
-            context.getChildrenByParentId(resolvedTypeDef.id).forEach { childId ->
+            context.getChildrenByParentId(typeId).forEach { childId ->
                 fillCreateVariants(context.getResolvedType(childId), context, result, true)
             }
         }
