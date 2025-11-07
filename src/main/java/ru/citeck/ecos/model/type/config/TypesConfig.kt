@@ -8,6 +8,8 @@ import ru.citeck.ecos.data.sql.domain.DbDomainConfig
 import ru.citeck.ecos.data.sql.domain.DbDomainFactory
 import ru.citeck.ecos.data.sql.records.DbRecordsDaoConfig
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
+import ru.citeck.ecos.model.domain.doclib.api.records.DocLibRecordId
+import ru.citeck.ecos.model.domain.doclib.api.records.DocLibRecords
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.model.type.service.utils.EModelTypeUtils
@@ -38,7 +40,7 @@ class TypesConfig(
 
         typesRegistry.getAllValues().values.forEach { typeDef ->
             if (emodelTypeUtils.getEmodelSourceId(typeDef.entity).isNotBlank()) {
-                recordsService.register(createRecordsDao(dbDomainFactory, typeDef.entity))
+                recordsService.register(createRecordsDao(dbDomainFactory, typeDef.entity, typesRegistry))
             }
         }
 
@@ -73,13 +75,13 @@ class TypesConfig(
                             "Please, change type ID or enter your custom sourceId"
                     )
                 } else {
-                    recordsService.register(createRecordsDao(dbDomainFactory, after))
+                    recordsService.register(createRecordsDao(dbDomainFactory, after, typesRegistry))
                 }
             }
         }
     }
 
-    private fun createRecordsDao(dbDomainFactory: DbDomainFactory, typeDef: TypeDef): RecordsDao {
+    private fun createRecordsDao(dbDomainFactory: DbDomainFactory, typeDef: TypeDef, typesRegistry: EcosTypesRegistry): RecordsDao {
 
         val sourceId = emodelTypeUtils.getEmodelSourceId(typeDef)
 
@@ -95,14 +97,16 @@ class TypesConfig(
         }
 
         val typeRef = ModelUtils.getTypeRef(typeDef.id)
+        val daoBuilder = DbRecordsDaoConfig.create()
+        daoBuilder.withId(sourceId)
+        daoBuilder.withTypeRef(typeRef)
+        if (typesRegistry.isSubType(typeRef.getLocalId(), DocLibRecords.DEFAULT_DIR_TYPE_ID)) {
+            daoBuilder.withAllowedRecordIdPattern(DocLibRecordId.VALID_ID_PATTERN)
+        }
+
         val recordsDao = dbDomainFactory.create(
             DbDomainConfig.create()
-                .withRecordsDao(
-                    DbRecordsDaoConfig.create {
-                        withId(sourceId)
-                        withTypeRef(typeRef)
-                    }
-                )
+                .withRecordsDao(daoBuilder.build())
                 .withDataService(
                     DbDataServiceConfig.create {
                         withTable(tableId)

@@ -10,6 +10,7 @@ class DocLibRecordId(
     companion object {
 
         const val TYPE_DELIM = "$"
+        const val VALID_ID_PATTERN = """^((\w+|\w[\w$/.-]+\w):)?(\w+|\w[\w$/.-]+\w)$"""
 
         fun valueOf(id: String?): DocLibRecordId {
             if (id == null || StringUtils.isBlank(id)) {
