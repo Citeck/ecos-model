@@ -7,10 +7,29 @@ parentRef: emodel/type@ecos-vcs-object
 formRef: uiserv/form@DEFAULT_FORM
 journalRef: uiserv/journal@gantt-settings-journal
 system: true
+defaultStatus: created
 inheritForm: false
 defaultCreateVariant: false
 storageType: ECOS_MODEL
+
 model:
+  statuses:
+    - id: created
+      name:
+        en: Created
+        ru: Создано
+    - id: EMPTY
+  roles:
+    - id: EVERYONE
+    - id: creator
+      attributes:
+        - _creator
+    - id: administrators
+      name:
+        ru: Администратор
+        en: Administrator
+      assignees:
+        - GROUP_ECOS_ADMINISTRATORS
   attributes:
     - id: name
       name:

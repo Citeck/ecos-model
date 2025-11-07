@@ -1,0 +1,19 @@
+{
+  "id": "gantt-settings-permissions",
+  "typeRef": "emodel/type@gantt-settings",
+  "permissions": {
+    "matrix": {
+      "EVERYONE": {
+        "ANY": "READ",
+        "EMPTY": "WRITE"
+      },
+      "creator": {
+        "ANY": "WRITE"
+      },
+      "administrators": {
+        "ANY": "WRITE"
+      }
+    }
+  },
+  "attributes": {}
+}
