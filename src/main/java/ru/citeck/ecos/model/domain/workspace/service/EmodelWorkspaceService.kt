@@ -8,6 +8,7 @@ import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthGroup
+import ru.citeck.ecos.model.domain.authorities.constant.PersonConstants
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
 import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao.Companion.WORKSPACE_ATT_MEMBER_AUTHORITY
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
@@ -17,6 +18,7 @@ import ru.citeck.ecos.model.domain.workspace.dto.Workspace
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMember
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMemberRole
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceVisibility
+import ru.citeck.ecos.model.domain.workspace.utils.WorkspaceSystemIdUtils
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.workspace.USER_WORKSPACE_PREFIX
 import ru.citeck.ecos.model.lib.workspace.api.WsMembershipType
@@ -60,14 +62,26 @@ class EmodelWorkspaceService(
     private val wsIdBySysIdCache = Caffeine.newBuilder()
         .expireAfterWrite(Duration.ofMinutes(30))
         .maximumSize(1000)
-        .build<String, String> {
+        .build<String, String> { wsSysId ->
             AuthContext.runAsSystem {
-                recordsService.queryOne(
-                    RecordsQuery.create()
-                        .withSourceId(WorkspaceDesc.SOURCE_ID)
-                        .withQuery(Predicates.eq(WorkspaceDesc.ATT_SYSTEM_ID, it))
-                        .build()
-                )?.getLocalId()
+                if (wsSysId.startsWith(WorkspaceSystemIdUtils.USER_WS_SYS_ID_PREFIX)) {
+                    USER_WORKSPACE_PREFIX + (
+                        recordsService.queryOne(
+                            RecordsQuery.create()
+                                .withSourceId(AuthorityType.PERSON.sourceId)
+                                .withQuery(
+                                    Predicates.eq(PersonConstants.ATT_WS_SYS_ID, wsSysId)
+                                ).build()
+                        )?.getLocalId() ?: wsSysId.substring(WorkspaceSystemIdUtils.USER_WS_SYS_ID_PREFIX.length)
+                    )
+                } else {
+                    recordsService.queryOne(
+                        RecordsQuery.create()
+                            .withSourceId(WorkspaceDesc.SOURCE_ID)
+                            .withQuery(Predicates.eq(WorkspaceDesc.ATT_SYSTEM_ID, wsSysId))
+                            .build()
+                    )?.getLocalId()
+                }
             }
         }
 

@@ -198,6 +198,13 @@ model:
       name:
         ru: Создан при регистрации
         en: Created by registration
+    - id: wsSysId
+      type: TEXT
+      name:
+        ru: Системный id персонального рабочего пространства
+        en: Personal workspace system id
+      index:
+        enabled: true
 aspects:
   - ref: emodel/aspect@import-data-config
     config:

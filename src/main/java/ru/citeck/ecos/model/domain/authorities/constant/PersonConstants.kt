@@ -18,6 +18,7 @@ object PersonConstants {
     const val ATT_AVATAR_URL = "avatarUrl"
     const val ATT_PHOTO_CACHE_KEY = "photoCacheKey"
     const val ATT_PHOTO = "photo"
+    const val ATT_WS_SYS_ID = "wsSysId"
     const val ATT_IS_MUTABLE = "isMutable"
     const val ATT_AT_WORKPLACE = "atWorkplace"
     const val ATT_AWAY_AUTH_DELEGATION_ENABLED = "awayAuthDelegationEnabled"

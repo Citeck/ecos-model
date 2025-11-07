@@ -6,18 +6,21 @@ import kotlin.random.Random
 
 object WorkspaceSystemIdUtils {
 
+    const val USER_WS_SYS_ID_PREFIX = "user__"
+
     private const val SRC_ID_SIZE_LIMIT = 25
     private val INVALID_CHARS_REGEX = "[^a-zA-Z0-9_-]".toRegex()
-    private val DOUBLE_UNDERSCORE_REGEX = "_{2,}".toRegex()
+    private val ALLOWED_DELIMITERS = setOf('-', '_')
+    private val DOUBLE_DELIM_REGEX = "[${ALLOWED_DELIMITERS.joinToString("")}]{2,}".toRegex()
 
-    fun createId(workspaceId: String, checkExisting: (String) -> Boolean): String {
+    fun createId(workspaceId: String, checkExisting: (String) -> Boolean = { false }): String {
 
         var id = workspaceId
         id = id.replace(INVALID_CHARS_REGEX, "_")
-        id = id.replace(DOUBLE_UNDERSCORE_REGEX, "_")
+        id = id.replace(DOUBLE_DELIM_REGEX, "_")
 
-        id = if (id.endsWith("_")) id.substring(0, id.length - 1) else id
-        id = if (id.startsWith("_")) id.substring(1) else id
+        id = if (ALLOWED_DELIMITERS.contains(id.lastOrNull())) id.substring(0, id.length - 1) else id
+        id = if (ALLOWED_DELIMITERS.contains(id.firstOrNull())) id.substring(1) else id
 
         if (id.length > SRC_ID_SIZE_LIMIT) {
             id = id.substring(0, SRC_ID_SIZE_LIMIT)

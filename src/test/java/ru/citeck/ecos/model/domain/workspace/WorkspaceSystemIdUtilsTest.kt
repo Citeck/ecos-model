@@ -12,7 +12,11 @@ class WorkspaceSystemIdUtilsTest {
         "1, 1",
         "Q..........................q_, Q_q",
         "abc_____def, abc_def",
-        "$$$, RND"
+        "$$$, RND",
+        "----q__q-q-, q_q-q",
+        "-q__q-q-, q_q-q",
+        "____q__q-q_, q_q-q",
+        "____----, RND",
     )
     fun test(input: String, output: String) {
         if (output == "RND") {

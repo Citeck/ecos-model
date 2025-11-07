@@ -14,6 +14,7 @@ import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceMemberDesc
 import ru.citeck.ecos.model.domain.workspace.dto.*
 import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
 import ru.citeck.ecos.model.domain.workspace.service.WorkspacePermissions
+import ru.citeck.ecos.model.domain.workspace.utils.WorkspaceSystemIdUtils
 import ru.citeck.ecos.model.lib.ModelServiceFactory
 import ru.citeck.ecos.model.lib.attributes.dto.AttOptionValue
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
@@ -362,6 +363,10 @@ class WorkspaceProxyDao(
         val workspace: Workspace,
         val user: String
     ) {
+
+        fun getSystemId(): String {
+            return WorkspaceSystemIdUtils.USER_WS_SYS_ID_PREFIX + WorkspaceSystemIdUtils.createId(user)
+        }
 
         fun getIsCurrentUserMember(): Boolean {
             return user == AuthContext.getCurrentUser()
