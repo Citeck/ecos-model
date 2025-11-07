@@ -20,6 +20,7 @@ import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.commons.utils.TmplUtils.applyAtts
 import ru.citeck.ecos.commons.utils.TmplUtils.getAtts
 import ru.citeck.ecos.model.lib.num.dto.NumTemplateDef
+import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.model.lib.workspace.IdInWs
 import ru.citeck.ecos.model.lib.workspace.WorkspaceService
 import ru.citeck.ecos.model.num.domain.NumCounterEntity
@@ -230,7 +231,11 @@ class NumTemplateService(
         if (entity == null) {
             entity = NumTemplateEntity()
             entity.extId = dto.id
-            entity.workspace = dto.workspace
+            entity.workspace = if (workspaceService.isWorkspaceWithGlobalEntities(dto.workspace)) {
+                ""
+            } else {
+                dto.workspace
+            }
         }
 
         entity.counterKey = dto.counterKey
@@ -244,7 +249,7 @@ class NumTemplateService(
             .withId(entity.extId)
             .withCounterKey(entity.counterKey)
             .withName(entity.name)
-            .withWorkspace(entity.workspace)
+            .withWorkspace(entity.workspace.ifBlank { ModelUtils.DEFAULT_WORKSPACE_ID })
             .withModelAttributes(ArrayList(getAtts(entity.counterKey)))
             .build()
 

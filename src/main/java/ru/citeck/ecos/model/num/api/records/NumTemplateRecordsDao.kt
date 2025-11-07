@@ -33,7 +33,6 @@ import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes
 import ru.citeck.ecos.webapp.api.constants.AppName
 import ru.citeck.ecos.webapp.api.entity.EntityRef
-import ru.citeck.ecos.webapp.api.entity.toEntityRef
 import java.nio.charset.StandardCharsets
 
 @Component
@@ -112,11 +111,6 @@ class NumTemplateRecordsDao(
         val dtoCtx = BeanTypeUtils.getTypeContext(dto::class.java)
         dtoCtx.applyData(dto, record.attributes)
 
-        val ctxWorkspace = record.getAtt(RecordConstants.ATT_WORKSPACE).asText().toEntityRef().getLocalId()
-        if (!workspaceService.isWorkspaceWithGlobalEntities(ctxWorkspace) && dto.workspace.isBlank()) {
-            dto.workspace = ctxWorkspace
-        }
-
         require(dto.id.isNotBlank()) { "Attribute 'id' is mandatory" }
 
         checkMutPerms(dto)
@@ -180,6 +174,8 @@ class NumTemplateRecordsDao(
 
         private var modelAttributes: List<String>
 
+        private val originalId = this.id
+
         constructor(model: NumTemplateWithMetaDto) : super(model) {
             modelAttributes = ArrayList(getAtts(this.counterKey))
         }
@@ -190,6 +186,15 @@ class NumTemplateRecordsDao(
 
         fun getModelAttributes(): List<String> {
             return modelAttributes
+        }
+
+        @JsonProperty(RecordConstants.ATT_WORKSPACE)
+        fun setCtxWorkspace(workspace: String?) {
+            if (originalId != this.id) {
+                this.workspace = workspace ?: ""
+            } else {
+                this.workspace = workspaceService.getUpdatedWsInMutation(this.workspace, workspace)
+            }
         }
 
         @AttName("?id")

@@ -73,7 +73,7 @@ class EmodelWorkspaceService(
                                     Predicates.eq(PersonConstants.ATT_WS_SYS_ID, wsSysId)
                                 ).build()
                         )?.getLocalId() ?: wsSysId.substring(WorkspaceSystemIdUtils.USER_WS_SYS_ID_PREFIX.length)
-                    )
+                        )
                 } else {
                     recordsService.queryOne(
                         RecordsQuery.create()
