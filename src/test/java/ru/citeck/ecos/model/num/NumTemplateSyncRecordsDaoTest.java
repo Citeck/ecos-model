@@ -136,6 +136,7 @@ public class NumTemplateSyncRecordsDaoTest {
 
             numTemplateDto.setName("name-" + i);
             numTemplateDto.setCounterKey("counter${some-att}-key-" + i);
+            numTemplateDto.setWorkspace("default");
 
             templates.add(numTemplateDto);
             numTemplateService.save(numTemplateDto);
