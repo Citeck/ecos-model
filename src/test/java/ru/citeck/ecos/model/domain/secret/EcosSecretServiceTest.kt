@@ -6,6 +6,7 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.security.authorization.AuthorizationDeniedException
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.commons.json.Json
@@ -92,7 +93,7 @@ class EcosSecretServiceTest {
             ecosSecretService.save(secret)
         }
 
-        assertThrows<IllegalStateException> {
+        assertThrows<AuthorizationDeniedException> {
             AuthContext.runAs("user") {
                 ecosSecretService.delete(id)
             }
@@ -143,7 +144,7 @@ class EcosSecretServiceTest {
             ecosSecretService.save(secret)
         }
 
-        assertThrows<IllegalStateException> {
+        assertThrows<AuthorizationDeniedException> {
             AuthContext.runAs("user") {
                 ecosSecretService.getSecret(id)
             }
@@ -155,7 +156,7 @@ class EcosSecretServiceTest {
         val id = "save-auth-test-secret"
         val secret = createTestSecret(id)
 
-        assertThrows<IllegalStateException> {
+        assertThrows<AuthorizationDeniedException> {
             AuthContext.runAs("user") {
                 ecosSecretService.save(secret)
             }

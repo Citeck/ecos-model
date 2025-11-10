@@ -1,13 +1,14 @@
 package ru.citeck.ecos.model.domain.secret.service
 
 import jakarta.annotation.PostConstruct
+import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.entity.EntityMeta
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.commons.json.Json
-import ru.citeck.ecos.context.lib.auth.AuthContext
+import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.events2.EventsService
 import ru.citeck.ecos.events2.emitter.EventsEmitter
 import ru.citeck.ecos.model.domain.secret.dto.EncryptionMeta
@@ -25,7 +26,6 @@ import ru.citeck.ecos.webapp.lib.secret.event.SecretChangedEvent
 import ru.citeck.ecos.webapp.lib.secret.provider.ModelEcosSecretsProvider
 import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverter
 import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverterFactory
-import java.lang.IllegalArgumentException
 import java.util.concurrent.CopyOnWriteArrayList
 
 @Service
@@ -58,12 +58,8 @@ class EcosSecretService(
         }
     }
 
+    @Secured(AuthRole.SYSTEM, AuthRole.ADMIN)
     fun getSecret(id: String): EcosSecret? {
-
-        if (!AuthContext.isRunAsSystem()) {
-            error("Permission denied")
-        }
-
         val entity = repo.findByExtId(id) ?: return null
         val type = entity.type ?: return null
         val data = entity.data ?: return null
@@ -110,10 +106,8 @@ class EcosSecretService(
         return repo.findByExtId(id)?.let { mapToDtoWithMeta(it) }
     }
 
+    @Secured(AuthRole.SYSTEM, AuthRole.ADMIN)
     fun delete(id: String) {
-        if (!AuthContext.isRunAsSystemOrAdmin()) {
-            error("Permission denied. You can't delete secret '$id'")
-        }
         repo.deleteByExtId(id)
     }
 
@@ -144,12 +138,10 @@ class EcosSecretService(
         } ?: Predicates.alwaysFalse()
     }
 
+    @Secured(AuthRole.SYSTEM, AuthRole.ADMIN)
     fun save(dto: EcosSecretDto): EcosSecretDto {
         if (dto.id.isBlank()) {
             error("Secret id is empty")
-        }
-        if (!AuthContext.isRunAsSystemOrAdmin()) {
-            error("Permission denied. You can't change secret '${dto.id}'")
         }
         val entity = mapToEntity(dto)
         val entityAfterSave = repo.save(entity)
