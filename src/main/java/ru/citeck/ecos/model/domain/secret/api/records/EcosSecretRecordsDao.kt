@@ -5,6 +5,7 @@ import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.entity.EntityMeta
 import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.context.lib.auth.AuthContext
+import ru.citeck.ecos.model.app.common.ModelSystemArtifactPerms
 import ru.citeck.ecos.model.domain.secret.service.EcosSecretDto
 import ru.citeck.ecos.model.domain.secret.service.EcosSecretService
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
@@ -23,12 +24,15 @@ import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes
 import ru.citeck.ecos.secrets.lib.EcosSecrets
 import ru.citeck.ecos.secrets.lib.secret.certificate.CertificateSecretData
 import ru.citeck.ecos.secrets.lib.secret.certificate.CertificateValidityStatus
+import ru.citeck.ecos.webapp.api.constants.AppName
 import ru.citeck.ecos.webapp.api.entity.EntityRef
+import ru.citeck.ecos.webapp.lib.perms.RecordPerms
 import java.time.Instant
 
 @Component
 class EcosSecretRecordsDao(
-    private val service: EcosSecretService
+    private val service: EcosSecretService,
+    private val perms: ModelSystemArtifactPerms
 ) : AbstractRecordsDao(), RecordsQueryDao, RecordDeleteDao, RecordAttsDao, RecordMutateDao {
 
     companion object {
@@ -83,7 +87,7 @@ class EcosSecretRecordsDao(
     /**
      * We purposely don`t return secret data here, because it is sensitive information.
      */
-    class SecretRecord(
+    inner class SecretRecord(
         @AttName("...")
         val dto: EcosSecretDto,
         val meta: EntityMeta
@@ -106,6 +110,10 @@ class EcosSecretRecordsDao(
 
         fun getEcosType(): String {
             return "secret"
+        }
+
+        fun getPermissions(): RecordPerms {
+            return perms.getPerms(EntityRef.create(AppName.EMODEL, ID, dto.id))
         }
 
         fun getCreated(): Instant {

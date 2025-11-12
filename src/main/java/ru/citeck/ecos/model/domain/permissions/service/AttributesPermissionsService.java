@@ -5,17 +5,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.citeck.ecos.context.lib.auth.AuthRole;
+import ru.citeck.ecos.model.app.common.ModelSystemArtifactPerms;
 import ru.citeck.ecos.model.converter.DtoConverter;
+import ru.citeck.ecos.model.domain.permissions.api.records.AttributesPermissionRecordsDao;
 import ru.citeck.ecos.model.domain.permissions.repo.AttributesPermissionEntity;
 import ru.citeck.ecos.model.domain.permissions.dto.AttributesPermissionDto;
 import ru.citeck.ecos.model.domain.permissions.dto.AttributesPermissionWithMetaDto;
 import ru.citeck.ecos.model.domain.permissions.repo.AttributesPermissionsRepository;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
 import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy;
+import ru.citeck.ecos.webapp.api.constants.AppName;
+import ru.citeck.ecos.webapp.api.entity.EntityRef;
 import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverter;
 import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverterFactory;
 
@@ -34,6 +36,7 @@ public class AttributesPermissionsService {
     private final DtoConverter<AttributesPermissionWithMetaDto, AttributesPermissionEntity> attrsPermissionConverter;
     private final List<Consumer<AttributesPermissionDto>> listeners = new CopyOnWriteArrayList<>();
     private final JpaSearchConverterFactory predicateJpaService;
+    private final ModelSystemArtifactPerms perms;
 
     private JpaSearchConverter<AttributesPermissionEntity> searchConv;
 
@@ -75,8 +78,9 @@ public class AttributesPermissionsService {
         return (int) attributesPermissionsRepository.count();
     }
 
-    @Secured({AuthRole.SYSTEM, AuthRole.ADMIN})
     public AttributesPermissionWithMetaDto save(AttributesPermissionDto dto) {
+        perms.checkWrite(EntityRef.create(AppName.EMODEL, AttributesPermissionRecordsDao.ID, dto.getId()));
+
         AttributesPermissionEntity entity = toEntity(new AttributesPermissionWithMetaDto(dto));
 
         entity = attributesPermissionsRepository.save(entity);
@@ -98,8 +102,9 @@ public class AttributesPermissionsService {
     }
 
     @Transactional
-    @Secured({AuthRole.SYSTEM, AuthRole.ADMIN})
     public void delete(String id) {
+        perms.checkWrite(EntityRef.create(AppName.EMODEL, AttributesPermissionRecordsDao.ID, id));
+
         AttributesPermissionEntity template = attributesPermissionsRepository.findByExtId(id).orElse(null);
         if (template == null) {
             return;

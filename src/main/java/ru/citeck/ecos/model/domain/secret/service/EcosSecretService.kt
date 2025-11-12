@@ -11,6 +11,8 @@ import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.events2.EventsService
 import ru.citeck.ecos.events2.emitter.EventsEmitter
+import ru.citeck.ecos.model.app.common.ModelSystemArtifactPerms
+import ru.citeck.ecos.model.domain.secret.api.records.EcosSecretRecordsDao
 import ru.citeck.ecos.model.domain.secret.dto.EncryptionMeta
 import ru.citeck.ecos.model.domain.secret.repo.EcosSecretEntity
 import ru.citeck.ecos.model.domain.secret.repo.EcosSecretRepo
@@ -22,6 +24,8 @@ import ru.citeck.ecos.secrets.lib.secret.EcosSecret
 import ru.citeck.ecos.secrets.lib.secret.EcosSecretImpl
 import ru.citeck.ecos.secrets.lib.secret.EcosSecretType
 import ru.citeck.ecos.txn.lib.TxnContext
+import ru.citeck.ecos.webapp.api.constants.AppName
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.secret.event.SecretChangedEvent
 import ru.citeck.ecos.webapp.lib.secret.provider.ModelEcosSecretsProvider
 import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverter
@@ -37,7 +41,8 @@ class EcosSecretService(
     private val eventsService: EventsService,
     private val ecosSecretEncryption: EcosSecretEncryption,
     private val encryptionConfig: EcosSecretEncryptionConfigProvider,
-    private val secretKeyEncoder: SecretKeyEncoder
+    private val secretKeyEncoder: SecretKeyEncoder,
+    private val perms: ModelSystemArtifactPerms
 ) {
 
     private lateinit var searchConverter: JpaSearchConverter<EcosSecretEntity>
@@ -58,7 +63,8 @@ class EcosSecretService(
         }
     }
 
-    @Secured(AuthRole.SYSTEM, AuthRole.ADMIN)
+    // For system only
+    @Secured(AuthRole.SYSTEM)
     fun getSecret(id: String): EcosSecret? {
         val entity = repo.findByExtId(id) ?: return null
         val type = entity.type ?: return null
@@ -106,8 +112,9 @@ class EcosSecretService(
         return repo.findByExtId(id)?.let { mapToDtoWithMeta(it) }
     }
 
-    @Secured(AuthRole.SYSTEM, AuthRole.ADMIN)
     fun delete(id: String) {
+        perms.checkWrite(EntityRef.create(AppName.EMODEL, EcosSecretRecordsDao.ID, id))
+
         repo.deleteByExtId(id)
     }
 
@@ -138,8 +145,9 @@ class EcosSecretService(
         } ?: Predicates.alwaysFalse()
     }
 
-    @Secured(AuthRole.SYSTEM, AuthRole.ADMIN)
     fun save(dto: EcosSecretDto): EcosSecretDto {
+        perms.checkWrite(EntityRef.create(AppName.EMODEL, EcosSecretRecordsDao.ID, dto.id))
+
         if (dto.id.isBlank()) {
             error("Secret id is empty")
         }

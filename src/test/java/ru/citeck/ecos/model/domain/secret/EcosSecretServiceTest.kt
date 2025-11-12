@@ -93,7 +93,7 @@ class EcosSecretServiceTest {
             ecosSecretService.save(secret)
         }
 
-        assertThrows<AuthorizationDeniedException> {
+        assertThrows<IllegalAccessException> {
             AuthContext.runAs("user") {
                 ecosSecretService.delete(id)
             }
@@ -156,7 +156,7 @@ class EcosSecretServiceTest {
         val id = "save-auth-test-secret"
         val secret = createTestSecret(id)
 
-        assertThrows<AuthorizationDeniedException> {
+        assertThrows<IllegalAccessException> {
             AuthContext.runAs("user") {
                 ecosSecretService.save(secret)
             }
