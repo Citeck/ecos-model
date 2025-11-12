@@ -79,6 +79,12 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
             return Collections.emptyList();
         }
 
+        EntityRef recordRef = EntityRef.valueOf(recordsQuery.getQuery().get("recordRef").asText());
+
+        if (!AppName.ALFRESCO.equals(recordRef.getAppName())) {
+            return Collections.emptyList();
+        }
+
         Map<String, String> contextAtts = AttContext.getInnerAttsMap();
 
         if (contextAtts.isEmpty()) {
