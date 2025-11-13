@@ -5,7 +5,7 @@ object TypeDesc {
     const val ASPECT_CONFIG_ATT_PREFIX = "aspectCfg$"
     const val ASPECT_CONFIG_ADDED_FLAG = "added"
 
-    val NON_CUSTOM_ASPECTS = setOf("listview", "doclib")
+    val NON_CUSTOM_ASPECTS = setOf("listview", "doclib", "has-category")
 
     fun parseAspectCfgKey(key: String): AspectCfgKey? {
 
