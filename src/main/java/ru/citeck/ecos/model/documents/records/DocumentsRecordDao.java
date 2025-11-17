@@ -75,7 +75,7 @@ public class DocumentsRecordDao extends AbstractRecordsDao implements RecordsQue
 
     private Object getDocumentTypes(RecordsQuery recordsQuery) {
 
-        if (!isAlfrescoEnabled()) {
+        if (!isAlfrescoEnabled() || !ecosWebAppsApi.isAppAvailable(AppName.ALFRESCO)) {
             return Collections.emptyList();
         }
 
