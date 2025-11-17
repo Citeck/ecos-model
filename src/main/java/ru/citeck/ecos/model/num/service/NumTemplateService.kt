@@ -123,9 +123,9 @@ class NumTemplateService(
 
     fun save(dto: NumTemplateDto): EntityWithMeta<NumTemplateDef> {
 
-        val before = getByIdOrNull(IdInWs.create(dto.workspace, dto.id))
-
         var entity = toEntity(dto)
+        val before = getByIdOrNull(IdInWs.create(entity.workspace, entity.extId))
+
         entity = templateRepo.save(entity)
         val changedDto = toDto(entity)
 
@@ -227,17 +227,17 @@ class NumTemplateService(
     }
 
     private fun toEntity(dto: NumTemplateDto): NumTemplateEntity {
-        var entity = templateRepo.findByWorkspaceAndExtId(dto.workspace, dto.id)
+        val workspace = if (workspaceService.isWorkspaceWithGlobalEntities(dto.workspace)) {
+            ""
+        } else {
+            dto.workspace
+        }
+        var entity = templateRepo.findByWorkspaceAndExtId(workspace, dto.id)
         if (entity == null) {
             entity = NumTemplateEntity()
             entity.extId = dto.id
-            entity.workspace = if (workspaceService.isWorkspaceWithGlobalEntities(dto.workspace)) {
-                ""
-            } else {
-                dto.workspace
-            }
+            entity.workspace = workspace
         }
-
         entity.counterKey = dto.counterKey
         entity.name = dto.name
 
