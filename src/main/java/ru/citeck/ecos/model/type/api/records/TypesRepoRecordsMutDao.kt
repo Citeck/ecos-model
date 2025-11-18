@@ -35,6 +35,9 @@ class TypesRepoRecordsMutDao(
         private const val ARTIFACT_UPLOAD_FORM_ID = "ecos-artifact-upload"
 
         private const val WORKSPACE_ATT = "workspace"
+        private const val FORM_REF_ATT = "formRef"
+        private const val JOURNAL_REF_ATT = "journalRef"
+        private const val NUM_TEMPLATE_REF_ATT = "numTemplateRef"
     }
 
     override fun getId() = "types-repo"
@@ -105,6 +108,34 @@ class TypesRepoRecordsMutDao(
                 mutAtts[WORKSPACE_ATT] = workspaceId
             }
             mutAtts.remove(RecordConstants.ATT_WORKSPACE)
+        }
+
+        val workspace = mutAtts[WORKSPACE_ATT].asText()
+        if (mutAtts.has(FORM_REF_ATT)) {
+            var formRef = mutAtts[FORM_REF_ATT].asText().toEntityRef()
+            formRef = formRef.withLocalId(
+                workspaceService?.replaceMaskFromIdToWsPrefix(formRef.getLocalId(), workspace)
+                    ?: formRef.getLocalId()
+            )
+            mutAtts[FORM_REF_ATT] = formRef
+        }
+
+        if (mutAtts.has(JOURNAL_REF_ATT)) {
+            var journalRef = mutAtts[JOURNAL_REF_ATT].asText().toEntityRef()
+            journalRef = journalRef.withLocalId(
+                workspaceService?.replaceMaskFromIdToWsPrefix(journalRef.getLocalId(), workspace)
+                    ?: journalRef.getLocalId()
+            )
+            mutAtts[JOURNAL_REF_ATT] = journalRef
+        }
+
+        if (mutAtts.has(NUM_TEMPLATE_REF_ATT)) {
+            var numTemplateRef = mutAtts[NUM_TEMPLATE_REF_ATT].asText().toEntityRef()
+            numTemplateRef = numTemplateRef.withLocalId(
+                workspaceService?.replaceMaskFromIdToWsPrefix(numTemplateRef.getLocalId(), workspace)
+                    ?: numTemplateRef.getLocalId()
+            )
+            mutAtts[NUM_TEMPLATE_REF_ATT] = numTemplateRef
         }
 
         val ctx = BeanTypeUtils.getTypeContext(TypeMutRecord::class.java)

@@ -190,7 +190,29 @@ class TypesRepoRecordsDao(
         }
 
         fun getData(): ByteArray {
-            return YamlUtils.toNonDefaultString(typeDef.copy().withWorkspace("").build())
+            val typeDefCopy = typeDef.copy {
+                withWorkspace("")
+
+                var formLocalId = typeDef.formRef.getLocalId()
+                if (formLocalId.isNotBlank() && formLocalId != TypeDefResolver.DEFAULT_FORM) {
+                    formLocalId = workspaceService?.replaceWsPrefixFromIdToMask(formLocalId) ?: formLocalId
+                    withForm(typeDef.formRef.withLocalId(formLocalId))
+                }
+
+                var journalLocalId = typeDef.journalRef.getLocalId()
+                if (journalLocalId.isNotBlank() && journalLocalId != TypeDefResolver.DEFAULT_JOURNAL) {
+                    journalLocalId = workspaceService?.replaceWsPrefixFromIdToMask(journalLocalId) ?: journalLocalId
+                    withJournal(typeDef.journalRef.withLocalId(journalLocalId))
+                }
+
+                var numTemplateLocalId = typeDef.numTemplateRef.getLocalId()
+                if (numTemplateLocalId.isNotBlank()) {
+                    numTemplateLocalId = workspaceService?.replaceWsPrefixFromIdToMask(numTemplateLocalId) ?: numTemplateLocalId
+                    withNumTemplate(typeDef.numTemplateRef.withLocalId(numTemplateLocalId))
+                }
+            }
+
+            return YamlUtils.toNonDefaultString(typeDefCopy)
                 .toByteArray(StandardCharsets.UTF_8)
         }
 
