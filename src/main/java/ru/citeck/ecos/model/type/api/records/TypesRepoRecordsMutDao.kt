@@ -110,33 +110,10 @@ class TypesRepoRecordsMutDao(
             mutAtts.remove(RecordConstants.ATT_WORKSPACE)
         }
 
-        val workspace = mutAtts[WORKSPACE_ATT].asText()
-        if (mutAtts.has(FORM_REF_ATT)) {
-            var formRef = mutAtts[FORM_REF_ATT].asText().toEntityRef()
-            formRef = formRef.withLocalId(
-                workspaceService?.replaceMaskFromIdToWsPrefix(formRef.getLocalId(), workspace)
-                    ?: formRef.getLocalId()
-            )
-            mutAtts[FORM_REF_ATT] = formRef
-        }
-
-        if (mutAtts.has(JOURNAL_REF_ATT)) {
-            var journalRef = mutAtts[JOURNAL_REF_ATT].asText().toEntityRef()
-            journalRef = journalRef.withLocalId(
-                workspaceService?.replaceMaskFromIdToWsPrefix(journalRef.getLocalId(), workspace)
-                    ?: journalRef.getLocalId()
-            )
-            mutAtts[JOURNAL_REF_ATT] = journalRef
-        }
-
-        if (mutAtts.has(NUM_TEMPLATE_REF_ATT)) {
-            var numTemplateRef = mutAtts[NUM_TEMPLATE_REF_ATT].asText().toEntityRef()
-            numTemplateRef = numTemplateRef.withLocalId(
-                workspaceService?.replaceMaskFromIdToWsPrefix(numTemplateRef.getLocalId(), workspace)
-                    ?: numTemplateRef.getLocalId()
-            )
-            mutAtts[NUM_TEMPLATE_REF_ATT] = numTemplateRef
-        }
+        processRefAttributes(
+            mutAtts,
+            listOf(FORM_REF_ATT, JOURNAL_REF_ATT, NUM_TEMPLATE_REF_ATT)
+        )
 
         val ctx = BeanTypeUtils.getTypeContext(TypeMutRecord::class.java)
         ctx.applyData(recToMutate, mutAtts)
@@ -148,6 +125,21 @@ class TypesRepoRecordsMutDao(
 
     private fun isWorkspaceShouldHasScopedTypes(workspaceId: String): Boolean {
         return workspaceId != ModelUtils.DEFAULT_WORKSPACE_ID && !workspaceId.startsWith("admin$")
+    }
+
+    private fun processRefAttributes(mutAtts: ObjectData, attributeNames: List<String>) {
+        val workspace = mutAtts[WORKSPACE_ATT].asText()
+
+        attributeNames.forEach { attributeName ->
+            if (mutAtts.has(attributeName)) {
+                var entityRef = mutAtts[attributeName].asText().toEntityRef()
+                entityRef = entityRef.withLocalId(
+                    workspaceService?.replaceMaskFromIdToWsPrefix(entityRef.getLocalId(), workspace)
+                        ?: entityRef.getLocalId()
+                )
+                mutAtts[attributeName] = entityRef
+            }
+        }
     }
 
     private fun applyAspectsData(
