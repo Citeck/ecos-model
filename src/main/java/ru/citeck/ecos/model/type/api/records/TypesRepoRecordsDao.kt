@@ -7,6 +7,7 @@ import ru.citeck.ecos.commons.data.entity.EntityMeta
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.commons.json.Json.mapper
 import ru.citeck.ecos.commons.json.YamlUtils
+import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.events2.type.RecordEventsService
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.permissions.dto.PermissionType
@@ -19,10 +20,8 @@ import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.predicate.PredicateService
-import ru.citeck.ecos.records2.predicate.PredicateUtils
 import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records2.predicate.model.Predicates
-import ru.citeck.ecos.records2.predicate.model.ValuePredicate
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.atts.value.AttValue
 import ru.citeck.ecos.records3.record.dao.AbstractRecordsDao
@@ -67,31 +66,14 @@ class TypesRepoRecordsDao(
             PredicateService.LANGUAGE_PREDICATE -> {
 
                 var predicate = recsQuery.getQuery(Predicate::class.java)
-                predicate = PredicateUtils.mapValuePredicates(predicate, {
-                    if (it.getAttribute() == "localIdInWorkspace") {
-                        val newPred = it.copy<ValuePredicate>()
-                        newPred.setAtt("id")
-                        if (newPred.getType() == ValuePredicate.Type.EQ) {
-                            newPred.setType(ValuePredicate.Type.LIKE)
-                            newPred.setValue("%$" + newPred.getValue().asText())
-                        }
-                        newPred
-                    } else {
-                        it
-                    }
-                }, onlyAnd = false, optimize = false) ?: Predicates.alwaysTrue()
 
-                if (recsQuery.workspaces.isNotEmpty()) {
-                    predicate = Predicates.and(
-                        predicate,
-                        Predicates.inVals(
-                            "workspace",
-                            recsQuery.workspaces.map {
-                                if (it.startsWith("admin$")) "" else it
-                            }
-                        )
-                    )
-                }
+                predicate = Predicates.and(
+                    predicate,
+                    workspaceService?.buildAvailableWorkspacesPredicate(
+                        AuthContext.getCurrentUser(),
+                        recsQuery.workspaces
+                    ) ?: Predicates.alwaysTrue()
+                )
 
                 val types = typeService.getAllWithMeta(
                     recsQuery.page.maxItems,
