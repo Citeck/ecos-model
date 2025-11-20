@@ -70,7 +70,7 @@ class TypesRepoRecordsDao(
                 predicate = Predicates.and(
                     predicate,
                     workspaceService?.buildAvailableWorkspacesPredicate(
-                        AuthContext.getCurrentUser(),
+                        AuthContext.getCurrentRunAsAuth(),
                         recsQuery.workspaces
                     ) ?: Predicates.alwaysTrue()
                 )
@@ -175,23 +175,13 @@ class TypesRepoRecordsDao(
             val typeDefCopy = typeDef.copy {
                 withWorkspace("")
 
-                var formLocalId = typeDef.formRef.getLocalId()
-                if (formLocalId.isNotBlank() && formLocalId != TypeDefResolver.DEFAULT_FORM) {
-                    formLocalId = workspaceService?.replaceWsPrefixFromIdToMask(formLocalId) ?: formLocalId
-                    withForm(typeDef.formRef.withLocalId(formLocalId))
+                fun prepareExtRef(ref: EntityRef): EntityRef {
+                    workspaceService ?: return ref
+                    return ref.withLocalId(workspaceService.replaceWsPrefixToCurrentWsPlaceholder(ref.getLocalId()))
                 }
-
-                var journalLocalId = typeDef.journalRef.getLocalId()
-                if (journalLocalId.isNotBlank() && journalLocalId != TypeDefResolver.DEFAULT_JOURNAL) {
-                    journalLocalId = workspaceService?.replaceWsPrefixFromIdToMask(journalLocalId) ?: journalLocalId
-                    withJournal(typeDef.journalRef.withLocalId(journalLocalId))
-                }
-
-                var numTemplateLocalId = typeDef.numTemplateRef.getLocalId()
-                if (numTemplateLocalId.isNotBlank()) {
-                    numTemplateLocalId = workspaceService?.replaceWsPrefixFromIdToMask(numTemplateLocalId) ?: numTemplateLocalId
-                    withNumTemplate(typeDef.numTemplateRef.withLocalId(numTemplateLocalId))
-                }
+                withForm(prepareExtRef(typeDef.formRef))
+                withJournalRef(prepareExtRef(typeDef.journalRef))
+                withNumTemplateRef(prepareExtRef(typeDef.numTemplateRef))
             }
 
             return YamlUtils.toNonDefaultString(typeDefCopy)

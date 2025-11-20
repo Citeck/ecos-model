@@ -99,21 +99,19 @@ class TypesRepoRecordsMutDao(
         if (!isNewRec) {
             mutAtts.remove(WORKSPACE_ATT)
             mutAtts.remove(RecordConstants.ATT_WORKSPACE)
-        } else if (
-            !mutAtts.has(WORKSPACE_ATT) &&
-            mutAtts.has(RecordConstants.ATT_WORKSPACE)
-        ) {
-            val workspaceId = mutAtts[RecordConstants.ATT_WORKSPACE].asText().toEntityRef().getLocalId()
-            if (isWorkspaceShouldHasScopedTypes(workspaceId)) {
-                mutAtts[WORKSPACE_ATT] = workspaceId
+        } else {
+            if (!mutAtts.has(WORKSPACE_ATT) && mutAtts.has(RecordConstants.ATT_WORKSPACE)) {
+                val workspaceId = mutAtts[RecordConstants.ATT_WORKSPACE].asText().toEntityRef().getLocalId()
+                if (isWorkspaceShouldHasScopedTypes(workspaceId)) {
+                    mutAtts[WORKSPACE_ATT] = workspaceId
+                }
+                mutAtts.remove(RecordConstants.ATT_WORKSPACE)
             }
-            mutAtts.remove(RecordConstants.ATT_WORKSPACE)
+            processRefAttributes(
+                mutAtts,
+                listOf(FORM_REF_ATT, JOURNAL_REF_ATT, NUM_TEMPLATE_REF_ATT)
+            )
         }
-
-        processRefAttributes(
-            mutAtts,
-            listOf(FORM_REF_ATT, JOURNAL_REF_ATT, NUM_TEMPLATE_REF_ATT)
-        )
 
         val ctx = BeanTypeUtils.getTypeContext(TypeMutRecord::class.java)
         ctx.applyData(recToMutate, mutAtts)
@@ -128,17 +126,18 @@ class TypesRepoRecordsMutDao(
     }
 
     private fun processRefAttributes(mutAtts: ObjectData, attributeNames: List<String>) {
+
+        workspaceService ?: return
+
         val workspace = mutAtts[WORKSPACE_ATT].asText()
 
-        attributeNames.forEach { attributeName ->
-            if (mutAtts.has(attributeName)) {
-                var entityRef = mutAtts[attributeName].asText().toEntityRef()
-                entityRef = entityRef.withLocalId(
-                    workspaceService?.replaceMaskFromIdToWsPrefix(entityRef.getLocalId(), workspace)
-                        ?: entityRef.getLocalId()
-                )
-                mutAtts[attributeName] = entityRef
+        for (attName in attributeNames) {
+            if (!mutAtts.has(attName)) {
+                continue
             }
+            val entityRef = mutAtts[attName].asText().toEntityRef()
+            val newLocalId = workspaceService.replaceCurrentWsPlaceholderToWsPrefix(entityRef.getLocalId(), workspace)
+            mutAtts[attName] = entityRef.withLocalId(newLocalId)
         }
     }
 
