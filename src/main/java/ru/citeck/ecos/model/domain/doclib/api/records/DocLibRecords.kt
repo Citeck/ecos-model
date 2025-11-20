@@ -53,7 +53,7 @@ class DocLibRecords @Autowired constructor(
         private const val ATT_FILE_NAME_EXTENSION = "_fileNameExtension"
         private const val TEMPLATED_CONTENT_SRC_ID = "transformations/templated-content"
 
-        private const val DEFAULT_DIR_TYPE_ID = "doclib-directory"
+        const val DEFAULT_DIR_TYPE_ID = "doclib-directory"
         private const val DEFAULT_DIR_SRC_ID = "doclib-directory"
 
         private val IN_MEM_ATTS = hashSetOf(

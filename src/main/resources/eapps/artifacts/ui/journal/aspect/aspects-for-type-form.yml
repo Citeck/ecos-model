@@ -10,7 +10,7 @@ editable: false
 predicate:
   t: 'not-in'
   a: 'id'
-  v: ['listview']
+  v: ['listview', 'doclib', 'has-category']
 
 columns:
   - id: id

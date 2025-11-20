@@ -1,15 +1,18 @@
 package ru.citeck.ecos.model.domain.secret.service
 
 import jakarta.annotation.PostConstruct
+import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.commons.data.entity.EntityMeta
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.commons.json.Json
-import ru.citeck.ecos.context.lib.auth.AuthContext
+import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.events2.EventsService
 import ru.citeck.ecos.events2.emitter.EventsEmitter
+import ru.citeck.ecos.model.app.common.ModelSystemArtifactPerms
+import ru.citeck.ecos.model.domain.secret.api.records.EcosSecretRecordsDao
 import ru.citeck.ecos.model.domain.secret.dto.EncryptionMeta
 import ru.citeck.ecos.model.domain.secret.repo.EcosSecretEntity
 import ru.citeck.ecos.model.domain.secret.repo.EcosSecretRepo
@@ -21,11 +24,12 @@ import ru.citeck.ecos.secrets.lib.secret.EcosSecret
 import ru.citeck.ecos.secrets.lib.secret.EcosSecretImpl
 import ru.citeck.ecos.secrets.lib.secret.EcosSecretType
 import ru.citeck.ecos.txn.lib.TxnContext
+import ru.citeck.ecos.webapp.api.constants.AppName
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.secret.event.SecretChangedEvent
 import ru.citeck.ecos.webapp.lib.secret.provider.ModelEcosSecretsProvider
 import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverter
 import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverterFactory
-import java.lang.IllegalArgumentException
 import java.util.concurrent.CopyOnWriteArrayList
 
 @Service
@@ -37,7 +41,8 @@ class EcosSecretService(
     private val eventsService: EventsService,
     private val ecosSecretEncryption: EcosSecretEncryption,
     private val encryptionConfig: EcosSecretEncryptionConfigProvider,
-    private val secretKeyEncoder: SecretKeyEncoder
+    private val secretKeyEncoder: SecretKeyEncoder,
+    private val perms: ModelSystemArtifactPerms
 ) {
 
     private lateinit var searchConverter: JpaSearchConverter<EcosSecretEntity>
@@ -58,12 +63,9 @@ class EcosSecretService(
         }
     }
 
+    // For system only
+    @Secured(AuthRole.SYSTEM)
     fun getSecret(id: String): EcosSecret? {
-
-        if (!AuthContext.isRunAsSystem()) {
-            error("Permission denied")
-        }
-
         val entity = repo.findByExtId(id) ?: return null
         val type = entity.type ?: return null
         val data = entity.data ?: return null
@@ -111,9 +113,8 @@ class EcosSecretService(
     }
 
     fun delete(id: String) {
-        if (!AuthContext.isRunAsSystemOrAdmin()) {
-            error("Permission denied. You can't delete secret '$id'")
-        }
+        perms.checkWrite(EntityRef.create(AppName.EMODEL, EcosSecretRecordsDao.ID, id))
+
         repo.deleteByExtId(id)
     }
 
@@ -145,11 +146,10 @@ class EcosSecretService(
     }
 
     fun save(dto: EcosSecretDto): EcosSecretDto {
+        perms.checkWrite(EntityRef.create(AppName.EMODEL, EcosSecretRecordsDao.ID, dto.id))
+
         if (dto.id.isBlank()) {
             error("Secret id is empty")
-        }
-        if (!AuthContext.isRunAsSystemOrAdmin()) {
-            error("Permission denied. You can't change secret '${dto.id}'")
         }
         val entity = mapToEntity(dto)
         val entityAfterSave = repo.save(entity)

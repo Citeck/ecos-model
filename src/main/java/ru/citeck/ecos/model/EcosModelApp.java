@@ -4,9 +4,11 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import ru.citeck.ecos.webapp.lib.spring.EcosSpringApplication;
 
 @EnableDiscoveryClient
+@EnableMethodSecurity(securedEnabled = true)
 @SpringBootApplication(scanBasePackageClasses = { EcosModelApp.class })
 @EnableJpaRepositories({"ru.citeck.ecos.model.*.repository", "ru.citeck.ecos.model.domain.**.repo"})
 public class EcosModelApp {

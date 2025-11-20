@@ -3,6 +3,7 @@ package ru.citeck.ecos.model.num.service
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.model.lib.num.dto.NumTemplateDef
+import ru.citeck.ecos.model.lib.workspace.WorkspaceService
 import ru.citeck.ecos.webapp.api.promise.Promise
 import ru.citeck.ecos.webapp.api.promise.Promises
 import ru.citeck.ecos.webapp.lib.registry.EcosRegistryProps
@@ -11,7 +12,8 @@ import ru.citeck.ecos.webapp.lib.registry.init.EcosRegistryInitializer
 
 @Component
 class NumRegistryInitializer(
-    private val numTemplateService: NumTemplateService
+    private val numTemplateService: NumTemplateService,
+    private val workspaceService: WorkspaceService
 ) : EcosRegistryInitializer<NumTemplateDef> {
 
     companion object {
@@ -44,7 +46,7 @@ class NumRegistryInitializer(
         if (entity.entity.id.isBlank()) {
             return ""
         }
-        return if (entity.entity.workspace.isEmpty()) {
+        return if (workspaceService.isWorkspaceWithGlobalEntities(entity.entity.workspace)) {
             entity.entity.id
         } else {
             entity.entity.workspace + ":" + entity.entity.id

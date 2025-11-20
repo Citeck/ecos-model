@@ -20,6 +20,7 @@ import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.commons.utils.TmplUtils.applyAtts
 import ru.citeck.ecos.commons.utils.TmplUtils.getAtts
 import ru.citeck.ecos.model.lib.num.dto.NumTemplateDef
+import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.model.lib.workspace.IdInWs
 import ru.citeck.ecos.model.lib.workspace.WorkspaceService
 import ru.citeck.ecos.model.num.domain.NumCounterEntity
@@ -122,9 +123,9 @@ class NumTemplateService(
 
     fun save(dto: NumTemplateDto): EntityWithMeta<NumTemplateDef> {
 
-        val before = getByIdOrNull(IdInWs.create(dto.workspace, dto.id))
-
         var entity = toEntity(dto)
+        val before = getByIdOrNull(IdInWs.create(entity.workspace, entity.extId))
+
         entity = templateRepo.save(entity)
         val changedDto = toDto(entity)
 
@@ -226,13 +227,17 @@ class NumTemplateService(
     }
 
     private fun toEntity(dto: NumTemplateDto): NumTemplateEntity {
-        var entity = templateRepo.findByWorkspaceAndExtId(dto.workspace, dto.id)
+        val workspace = if (workspaceService.isWorkspaceWithGlobalEntities(dto.workspace)) {
+            ""
+        } else {
+            dto.workspace
+        }
+        var entity = templateRepo.findByWorkspaceAndExtId(workspace, dto.id)
         if (entity == null) {
             entity = NumTemplateEntity()
             entity.extId = dto.id
-            entity.workspace = dto.workspace
+            entity.workspace = workspace
         }
-
         entity.counterKey = dto.counterKey
         entity.name = dto.name
 
@@ -244,7 +249,7 @@ class NumTemplateService(
             .withId(entity.extId)
             .withCounterKey(entity.counterKey)
             .withName(entity.name)
-            .withWorkspace(entity.workspace)
+            .withWorkspace(entity.workspace.ifBlank { ModelUtils.DEFAULT_WORKSPACE_ID })
             .withModelAttributes(ArrayList(getAtts(entity.counterKey)))
             .build()
 

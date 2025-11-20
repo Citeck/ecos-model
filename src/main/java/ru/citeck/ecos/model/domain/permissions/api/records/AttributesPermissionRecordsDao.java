@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.citeck.ecos.commons.data.ObjectData;
 import ru.citeck.ecos.commons.json.Json;
+import ru.citeck.ecos.model.app.common.ModelSystemArtifactPerms;
 import ru.citeck.ecos.model.domain.permissions.dto.AttributesPermissionDto;
 import ru.citeck.ecos.model.domain.permissions.dto.AttributesPermissionWithMetaDto;
 import ru.citeck.ecos.model.domain.permissions.service.AttributesPermissionsService;
@@ -24,10 +25,10 @@ import ru.citeck.ecos.records3.record.dao.mutate.RecordMutateDtoDao;
 import ru.citeck.ecos.records3.record.dao.query.RecordsQueryDao;
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery;
 import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes;
-import ru.citeck.ecos.webapp.api.entity.EntityRef;
 import ru.citeck.ecos.records2.predicate.PredicateService;
 import ru.citeck.ecos.records2.predicate.model.Predicate;
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName;
+import ru.citeck.ecos.webapp.api.constants.AppName;
 import ru.citeck.ecos.webapp.api.entity.EntityRef;
 
 import java.util.*;
@@ -43,12 +44,15 @@ public class AttributesPermissionRecordsDao extends AbstractRecordsDao
     public static final String ID = "attrs_permission";
 
     private final AttributesPermissionsService attributesPermissionsService;
+    private final ModelSystemArtifactPerms perms;
 
     private final AttributesPermissionRecord EMPTY_RECORD = new AttributesPermissionRecord(new AttributesPermissionWithMetaDto());
 
     @Autowired
-    public AttributesPermissionRecordsDao(AttributesPermissionsService attributesPermissionsService) {
+    public AttributesPermissionRecordsDao(AttributesPermissionsService attributesPermissionsService,
+                                          ModelSystemArtifactPerms perms) {
         this.attributesPermissionsService = attributesPermissionsService;
+        this.perms = perms;
     }
 
     @Nullable
@@ -112,12 +116,12 @@ public class AttributesPermissionRecordsDao extends AbstractRecordsDao
         } else {
             result.setRecords(
                 attributesPermissionsService.getAll(
-                recordsQuery.getPage().getMaxItems(),
+                        recordsQuery.getPage().getMaxItems(),
                         recordsQuery.getPage().getSkipCount()
                     )
-                .stream()
-                .map(AttributesPermissionRecord::new)
-                .collect(Collectors.toList()));
+                    .stream()
+                    .map(AttributesPermissionRecord::new)
+                    .collect(Collectors.toList()));
             result.setTotalCount(attributesPermissionsService.getCount());
         }
 
@@ -130,7 +134,7 @@ public class AttributesPermissionRecordsDao extends AbstractRecordsDao
         return ID;
     }
 
-    public static class AttributesPermissionRecord implements AttValue {
+    public class AttributesPermissionRecord implements AttValue {
 
         private final AttributesPermissionWithMetaDto dto;
 
@@ -151,34 +155,22 @@ public class AttributesPermissionRecordsDao extends AbstractRecordsDao
         @Override
         @AttName("?disp")
         public String getDisplayName() {
-            String dispName = dto.getId();
-            if (dispName == null) {
-                dispName = dto.getId();
-            }
-            return dispName;
+            return dto.getId();
         }
 
         @Override
         public Object getAtt(String name) {
-            switch (name) {
-                case "extId":
-                case "moduleId":
-                    return dto.getId();
-                case "typeRef":
-                case RecordConstants.ATT_TYPE:
-                    return dto.getTypeRef();
-                case "rules":
-                    return dto.getRules();
-                case RecordConstants.ATT_MODIFIED:
-                    return dto.getModified();
-                case RecordConstants.ATT_MODIFIER:
-                    return dto.getModifier(); //todo: return RecordRef of User
-                case RecordConstants.ATT_CREATED:
-                    return dto.getCreated();
-                case RecordConstants.ATT_CREATOR:
-                    return dto.getCreator();
-            }
-            return null;
+            return switch (name) {
+                case "extId", "moduleId" -> dto.getId();
+                case "typeRef", RecordConstants.ATT_TYPE -> dto.getTypeRef();
+                case "rules" -> dto.getRules();
+                case "permissions" -> perms.getPerms(EntityRef.create(AppName.EMODEL, ID, getId()));
+                case RecordConstants.ATT_MODIFIED -> dto.getModified();
+                case RecordConstants.ATT_MODIFIER -> dto.getModifier(); //todo: return RecordRef of User
+                case RecordConstants.ATT_CREATED -> dto.getCreated();
+                case RecordConstants.ATT_CREATOR -> dto.getCreator();
+                default -> null;
+            };
         }
 
         @JsonIgnore
@@ -207,8 +199,7 @@ public class AttributesPermissionRecordsDao extends AbstractRecordsDao
         @JsonIgnore
         @AttName("?disp")
         public String getDisplayName() {
-            String result = getId();
-            return result != null ? result : "default_attrs_permission";
+            return getId();
         }
 
         @JsonProperty("_content")

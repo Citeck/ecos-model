@@ -7,6 +7,7 @@
   "description": {},
   "customModule": "",
   "typeRef": "emodel/type@type",
+  "workspace": "",
   "width": "extra-lg",
   "system": true,
   "i18n": {
@@ -82,11 +83,17 @@
                               "en": "Parent"
                             },
                             "key": "_parentRefSelector",
+                            "validate": {
+                              "select": false
+                            },
                             "disableInlineEdit": true,
                             "clearOnHide": false,
                             "dataSrc": "custom",
                             "data": {
-                              "custom": "values = [\n  {\n    label: utils.getTextByLocale({\n      en: 'Case',\n      ru: 'Кейс'\n    }),\n    value: 'emodel/type@case'\n  },  \n  {\n    label: utils.getTextByLocale({\n      en: 'Data List Item',\n      ru: 'Справочник'\n    }),\n    value: 'emodel/type@data-list'\n  },\n  {\n    label: utils.getTextByLocale({\n      en: 'Document',\n      ru: 'Документ'\n    }),\n    value: 'emodel/type@document'\n  },\n  {\n    label: utils.getTextByLocale({\n      en: 'Documents library file',\n      ru: 'Файл библиотеки документов'\n    }),\n    value: 'emodel/type@doclib-file'\n  },\n  {\n    label: utils.getTextByLocale({\n      en: 'Publication',\n      ru: 'Публикация'\n    }),\n    value: 'emodel/type@publication'\n  },\n  {\n    label: utils.getTextByLocale({\n      en: 'Rest',\n      ru: 'Остальное'\n    }),\n    value: '__rest__'\n  }\n];"
+                              "custom": "values = [\n  {\n    label: utils.getTextByLocale({\n      en: 'Case',\n      ru: 'Кейс'\n    }),\n    value: 'emodel/type@case'\n  },  \n  {\n    label: utils.getTextByLocale({\n      en: 'Data List Item',\n      ru: 'Справочник'\n    }),\n    value: 'emodel/type@data-list'\n  },\n  {\n    label: utils.getTextByLocale({\n      en: 'Document',\n      ru: 'Документ'\n    }),\n    value: 'emodel/type@document'\n  },\n  {\n    label: utils.getTextByLocale({\n      en: 'Documents library file',\n      ru: 'Файл библиотеки документов'\n    }),\n    value: 'emodel/type@workspace-file'\n  },\n  {\n    label: utils.getTextByLocale({\n      en: 'Publication',\n      ru: 'Публикация'\n    }),\n    value: 'emodel/type@publication'\n  },\n  {\n    label: utils.getTextByLocale({\n      en: 'Rest',\n      ru: 'Остальное'\n    }),\n    value: '__rest__'\n  }\n];",
+                              "headers": [
+                                {}
+                              ]
                             },
                             "defaultValue": "",
                             "calculateValue": "const { parentRef, _parentRefJournal, _parentRefSelector } = data;\n\nif (_parentRefSelector === '__rest__') {\n  return;\n}\n\nif (!parentRef) {\n  value = 'emodel/type@case';\n} \n\nif (parentRef && ['emodel/type@data-list', 'emodel/type@case'].includes(parentRef)) {\n  value = parentRef;\n} else { \n  value = '__rest__';\n}",
@@ -97,7 +104,9 @@
                             },
                             "customConditional": "const isView = _.get(instance, 'currentForm.options.formMode') === 'VIEW';\n\nshow = isView ? ['emodel/type@data-list', 'emodel/type@case'].includes(data.parentRef) : true;",
                             "type": "ecosSelect",
-                            "input": true
+                            "input": true,
+                            "reorder": false,
+                            "reference": false
                           },
                           {
                             "label": {
@@ -2676,6 +2685,37 @@
                     "label": {
                       "ru": "Panel"
                     },
+                    "key": "panel12",
+                    "title": {
+                      "en": "Has category",
+                      "ru": "Имеет категорию"
+                    },
+                    "refreshOn": [],
+                    "optionalWhenDisabled": false,
+                    "type": "panel",
+                    "input": false,
+                    "components": [
+                      {
+                        "label": {
+                          "ru": "Имеет категорию",
+                          "en": "Has category"
+                        },
+                        "key": "aspectCfg$has-category$added",
+                        "refreshOn": [],
+                        "optionalWhenDisabled": false,
+                        "type": "checkbox",
+                        "input": true,
+                        "reorder": false,
+                        "dataGridLabel": false
+                      }
+                    ],
+                    "collapsed": false,
+                    "reorder": false
+                  },
+                  {
+                    "label": {
+                      "ru": "Panel"
+                    },
                     "key": "listview-settings",
                     "title": {
                       "ru": "Отображение в виде списка",
@@ -2847,8 +2887,7 @@
                               "custom": {
                                 "columns": []
                               },
-                              "customValues": "",
-                              "viewMode": "default"
+                              "customValues": ""
                             },
                             "queryData": "",
                             "refreshOn": [
@@ -3017,5 +3056,7 @@
       }
     ],
     "display": "form"
-  }
+  },
+  "attributes": {},
+  "notExists": false
 }

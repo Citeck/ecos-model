@@ -138,19 +138,14 @@ public class TypePermsRecords extends AbstractRecordsDao
 
         @Override
         public Object getAtt(@NotNull String name) {
-            switch (name) {
-                case RecordConstants.ATT_MODIFIED:
-                    return typePermsMeta.getModified();
-                case "moduleId":
-                    return typePermsDef.getId();
-                case "typeRef":
-                    return typePermsDef.getTypeRef();
-                case "permissions":
-                    return new PermsWrapper(typePermsDef.getPermissions());
-                case "attributes":
-                    return typePermsDef.getAttributes();
-            }
-            return null;
+            return switch (name) {
+                case RecordConstants.ATT_MODIFIED -> typePermsMeta.getModified();
+                case "moduleId" -> typePermsDef.getId();
+                case "typeRef" -> typePermsDef.getTypeRef();
+                case "permissions" -> new PermsWrapper(typePermsDef.getPermissions());
+                case "attributes" -> typePermsDef.getAttributes();
+                default -> null;
+            };
         }
 
         @Override

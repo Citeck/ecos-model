@@ -8,13 +8,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import ru.citeck.ecos.commons.data.DataValue;
 import ru.citeck.ecos.commons.data.entity.EntityMeta;
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta;
 import ru.citeck.ecos.commons.json.Json;
 import ru.citeck.ecos.commons.json.JsonMapper;
-import ru.citeck.ecos.context.lib.auth.AuthContext;
+import ru.citeck.ecos.context.lib.auth.AuthRole;
 import ru.citeck.ecos.model.domain.perms.dto.TypePermsMeta;
 import ru.citeck.ecos.model.domain.perms.repo.TypePermsEntity;
 import ru.citeck.ecos.model.domain.perms.repo.TypePermsRepository;
@@ -104,11 +105,8 @@ public class TypePermsService {
     }
 
     @NotNull
+    @Secured({AuthRole.SYSTEM, AuthRole.ADMIN})
     public TypePermsDef save(TypePermsDef permissions) {
-        if (!AuthContext.isRunAsSystemOrAdmin()) {
-            throw new SecurityException("Permission denied. You can't modify permissions");
-        }
-
         if (EntityRef.isEmpty(permissions.getTypeRef())) {
             throw new IllegalStateException("TypeRef is a mandatory parameter!");
         }
@@ -136,11 +134,8 @@ public class TypePermsService {
         return resultPermissions.getEntity();
     }
 
+    @Secured({AuthRole.SYSTEM, AuthRole.ADMIN})
     public void delete(String id) {
-        if (!AuthContext.isRunAsSystemOrAdmin()) {
-            throw new SecurityException("Permission denied. You can't modify permissions");
-        }
-
         TypePermsEntity typePerms = repository.findByExtId(id);
         if (typePerms != null) {
             EntityWithMeta<TypePermsDef> permsDefBefore = toDtoWithMeta(typePerms);
