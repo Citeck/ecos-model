@@ -18,6 +18,10 @@ open class AspectsRecordsDao(
 
     override fun mutateForAnyRes(records: List<LocalRecordAtts>): List<Any> {
         val newRecs = records.map {
+            check(AuthContext.isRunAsSystemOrAdmin()) {
+                "Permission denied"
+            }
+
             val recordId = it.attributes["id"].asText().ifBlank { it.id }
             if (recordId.isBlank()) {
                 error("Id is blank")

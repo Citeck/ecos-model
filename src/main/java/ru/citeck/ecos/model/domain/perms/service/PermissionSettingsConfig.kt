@@ -72,13 +72,15 @@ class PermissionSettingsConfig {
 
     @Bean
     fun permissionSettingsDao(
-        recordsService: RecordsService,
-        dbDomainFactory: DbDomainFactory,
         customPermsService: PermissionSettingsService
     ): RecordsDao {
 
         return object : RecordsDaoProxy(PermissionSettingsDto.SOURCE_ID, PERMISSION_SETTINGS_REPO_ID) {
             override fun mutate(records: List<LocalRecordAtts>): List<String> {
+                check(AuthContext.isRunAsSystemOrAdmin()) {
+                    "Permission denied"
+                }
+
                 for (record in records) {
                     var id = record.id.ifBlank { record.getAtt(PermissionSettingsDto.ATT_ID).asText() }
                     val recordRef = record.getAtt(PermissionSettingsDto.ATT_RECORD_REF).asText().toEntityRef()
@@ -111,8 +113,8 @@ class PermissionSettingsConfig {
             }
 
             override fun delete(recordIds: List<String>): List<DelStatus> {
-                if (AuthContext.isNotRunAsSystemOrAdmin()) {
-                    error("Permission denied")
+                check(AuthContext.isRunAsSystemOrAdmin()) {
+                    "Permission denied"
                 }
                 return super.delete(recordIds)
             }
