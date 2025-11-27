@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service
 import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.io.file.mem.EcosMemDir
 import ru.citeck.ecos.commons.utils.ZipUtils
+import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.model.domain.wstemplate.desc.WorkspaceTemplateDesc
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records3.RecordsService
@@ -42,15 +43,25 @@ class WorkspaceTemplateService(
             return artifactsDir
         }
 
+        val queryBody = DataValue.createObj().set("workspace", workspace)
         for (app in APPS_WITH_ARTIFACTS_FOR_TEMPLATE) {
-
-            val artifactsDirBytes = webClient.newRequest()
-                .targetApp(app)
-                .path(GET_WS_ARTIFACTS_PATH)
-                .version(checkRequiredPath(app, GET_WS_ARTIFACTS_PATH))
-                .body { it.writeDto(DataValue.createObj().set("workspace", workspace)) }
-                .executeSync { it.getBodyReader().readAsBytes() }
-            artifactsDir.copyFilesFrom(ZipUtils.extractZip(artifactsDirBytes))
+            try {
+                val artifactsDirBytes = AuthContext.runAsSystem {
+                    webClient.newRequest()
+                        .targetApp(app)
+                        .path(GET_WS_ARTIFACTS_PATH)
+                        .version(checkRequiredPath(app, GET_WS_ARTIFACTS_PATH))
+                        .body { it.writeDto(queryBody) }
+                        .executeSync { it.getBodyReader().readAsBytes() }
+                }
+                artifactsDir.copyFilesFrom(ZipUtils.extractZip(artifactsDirBytes))
+            } catch (e: Throwable) {
+                log.error(e) { "Request Failed: $app$GET_WS_ARTIFACTS_PATH $queryBody" }
+                throw RuntimeException(
+                    "Application '$app' is currently unavailable. " +
+                    "Please contact your administrator."
+                )
+            }
         }
 
         return artifactsDir
@@ -140,9 +151,9 @@ class WorkspaceTemplateService(
     )
 
     private class TemplateAtts(
-        @AttName(RecordConstants.ATT_NOT_EXISTS + ScalarType.BOOL_SCHEMA + "!")
+        @param:AttName(RecordConstants.ATT_NOT_EXISTS + ScalarType.BOOL_SCHEMA + "!")
         val notExists: Boolean,
-        @AttName(WorkspaceTemplateDesc.ATT_ARTIFACTS + ScalarType.STR_SCHEMA)
+        @param:AttName(WorkspaceTemplateDesc.ATT_ARTIFACTS + ScalarType.STR_SCHEMA)
         val artifacts: String?
     )
 }
