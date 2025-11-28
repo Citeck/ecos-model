@@ -1,12 +1,15 @@
 package ru.citeck.ecos.model.app.api.rest
 
+import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.server.ResponseStatusException
 import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.mime.MimeTypes
+import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.request.RequestContext
 import ru.citeck.ecos.webapp.api.content.EcosContentApi
@@ -25,6 +28,19 @@ class ContentVersionController(
         @RequestParam("description") description: String?,
         @RequestParam("majorversion") majorversion: Boolean?
     ): String {
+        val permissions = recordsService.getAtts(
+            entityRef,
+            mapOf(
+                "hasWrite" to "permissions._has.Write?bool!true",
+                "isContentProtected" to "${RecordConstants.ATT_EDGE}.${RecordConstants.ATT_CONTENT}.protected?bool!"
+            )
+        ).getAtts()
+        val hasWrite = permissions["hasWrite"].asBoolean()
+        val isContentProtected = permissions["isContentProtected"].asBoolean()
+
+        if (!hasWrite || isContentProtected) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Permission Denied")
+        }
 
         val tempFile = RequestContext.doWithCtx {
             contentApi.uploadTempFile()
