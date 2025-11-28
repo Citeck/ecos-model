@@ -1,0 +1,12 @@
+{
+  "id": "doclib-directory-permissions",
+  "typeRef": "emodel/type@doclib-directory",
+  "permissions": {
+    "matrix": {
+      "EVERYONE": {
+        "ANY": "WRITE"
+      }
+    }
+  },
+  "attributes": {}
+}

@@ -19,6 +19,10 @@ actions:
 postCreateActionRef: uiserv/action@none
 
 model:
+  statuses:
+    - id: EMPTY
+  roles:
+    - id: EVERYONE
   attributes:
     - id: name
       name:

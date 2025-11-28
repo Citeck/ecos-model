@@ -1,0 +1,12 @@
+{
+  "id": "workspace-directory-permissions",
+  "typeRef": "emodel/type@workspace-directory",
+  "permissions": {
+    "matrix": {
+      "EVERYONE": {
+        "ANY": "WRITE"
+      }
+    }
+  },
+  "attributes": {}
+}

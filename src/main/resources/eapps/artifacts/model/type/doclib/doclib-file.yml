@@ -30,6 +30,10 @@ aspects:
   - ref: emodel/aspect@doclib
 
 model:
+  statuses:
+    - id: EMPTY
+  roles:
+    - id: EVERYONE
   attributes:
     - id: name
       name:
