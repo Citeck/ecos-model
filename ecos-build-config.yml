@@ -1,7 +1,0 @@
----
-type: 'maven-webapp'
-properties:
-  jdk: JDK24
-  buildArgs: '-Plegacy-testcontainers'
-  image:
-    multiplatform: true
