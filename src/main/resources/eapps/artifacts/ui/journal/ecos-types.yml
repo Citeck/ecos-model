@@ -6,6 +6,9 @@ system: true
 defaultFilters:
   - { t: eq, att: system, val: false }
 
+queryData:
+  queryFromJournal: true
+
 columns:
 
   - id: _localId
