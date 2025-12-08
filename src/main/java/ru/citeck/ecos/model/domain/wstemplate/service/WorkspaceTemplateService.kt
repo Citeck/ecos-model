@@ -59,7 +59,7 @@ class WorkspaceTemplateService(
                 log.error(e) { "Request Failed: $app$GET_WS_ARTIFACTS_PATH $queryBody" }
                 throw RuntimeException(
                     "Application '$app' is currently unavailable. " +
-                    "Please contact your administrator."
+                        "Please contact your administrator."
                 )
             }
         }

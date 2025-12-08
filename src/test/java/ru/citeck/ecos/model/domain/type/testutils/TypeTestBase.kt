@@ -123,7 +123,11 @@ open class TypeTestBase {
         eventsServiceFactory.modelServices = modelLibServices
         this.eventsService = eventsServiceFactory.eventsService
 
-        val typesRepoRecordsDao = TypesRepoRecordsDao(typeService, eventsServiceFactory.recordEventsService)
+        val typesRepoRecordsDao = TypesRepoRecordsDao(
+            typeService,
+            eventsServiceFactory.recordEventsService,
+            typesRepo = typesRegistry
+        )
         records.register(typesRepoRecordsDao)
         records.register(TypeRecordsDao(typesRegistry, modelLibServices))
 
@@ -134,5 +138,9 @@ open class TypeTestBase {
         val baseType = TypeEntity()
         baseType.extId = "base"
         typesRepo.save(baseType)
+
+/*        val typeType = TypeEntity()
+        typeType.extId = "type"
+        typesRepo.save(typeType)*/
     }
 }

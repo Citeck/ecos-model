@@ -13,8 +13,8 @@ import ru.citeck.ecos.events2.type.RecordEventsService
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.permissions.dto.PermissionType
 import ru.citeck.ecos.model.lib.type.dto.TypeAspectDef
+import ru.citeck.ecos.model.lib.type.repo.TypesRepo
 import ru.citeck.ecos.model.lib.utils.ModelUtils
-import ru.citeck.ecos.model.lib.workspace.IdInWs
 import ru.citeck.ecos.model.lib.workspace.WorkspaceService
 import ru.citeck.ecos.model.lib.workspace.convertToIdInWsSafe
 import ru.citeck.ecos.model.type.service.TypeDesc
@@ -42,7 +42,8 @@ class TypesRepoRecordsDao(
     private val typeService: TypesService,
     private val recordEventsService: RecordEventsService? = null,
     private val typesRepoPermsService: TypesRepoPermsService? = null,
-    private val workspaceService: WorkspaceService? = null
+    private val workspaceService: WorkspaceService? = null,
+    private val typesRepo: TypesRepo
 ) : AbstractRecordsDao(), RecordsQueryDao, RecordAttsDao {
 
     companion object {
@@ -118,10 +119,10 @@ class TypesRepoRecordsDao(
     }
 
     private fun onTypeDefDeleted(typeDef: EntityWithMeta<TypeDef>) {
-        recordEventsService?.emitRecDeleted(RecordDeletedEvent(
-            buildTypeRecord(typeDef),
-            typeService.getById(IdInWs.create("type")).getTypeInfo()
-        ))
+        val typeInfo = typesRepo.getTypeInfo(ModelUtils.getTypeRef("type")) ?: return
+        recordEventsService?.emitRecDeleted(
+            RecordDeletedEvent(buildTypeRecord(typeDef), typeInfo)
+        )
     }
 
     private fun buildTypeRecord(entity: EntityWithMeta<TypeDef>): TypeRecord {
