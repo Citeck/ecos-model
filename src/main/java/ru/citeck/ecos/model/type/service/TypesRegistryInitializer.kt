@@ -83,7 +83,8 @@ class TypesRegistryInitializer(
 
         typesService.addOnDeletedListener {
             TxnContext.doAfterCommit(0f, false) {
-                registry.setValue(workspaceService.convertToStrIdSafe(it), null)
+                val idInWs = IdInWs.create(it.entity.workspace, it.entity.id)
+                registry.setValue(workspaceService.convertToStrIdSafe(idInWs), null)
             }
         }
 

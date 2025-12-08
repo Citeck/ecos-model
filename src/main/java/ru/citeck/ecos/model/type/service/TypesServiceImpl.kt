@@ -47,7 +47,7 @@ class TypesServiceImpl(
 
     private var onTypeChangedListeners = CopyOnWriteArrayList<TypeDefListener>()
 
-    private var onDeletedListeners: MutableList<(IdInWs) -> Unit> = CopyOnWriteArrayList()
+    private var onDeletedListeners: MutableList<(EntityWithMeta<TypeDef>) -> Unit> = CopyOnWriteArrayList()
 
     private var onTypeHierarchyChangedListeners: MutableList<(Set<IdInWs>) -> Unit> = CopyOnWriteArrayList()
 
@@ -143,7 +143,7 @@ class TypesServiceImpl(
         addListenerWithMeta(0f, onTypeChangedListener)
     }
 
-    override fun addOnDeletedListener(listener: (IdInWs) -> Unit) {
+    override fun addOnDeletedListener(listener: (EntityWithMeta<TypeDef>) -> Unit) {
         onDeletedListeners.add(listener)
     }
 
@@ -307,9 +307,10 @@ class TypesServiceImpl(
         if (typeRepoDao.getChildrenIds(typeId).isNotEmpty()) {
             error("Type $typeId contains children and can't be deleted")
         }
+        val typeDef = typeConverter.toDtoWithMeta(typeEntity)
         val parentId = typeEntity.parent?.getTypeId() ?: IdInWs.EMPTY
         typeRepoDao.delete(typeEntity)
-        onDeletedListeners.forEach { it(typeId) }
+        onDeletedListeners.forEach { it(typeDef) }
         return parentId
     }
 

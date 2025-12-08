@@ -11,7 +11,7 @@ import java.util.function.Consumer
 
 interface TypesService {
 
-    fun addOnDeletedListener(listener: (IdInWs) -> Unit)
+    fun addOnDeletedListener(listener: (EntityWithMeta<TypeDef>) -> Unit)
 
     fun addListenerWithMeta(onTypeChangedListener: BiConsumer<EntityWithMeta<TypeDef>?, EntityWithMeta<TypeDef>?>)
 

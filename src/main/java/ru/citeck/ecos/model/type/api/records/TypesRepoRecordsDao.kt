@@ -8,11 +8,13 @@ import ru.citeck.ecos.commons.data.entity.EntityWithMeta
 import ru.citeck.ecos.commons.json.Json.mapper
 import ru.citeck.ecos.commons.json.YamlUtils
 import ru.citeck.ecos.context.lib.auth.AuthContext
+import ru.citeck.ecos.events2.type.RecordDeletedEvent
 import ru.citeck.ecos.events2.type.RecordEventsService
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.permissions.dto.PermissionType
 import ru.citeck.ecos.model.lib.type.dto.TypeAspectDef
 import ru.citeck.ecos.model.lib.utils.ModelUtils
+import ru.citeck.ecos.model.lib.workspace.IdInWs
 import ru.citeck.ecos.model.lib.workspace.WorkspaceService
 import ru.citeck.ecos.model.lib.workspace.convertToIdInWsSafe
 import ru.citeck.ecos.model.type.service.TypeDesc
@@ -48,6 +50,9 @@ class TypesRepoRecordsDao(
     }
 
     init {
+        typeService.addOnDeletedListener { typeDef ->
+            onTypeDefDeleted(typeDef)
+        }
         typeService.addListenerWithMeta { before, after ->
             if (after != null) {
                 onTypeDefChanged(before, after)
@@ -112,12 +117,19 @@ class TypesRepoRecordsDao(
         }
     }
 
+    private fun onTypeDefDeleted(typeDef: EntityWithMeta<TypeDef>) {
+        recordEventsService?.emitRecDeleted(RecordDeletedEvent(
+            buildTypeRecord(typeDef),
+            typeService.getById(IdInWs.create("type")).getTypeInfo()
+        ))
+    }
+
     private fun buildTypeRecord(entity: EntityWithMeta<TypeDef>): TypeRecord {
         return TypeRecord(entity.entity, entity.meta)
     }
 
     inner class TypeRecord(
-        @AttName("...")
+        @param:AttName("...")
         val typeDef: TypeDef,
         private val audit: EntityMeta
     ) {
