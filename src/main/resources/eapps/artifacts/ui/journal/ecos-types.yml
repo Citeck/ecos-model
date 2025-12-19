@@ -11,7 +11,7 @@ queryData:
 
 columns:
 
-  - id: _localId
+  - id: id
     name: { ru: Идентификатор, en: Id }
     type: text
 
