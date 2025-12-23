@@ -242,7 +242,7 @@ class TypeDefResolver(
             resTypeDef.withAspects(fullAspects.values.toList())
         }
 
-        resTypeDef.withAssociations(getAssocs(typeDef, resolvedParentDef))
+        resTypeDef.withAssociations(getAssocs(typeDef, resTypeDef, resolvedParentDef))
 
         if (resTypeDef.queryPermsPolicy == QueryPermsPolicy.DEFAULT) {
             resTypeDef.withQueryPermsPolicy(resolvedParentDef.queryPermsPolicy)
@@ -288,7 +288,11 @@ class TypeDefResolver(
         return resTypeDef
     }
 
-    private fun getAssocs(typeDef: TypeDef, parentTypeDef: TypeDef.Builder): List<AssocDef> {
+    private fun getAssocs(
+        typeDef: TypeDef,
+        resTypeDef: TypeDef.Builder,
+        parentTypeDef: TypeDef.Builder
+    ): List<AssocDef> {
 
         val assocs = LinkedHashMap<String, AssocDef>()
 
@@ -304,7 +308,7 @@ class TypeDefResolver(
                     newAssoc.withAttribute(newAssoc.id)
                 }
             }
-            val attDef = typeDef.model.attributes.find {
+            val attDef = resTypeDef.model.attributes.find {
                 it.id == newAssoc.attribute && it.type == AttributeType.ASSOC
             }
             if (newAssoc.target.isEmpty()) {
