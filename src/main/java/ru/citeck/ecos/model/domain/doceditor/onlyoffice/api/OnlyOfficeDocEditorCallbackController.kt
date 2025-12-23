@@ -104,6 +104,13 @@ class OnlyOfficeDocEditorCallbackController(
                     uri.query,
                     uri.fragment
                 )
+                var contentAtt = jwtData.att.ifBlank { RecordConstants.ATT_CONTENT }
+                if (contentAtt == RecordConstants.ATT_CONTENT) {
+                    contentAtt = recordsService.getAtt(
+                        jwtData.ref,
+                        "_type.contentConfig.path!'content'"
+                    ).asText()
+                }
                 val currentContent = contentApi.getContent(jwtData.ref, jwtData.att)
 
                 restTemplate.execute(
@@ -117,7 +124,6 @@ class OnlyOfficeDocEditorCallbackController(
                         .writeContent {
                             it.writeStream(resp.body)
                         }
-                    val contentAtt = jwtData.att.ifBlank { RecordConstants.ATT_CONTENT }
                     recordsService.mutateAtt(jwtData.ref, contentAtt, tempRef)
                 }
             }
