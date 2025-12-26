@@ -19,7 +19,7 @@ postCreateActionRef: uiserv/action@none
 createVariants:
   - id: upload
     name: { ru: Загрузить конфигурацию, en: Upload configuration }
-    formRef: 'uiserv/form@ecos-artifact-upload'
+    formRef: 'uiserv/form@full-atts-upload'
 
 actions:
   - uiserv/action@download-text-yml

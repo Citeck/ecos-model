@@ -11,8 +11,18 @@ queryData:
 
 columns:
 
-  - id: _localId
+  - id: id
     name: { ru: Идентификатор, en: Id }
+    formatter:
+      type: script
+      config:
+        fn: |
+          let twoDotsIdx = cell.indexOf(':');
+          if (twoDotsIdx > 0) {
+            return cell.substring(twoDotsIdx + 1);
+          } else {
+            return cell
+          }
     type: text
 
   - id: name
