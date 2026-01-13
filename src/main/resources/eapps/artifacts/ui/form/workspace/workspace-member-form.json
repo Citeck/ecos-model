@@ -36,8 +36,9 @@
                     "validate": {
                       "required": true
                     },
+                    "isSkipSearchInWorkspace": true,
                     "allowedGroupType": "ROLE, BRANCH, GROUP",
-                    "defaultValue": "",
+                    "defaultValue": [],
                     "refreshOn": [],
                     "optionalWhenDisabled": false,
                     "type": "selectOrgstruct",
