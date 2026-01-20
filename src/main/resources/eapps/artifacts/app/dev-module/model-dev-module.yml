@@ -5,6 +5,6 @@ name:
 
 actions:
   - uiserv/action@admin-update-permissions
-  - uiserv/action@admin-update-identifiers
+  #- uiserv/action@admin-update-identifiers
   - uiserv/action@admin-update-workspace
   - uiserv/action@admin-update-calculated-atts
