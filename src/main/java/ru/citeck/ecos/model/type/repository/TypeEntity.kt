@@ -17,6 +17,7 @@ class TypeEntity : AbstractAuditingEntity() {
     @Column(unique = true)
     lateinit var extId: String
 
+    var localIdTemplate: String? = null
     @Column(nullable = false)
     var name: String? = null
     var description: String? = null

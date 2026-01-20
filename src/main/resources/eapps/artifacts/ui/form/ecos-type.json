@@ -162,7 +162,14 @@
                               }
                             ],
                             "type": "selectJournal",
-                            "input": true
+                            "input": true,
+                            "source": {
+                              "custom": {
+                                "columns": []
+                              },
+                              "type": "journal",
+                              "customValues": []
+                            }
                           },
                           {
                             "label": {
@@ -190,8 +197,7 @@
                                 "attributes": {
                                   "parentConfigFormRef": "configFormRef?str"
                                 }
-                              },
-                              "forceLoad": false
+                              }
                             },
                             "update": {
                               "type": "disabled"
@@ -242,7 +248,14 @@
                                     "refreshOn": [],
                                     "optionalWhenDisabled": false,
                                     "type": "selectJournal",
-                                    "input": true
+                                    "input": true,
+                                    "source": {
+                                      "custom": {
+                                        "columns": []
+                                      },
+                                      "type": "journal",
+                                      "customValues": []
+                                    }
                                   }
                                 ],
                                 "type": "column",
@@ -303,7 +316,14 @@
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
                             "type": "selectJournal",
-                            "input": true
+                            "input": true,
+                            "source": {
+                              "custom": {
+                                "columns": []
+                              },
+                              "type": "journal",
+                              "customValues": []
+                            }
                           },
                           {
                             "label": {
@@ -316,7 +336,14 @@
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
                             "type": "selectJournal",
-                            "input": true
+                            "input": true,
+                            "source": {
+                              "custom": {
+                                "columns": []
+                              },
+                              "type": "journal",
+                              "customValues": []
+                            }
                           },
                           {
                             "label": {
@@ -341,7 +368,14 @@
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
                             "type": "selectJournal",
-                            "input": true
+                            "input": true,
+                            "source": {
+                              "custom": {
+                                "columns": []
+                              },
+                              "type": "journal",
+                              "customValues": []
+                            }
                           },
                           {
                             "label": {
@@ -359,6 +393,27 @@
                             "customConditional": "show = !!data.asyncData['parentConfigFormRef'] || !!data['configFormRef'];",
                             "type": "button",
                             "input": true
+                          },
+                          {
+                            "label": {
+                              "ru": "Шаблон локального идентификатора",
+                              "en": "Local ID Template"
+                            },
+                            "key": "localIdTemplate",
+                            "tooltip": {
+                              "ru": "Определяет, как формируется локальная часть идентификатора (localId) в EntityRef.\nОбщий вид ссылки: {appName}/{sourceId}@{localId}. Значение localId формируется по шаблону, заданному в этом поле.\nУкажите дефис (-), если необходимо отключить шаблон, унаследованный от родительского типа.\nПосле изменения шаблона для миграции существующих записей можно воспользоваться соответствующим действием в панели администратора.",
+                              "en": "Defines how the local part of the identifier (localId) in EntityRef is generated.\nThe general reference format is {appName}/{sourceId}@{localId}. The localId value is generated according to the template specified in this field.\nEnter a hyphen (-) to disable the template inherited from the parent type.\nAfter changing the template, you can use the corresponding action in the admin panel to migrate existing records."
+                            },
+                            "defaultValue": "",
+                            "refreshOn": [],
+                            "optionalWhenDisabled": false,
+                            "type": "textfield",
+                            "input": true,
+                            "inputMasks": [
+                              {}
+                            ],
+                            "reorder": false,
+                            "dataSrc": ""
                           }
                         ],
                         "type": "column",
@@ -430,7 +485,14 @@
                                     "refreshOn": [],
                                     "optionalWhenDisabled": false,
                                     "type": "selectJournal",
-                                    "input": true
+                                    "input": true,
+                                    "source": {
+                                      "custom": {
+                                        "columns": []
+                                      },
+                                      "type": "journal",
+                                      "customValues": []
+                                    }
                                   },
                                   {
                                     "label": {
@@ -530,8 +592,7 @@
                                       "custom": {
                                         "columns": []
                                       },
-                                      "customValues": "",
-                                      "viewMode": "default"
+                                      "customValues": ""
                                     },
                                     "queryData": "",
                                     "refreshOn": [],
@@ -667,7 +728,14 @@
                             "refreshOn": [],
                             "type": "selectJournal",
                             "input": true,
-                            "queryData": ""
+                            "queryData": "",
+                            "source": {
+                              "custom": {
+                                "columns": []
+                              },
+                              "type": "journal",
+                              "customValues": []
+                            }
                           }
                         ],
                         "conditional": {

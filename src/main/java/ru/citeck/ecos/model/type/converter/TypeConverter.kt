@@ -54,6 +54,7 @@ class TypeConverter(
             entity.parent = parentEntity
         }
 
+        entity.localIdTemplate = typeDef.localIdTemplate
         entity.name = Json.mapper.toString(typeDef.name)
         entity.description = Json.mapper.toString(typeDef.description)
         entity.system = typeDef.system
@@ -122,6 +123,7 @@ class TypeConverter(
 
         val typeDef = TypeDef.create()
             .withId(entity.extId)
+            .withLocalIdTemplate(entity.localIdTemplate)
             .withName(Json.mapper.read(entity.name, MLText::class.java))
             .withDescription(Json.mapper.read(entity.description, MLText::class.java))
             .withSystem(entity.system)

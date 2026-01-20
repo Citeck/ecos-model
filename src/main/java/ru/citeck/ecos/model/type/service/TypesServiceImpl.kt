@@ -21,6 +21,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 import java.util.function.BiConsumer
 import java.util.function.Consumer
 import java.util.regex.Pattern
+import kotlin.IllegalStateException
 
 @Service
 class TypesServiceImpl(
@@ -41,6 +42,7 @@ class TypesServiceImpl(
             "doclib-directory",
             "doclib-file"
         )
+        private val BASE_TYPES_WO_AUTO_CREATION = setOf("base", "user-base", "type")
         private const val VALID_ID_PATTERN_TXT = "^[\\w\$:/.-]+\\w\$"
         private val VALID_ID_PATTERN = Pattern.compile(VALID_ID_PATTERN_TXT)
     }
@@ -267,14 +269,8 @@ class TypesServiceImpl(
             return typeConverter.toDto(byExtId)
         }
 
-        check(
-            !(
-                "base" == typeId.id ||
-                    "user-base" == typeId.id ||
-                    "type" == typeId.id
-                )
-        ) {
-            "Base type doesn't exists: '$typeId'"
+        if (BASE_TYPES_WO_AUTO_CREATION.contains(typeId.id)) {
+            throw IllegalStateException("Base type doesn't exists: '$typeId'")
         }
 
         val typeDef = TypeDef.create()

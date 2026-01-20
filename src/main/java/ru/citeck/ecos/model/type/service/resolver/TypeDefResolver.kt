@@ -224,6 +224,11 @@ class TypeDefResolver(
         if (MLText.isEmpty(resTypeDef.dispNameTemplate)) {
             resTypeDef.withDispNameTemplate(resolvedParentDef.dispNameTemplate)
         }
+        if (resTypeDef.localIdTemplate == "-") {
+            resTypeDef.withLocalIdTemplate("")
+        } else if (resTypeDef.localIdTemplate.isEmpty()) {
+            resTypeDef.withLocalIdTemplate(resolvedParentDef.localIdTemplate)
+        }
 
         if (resolvedParentDef.aspects.isNotEmpty()) {
             val fullAspects = linkedMapOf<EntityRef, TypeAspectDef>()
