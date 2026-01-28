@@ -42,7 +42,8 @@ open class GroupsPersonsRecordsDao(
     private val workspaceService: EmodelWorkspaceService,
     private val webAppApi: EcosWebAppApi,
     proxyProcessor: ProxyProcessor? = null
-) : RecordsDaoProxy(id, "$id-repo", proxyProcessor), RecordsMutateWithAnyResDao {
+) : RecordsDaoProxy(id, "$id-repo", proxyProcessor),
+    RecordsMutateWithAnyResDao {
 
     companion object {
         private val UNIFIED_PRIVATE_GROUP_AUTH = AuthGroup.PREFIX + AuthorityGroupConstants.UNIFIED_PRIVATE_GROUP

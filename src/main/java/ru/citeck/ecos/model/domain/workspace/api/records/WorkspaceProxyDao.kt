@@ -72,7 +72,8 @@ class WorkspaceProxyDao(
      */
     override fun queryRecords(recsQuery: RecordsQuery): RecsQueryRes<*>? {
         val currentAuthorities = AuthContext.getCurrentAuthorities()
-        if (AuthContext.isNotRunAsSystemOrAdmin() && (
+        if (AuthContext.isNotRunAsSystemOrAdmin() &&
+            (
                 currentAuthorities.contains(AuthRole.GUEST) ||
                     currentAuthorities.contains(AuthRole.ANONYMOUS) ||
                     currentAuthorities.none { it == AuthRole.USER }

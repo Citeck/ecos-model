@@ -22,7 +22,9 @@ import java.util.concurrent.atomic.AtomicLong
 @Component
 class ContentStoragesRecordsDao(
     private val typesRegistry: EcosTypesRegistry
-) : AbstractRecordsDao(), RecordsQueryDao, RecordAttsDao {
+) : AbstractRecordsDao(),
+    RecordsQueryDao,
+    RecordAttsDao {
 
     companion object {
 

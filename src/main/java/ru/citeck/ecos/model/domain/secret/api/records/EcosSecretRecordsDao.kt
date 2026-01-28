@@ -33,7 +33,11 @@ import java.time.Instant
 class EcosSecretRecordsDao(
     private val service: EcosSecretService,
     private val perms: ModelSystemArtifactPerms
-) : AbstractRecordsDao(), RecordsQueryDao, RecordDeleteDao, RecordAttsDao, RecordMutateDao {
+) : AbstractRecordsDao(),
+    RecordsQueryDao,
+    RecordDeleteDao,
+    RecordAttsDao,
+    RecordMutateDao {
 
     companion object {
         const val ID = "secret"

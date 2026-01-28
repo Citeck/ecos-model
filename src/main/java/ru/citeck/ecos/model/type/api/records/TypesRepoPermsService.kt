@@ -150,7 +150,8 @@ class TypesRepoPermsService(
 
     private class DefaultPerms(
         private val hasWritePerms: Boolean
-    ) : RecordPermsData, RecordAttsPermsData {
+    ) : RecordPermsData,
+        RecordAttsPermsData {
         override fun getAdditionalPerms(): Set<String> {
             return emptySet()
         }

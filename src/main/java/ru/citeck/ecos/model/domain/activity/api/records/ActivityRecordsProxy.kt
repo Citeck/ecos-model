@@ -28,10 +28,11 @@ import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.api.entity.toEntityRef
 
 @Component
-class ActivityRecordsProxy : RecordsDaoProxy(
-    ActivityConfiguration.ACTIVITY_DAO_ID,
-    ActivityConfiguration.ACTIVITY_REPO_DAO_ID
-) {
+class ActivityRecordsProxy :
+    RecordsDaoProxy(
+        ActivityConfiguration.ACTIVITY_DAO_ID,
+        ActivityConfiguration.ACTIVITY_REPO_DAO_ID
+    ) {
 
     companion object {
         const val COMMENT_ID_PREFIX = "comment$"
@@ -276,7 +277,8 @@ class ActivityRecordsProxy : RecordsDaoProxy(
     private class ProxyCommentVal(
         private val id: EntityRef,
         base: AttValue
-    ) : AttValueDelegate(base), AttValueProxy {
+    ) : AttValueDelegate(base),
+        AttValueProxy {
 
         override fun getId(): Any {
             return id

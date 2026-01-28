@@ -38,7 +38,8 @@ class TypesRegistryInitializer(
     private val localAppService: LocalAppService,
     private val resolver: TypeDefResolver,
     private val workspaceService: WorkspaceService? = null
-) : EcosRegistryInitializer<TypeDef>, DisposableBean {
+) : EcosRegistryInitializer<TypeDef>,
+    DisposableBean {
 
     companion object {
         const val ORDER = -10f

@@ -22,7 +22,8 @@ class PermissionsDiagnosticRecords(
     private val dbPermsComponent: DbPermsComponent,
     private val recordPermsService: RecordPermsService,
     private val roleService: RoleService
-) : AbstractRecordsDao(), RecordsQueryDao {
+) : AbstractRecordsDao(),
+    RecordsQueryDao {
 
     companion object {
         const val ID = "permissions-diagnostic"

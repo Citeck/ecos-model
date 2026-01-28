@@ -39,3 +39,8 @@ model:
       name:
         ru: Время создания версии
         en: Version creation time
+
+aspects:
+  - ref: emodel/aspect@history-config
+    config:
+      disableHistory: true

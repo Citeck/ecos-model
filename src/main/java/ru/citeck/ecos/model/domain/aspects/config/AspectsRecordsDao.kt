@@ -14,7 +14,8 @@ open class AspectsRecordsDao(
     id: String,
     targetId: String,
     proxyProcessor: ProxyProcessor? = null
-) : RecordsDaoProxy(id, targetId, proxyProcessor), RecordsMutateWithAnyResDao {
+) : RecordsDaoProxy(id, targetId, proxyProcessor),
+    RecordsMutateWithAnyResDao {
 
     override fun mutateForAnyRes(records: List<LocalRecordAtts>): List<Any> {
         val newRecs = records.map {

@@ -49,3 +49,8 @@ model:
       name:
         ru: Описание последней ошибки
         en: Last fail description
+
+aspects:
+  - ref: emodel/aspect@history-config
+    config:
+      disableHistory: true

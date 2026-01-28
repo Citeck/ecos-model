@@ -29,7 +29,8 @@ class TypesRepoRecordsMutDao(
     private val typeService: TypesService,
     private val typesRepoPermsService: TypesRepoPermsService? = null,
     private val workspaceService: WorkspaceService? = null
-) : RecordMutateWithAnyResDao, RecordDeleteDao {
+) : RecordMutateWithAnyResDao,
+    RecordDeleteDao {
 
     companion object {
         private const val ARTIFACT_UPLOAD_FORM_ID = "ecos-artifact-upload"

@@ -21,3 +21,8 @@ model:
         ru: Содержимое
         en: Content
       type: CONTENT
+
+aspects:
+  - ref: emodel/aspect@history-config
+    config:
+      disableHistory: true

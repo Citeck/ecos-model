@@ -44,7 +44,9 @@ class TypesRepoRecordsDao(
     private val typesRepoPermsService: TypesRepoPermsService? = null,
     private val workspaceService: WorkspaceService? = null,
     private val typesRepo: TypesRepo
-) : AbstractRecordsDao(), RecordsQueryDao, RecordAttsDao {
+) : AbstractRecordsDao(),
+    RecordsQueryDao,
+    RecordAttsDao {
 
     companion object {
         const val ID = "types-repo"

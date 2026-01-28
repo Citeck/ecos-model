@@ -6,7 +6,9 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
 @Repository
-interface TypeRepository : JpaRepository<TypeEntity, Long>, JpaSpecificationExecutor<TypeEntity> {
+interface TypeRepository :
+    JpaRepository<TypeEntity, Long>,
+    JpaSpecificationExecutor<TypeEntity> {
 
     @Query("SELECT TYPE FROM TypeEntity TYPE WHERE TYPE.extId = ?1")
     fun findByExtId(extId: String): TypeEntity?

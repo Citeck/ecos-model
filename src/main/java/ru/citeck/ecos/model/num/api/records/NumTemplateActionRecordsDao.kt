@@ -14,7 +14,8 @@ import ru.citeck.ecos.webapp.api.entity.EntityRef
 @Component
 class NumTemplateActionRecordsDao(
     private val numTemplateService: NumTemplateService
-) : ValueMutateDao<NumTemplateActionRecordsDao.ActionDao>, RecordsQueryDao {
+) : ValueMutateDao<NumTemplateActionRecordsDao.ActionDao>,
+    RecordsQueryDao {
 
     companion object {
         const val ID = "num-template-action"

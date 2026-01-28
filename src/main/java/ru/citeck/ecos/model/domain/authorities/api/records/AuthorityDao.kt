@@ -14,7 +14,10 @@ import ru.citeck.ecos.records3.record.dao.query.RecordsQueryDao
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 
 @Component
-class AuthorityDao : RecordsQueryDao, RecordAttsDao, AbstractRecordsDao() {
+class AuthorityDao :
+    AbstractRecordsDao(),
+    RecordsQueryDao,
+    RecordAttsDao {
 
     companion object {
         const val SRC_ID = "authority"

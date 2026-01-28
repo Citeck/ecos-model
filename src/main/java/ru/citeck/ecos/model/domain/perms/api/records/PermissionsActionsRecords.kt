@@ -21,7 +21,9 @@ import ru.citeck.ecos.webapp.api.entity.EntityRef
 import kotlin.concurrent.thread
 
 @Component
-class PermissionsActionsRecords : AbstractRecordsDao(), ValueMutateDao<PermissionsActionsRecords.ActionDto> {
+class PermissionsActionsRecords :
+    AbstractRecordsDao(),
+    ValueMutateDao<PermissionsActionsRecords.ActionDto> {
 
     companion object {
         const val ID = "update-permissions"

@@ -11,7 +11,9 @@ import ru.citeck.ecos.records3.record.dao.query.dto.res.RecsQueryRes
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 
 @Component
-class ActivityServiceRecordsDao : AbstractRecordsDao(), RecordsQueryDao {
+class ActivityServiceRecordsDao :
+    AbstractRecordsDao(),
+    RecordsQueryDao {
 
     companion object {
         const val ID = "activity-service"

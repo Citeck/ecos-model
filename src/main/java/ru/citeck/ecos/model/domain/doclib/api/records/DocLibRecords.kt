@@ -39,7 +39,10 @@ import java.time.Duration
 class DocLibRecords @Autowired constructor(
     val typesRegistry: EcosTypesRegistry,
     val webAppApi: EcosWebAppApi
-) : AbstractRecordsDao(), RecordsQueryDao, RecordMutateWithAnyResDao, RecordAttsDao {
+) : AbstractRecordsDao(),
+    RecordsQueryDao,
+    RecordMutateWithAnyResDao,
+    RecordAttsDao {
 
     companion object {
         const val ID = "doclib"

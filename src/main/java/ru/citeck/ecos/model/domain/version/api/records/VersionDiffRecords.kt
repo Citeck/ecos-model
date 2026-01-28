@@ -13,7 +13,8 @@ import ru.citeck.ecos.webapp.api.entity.EntityRef
 @Component
 class VersionDiffRecords(
     private val versionDiffService: VersionDiffService
-) : AbstractRecordsDao(), RecordsQueryDao {
+) : AbstractRecordsDao(),
+    RecordsQueryDao {
 
     companion object {
         const val ID = "version-diff"

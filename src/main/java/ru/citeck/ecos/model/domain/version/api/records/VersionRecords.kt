@@ -10,7 +10,9 @@ import ru.citeck.ecos.webapp.api.constants.AppName
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 
 @Component
-class VersionRecords : AbstractRecordsDao(), RecordsQueryDao {
+class VersionRecords :
+    AbstractRecordsDao(),
+    RecordsQueryDao {
 
     companion object {
         const val ID = "version"

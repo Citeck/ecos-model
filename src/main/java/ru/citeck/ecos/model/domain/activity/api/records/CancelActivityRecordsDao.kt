@@ -24,7 +24,8 @@ import java.time.Instant
 @Component
 class CancelActivityRecordsDao(
     private val notificationService: NotificationService
-) : AbstractRecordsDao(), ValueMutateDao<CancelActivityRecordsDao.ActivityDto> {
+) : AbstractRecordsDao(),
+    ValueMutateDao<CancelActivityRecordsDao.ActivityDto> {
 
     companion object {
         const val ID = "cancel-activity"

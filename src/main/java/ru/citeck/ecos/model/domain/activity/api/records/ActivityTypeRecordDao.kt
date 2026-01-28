@@ -12,7 +12,8 @@ import ru.citeck.ecos.webapp.api.entity.EntityRef
 @Component
 class ActivityTypeRecordDao(
     private val typeRefService: TypeRefService
-) : AbstractRecordsDao(), RecordsQueryDao {
+) : AbstractRecordsDao(),
+    RecordsQueryDao {
 
     companion object {
         const val ID = "activity-type"
@@ -38,7 +39,8 @@ class ActivityTypeRecordDao(
         if (typeRef.isNotEmpty()) {
             val result = activities.filter { activity ->
                 val config = activity.config
-                config == null || config.availableTypes.isEmpty() ||
+                config == null ||
+                    config.availableTypes.isEmpty() ||
                     config.availableTypes.find { typeRefService.isSubType(typeRef, it) } != null
             }.map { it.id }
             return result

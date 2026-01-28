@@ -5,7 +5,9 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.stereotype.Repository
 
 @Repository
-interface EcosSecretRepo : JpaRepository<EcosSecretEntity, Long>, JpaSpecificationExecutor<EcosSecretEntity> {
+interface EcosSecretRepo :
+    JpaRepository<EcosSecretEntity, Long>,
+    JpaSpecificationExecutor<EcosSecretEntity> {
 
     fun findByExtId(extId: String): EcosSecretEntity?
 

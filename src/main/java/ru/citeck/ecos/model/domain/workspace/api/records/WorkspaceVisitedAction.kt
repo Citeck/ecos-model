@@ -21,7 +21,9 @@ import java.time.Instant
 import java.util.concurrent.ArrayBlockingQueue
 
 @Component
-class WorkspaceVisitedAction : AbstractRecordsDao(), ValueMutateDao<WorkspaceVisitedAction.VisitActionDto> {
+class WorkspaceVisitedAction :
+    AbstractRecordsDao(),
+    ValueMutateDao<WorkspaceVisitedAction.VisitActionDto> {
 
     companion object {
         private val log = KotlinLogging.logger {}

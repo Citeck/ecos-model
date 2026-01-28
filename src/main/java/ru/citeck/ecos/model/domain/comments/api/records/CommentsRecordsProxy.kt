@@ -170,7 +170,8 @@ class CommentsRecordsProxy(
     private class ProxyRecVal(
         private val id: EntityRef,
         base: AttValue
-    ) : AttValueDelegate(base), AttValueProxy {
+    ) : AttValueDelegate(base),
+        AttValueProxy {
 
         override fun getId(): Any {
             return id
