@@ -7,6 +7,7 @@
   "description": {},
   "customModule": "",
   "typeRef": "",
+  "workspace": "",
   "width": "",
   "system": true,
   "i18n": {},
@@ -94,12 +95,26 @@
             "input": true,
             "components": [
               {
-                "label": "Script",
-                "defaultValue": "",
+                "label": {
+                  "ru": "Script"
+                },
                 "key": "fn",
+                "editor": "ace",
+                "wysiwyg": "",
+                "defaultValue": "",
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
+                "aiEnabled": true,
+                "as": "",
                 "type": "textarea",
                 "input": true,
-                "editor": "ace"
+                "scriptContextType": "computed_role",
+                "uploadStorage": "",
+                "uploadUrl": "",
+                "uploadOptions": "",
+                "uploadDir": "",
+                "reorder": false,
+                "textAreaAIContextType": ""
               }
             ]
           }
@@ -207,13 +222,7 @@
                 "refreshOn": [],
                 "optionalWhenDisabled": false,
                 "type": "selectJournal",
-                "input": true,
-                "source": {
-                  "custom": {
-                    "columns": []
-                  },
-                  "type": "journal"
-                }
+                "input": true
               }
             ]
           }

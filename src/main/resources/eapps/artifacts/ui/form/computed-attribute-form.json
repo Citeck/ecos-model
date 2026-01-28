@@ -1,13 +1,15 @@
 {
   "id": "computed-attribute-form",
+  "formKey": "",
   "system": true,
   "title": {
     "en": "computed-attribute-form"
   },
   "description": {},
-  "customModule": null,
+  "customModule": "",
   "typeRef": "",
-  "width": null,
+  "workspace": "",
+  "width": "",
   "i18n": {},
   "definition": {
     "components": [
@@ -119,8 +121,7 @@
                 "optionalWhenDisabled": false,
                 "customConditional": "show = data.type === 'COUNTER' && data.storingType != 'ON_CREATE';",
                 "type": "htmlelement",
-                "input": false,
-                "addAnother": "ecos.forms.btn.add-another"
+                "input": false
               }
             ]
           }
@@ -148,12 +149,26 @@
             "input": true,
             "components": [
               {
-                "label": "Script",
-                "defaultValue": "",
+                "label": {
+                  "ru": "Script"
+                },
                 "key": "fn",
+                "editor": "ace",
+                "wysiwyg": "",
+                "defaultValue": "",
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
+                "aiEnabled": true,
+                "as": "",
+                "scriptContextType": "computed_attribute",
                 "type": "textarea",
                 "input": true,
-                "editor": "ace"
+                "uploadStorage": "",
+                "uploadUrl": "",
+                "uploadOptions": "",
+                "uploadDir": "",
+                "reorder": false,
+                "textAreaAIContextType": ""
               }
             ]
           }
@@ -275,7 +290,9 @@
           }
         ]
       }
-    ]
+    ],
+    "formId": "computed-attribute-form"
   },
-  "attributes": {}
+  "attributes": {},
+  "notExists": false
 }
