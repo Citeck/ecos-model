@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.domain.authorities.config
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import ru.citeck.ecos.commons.data.MLText
@@ -77,6 +78,9 @@ class PersonsConfiguration(
         private val UPDATE_KK_USERS_TXN_KEY = PersonsConfiguration::class.jvmName + "-update-kk-users"
         private val DELETE_KK_USERS_TXN_KEY = PersonsConfiguration::class.jvmName + "-delete-kk-users"
     }
+
+    @Value($$"${ecos.model.person.allowedRecordIdPattern}")
+    private lateinit var personAllowedRecordIdPattern: String
 
     @Bean
     fun personDao(): RecordsDao {
@@ -225,6 +229,7 @@ class PersonsConfiguration(
                     DbRecordsDaoConfig.create {
                         withId("person-repo")
                         withTypeRef(typeRef)
+                        withAllowedRecordIdPattern(personAllowedRecordIdPattern)
                     }
                 )
                 .withDataService(
