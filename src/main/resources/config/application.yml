@@ -17,6 +17,9 @@ spring:
       max-request-size: 100MB
 ecos:
   treeSearchLeafAssocs: 'has-category:category'
+  model:
+    person:
+      allowedRecordIdPattern: '^(\w+|\w[\w$/.-]+\w)$'
   idp:
     default-realm: ecos-app
   job:

@@ -162,14 +162,7 @@
                               }
                             ],
                             "type": "selectJournal",
-                            "input": true,
-                            "source": {
-                              "custom": {
-                                "columns": []
-                              },
-                              "type": "journal",
-                              "customValues": []
-                            }
+                            "input": true
                           },
                           {
                             "label": {
@@ -197,7 +190,8 @@
                                 "attributes": {
                                   "parentConfigFormRef": "configFormRef?str"
                                 }
-                              }
+                              },
+                              "forceLoad": false
                             },
                             "update": {
                               "type": "disabled"
@@ -248,14 +242,7 @@
                                     "refreshOn": [],
                                     "optionalWhenDisabled": false,
                                     "type": "selectJournal",
-                                    "input": true,
-                                    "source": {
-                                      "custom": {
-                                        "columns": []
-                                      },
-                                      "type": "journal",
-                                      "customValues": []
-                                    }
+                                    "input": true
                                   }
                                 ],
                                 "type": "column",
@@ -316,14 +303,7 @@
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
                             "type": "selectJournal",
-                            "input": true,
-                            "source": {
-                              "custom": {
-                                "columns": []
-                              },
-                              "type": "journal",
-                              "customValues": []
-                            }
+                            "input": true
                           },
                           {
                             "label": {
@@ -336,14 +316,7 @@
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
                             "type": "selectJournal",
-                            "input": true,
-                            "source": {
-                              "custom": {
-                                "columns": []
-                              },
-                              "type": "journal",
-                              "customValues": []
-                            }
+                            "input": true
                           },
                           {
                             "label": {
@@ -368,14 +341,7 @@
                             "refreshOn": [],
                             "optionalWhenDisabled": false,
                             "type": "selectJournal",
-                            "input": true,
-                            "source": {
-                              "custom": {
-                                "columns": []
-                              },
-                              "type": "journal",
-                              "customValues": []
-                            }
+                            "input": true
                           },
                           {
                             "label": {
@@ -485,14 +451,7 @@
                                     "refreshOn": [],
                                     "optionalWhenDisabled": false,
                                     "type": "selectJournal",
-                                    "input": true,
-                                    "source": {
-                                      "custom": {
-                                        "columns": []
-                                      },
-                                      "type": "journal",
-                                      "customValues": []
-                                    }
+                                    "input": true
                                   },
                                   {
                                     "label": {
@@ -592,7 +551,8 @@
                                       "custom": {
                                         "columns": []
                                       },
-                                      "customValues": ""
+                                      "customValues": "",
+                                      "viewMode": "default"
                                     },
                                     "queryData": "",
                                     "refreshOn": [],
@@ -728,14 +688,7 @@
                             "refreshOn": [],
                             "type": "selectJournal",
                             "input": true,
-                            "queryData": "",
-                            "source": {
-                              "custom": {
-                                "columns": []
-                              },
-                              "type": "journal",
-                              "customValues": []
-                            }
+                            "queryData": ""
                           }
                         ],
                         "conditional": {
@@ -937,7 +890,7 @@
                                     "action": "custom",
                                     "state": "",
                                     "showValidations": false,
-                                    "custom": "var currentRow = row;\nvar config = row.config || {}; \nvar formData = config;\n\nfunction checkForChanges(newData, originalData) {\n    const changed = {};\n    for (let key in newData) {\n        if (newData.hasOwnProperty(key) && originalData.hasOwnProperty(key)) {\n            if (newData[key] !== originalData[key]) {\n                changed[key] = {\n                    oldValue: originalData[key],\n                    newValue: newData[key]\n                };\n            }\n        }\n    }\n    return Object.keys(changed).length > 0 ? { \n      instance: changed, \n      component: { type: \"button\" }\n    } : null;\n}\n\n\nCiteck.EcosFormUtils.getFormById('uiserv/form@att-type-' + row.type + '-form', {\n    definition: 'definition?json'\n}).then(function(formConfig) {\n    \n    var inputs = Citeck.EcosFormUtils.getFormInputs(formConfig.definition);\n\n    Citeck.Dialogs.showFormDialog({\n        title: 'Attribute type config',\n        showDefaultButtons: true,\n        formDefinition: formConfig.definition,\n        formData: formData,\n        onSubmit: submission => {\n            var data = submission.data || {};\n            var configData = {};\n            for (let input of inputs) {\n                if (!input.scope) {\n                  configData[input.attribute] = data[input.attribute];\n                } else {\n                  let key = _.get(input, 'scope.component.key');\n                  if (key && !configData.hasOwnProperty(key)) {\n                    configData[key] = data[key];\n                  }\n                }\n            }\n            currentRow.config = configData;\n            const changedData = checkForChanges(data, formData);\n            submission.changed = changedData;\n            form.emit(\"change\", submission);\n        }\n    })\n    \n});",
+                                    "custom": "var currentRow = row;\nvar config = row.config || {}; \nvar formData = config;\n\nfunction checkForChanges(newData, originalData) {\n    const changed = {};\n    for (let key in newData) {\n        if (newData.hasOwnProperty(key) && originalData.hasOwnProperty(key)) {\n            if (newData[key] !== originalData[key]) {\n                changed[key] = {\n                    oldValue: originalData[key],\n                    newValue: newData[key]\n                };\n            }\n        }\n    }\n    return Object.keys(changed).length > 0 ? { \n      instance: changed, \n      component: { type: \"button\" }\n    } : null;\n}\n\nlet formRef = 'uiserv/form@att-type-' + row.type + '-form';\nCiteck.EcosFormUtils.getFormById(formRef, {\n    definition: 'definition?json'\n}).then(function(formConfig) {\n    \n    var inputs = Citeck.EcosFormUtils.getFormInputs(formConfig.definition);\n\n    Citeck.Dialogs.showFormDialog({\n        title: 'Attribute type config',\n        showDefaultButtons: true,\n        formDefinition: formConfig.definition,\n        formData: formData,\n        formRef: formRef,\n        onSubmit: submission => {\n            var data = submission.data || {};\n            var configData = {};\n            for (let input of inputs) {\n                if (!input.scope) {\n                  configData[input.attribute] = data[input.attribute];\n                } else {\n                  let key = _.get(input, 'scope.component.key');\n                  if (key && !configData.hasOwnProperty(key)) {\n                    configData[key] = data[key];\n                  }\n                }\n            }\n            currentRow.config = configData;\n            const changedData = checkForChanges(data, formData);\n            submission.changed = changedData;\n            form.emit(\"change\", submission);\n        }\n    })\n    \n});",
                                     "block": true,
                                     "refreshOn": [],
                                     "optionalWhenDisabled": false,
@@ -965,9 +918,13 @@
                                     "type": "button",
                                     "input": true,
                                     "row": "0-3",
+                                    "event": "",
+                                    "url": "",
                                     "headers": [
                                       {}
-                                    ]
+                                    ],
+                                    "reorder": false,
+                                    "dataGridLabel": false
                                   },
                                   {
                                     "label": {
@@ -1545,8 +1502,7 @@
                       "custom": {
                         "syncData": "let currentAtts = (data.modelAttributes || []).filter(a => !!a.id).map(a => {\n  return {\n    value: a.id, \n    label: Citeck.helpers.getMLValue(a.name) || a.id,\n    type: a.type || 'TEXT'\n  };\n});\nlet aspects = (data.customAspects || []).filter(a => !!a.ref).map(a => a.ref);\n\nvalue = {\n  parent: data.parentRef,\n  aspects,\n  currentAtts\n};",
                         "asyncData": "let parentAttsPromise;\nif (data.parent) {\n    parentAttsPromise = Records.get(data.parent).load({\n        attributes: 'model.attributes[]{label:name,value:id,type}',\n        systemAtts: 'model.systemAttributes[]{label:name,value:id,type}'\n    });\n} else {\n    parentAttsPromise = Promise.resolve({});\n}\n\nlet aspectsAttsPromise;\nif (data.aspects) {\n    aspectsAttsPromise = Records.get(data.aspects).load({\n        prefix: 'prefix!id',\n        attributes: 'attributes[]{label:name._as.mltext,value:id,type}',\n        systemAtts: 'systemAttributes[]{label:name._as.mltext,value:id,type}'\n    }).then(aspectsAtts => {\n        const addPrefix = (prefix, atts) => {\n            let result = [];\n            for (let att of atts) {\n                result.push({\n                    label: att.label,\n                    value: prefix + ':' + att.value,\n                    type: att.type\n                });\n            }\n            return result;\n        }\n        const resultAspects = [];\n        for (let aspect of aspectsAtts) {\n            resultAspects.push({\n                attributes: addPrefix(aspect.prefix, aspect.attributes || []),\n                systemAttributes: addPrefix(aspect.prefix, aspect.systemAtts || [])\n            });\n        }\n        return resultAspects;\n    });\n} else {\n    aspectsAttsPromise = Promise.resolve([]);\n}\n\nvalue = Promise.all([parentAttsPromise, aspectsAttsPromise]).then(results => {\n\n    const parentAtts = results[0] || {};\n    const aspectsAtts = results[1] || [];\n\n    const attributes = {};\n    const systemAtts = {};\n    \n    const fillAtts = (attsToFill, target) => {\n        if (!attsToFill || !attsToFill.length) {\n            return;\n        }\n        for (let att of attsToFill) {\n            if (att.value) {\n                let label = att.label\n                if (!label) {\n                    label = target[att.value] || att.value;\n                }\n                target[att.value] = {label, type: att.type};\n            }\n        }\n    }\n    \n    fillAtts(parentAtts.systemAtts, systemAtts);\n    fillAtts(parentAtts.attributes, attributes);\n    \n    const aspects = {\n      attributes: {},\n      systemAtts: {}\n    };\n    const aspectSystemAtts = {};\n\n    for (let aspectAtts of aspectsAtts) {\n        fillAtts(aspectAtts.systemAtts, systemAtts);\n        fillAtts(aspectAtts.attributes, attributes);\n        \n        fillAtts(aspectAtts.systemAtts, aspects.systemAtts);\n        fillAtts(aspectAtts.attributes, aspects.attributes);\n    }\n\n    fillAtts(data.currentAtts, attributes);\n    \n    const mergeAtts = (atts0, atts1) => {\n      const mergedAtts = {};\n      for (let attId in atts0) {\n          mergedAtts[attId] = atts0[attId];\n      }\n      for (let attId in atts1) {\n          mergedAtts[attId] = atts1[attId];\n      }\n      return mergedAtts;\n    }\n\n    const objToArray = (obj) => {\n        const resArr = [];\n        for (let value in obj) {\n          resArr.push({\n            value, \n            ...(obj[value])\n          });\n        }\n        return resArr;    \n    }\n    return {\n        attributes: objToArray(attributes),\n        systemAtts: objToArray(systemAtts),\n        fullAtts: objToArray(mergeAtts(systemAtts, attributes)),\n        aspects: {\n          attributes: objToArray(aspects.attributes),\n          systemAtts: objToArray(aspects.systemAtts),\n          fullAtts: objToArray(mergeAtts(aspects.systemAtts, aspects.attributes))\n        }\n    };\n});"
-                      },
-                      "forceLoad": false
+                      }
                     },
                     "update": {
                       "type": "any-change",
@@ -1662,18 +1618,19 @@
                                 "action": "custom",
                                 "state": "",
                                 "showValidations": false,
-                                "custom": "var currentRow = row;\r\nvar config = row.config || {};\r\nvar formData = config;\r\nvar aspectRef = row.ref;\r\n\r\nCiteck.Records\r\n    .get(aspectRef)\r\n    .load('configFormRef?id', true)\r\n    .then((formRef) => {\r\n        Citeck.EcosFormUtils.getFormById(formRef, {\r\n            definition: 'definition?json'\r\n        }).then(function(formConfig) {\r\n\r\n            var inputs = Citeck.EcosFormUtils.getFormInputs(formConfig.definition);\r\n\r\n            Citeck.Dialogs.showFormDialog({\r\n                title: 'Aspect type config',\r\n                showDefaultButtons: false,\r\n                formDefinition: formConfig.definition,\r\n                formData: formData,\r\n                onSubmit: submission => {\r\n                    var data = submission.data || {};\r\n                    var configData = {};\r\n                    for (let input of inputs) {\r\n                        if (!input.scope) {\r\n                            configData[input.attribute] = data[input.attribute];\r\n                        } else {\r\n                            let key = _.get(input, 'scope.component.key');\r\n                            if (key && !configData.hasOwnProperty(key)) {\r\n                                configData[key] = data[key];\r\n                            }\r\n                        }\r\n                    }\r\n\r\n                    currentRow.config = configData;\r\n                }\r\n            });\r\n        });\r\n    });",
-                                "headers": [
-                                  {
-                                    "header": "",
-                                    "value": ""
-                                  }
-                                ],
+                                "custom": "var currentRow = row;\r\nvar config = row.config || {};\r\nvar formData = config;\r\nvar aspectRef = row.ref;\r\n\r\nCiteck.Records\r\n    .get(aspectRef)\r\n    .load('configFormRef?id', true)\r\n    .then((formRef) => {\r\n        Citeck.EcosFormUtils.getFormById(formRef, {\r\n            definition: 'definition?json'\r\n        }).then(function(formConfig) {\r\n\r\n            var inputs = Citeck.EcosFormUtils.getFormInputs(formConfig.definition);\r\n\r\n            Citeck.Dialogs.showFormDialog({\r\n                title: 'Aspect type config',\r\n                showDefaultButtons: false,\r\n                formDefinition: formConfig.definition,\r\n                formData: formData,\r\n                formRef: formRef,\r\n                onSubmit: submission => {\r\n                    var data = submission.data || {};\r\n                    var configData = {};\r\n                    for (let input of inputs) {\r\n                        if (!input.scope) {\r\n                            configData[input.attribute] = data[input.attribute];\r\n                        } else {\r\n                            let key = _.get(input, 'scope.component.key');\r\n                            if (key && !configData.hasOwnProperty(key)) {\r\n                                configData[key] = data[key];\r\n                            }\r\n                        }\r\n                    }\r\n\r\n                    currentRow.config = configData;\r\n                }\r\n            });\r\n        });\r\n    });",
                                 "block": true,
                                 "refreshOn": [],
                                 "optionalWhenDisabled": false,
                                 "type": "button",
-                                "input": true
+                                "input": true,
+                                "event": "",
+                                "url": "",
+                                "headers": [
+                                  {}
+                                ],
+                                "reorder": false,
+                                "dataGridLabel": false
                               },
                               {
                                 "label": {
