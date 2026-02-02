@@ -81,7 +81,11 @@ class TypesConfig(
         }
     }
 
-    private fun createRecordsDao(dbDomainFactory: DbDomainFactory, typeDef: TypeDef, typesRegistry: EcosTypesRegistry): RecordsDao {
+    private fun createRecordsDao(
+        dbDomainFactory: DbDomainFactory,
+        typeDef: TypeDef,
+        typesRegistry: EcosTypesRegistry
+    ): RecordsDao {
 
         val sourceId = emodelTypeUtils.getEmodelSourceId(typeDef)
 
@@ -98,6 +102,7 @@ class TypesConfig(
 
         val typeRef = ModelUtils.getTypeRef(typeDef.id)
         val daoBuilder = DbRecordsDaoConfig.create()
+        daoBuilder.withAllowRecordIdUpdate(true)
         daoBuilder.withId(sourceId)
         daoBuilder.withTypeRef(typeRef)
         if (typesRegistry.isSubType(typeRef.getLocalId(), DocLibRecords.DEFAULT_DIR_TYPE_ID)) {
