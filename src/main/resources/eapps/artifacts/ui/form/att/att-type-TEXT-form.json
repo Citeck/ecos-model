@@ -22,6 +22,28 @@
         "optionalWhenDisabled": false,
         "type": "checkbox",
         "input": true
+      },
+      {
+        "label": {
+          "ru": "Глобальная проверка",
+          "en": "Global check"
+        },
+        "key": "globalCheck",
+        "tooltip": {
+          "ru": "Проверка на уникальность будет происходить по всем рабочим пространствам ",
+          "en": "The uniqueness check will be performed across all workspaces"
+        },
+        "refreshOn": [],
+        "optionalWhenDisabled": false,
+        "conditional": {
+          "show": "true",
+          "when": "unique",
+          "eq": "true"
+        },
+        "type": "checkbox",
+        "input": true,
+        "reorder": false,
+        "dataGridLabel": false
       }
     ],
     "formId": "att-type-TEXT-form"
