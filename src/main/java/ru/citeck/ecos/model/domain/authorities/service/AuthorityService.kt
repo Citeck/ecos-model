@@ -154,10 +154,12 @@ class AuthorityService(
         groupsToResetCache.add(groupId)
 
         if (groupsToResetCache.size == 1) {
-            TxnContext.doAfterCommit(-1000f, false) {
+            val resetAction = {
                 personAuthoritiesCache.clear()
                 authGroupsVersionCounter.incrementAndGet()
             }
+            TxnContext.doBeforeCommit(-1000f) { resetAction() }
+            TxnContext.doAfterCommit(-1000f, false) { resetAction() }
         }
     }
 
