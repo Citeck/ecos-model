@@ -7,6 +7,7 @@
   "description": {},
   "customModule": "",
   "typeRef": "",
+  "workspace": "",
   "width": "",
   "system": true,
   "i18n": {},
@@ -22,6 +23,80 @@
         "optionalWhenDisabled": false,
         "type": "checkbox",
         "input": true
+      },
+      {
+        "label": {
+          "ru": "Columns"
+        },
+        "key": "columns2",
+        "columns": [
+          {
+            "components": [
+              {
+                "label": {
+                  "ru": "Область уникальности",
+                  "en": "Unique scope"
+                },
+                "key": "uniqueScope",
+                "tooltip": {
+                  "ru": "Определяет, где проверяется уникальность значения атрибута:\n\n- WORKSPACE — значение должно быть уникальным только в пределах текущего рабочего пространства\n- GLOBAL — значение должно быть уникальным во всех рабочих пространствах",
+                  "en": "Defines where the uniqueness of an attribute value is checked:\n\n- WORKSPACE — the value must be unique only within the current workspace\n- GLOBAL — the value must be unique across all workspaces"
+                },
+                "validate": {
+                  "required": true,
+                  "select": false
+                },
+                "dataSrc": "values",
+                "data": {
+                  "values": [
+                    {
+                      "label": {
+                        "ru": "WORKSPACE",
+                        "en": "WORKSPACE"
+                      },
+                      "value": "WORKSPACE"
+                    },
+                    {
+                      "label": {
+                        "ru": "GLOBAL",
+                        "en": "GLOBAL"
+                      },
+                      "value": "GLOBAL"
+                    }
+                  ],
+                  "headers": [
+                    {}
+                  ]
+                },
+                "optionalWhenDisabled": false,
+                "conditional": {
+                  "show": "true",
+                  "when": "unique",
+                  "eq": "true"
+                },
+                "type": "ecosSelect",
+                "input": true,
+                "reorder": false,
+                "reference": false,
+                "defaultValue": "GLOBAL"
+              }
+            ],
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 0
+          },
+          {
+            "index": 1,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "components": []
+          }
+        ],
+        "oneColumnInViewMode": false,
+        "type": "columns",
+        "input": false
       }
     ],
     "formId": "att-type-TEXT-form"
