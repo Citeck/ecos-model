@@ -78,7 +78,7 @@
                 "input": true,
                 "reorder": false,
                 "reference": false,
-                "defaultValue": "WORKSPACE"
+                "defaultValue": "GLOBAL"
               }
             ],
             "type": "column",
