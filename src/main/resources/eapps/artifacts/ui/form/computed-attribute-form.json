@@ -115,11 +115,11 @@
                 },
                 "key": "html",
                 "className": "",
-                "content": "<h6>Storing type should be \"On create\" for counters</h6>",
+                "content": "<h6>Storing type should be \"On create\" or \"On empty\" for counters</h6>",
                 "refreshOnChange": false,
                 "refreshOn": [],
                 "optionalWhenDisabled": false,
-                "customConditional": "show = data.type === 'COUNTER' && data.storingType != 'ON_CREATE';",
+                "customConditional": "show = data.type === 'COUNTER' && data.storingType != 'ON_CREATE' && data.storingType != 'ON_EMPTY';",
                 "type": "htmlelement",
                 "input": false
               }
