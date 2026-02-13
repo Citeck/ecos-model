@@ -144,7 +144,7 @@ class EmodelTwoPhaseCommitCoordinatorRepo : TwoPhaseCommitRepo {
                 )
                 remainingAppsToProc.removeAll(processedApps)
                 if (remainingAppsToProc.isEmpty()) {
-                    dataService.forceDelete(Predicates.eq(TwoPcEntity.TXN_ID, txnId.toString()))
+                    dataService.delete(Predicates.eq(TwoPcEntity.TXN_ID, txnId.toString()))
                 } else {
                     entity.appsToProcess = Json.mapper.toStringNotNull(remainingAppsToProc)
                     entity.modified = Instant.now()
