@@ -38,10 +38,8 @@ class TypesRepoPermsService(
     }
 
     private val permsCalculator = ecosPermissionsService.createCalculator()
+        .defaultComponents()
         .addComponent(object : RecordPermsComponent, RecordAttsPermsComponent {
-            override fun getOrder(): Float {
-                return Float.MAX_VALUE
-            }
 
             override fun getRecordPerms(context: RecordPermsContext): RecordPermsData {
                 return evalPerms(context)
