@@ -315,6 +315,9 @@
             "key": "workingCalendar",
             "modalTitle": "",
             "journalId": "working-calendar",
+            "validate": {
+              "required": true
+            },
             "refreshOn": [],
             "optionalWhenDisabled": false,
             "type": "selectJournal",
