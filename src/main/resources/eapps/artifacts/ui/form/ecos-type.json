@@ -2429,7 +2429,7 @@
                   {
                     "label": "Associations",
                     "hideLabel": true,
-                    "disableAddingRemovingRows": true,
+                    "disableAddingRemovingRows": false,
                     "defaultOpen": false,
                     "layoutFixed": false,
                     "enableRowGroups": false,
