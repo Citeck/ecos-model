@@ -99,8 +99,7 @@
                   "ru": "Script"
                 },
                 "key": "fn",
-                "editor": "monaco",
-                "codeAs": "javascript",
+                "editor": "ace",
                 "wysiwyg": "",
                 "defaultValue": "",
                 "refreshOn": [],
