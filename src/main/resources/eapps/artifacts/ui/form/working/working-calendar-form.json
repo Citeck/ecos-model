@@ -45,7 +45,7 @@
           "en": "Calendar ends at"
         },
         "validate": {
-          "custom": "valid = !input || !data.from || input >= data.from || Citeck.helpers.getMLValue({'ru': 'Дата «до» не может быть раньше даты «с»', 'en': '\"Until\" date cannot be earlier than \"from\" date'});"
+          "custom": "valid = !input || !data.from || moment(input).isSameOrAfter(data.from, 'day') || Citeck.helpers.getMLValue({'ru': 'Дата «до» не может быть раньше даты «с»', 'en': '\"Until\" date cannot be earlier than \"from\" date'});"
         },
         "refreshOn": [
           "from"
