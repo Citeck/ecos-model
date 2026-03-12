@@ -56,6 +56,7 @@ class SearchRecordsDao(
         private const val GROUP_TYPE_DOCUMENTS = "DOCUMENTS"
         private const val GROUP_TYPE_TASKS = "TASKS"
         private const val GROUP_TYPE_WORKSPACES = "WORKSPACES"
+        private const val GROUP_TYPE_SEMANTIC = "SEMANTIC"
 
         private const val MAX_ITEMS_FOR_TYPE = 50
 
@@ -80,6 +81,7 @@ class SearchRecordsDao(
         if (recsQuery.language == PredicateService.LANGUAGE_PREDICATE) {
             var text = ""
             var types = listOf(GROUP_TYPE_DOCUMENTS)
+            var workspaceId: String? = null
             PredicateUtils.mapValuePredicates(recsQuery.getPredicate(), { p ->
                 if (p.getAttribute() == "ALL") {
                     text = p.getValue().asText()
@@ -87,11 +89,27 @@ class SearchRecordsDao(
                 if (p.getAttribute() == "types") {
                     types = p.getValue().toStrList()
                 }
+                if (p.getAttribute() == "workspaceId") {
+                    workspaceId = p.getValue().asText()
+                }
                 p
             }, onlyAnd = true, optimize = false, filterEmptyComposite = true)
-            query = SearchQuery(text, types, recsQuery.page.maxItems)
+            if (workspaceId.isNullOrBlank()) {
+                workspaceId = recsQuery.workspaces.firstOrNull()
+            }
+            query = SearchQuery(text, types, recsQuery.page.maxItems, workspaceId)
         } else {
-            query = recsQuery.getQueryOrNull(SearchQuery::class.java)
+            val parsed = recsQuery.getQueryOrNull(SearchQuery::class.java)
+            if (parsed != null && parsed.workspaceId.isNullOrBlank()) {
+                val wsFromQuery = recsQuery.workspaces.firstOrNull()
+                if (!wsFromQuery.isNullOrBlank()) {
+                    query = SearchQuery(parsed.text, parsed.types, parsed.maxItemsForType, wsFromQuery)
+                } else {
+                    query = parsed
+                }
+            } else {
+                query = parsed
+            }
         }
         return if (query?.text.isNullOrBlank()) null else query
     }
@@ -118,6 +136,7 @@ class SearchRecordsDao(
                 GROUP_TYPE_DOCUMENTS -> addResult(queryDocuments(textToSearch, maxItemsForType))
                 GROUP_TYPE_TASKS -> addResult(queryTasks(textToSearch, maxItemsForType))
                 GROUP_TYPE_WORKSPACES -> addResult(queryWorkspaces(textToSearch, maxItemsForType))
+                GROUP_TYPE_SEMANTIC -> addResult(querySemantic(textToSearch, maxItemsForType, query.workspaceId))
             }
             if (maxItems >= 0 && records.size >= maxItems) {
                 break
@@ -128,6 +147,34 @@ class SearchRecordsDao(
             records.subList(0, maxItems - 1)
         } else {
             records
+        }
+    }
+
+    private fun querySemantic(text: String, maxItems: Int, workspaceId: String?): SearchRes {
+        if (workspaceId.isNullOrBlank()) return SearchRes.EMPTY
+        return try {
+            val result = recordsService.query(
+                RecordsQuery.create()
+                    .withSourceId("rag/rag-search")
+                    .withQuery(
+                        mapOf(
+                            "text" to text,
+                            "maxItemsForType" to maxItems,
+                            "workspaceId" to workspaceId,
+                            "sourceType" to "ECOS"
+                        )
+                    )
+                    .withMaxItems(maxItems)
+                    .build(),
+                BASE_ATTS_TO_REQUEST
+            )
+            SearchRes(
+                result.getRecords().map { createSearchRecord(it, GROUP_TYPE_SEMANTIC) },
+                result.getTotalCount()
+            )
+        } catch (e: Exception) {
+            log.warn(e) { "Semantic search failed, rag service may be unavailable" }
+            SearchRes.EMPTY
         }
     }
 
@@ -466,7 +513,8 @@ class SearchRecordsDao(
     class SearchQuery(
         val text: String,
         val types: List<String> = emptyList(),
-        val maxItemsForType: Int = 5
+        val maxItemsForType: Int = 5,
+        val workspaceId: String? = null
     )
 
     class SearchRecord(

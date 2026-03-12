@@ -10,7 +10,7 @@ sourceId: 'emodel/search'
 predicate:
   t: 'in'
   a: 'types'
-  v: ['PEOPLE', 'DOCUMENTS', 'WORKSPACES' ]
+  v: ['PEOPLE', 'DOCUMENTS', 'WORKSPACES', 'SEMANTIC']
 
 properties:
   full-search-predicate: '{ "t": "contains", "att": "ALL", "val": "$INPUT" }'
