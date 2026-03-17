@@ -5,6 +5,7 @@ import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.config.lib.consumer.bean.EcosConfig
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.i18n.I18nContext
+import ru.citeck.ecos.data.sql.records.dao.atts.DbRecord
 import ru.citeck.ecos.data.sql.records.listener.DbRecordChangedEvent
 import ru.citeck.ecos.data.sql.records.listener.DbRecordCreatedEvent
 import ru.citeck.ecos.data.sql.records.listener.DbRecordsListenerAdapter
@@ -38,6 +39,7 @@ class WorkspaceRecordsListener(
         private const val WIKI_ROOT_ASSOC = "wikiRoot"
 
         const val CREATOR_MEMBER_ID = "creator"
+        const val ATT_WORKSPACE_MANAGED_BY = "workspaceManagedBy"
     }
 
     @EcosConfig("wiki-initial-page-content")
@@ -58,6 +60,16 @@ class WorkspaceRecordsListener(
             createWikiRoot(event.globalRef)
             createCreatorMember(event.globalRef)
             generateAndUpdateSystemId(event.globalRef.getLocalId())
+            syncVisibleInWorkspaces(
+                event.globalRef,
+                added = listOf(
+                    recordsService.getAtt(
+                        event.record,
+                        "$ATT_WORKSPACE_MANAGED_BY?id"
+                    ).asText().toEntityRef()
+                ),
+                removed = emptyList()
+            )
         }
     }
 
@@ -82,10 +94,33 @@ class WorkspaceRecordsListener(
     }
 
     override fun onChanged(event: DbRecordChangedEvent) {
-        val nestedWorkspacesDiff = event.assocs.find {
+        event.assocs.find {
             it.assocId == WorkspaceDesc.ATT_NESTED_WORKSPACES
-        } ?: return
-        validateNestedWorkspaces(event.globalRef.getLocalId(), nestedWorkspacesDiff.added)
+        }?.let {
+            validateNestedWorkspaces(event.globalRef.getLocalId(), it.added)
+        }
+        val wsManagedByDiff = event.systemAssocs.find { it.assocId == ATT_WORKSPACE_MANAGED_BY }
+        if (wsManagedByDiff != null) {
+            syncVisibleInWorkspaces(event.globalRef, added = wsManagedByDiff.added, removed = wsManagedByDiff.removed)
+        }
+    }
+
+    private fun syncVisibleInWorkspaces(
+        workspaceRef: EntityRef,
+        added: List<EntityRef>,
+        removed: List<EntityRef>
+    ) {
+        fun updateWsVisibility(forRef: EntityRef, add: Boolean) {
+            if (forRef.isEmpty()) return
+            val mutAttPrefix = if (add) "att_add_" else "att_rem_"
+            recordsService.mutateAtt(
+                forRef,
+                mutAttPrefix + DbRecord.ATT_VISIBLE_IN_WORKSPACES,
+                workspaceRef
+            )
+        }
+        added.forEach { updateWsVisibility(it, true) }
+        removed.forEach { updateWsVisibility(it, false) }
     }
 
     private fun validateNestedWorkspaces(workspaceId: String, addedNestedWorkspaces: List<EntityRef>) {
