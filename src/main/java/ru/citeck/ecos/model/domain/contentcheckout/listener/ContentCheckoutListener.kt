@@ -22,8 +22,7 @@ class ContentCheckoutListener(
             withFilter(
                 AndPredicate.of(
                     Predicates.eq("record._aspects._has.content-checkout?bool", true),
-                    Predicates.eq("record.checkout:isCheckedOut?bool", true),
-                    Predicates.notEq("\$auth.runAs.isSystem?bool", true)
+                    Predicates.eq("record.checkout:isCheckedOut?bool", true)
                 )
             )
             withAction { data -> validateContentChange(data) }
@@ -31,6 +30,9 @@ class ContentCheckoutListener(
     }
 
     private fun validateContentChange(data: ContentChangedData) {
+        if (AuthContext.isRunAsSystem()) {
+            return
+        }
         if (data.checkedOutMode == ContentCheckoutService.Mode.MANUAL.name) {
             val currentUser = AuthContext.getCurrentUser()
             if (currentUser == data.checkedOutBy) {
