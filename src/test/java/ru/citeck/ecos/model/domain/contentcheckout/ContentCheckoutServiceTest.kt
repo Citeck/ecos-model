@@ -14,8 +14,13 @@ import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.commons.utils.resource.ResourceUtils
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.auth.AuthRole
+import ru.citeck.ecos.data.sql.domain.DbDomainConfig
+import ru.citeck.ecos.data.sql.domain.DbDomainFactory
+import ru.citeck.ecos.data.sql.records.DbRecordsDaoConfig
+import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
 import ru.citeck.ecos.model.EcosModelApp
 import ru.citeck.ecos.model.domain.contentcheckout.service.ContentCheckoutService
+import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.webapp.api.entity.EntityRef
@@ -29,6 +34,9 @@ class ContentCheckoutServiceTest {
     companion object {
         private const val USER_A = "userA"
         private const val USER_B = "userB"
+
+        private const val TEST_SOURCE_ID = "content-checkout-test"
+        private const val TEST_TYPE_ID = "content-checkout-test"
     }
 
     @Autowired
@@ -40,28 +48,55 @@ class ContentCheckoutServiceTest {
     @Autowired
     private lateinit var contentCheckoutService: ContentCheckoutService
 
+    @Autowired
+    private lateinit var dbDomainFactory: DbDomainFactory
+
     private val refsToDelete = mutableListOf<EntityRef>()
 
     @BeforeAll
     fun setUp() {
         localAppService.deployLocalArtifacts(ResourceUtils.getFile("classpath:eapps/artifacts"))
+
+        val dao = dbDomainFactory.create(
+            DbDomainConfig.create()
+                .withRecordsDao(
+                    DbRecordsDaoConfig.create {
+                        withId(TEST_SOURCE_ID)
+                        withTypeRef(ModelUtils.getTypeRef(TEST_TYPE_ID))
+                    }
+                )
+                .withDataService(
+                    DbDataServiceConfig.create {
+                        withTable("test_content_checkout")
+                        withStoreTableMeta(true)
+                    }
+                ).build()
+        ).withSchema("ecos_data").build()
+
+        recordsService.register(dao)
     }
 
     @AfterAll
     fun tearDown() {
         AuthContext.runAsSystem {
-            recordsService.delete(refsToDelete)
+            for (ref in refsToDelete.reversed()) {
+                try {
+                    recordsService.delete(ref)
+                } catch (_: Exception) {
+                }
+            }
         }
+        recordsService.unregister(TEST_SOURCE_ID)
     }
 
     private fun createFileRecord(): EntityRef {
         val ref = AuthContext.runAsSystem {
             recordsService.create(
-                "emodel/types-repo",
-                ObjectData.create()
-                    .set("id", "file")
-                    .set(RecordConstants.ATT_TYPE, "emodel/type@file")
-                    .set("name", "test-file-${System.nanoTime()}")
+                TEST_SOURCE_ID,
+                mapOf(
+                    RecordConstants.ATT_TYPE to "emodel/type@$TEST_TYPE_ID",
+                    "name" to "test-file-${System.nanoTime()}"
+                )
             )
         }
         refsToDelete.add(ref)
@@ -187,7 +222,7 @@ class ContentCheckoutServiceTest {
 
         val dummyContent = EntityRef.valueOf("emodel/temp-content@dummy")
         runAsUser(USER_A) {
-            contentCheckoutService.checkin(fileRef, dummyContent, "version comment", false)
+            contentCheckoutService.checkin(fileRef, dummyContent)
         }
 
         assertThat(contentCheckoutService.isCheckedOut(fileRef)).isFalse()
@@ -205,7 +240,7 @@ class ContentCheckoutServiceTest {
         val dummyContent = EntityRef.valueOf("emodel/temp-content@dummy")
         val exception = assertThrows<RuntimeException> {
             runAsUser(USER_B) {
-                contentCheckoutService.checkin(fileRef, dummyContent, "", false)
+                contentCheckoutService.checkin(fileRef, dummyContent)
             }
         }
         assertThat(exception.message).contains("Only the user who checked out")
@@ -236,7 +271,7 @@ class ContentCheckoutServiceTest {
         val dummyContent = EntityRef.valueOf("emodel/temp-content@dummy")
         val exception = assertThrows<RuntimeException> {
             runAsUser(USER_A) {
-                contentCheckoutService.checkin(fileRef, dummyContent, "", false)
+                contentCheckoutService.checkin(fileRef, dummyContent)
             }
         }
         assertThat(exception.message).contains("not checked out")
@@ -312,7 +347,6 @@ class ContentCheckoutServiceTest {
             contentCheckoutService.checkout(fileRef, ContentCheckoutService.Mode.EDITOR)
         }
 
-        // In EDITOR mode, any user with write access can release the lock
         runAsUser(USER_B) {
             contentCheckoutService.cancelCheckout(fileRef)
         }

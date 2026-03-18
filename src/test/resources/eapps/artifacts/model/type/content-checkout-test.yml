@@ -1,0 +1,11 @@
+---
+id: content-checkout-test
+name:
+  en: Content Checkout Test File
+sourceId: emodel/content-checkout-test
+model:
+  attributes:
+    - id: name
+      type: TEXT
+    - id: content
+      type: CONTENT

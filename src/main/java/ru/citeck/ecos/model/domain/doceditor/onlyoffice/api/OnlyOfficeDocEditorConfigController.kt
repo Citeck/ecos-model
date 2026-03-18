@@ -107,7 +107,8 @@ class OnlyOfficeDocEditorConfigController(
             webAppProps.appName +
                 webAppProps.appInstanceId +
                 docRef.toString() +
-                content.getSha256()
+                content.getSha256() +
+                content.getCreated()
         ).hash
 
         return Document(
