@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.client.RestTemplate
 import ru.citeck.ecos.commons.json.Json
+import ru.citeck.ecos.model.domain.contentcheckout.service.ContentCheckoutService
 import ru.citeck.ecos.model.domain.doceditor.onlyoffice.OnlyOfficeAppProps
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records3.RecordsService
@@ -26,7 +27,8 @@ class OnlyOfficeDocEditorCallbackController(
     val recordsService: RecordsService,
     val callbackService: RemoteCallbackService,
     val contentApi: EcosContentApi,
-    val onlyOfficeProps: OnlyOfficeAppProps
+    val onlyOfficeProps: OnlyOfficeAppProps,
+    val checkoutService: ContentCheckoutService
 ) {
 
     companion object {
@@ -113,19 +115,25 @@ class OnlyOfficeDocEditorCallbackController(
                 }
                 val currentContent = contentApi.getContent(jwtData.ref, jwtData.att)
 
-                restTemplate.execute(
+                val tempRef = restTemplate.execute(
                     fixedURI,
                     HttpMethod.GET,
                     null
                 ) { resp ->
-                    val tempRef = contentApi.uploadTempFile()
+                    contentApi.uploadTempFile()
                         .withName(currentContent?.getName())
                         .withMimeType(currentContent?.getMimeType())
                         .writeContent {
                             it.writeStream(resp.body)
                         }
-                    recordsService.mutateAtt(jwtData.ref, contentAtt, tempRef)
                 }
+                checkoutService.checkin(
+                    jwtData.ref,
+                    tempRef ?: error("Failed to download content from OnlyOffice server: $fixedURI"),
+                    contentAtt = contentAtt
+                )
+            } else if (status == 4 || status == 6) {
+                checkoutService.cancelCheckout(jwtData.ref)
             }
             Json.mapper.toBytesNotNull(CallbackResponse())
         }

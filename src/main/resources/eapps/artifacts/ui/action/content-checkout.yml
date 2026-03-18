@@ -1,0 +1,26 @@
+id: content-checkout
+name:
+  ru: Заблокировать документ
+  en: Check Out
+icon: icon-custom-lock
+type: mutate
+config:
+  record:
+    id: emodel/content-checkout@
+    attributes:
+      action: CHECKOUT
+      recordRef: ${?id}
+features:
+  execForRecord: true
+predicate:
+  t: and
+  val:
+    - t: eq
+      att: permissions._has.Write?bool!true
+      val: true
+    - t: eq
+      att: _has._content?bool
+      val: true
+    - t: eq
+      att: checkout:isCheckedOut?bool!
+      val: false

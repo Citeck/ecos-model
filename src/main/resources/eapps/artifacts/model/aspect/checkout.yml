@@ -1,0 +1,25 @@
+---
+id: content-checkout
+name:
+  ru: Блокировка документа
+  en: Document Checkout
+prefix: checkout
+systemAttributes:
+  - id: isCheckedOut
+    type: BOOLEAN
+  - id: checkedOutBy
+    type: PERSON
+  - id: checkedOutTime
+    type: DATETIME
+  - id: checkedOutMode
+    type: OPTIONS
+    config:
+      values:
+        - value: MANUAL
+          label:
+            ru: Ручная блокировка
+            en: Manual
+        - value: EDITOR
+          label:
+            ru: Блокировка редактором
+            en: Editor

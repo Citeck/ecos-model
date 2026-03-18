@@ -9,16 +9,20 @@ import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.server.ResponseStatusException
 import ru.citeck.ecos.commons.data.DataValue
 import ru.citeck.ecos.commons.mime.MimeTypes
+import ru.citeck.ecos.context.lib.auth.AuthContext
+import ru.citeck.ecos.model.domain.contentcheckout.service.ContentCheckoutService
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.request.RequestContext
 import ru.citeck.ecos.webapp.api.content.EcosContentApi
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 
 @RestController
 @RequestMapping("/api/content-version")
 class ContentVersionController(
     private val recordsService: RecordsService,
-    private val contentApi: EcosContentApi
+    private val contentApi: EcosContentApi,
+    private val checkoutService: ContentCheckoutService
 ) {
 
     @PostMapping("/upload", produces = [MimeTypes.APP_JSON_UTF8_TEXT])
@@ -40,6 +44,17 @@ class ContentVersionController(
 
         if (!hasWrite || isContentProtected) {
             throw ResponseStatusException(HttpStatus.FORBIDDEN, "Permission Denied")
+        }
+
+        val fileRef = EntityRef.valueOf(entityRef)
+        val checkoutState = checkoutService.getCheckoutState(fileRef)
+        if (checkoutState.isCheckedOut) {
+            if (checkoutState.checkedOutMode == ContentCheckoutService.Mode.EDITOR) {
+                throw ResponseStatusException(HttpStatus.FORBIDDEN, "Document is being edited in document editor")
+            }
+            if (checkoutState.checkedOutBy != AuthContext.getCurrentUser()) {
+                throw ResponseStatusException(HttpStatus.FORBIDDEN, "Document is checked out by another user")
+            }
         }
 
         val tempFile = RequestContext.doWithCtx {

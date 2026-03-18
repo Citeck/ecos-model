@@ -9,6 +9,7 @@ import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.commons.utils.digest.DigestUtils
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.i18n.I18nContext
+import ru.citeck.ecos.model.domain.contentcheckout.service.ContentCheckoutService
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.webapp.api.constants.AppName
@@ -31,7 +32,8 @@ class OnlyOfficeDocEditorConfigController(
     val recordsService: RecordsService,
     val contentApi: EcosContentApi,
     val callbackService: RemoteCallbackService,
-    val webAppProps: EcosWebAppProps
+    val webAppProps: EcosWebAppProps,
+    val checkoutService: ContentCheckoutService
 ) {
 
     @GetMapping(
@@ -43,6 +45,7 @@ class OnlyOfficeDocEditorConfigController(
     ): ByteArray {
 
         val entityRef = ref.toEntityRef()
+        checkoutService.checkout(entityRef, ContentCheckoutService.Mode.EDITOR)
         val content = contentApi.getContent(entityRef) ?: error("Content is null for entity $ref")
         val extension = content.getMimeType().getExtension().ifBlank {
             content.getMimeType().asTikaMimeType().extension
