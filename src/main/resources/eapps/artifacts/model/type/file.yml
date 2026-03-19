@@ -13,6 +13,9 @@ actions:
   - uiserv/action@view-dashboard
   - uiserv/action@edit
   - uiserv/action@edit-in-onlyoffice-tfm
+  - uiserv/action@content-checkout
+  - uiserv/action@cancel-content-checkout
+  - uiserv/action@content-checkin
   - uiserv/action@content-download
   - uiserv/action@delete
 model:

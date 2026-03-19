@@ -1,0 +1,38 @@
+id: content-checkin
+name:
+  ru: Загрузить версию и разблокировать
+  en: Check In (Upload & Unlock)
+icon: icon-upload
+type: mutate
+confirm:
+  title:
+    ru: Загрузить новую версию
+    en: Upload New Version
+  formRef: uiserv/form@content-checkin-form
+  attributesMapping:
+    record.attributes.content: content
+    record.attributes.versionComment: versionComment
+    record.attributes.majorVersion: majorVersion
+config:
+  record:
+    id: emodel/content-checkout@
+    attributes:
+      action: CHECKIN
+      recordRef: ${?id}
+features:
+  execForRecord: true
+predicate:
+  t: and
+  val:
+    - t: eq
+      att: checkout:isCheckedOut?bool
+      val: true
+    - t: eq
+      att: checkout:checkedOutMode?str
+      val: MANUAL
+    - t: eq
+      att: permissions._has.Write?bool!true
+      val: true
+    - t: eq
+      att: checkout:checkedOutBy?localId
+      val: ${$user?localId}

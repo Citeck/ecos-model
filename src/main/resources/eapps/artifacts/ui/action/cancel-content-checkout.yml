@@ -1,0 +1,38 @@
+id: cancel-content-checkout
+name:
+  ru: Отменить блокировку
+  en: Cancel Check Out
+icon: icon-small-close
+type: mutate
+confirm:
+  title:
+    ru: Отменить блокировку документа?
+    en: Cancel document checkout?
+config:
+  record:
+    id: emodel/content-checkout@
+    attributes:
+      action: CANCEL_CHECKOUT
+      recordRef: ${?id}
+features:
+  execForRecord: true
+predicate:
+  t: and
+  val:
+    - t: eq
+      att: checkout:isCheckedOut?bool
+      val: true
+    - t: eq
+      att: checkout:checkedOutMode?str
+      val: MANUAL
+    - t: eq
+      att: permissions._has.Write?bool!true
+      val: true
+    - t: or
+      val:
+        - t: eq
+          att: checkout:checkedOutBy?localId
+          val: ${$user?localId}
+        - t: eq
+          att: $user.authorities._has.ROLE_ADMIN
+          val: true

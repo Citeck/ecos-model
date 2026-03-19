@@ -35,6 +35,13 @@
             "t": "not-eq",
             "att": "permissions._has.Write?bool",
             "val": false
+          },
+          {
+            "t": "or",
+            "val": [
+              { "t": "eq", "att": "checkout:isCheckedOut?bool!", "val": false },
+              { "t": "eq", "att": "checkout:checkedOutMode?str", "val": "EDITOR" }
+            ]
           }
         ]
       }
