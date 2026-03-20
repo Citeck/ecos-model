@@ -155,6 +155,7 @@
                 "key": "fn",
                 "editor": "monaco",
                 "codeAs": "javascript",
+                "rows": 15,
                 "wysiwyg": "",
                 "defaultValue": "",
                 "refreshOn": [],
