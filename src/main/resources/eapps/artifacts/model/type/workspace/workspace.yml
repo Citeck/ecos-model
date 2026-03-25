@@ -101,6 +101,11 @@ model:
       config:
         child: true
         typeRef: emodel/type@wiki
+    - id: style
+      name:
+        ru: Стиль
+        en: Style
+      type: JSON
   systemAttributes:
     - id: systemId
       name:
