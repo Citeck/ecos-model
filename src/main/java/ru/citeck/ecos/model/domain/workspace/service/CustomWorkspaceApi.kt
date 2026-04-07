@@ -1,11 +1,13 @@
 package ru.citeck.ecos.model.domain.workspace.service
 
 import jakarta.annotation.PostConstruct
+import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.model.lib.ModelServiceFactory
 import ru.citeck.ecos.model.lib.workspace.api.WorkspaceApi
 import ru.citeck.ecos.model.lib.workspace.api.WsMembershipType
 
+@Primary
 @Component
 class CustomWorkspaceApi(
     private val workspaceService: EmodelWorkspaceService,
