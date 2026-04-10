@@ -10,6 +10,7 @@ import ru.citeck.ecos.data.sql.records.DbRecordsDaoConfig
 import ru.citeck.ecos.data.sql.service.DbDataServiceConfig
 import ru.citeck.ecos.model.domain.doclib.api.records.DocLibRecordId
 import ru.citeck.ecos.model.domain.doclib.api.records.DocLibRecords
+import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.model.type.service.utils.EModelTypeUtils
@@ -39,7 +40,9 @@ class TypesConfig(
         val typesRegistry = typesRegistry ?: return
 
         typesRegistry.getAllValues().values.forEach { typeDef ->
-            if (emodelTypeUtils.getEmodelSourceId(typeDef.entity).isNotBlank()) {
+            if (emodelTypeUtils.getEmodelSourceId(typeDef.entity).isNotBlank() &&
+                !typeDef.entity.isInDeletedWorkspace()
+            ) {
                 recordsService.register(createRecordsDao(dbDomainFactory, typeDef.entity, typesRegistry))
             }
         }
@@ -69,7 +72,9 @@ class TypesConfig(
                 recordsService.unregister(emodelSrcIdBefore)
             }
             if (after != null && emodelSrcIdAfter.isNotBlank() && (emodelSrcIdBefore != emodelSrcIdAfter)) {
-                if (recordsService.getRecordsDao(emodelSrcIdAfter) != null) {
+                if (after.isInDeletedWorkspace()) {
+                    log.info { "Skip records DAO registration for type '${after.id}': workspace is deleted" }
+                } else if (recordsService.getRecordsDao(emodelSrcIdAfter) != null) {
                     error(
                         "Type with SourceId '$emodelSrcIdAfter' already registered. " +
                             "Please, change type ID or enter your custom sourceId"
@@ -142,5 +147,9 @@ class TypesConfig(
     @Autowired
     fun setTypesService(typesService: TypesService) {
         this.typesService = typesService
+    }
+
+    private fun TypeDef.isInDeletedWorkspace(): Boolean {
+        return id.startsWith(EmodelWorkspaceService.DELETED_WS_SYS_ID_PREFIX)
     }
 }

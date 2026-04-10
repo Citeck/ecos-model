@@ -46,6 +46,7 @@ class EmodelWorkspaceService(
 
     companion object {
         const val USER_JOIN_PREFIX = "user-join-"
+        const val DELETED_WS_SYS_ID_PREFIX = "DELETED_"
 
         private val log = KotlinLogging.logger {}
     }
@@ -53,9 +54,14 @@ class EmodelWorkspaceService(
     private val wsSystemIdCache = Caffeine.newBuilder()
         .expireAfterWrite(Duration.ofMinutes(30))
         .maximumSize(1000)
-        .build<String, String> {
+        .build<String, String> { workspaceId ->
             AuthContext.runAsSystem {
-                recordsService.getAtt(WorkspaceDesc.getRef(it), WorkspaceDesc.ATT_SYSTEM_ID).asText().ifBlank { null }
+                recordsService.getAtt(
+                    WorkspaceDesc.getRef(workspaceId),
+                    WorkspaceDesc.ATT_SYSTEM_ID
+                ).asText().ifBlank {
+                    DELETED_WS_SYS_ID_PREFIX + WorkspaceSystemIdUtils.createId(workspaceId)
+                }
             }
         }
 

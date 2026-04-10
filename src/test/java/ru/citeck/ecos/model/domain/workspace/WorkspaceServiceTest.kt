@@ -282,6 +282,44 @@ class WorkspaceServiceTest {
         recordsService.delete(WorkspaceDesc.getRef(workspaceId))
     }
 
+    @Test
+    fun `getSystemId returns DELETED prefix for non-existent workspace`() {
+
+        val workspaceId = "test-deleted-ws-" + System.currentTimeMillis()
+
+        // Deploy and immediately delete workspace — don't query sysId in between
+        // so the cache doesn't hold the real value
+        val deployedId = workspaceService.deployWorkspace(
+            Workspace.create().withId(workspaceId)
+                .withName(MLText(workspaceId))
+                .build()
+        )
+        recordsService.delete(WorkspaceDesc.getRef(deployedId))
+
+        val sysId = workspaceService.getSystemId(workspaceId)
+
+        assertThat(sysId).startsWith(EmodelWorkspaceService.DELETED_WS_SYS_ID_PREFIX)
+    }
+
+    @Test
+    fun `getSystemId returns normal sysId for existing workspace`() {
+
+        val workspaceId = "test-alive-ws-" + System.currentTimeMillis()
+
+        workspaceService.deployWorkspace(
+            Workspace.create().withId(workspaceId)
+                .withName(MLText(workspaceId))
+                .build()
+        )
+
+        val sysId = workspaceService.getSystemId(workspaceId)
+
+        assertThat(sysId).isNotBlank()
+        assertThat(sysId).doesNotStartWith(EmodelWorkspaceService.DELETED_WS_SYS_ID_PREFIX)
+
+        recordsService.delete(WorkspaceDesc.getRef(workspaceId))
+    }
+
     private inline fun <T> runAsUser(user: String, crossinline action: () -> T): T {
         return AuthContext.runAsFull(user, listOf(AuthRole.USER)) {
             action.invoke()
