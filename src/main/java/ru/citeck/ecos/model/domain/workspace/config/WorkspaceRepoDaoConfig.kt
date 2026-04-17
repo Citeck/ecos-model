@@ -16,7 +16,7 @@ import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceMemberDesc
 import ru.citeck.ecos.model.domain.workspace.dto.Workspace
 import ru.citeck.ecos.model.domain.workspace.listener.WorkspaceRecordsListener
-import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
+import ru.citeck.ecos.model.domain.workspace.service.CustomWorkspaceApi
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.model.lib.workspace.WorkspaceService
@@ -39,7 +39,7 @@ class WorkspaceRepoDaoConfig {
         workspaceDbPerms: WorkspaceDbPerms,
         recordsService: RecordsService,
         workspaceService: WorkspaceService,
-        emodelWorkspaceService: EmodelWorkspaceService,
+        customWorkspaceApi: CustomWorkspaceApi,
         recsListener: WorkspaceRecordsListener
     ): RecordsDao {
 
@@ -67,7 +67,7 @@ class WorkspaceRepoDaoConfig {
         recordsDao.addAttributesMixin(
             DefaultWorkspaceMixin(
                 workspaceService,
-                emodelWorkspaceService
+                customWorkspaceApi
             )
         )
         recordsDao.addListener(recsListener)
@@ -77,7 +77,7 @@ class WorkspaceRepoDaoConfig {
 
     private class DefaultWorkspaceMixin(
         private val workspaceService: WorkspaceService,
-        private val emodelWorkspaceService: EmodelWorkspaceService
+        private val customWorkspaceApi: CustomWorkspaceApi
     ) : AttMixin {
 
         val providedAtts = setOf(
@@ -106,7 +106,7 @@ class WorkspaceRepoDaoConfig {
                 }
                 WorkspaceDesc.ATT_IS_CURRENT_USER_LAST_MANAGER -> {
                     val currentUserRef = AuthorityType.PERSON.getRef(AuthContext.getCurrentUser())
-                    val managers = emodelWorkspaceService.getWorkspaceManagersRefs(value.getLocalId()) ?: emptySet()
+                    val managers = customWorkspaceApi.getWorkspaceManagersRefs(value.getLocalId()) ?: emptySet()
                     managers.size == 1 && managers.contains(currentUserRef)
                 }
                 RecordConstants.ATT_WORKSPACE -> {
