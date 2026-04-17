@@ -50,7 +50,7 @@ class TypesServiceTest : TypeTestBase() {
             withId("assocTarget")
             withJournalRef(EntityRef.create("uiserv", "journal", "someJournal"))
         }
-        artifactHandler.deployArtifact(assocTargetType)
+        artifactHandler.deployArtifact(assocTargetType, "")
 
         val fullType = TypeDef.create {
             this.withId("test-type")
@@ -210,7 +210,7 @@ class TypesServiceTest : TypeTestBase() {
 
     private fun testType(typeDef: TypeDef) {
 
-        artifactHandler.deployArtifact(typeDef)
+        artifactHandler.deployArtifact(typeDef, "")
 
         val typeFromService = typeService.getById(IdInWs.create(typeDef.id))
         assertEquals(typeDef, typeFromService)
@@ -266,13 +266,13 @@ class TypesServiceTest : TypeTestBase() {
     @Test
     fun testInhNumTemplate() {
 
-        artifactHandler.deployArtifact(TypeDef.create { withId("base") })
+        artifactHandler.deployArtifact(TypeDef.create { withId("base") }, "")
 
         val custom0 = TypeDef.create {
             withId("custom0")
             withNumTemplateRef(EntityRef.valueOf("emodel/num-template@numTemplateRefValue"))
         }
-        artifactHandler.deployArtifact(custom0)
+        artifactHandler.deployArtifact(custom0, "")
         val custom0Ref = EntityRef.valueOf("emodel/type@custom0")
         val getCustom0AttStr = { att: String ->
             records.getAtt(custom0Ref, att).asText()
@@ -288,7 +288,7 @@ class TypesServiceTest : TypeTestBase() {
             withNumTemplateRef(EntityRef.valueOf("emodel/num-template@numTemplateRefValue1123"))
             withInheritNumTemplate(false)
         }
-        artifactHandler.deployArtifact(custom1)
+        artifactHandler.deployArtifact(custom1, "")
         val custom1Ref = EntityRef.valueOf("emodel/type@custom1")
         val getCustom1AttStr = { att: String ->
             records.getAtt(custom1Ref, att).asText()

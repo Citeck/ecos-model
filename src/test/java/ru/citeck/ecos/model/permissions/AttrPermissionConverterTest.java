@@ -51,10 +51,10 @@ public class AttrPermissionConverterTest {
 
         typeArtifactsHandler.deployArtifact(TypeDef.create()
             .withId("base")
-            .build());
+            .build(), "");
         typeArtifactsHandler.deployArtifact(TypeDef.create()
             .withId("type")
-            .build());
+            .build(), "");
 
         targetEntity = new AttributesPermissionEntity();
         targetEntity.setExtId("testAttrPermId");
