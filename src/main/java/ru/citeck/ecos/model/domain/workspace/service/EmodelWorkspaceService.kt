@@ -1,6 +1,6 @@
 package ru.citeck.ecos.model.domain.workspace.service
 
-import com.hazelcast.hibernate.shaded.caffeine.cache.Caffeine
+import com.github.benmanes.caffeine.cache.Caffeine
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 import ru.citeck.ecos.commons.data.DataValue
@@ -35,6 +35,8 @@ import ru.citeck.ecos.records3.record.request.RequestContext
 import ru.citeck.ecos.webapp.api.authority.EcosAuthoritiesApi
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import java.time.Duration
+import java.util.Optional
+import java.util.concurrent.CopyOnWriteArrayList
 
 @Service
 class EmodelWorkspaceService(
@@ -50,6 +52,9 @@ class EmodelWorkspaceService(
 
         private val log = KotlinLogging.logger {}
     }
+
+    private val joinListeners = CopyOnWriteArrayList<WorkspaceJoinListener>()
+    private val leaveListeners = CopyOnWriteArrayList<WorkspaceLeaveListener>()
 
     private val wsSystemIdCache = Caffeine.newBuilder()
         .expireAfterWrite(Duration.ofMinutes(30))
@@ -68,9 +73,9 @@ class EmodelWorkspaceService(
     private val wsIdBySysIdCache = Caffeine.newBuilder()
         .expireAfterWrite(Duration.ofMinutes(30))
         .maximumSize(1000)
-        .build<String, String> { wsSysId ->
+        .build<String, Optional<String>> { wsSysId ->
             AuthContext.runAsSystem {
-                if (wsSysId.startsWith(WorkspaceSystemIdUtils.USER_WS_SYS_ID_PREFIX)) {
+                val resolved = if (wsSysId.startsWith(WorkspaceSystemIdUtils.USER_WS_SYS_ID_PREFIX)) {
                     USER_WORKSPACE_PREFIX + (
                         recordsService.queryOne(
                             RecordsQuery.create()
@@ -88,6 +93,7 @@ class EmodelWorkspaceService(
                             .build()
                     )?.getLocalId()
                 }
+                Optional.ofNullable(resolved)
             }
         }
 
@@ -118,7 +124,7 @@ class EmodelWorkspaceService(
         if (wsSysId.isBlank()) {
             return ""
         }
-        return wsIdBySysIdCache.get(wsSysId) ?: ""
+        return wsIdBySysIdCache.get(wsSysId).orElse(null) ?: ""
     }
 
     /**
@@ -178,7 +184,6 @@ class EmodelWorkspaceService(
      * @return a set of manager references, or `null` if the workspace does not exist.
      */
     fun getWorkspaceManagersRefs(workspaceId: String): Set<EntityRef>? {
-
         if (workspaceId.startsWith(USER_WORKSPACE_PREFIX)) {
             return setOf(
                 AuthorityType.PERSON.getRef(workspaceId.substring(USER_WORKSPACE_PREFIX.length))
@@ -209,7 +214,8 @@ class EmodelWorkspaceService(
         membershipType: WsMembershipType = WsMembershipType.ALL,
         filter: Predicate = Predicates.alwaysTrue(),
         includePersonal: Boolean? = null,
-        maxItems: Int = 1000
+        maxItems: Int = 1000,
+        sortByVisits: Boolean = true
     ): UserWorkspaces {
 
         val userRef = AuthorityType.PERSON.getRef(user)
@@ -257,6 +263,11 @@ class EmodelWorkspaceService(
             workspaces.add("$USER_WORKSPACE_PREFIX$user")
             totalCount += 1
         }
+
+        if (!sortByVisits) {
+            return UserWorkspaces(workspaces, totalCount)
+        }
+
         val orders = recordsService.query(
             RecordsQuery.create()
                 .withSourceId(WorkspaceVisitDesc.SOURCE_ID)
@@ -412,6 +423,8 @@ class EmodelWorkspaceService(
                 }
             }
         }
+
+        leaveListeners.forEach { it.onLeave(currentUserRef.getLocalId(), workspaceId) }
     }
 
     fun joinCurrentUserToWorkspace(workspaceId: String) {
@@ -434,6 +447,16 @@ class EmodelWorkspaceService(
             )
             addMember(workspaceId, workspaceMember)
         }
+
+        joinListeners.forEach { it.onJoin(currentUser, workspaceId) }
+    }
+
+    fun addJoinListener(listener: WorkspaceJoinListener) {
+        joinListeners.add(listener)
+    }
+
+    fun addLeaveListener(listener: WorkspaceLeaveListener) {
+        leaveListeners.add(listener)
     }
 
     fun resetMembersToDefault(workspaceId: String) {
@@ -488,6 +511,14 @@ class EmodelWorkspaceService(
                 RecordConstants.ATT_PARENT_ATT to "workspaceMembers",
             )
         )
+    }
+
+    fun interface WorkspaceJoinListener {
+        fun onJoin(userId: String, workspaceId: String)
+    }
+
+    fun interface WorkspaceLeaveListener {
+        fun onLeave(userId: String, workspaceId: String)
     }
 
     private class WorkspaceVisitAtts(
