@@ -192,11 +192,16 @@ class TypesRepoRecordsDao(
 
                 fun prepareExtRef(ref: EntityRef): EntityRef {
                     workspaceService ?: return ref
+                    if (EntityRef.isEmpty(ref)) return ref
                     return ref.withLocalId(workspaceService.replaceWsPrefixToCurrentWsPlaceholder(ref.getLocalId()))
                 }
-                withForm(prepareExtRef(typeDef.formRef))
+                withFormRef(prepareExtRef(typeDef.formRef))
                 withJournalRef(prepareExtRef(typeDef.journalRef))
                 withNumTemplateRef(prepareExtRef(typeDef.numTemplateRef))
+                withBoardRef(prepareExtRef(typeDef.boardRef))
+                withConfigFormRef(prepareExtRef(typeDef.configFormRef))
+                withPostCreateActionRef(prepareExtRef(typeDef.postCreateActionRef))
+                withActions(typeDef.actions.map { prepareExtRef(it) })
             }
 
             return YamlUtils.toNonDefaultString(typeDefCopy)

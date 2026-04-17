@@ -82,7 +82,6 @@ open class TypeTestBase {
         typesRepo = TypeRepoMock(recordsServices)
         val typeConverter = TypeConverter(typesRepo)
         typeService = TypesServiceImpl(typeConverter, typesRepo)
-        artifactHandler = TypeArtifactHandler(typeService, webAppCtxMock)
         records = recordsServices.recordsService
 
         val emodelTypeUtils = EModelTypeUtils()
@@ -117,6 +116,7 @@ open class TypeTestBase {
         }
         modelLibServices.setRecordsServices(recordsServices)
         emodelTypeUtils.workspaceService = modelLibServices.workspaceService
+        artifactHandler = TypeArtifactHandler(typeService, webAppCtxMock, modelLibServices.workspaceService)
 
         eventsServiceFactory = EventsServiceFactory()
         eventsServiceFactory.recordsServices = recordsServices
