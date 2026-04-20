@@ -1,5 +1,6 @@
 package ru.citeck.ecos.model.domain.secret.service
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.annotation.PostConstruct
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Service
@@ -45,6 +46,10 @@ class EcosSecretService(
     private val perms: ModelSystemArtifactPerms
 ) {
 
+    companion object {
+        private val log = KotlinLogging.logger {}
+    }
+
     private lateinit var searchConverter: JpaSearchConverter<EcosSecretEntity>
     private lateinit var secretChangedEventEmitter: EventsEmitter<SecretChangedEvent>
 
@@ -86,15 +91,37 @@ class EcosSecretService(
             val encryptionMeta = parseEncryptInfo(entity) ?: error(
                 "Encryption meta is empty while key hash is not. Secret id: $id"
             )
-            ecosSecretEncryption.decrypt(
-                EncryptData(
-                    data = data,
-                    key = encryptionConfig.getCurrentSecretKey(),
-                    algorithm = encryptionMeta.algorithm,
-                    ivSize = encryptionMeta.ivSize,
-                    tagSize = encryptionMeta.tagSize
+            try {
+                ecosSecretEncryption.decrypt(
+                    EncryptData(
+                        data = data,
+                        key = encryptionConfig.getCurrentSecretKey(),
+                        algorithm = encryptionMeta.algorithm,
+                        ivSize = encryptionMeta.ivSize,
+                        tagSize = encryptionMeta.tagSize
+                    )
                 )
-            )
+            } catch (e: Exception) {
+                val hashMatchesCurrent = runCatching {
+                    secretKeyEncoder.matchesKey(
+                        encryptionConfig.getCurrentSecretKeyBase64(),
+                        entity.encryptionKeyHash!!
+                    )
+                }.getOrDefault(false)
+                log.error(e) {
+                    "Failed to decrypt secret '$id' with current encryption key. " +
+                        "encryptionKeyHash matches current key: $hashMatchesCurrent, " +
+                        "meta: algorithm=${encryptionMeta.algorithm}, " +
+                        "ivSize=${encryptionMeta.ivSize}, tagSize=${encryptionMeta.tagSize}. " +
+                        "Likely causes: stored data and key hash were written with different keys " +
+                        "(incomplete rotation / key rollback), encryption meta mismatch, or data corruption. " +
+                        "Re-save the secret to re-encrypt it with the current key."
+                }
+                throw IllegalStateException(
+                    "Cannot decrypt secret '$id' with current encryption key. Re-save the secret to fix it.",
+                    e
+                )
+            }
         }
 
         return EcosSecretImpl(id, secretType, decryptedData)

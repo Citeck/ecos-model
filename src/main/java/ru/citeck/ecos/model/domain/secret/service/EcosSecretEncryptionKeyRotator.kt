@@ -2,6 +2,7 @@ package ru.citeck.ecos.model.domain.secret.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import ru.citeck.ecos.commons.json.Json
@@ -36,7 +37,9 @@ class EcosSecretEncryptionKeyRotator(
         val batchSize = 10
 
         while (true) {
-            val secrets = ecosSecretRepo.findAll(PageRequest.of(page, batchSize)).content
+            val secrets = ecosSecretRepo.findAll(
+                PageRequest.of(page, batchSize, Sort.by(Sort.Direction.ASC, "id"))
+            ).content
             if (secrets.isEmpty()) {
                 break
             }
