@@ -25,6 +25,7 @@ import ru.citeck.ecos.records3.record.dao.query.RecordsQueryDao
 import ru.citeck.ecos.records3.record.dao.query.dto.query.Consistency
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
 import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy
+import ru.citeck.ecos.webapp.api.apps.EcosRemoteWebAppsApi
 import ru.citeck.ecos.webapp.api.constants.AppName
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.api.promise.Promise
@@ -41,6 +42,7 @@ class SearchRecordsDao(
     private val typesRegistry: EcosTypesRegistry,
     private val ecosContext: EcosContext,
     private val workspaceService: EmodelWorkspaceService,
+    private val remoteWebAppsApi: EcosRemoteWebAppsApi,
     modelServiceFactory: ModelServiceFactory
 ) : RecordsQueryDao {
 
@@ -56,6 +58,10 @@ class SearchRecordsDao(
         private const val GROUP_TYPE_DOCUMENTS = "DOCUMENTS"
         private const val GROUP_TYPE_TASKS = "TASKS"
         private const val GROUP_TYPE_WORKSPACES = "WORKSPACES"
+        private const val GROUP_TYPE_SEMANTIC = "SEMANTIC"
+
+        private const val RAG_APP_NAME = "rag"
+        private const val RAG_SEARCH_SOURCE_ID = "rag/rag-search"
 
         private const val MAX_ITEMS_FOR_TYPE = 50
 
@@ -76,22 +82,34 @@ class SearchRecordsDao(
     private val activeRequestsByAppLock = ReentrantLock()
 
     private fun readQuery(recsQuery: RecordsQuery): SearchQuery? {
-        val query: SearchQuery?
-        if (recsQuery.language == PredicateService.LANGUAGE_PREDICATE) {
+        val fallbackWorkspaceId = recsQuery.workspaces.firstOrNull()
+        val query: SearchQuery? = if (recsQuery.language == PredicateService.LANGUAGE_PREDICATE) {
             var text = ""
             var types = listOf(GROUP_TYPE_DOCUMENTS)
+            var workspaceId: String? = null
             PredicateUtils.mapValuePredicates(recsQuery.getPredicate(), { p ->
-                if (p.getAttribute() == "ALL") {
-                    text = p.getValue().asText()
-                }
-                if (p.getAttribute() == "types") {
-                    types = p.getValue().toStrList()
+                when (p.getAttribute()) {
+                    "ALL" -> text = p.getValue().asText()
+                    "types" -> types = p.getValue().toStrList()
+                    "workspaceId" -> workspaceId = p.getValue().asText()
                 }
                 p
             }, onlyAnd = true, optimize = false, filterEmptyComposite = true)
-            query = SearchQuery(text, types, recsQuery.page.maxItems)
+            SearchQuery(
+                text,
+                types,
+                recsQuery.page.maxItems,
+                workspaceId?.takeIf { it.isNotBlank() } ?: fallbackWorkspaceId
+            )
         } else {
-            query = recsQuery.getQueryOrNull(SearchQuery::class.java)
+            val parsed = recsQuery.getQueryOrNull(SearchQuery::class.java)
+            parsed?.let {
+                if (it.workspaceId.isNullOrBlank() && !fallbackWorkspaceId.isNullOrBlank()) {
+                    SearchQuery(it.text, it.types, it.maxItemsForType, fallbackWorkspaceId)
+                } else {
+                    it
+                }
+            }
         }
         return if (query?.text.isNullOrBlank()) null else query
     }
@@ -118,6 +136,7 @@ class SearchRecordsDao(
                 GROUP_TYPE_DOCUMENTS -> addResult(queryDocuments(textToSearch, maxItemsForType))
                 GROUP_TYPE_TASKS -> addResult(queryTasks(textToSearch, maxItemsForType))
                 GROUP_TYPE_WORKSPACES -> addResult(queryWorkspaces(textToSearch, maxItemsForType))
+                GROUP_TYPE_SEMANTIC -> addResult(querySemantic(textToSearch, maxItemsForType, query.workspaceId))
             }
             if (maxItems >= 0 && records.size >= maxItems) {
                 break
@@ -129,6 +148,35 @@ class SearchRecordsDao(
         } else {
             records
         }
+    }
+
+    private fun querySemantic(text: String, maxItemsForType: Int, workspaceId: String?): SearchRes {
+        if (workspaceId.isNullOrBlank()) {
+            return SearchRes.EMPTY
+        }
+        if (!remoteWebAppsApi.isAppAvailable(RAG_APP_NAME)) {
+            return SearchRes.EMPTY
+        }
+
+        val result = recordsService.query(
+            RecordsQuery.create()
+                .withSourceId(RAG_SEARCH_SOURCE_ID)
+                .withQuery(
+                    mapOf(
+                        "text" to text,
+                        "maxItemsForType" to maxItemsForType,
+                        "workspaceId" to workspaceId,
+                        "sourceType" to "ECOS"
+                    )
+                )
+                .withMaxItems(maxItemsForType)
+                .build(),
+            BASE_ATTS_TO_REQUEST
+        )
+        return SearchRes(
+            result.getRecords().map { createSearchRecord(it, GROUP_TYPE_SEMANTIC) },
+            result.getTotalCount()
+        )
     }
 
     private fun queryWorkspaces(text: String, maxItems: Int): SearchRes {
@@ -466,7 +514,8 @@ class SearchRecordsDao(
     class SearchQuery(
         val text: String,
         val types: List<String> = emptyList(),
-        val maxItemsForType: Int = 5
+        val maxItemsForType: Int = 5,
+        val workspaceId: String? = null
     )
 
     class SearchRecord(
