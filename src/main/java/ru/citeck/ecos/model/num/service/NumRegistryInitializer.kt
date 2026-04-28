@@ -46,11 +46,7 @@ class NumRegistryInitializer(
         if (entity.entity.id.isBlank()) {
             return ""
         }
-        return if (workspaceService.isWorkspaceWithGlobalEntities(entity.entity.workspace)) {
-            entity.entity.id
-        } else {
-            entity.entity.workspace + ":" + entity.entity.id
-        }
+        return workspaceService.addWsPrefixToId(entity.entity.id, entity.entity.workspace)
     }
 
     override fun getOrder(): Float {
