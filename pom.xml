@@ -5,13 +5,13 @@
 
     <groupId>ru.citeck.ecos.model</groupId>
     <artifactId>ecos-model</artifactId>
-    <version>2.39.2</version>
+    <version>2.39.3</version>
     <name>Ecos Model</name>
 
     <parent>
         <groupId>ru.citeck.ecos.webapp</groupId>
         <artifactId>ecos-webapp-spring-hibernate-parent</artifactId>
-        <version>3.24.3</version>
+        <version>3.24.6</version>
     </parent>
 
     <properties>
