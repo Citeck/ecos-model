@@ -15,7 +15,7 @@ import java.util.zip.CRC32
 class EModelTypeUtils {
 
     companion object {
-        private val ABSTRACT_TYPES = setOf(
+        val ABSTRACT_TYPES = setOf(
             "base",
             "user-base",
             "case",

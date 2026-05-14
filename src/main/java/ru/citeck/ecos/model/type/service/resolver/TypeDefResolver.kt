@@ -146,8 +146,16 @@ class TypeDefResolver(
             }
         }
 
+        if (resTypeDef.storageType == EModelTypeUtils.STORAGE_TYPE_DEFAULT
+            && resTypeDef.sourceId.isBlank()
+            && !EModelTypeUtils.ABSTRACT_TYPES.contains(resTypeDef.id)
+            && EModelTypeUtils.ABSTRACT_TYPES.contains(resolvedParentDef.id)
+        ) {
+            resTypeDef.withStorageType(EModelTypeUtils.STORAGE_TYPE_EMODEL)
+        }
+
         when ((resTypeDef.storageType)) {
-            EModelTypeUtils.STORAGE_TYPE_REFERENCE, // todo: set sourceId based on source ref
+            EModelTypeUtils.STORAGE_TYPE_REFERENCE,
             EModelTypeUtils.STORAGE_TYPE_DEFAULT,
             "" -> {
                 if (resTypeDef.sourceId.isBlank()) {
@@ -158,7 +166,7 @@ class TypeDefResolver(
                 }
             }
             EModelTypeUtils.STORAGE_TYPE_EMODEL -> {
-                if (resTypeDef.sourceId.isBlank()) {
+                if (resTypeDef.sourceId.isBlank() && !EModelTypeUtils.ABSTRACT_TYPES.contains(resTypeDef.id)) {
                     resTypeDef.withSourceId(emodelTypeUtils.getEmodelSourceId(resTypeDef.id, resTypeDef.workspace))
                 }
             }
