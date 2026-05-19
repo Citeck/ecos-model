@@ -146,10 +146,10 @@ class TypeDefResolver(
             }
         }
 
-        if (resTypeDef.storageType == EModelTypeUtils.STORAGE_TYPE_DEFAULT
-            && resTypeDef.sourceId.isBlank()
-            && !EModelTypeUtils.ABSTRACT_TYPES.contains(resTypeDef.id)
-            && EModelTypeUtils.ABSTRACT_TYPES.contains(resolvedParentDef.id)
+        if (resTypeDef.storageType == EModelTypeUtils.STORAGE_TYPE_DEFAULT &&
+            resTypeDef.sourceId.isBlank() &&
+            !EModelTypeUtils.ABSTRACT_TYPES.contains(resTypeDef.id) &&
+            EModelTypeUtils.ABSTRACT_TYPES.contains(resolvedParentDef.id)
         ) {
             resTypeDef.withStorageType(EModelTypeUtils.STORAGE_TYPE_EMODEL)
         }
