@@ -9,10 +9,8 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import ru.citeck.ecos.apps.app.service.LocalAppService
 import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.commons.exception.I18nRuntimeException
-import ru.citeck.ecos.commons.utils.resource.ResourceUtils
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.context.lib.i18n.I18nContext
 import ru.citeck.ecos.data.sql.domain.DbDomainConfig
@@ -43,9 +41,6 @@ class ActivityParentCycleValidatorTest {
     private lateinit var recordsService: RecordsService
 
     @Autowired
-    private lateinit var localAppService: LocalAppService
-
-    @Autowired
     private lateinit var dbDomainFactory: DbDomainFactory
 
     private val refsToDelete = mutableListOf<EntityRef>()
@@ -53,8 +48,6 @@ class ActivityParentCycleValidatorTest {
     @BeforeAll
     fun setUp() {
         AuthContext.runAsSystem {
-            localAppService.deployLocalArtifacts(ResourceUtils.getFile("classpath:eapps/artifacts"))
-
             val dao = dbDomainFactory.create(
                 DbDomainConfig.create()
                     .withRecordsDao(
