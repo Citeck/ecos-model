@@ -13,13 +13,15 @@ import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.dto.RecordAtts
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
+import ru.citeck.ecos.records3.record.dao.query.dto.query.SortBy
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 
 /**
  * Assigns `activity:position` whenever an `activity-atts` aspect record
  * is created or its `activity:parent` assoc changes. The new value is
- * `count(siblings excluding self) + 1`, so the freshly placed record
- * always lands at the end of its (new) parent's ordered list.
+ * `max(siblings.position excluding self) + 1`, so the freshly placed
+ * record always lands strictly after every existing sibling, even when
+ * existing positions have gaps (from deletions, manual edits, imports).
  *
  * "Siblings" are records in the same source whose `activity:parent`
  * matches the new parent. When the new parent is empty the record is
@@ -29,7 +31,7 @@ import ru.citeck.ecos.webapp.api.entity.EntityRef
  *
  * The aspect itself ships a computed `position = 1` with
  * `storingType: ON_EMPTY` (see `aspect/timeline/activity-atts.yml`).
- * This listener overrides that initial 1 with the real count-based
+ * This listener overrides that initial 1 with the real max-based
  * position, and re-assigns on every parent move.
  */
 @Component
@@ -47,6 +49,7 @@ class ActivityPositionListener(
 
         private const val FILTER_HAS_ACTIVITY_ATTS = "record._aspects._has.$ACTIVITY_ATTS_ASPECT?bool!"
         private const val FILTER_DIFF_HAS_PARENT = "diff._has.$ACTIVITY_ATT_PARENT?bool!"
+        private const val FILTER_DIFF_HAS_POSITION = "diff._has.$ACTIVITY_ATT_POSITION?bool!"
     }
 
     init {
@@ -64,7 +67,12 @@ class ActivityPositionListener(
             withFilter(
                 Predicates.and(
                     Predicates.eq(FILTER_HAS_ACTIVITY_ATTS, true),
-                    Predicates.eq(FILTER_DIFF_HAS_PARENT, true)
+                    Predicates.eq(FILTER_DIFF_HAS_PARENT, true),
+                    // If the same mutate also carries an explicit
+                    // `activity:position`, the caller (typically
+                    // drag-and-drop in the UI) has already picked the
+                    // target slot — don't overwrite it.
+                    Predicates.eq(FILTER_DIFF_HAS_POSITION, false)
                 )
             )
             withTransactional(true)
@@ -90,12 +98,7 @@ class ActivityPositionListener(
 
     private fun assignPosition(self: EntityRef, parent: EntityRef, workspace: String) {
         AuthContext.runAsSystem {
-            // By the time both create and change events fire the record is
-            // already persisted with its new parent, so the sibling query
-            // includes self. We use the count as-is — self being the newest
-            // sibling, that count is exactly the slot the newcomer should
-            // occupy at the end of the ordered list.
-            val newPosition = countSiblingsIncludingSelf(self, parent, workspace)
+            val newPosition = findNextPosition(self, parent, workspace)
             recordsService.mutate(
                 RecordAtts(self).apply { setAtt(ACTIVITY_ATT_POSITION, newPosition) }
             )
@@ -103,27 +106,33 @@ class ActivityPositionListener(
         }
     }
 
-    private fun countSiblingsIncludingSelf(self: EntityRef, parent: EntityRef, workspace: String): Long {
+    private fun findNextPosition(self: EntityRef, parent: EntityRef, workspace: String): Long {
         // Sibling scope: same source as the record itself. Cross-source
         // nesting via activity:parent is not a supported case here — and
         // restricting to the record's own source keeps the query cheap
         // and predictable.
-        val predicate = if (parent.isNotEmpty()) {
+        val parentScope = if (parent.isNotEmpty()) {
             Predicates.eq(ACTIVITY_ATT_PARENT, parent.toString())
         } else {
             // Top-level (no parent): numbering is per-workspace, not global
             // across the source. Workspace filter is applied below.
             Predicates.empty(ACTIVITY_ATT_PARENT)
         }
+        val predicate = Predicates.and(
+            parentScope,
+            Predicates.notEq("id", self.getLocalId())
+        )
         val workspaces = if (workspace.isNotBlank()) listOf(workspace) else emptyList()
         val query = RecordsQuery.create {
             withSourceId(self.getSourceId())
             withLanguage(PredicateService.LANGUAGE_PREDICATE)
             withQuery(predicate)
-            withMaxItems(0)
+            withMaxItems(1)
+            withSortBy(SortBy(ACTIVITY_ATT_POSITION, false))
             withWorkspaces(workspaces)
         }
-        return recordsService.query(query).getTotalCount()
+        val maxPosition = recordsService.queryOne(query, "$ACTIVITY_ATT_POSITION?num!0").asLong()
+        return maxPosition + 1
     }
 
     private data class CreatedEvent(

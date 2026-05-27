@@ -20,6 +20,7 @@ import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records3.RecordsService
+import ru.citeck.ecos.records3.record.atts.dto.RecordAtts
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension
 
@@ -146,6 +147,98 @@ class ActivityPositionListenerTest {
         }
 
         assertThat(getPosition(mover)).isEqualTo(2)
+    }
+
+    @Test
+    fun `irina scenario - moving a top-level record under a parent does not collide later top-level positions`() {
+        // Reproduces COREDEV-196 item 25: create stages and tasks via the
+        // journal, move a top-level task under a stage, then create another
+        // top-level task — its position must not collide with existing
+        // top-level stages.
+        val stage1 = createActivity()
+        val stage2 = createActivity()
+        val task1 = createActivity(parent = stage1)
+        val stage3 = createActivity()
+        val task2 = createActivity()
+
+        AuthContext.runAsSystem {
+            recordsService.mutateAtt(task2, ATT_PARENT, stage1)
+        }
+
+        val task3 = createActivity()
+
+        val topLevelPositions = listOf(
+            getPosition(stage1),
+            getPosition(stage2),
+            getPosition(stage3),
+            getPosition(task3)
+        )
+        val stage1ChildrenPositions = listOf(getPosition(task1), getPosition(task2))
+
+        assertThat(topLevelPositions)
+            .`as`("Top-level positions must be unique after a sibling moves under a parent")
+            .doesNotHaveDuplicates()
+        assertThat(stage1ChildrenPositions)
+            .`as`("Children of stage1 must have unique positions")
+            .doesNotHaveDuplicates()
+        assertThat(getPosition(task3))
+            .`as`("task3 must land at the end of the top-level list, not in the middle")
+            .isGreaterThan(getPosition(stage3))
+    }
+
+    @Test
+    fun `creating a sibling does not collide with existing positions when there are gaps`() {
+        // Real-world position lists rarely stay dense: records get deleted,
+        // bulk-imported with custom positions, or fixed up by hand. COUNT+1
+        // collides as soon as `count(remaining) + 1` lands on an existing
+        // position. Reproduce that with deletion-induced gap.
+        val parent = createActivity()
+        val first = createActivity(parent = parent)
+        val second = createActivity(parent = parent)
+        val third = createActivity(parent = parent)
+        assertThat(getPosition(first)).isEqualTo(1)
+        assertThat(getPosition(second)).isEqualTo(2)
+        assertThat(getPosition(third)).isEqualTo(3)
+
+        AuthContext.runAsSystem { recordsService.delete(first) }
+        refsToDelete.remove(first)
+
+        val fourth = createActivity(parent = parent)
+
+        val remaining = listOf(getPosition(second), getPosition(third), getPosition(fourth))
+        assertThat(remaining)
+            .`as`("Positions of remaining siblings must stay unique")
+            .doesNotHaveDuplicates()
+        assertThat(getPosition(fourth))
+            .`as`("A freshly created sibling must land past the highest existing position")
+            .isGreaterThan(getPosition(third))
+    }
+
+    @Test
+    fun `moving a record with an explicit new position preserves it instead of recomputing`() {
+        // Drag-and-drop on the chart can send `parent` and `position` together
+        // when the user drops a task into the middle of another parent's list.
+        // The user's intent (the chosen slot) must win — the listener should
+        // not overwrite an explicitly supplied position.
+        val parentA = createActivity()
+        val parentB = createActivity()
+        createActivity(parent = parentB)
+        createActivity(parent = parentB)
+        createActivity(parent = parentB)
+        val mover = createActivity(parent = parentA)
+
+        AuthContext.runAsSystem {
+            recordsService.mutate(
+                RecordAtts(mover).apply {
+                    setAtt(ATT_PARENT, parentB)
+                    setAtt(ATT_POSITION, 2)
+                }
+            )
+        }
+
+        assertThat(getPosition(mover))
+            .`as`("Explicit position from the same mutate must be honored")
+            .isEqualTo(2)
     }
 
     @Test
