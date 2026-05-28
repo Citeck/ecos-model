@@ -1,0 +1,11 @@
+---
+id: my-doc
+name:
+  en: my-doc
+
+parentRef: emodel/type@case
+inheritCreateVariants: false
+
+sourceId: alfresco/
+storageType: ALFRESCO
+metaRecord: alfresco/@

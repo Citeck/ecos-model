@@ -149,7 +149,8 @@ class TypeDefResolver(
         if (resTypeDef.storageType == EModelTypeUtils.STORAGE_TYPE_DEFAULT &&
             resTypeDef.sourceId.isBlank() &&
             !EModelTypeUtils.ABSTRACT_TYPES.contains(resTypeDef.id) &&
-            EModelTypeUtils.ABSTRACT_TYPES.contains(resolvedParentDef.id)
+            EModelTypeUtils.ABSTRACT_TYPES.contains(resolvedParentDef.id) &&
+            resolvedParentDef.sourceId.isBlank()
         ) {
             resTypeDef.withStorageType(EModelTypeUtils.STORAGE_TYPE_EMODEL)
         }
@@ -161,7 +162,8 @@ class TypeDefResolver(
                 if (resTypeDef.sourceId.isBlank()) {
                     resTypeDef.withStorageType(EModelTypeUtils.STORAGE_TYPE_DEFAULT)
                     resTypeDef.withSourceId(resolvedParentDef.sourceId)
-                } else if (resTypeDef.sourceId == "alfresco/") {
+                }
+                if (resTypeDef.sourceId == "alfresco/") {
                     resTypeDef.withStorageType(EModelTypeUtils.STORAGE_TYPE_ALFRESCO)
                 }
             }
