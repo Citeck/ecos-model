@@ -5,16 +5,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
+import ru.citeck.ecos.apps.app.domain.handler.ArtifactDeployMeta;
 import ru.citeck.ecos.apps.app.domain.handler.WsAwareArtifactHandler;
 import ru.citeck.ecos.context.lib.auth.AuthContext;
 import ru.citeck.ecos.model.lib.workspace.IdInWs;
 import ru.citeck.ecos.model.lib.workspace.WorkspaceService;
+import ru.citeck.ecos.model.lib.workspace.WorkspaceServiceExtensionsKt;
 import ru.citeck.ecos.model.type.service.TypesService;
 import ru.citeck.ecos.webapp.api.EcosWebAppApi;
 import ru.citeck.ecos.webapp.api.entity.EntityRef;
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -32,9 +36,10 @@ public class TypeArtifactHandler implements WsAwareArtifactHandler<TypeDef> {
 
     @Override
     public void deployArtifact(@NotNull TypeDef artifact, @NotNull String workspace) {
+        Set<EntityRef> coDeployedRefs = new HashSet<>(ArtifactDeployMeta.getThreadMeta().getCoDeployedArtifacts());
         AuthContext.runAsSystemJ(() -> {
             typeService.save(applyRefs(artifact, workspace, ref ->
-                ref.withLocalId(workspaceService.replaceCurrentWsPlaceholderToWsPrefix(ref.getLocalId(), workspace))
+                WorkspaceServiceExtensionsKt.bindRefToWorkspace(workspaceService, ref, workspace, coDeployedRefs)
             ));
         });
     }

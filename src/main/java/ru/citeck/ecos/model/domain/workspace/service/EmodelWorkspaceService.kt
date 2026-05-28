@@ -76,14 +76,19 @@ class EmodelWorkspaceService(
         .build<String, Optional<String>> { wsSysId ->
             AuthContext.runAsSystem {
                 val resolved = if (wsSysId.startsWith(WorkspaceSystemIdUtils.USER_WS_SYS_ID_PREFIX)) {
+                    // Person.wsSysId stores the sanitized user-name part only (without the
+                    // "user__" workspace-sysId prefix). Strip the prefix before matching so we
+                    // recover the original Person localId — characters like '.' are otherwise
+                    // collapsed to '_' by createId() and the fallback below cannot un-collapse them.
+                    val userPart = wsSysId.substring(WorkspaceSystemIdUtils.USER_WS_SYS_ID_PREFIX.length)
                     USER_WORKSPACE_PREFIX + (
                         recordsService.queryOne(
                             RecordsQuery.create()
                                 .withSourceId(AuthorityType.PERSON.sourceId)
                                 .withQuery(
-                                    Predicates.eq(PersonConstants.ATT_WS_SYS_ID, wsSysId)
+                                    Predicates.eq(PersonConstants.ATT_WS_SYS_ID, userPart)
                                 ).build()
-                        )?.getLocalId() ?: wsSysId.substring(WorkspaceSystemIdUtils.USER_WS_SYS_ID_PREFIX.length)
+                        )?.getLocalId() ?: userPart
                         )
                 } else {
                     recordsService.queryOne(

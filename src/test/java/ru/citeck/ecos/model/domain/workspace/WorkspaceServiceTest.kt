@@ -320,6 +320,62 @@ class WorkspaceServiceTest {
         recordsService.delete(WorkspaceDesc.getRef(workspaceId))
     }
 
+    @Test
+    fun managerAuthoritiesMixinTest() {
+
+        val userMgr = AuthorityType.PERSON.getRef("mgr-user")
+        val userPlain = AuthorityType.PERSON.getRef("plain-user")
+        val groupMgr = AuthorityType.GROUP.getRef("mgr-group")
+
+        val workspaceId = "mgr-auth-ws-" + System.currentTimeMillis()
+        val workspaceRef = WorkspaceDesc.getRef(workspaceId)
+
+        workspaceService.deployWorkspace(
+            Workspace.create().withId(workspaceId)
+                .withName(MLText(workspaceId))
+                .withWorkspaceMembers(
+                    listOf(
+                        WorkspaceMember.create()
+                            .withMemberId("m-user-mgr")
+                            .withAuthorities(listOf(userMgr))
+                            .withMemberRole(WorkspaceMemberRole.MANAGER)
+                            .build(),
+                        WorkspaceMember.create()
+                            .withMemberId("m-group-mgr")
+                            .withAuthorities(listOf(groupMgr))
+                            .withMemberRole(WorkspaceMemberRole.MANAGER)
+                            .build(),
+                        WorkspaceMember.create()
+                            .withMemberId("m-user-plain")
+                            .withAuthorities(listOf(userPlain))
+                            .withMemberRole(WorkspaceMemberRole.USER)
+                            .build()
+                    )
+                ).build()
+        )
+
+        val managers = recordsService.getAtt(
+            workspaceRef,
+            WorkspaceDesc.ATT_MANAGER_AUTHORITIES + "[]?id"
+        ).asList(EntityRef::class.java)
+
+        assertThat(managers).containsExactlyInAnyOrder(userMgr, groupMgr)
+
+        recordsService.delete(workspaceRef)
+    }
+
+    @Test
+    fun managerAuthoritiesMixinReturnsEmptyForUnknownWorkspace() {
+
+        val ref = WorkspaceDesc.getRef("non-existing-ws-" + System.currentTimeMillis())
+        val managers = recordsService.getAtt(
+            ref,
+            WorkspaceDesc.ATT_MANAGER_AUTHORITIES + "[]?id"
+        ).asList(EntityRef::class.java)
+
+        assertThat(managers).isEmpty()
+    }
+
     private inline fun <T> runAsUser(user: String, crossinline action: () -> T): T {
         return AuthContext.runAsFull(user, listOf(AuthRole.USER)) {
             action.invoke()

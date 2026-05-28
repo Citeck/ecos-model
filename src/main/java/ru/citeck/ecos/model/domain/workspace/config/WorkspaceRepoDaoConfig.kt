@@ -27,6 +27,7 @@ import ru.citeck.ecos.records3.record.atts.schema.ScalarType
 import ru.citeck.ecos.records3.record.atts.value.AttValueCtx
 import ru.citeck.ecos.records3.record.dao.RecordsDao
 import ru.citeck.ecos.records3.record.mixin.AttMixin
+import ru.citeck.ecos.webapp.api.entity.EntityRef
 import java.util.zip.CRC32
 import kotlin.random.Random
 
@@ -86,6 +87,7 @@ class WorkspaceRepoDaoConfig {
             WorkspaceDesc.ATT_IS_CURRENT_USER_MANAGER,
             WorkspaceDesc.ATT_IS_CURRENT_USER_DIRECT_MEMBER,
             WorkspaceDesc.ATT_IS_CURRENT_USER_LAST_MANAGER,
+            WorkspaceDesc.ATT_MANAGER_AUTHORITIES,
             RecordConstants.ATT_WORKSPACE
         )
 
@@ -108,6 +110,9 @@ class WorkspaceRepoDaoConfig {
                     val currentUserRef = AuthorityType.PERSON.getRef(AuthContext.getCurrentUser())
                     val managers = customWorkspaceApi.getWorkspaceManagersRefs(value.getLocalId()) ?: emptySet()
                     managers.size == 1 && managers.contains(currentUserRef)
+                }
+                WorkspaceDesc.ATT_MANAGER_AUTHORITIES -> {
+                    customWorkspaceApi.getWorkspaceManagersRefs(value.getLocalId())?.toList() ?: emptyList<EntityRef>()
                 }
                 RecordConstants.ATT_WORKSPACE -> {
                     value.getRef()

@@ -88,7 +88,8 @@ class TypesHierarchyUpdater(
         val lmEntity = lastModifiedType.entity
         val typeIdInWs = workspaceService?.addWsPrefixToId(lmEntity.id, lmEntity.workspace) ?: lmEntity.id
         val lastModifiedFromRegistry = registry.getValueWithMeta(typeIdInWs)?.meta?.modified
-        val lastModifiedFromRepo = lastModifiedType.meta.modified
+            ?.truncatedTo(ChronoUnit.MILLIS)
+        val lastModifiedFromRepo = lastModifiedType.meta.modified.truncatedTo(ChronoUnit.MILLIS)
         return if (lastModifiedFromRegistry != lastModifiedFromRepo) {
             log.info {
                 "Found unmatched modified time for '${lastModifiedType.entity.id}'. " +

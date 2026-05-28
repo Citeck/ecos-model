@@ -146,19 +146,29 @@ class TypeDefResolver(
             }
         }
 
+        if (resTypeDef.storageType == EModelTypeUtils.STORAGE_TYPE_DEFAULT &&
+            resTypeDef.sourceId.isBlank() &&
+            !EModelTypeUtils.ABSTRACT_TYPES.contains(resTypeDef.id) &&
+            EModelTypeUtils.ABSTRACT_TYPES.contains(resolvedParentDef.id) &&
+            resolvedParentDef.sourceId.isBlank()
+        ) {
+            resTypeDef.withStorageType(EModelTypeUtils.STORAGE_TYPE_EMODEL)
+        }
+
         when ((resTypeDef.storageType)) {
-            EModelTypeUtils.STORAGE_TYPE_REFERENCE, // todo: set sourceId based on source ref
+            EModelTypeUtils.STORAGE_TYPE_REFERENCE,
             EModelTypeUtils.STORAGE_TYPE_DEFAULT,
             "" -> {
                 if (resTypeDef.sourceId.isBlank()) {
                     resTypeDef.withStorageType(EModelTypeUtils.STORAGE_TYPE_DEFAULT)
                     resTypeDef.withSourceId(resolvedParentDef.sourceId)
-                } else if (resTypeDef.sourceId == "alfresco/") {
+                }
+                if (resTypeDef.sourceId == "alfresco/") {
                     resTypeDef.withStorageType(EModelTypeUtils.STORAGE_TYPE_ALFRESCO)
                 }
             }
             EModelTypeUtils.STORAGE_TYPE_EMODEL -> {
-                if (resTypeDef.sourceId.isBlank()) {
+                if (resTypeDef.sourceId.isBlank() && !EModelTypeUtils.ABSTRACT_TYPES.contains(resTypeDef.id)) {
                     resTypeDef.withSourceId(emodelTypeUtils.getEmodelSourceId(resTypeDef.id, resTypeDef.workspace))
                 }
             }

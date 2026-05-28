@@ -1,0 +1,21 @@
+{
+  "id": "ecos-model-messages",
+  "locales": [
+    "en",
+    "ru"
+  ],
+  "messages": {
+    "ecos-model.activity.parent.self-reference": [
+      "Activity '{{ref}}' cannot be its own parent",
+      "Активность '{{ref}}' не может быть своим собственным родителем"
+    ],
+    "ecos-model.activity.parent.cycle-detected": [
+      "Cycle detected in activity:parent chain for '{{ref}}'. New parent '{{parent}}' eventually references '{{ref}}'",
+      "Обнаружен цикл в цепочке activity:parent для '{{ref}}'. Новый родитель '{{parent}}' замыкается обратно на '{{ref}}'"
+    ],
+    "ecos-model.activity.parent.max-depth-exceeded": [
+      "activity:parent chain depth exceeded {{maxDepth}} while validating '{{ref}}' (new parent '{{parent}}')",
+      "Глубина цепочки activity:parent превысила {{maxDepth}} при проверке '{{ref}}' (новый родитель '{{parent}}')"
+    ]
+  }
+}
