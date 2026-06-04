@@ -34,7 +34,7 @@ model:
       name:
         ru: Иконка
         en: Icon
-      type: ASSOC
+      type: ENTITY_REF
       config:
         typeRef: emodel/type@icon
     - id: description
