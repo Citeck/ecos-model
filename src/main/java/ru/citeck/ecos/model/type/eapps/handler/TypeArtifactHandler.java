@@ -12,16 +12,15 @@ import ru.citeck.ecos.model.lib.workspace.IdInWs;
 import ru.citeck.ecos.model.lib.workspace.WorkspaceService;
 import ru.citeck.ecos.model.lib.workspace.WorkspaceServiceExtensionsKt;
 import ru.citeck.ecos.model.type.service.TypesService;
+import ru.citeck.ecos.model.type.service.utils.TypeWorkspaceRefs;
 import ru.citeck.ecos.webapp.api.EcosWebAppApi;
 import ru.citeck.ecos.webapp.api.entity.EntityRef;
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -73,31 +72,6 @@ public class TypeArtifactHandler implements WsAwareArtifactHandler<TypeDef> {
     }
 
     private TypeDef applyRefs(TypeDef typeDef, String workspace, Function<EntityRef, EntityRef> transform) {
-        TypeDef.Builder builder = typeDef.copy().withWorkspace(workspace);
-        if (EntityRef.isNotEmpty(typeDef.getFormRef())) {
-            builder.withFormRef(transform.apply(typeDef.getFormRef()));
-        }
-        if (EntityRef.isNotEmpty(typeDef.getJournalRef())) {
-            builder.withJournalRef(transform.apply(typeDef.getJournalRef()));
-        }
-        if (EntityRef.isNotEmpty(typeDef.getNumTemplateRef())) {
-            builder.withNumTemplateRef(transform.apply(typeDef.getNumTemplateRef()));
-        }
-        if (EntityRef.isNotEmpty(typeDef.getBoardRef())) {
-            builder.withBoardRef(transform.apply(typeDef.getBoardRef()));
-        }
-        if (EntityRef.isNotEmpty(typeDef.getConfigFormRef())) {
-            builder.withConfigFormRef(transform.apply(typeDef.getConfigFormRef()));
-        }
-        if (EntityRef.isNotEmpty(typeDef.getPostCreateActionRef())) {
-            builder.withPostCreateActionRef(transform.apply(typeDef.getPostCreateActionRef()));
-        }
-        List<EntityRef> actions = typeDef.getActions();
-        if (actions != null && !actions.isEmpty()) {
-            builder.withActions(actions.stream()
-                .map(ref -> EntityRef.isNotEmpty(ref) ? transform.apply(ref) : ref)
-                .collect(Collectors.toList()));
-        }
-        return builder.build();
+        return TypeWorkspaceRefs.rewrite(typeDef, transform).copy().withWorkspace(workspace).build();
     }
 }

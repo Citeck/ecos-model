@@ -20,6 +20,7 @@ import ru.citeck.ecos.model.lib.workspace.convertToIdInWsSafe
 import ru.citeck.ecos.model.type.service.TypeDesc
 import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
+import ru.citeck.ecos.model.type.service.utils.TypeWorkspaceRefs
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records2.predicate.PredicateService
 import ru.citeck.ecos.records2.predicate.model.Predicate
@@ -187,22 +188,15 @@ class TypesRepoRecordsDao(
         }
 
         fun getData(): ByteArray {
-            val typeDefCopy = typeDef.copy {
-                withWorkspace("")
-
-                fun prepareExtRef(ref: EntityRef): EntityRef {
-                    workspaceService ?: return ref
-                    if (EntityRef.isEmpty(ref)) return ref
-                    return ref.withLocalId(workspaceService.replaceWsPrefixToCurrentWsPlaceholder(ref.getLocalId()))
+            val wsService = workspaceService
+            val rewritten = if (wsService == null) {
+                typeDef
+            } else {
+                TypeWorkspaceRefs.rewrite(typeDef) { ref ->
+                    ref.withLocalId(wsService.replaceWsPrefixToCurrentWsPlaceholder(ref.getLocalId()))
                 }
-                withFormRef(prepareExtRef(typeDef.formRef))
-                withJournalRef(prepareExtRef(typeDef.journalRef))
-                withNumTemplateRef(prepareExtRef(typeDef.numTemplateRef))
-                withBoardRef(prepareExtRef(typeDef.boardRef))
-                withConfigFormRef(prepareExtRef(typeDef.configFormRef))
-                withPostCreateActionRef(prepareExtRef(typeDef.postCreateActionRef))
-                withActions(typeDef.actions.map { prepareExtRef(it) })
             }
+            val typeDefCopy = rewritten.copy().withWorkspace("").build()
 
             return YamlUtils.toNonDefaultString(typeDefCopy)
                 .toByteArray(StandardCharsets.UTF_8)

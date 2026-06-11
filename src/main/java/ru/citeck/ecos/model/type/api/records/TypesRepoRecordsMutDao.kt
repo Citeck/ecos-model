@@ -14,6 +14,7 @@ import ru.citeck.ecos.model.lib.workspace.WorkspaceService
 import ru.citeck.ecos.model.lib.workspace.convertToIdInWsSafe
 import ru.citeck.ecos.model.type.service.TypeDesc
 import ru.citeck.ecos.model.type.service.TypesService
+import ru.citeck.ecos.model.type.service.utils.TypeWorkspaceRefs
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
 import ru.citeck.ecos.records3.record.atts.value.factory.bean.BeanTypeUtils
@@ -36,9 +37,6 @@ class TypesRepoRecordsMutDao(
         private const val ARTIFACT_UPLOAD_FORM_ID = "ecos-artifact-upload"
 
         private const val WORKSPACE_ATT = "workspace"
-        private const val FORM_REF_ATT = "formRef"
-        private const val JOURNAL_REF_ATT = "journalRef"
-        private const val NUM_TEMPLATE_REF_ATT = "numTemplateRef"
     }
 
     override fun getId() = "types-repo"
@@ -108,10 +106,6 @@ class TypesRepoRecordsMutDao(
                 }
                 mutAtts.remove(RecordConstants.ATT_WORKSPACE)
             }
-            processRefAttributes(
-                mutAtts,
-                listOf(FORM_REF_ATT, JOURNAL_REF_ATT, NUM_TEMPLATE_REF_ATT)
-            )
         }
 
         val ctx = BeanTypeUtils.getTypeContext(TypeMutRecord::class.java)
@@ -119,27 +113,11 @@ class TypesRepoRecordsMutDao(
 
         recToMutate.aspects = mutAspects
 
-        return saveMutatedRec(recToMutate)
+        return saveMutatedRec(recToMutate, rebindCurrentWs = isNewRec)
     }
 
     private fun isWorkspaceShouldHasScopedTypes(workspaceId: String): Boolean {
         return workspaceId != ModelUtils.DEFAULT_WORKSPACE_ID && !workspaceId.startsWith("admin$")
-    }
-
-    private fun processRefAttributes(mutAtts: ObjectData, attributeNames: List<String>) {
-
-        workspaceService ?: return
-
-        val workspace = mutAtts[WORKSPACE_ATT].asText()
-
-        for (attName in attributeNames) {
-            if (!mutAtts.has(attName)) {
-                continue
-            }
-            val entityRef = mutAtts[attName].asText().toEntityRef()
-            val newLocalId = workspaceService.replaceCurrentWsPlaceholderToWsPrefix(entityRef.getLocalId(), workspace)
-            mutAtts[attName] = entityRef.withLocalId(newLocalId)
-        }
     }
 
     private fun applyAspectsData(
@@ -175,9 +153,9 @@ class TypesRepoRecordsMutDao(
         }
     }
 
-    private fun saveMutatedRec(record: TypeMutRecord): String {
+    private fun saveMutatedRec(record: TypeMutRecord, rebindCurrentWs: Boolean): String {
 
-        val newTypeDef = record.build()
+        var newTypeDef = record.build()
 
         if (newTypeDef.id.isEmpty()) {
             error("Type identifier is empty")
@@ -185,11 +163,20 @@ class TypesRepoRecordsMutDao(
 
         typesRepoPermsService?.checkMutationPermissions(record)
 
+        val wsService = workspaceService
+        if (rebindCurrentWs && wsService != null) {
+            // artifact-upload import: CURRENT_WS: placeholders in any ws-scoped ref -> target ws prefix
+            val workspace = newTypeDef.workspace
+            newTypeDef = TypeWorkspaceRefs.rewrite(newTypeDef) { ref ->
+                ref.withLocalId(wsService.replaceCurrentWsPlaceholderToWsPrefix(ref.getLocalId(), workspace))
+            }
+        }
+
         val baseId = record.baseTypeDef.id
         val clonedRecord = baseId.isNotEmpty() && baseId != newTypeDef.id
 
         val defAfterSave = typeService.save(newTypeDef, clonedRecord)
-        return workspaceService?.addWsPrefixToId(defAfterSave.id, defAfterSave.workspace) ?: defAfterSave.id
+        return wsService?.addWsPrefixToId(defAfterSave.id, defAfterSave.workspace) ?: defAfterSave.id
     }
 
     override fun delete(recordId: String): DelStatus {
