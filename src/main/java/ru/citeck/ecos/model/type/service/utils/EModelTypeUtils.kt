@@ -43,21 +43,24 @@ class EModelTypeUtils {
         if (typeDef == null) {
             return ""
         }
-        if (ABSTRACT_TYPES.contains(typeDef.id)) {
+        return getEmodelSourceId(typeDef.id, typeDef.workspace, typeDef.storageType, typeDef.sourceId)
+    }
+
+    fun getEmodelSourceId(typeId: String, workspace: String, storageType: String, sourceId: String): String {
+        if (ABSTRACT_TYPES.contains(typeId)) {
             return ""
         }
-        val srcId = typeDef.sourceId
-        return if (typeDef.storageType == STORAGE_TYPE_EMODEL) {
-            if (srcId.startsWith(EMODEL_SOURCE_ID_PREFIX)) {
-                srcId.substring(EMODEL_SOURCE_ID_PREFIX.length)
-            } else if (srcId.isNotBlank()) {
-                if (srcId.contains("/")) {
-                    getEmodelSourceId(typeDef.id, typeDef.workspace)
+        return if (storageType == STORAGE_TYPE_EMODEL) {
+            if (sourceId.startsWith(EMODEL_SOURCE_ID_PREFIX)) {
+                sourceId.substring(EMODEL_SOURCE_ID_PREFIX.length)
+            } else if (sourceId.isNotBlank()) {
+                if (sourceId.contains("/")) {
+                    getEmodelSourceId(typeId, workspace)
                 } else {
-                    srcId
+                    sourceId
                 }
             } else {
-                getEmodelSourceId(typeDef.id, typeDef.workspace)
+                getEmodelSourceId(typeId, workspace)
             }
         } else {
             ""

@@ -6,20 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.DependsOn
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
-import ru.citeck.ecos.apps.app.service.LocalAppService
-import ru.citeck.ecos.commons.data.ObjectData
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta
-import ru.citeck.ecos.model.lib.aspect.dto.AspectInfo
-import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
 import ru.citeck.ecos.model.lib.workspace.*
-import ru.citeck.ecos.model.type.eapps.handler.TypeArtifactHandler
 import ru.citeck.ecos.model.type.service.resolver.AspectsProvider
 import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
 import ru.citeck.ecos.model.type.service.resolver.TypesProvider
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.txn.lib.TxnContext
 import ru.citeck.ecos.webapp.api.EcosWebAppApi
-import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.api.promise.Promise
 import ru.citeck.ecos.webapp.api.promise.Promises
 import ru.citeck.ecos.webapp.lib.model.aspect.dto.AspectDef
@@ -35,8 +29,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 @DependsOn("workspaceRepoDao")
 class TypesRegistryInitializer(
     private val typesService: TypesService,
-    private val localAppService: LocalAppService,
     private val resolver: TypeDefResolver,
+    private val rawTypesProvider: TypesProvider,
+    private val aspectsProvider: AspectsProvider,
     private val workspaceService: WorkspaceService? = null
 ) : EcosRegistryInitializer<TypeDef>,
     DisposableBean {
@@ -59,9 +54,9 @@ class TypesRegistryInitializer(
         props: EcosRegistryProps.Initializer
     ): Promise<*> {
 
-        val rawProv = TypesServiceBasedProv(typesService, loadClasspathTypes(), workspaceService)
+        val rawProv = rawTypesProvider
         val resProv = RegistryBasedTypesProv(registry)
-        val aspectsProv = AspectsProv()
+        val aspectsProv = aspectsProvider
 
         typesHierarchyUpdater = TypesHierarchyUpdater(
             typesService,
@@ -112,25 +107,6 @@ class TypesRegistryInitializer(
         return Promises.resolve(Unit)
     }
 
-    private fun loadClasspathTypes(): List<TypeDef> {
-        val typeArtifacts = localAppService.readStaticLocalArtifacts(
-            TypeArtifactHandler.TYPE,
-            "json",
-            ObjectData.create()
-        )
-        val result = ArrayList<TypeDef>()
-        for (typeArtifact in typeArtifacts) {
-            if (typeArtifact !is ObjectData) {
-                continue
-            }
-            val typeDef = typeArtifact.getAs(TypeDef::class.java) ?: continue
-            if (typeDef.id.isNotBlank()) {
-                result.add(typeDef)
-            }
-        }
-        return result
-    }
-
     private fun syncAllTypes(
         registry: MutableEcosRegistry<TypeDef>,
         rawProv: TypesProvider,
@@ -173,12 +149,6 @@ class TypesRegistryInitializer(
         log.info { "Types full sync completed" }
     }
 
-    private inner class AspectsProv : AspectsProvider {
-        override fun getAspectInfo(aspectRef: EntityRef): AspectInfo? {
-            return aspectsRegistry.getValue(aspectRef.getLocalId())?.getAspectInfo()
-        }
-    }
-
     private class EmptyProv : TypesProvider {
         override fun get(id: String): TypeDef? {
             return null
@@ -198,97 +168,6 @@ class TypesRegistryInitializer(
                 .values
                 .filter { it.entity.parentRef.getLocalId() == typeId }
                 .map { it.entity.id }
-        }
-    }
-
-    private class TypesServiceBasedProv(
-        val typesService: TypesService,
-        predefinedTypes: List<TypeDef>,
-        val workspaceService: WorkspaceService?
-    ) : TypesProvider {
-
-        private val predefinedTypesInfo: Map<String, PredefinedTypeInfo> = predefinedTypes.associate {
-            it.id to PredefinedTypeInfo(it)
-        }
-
-        private fun isAllAttsFromMapExistsInList(
-            attsMap: Map<String, AttributeDef>,
-            attsList: List<AttributeDef>
-        ): Boolean {
-            if (attsMap.isEmpty()) {
-                return true
-            }
-            if (attsList.size < attsMap.size) {
-                return false
-            }
-            var notFoundCount = attsMap.size
-            for (att in attsList) {
-                if (attsMap.containsKey(att.id)) {
-                    if (--notFoundCount == 0) {
-                        break
-                    }
-                }
-            }
-            return notFoundCount == 0
-        }
-
-        override fun get(id: String): TypeDef? {
-
-            val typeFromRepo = typesService.getByIdOrNull(workspaceService.convertToIdInWsSafe(id)) ?: return null
-            val predefinedType = predefinedTypesInfo[id] ?: return typeFromRepo
-
-            // Add missing predefined attributes to the type model loaded from the database.
-            // This is needed to protect against potential bugs when a new attribute is added
-            // in artifacts/model/type/... but the database still contains an older version
-            // of the type without this attribute.
-            // The updated type will eventually be deployed, but until that happens we apply this workaround.
-            val repoAtts = typeFromRepo.model.attributes
-            val repoSysAtts = typeFromRepo.model.systemAttributes
-
-            val foundMissingAtts = !isAllAttsFromMapExistsInList(predefinedType.attributesById, repoAtts)
-            val foundMissingSysAtts = !isAllAttsFromMapExistsInList(predefinedType.sysAttsById, repoSysAtts)
-
-            if (!foundMissingAtts && !foundMissingSysAtts) {
-                return typeFromRepo
-            }
-
-            val newModel = typeFromRepo.model.copy()
-
-            if (foundMissingAtts) {
-                val newAtts = ArrayList(repoAtts)
-                for (attribute in predefinedType.attributesById.values) {
-                    if (repoAtts.find { it.id == attribute.id } == null) {
-                        newAtts.add(attribute)
-                    }
-                }
-                newModel.withAttributes(newAtts)
-            }
-            if (foundMissingSysAtts) {
-                val newSysAtts = ArrayList(repoSysAtts)
-                for (attribute in predefinedType.sysAttsById.values) {
-                    if (repoSysAtts.find { it.id == attribute.id } == null) {
-                        newSysAtts.add(attribute)
-                    }
-                }
-                newModel.withSystemAttributes(newSysAtts)
-            }
-
-            return typeFromRepo.copy()
-                .withModel(newModel.build())
-                .build()
-        }
-
-        override fun getChildren(typeId: String): List<String> {
-            return typesService.getChildren(workspaceService.convertToIdInWsSafe(typeId)).map {
-                workspaceService.convertToStrIdSafe(it)
-            }
-        }
-
-        private class PredefinedTypeInfo(
-            val typeDef: TypeDef
-        ) {
-            val attributesById: Map<String, AttributeDef> = typeDef.model.attributes.associateBy { it.id }
-            val sysAttsById: Map<String, AttributeDef> = typeDef.model.systemAttributes.associateBy { it.id }
         }
     }
 
