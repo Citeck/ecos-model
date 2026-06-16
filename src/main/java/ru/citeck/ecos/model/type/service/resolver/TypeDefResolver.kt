@@ -83,6 +83,131 @@ class TypeDefResolver(
         return resolvedByParentTypes.map { it.build() }
     }
 
+    /**
+     * Resolves only storageType and sourceId, walking the parents hierarchy the same way
+     * as [getResolvedByParentType], but without the heavyweight model/aspects/associations
+     * postprocessing. Cheap enough to be called on every type save.
+     *
+     * The parent walk below (idInWs, base/blank short-circuit, parentRef defaulting to base,
+     * recursive parent resolution and parent-workspace inheritance) intentionally mirrors the one
+     * in [getResolvedByParentType]; both feed the same [deriveStorageTypeAndSourceId] core. The two
+     * walks must stay in sync — [TypeDefResolverTest] pins their agreement so a silent divergence
+     * (which would make the save-guard disagree with the registry) fails the build.
+     */
+    fun resolveStorageTypeAndSourceId(typeDef: TypeDef, rawProv: TypesProvider): TypeStorageDef {
+        return resolveStorage(typeDef, rawProv, HashMap())
+    }
+
+    private fun resolveStorage(
+        typeDef: TypeDef,
+        rawProv: TypesProvider,
+        cache: MutableMap<String, TypeStorageDef>
+    ): TypeStorageDef {
+
+        val idInWs = workspaceService?.addWsPrefixToId(typeDef.id, typeDef.workspace) ?: typeDef.id
+
+        cache[idInWs]?.let { return it }
+
+        if (typeDef.id.isBlank() || typeDef.id == "base") {
+            return TypeStorageDef(typeDef.id, typeDef.workspace, typeDef.storageType, typeDef.sourceId)
+                .also { cache[idInWs] = it }
+        }
+
+        val resolvedId = if (typeDef.workspace.isNotBlank()) idInWs else typeDef.id
+
+        val parentRef = if (EntityRef.isEmpty(typeDef.parentRef) && typeDef.id != "base") {
+            ModelUtils.getTypeRef("base")
+        } else {
+            typeDef.parentRef
+        }
+        val parent = run {
+            val parentTypeId = parentRef.getLocalId()
+            val parentTypeDef = if (parentTypeId.isNotBlank()) {
+                rawProv.get(parentTypeId) ?: TypeDef.EMPTY
+            } else {
+                TypeDef.EMPTY
+            }
+            resolveStorage(parentTypeDef, rawProv, cache)
+        }
+
+        val workspace = if (parent.workspace.isNotEmpty()) parent.workspace else typeDef.workspace
+
+        val storage = deriveStorageTypeAndSourceId(
+            resolvedId = resolvedId,
+            workspace = workspace,
+            storageType = typeDef.storageType,
+            sourceId = typeDef.sourceId,
+            parentResolvedId = parent.id,
+            parentResolvedStorageType = parent.storageType,
+            parentResolvedSourceId = parent.sourceId
+        )
+        return TypeStorageDef(resolvedId, workspace, storage.storageType, storage.sourceId)
+            .also { cache[idInWs] = it }
+    }
+
+    /**
+     * Pure derivation of the effective storageType and sourceId from the raw values and the
+     * resolved parent. Shared by full resolution ([getResolvedByParentType]) and the targeted
+     * [resolveStorageTypeAndSourceId] so both always agree.
+     */
+    private fun deriveStorageTypeAndSourceId(
+        resolvedId: String,
+        workspace: String,
+        storageType: String,
+        sourceId: String,
+        parentResolvedId: String,
+        parentResolvedStorageType: String,
+        parentResolvedSourceId: String
+    ): TypeStorageDef {
+
+        var resStorageType = storageType
+        var resSourceId = sourceId
+
+        if (workspace.isNotEmpty()) {
+            resSourceId = ""
+            resStorageType = EModelTypeUtils.STORAGE_TYPE_EMODEL
+        }
+
+        // A non-abstract type with default storage and no explicit sourceId under an abstract
+        // parent inherits the parent's storage policy: business types extend user-base/case/etc.
+        // (ECOS_MODEL) and get an auto-generated DAO, while types under the bare abstract root
+        // (base, authority) stay DEFAULT and rely on a manually-registered DAO (e.g. record-version).
+        if (resStorageType == EModelTypeUtils.STORAGE_TYPE_DEFAULT &&
+            resSourceId.isBlank() &&
+            !EModelTypeUtils.ABSTRACT_TYPES.contains(resolvedId) &&
+            EModelTypeUtils.ABSTRACT_TYPES.contains(parentResolvedId) &&
+            parentResolvedSourceId.isBlank()
+        ) {
+            resStorageType = parentResolvedStorageType
+        }
+
+        when (resStorageType) {
+            EModelTypeUtils.STORAGE_TYPE_REFERENCE,
+            EModelTypeUtils.STORAGE_TYPE_DEFAULT,
+            "" -> {
+                if (resSourceId.isBlank()) {
+                    resStorageType = EModelTypeUtils.STORAGE_TYPE_DEFAULT
+                    resSourceId = parentResolvedSourceId
+                }
+                if (resSourceId == "alfresco/") {
+                    resStorageType = EModelTypeUtils.STORAGE_TYPE_ALFRESCO
+                }
+            }
+            EModelTypeUtils.STORAGE_TYPE_EMODEL -> {
+                if (resSourceId.isBlank() && !EModelTypeUtils.ABSTRACT_TYPES.contains(resolvedId)) {
+                    resSourceId = emodelTypeUtils.getEmodelSourceId(resolvedId, workspace)
+                }
+            }
+            EModelTypeUtils.STORAGE_TYPE_ALFRESCO -> {
+                resSourceId = "alfresco/"
+            }
+        }
+        if (resSourceId.isNotEmpty() && !resSourceId.contains(EntityRef.APP_NAME_DELIMITER)) {
+            resSourceId = EcosModelApp.NAME + EntityRef.APP_NAME_DELIMITER + resSourceId
+        }
+        return TypeStorageDef(resolvedId, workspace, resStorageType, resSourceId)
+    }
+
     private fun getResolvedByParentType(typeDef: TypeDef, context: ResolveContext): TypeDef.Builder {
 
         val idInWs = workspaceService?.addWsPrefixToId(typeDef.id, typeDef.workspace) ?: typeDef.id
@@ -133,8 +258,6 @@ class TypeDefResolver(
         }
 
         if (resTypeDef.workspace.isNotEmpty()) {
-            resTypeDef.withSourceId("")
-            resTypeDef.withStorageType(EModelTypeUtils.STORAGE_TYPE_EMODEL)
             resTypeDef.withWorkspaceScope(WorkspaceScope.PRIVATE)
             resTypeDef.withDefaultWorkspace(resTypeDef.workspace)
         } else {
@@ -146,39 +269,17 @@ class TypeDefResolver(
             }
         }
 
-        if (resTypeDef.storageType == EModelTypeUtils.STORAGE_TYPE_DEFAULT &&
-            resTypeDef.sourceId.isBlank() &&
-            !EModelTypeUtils.ABSTRACT_TYPES.contains(resTypeDef.id) &&
-            EModelTypeUtils.ABSTRACT_TYPES.contains(resolvedParentDef.id) &&
-            resolvedParentDef.sourceId.isBlank()
-        ) {
-            resTypeDef.withStorageType(EModelTypeUtils.STORAGE_TYPE_EMODEL)
-        }
+        val storage = deriveStorageTypeAndSourceId(
+            resolvedId = resTypeDef.id,
+            workspace = resTypeDef.workspace,
+            storageType = resTypeDef.storageType,
+            sourceId = resTypeDef.sourceId,
+            parentResolvedId = resolvedParentDef.id,
+            parentResolvedStorageType = resolvedParentDef.storageType,
+            parentResolvedSourceId = resolvedParentDef.sourceId
+        )
+        resTypeDef.withStorageType(storage.storageType).withSourceId(storage.sourceId)
 
-        when ((resTypeDef.storageType)) {
-            EModelTypeUtils.STORAGE_TYPE_REFERENCE,
-            EModelTypeUtils.STORAGE_TYPE_DEFAULT,
-            "" -> {
-                if (resTypeDef.sourceId.isBlank()) {
-                    resTypeDef.withStorageType(EModelTypeUtils.STORAGE_TYPE_DEFAULT)
-                    resTypeDef.withSourceId(resolvedParentDef.sourceId)
-                }
-                if (resTypeDef.sourceId == "alfresco/") {
-                    resTypeDef.withStorageType(EModelTypeUtils.STORAGE_TYPE_ALFRESCO)
-                }
-            }
-            EModelTypeUtils.STORAGE_TYPE_EMODEL -> {
-                if (resTypeDef.sourceId.isBlank() && !EModelTypeUtils.ABSTRACT_TYPES.contains(resTypeDef.id)) {
-                    resTypeDef.withSourceId(emodelTypeUtils.getEmodelSourceId(resTypeDef.id, resTypeDef.workspace))
-                }
-            }
-            EModelTypeUtils.STORAGE_TYPE_ALFRESCO -> {
-                resTypeDef.withSourceId("alfresco/")
-            }
-        }
-        if (resTypeDef.sourceId.isNotEmpty() && !resTypeDef.sourceId.contains(EntityRef.APP_NAME_DELIMITER)) {
-            resTypeDef.withSourceId(EcosModelApp.NAME + EntityRef.APP_NAME_DELIMITER + resTypeDef.sourceId)
-        }
         if (EntityRef.isEmpty(resTypeDef.metaRecord)) {
             resTypeDef.withMetaRecord(EntityRef.valueOf(resTypeDef.sourceId + "@"))
         }
@@ -596,6 +697,17 @@ class TypeDefResolver(
 
     private data class JournalsByTargetTypeKey(
         val target: EntityRef
+    )
+
+    /**
+     * Effective storage of a type after parent resolution. [id] and [workspace] are the resolved
+     * values needed to interpret [sourceId] (e.g. via [EModelTypeUtils.getEmodelSourceId]).
+     */
+    data class TypeStorageDef(
+        val id: String,
+        val workspace: String,
+        val storageType: String,
+        val sourceId: String
     )
 
     private class ResolveContext(

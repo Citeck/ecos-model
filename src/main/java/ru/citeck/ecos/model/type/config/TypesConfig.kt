@@ -13,6 +13,9 @@ import ru.citeck.ecos.model.domain.doclib.api.records.DocLibRecords
 import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.model.type.service.TypesService
+import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
+import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver.TypeStorageDef
+import ru.citeck.ecos.model.type.service.resolver.TypesProvider
 import ru.citeck.ecos.model.type.service.utils.EModelTypeUtils
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.dao.RecordsDao
@@ -21,7 +24,9 @@ import ru.citeck.ecos.webapp.lib.model.type.registry.EcosTypesRegistry
 
 @Configuration
 class TypesConfig(
-    val emodelTypeUtils: EModelTypeUtils
+    val emodelTypeUtils: EModelTypeUtils,
+    val typeDefResolver: TypeDefResolver,
+    val rawTypesProvider: TypesProvider
 ) {
 
     companion object {
@@ -48,13 +53,26 @@ class TypesConfig(
         }
 
         typesService.addListener(-100f) { before, after ->
-            val emodelSrcIdBefore = emodelTypeUtils.getEmodelSourceId(before)
-            val emodelSrcIdAfter = emodelTypeUtils.getEmodelSourceId(after)
-            if (emodelSrcIdAfter.isNotEmpty() &&
-                emodelSrcIdAfter != emodelSrcIdBefore &&
-                recordsService.getRecordsDao(emodelSrcIdAfter) != null
+            if (after == null) {
+                return@addListener
+            }
+            // A type that resolves to ECOS_MODEL storage gets an auto-generated DbRecordsDao under
+            // its emodel source id (whether ECOS_MODEL was declared explicitly or derived through
+            // the parents hierarchy). The raw def doesn't carry the sourceId derived from
+            // id/workspace, so it's computed by resolving the def the same way the registry does.
+            val storageAfter = resolveStorage(after) ?: return@addListener
+            val emodelSrcIdAfter = storageAfter.emodelSourceId()
+            if (emodelSrcIdAfter.isEmpty() ||
+                emodelSrcIdAfter == resolveStorage(before).emodelSourceId() ||
+                recordsService.getRecordsDao(emodelSrcIdAfter) == null
             ) {
-
+                return@addListener
+            }
+            // The conflict is not new if the type already known to the registry implies the same
+            // source id: on a fresh database the DAO is registered from the registry before
+            // DeployCoreTypesPatch saves the type into the repo.
+            val registryDef = typesRegistry.getValue(storageAfter.id)
+            if (resolveStorage(registryDef).emodelSourceId() != emodelSrcIdAfter) {
                 error(
                     "Records DAO with source id '$emodelSrcIdAfter' already registered. " +
                         "Please change type id or enter custom source id in sourceId attribute"
@@ -84,6 +102,16 @@ class TypesConfig(
                 }
             }
         }
+    }
+
+    private fun resolveStorage(typeDef: TypeDef?): TypeStorageDef? {
+        typeDef ?: return null
+        return typeDefResolver.resolveStorageTypeAndSourceId(typeDef, rawTypesProvider)
+    }
+
+    private fun TypeStorageDef?.emodelSourceId(): String {
+        this ?: return ""
+        return emodelTypeUtils.getEmodelSourceId(id, workspace, storageType, sourceId)
     }
 
     private fun createRecordsDao(

@@ -21,6 +21,8 @@ import ru.citeck.ecos.model.type.repository.TypeEntity
 import ru.citeck.ecos.model.type.service.TypesRegistryInitializer
 import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.model.type.service.TypesServiceImpl
+import ru.citeck.ecos.model.type.service.resolver.RawTypesProvider
+import ru.citeck.ecos.model.type.service.resolver.RegistryBasedAspectsProvider
 import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
 import ru.citeck.ecos.model.type.service.utils.EModelTypeUtils
 import ru.citeck.ecos.records3.RecordsService
@@ -86,17 +88,17 @@ open class TypeTestBase {
 
         val emodelTypeUtils = EModelTypeUtils()
 
+        val aspectsRegistry = EcosAspectsRegistry(
+            EcosRegistryProps.DEFAULT,
+            listOf(AspectArtifactsInitializer(ecosAppsServiceFactory.localAppService))
+        )
         val typesRegistryInitializer = TypesRegistryInitializer(
             typeService,
-            ecosAppsServiceFactory.localAppService,
-            TypeDefResolver(emodelTypeUtils = emodelTypeUtils)
+            TypeDefResolver(emodelTypeUtils = emodelTypeUtils),
+            RawTypesProvider(typeService, ecosAppsServiceFactory.localAppService),
+            RegistryBasedAspectsProvider(aspectsRegistry)
         )
-        typesRegistryInitializer.setAspectsRegistry(
-            EcosAspectsRegistry(
-                EcosRegistryProps.DEFAULT,
-                listOf(AspectArtifactsInitializer(ecosAppsServiceFactory.localAppService))
-            )
-        )
+        typesRegistryInitializer.setAspectsRegistry(aspectsRegistry)
         typesRegistryInitializer.setWebAppApi(webAppCtxMock)
 
         val typesRegistry = EcosTypesRegistry(
