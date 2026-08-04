@@ -1,0 +1,199 @@
+{
+  "id": "record-change-status-form",
+  "formKey": "",
+  "title": {
+    "ru": "Изменение статуса",
+    "en": "Change status"
+  },
+  "description": {},
+  "customModule": "",
+  "typeRef": "",
+  "width": "sm",
+  "system": true,
+  "definition": {
+    "components": [
+      {
+        "label": {
+          "ru": "Panel"
+        },
+        "key": "panel2",
+        "scrollableContent": true,
+        "refreshOn": [],
+        "optionalWhenDisabled": false,
+        "type": "panel",
+        "input": false,
+        "components": [
+          {
+            "label": {
+              "ru": "Статус",
+              "en": "Status"
+            },
+            "key": "status",
+            "validate": {
+              "required": true,
+              "customMessage": "Новый статус не может быть равен текущему",
+              "custom": "let currentStatus = _.get(data, \"recordInfo.currentStatus\");\nvalid = currentStatus !== input;"
+            },
+            "clearOnHide": false,
+            "dataSrc": "custom",
+            "data": {
+              "custom": "const statuses = _.get(data, \"recordInfo.statuses\");\n\nlist = [];\n\nfor(var i in statuses) {\n  list.push({label: Citeck.helpers.getMLValue(statuses[i].name), value: statuses[i].id});\n}\n\n\nvalues = list;",
+              "headers": [
+                {}
+              ]
+            },
+            "searchEnabled": false,
+            "defaultValue": "",
+            "refreshOn": [
+              "recordInfo"
+            ],
+            "customDefaultValue": "value = _.get(data, \"recordInfo.currentStatus\");",
+            "optionalWhenDisabled": false,
+            "type": "ecosSelect",
+            "input": true
+          }
+        ]
+      },
+      {
+        "label": {
+          "ru": "Columns"
+        },
+        "key": "columns4",
+        "columns": [
+          {
+            "components": [
+              {
+                "label": "Record Info",
+                "source": {
+                  "type": "record",
+                  "forceLoad": true,
+                  "record": {
+                    "id": "{{instance.options.actionRecord}}",
+                    "attributes": {
+                      "statuses": "_type.model.statuses[]?json",
+                      "currentStatus": "_status?str"
+                    }
+                  }
+                },
+                "update": {
+                  "type": "once"
+                },
+                "ignoreValuesEqualityChecking": true,
+                "key": "recordInfo",
+                "type": "asyncData",
+                "input": true
+              }
+            ],
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 0
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 1,
+            "components": []
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 2,
+            "components": []
+          },
+          {
+            "md": 3,
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 3,
+            "components": []
+          }
+        ],
+        "oneColumnInViewMode": false,
+        "type": "columns",
+        "input": false
+      },
+      {
+        "label": {
+          "ru": "Columns"
+        },
+        "key": "columns2",
+        "columns": [
+          {
+            "components": [
+              {
+                "label": "Cancel",
+                "action": "event",
+                "state": "",
+                "showValidations": false,
+                "event": "cancel",
+                "block": true,
+                "type": "button",
+                "input": true,
+                "key": "submit2",
+                "conditional": {
+                  "show": null,
+                  "when": null
+                }
+              }
+            ],
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "label": "Column",
+            "clearOnHide": true,
+            "conditional": {
+              "show": null,
+              "when": null
+            },
+            "index": 0
+          },
+          {
+            "components": [
+              {
+                "label": {
+                  "en": "Save",
+                  "ru": "Сохранить"
+                },
+                "key": "submit",
+                "state": "",
+                "theme": "primary",
+                "block": true,
+                "disableOnInvalid": true,
+                "refreshOn": [],
+                "optionalWhenDisabled": false,
+                "type": "button",
+                "input": true,
+                "headers": [
+                  {}
+                ]
+              }
+            ],
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "label": "Column",
+            "clearOnHide": true,
+            "conditional": {
+              "show": null,
+              "when": null
+            },
+            "index": 1
+          }
+        ],
+        "oneColumnInViewMode": false,
+        "type": "columns",
+        "input": false
+      }
+    ],
+    "formId": "record-change-status-form"
+  },
+  "attributes": {},
+  "notExists": false
+}

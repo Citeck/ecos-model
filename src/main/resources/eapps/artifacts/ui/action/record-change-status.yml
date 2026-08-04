@@ -1,0 +1,23 @@
+---
+id: record-change-status
+name:
+  ru: Изменить статус
+  en: Change status
+confirm:
+  title:
+    ru: Изменить статус
+    en: Change status
+  message: {}
+  formRef: uiserv/form@record-change-status-form
+  formAttributes: {}
+  attributesMapping:
+    record.attributes._status: status
+type: mutate
+config:
+  records:
+    id: '${recordRef}'
+    attributes: {}
+features:
+  execForRecord: true
+  execForRecords: false
+  execForQuery: false
