@@ -199,6 +199,10 @@
                       "minDate": "",
                       "maxDate": ""
                     },
+                    "enableTime": false,
+                    "timePicker": {
+                      "showMeridian": false
+                    },
                     "defaultValue": "",
                     "refreshOn": [],
                     "optionalWhenDisabled": false,
@@ -207,7 +211,8 @@
                     },
                     "type": "datetime",
                     "input": true,
-                    "suffix": true
+                    "suffix": true,
+                    "reorder": false
                   },
                   {
                     "label": {
