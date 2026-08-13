@@ -74,21 +74,21 @@ class CommentsEmitEventsDbRecordsListener(
         return CommentDeleteEvent(
             record = commentAtts.record,
             commentRecord = commentAtts.commentRecord,
-            text = commentAtts.text
+            text = extractor.extractCommentTextForEvent(commentAtts.text ?: "")
         )
     }
 
     private fun DbRecordChangedEvent.toCommentEvent(): CommentUpdateEvent {
         val commentAtts = recordsService.getAtts(this.record, CommentAtts::class.java)
 
-        val textBefore = this.before[TEXT_ATT]
-        val textAfter = this.after[TEXT_ATT]
+        val textBefore = this.before[TEXT_ATT]?.toString()
+        val textAfter = this.after[TEXT_ATT]?.toString()
 
         return CommentUpdateEvent(
             record = commentAtts.record,
             commentRecord = commentAtts.commentRecord,
-            textBefore = textBefore?.toString(),
-            textAfter = textAfter?.toString()
+            textBefore = textBefore?.let { extractor.extractCommentTextForEvent(it) },
+            textAfter = textAfter?.let { extractor.extractCommentTextForEvent(it) }
         )
     }
 
