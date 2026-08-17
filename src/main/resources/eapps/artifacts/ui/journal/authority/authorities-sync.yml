@@ -1,12 +1,13 @@
 ---
 id: authorities-sync
-name: { ru: Синхронизация, en: Synchronization }
+name: { ru: LDAP Синхронизация, en: LDAP Synchronization }
 
 system: true
 
 actions:
   - uiserv/action@download-base64-data-yml
   - uiserv/action@edit-json
+  - uiserv/action@delete
 
 columns:
   - id: _localId
