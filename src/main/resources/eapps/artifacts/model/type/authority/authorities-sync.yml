@@ -9,6 +9,13 @@ sourceId: emodel/authorities-sync
 journalRef: uiserv/journal@authorities-sync
 
 defaultCreateVariant: false
+postCreateActionRef: uiserv/action@none
+
+createVariants:
+  - id: upload-sync-config
+    name: { ru: Загрузить конфигурацию, en: Upload configuration }
+    formRef: uiserv/form@full-atts-upload
+    allowedFor: ['ROLE_ADMIN']
 
 model:
   attributes:
