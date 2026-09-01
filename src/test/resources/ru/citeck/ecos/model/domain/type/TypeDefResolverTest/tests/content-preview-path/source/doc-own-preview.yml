@@ -1,0 +1,6 @@
+---
+id: doc-own-preview
+parentRef: emodel/type@doc-base
+
+contentConfig:
+  previewPath: ownPreview

@@ -1,0 +1,11 @@
+---
+id: doc-base
+name:
+  en: doc-base
+
+parentRef: emodel/type@base
+inheritCreateVariants: false
+
+contentConfig:
+  path: content
+  previewPath: content

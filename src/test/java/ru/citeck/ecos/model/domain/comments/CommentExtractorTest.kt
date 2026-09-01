@@ -2,6 +2,7 @@ package ru.citeck.ecos.model.domain.comments
 
 import org.assertj.core.api.Assertions.assertThat
 import ru.citeck.ecos.model.domain.comments.api.extractor.CommentExtractor
+import ru.citeck.ecos.model.domain.comments.api.validator.CommentValidator
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.api.entity.toEntityRef
 import kotlin.test.Test
@@ -75,6 +76,28 @@ class CommentExtractorTest {
                 "emodel/temp-file@c5a75903-d886-4c88-ae1b-9ac6ce1b4385" to EntityRef.valueOf("emodel/temp-file@c5a75903-d886-4c88-ae1b-9ac6ce1b4385"),
                 "temp-file%401c00dce5-b34d-4cb5-8706-f6393a9ff822" to EntityRef.valueOf("temp-file@1c00dce5-b34d-4cb5-8706-f6393a9ff822"),
             )
+        )
+    }
+
+    // The safelist in CommentValidator decides what a saved comment keeps, and this extraction is
+    // what turns a temp file into a real attachment (CommentsRecordsProxy). Widening the safelist
+    // must not cost the extraction the src, the href or the json a file node leaves behind.
+    @Test
+    fun extractAttachmentsRefsFromCleanedText() {
+        val cleaned = CommentValidator.removeVulnerabilities(LEXICAL_TEXT_WITH_IMAGES)
+
+        assertThat(extractor.extractAttachRefsFromText(cleaned).values).containsAll(
+            listOf(
+                EntityRef.valueOf("temp-file@31ca7535-9b3d-4fa9-9556-ea101925abb0"),
+                EntityRef.valueOf("emodel/temp-file@c5a75903-d886-4c88-ae1b-9ac6ce1b4385"),
+                EntityRef.valueOf("temp-file@1c00dce5-b34d-4cb5-8706-f6393a9ff822")
+            )
+        )
+
+        val cleanedJson = CommentValidator.removeVulnerabilities(COMMENT_EVENT_TEXT)
+
+        assertThat(extractor.extractAttachRefsFromText(cleanedJson).values).containsAll(
+            listOf(EntityRef.valueOf("emodel/attachment@test"), EntityRef.valueOf("emodel/attachment@test-2"))
         )
     }
 

@@ -48,11 +48,22 @@ object CommentValidator {
         "__lexicallisttype"
     )
 
+    // A file attached to a comment is exported by the editor as an anchor carrying what the file
+    // node is made of. Without these the anchor survives a save as a bare link and the attachment
+    // stops being a file for the editor - it can no longer be previewed, only followed.
+    private val ALLOWED_ATTS_FOR_A = setOf(
+        "type",
+        "data-file-name",
+        "data-file-size",
+        "data-file-record-id"
+    )
+
     private val cleaner = Cleaner(
         Safelist.relaxed()
             .addTags(*ALLOWED_TAGS.toTypedArray())
             .addAttributes("p", "dir")
             .addAttributes("ul", *ALLOWED_ATTS_FOR_UL.toTypedArray())
+            .addAttributes("a", *ALLOWED_ATTS_FOR_A.toTypedArray())
             .addAttributes("span", "data-mention")
             .addAttributes("details", "open")
             .addAttributes(":all", *ALLOWED_ATTS_FOR_ALL.toTypedArray())

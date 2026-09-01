@@ -1,0 +1,11 @@
+---
+id: doc-preview-ancestor
+name:
+  en: doc-preview-ancestor
+
+parentRef: emodel/type@doc-base
+inheritCreateVariants: false
+
+contentConfig:
+  path: content
+  previewPath: ancestorPreview

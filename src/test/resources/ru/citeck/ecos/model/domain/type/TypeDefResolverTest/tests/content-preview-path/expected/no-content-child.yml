@@ -1,0 +1,7 @@
+---
+id: no-content-child
+name:
+  en: no-content-child
+
+parentRef: emodel/type@no-content-base
+inheritCreateVariants: false

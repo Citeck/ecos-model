@@ -1,0 +1,17 @@
+---
+id: chunked-upload-mut-test
+name:
+  en: Chunked Upload Mutation Test File
+sourceId: emodel/chunked-upload-mut-test
+parentRef: emodel/type@user-base
+
+model:
+  statuses:
+    - id: EMPTY
+  roles:
+    - id: EVERYONE
+  attributes:
+    - id: name
+      type: TEXT
+    - id: content
+      type: CONTENT

@@ -1,0 +1,6 @@
+---
+id: doc-own-path
+parentRef: emodel/type@doc-base
+
+contentConfig:
+  path: attachment

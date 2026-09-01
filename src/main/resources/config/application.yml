@@ -27,6 +27,8 @@ ecos:
       cron: '0 0 0/6 ? * *'
     activityStartUserTask:
       cron: '0 */5 * * * *'
+    contentUploadSessionCleanup:
+      cron: '0 */10 * * * *'
   secret:
     encryption:
       previous:

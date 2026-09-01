@@ -1,0 +1,7 @@
+---
+id: doc-own-path-and-preview
+parentRef: emodel/type@doc-base
+
+contentConfig:
+  path: attachment
+  previewPath: ownPreview

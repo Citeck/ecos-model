@@ -1,0 +1,6 @@
+---
+id: doc-own-path-under-preview
+parentRef: emodel/type@doc-preview-ancestor
+
+contentConfig:
+  path: attachment

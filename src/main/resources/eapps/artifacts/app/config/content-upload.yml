@@ -1,0 +1,24 @@
+---
+id: content-upload
+name:
+  ru: Загрузка контента
+  en: Content upload
+version: 1
+valueDef:
+  attributes:
+    - id: chunkingThreshold
+      type: NUMBER
+    - id: maxSingleUploadSize
+      type: NUMBER
+    - id: maxFileSize
+      type: NUMBER
+    - id: sessionIdleTimeout
+      type: TEXT
+    - id: maxActiveSessionsPerUser
+      type: NUMBER
+value:
+  chunkingThreshold: 10485760
+  maxSingleUploadSize: 104857600
+  maxFileSize: -1
+  sessionIdleTimeout: "PT1H"
+  maxActiveSessionsPerUser: 10

@@ -1,0 +1,11 @@
+---
+id: doc-inherits-path
+name:
+  en: doc-inherits-path
+
+parentRef: emodel/type@doc-base
+inheritCreateVariants: false
+
+contentConfig:
+  path: content
+  previewPath: content

@@ -85,6 +85,31 @@ public class CommentValidatorTest {
             result.contains("<ul>"));
     }
 
+    // A file attached to a comment must survive the clean as a file, not as a bare link: the editor
+    // rebuilds its node from these attributes.
+    @Test
+    public void shouldKeepAttachedFileAttributes() {
+        String src = "<p><a type=\"lexical-file-node\" href=\"/v2/dashboard?recordRef=emodel/attachment@abc\" " +
+            "data-file-size=\"10\" data-file-record-id=\"emodel/attachment@abc\" data-file-name=\"clip.mp4\">clip.mp4</a></p>";
+
+        String result = CommentValidator.removeVulnerabilities(src);
+
+        assertThat(result).contains("type=\"lexical-file-node\"");
+        assertThat(result).contains("data-file-record-id=\"emodel/attachment@abc\"");
+        assertThat(result).contains("data-file-name=\"clip.mp4\"");
+        assertThat(result).contains("data-file-size=\"10\"");
+        assertThat(result).contains("href=\"/v2/dashboard?recordRef=emodel/attachment@abc\"");
+    }
+
+    @Test
+    public void shouldStillCleanScriptAttributesOnAnchor() {
+        String result = CommentValidator.removeVulnerabilities(
+            "<a href=\"/page\" onclick=\"alert(1)\" onmouseover=\"alert(2)\">link</a>");
+
+        assertThat(result).doesNotContain("onclick");
+        assertThat(result).doesNotContain("onmouseover");
+    }
+
     @Test
     public void shouldCleanNonPrintableElementsInTheBeginning(){
         String result = CommentValidator.removeVulnerabilities("<script\\x0C>javascript:alert(1)</script> text message");

@@ -1,0 +1,11 @@
+---
+id: doc-own-path-and-preview
+name:
+  en: doc-own-path-and-preview
+
+parentRef: emodel/type@doc-base
+inheritCreateVariants: false
+
+contentConfig:
+  path: attachment
+  previewPath: ownPreview

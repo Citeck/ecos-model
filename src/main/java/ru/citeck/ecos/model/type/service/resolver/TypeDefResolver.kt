@@ -300,16 +300,21 @@ class TypeDefResolver(
         }
 
         val contentConfig = resTypeDef.contentConfig.copy()
-        if (contentConfig.path.isBlank()) {
+        val ownContentPath = contentConfig.path
+        if (ownContentPath.isBlank()) {
             contentConfig.withPath(resolvedParentDef.contentConfig.path)
         }
         if (contentConfig.previewPath.isBlank()) {
             val parentPreviewPath = resolvedParentDef.contentConfig.previewPath
-            if (parentPreviewPath.isNotBlank()) {
-                contentConfig.withPreviewPath(parentPreviewPath)
-            } else {
-                contentConfig.withPath(contentConfig.path)
-            }
+            contentConfig.withPreviewPath(
+                if (ownContentPath.isNotBlank()) {
+                    ownContentPath
+                } else if (parentPreviewPath.isNotBlank()) {
+                    parentPreviewPath
+                } else {
+                    contentConfig.path
+                }
+            )
         }
         if (contentConfig.storageRef.isEmpty()) {
             contentConfig.withStorageRef(resolvedParentDef.contentConfig.storageRef)

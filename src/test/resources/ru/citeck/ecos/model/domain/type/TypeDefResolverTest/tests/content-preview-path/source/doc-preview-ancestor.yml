@@ -1,0 +1,6 @@
+---
+id: doc-preview-ancestor
+parentRef: emodel/type@doc-base
+
+contentConfig:
+  previewPath: ancestorPreview
