@@ -9,7 +9,7 @@ import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.model.domain.secret.dto.EncryptionMeta
 import ru.citeck.ecos.model.domain.secret.repo.EcosSecretEntity
 import ru.citeck.ecos.model.domain.secret.repo.EcosSecretRepo
-import javax.annotation.PostConstruct
+import jakarta.annotation.PostConstruct
 
 @Component
 @Transactional

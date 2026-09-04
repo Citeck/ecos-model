@@ -1,10 +1,10 @@
 package ru.citeck.ecos.model.num.service
 
-import com.hazelcast.core.HazelcastInstance
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.annotation.PostConstruct
 import lombok.RequiredArgsConstructor
 import lombok.extern.slf4j.Slf4j
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
@@ -35,7 +35,6 @@ import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchCon
 import ru.citeck.ecos.webapp.lib.spring.hibernate.context.predicate.JpaSearchConverterFactory
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.TimeUnit
 import java.util.stream.Collectors
 
 @Slf4j
@@ -45,7 +44,6 @@ class NumTemplateService(
     private val templateRepo: NumTemplateRepository,
     private val counterRepo: EcosNumCounterRepository,
     private val transactionManager: PlatformTransactionManager,
-    private val hazelcast: HazelcastInstance,
     private val predicateToJpaConvFactory: JpaSearchConverterFactory,
     private val workspaceService: WorkspaceService
 ) {
@@ -173,42 +171,53 @@ class NumTemplateService(
             }
         }
 
-        val lockingStartedAt = System.currentTimeMillis()
+        val templateId = numTemplateEntity.id
 
-        val lock = hazelcast.cpSubsystem.getLock("num-tlt-" + numTemplateEntity.extId + "-" + counterKey)
-        check(lock.tryLock(10, TimeUnit.MINUTES)) { "Number template lock can't be locked" }
-        try {
-            val lockingTime = System.currentTimeMillis() - lockingStartedAt
-            if (lockingTime > 1000) {
-                log.warn { "Too high lockingTime: $lockingTime" }
+        // Fast path. A single UPDATE holds the row lock until commit, so concurrent increments
+        // of the same counter are serialized by the database across all application instances.
+        incrementAndGetOrNull(templateId, counterKey)?.let { return it }
+
+        // The very first number for this counter key: the row has to be created. This runs in its
+        // own transaction because losing the race on the unique constraint (num_template_id, key)
+        // raises a constraint violation, which would leave the surrounding transaction unusable.
+        createFirstNumberOrNull(numTemplateEntity, counterKey)?.let { return it }
+
+        // Another instance created the same counter first, so the increment must succeed now.
+        return incrementAndGetOrNull(templateId, counterKey)
+            ?: error("Number counter disappeared. Template: ${numTemplateEntity.extId} key: $counterKey")
+    }
+
+    private fun incrementAndGetOrNull(templateId: Long, counterKey: String): Long? {
+        return doInNewTxnOrNull {
+            if (counterRepo.incrementCounter(templateId, counterKey) == 0) {
+                null
+            } else {
+                counterRepo.findCounterValue(templateId, counterKey)
             }
-            return doInNewTxn { getNextNumberAndIncrement(numTemplateEntity, counterKey) }
-        } finally {
-            lock.unlock()
         }
     }
 
-    private fun getNextNumberAndIncrement(numTemplateEntity: NumTemplateEntity, counterKey: String): Long {
-
-        var counterEntity = counterRepo.findByTemplateAndKey(numTemplateEntity, counterKey)
-
-        if (counterEntity == null) {
-            counterEntity = NumCounterEntity()
-            counterEntity.key = counterKey
-            counterEntity.counter = 1L
-            counterEntity.template = numTemplateEntity
-        } else {
-            counterEntity.counter += 1
+    private fun createFirstNumberOrNull(numTemplateEntity: NumTemplateEntity, counterKey: String): Long? {
+        return try {
+            doInNewTxnOrNull {
+                val counterEntity = NumCounterEntity()
+                counterEntity.key = counterKey
+                counterEntity.counter = 1L
+                counterEntity.template = numTemplateEntity
+                counterRepo.save(counterEntity).counter
+            }
+        } catch (e: DataIntegrityViolationException) {
+            log.debug(e) { "Counter '$counterKey' was created concurrently. Falling back to increment." }
+            null
         }
-        return counterRepo.save(counterEntity).counter
     }
 
-    private fun <T : Any> doInNewTxn(action: () -> T): T {
+    private fun <T : Any> doInNewTxnOrNull(action: () -> T?): T? {
         return doInNewTxnTemplate.execute<T> { status: TransactionStatus ->
             val res = action.invoke()
             status.flush()
             res
-        }!!
+        }
     }
 
     @Transactional

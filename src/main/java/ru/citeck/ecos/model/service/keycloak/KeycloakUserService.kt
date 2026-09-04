@@ -1,16 +1,9 @@
 package ru.citeck.ecos.model.service.keycloak
 
-import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.node.ObjectNode
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.annotation.PostConstruct
-import lombok.extern.slf4j.Slf4j
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder
-import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider
-import org.keycloak.admin.client.Keycloak
-import org.keycloak.admin.client.KeycloakBuilder
-import org.keycloak.admin.client.resource.RealmResource
-import org.keycloak.representations.idm.CredentialRepresentation
-import org.keycloak.representations.idm.UserRepresentation
+import ru.citeck.ecos.commons.json.Json
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import ru.citeck.ecos.context.lib.auth.AuthContext
@@ -19,7 +12,6 @@ import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.webapp.lib.env.EcosWebAppEnvironment
 
-@Slf4j
 @Service
 class KeycloakUserService(
     private val recordsService: RecordsService,
@@ -27,10 +19,12 @@ class KeycloakUserService(
 ) {
     companion object {
         private val log = KotlinLogging.logger {}
+
+        private const val CREDENTIAL_TYPE_PASSWORD = "password"
+        private const val REQUIRED_ACTION_UPDATE_PASSWORD = "UPDATE_PASSWORD"
     }
 
-    private lateinit var keycloak: Keycloak
-    private lateinit var realmResource: RealmResource
+    private var client: KeycloakAdminClient? = null
 
     @Value("\${ecos.idp.default-realm}")
     lateinit var defaultRealm: String
@@ -41,25 +35,12 @@ class KeycloakUserService(
     fun init() {
         props = ecosEnv.getValue("ecos.integrations.keycloakAdmin", KeycloakAdminProps::class.java)
         if (props.enabled) {
-
-            val jacksonProvider = CustomResteasyJackson2Provider()
-            // Disable this feature to let the old client library work with newer Keycloak versions
-            jacksonProvider.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-
-            val client = ResteasyClientBuilder()
-                .register(jacksonProvider, 100)
-                .build()
-
-            keycloak = KeycloakBuilder.builder()
-                .serverUrl(props.url)
-                .realm("master")
-                .username(props.user)
-                .password(props.password)
-                .clientId("admin-cli")
-                .resteasyClient(client)
-                .build()
-
-            realmResource = keycloak.realm(defaultRealm)
+            client = KeycloakAdminClient(
+                serverUrl = props.url,
+                realm = defaultRealm,
+                adminUser = props.user,
+                adminPassword = props.password
+            )
         } else {
             log.info { "Keycloak integration is disabled. Skipping Keycloak initialization." }
         }
@@ -71,9 +52,7 @@ class KeycloakUserService(
 
     fun updateUser(userName: String) {
 
-        if (!props.enabled) {
-            error("Keycloak integration is disabled")
-        }
+        val client = requireEnabled()
 
         if (!checkUserAuth(userName)) {
             throw IllegalStateException("Cannot update user '$userName'. User does not have permissions.")
@@ -82,63 +61,59 @@ class KeycloakUserService(
         val personRef = AuthorityType.PERSON.getRef(userName)
         val userAtts = recordsService.getAtts(personRef, KeycloakUserAttributes::class.java)
 
-        val users = realmResource.users().search(userName, true)
+        val users = client.findUsersByName(userName)
         if (users.isEmpty()) {
 
-            val user = UserRepresentation()
-            user.username = userAtts.id
-            user.firstName = userAtts.firstName
-            user.lastName = userAtts.lastName
-            user.email = userAtts.email
-            user.isEnabled = !userAtts.personDisabled
+            val credential = Json.mapper.newObjectNode()
+            credential.put("type", CREDENTIAL_TYPE_PASSWORD)
+            credential.put("value", userAtts.id)
 
-            val credential = CredentialRepresentation()
-            credential.type = CredentialRepresentation.PASSWORD
-            credential.value = userAtts.id
-            user.credentials = listOf(credential)
+            val user = Json.mapper.newObjectNode()
+            user.put("username", userAtts.id)
+            user.set<ObjectNode>("credentials", Json.mapper.newArrayNode().add(credential))
+            user.set<ObjectNode>(
+                "requiredActions",
+                Json.mapper.newArrayNode().add(REQUIRED_ACTION_UPDATE_PASSWORD)
+            )
+            applyAtts(user, userAtts)
 
-            val requiredActions = ArrayList<String>()
-            requiredActions.add("UPDATE_PASSWORD")
-            user.requiredActions = requiredActions
-
-            realmResource.users().create(user)
+            client.createUser(user)
         } else {
-
+            // Keep every field Keycloak sent us and change only ours, the way the admin
+            // client did: a PUT with a partial representation can drop what it omits.
             val userToUpdate = users[0]
-            userToUpdate.firstName = userAtts.firstName
-            userToUpdate.lastName = userAtts.lastName
-            userToUpdate.email = userAtts.email
-            userToUpdate.isEnabled = !userAtts.personDisabled
-
-            realmResource.users().get(userToUpdate.id).update(userToUpdate)
+            val userId = userToUpdate.path("id").asText("")
+            if (userId.isEmpty()) {
+                error("Keycloak returned a user without id for username '$userName'")
+            }
+            applyAtts(userToUpdate, userAtts)
+            client.updateUser(userId, userToUpdate)
         }
     }
 
     fun deleteUser(userName: String) {
 
-        if (!props.enabled) {
-            error("Keycloak integration is disabled")
-        }
+        val client = requireEnabled()
 
         if (!checkUserAuth(userName)) {
             throw IllegalStateException("Cannot delete user '$userName'. User does not have permissions.")
         }
 
-        val users = realmResource.users().search(userName, true)
+        val users = client.findUsersByName(userName)
         if (users.isNotEmpty()) {
-            val userId = users[0].id
-            realmResource.users().delete(userId)
+            val userId = users[0].path("id").asText("")
+            if (userId.isEmpty()) {
+                error("Keycloak returned a user without id for username '$userName'")
+            }
+            client.deleteUser(userId)
         }
     }
 
     fun updateUserPassword(userName: String, newPassword: String) {
 
-        if (!props.enabled) {
-            throw IllegalStateException(
-                "Cannot update user password for '$userName'. " +
-                    "Keycloak integration is disabled."
-            )
-        }
+        val client = client ?: throw IllegalStateException(
+            "Cannot update user password for '$userName'. Keycloak integration is disabled."
+        )
         if (!checkUserAuth(userName)) {
             throw IllegalStateException(
                 "Cannot update user password for '$userName'. " +
@@ -146,17 +121,31 @@ class KeycloakUserService(
             )
         }
 
-        val users = realmResource.users().search(userName, true)
+        val users = client.findUsersByName(userName)
         if (users.isNotEmpty()) {
-            val userToUpdate = users[0]
-            val credential = CredentialRepresentation()
-            credential.type = CredentialRepresentation.PASSWORD
-            credential.value = newPassword
+            val userId = users[0].path("id").asText("")
+            if (userId.isEmpty()) {
+                error("Keycloak returned a user without id for username '$userName'")
+            }
+            val credential = Json.mapper.newObjectNode()
+            credential.put("type", CREDENTIAL_TYPE_PASSWORD)
+            credential.put("value", newPassword)
 
-            realmResource.users().get(userToUpdate.id).resetPassword(credential)
+            client.resetPassword(userId, credential)
         } else {
-            log.warn("User with username '$userName' not found.")
+            log.warn { "User with username '$userName' not found." }
         }
+    }
+
+    private fun applyAtts(user: ObjectNode, atts: KeycloakUserAttributes) {
+        user.put("firstName", atts.firstName)
+        user.put("lastName", atts.lastName)
+        user.put("email", atts.email)
+        user.put("enabled", !atts.personDisabled)
+    }
+
+    private fun requireEnabled(): KeycloakAdminClient {
+        return client ?: error("Keycloak integration is disabled")
     }
 
     private fun checkUserAuth(changedUserName: String): Boolean {
@@ -181,11 +170,4 @@ class KeycloakUserService(
         val password: String,
         val enabled: Boolean
     )
-
-    /**
-     * ResteasyClient registers its own ResteasyJackson2Provider by default,
-     * so our custom provider gets ignored.
-     * To apply a custom ObjectMapper configuration, we create a dedicated subclass.
-     */
-    private class CustomResteasyJackson2Provider : ResteasyJackson2Provider()
 }
