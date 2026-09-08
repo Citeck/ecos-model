@@ -9,6 +9,7 @@ import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.model.lib.workspace.IdInWs
+import ru.citeck.ecos.model.service.validation.ModelAttColumnNameValidator
 import ru.citeck.ecos.model.type.converter.TypeConverter
 import ru.citeck.ecos.model.type.repository.TypeEntity
 import ru.citeck.ecos.model.type.service.dao.TypeRepoDao
@@ -345,6 +346,9 @@ class TypesServiceImpl(
     }
 
     private fun saveTypeDefImpl(dto: TypeDef, clonedRecord: Boolean): TypeDef {
+
+        // before the "nothing changed" short-circuit: a redeploy of an already broken type must fail too
+        ModelAttColumnNameValidator.validateTypeAtts(dto.id, dto.model)
 
         val existingEntity = typeRepoDao.findByExtId(dto.getTypeId())
 

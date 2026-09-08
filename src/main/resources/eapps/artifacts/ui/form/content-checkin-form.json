@@ -28,7 +28,7 @@
           "ru": "Дождитесь загрузки файла",
           "en": "Wait for the file to upload"
         },
-        "fileMaxSize": "100MB"
+        "fileMaxSize": "500GB"
       },
       {
         "key": "versionComment",
