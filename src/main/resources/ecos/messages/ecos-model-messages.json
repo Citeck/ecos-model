@@ -16,6 +16,14 @@
     "ecos-model.activity.parent.max-depth-exceeded": [
       "activity:parent chain depth exceeded {{maxDepth}} while validating '{{ref}}' (new parent '{{parent}}')",
       "Глубина цепочки activity:parent превысила {{maxDepth}} при проверке '{{ref}}' (новый родитель '{{parent}}')"
+    ],
+    "ecos-model.type.attribute-id-too-long": [
+      "Attribute '{{attribute}}' of type '{{typeId}}' can't be stored: its database column name is {{length}} bytes long, but PostgreSQL limits identifiers to {{limit}} bytes. Shorten the attribute id.",
+      "Атрибут '{{attribute}}' типа '{{typeId}}' не может быть сохранён: имя колонки в базе данных занимает {{length}} байт, а PostgreSQL ограничивает идентификаторы {{limit}} байтами. Сократите идентификатор атрибута."
+    ],
+    "ecos-model.aspect.attribute-id-too-long": [
+      "Attribute '{{attribute}}' of aspect '{{aspectId}}' can't be stored: its database column name is {{length}} bytes long, but PostgreSQL limits identifiers to {{limit}} bytes. Shorten the attribute id or set a shorter aspect prefix.",
+      "Атрибут '{{attribute}}' аспекта '{{aspectId}}' не может быть сохранён: имя колонки в базе данных занимает {{length}} байт, а PostgreSQL ограничивает идентификаторы {{limit}} байтами. Сократите идентификатор атрибута или задайте более короткий префикс аспекта."
     ]
   }
 }
