@@ -25,7 +25,6 @@ import ru.citeck.ecos.records3.record.atts.dto.LocalRecordAtts
 import ru.citeck.ecos.records3.record.atts.dto.RecordAtts
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
-import ru.citeck.ecos.txn.lib.TxnContext
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.api.lock.EcosLockApi
 import ru.citeck.ecos.webapp.api.task.EcosTasksApi
@@ -206,9 +205,7 @@ class AuthoritiesSyncService(
                                 Schedules.fixedDelay(Duration.ofMinutes(1), repeatDelayDuration)
                             ) {
                                 AuthContext.runAsSystem {
-                                    TxnContext.doInTxn {
-                                        run(newInstance, true)
-                                    }
+                                    run(newInstance, true)
                                 }
                             }
                         }
@@ -347,7 +344,7 @@ class AuthoritiesSyncService(
                             } else {
                                 log.debug {
                                     "Current sync or before sync is null and priority checking will be skipped. " +
-                                    "Before sync: $syncBefore Current sync: $currentSync"
+                                        "Before sync: $syncBefore Current sync: $currentSync"
                                 }
                             }
                         }
