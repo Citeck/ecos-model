@@ -9,3 +9,6 @@ storageType: DEFAULT
 parentRef: emodel/type@planned-activity
 
 inheritActions: true
+
+aspects:
+  - ref: emodel/aspect@recording-aspect
