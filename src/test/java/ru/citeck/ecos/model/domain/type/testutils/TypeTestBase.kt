@@ -51,6 +51,8 @@ open class TypeTestBase {
     lateinit var eventsServiceFactory: EventsServiceFactory
     lateinit var eventsService: EventsService
 
+    lateinit var aspectsRegistry: EcosAspectsRegistry
+
     @BeforeEach
     fun init() {
 
@@ -88,7 +90,7 @@ open class TypeTestBase {
 
         val emodelTypeUtils = EModelTypeUtils()
 
-        val aspectsRegistry = EcosAspectsRegistry(
+        aspectsRegistry = EcosAspectsRegistry(
             EcosRegistryProps.DEFAULT,
             listOf(AspectArtifactsInitializer(ecosAppsServiceFactory.localAppService))
         )

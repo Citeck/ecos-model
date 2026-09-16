@@ -1,0 +1,46 @@
+---
+id: recording-aspect
+name:
+  ru: Запись звонка/встречи
+  en: Call/Meeting Recording
+attributes:
+  - id: recording
+    name:
+      ru: Аудиозапись
+      en: Audio Recording
+    type: CONTENT
+  - id: transcription
+    name:
+      ru: Расшифровка
+      en: Transcription
+    type: TEXT
+  - id: transcriptionDiarized
+    name:
+      ru: Расшифровка по спикерам
+      en: Diarized Transcription
+    type: TEXT
+  - id: summary
+    name:
+      ru: Резюме встречи
+      en: Meeting Summary
+    type: TEXT
+  - id: recordingDuration
+    name:
+      ru: Длительность записи (сек)
+      en: Recording Duration (sec)
+    type: NUMBER
+  - id: recordingStatus
+    name:
+      ru: Статус записи
+      en: Recording Status
+    type: TEXT
+  - id: callPlatform
+    name:
+      ru: Платформа звонка
+      en: Call Platform
+    type: TEXT
+  - id: meetingUrl
+    name:
+      ru: Ссылка на встречу
+      en: Meeting URL
+    type: TEXT
