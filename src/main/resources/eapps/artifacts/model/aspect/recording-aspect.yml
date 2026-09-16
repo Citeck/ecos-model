@@ -33,7 +33,33 @@ attributes:
     name:
       ru: Статус записи
       en: Recording Status
-    type: TEXT
+    type: OPTIONS
+    config:
+      values:
+        - value: downloading
+          label:
+            ru: Загружается
+            en: Downloading
+        - value: downloaded
+          label:
+            ru: Аудио сохранено
+            en: Audio saved
+        - value: processing
+          label:
+            ru: Обрабатывается
+            en: Processing
+        - value: completed
+          label:
+            ru: Обработана
+            en: Completed
+        - value: download-failed
+          label:
+            ru: Ошибка загрузки
+            en: Download failed
+        - value: transcription-failed
+          label:
+            ru: Ошибка расшифровки
+            en: Transcription failed
   - id: callPlatform
     name:
       ru: Платформа звонка

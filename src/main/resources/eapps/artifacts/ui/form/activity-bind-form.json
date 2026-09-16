@@ -1,0 +1,169 @@
+{
+  "id": "activity-bind-form",
+  "formKey": "",
+  "title": {
+    "ru": "Привязать к записи",
+    "en": "Bind to record"
+  },
+  "description": {},
+  "customModule": "",
+  "typeRef": "",
+  "workspace": "",
+  "width": "md",
+  "system": true,
+  "i18n": {},
+  "definition": {
+    "components": [
+      {
+        "label": "bindable types with their journals",
+        "key": "_allowedTypes",
+        "type": "asyncData",
+        "input": true,
+        "triggerEventOnChange": true,
+        "source": {
+          "type": "custom",
+          "custom": {
+            "syncData": "",
+            "asyncData": "var TYPES = ['emodel/type@deal', 'emodel/type@lead']; value = Promise.all(TYPES.map(function(tref) { return Promise.all([Records.get(tref).load('name?disp'), Records.get(tref).load('journalRef?id')]).then(function(arr) { var journalRef = String(arr[1] || ''); return { ref: tref, name: String(arr[0] || tref), journalId: journalRef.replace(/^uiserv\\/journal@/, '') }; }); })).then(function(list) { return list.filter(function(t) { return !!t.journalId; }); });"
+          },
+          "forceLoad": true
+        },
+        "update": {
+          "type": "once",
+          "rate": 500
+        }
+      },
+      {
+        "label": {
+          "ru": "Panel"
+        },
+        "key": "panel1",
+        "scrollableContent": true,
+        "refreshOn": [],
+        "optionalWhenDisabled": false,
+        "type": "panel",
+        "input": false,
+        "components": [
+          {
+            "label": {
+              "ru": "Тип",
+              "en": "Type"
+            },
+            "key": "_parentType",
+            "type": "select",
+            "input": true,
+            "dataSrc": "custom",
+            "data": {
+              "custom": "var src = data._allowedTypes; values = Array.isArray(src) ? src.map(function(t) { return { value: t.ref, label: t.name || t.ref }; }) : [];"
+            },
+            "valueProperty": "value",
+            "validate": {
+              "required": true
+            },
+            "refreshOn": [
+              {
+                "label": "_allowedTypes",
+                "value": "_allowedTypes"
+              }
+            ],
+            "redrawOn": "_allowedTypes"
+          },
+          {
+            "label": {
+              "ru": "Запись",
+              "en": "Record"
+            },
+            "key": "_parent",
+            "validate": {
+              "required": true
+            },
+            "modalTitle": "",
+            "linkFormatter": "",
+            "journalId": "",
+            "customJournalId": "var list = Array.isArray(data._allowedTypes) ? data._allowedTypes : [];\nvar sel = list.filter(function (t) { return t.ref === data._parentType; })[0];\nvalue = (sel && sel.journalId) || '';",
+            "source": {
+              "type": "journal",
+              "custom": {
+                "columns": []
+              },
+              "customValues": "",
+              "viewMode": "default"
+            },
+            "searchInWorkspacePolicy": "all",
+            "customConditional": "show = !!data._parentType;",
+            "refreshOn": [],
+            "optionalWhenDisabled": false,
+            "type": "selectJournal",
+            "input": true,
+            "redrawOn": "_parentType",
+            "queryData": ""
+          },
+          {
+            "key": "_parentAtt",
+            "type": "hidden",
+            "defaultValue": "has-ecos-activities:ecosActivities",
+            "input": true
+          }
+        ]
+      },
+      {
+        "label": {
+          "ru": "Columns"
+        },
+        "key": "_actions",
+        "type": "columns",
+        "input": false,
+        "oneColumnInViewMode": false,
+        "columns": [
+          {
+            "components": [
+              {
+                "label": {
+                  "ru": "Отмена",
+                  "en": "Cancel"
+                },
+                "key": "cancelBtn",
+                "type": "button",
+                "action": "event",
+                "event": "cancel",
+                "theme": "secondary",
+                "block": true,
+                "showValidations": false,
+                "input": true,
+                "tableView": false
+              }
+            ],
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 0
+          },
+          {
+            "components": [
+              {
+                "label": {
+                  "ru": "Подтвердить",
+                  "en": "Confirm"
+                },
+                "key": "submitBtn",
+                "type": "button",
+                "theme": "primary",
+                "block": true,
+                "disableOnInvalid": true,
+                "input": true,
+                "tableView": false
+              }
+            ],
+            "type": "column",
+            "input": false,
+            "key": "column",
+            "index": 1
+          }
+        ]
+      }
+    ],
+    "formId": "activity-bind-form"
+  },
+  "attributes": {},
+  "notExists": false
+}
