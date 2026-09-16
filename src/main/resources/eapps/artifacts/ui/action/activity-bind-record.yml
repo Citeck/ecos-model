@@ -1,0 +1,25 @@
+---
+id: activity-bind-record
+name:
+  ru: Привязать запись
+  en: Bind record
+confirm:
+  title:
+    ru: Привязать к записи
+    en: Bind to record
+  formRef: uiserv/form@activity-bind-form
+  formAttributes: {}
+  attributesMapping:
+    record.attributes._parent: _parent
+    record.attributes._parentAtt: _parentAtt
+type: mutate
+config:
+  record:
+    id: '${recordRef}'
+    attributes:
+      _parent: _parent
+      _parentAtt: _parentAtt
+features:
+  execForQuery: false
+  execForRecord: true
+  execForRecords: false

@@ -8,7 +8,15 @@ system: true
 storageType: DEFAULT
 parentRef: emodel/type@planned-activity
 
+# Without it the type inherits formRef of planned-activity, whose form is a single panel
+# holding the parent alone - the recording, its transcription and the status of the
+# download would be stored and invisible (COREDEV-510, D1).
+formRef: uiserv/form@call-activity-form
+
 inheritActions: true
+
+actions:
+  - uiserv/action@activity-bind-record
 
 aspects:
   - ref: emodel/aspect@recording-aspect

@@ -1,0 +1,308 @@
+{
+  "id": "call-activity-form",
+  "system": true,
+  "formKey": "",
+  "title": {
+    "ru": "Звонок с записью",
+    "en": "Call with recording"
+  },
+  "description": {},
+  "customModule": "",
+  "typeRef": "",
+  "width": "extra-lg",
+  "i18n": {},
+  "definition": {
+    "components": [
+      {
+        "label": "recording status values from the aspect",
+        "key": "_recordingStatusOptions",
+        "type": "asyncData",
+        "input": true,
+        "triggerEventOnChange": true,
+        "source": {
+          "type": "custom",
+          "custom": {
+            "syncData": "",
+            "asyncData": "value = Records.get('emodel/aspect@recording-aspect').load('attributes[]?json').then(function (atts) { var att = (atts || []).filter(function (a) { return a.id === 'recordingStatus'; })[0]; return (att && att.config && att.config.values) || []; });"
+          },
+          "forceLoad": true
+        },
+        "update": {
+          "type": "once",
+          "rate": 500
+        }
+      },
+      {
+        "type": "columns",
+        "key": "mainColumns",
+        "input": false,
+        "oneColumnInViewMode": false,
+        "columns": [
+          {
+            "type": "column",
+            "key": "columnLeft",
+            "index": 0,
+            "md": 4,
+            "input": false,
+            "components": [
+              {
+                "type": "panel",
+                "key": "panelInfo",
+                "title": {
+                  "ru": "Информация о звонке",
+                  "en": "Call info"
+                },
+                "collapsible": false,
+                "input": false,
+                "components": [
+                  {
+                    "type": "textfield",
+                    "key": "topic",
+                    "label": {
+                      "ru": "Тема",
+                      "en": "Topic"
+                    },
+                    "disabled": true,
+                    "input": true
+                  },
+                  {
+                    "label": {
+                      "ru": "Документ",
+                      "en": "Document"
+                    },
+                    "key": "_parent",
+                    "disabled": true,
+                    "modalTitle": "",
+                    "linkFormatter": "function(ref) {\n  if (!ref) {\n    throw 'ref is required\\n';\n  }\n  \n  if (ref.includes('emodel/workspace@')) {\n    const workspaceId = ref.split('@')[1];\n    return '/v2/dashboard?ws=' + workspaceId;\n  }\n  \n  return ref;\n}",
+                    "journalId": "search",
+                    "refreshOn": [],
+                    "optionalWhenDisabled": false,
+                    "type": "selectJournal",
+                    "input": true,
+                    "queryData": "",
+                    "source": {
+                      "custom": {
+                        "columns": []
+                      },
+                      "type": "journal",
+                      "customValues": []
+                    }
+                  },
+                  {
+                    "type": "datetime",
+                    "key": "activityDate",
+                    "label": {
+                      "ru": "Дата и время",
+                      "en": "Date and time"
+                    },
+                    "disabled": true,
+                    "enableDate": true,
+                    "enableTime": true,
+                    "input": true
+                  },
+                  {
+                    "type": "textfield",
+                    "key": "recording-aspect:callPlatform",
+                    "label": {
+                      "ru": "Платформа звонка",
+                      "en": "Call platform"
+                    },
+                    "disabled": true,
+                    "input": true
+                  },
+                  {
+                    "type": "number",
+                    "key": "recording-aspect:recordingDuration",
+                    "label": {
+                      "ru": "Длительность записи (сек)",
+                      "en": "Recording duration (sec)"
+                    },
+                    "disabled": true,
+                    "input": true
+                  },
+                  {
+                    "type": "ecosSelect",
+                    "key": "recording-aspect:recordingStatus",
+                    "label": {
+                      "ru": "Статус записи",
+                      "en": "Recording status"
+                    },
+                    "disabled": true,
+                    "input": true,
+                    "dataSrc": "custom",
+                    "data": {
+                      "custom": "var src = data._recordingStatusOptions;\nvalues = Array.isArray(src) ? src.map(function (v) {\n  return { value: v.value, label: utils.getTextByLocale(v.label) };\n}) : [];"
+                    },
+                    "valueProperty": "value",
+                    "searchEnabled": false,
+                    "refreshOn": [
+                      "_recordingStatusOptions"
+                    ],
+                    "redrawOn": "_recordingStatusOptions"
+                  },
+                  {
+                    "type": "textfield",
+                    "key": "recording-aspect:meetingUrl",
+                    "label": {
+                      "ru": "Идентификатор звонка в телефонии",
+                      "en": "Telephony call id"
+                    },
+                    "disabled": true,
+                    "input": true
+                  },
+                  {
+                    "type": "selectOrgstruct",
+                    "key": "responsible",
+                    "label": {
+                      "ru": "Ответственный",
+                      "en": "Responsible"
+                    },
+                    "dataType": "user",
+                    "multiple": false,
+                    "allowedGroupType": "",
+                    "refreshOn": [],
+                    "optionalWhenDisabled": false,
+                    "input": true
+                  }
+                ]
+              },
+              {
+                "type": "panel",
+                "key": "panelManager",
+                "title": {
+                  "ru": "Работа менеджера",
+                  "en": "Manager's notes"
+                },
+                "collapsible": false,
+                "input": false,
+                "components": [
+                  {
+                    "type": "textarea",
+                    "key": "text",
+                    "label": {
+                      "ru": "Примечание",
+                      "en": "Note"
+                    },
+                    "rows": 4,
+                    "autoExpand": true,
+                    "input": true
+                  },
+                  {
+                    "type": "textfield",
+                    "key": "result",
+                    "label": {
+                      "ru": "Результат",
+                      "en": "Result"
+                    },
+                    "input": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "column",
+            "key": "columnRight",
+            "index": 1,
+            "md": 8,
+            "input": false,
+            "components": [
+              {
+                "type": "panel",
+                "key": "panelRecording",
+                "title": {
+                  "ru": "Аудиозапись",
+                  "en": "Audio recording"
+                },
+                "collapsible": false,
+                "input": false,
+                "components": [
+                  {
+                    "type": "file",
+                    "key": "recording-aspect:recording",
+                    "label": {
+                      "ru": "Файл записи",
+                      "en": "Recording file"
+                    },
+                    "hideLabel": true,
+                    "input": true,
+                    "multiple": false,
+                    "storage": "url",
+                    "url": "/gateway/emodel/api/ecos/webapp/content",
+                    "onFileClick": "download",
+                    "disabled": true,
+                    "fileMaxSize": "500MB"
+                  }
+                ]
+              },
+              {
+                "type": "panel",
+                "key": "panelSummary",
+                "title": {
+                  "ru": "Резюме звонка",
+                  "en": "Call summary"
+                },
+                "collapsible": false,
+                "input": false,
+                "components": [
+                  {
+                    "type": "textarea",
+                    "key": "recording-aspect:summary",
+                    "label": {
+                      "ru": "Резюме",
+                      "en": "Summary"
+                    },
+                    "hideLabel": true,
+                    "disabled": true,
+                    "rows": 12,
+                    "autoExpand": true,
+                    "input": true
+                  }
+                ]
+              },
+              {
+                "type": "panel",
+                "key": "panelTranscription",
+                "title": {
+                  "ru": "Расшифровка",
+                  "en": "Transcription"
+                },
+                "collapsible": true,
+                "collapsed": true,
+                "input": false,
+                "components": [
+                  {
+                    "type": "textarea",
+                    "key": "recording-aspect:transcriptionDiarized",
+                    "label": {
+                      "ru": "По спикерам",
+                      "en": "By speakers"
+                    },
+                    "disabled": true,
+                    "rows": 15,
+                    "autoExpand": true,
+                    "input": true
+                  },
+                  {
+                    "type": "textarea",
+                    "key": "recording-aspect:transcription",
+                    "label": {
+                      "ru": "Полный текст",
+                      "en": "Full text"
+                    },
+                    "disabled": true,
+                    "rows": 10,
+                    "autoExpand": true,
+                    "input": true
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "attributes": {},
+  "notExists": false
+}
