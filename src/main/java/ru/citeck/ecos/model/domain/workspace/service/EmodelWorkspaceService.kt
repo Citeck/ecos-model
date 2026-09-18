@@ -1,6 +1,5 @@
 package ru.citeck.ecos.model.domain.workspace.service
 
-import com.github.benmanes.caffeine.cache.Caffeine
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 import ru.citeck.ecos.commons.data.DataValue
@@ -27,6 +26,7 @@ import ru.citeck.ecos.records2.predicate.PredicateUtils
 import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
+import ru.citeck.ecos.records3.RecordsServiceFactory
 import ru.citeck.ecos.records3.record.atts.schema.ScalarType
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
@@ -41,6 +41,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 @Service
 class EmodelWorkspaceService(
     private val recordsService: RecordsService,
+    private val recordsServiceFactory: RecordsServiceFactory,
     private val ecosAuthoritiesApi: EcosAuthoritiesApi,
     private val authorityService: AuthorityService,
     private val workspacePermissions: WorkspacePermissions
@@ -50,57 +51,115 @@ class EmodelWorkspaceService(
         const val USER_JOIN_PREFIX = "user-join-"
         const val DELETED_WS_SYS_ID_PREFIX = "DELETED_"
 
+        private val RESOLVED_MAPPING_TTL: Duration = Duration.ofMinutes(30)
+
+        /**
+         * Mappings which were not resolved are re-checked quickly: a single failed lookup
+         * must not hide the workspace for the whole [RESOLVED_MAPPING_TTL]. See [WsIdMappingCache].
+         */
+        private val UNRESOLVED_MAPPING_TTL: Duration = Duration.ofSeconds(10)
+
+        private const val MAPPING_CACHE_MAX_SIZE = 1000L
+
         private val log = KotlinLogging.logger {}
     }
 
     private val joinListeners = CopyOnWriteArrayList<WorkspaceJoinListener>()
     private val leaveListeners = CopyOnWriteArrayList<WorkspaceLeaveListener>()
 
-    private val wsSystemIdCache = Caffeine.newBuilder()
-        .expireAfterWrite(Duration.ofMinutes(30))
-        .maximumSize(1000)
-        .build<String, String> { workspaceId ->
-            AuthContext.runAsSystem {
-                recordsService.getAtt(
-                    WorkspaceDesc.getRef(workspaceId),
-                    WorkspaceDesc.ATT_SYSTEM_ID
-                ).asText().ifBlank {
-                    DELETED_WS_SYS_ID_PREFIX + WorkspaceSystemIdUtils.createId(workspaceId)
-                }
+    private val wsSystemIdCache = WsIdMappingCache.create(
+        positiveTtl = RESOLVED_MAPPING_TTL,
+        negativeTtl = UNRESOLVED_MAPPING_TTL,
+        maxSize = MAPPING_CACHE_MAX_SIZE,
+        isResolved = { sysId: String -> !sysId.startsWith(DELETED_WS_SYS_ID_PREFIX) }
+    ) { workspaceId ->
+        AuthContext.runAsSystem {
+            recordsService.getAtt(
+                WorkspaceDesc.getRef(workspaceId),
+                WorkspaceDesc.ATT_SYSTEM_ID
+            ).asText().ifBlank {
+                checkSourceIsRegistered(WorkspaceDesc.SOURCE_ID, "system id of workspace '$workspaceId'")
+                log.debug { "System id is not found for workspace '$workspaceId'" }
+                DELETED_WS_SYS_ID_PREFIX + WorkspaceSystemIdUtils.createId(workspaceId)
             }
         }
+    }
 
-    private val wsIdBySysIdCache = Caffeine.newBuilder()
-        .expireAfterWrite(Duration.ofMinutes(30))
-        .maximumSize(1000)
-        .build<String, Optional<String>> { wsSysId ->
-            AuthContext.runAsSystem {
-                val resolved = if (wsSysId.startsWith(WorkspaceSystemIdUtils.USER_WS_SYS_ID_PREFIX)) {
-                    // Person.wsSysId stores the sanitized user-name part only (without the
-                    // "user__" workspace-sysId prefix). Strip the prefix before matching so we
-                    // recover the original Person localId — characters like '.' are otherwise
-                    // collapsed to '_' by createId() and the fallback below cannot un-collapse them.
-                    val userPart = wsSysId.substring(WorkspaceSystemIdUtils.USER_WS_SYS_ID_PREFIX.length)
-                    USER_WORKSPACE_PREFIX + (
-                        recordsService.queryOne(
-                            RecordsQuery.create()
-                                .withSourceId(AuthorityType.PERSON.sourceId)
-                                .withQuery(
-                                    Predicates.eq(PersonConstants.ATT_WS_SYS_ID, userPart)
-                                ).build()
-                        )?.getLocalId() ?: userPart
-                        )
-                } else {
-                    recordsService.queryOne(
-                        RecordsQuery.create()
-                            .withSourceId(WorkspaceDesc.SOURCE_ID)
-                            .withQuery(Predicates.eq(WorkspaceDesc.ATT_SYSTEM_ID, wsSysId))
-                            .build()
-                    )?.getLocalId()
+    private val wsIdBySysIdCache = WsIdMappingCache.create(
+        positiveTtl = RESOLVED_MAPPING_TTL,
+        negativeTtl = UNRESOLVED_MAPPING_TTL,
+        maxSize = MAPPING_CACHE_MAX_SIZE,
+        isResolved = { workspaceId: Optional<String> -> workspaceId.isPresent }
+    ) { wsSysId ->
+        AuthContext.runAsSystem {
+            val resolved = if (wsSysId.startsWith(WorkspaceSystemIdUtils.USER_WS_SYS_ID_PREFIX)) {
+                // Person.wsSysId stores the sanitized user-name part only (without the
+                // "user__" workspace-sysId prefix). Strip the prefix before matching so we
+                // recover the original Person localId — characters like '.' are otherwise
+                // collapsed to '_' by createId() and the fallback below cannot un-collapse them.
+                val userPart = wsSysId.substring(WorkspaceSystemIdUtils.USER_WS_SYS_ID_PREFIX.length)
+                val personId = recordsService.queryOne(
+                    RecordsQuery.create()
+                        .withSourceId(AuthorityType.PERSON.sourceId)
+                        .withQuery(
+                            Predicates.eq(PersonConstants.ATT_WS_SYS_ID, userPart)
+                        ).build()
+                )?.getLocalId()
+                if (personId == null) {
+                    checkSourceIsRegistered(AuthorityType.PERSON.sourceId, "person with wsSysId '$userPart'")
                 }
-                Optional.ofNullable(resolved)
+                USER_WORKSPACE_PREFIX + (personId ?: userPart)
+            } else {
+                recordsService.queryOne(
+                    RecordsQuery.create()
+                        .withSourceId(WorkspaceDesc.SOURCE_ID)
+                        .withQuery(Predicates.eq(WorkspaceDesc.ATT_SYSTEM_ID, wsSysId))
+                        .build()
+                )?.getLocalId().also {
+                    if (it == null) {
+                        checkSourceIsRegistered(WorkspaceDesc.SOURCE_ID, "workspace with system id '$wsSysId'")
+                        log.debug { "Workspace is not found by system id '$wsSysId'" }
+                    }
+                }
             }
+            Optional.ofNullable(resolved)
         }
+    }
+
+    /**
+     * A query to a records source which is not registered yet returns an empty result without
+     * any error, so it looks exactly like "nothing is found". Such an answer must not be cached
+     * as a resolved or unresolved mapping - fail instead, nothing is cached when the cache loader
+     * throws. Without this check a single lookup made while the source was not registered yet made
+     * all artifacts of a workspace unreadable by ref until the cache entry expired (COREDEV-514).
+     */
+    internal fun checkSourceIsRegistered(sourceId: String, lookupDesc: String) {
+        if (recordsServiceFactory.recordsResolver.getSourceInfo(sourceId) == null) {
+            error(
+                "Records source '$sourceId' is not registered. " +
+                    "Lookup of $lookupDesc can't be performed and its result must not be cached."
+            )
+        }
+    }
+
+    /**
+     * Drops cached identifier mappings of the workspace. Must be called when a workspace appears
+     * or changes its system id: a mapping which was not resolved before that stays in the cache
+     * until it expires, and while it is there all artifacts of the workspace are unreadable by
+     * ref (COREDEV-514).
+     *
+     * @param workspaceSystemId known system id of the workspace, may be blank
+     */
+    @JvmOverloads
+    fun evictIdMappings(workspaceId: String, workspaceSystemId: String = "") {
+        val sysIdsToEvict = LinkedHashSet<String>()
+        if (workspaceSystemId.isNotBlank()) {
+            sysIdsToEvict.add(workspaceSystemId)
+        }
+        wsSystemIdCache.getIfPresent(workspaceId)?.let { sysIdsToEvict.add(it) }
+        wsSystemIdCache.invalidate(workspaceId)
+        sysIdsToEvict.forEach { wsIdBySysIdCache.invalidate(it) }
+    }
 
     private fun getUserAuthoritiesRefs(userRef: EntityRef, withUserRef: Boolean = true): Set<EntityRef> {
         val authoritiesRefs = authorityService.getAuthoritiesForPerson(userRef.getLocalId()).mapNotNullTo(HashSet()) {

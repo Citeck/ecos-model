@@ -8,6 +8,7 @@ import ru.citeck.ecos.context.lib.i18n.I18nContext
 import ru.citeck.ecos.data.sql.records.dao.atts.DbRecord
 import ru.citeck.ecos.data.sql.records.listener.DbRecordChangedEvent
 import ru.citeck.ecos.data.sql.records.listener.DbRecordCreatedEvent
+import ru.citeck.ecos.data.sql.records.listener.DbRecordDeletedEvent
 import ru.citeck.ecos.data.sql.records.listener.DbRecordsListenerAdapter
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceMemberDesc
@@ -22,6 +23,7 @@ import ru.citeck.ecos.records2.predicate.model.ValuePredicate
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.schema.ScalarType
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
+import ru.citeck.ecos.txn.lib.TxnContext
 import ru.citeck.ecos.webapp.api.constants.AppName
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import ru.citeck.ecos.webapp.api.entity.toEntityRef
@@ -91,9 +93,38 @@ class WorkspaceRecordsListener(
         }
 
         recordsService.mutateAtt(workspaceRef, WorkspaceDesc.ATT_SYSTEM_ID, workspaceSystemId)
+
+        evictIdMappingsAfterCommit(workspaceId, workspaceSystemId)
+    }
+
+    /**
+     * Identifier mappings of a workspace are cached, and a lookup made before the workspace got
+     * its system id caches the "not resolved" answer. Drop it as soon as the mapping becomes
+     * valid, otherwise artifacts of the workspace stay unreadable by ref until the cache entry
+     * expires (COREDEV-514). Eviction is done after commit: until then other threads still read
+     * the previous state and would immediately cache it back.
+     */
+    private fun evictIdMappingsAfterCommit(workspaceId: String, workspaceSystemId: String = "") {
+        TxnContext.doAfterCommit(0f, false) {
+            emodelWorkspaceService.evictIdMappings(workspaceId, workspaceSystemId)
+        }
+    }
+
+    override fun onDeleted(event: DbRecordDeletedEvent) {
+        evictIdMappingsAfterCommit(event.globalRef.getLocalId())
     }
 
     override fun onChanged(event: DbRecordChangedEvent) {
+        if (event.after.containsKey(WorkspaceDesc.ATT_SYSTEM_ID) ||
+            event.systemAfter.containsKey(WorkspaceDesc.ATT_SYSTEM_ID)
+        ) {
+            evictIdMappingsAfterCommit(
+                event.globalRef.getLocalId(),
+                event.after[WorkspaceDesc.ATT_SYSTEM_ID]?.toString()
+                    ?: event.systemAfter[WorkspaceDesc.ATT_SYSTEM_ID]?.toString()
+                    ?: ""
+            )
+        }
         event.assocs.find {
             it.assocId == WorkspaceDesc.ATT_NESTED_WORKSPACES
         }?.let {

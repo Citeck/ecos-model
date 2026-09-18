@@ -1,6 +1,8 @@
 package ru.citeck.ecos.model.domain.workspace
 
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatCode
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -23,6 +25,7 @@ import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceMemberRole
 import ru.citeck.ecos.model.domain.workspace.dto.WorkspaceVisibility
 import ru.citeck.ecos.model.domain.workspace.service.CustomWorkspaceApi
 import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
+import ru.citeck.ecos.model.domain.workspace.utils.WorkspaceSystemIdUtils
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.workspace.api.WsMembershipType
 import ru.citeck.ecos.records2.RecordConstants
@@ -184,6 +187,50 @@ class WorkspaceCacheTest {
             customWorkspaceApi.getUserWorkspaces(USER_A, WsMembershipType.DIRECT)
         }
         assertThat(after).contains(wsId)
+    }
+
+    /**
+     * COREDEV-514: a lookup made before the workspace exists must not hide it afterwards.
+     * The unresolved mapping is cached, and until it is dropped every artifact of the workspace
+     * is read as non-existent, because the workspace prefix of its ref stays unresolved.
+     */
+    @Test
+    fun workspaceIdMappingsAreEvictedWhenWorkspaceAppears() {
+
+        val wsId = "cache-test-ws-mapping"
+        val wsSysId = WorkspaceSystemIdUtils.createId(wsId)
+
+        val idBefore = AuthContext.runAsSystem { workspaceService.getWorkspaceIdBySystemId(wsSysId) }
+        assertThat(idBefore).isEmpty()
+
+        val sysIdBefore = AuthContext.runAsSystem { workspaceService.getSystemId(wsId) }
+        assertThat(sysIdBefore).startsWith(EmodelWorkspaceService.DELETED_WS_SYS_ID_PREFIX)
+
+        createWorkspace(wsId, listOf(managerMember("m0", AuthorityType.PERSON.getRef(USER_B))))
+
+        val idAfter = AuthContext.runAsSystem { workspaceService.getWorkspaceIdBySystemId(wsSysId) }
+        assertThat(idAfter).isEqualTo(wsId)
+
+        val sysIdAfter = AuthContext.runAsSystem { workspaceService.getSystemId(wsId) }
+        assertThat(sysIdAfter).isEqualTo(wsSysId)
+    }
+
+    /**
+     * COREDEV-514: a query to a records source which is not registered returns an empty result
+     * without any error, and such an answer must not become a cached "workspace is not found".
+     * The check must recognize the sources actually used for the lookups.
+     */
+    @Test
+    fun lookupInUnregisteredRecordsSourceFails() {
+
+        assertThatThrownBy {
+            workspaceService.checkSourceIsRegistered("no-such-source-coredev-514", "test lookup")
+        }.hasMessageContaining("is not registered")
+
+        assertThatCode {
+            workspaceService.checkSourceIsRegistered(WorkspaceDesc.SOURCE_ID, "test lookup")
+            workspaceService.checkSourceIsRegistered(AuthorityType.PERSON.sourceId, "test lookup")
+        }.doesNotThrowAnyException()
     }
 
     @Test
