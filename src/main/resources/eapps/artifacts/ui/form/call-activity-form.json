@@ -22,7 +22,7 @@
         "source": {
           "type": "custom",
           "custom": {
-            "syncData": "",
+            "syncData": "value = true;",
             "asyncData": "value = Records.get('emodel/aspect@recording-aspect').load('attributes[]?json').then(function (atts) { var att = (atts || []).filter(function (a) { return a.id === 'recordingStatus'; })[0]; return (att && att.config && att.config.values) || []; });"
           },
           "forceLoad": true
