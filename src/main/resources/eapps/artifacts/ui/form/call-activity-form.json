@@ -165,38 +165,6 @@
                     "input": true
                   }
                 ]
-              },
-              {
-                "type": "panel",
-                "key": "panelManager",
-                "title": {
-                  "ru": "Работа менеджера",
-                  "en": "Manager's notes"
-                },
-                "collapsible": false,
-                "input": false,
-                "components": [
-                  {
-                    "type": "textarea",
-                    "key": "text",
-                    "label": {
-                      "ru": "Примечание",
-                      "en": "Note"
-                    },
-                    "rows": 4,
-                    "autoExpand": true,
-                    "input": true
-                  },
-                  {
-                    "type": "textfield",
-                    "key": "result",
-                    "label": {
-                      "ru": "Результат",
-                      "en": "Result"
-                    },
-                    "input": true
-                  }
-                ]
               }
             ]
           },
