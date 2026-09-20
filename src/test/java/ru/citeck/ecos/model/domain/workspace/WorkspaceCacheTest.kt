@@ -27,6 +27,7 @@ import ru.citeck.ecos.model.domain.workspace.service.CustomWorkspaceApi
 import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
 import ru.citeck.ecos.model.domain.workspace.utils.WorkspaceSystemIdUtils
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
+import ru.citeck.ecos.model.lib.workspace.USER_WORKSPACE_PREFIX
 import ru.citeck.ecos.model.lib.workspace.api.WsMembershipType
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records3.RecordsService
@@ -269,5 +270,64 @@ class WorkspaceCacheTest {
             customWorkspaceApi.getUserWorkspaces(USER_A, WsMembershipType.ALL)
         }
         assertThat(after).contains(wsId)
+    }
+
+    /**
+     * COREDEV-550: the registries are initialized before the common RecordsDaoRegistrar runs, so a
+     * mapping lookup may be made while its records source is not registered yet. Such a lookup must
+     * neither fail the caller (it killed the whole start) nor cache its answer: the very next lookup
+     * made after the registration resolves the workspace at once, without waiting for the negative
+     * TTL to expire.
+     */
+    @Test
+    fun lookupWhileSourceIsNotRegisteredDoesNotFailAndIsNotCached() {
+
+        val wsId = createWorkspace(
+            "cache-test-ws-startup-window",
+            listOf(managerMember("m0", AuthorityType.PERSON.getRef(USER_B)))
+        )
+        val wsSysId = AuthContext.runAsSystem { workspaceService.getSystemId(wsId) }
+        assertThat(wsSysId).doesNotStartWith(EmodelWorkspaceService.DELETED_WS_SYS_ID_PREFIX)
+        workspaceService.evictIdMappings(wsId, wsSysId)
+
+        val workspaceDao = recordsService.getRecordsDao(WorkspaceDesc.SOURCE_ID)
+            ?: error("Records source '${WorkspaceDesc.SOURCE_ID}' is not registered")
+        recordsService.unregister(WorkspaceDesc.SOURCE_ID)
+        try {
+            val sysIdInWindow = AuthContext.runAsSystem { workspaceService.getSystemId(wsId) }
+            assertThat(sysIdInWindow).startsWith(EmodelWorkspaceService.DELETED_WS_SYS_ID_PREFIX)
+            val idInWindow = AuthContext.runAsSystem { workspaceService.getWorkspaceIdBySystemId(wsSysId) }
+            assertThat(idInWindow).isEmpty()
+        } finally {
+            recordsService.register(workspaceDao)
+        }
+
+        val sysIdAfter = AuthContext.runAsSystem { workspaceService.getSystemId(wsId) }
+        assertThat(sysIdAfter).isEqualTo(wsSysId)
+        val idAfter = AuthContext.runAsSystem { workspaceService.getWorkspaceIdBySystemId(wsSysId) }
+        assertThat(idAfter).isEqualTo(wsId)
+    }
+
+    /**
+     * COREDEV-550, the person branch: the system id of a personal workspace is mapped back through
+     * the 'person' source, and a lookup in the startup window follows the same contract.
+     */
+    @Test
+    fun userWorkspaceLookupWhilePersonSourceIsNotRegisteredDoesNotFailAndIsNotCached() {
+
+        val userWsSysId = WorkspaceSystemIdUtils.USER_WS_SYS_ID_PREFIX + WorkspaceSystemIdUtils.createId(USER_B)
+
+        val personDao = recordsService.getRecordsDao(AuthorityType.PERSON.sourceId)
+            ?: error("Records source '${AuthorityType.PERSON.sourceId}' is not registered")
+        recordsService.unregister(AuthorityType.PERSON.sourceId)
+        try {
+            val idInWindow = AuthContext.runAsSystem { workspaceService.getWorkspaceIdBySystemId(userWsSysId) }
+            assertThat(idInWindow).isEmpty()
+        } finally {
+            recordsService.register(personDao)
+        }
+
+        val idAfter = AuthContext.runAsSystem { workspaceService.getWorkspaceIdBySystemId(userWsSysId) }
+        assertThat(idAfter).startsWith(USER_WORKSPACE_PREFIX)
     }
 }

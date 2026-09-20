@@ -10,6 +10,7 @@ import ru.citeck.ecos.context.lib.auth.AuthGroup
 import ru.citeck.ecos.model.domain.authorities.constant.PersonConstants
 import ru.citeck.ecos.model.domain.authorities.service.AuthorityService
 import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao.Companion.WORKSPACE_ATT_MEMBER_AUTHORITY
+import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao.Companion.WORKSPACE_REPO_SOURCE_ID
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceMemberDesc
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceVisitDesc
@@ -26,7 +27,6 @@ import ru.citeck.ecos.records2.predicate.PredicateUtils
 import ru.citeck.ecos.records2.predicate.model.Predicate
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
-import ru.citeck.ecos.records3.RecordsServiceFactory
 import ru.citeck.ecos.records3.record.atts.schema.ScalarType
 import ru.citeck.ecos.records3.record.atts.schema.annotation.AttName
 import ru.citeck.ecos.records3.record.dao.query.dto.query.RecordsQuery
@@ -36,12 +36,12 @@ import ru.citeck.ecos.webapp.api.authority.EcosAuthoritiesApi
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import java.time.Duration
 import java.util.Optional
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 
 @Service
 class EmodelWorkspaceService(
     private val recordsService: RecordsService,
-    private val recordsServiceFactory: RecordsServiceFactory,
     private val ecosAuthoritiesApi: EcosAuthoritiesApi,
     private val authorityService: AuthorityService,
     private val workspacePermissions: WorkspacePermissions
@@ -50,6 +50,8 @@ class EmodelWorkspaceService(
     companion object {
         const val USER_JOIN_PREFIX = "user-join-"
         const val DELETED_WS_SYS_ID_PREFIX = "DELETED_"
+
+        private val PERSON_REPO_SOURCE_ID = "${AuthorityType.PERSON.sourceId}-repo"
 
         private val RESOLVED_MAPPING_TTL: Duration = Duration.ofMinutes(30)
 
@@ -63,6 +65,8 @@ class EmodelWorkspaceService(
 
         private val log = KotlinLogging.logger {}
     }
+
+    private val notRegisteredSourcesWarned: MutableSet<String> = ConcurrentHashMap.newKeySet()
 
     private val joinListeners = CopyOnWriteArrayList<WorkspaceJoinListener>()
     private val leaveListeners = CopyOnWriteArrayList<WorkspaceLeaveListener>()
@@ -134,11 +138,40 @@ class EmodelWorkspaceService(
      * all artifacts of a workspace unreadable by ref until the cache entry expired (COREDEV-514).
      */
     internal fun checkSourceIsRegistered(sourceId: String, lookupDesc: String) {
-        if (recordsServiceFactory.recordsResolver.getSourceInfo(sourceId) == null) {
+        if (!isMappingSourceRegistered(sourceId)) {
             error(
                 "Records source '$sourceId' is not registered. " +
                     "Lookup of $lookupDesc can't be performed and its result must not be cached."
             )
+        }
+    }
+
+    /**
+     * The mapping reads its sources through proxies ('workspace' -> 'workspace-repo',
+     * 'person' -> 'person-repo'). A registered proxy whose target is not registered yet answers
+     * with an empty result as well, so both ends of the chain are checked. A plain map lookup:
+     * this runs on every mapping call, before the cache.
+     */
+    private fun isMappingSourceRegistered(sourceId: String): Boolean {
+        if (recordsService.getRecordsDao(sourceId) == null) {
+            return false
+        }
+        val targetSourceId = when (sourceId) {
+            WorkspaceDesc.SOURCE_ID -> WORKSPACE_REPO_SOURCE_ID
+            AuthorityType.PERSON.sourceId -> PERSON_REPO_SOURCE_ID
+            else -> return true
+        }
+        return recordsService.getRecordsDao(targetSourceId) != null
+    }
+
+    private fun logSourceIsNotRegistered(sourceId: String, lookupDesc: String) {
+        val message = "Records source '$sourceId' is not registered yet. Lookup of $lookupDesc is reported " +
+            "as unresolved and is not cached. The sources of the workspace id mapping must be registered " +
+            "before the caller (see WorkspaceIdMappingSourcesRegistrar), check the beans ordering."
+        if (notRegisteredSourcesWarned.add(sourceId)) {
+            log.warn { message }
+        } else {
+            log.debug { message }
         }
     }
 
@@ -181,21 +214,16 @@ class EmodelWorkspaceService(
         if (workspaceId.isBlank()) {
             return ""
         }
-        if (recordsServiceFactory.recordsResolver.getSourceInfo(WorkspaceDesc.SOURCE_ID) == null) {
-            // The types registry maps the identifier of EVERY workspace-scoped type while the
-            // application context is still loading (TypeConverter.toDtoWithMeta -> addWsPrefixToId),
-            // and the 'workspace' records source is registered only after that. COREDEV-514 made the
-            // lookup in that window throw, so that its empty answer would not be cached - and the
-            // throw travelled up through the registry initialization and killed the whole start:
-            // an application holding a single type in a workspace could not boot at all.
-            //
-            // The answer still must not be CACHED, and it must not end the caller either. So the
-            // unresolved marker is returned directly, bypassing the cache: the very next lookup,
-            // made after the source is registered, resolves the workspace normally.
-            log.debug {
-                "Records source '${WorkspaceDesc.SOURCE_ID}' is not registered yet. " +
-                    "System id of workspace '$workspaceId' is reported as unresolved and is not cached."
-            }
+        if (!isMappingSourceRegistered(WorkspaceDesc.SOURCE_ID)) {
+            // The registries map the identifier of EVERY workspace-scoped artifact while the
+            // application context is still loading. COREDEV-514 made a lookup in that window throw, so
+            // that its empty answer would not be cached - and the throw travelled up through the
+            // registry initialization and killed the whole start (COREDEV-550). The answer still must
+            // not be CACHED here, and it must not end the caller either: the unresolved marker is
+            // returned directly, bypassing the cache. The callers keep their own caches, so the sources
+            // are registered before the registries by WorkspaceIdMappingSourcesRegistrar, and reaching
+            // this branch means a bean ordering defect - hence the warning.
+            logSourceIsNotRegistered(WorkspaceDesc.SOURCE_ID, "system id of workspace '$workspaceId'")
             return DELETED_WS_SYS_ID_PREFIX + WorkspaceSystemIdUtils.createId(workspaceId)
         }
         return wsSystemIdCache.get(workspaceId) ?: ""
@@ -205,19 +233,15 @@ class EmodelWorkspaceService(
         if (wsSysId.isBlank()) {
             return ""
         }
-        // The same startup window as in [getSystemId]: the sources this mapping reads are registered
-        // after the context is loaded, and the lookup must neither cache its empty answer nor end
-        // the caller. An unresolved workspace is an empty id here, exactly as for a missing one.
+        // The same startup window as in [getSystemId]. An unresolved workspace is an empty id here,
+        // exactly as for a missing one, and nothing is cached.
         val sourceId = if (wsSysId.startsWith(WorkspaceSystemIdUtils.USER_WS_SYS_ID_PREFIX)) {
             AuthorityType.PERSON.sourceId
         } else {
             WorkspaceDesc.SOURCE_ID
         }
-        if (recordsServiceFactory.recordsResolver.getSourceInfo(sourceId) == null) {
-            log.debug {
-                "Records source '$sourceId' is not registered yet. " +
-                    "Workspace of system id '$wsSysId' is reported as unresolved and is not cached."
-            }
+        if (!isMappingSourceRegistered(sourceId)) {
+            logSourceIsNotRegistered(sourceId, "workspace of system id '$wsSysId'")
             return ""
         }
         return wsIdBySysIdCache.get(wsSysId).orElse(null) ?: ""
