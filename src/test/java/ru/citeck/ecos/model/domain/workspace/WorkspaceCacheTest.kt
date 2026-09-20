@@ -10,6 +10,7 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.ConfigurableApplicationContext
 import ru.citeck.ecos.apps.app.service.LocalAppService
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.context.lib.auth.AuthContext
@@ -17,6 +18,8 @@ import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.context.lib.auth.data.SimpleAuthData
 import ru.citeck.ecos.model.AuthoritiesHelper
 import ru.citeck.ecos.model.EcosModelApp
+import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao.Companion.WORKSPACE_REPO_SOURCE_ID
+import ru.citeck.ecos.model.domain.workspace.config.WorkspaceIdMappingSourcesRegistrar
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceMemberDesc
 import ru.citeck.ecos.model.domain.workspace.dto.Workspace
@@ -27,11 +30,18 @@ import ru.citeck.ecos.model.domain.workspace.service.CustomWorkspaceApi
 import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
 import ru.citeck.ecos.model.domain.workspace.utils.WorkspaceSystemIdUtils
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
+import ru.citeck.ecos.model.lib.utils.ModelUtils
+import ru.citeck.ecos.model.lib.workspace.IdInWs
 import ru.citeck.ecos.model.lib.workspace.USER_WORKSPACE_PREFIX
+import ru.citeck.ecos.model.lib.workspace.WorkspaceService
 import ru.citeck.ecos.model.lib.workspace.api.WsMembershipType
+import ru.citeck.ecos.model.num.service.NumRegistryInitializer
+import ru.citeck.ecos.model.type.service.TypesRegistryInitializer
+import ru.citeck.ecos.model.type.service.TypesService
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.webapp.api.entity.EntityRef
+import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension
 
 @ExtendWith(EcosSpringExtension::class)
@@ -59,6 +69,15 @@ class WorkspaceCacheTest {
 
     @Autowired
     private lateinit var authoritiesHelper: AuthoritiesHelper
+
+    @Autowired
+    private lateinit var applicationContext: ConfigurableApplicationContext
+
+    @Autowired
+    private lateinit var typesService: TypesService
+
+    @Autowired
+    private lateinit var libWorkspaceService: WorkspaceService
 
     private val workspaceRefsToDelete = mutableListOf<EntityRef>()
     private val authorityRefsToDelete = mutableListOf<EntityRef>()
@@ -329,5 +348,158 @@ class WorkspaceCacheTest {
 
         val idAfter = AuthContext.runAsSystem { workspaceService.getWorkspaceIdBySystemId(userWsSysId) }
         assertThat(idAfter).startsWith(USER_WORKSPACE_PREFIX)
+    }
+
+    /**
+     * COREDEV-550: the mapping reads 'workspace' through a proxy. A registered proxy whose target
+     * ('workspace-repo') is not registered yet answers with an empty result as well, so the guard
+     * must recognize that state too - otherwise the empty answer is cached as "not found".
+     */
+    @Test
+    fun lookupWhileProxyTargetIsNotRegisteredDoesNotFailAndIsNotCached() {
+
+        val wsId = createWorkspace(
+            "cache-test-ws-proxy-target",
+            listOf(managerMember("m0", AuthorityType.PERSON.getRef(USER_B)))
+        )
+        val wsSysId = AuthContext.runAsSystem { workspaceService.getSystemId(wsId) }
+        assertThat(wsSysId).doesNotStartWith(EmodelWorkspaceService.DELETED_WS_SYS_ID_PREFIX)
+        workspaceService.evictIdMappings(wsId, wsSysId)
+
+        val repoDao = recordsService.getRecordsDao(WORKSPACE_REPO_SOURCE_ID)
+            ?: error("Records source '$WORKSPACE_REPO_SOURCE_ID' is not registered")
+        recordsService.unregister(WORKSPACE_REPO_SOURCE_ID)
+        try {
+            assertThat(recordsService.getRecordsDao(WorkspaceDesc.SOURCE_ID)).describedAs("proxy stays").isNotNull
+            val sysIdInWindow = AuthContext.runAsSystem { workspaceService.getSystemId(wsId) }
+            assertThat(sysIdInWindow).startsWith(EmodelWorkspaceService.DELETED_WS_SYS_ID_PREFIX)
+            val idInWindow = AuthContext.runAsSystem { workspaceService.getWorkspaceIdBySystemId(wsSysId) }
+            assertThat(idInWindow).isEmpty()
+        } finally {
+            recordsService.register(repoDao)
+        }
+
+        assertThat(AuthContext.runAsSystem { workspaceService.getSystemId(wsId) }).isEqualTo(wsSysId)
+        assertThat(AuthContext.runAsSystem { workspaceService.getWorkspaceIdBySystemId(wsSysId) }).isEqualTo(wsId)
+    }
+
+    /**
+     * COREDEV-550: the registries which map workspace ids at startup must be initialized after the
+     * sources of the mapping are registered. The ordering is declared with @DependsOn and nothing
+     * else enforces it, so the declaration itself is guarded here.
+     */
+    @Test
+    fun registryInitializersDependOnMappingSourcesRegistrar() {
+        val beanFactory = applicationContext.beanFactory
+        for (type in listOf(TypesRegistryInitializer::class.java, NumRegistryInitializer::class.java)) {
+            val beanName = beanFactory.getBeanNamesForType(type).single()
+            val dependsOn = beanFactory.getBeanDefinition(beanName).dependsOn ?: emptyArray()
+            assertThat(dependsOn).describedAs(beanName).contains(WorkspaceIdMappingSourcesRegistrar.BEAN_NAME)
+        }
+    }
+
+    /**
+     * COREDEV-550, the trigger found on the stand: a GLOBAL type whose parent lives in a workspace.
+     * The first (synchronous) pass of the types registry sync reads global types only, but
+     * TypeConverter maps the parent id through the parent's workspace, and that lookup lands in the
+     * startup window. Before COREDEV-550 it threw and the whole start failed. The conversion must
+     * survive: the parent is reported as unresolved and the emodel cache stays empty.
+     */
+    @Test
+    fun globalTypeWithParentInWorkspaceIsConvertedWhileWorkspaceSourceIsNotRegistered() {
+
+        val wsId = createWorkspace(
+            "cache-test-ws-type-parent",
+            listOf(managerMember("m0", AuthorityType.PERSON.getRef(USER_B)))
+        )
+        val parentId = "cache-test-parent-in-ws"
+        val childId = "cache-test-global-child"
+        val parentIdInWs = IdInWs.create(wsId, parentId)
+        val childIdInWs = IdInWs.create("", childId)
+
+        AuthContext.runAsSystem {
+            typesService.save(
+                TypeDef.create()
+                    .withId(parentId)
+                    .withWorkspace(wsId)
+                    .withParentRef(ModelUtils.getTypeRef("base"))
+                    .build()
+            )
+            typesService.save(
+                TypeDef.create()
+                    .withId(childId)
+                    .withParentRef(
+                        ModelUtils.getTypeRef(WorkspaceSystemIdUtils.createId(wsId) + IdInWs.WS_DELIM + parentId)
+                    )
+                    .build()
+            )
+        }
+        try {
+            // Saving the types resolved the workspace already; a cold start has no such history.
+            workspaceService.evictIdMappings(wsId)
+            resetLibWorkspaceCaches()
+
+            val workspaceDao = recordsService.getRecordsDao(WorkspaceDesc.SOURCE_ID)
+                ?: error("Records source '${WorkspaceDesc.SOURCE_ID}' is not registered")
+            recordsService.unregister(WorkspaceDesc.SOURCE_ID)
+            val convertedInWindow = try {
+                AuthContext.runAsSystem { typesService.getAllWithMeta(listOf(childIdInWs)) }
+            } finally {
+                recordsService.register(workspaceDao)
+            }
+            assertThat(convertedInWindow).hasSize(1)
+            assertThat(convertedInWindow[0].entity.parentRef.getLocalId())
+                .startsWith(EmodelWorkspaceService.DELETED_WS_SYS_ID_PREFIX)
+
+            // The emodel cache is empty: a direct lookup resolves the workspace at once.
+            assertThat(AuthContext.runAsSystem { workspaceService.getSystemId(wsId) })
+                .isEqualTo(WorkspaceSystemIdUtils.createId(wsId))
+
+            // The caller-side cache of ecos-model-lib is NOT empty: it keeps the unresolved answer for
+            // its unresolved TTL (30 seconds in 2.40), and a conversion made right after the
+            // registration still reports the parent as unresolved. This is why the sources are registered before the registries at startup
+            // (WorkspaceIdMappingSourcesRegistrar). Drop this assertion when the lib stops caching
+            // unresolved mappings.
+            assertThat(libWorkspaceService.getWorkspaceSystemId(wsId))
+                .startsWith(EmodelWorkspaceService.DELETED_WS_SYS_ID_PREFIX)
+            resetLibWorkspaceCaches()
+            val convertedAfter = AuthContext.runAsSystem { typesService.getAllWithMeta(listOf(childIdInWs)) }
+            assertThat(convertedAfter[0].entity.parentRef.getLocalId())
+                .isEqualTo(WorkspaceSystemIdUtils.createId(wsId) + IdInWs.WS_DELIM + parentId)
+        } finally {
+            resetLibWorkspaceCaches()
+            AuthContext.runAsSystem {
+                typesService.delete(childIdInWs)
+                typesService.delete(parentIdInWs)
+            }
+        }
+    }
+
+    /**
+     * WorkspaceServiceImpl of ecos-model-lib keeps its own mapping caches and has no API to reset
+     * them. A test which needs the startup window must clear them: a mapping made before the window
+     * would otherwise serve the window from this cache.
+     */
+    private fun resetLibWorkspaceCaches() {
+        var found = false
+        var cls: Class<*>? = libWorkspaceService.javaClass
+        while (cls != null) {
+            for (fieldName in listOf("workspaceSysIdCache", "workspaceIdBySysIdCache")) {
+                val field = runCatching { cls.getDeclaredField(fieldName) }.getOrNull() ?: continue
+                field.isAccessible = true
+                // Since ecos-model-lib 2.40 the field holds WsIdMappingCache, which wraps the Caffeine
+                // cache in its private 'cache' field; older versions hold the Caffeine cache directly.
+                var holder: Any = field.get(libWorkspaceService)
+                if (holder !is com.github.benmanes.caffeine.cache.Cache<*, *>) {
+                    val cacheField = holder.javaClass.getDeclaredField("cache")
+                    cacheField.isAccessible = true
+                    holder = cacheField.get(holder)
+                }
+                (holder as com.github.benmanes.caffeine.cache.Cache<*, *>).invalidateAll()
+                found = true
+            }
+            cls = cls.superclass
+        }
+        check(found) { "Mapping caches of WorkspaceServiceImpl are not found" }
     }
 }
