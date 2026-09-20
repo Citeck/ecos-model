@@ -181,11 +181,43 @@ class EmodelWorkspaceService(
         if (workspaceId.isBlank()) {
             return ""
         }
+        if (recordsServiceFactory.recordsResolver.getSourceInfo(WorkspaceDesc.SOURCE_ID) == null) {
+            // The types registry maps the identifier of EVERY workspace-scoped type while the
+            // application context is still loading (TypeConverter.toDtoWithMeta -> addWsPrefixToId),
+            // and the 'workspace' records source is registered only after that. COREDEV-514 made the
+            // lookup in that window throw, so that its empty answer would not be cached - and the
+            // throw travelled up through the registry initialization and killed the whole start:
+            // an application holding a single type in a workspace could not boot at all.
+            //
+            // The answer still must not be CACHED, and it must not end the caller either. So the
+            // unresolved marker is returned directly, bypassing the cache: the very next lookup,
+            // made after the source is registered, resolves the workspace normally.
+            log.debug {
+                "Records source '${WorkspaceDesc.SOURCE_ID}' is not registered yet. " +
+                    "System id of workspace '$workspaceId' is reported as unresolved and is not cached."
+            }
+            return DELETED_WS_SYS_ID_PREFIX + WorkspaceSystemIdUtils.createId(workspaceId)
+        }
         return wsSystemIdCache.get(workspaceId) ?: ""
     }
 
     fun getWorkspaceIdBySystemId(wsSysId: String): String {
         if (wsSysId.isBlank()) {
+            return ""
+        }
+        // The same startup window as in [getSystemId]: the sources this mapping reads are registered
+        // after the context is loaded, and the lookup must neither cache its empty answer nor end
+        // the caller. An unresolved workspace is an empty id here, exactly as for a missing one.
+        val sourceId = if (wsSysId.startsWith(WorkspaceSystemIdUtils.USER_WS_SYS_ID_PREFIX)) {
+            AuthorityType.PERSON.sourceId
+        } else {
+            WorkspaceDesc.SOURCE_ID
+        }
+        if (recordsServiceFactory.recordsResolver.getSourceInfo(sourceId) == null) {
+            log.debug {
+                "Records source '$sourceId' is not registered yet. " +
+                    "Workspace of system id '$wsSysId' is reported as unresolved and is not cached."
+            }
             return ""
         }
         return wsIdBySysIdCache.get(wsSysId).orElse(null) ?: ""
