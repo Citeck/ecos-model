@@ -1,6 +1,7 @@
 package ru.citeck.ecos.model.domain.secret.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import jakarta.annotation.PostConstruct
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
@@ -9,7 +10,6 @@ import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.model.domain.secret.dto.EncryptionMeta
 import ru.citeck.ecos.model.domain.secret.repo.EcosSecretEntity
 import ru.citeck.ecos.model.domain.secret.repo.EcosSecretRepo
-import jakarta.annotation.PostConstruct
 
 @Component
 @Transactional

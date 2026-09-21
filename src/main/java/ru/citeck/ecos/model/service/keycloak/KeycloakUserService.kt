@@ -3,9 +3,9 @@ package ru.citeck.ecos.model.service.keycloak
 import com.fasterxml.jackson.databind.node.ObjectNode
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.annotation.PostConstruct
-import ru.citeck.ecos.commons.json.Json
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import ru.citeck.ecos.commons.json.Json
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.records3.RecordsService
