@@ -12,10 +12,10 @@ import ru.citeck.ecos.model.service.validation.TypeWorkspaceParentValidator
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 
 /**
- * A global type may not inherit from a type living in a workspace (COREDEV-550),
+ * A type may inherit only from a global type or from a type of its own workspace (COREDEV-550),
  * see [TypeWorkspaceParentValidator].
  */
-class GlobalTypeWorkspaceParentValidationTest : TypeTestBase() {
+class TypeWorkspaceParentValidationTest : TypeTestBase() {
 
     private fun saveType(id: String, workspace: String = "", parent: String = "base"): TypeDef {
         return typeService.save(
@@ -74,6 +74,24 @@ class GlobalTypeWorkspaceParentValidationTest : TypeTestBase() {
 
         assertThat(i18nCause(ex).messageKey).isEqualTo("ecos-model.type.global-type-with-workspace-parent")
         assertThat(typeService.getById(IdInWs.create("movable-child")).parentRef.getLocalId()).isEqualTo("base")
+    }
+
+    @Test
+    fun typeWithParentFromAnotherWorkspaceIsRejected() {
+
+        saveType("parent-in-ws", workspace = "ws1")
+
+        val ex = assertThrows<Exception> {
+            saveType("child-in-other-ws", workspace = "ws2", parent = "parent-in-ws")
+        }
+
+        val i18n = i18nCause(ex)
+        assertThat(i18n.messageKey).isEqualTo("ecos-model.type.type-with-parent-from-other-workspace")
+        assertThat(i18n.messageArgs).containsEntry("typeId", "child-in-other-ws")
+        assertThat(i18n.messageArgs).containsEntry("typeWorkspace", "ws2")
+        assertThat(i18n.messageArgs).containsEntry("parentId", "parent-in-ws")
+        assertThat(i18n.messageArgs).containsEntry("parentWorkspace", "ws1")
+        assertThat(typeService.getByIdOrNull(IdInWs.create("ws2", "child-in-other-ws"))).isNull()
     }
 
     @Test
