@@ -21,6 +21,10 @@
       "Attribute '{{attribute}}' of type '{{typeId}}' can't be stored: its database column name is {{length}} bytes long, but PostgreSQL limits identifiers to {{limit}} bytes. Shorten the attribute id.",
       "Атрибут '{{attribute}}' типа '{{typeId}}' не может быть сохранён: имя колонки в базе данных занимает {{length}} байт, а PostgreSQL ограничивает идентификаторы {{limit}} байтами. Сократите идентификатор атрибута."
     ],
+    "ecos-model.type.global-type-with-workspace-parent": [
+      "Type '{{typeId}}' is global and can't inherit from type '{{parentId}}' which belongs to workspace '{{parentWorkspace}}'. Either move the type into the same workspace or choose a global parent.",
+      "Тип '{{typeId}}' является глобальным и не может наследоваться от типа '{{parentId}}' из рабочего пространства '{{parentWorkspace}}'. Перенесите тип в это же пространство или выберите глобального родителя."
+    ],
     "ecos-model.aspect.attribute-id-too-long": [
       "Attribute '{{attribute}}' of aspect '{{aspectId}}' can't be stored: its database column name is {{length}} bytes long, but PostgreSQL limits identifiers to {{limit}} bytes. Shorten the attribute id or set a shorter aspect prefix.",
       "Атрибут '{{attribute}}' аспекта '{{aspectId}}' не может быть сохранён: имя колонки в базе данных занимает {{length}} байт, а PostgreSQL ограничивает идентификаторы {{limit}} байтами. Сократите идентификатор атрибута или задайте более короткий префикс аспекта."

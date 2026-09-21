@@ -131,11 +131,10 @@ class EmodelWorkspaceService(
     }
 
     /**
-     * A query to a records source which is not registered yet returns an empty result without
-     * any error, so it looks exactly like "nothing is found". Such an answer must not be cached
-     * as a resolved or unresolved mapping - fail instead, nothing is cached when the cache loader
-     * throws. Without this check a single lookup made while the source was not registered yet made
-     * all artifacts of a workspace unreadable by ref until the cache entry expired (COREDEV-514).
+     * A query to a source which is not registered yet returns an empty result without any error,
+     * so "not found" is indistinguishable from "can't be asked". Such an answer must not be cached:
+     * Caffeine keeps nothing when the loader throws (COREDEV-514). Unreachable through [getSystemId]
+     * and [getWorkspaceIdBySystemId], which check the registration before the cache.
      */
     internal fun checkSourceIsRegistered(sourceId: String, lookupDesc: String) {
         if (!isMappingSourceRegistered(sourceId)) {
@@ -147,10 +146,8 @@ class EmodelWorkspaceService(
     }
 
     /**
-     * The mapping reads its sources through proxies ('workspace' -> 'workspace-repo',
-     * 'person' -> 'person-repo'). A registered proxy whose target is not registered yet answers
-     * with an empty result as well, so both ends of the chain are checked. A plain map lookup:
-     * this runs on every mapping call, before the cache.
+     * A registered proxy ('workspace', 'person') whose target ('…-repo') is not registered yet
+     * answers with an empty result too, so both ends of the chain are checked.
      */
     private fun isMappingSourceRegistered(sourceId: String): Boolean {
         if (recordsService.getRecordsDao(sourceId) == null) {
@@ -215,14 +212,9 @@ class EmodelWorkspaceService(
             return ""
         }
         if (!isMappingSourceRegistered(WorkspaceDesc.SOURCE_ID)) {
-            // The registries map the identifier of EVERY workspace-scoped artifact while the
-            // application context is still loading. COREDEV-514 made a lookup in that window throw, so
-            // that its empty answer would not be cached - and the throw travelled up through the
-            // registry initialization and killed the whole start (COREDEV-550). The answer still must
-            // not be CACHED here, and it must not end the caller either: the unresolved marker is
-            // returned directly, bypassing the cache. The callers keep their own caches, so the sources
-            // are registered before the registries by WorkspaceIdMappingSourcesRegistrar, and reaching
-            // this branch means a bean ordering defect - hence the warning.
+            // In the startup window the answer must be neither cached nor fatal for the caller:
+            // the guard of COREDEV-514 threw here and killed the whole start (COREDEV-550).
+            // Reaching this branch means a bean ordering defect, hence the warning.
             logSourceIsNotRegistered(WorkspaceDesc.SOURCE_ID, "system id of workspace '$workspaceId'")
             return DELETED_WS_SYS_ID_PREFIX + WorkspaceSystemIdUtils.createId(workspaceId)
         }
@@ -233,8 +225,7 @@ class EmodelWorkspaceService(
         if (wsSysId.isBlank()) {
             return ""
         }
-        // The same startup window as in [getSystemId]. An unresolved workspace is an empty id here,
-        // exactly as for a missing one, and nothing is cached.
+        // The same startup window as in getSystemId: unresolved is an empty id, nothing is cached.
         val sourceId = if (wsSysId.startsWith(WorkspaceSystemIdUtils.USER_WS_SYS_ID_PREFIX)) {
             AuthorityType.PERSON.sourceId
         } else {

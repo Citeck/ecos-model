@@ -11,6 +11,7 @@ import ru.citeck.ecos.model.lib.type.dto.*
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.model.lib.workspace.WorkspaceService
 import ru.citeck.ecos.model.lib.workspace.convertToIdInWsSafe
+import ru.citeck.ecos.model.service.validation.TypeWorkspaceParentValidator
 import ru.citeck.ecos.model.type.repository.TypeEntity
 import ru.citeck.ecos.model.type.service.dao.TypeRepoDao
 import ru.citeck.ecos.model.type.service.getTypeId
@@ -51,6 +52,12 @@ class TypeConverter(
 
             val parentEntity = typeRepoDao.findByExtId(workspaceService.convertToIdInWsSafe(typeDef.parentRef.getLocalId()))
                 ?: error("Parent type is not found: ${typeDef.parentRef.getLocalId()}")
+            TypeWorkspaceParentValidator.validateParentWorkspace(
+                typeDef.id,
+                typeDef.workspace,
+                parentEntity.extId,
+                parentEntity.workspace
+            )
             entity.parent = parentEntity
         }
 

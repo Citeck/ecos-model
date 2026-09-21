@@ -27,8 +27,8 @@ import java.time.Duration
 import java.util.concurrent.atomic.AtomicBoolean
 
 @Component
-// Every workspace-scoped type is mapped through the workspace system id at startup, and the
-// sources of that mapping must be registered by then, not merely created as beans (COREDEV-550)
+// Identifiers are mapped through the workspace system id at startup, and the sources of that
+// mapping must be registered by then, not merely created as beans (COREDEV-550)
 @DependsOn(WorkspaceIdMappingSourcesRegistrar.BEAN_NAME)
 class TypesRegistryInitializer(
     private val typesService: TypesService,
