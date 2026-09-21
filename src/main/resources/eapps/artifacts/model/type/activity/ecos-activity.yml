@@ -55,26 +55,19 @@ model:
         type: SCRIPT
         config:
           fn: |
-            const typeRu = value.load("_type._disp.closest.ru");
-            const typeEn = value.load("_type._disp.closest.en");
-
-            const topic = value.load("topic");
-            const parentDispRu = value.load("_parent._disp.closest.ru");
-            const parentDispEn = value.load("_parent._disp.closest.en");
-
-            let titleRu = typeRu + ": ";
-            let titleEn = typeEn + ": ";
-
-            if (topic) {
-              titleRu += topic;
-              titleEn += topic;
-            } else {
-              titleRu += parentDispRu;
-              titleEn += parentDispEn;
+            // "!" gives an empty string instead of null, presuf wraps only a non-empty value
+            function presuf(text, prefix, suffix) {
+              return text ? (prefix || "") + text + (suffix || "") : "";
             }
 
+            const typeRu = value.load("_type._disp.closest.ru!");
+            const typeEn = value.load("_type._disp.closest.en!");
+
+            const topic = value.load("topic!").trim();
+            const suffixRu = topic || value.load("_parent._disp.closest.ru!").trim();
+            const suffixEn = topic || value.load("_parent._disp.closest.en!").trim();
+
             return {
-              ru: titleRu,
-              en: titleEn
+              ru: typeRu + presuf(suffixRu, ": "),
+              en: typeEn + presuf(suffixEn, ": ")
             };
-      storingType: ON_MUTATE
