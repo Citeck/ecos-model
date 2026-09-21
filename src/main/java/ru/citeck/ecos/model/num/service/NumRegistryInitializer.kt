@@ -1,7 +1,9 @@
 package ru.citeck.ecos.model.num.service
 
+import org.springframework.context.annotation.DependsOn
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta
+import ru.citeck.ecos.model.domain.workspace.config.WorkspaceIdMappingSourcesRegistrar
 import ru.citeck.ecos.model.lib.num.dto.NumTemplateDef
 import ru.citeck.ecos.model.lib.workspace.WorkspaceService
 import ru.citeck.ecos.webapp.api.promise.Promise
@@ -11,6 +13,8 @@ import ru.citeck.ecos.webapp.lib.registry.MutableEcosRegistry
 import ru.citeck.ecos.webapp.lib.registry.init.EcosRegistryInitializer
 
 @Component
+// The num templates of workspaces are mapped through the workspace system id at startup (COREDEV-550)
+@DependsOn(WorkspaceIdMappingSourcesRegistrar.BEAN_NAME)
 class NumRegistryInitializer(
     private val numTemplateService: NumTemplateService,
     private val workspaceService: WorkspaceService

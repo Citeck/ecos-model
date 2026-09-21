@@ -21,6 +21,14 @@
       "Attribute '{{attribute}}' of type '{{typeId}}' can't be stored: its database column name is {{length}} bytes long, but PostgreSQL limits identifiers to {{limit}} bytes. Shorten the attribute id.",
       "Атрибут '{{attribute}}' типа '{{typeId}}' не может быть сохранён: имя колонки в базе данных занимает {{length}} байт, а PostgreSQL ограничивает идентификаторы {{limit}} байтами. Сократите идентификатор атрибута."
     ],
+    "ecos-model.type.global-type-with-workspace-parent": [
+      "Type '{{typeId}}' is global and can't inherit from type '{{parentId}}' which belongs to workspace '{{parentWorkspace}}'. Either move the type into the same workspace or choose a global parent.",
+      "Тип '{{typeId}}' является глобальным и не может наследоваться от типа '{{parentId}}' из рабочего пространства '{{parentWorkspace}}'. Перенесите тип в это же пространство или выберите глобального родителя."
+    ],
+    "ecos-model.type.type-with-parent-from-other-workspace": [
+      "Type '{{typeId}}' of workspace '{{typeWorkspace}}' can't inherit from type '{{parentId}}' which belongs to another workspace '{{parentWorkspace}}'. A type may inherit only from a global type or from a type of its own workspace.",
+      "Тип '{{typeId}}' из рабочего пространства '{{typeWorkspace}}' не может наследоваться от типа '{{parentId}}' из другого пространства '{{parentWorkspace}}'. Наследоваться можно только от глобального типа или от типа своего пространства."
+    ],
     "ecos-model.aspect.attribute-id-too-long": [
       "Attribute '{{attribute}}' of aspect '{{aspectId}}' can't be stored: its database column name is {{length}} bytes long, but PostgreSQL limits identifiers to {{limit}} bytes. Shorten the attribute id or set a shorter aspect prefix.",
       "Атрибут '{{attribute}}' аспекта '{{aspectId}}' не может быть сохранён: имя колонки в базе данных занимает {{length}} байт, а PostgreSQL ограничивает идентификаторы {{limit}} байтами. Сократите идентификатор атрибута или задайте более короткий префикс аспекта."

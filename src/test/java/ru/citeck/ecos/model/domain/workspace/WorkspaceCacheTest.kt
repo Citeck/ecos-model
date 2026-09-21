@@ -10,6 +10,7 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.ConfigurableApplicationContext
 import ru.citeck.ecos.apps.app.service.LocalAppService
 import ru.citeck.ecos.commons.data.MLText
 import ru.citeck.ecos.context.lib.auth.AuthContext
@@ -17,6 +18,8 @@ import ru.citeck.ecos.context.lib.auth.AuthRole
 import ru.citeck.ecos.context.lib.auth.data.SimpleAuthData
 import ru.citeck.ecos.model.AuthoritiesHelper
 import ru.citeck.ecos.model.EcosModelApp
+import ru.citeck.ecos.model.domain.workspace.api.records.WorkspaceProxyDao.Companion.WORKSPACE_REPO_SOURCE_ID
+import ru.citeck.ecos.model.domain.workspace.config.WorkspaceIdMappingSourcesRegistrar
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceDesc
 import ru.citeck.ecos.model.domain.workspace.desc.WorkspaceMemberDesc
 import ru.citeck.ecos.model.domain.workspace.dto.Workspace
@@ -27,7 +30,10 @@ import ru.citeck.ecos.model.domain.workspace.service.CustomWorkspaceApi
 import ru.citeck.ecos.model.domain.workspace.service.EmodelWorkspaceService
 import ru.citeck.ecos.model.domain.workspace.utils.WorkspaceSystemIdUtils
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
+import ru.citeck.ecos.model.lib.workspace.USER_WORKSPACE_PREFIX
 import ru.citeck.ecos.model.lib.workspace.api.WsMembershipType
+import ru.citeck.ecos.model.num.service.NumRegistryInitializer
+import ru.citeck.ecos.model.type.service.TypesRegistryInitializer
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.webapp.api.entity.EntityRef
@@ -58,6 +64,9 @@ class WorkspaceCacheTest {
 
     @Autowired
     private lateinit var authoritiesHelper: AuthoritiesHelper
+
+    @Autowired
+    private lateinit var applicationContext: ConfigurableApplicationContext
 
     private val workspaceRefsToDelete = mutableListOf<EntityRef>()
     private val authorityRefsToDelete = mutableListOf<EntityRef>()
@@ -269,5 +278,110 @@ class WorkspaceCacheTest {
             customWorkspaceApi.getUserWorkspaces(USER_A, WsMembershipType.ALL)
         }
         assertThat(after).contains(wsId)
+    }
+
+    /**
+     * COREDEV-550: a lookup made while its records source is not registered yet must neither fail
+     * the caller (it killed the whole start) nor cache its answer - the next lookup after the
+     * registration resolves the workspace at once, without waiting for the negative TTL.
+     */
+    @Test
+    fun lookupWhileSourceIsNotRegisteredDoesNotFailAndIsNotCached() {
+
+        val wsId = createWorkspace(
+            "cache-test-ws-startup-window",
+            listOf(managerMember("m0", AuthorityType.PERSON.getRef(USER_B)))
+        )
+        val wsSysId = AuthContext.runAsSystem { workspaceService.getSystemId(wsId) }
+        assertThat(wsSysId).doesNotStartWith(EmodelWorkspaceService.DELETED_WS_SYS_ID_PREFIX)
+        workspaceService.evictIdMappings(wsId, wsSysId)
+
+        val workspaceDao = recordsService.getRecordsDao(WorkspaceDesc.SOURCE_ID)
+            ?: error("Records source '${WorkspaceDesc.SOURCE_ID}' is not registered")
+        recordsService.unregister(WorkspaceDesc.SOURCE_ID)
+        try {
+            val sysIdInWindow = AuthContext.runAsSystem { workspaceService.getSystemId(wsId) }
+            assertThat(sysIdInWindow).startsWith(EmodelWorkspaceService.DELETED_WS_SYS_ID_PREFIX)
+            val idInWindow = AuthContext.runAsSystem { workspaceService.getWorkspaceIdBySystemId(wsSysId) }
+            assertThat(idInWindow).isEmpty()
+        } finally {
+            recordsService.register(workspaceDao)
+        }
+
+        val sysIdAfter = AuthContext.runAsSystem { workspaceService.getSystemId(wsId) }
+        assertThat(sysIdAfter).isEqualTo(wsSysId)
+        val idAfter = AuthContext.runAsSystem { workspaceService.getWorkspaceIdBySystemId(wsSysId) }
+        assertThat(idAfter).isEqualTo(wsId)
+    }
+
+    /**
+     * COREDEV-550, the person branch: the system id of a personal workspace is mapped back through
+     * the 'person' source, and a lookup in the startup window follows the same contract.
+     */
+    @Test
+    fun userWorkspaceLookupWhilePersonSourceIsNotRegisteredDoesNotFailAndIsNotCached() {
+
+        val userWsSysId = WorkspaceSystemIdUtils.USER_WS_SYS_ID_PREFIX + WorkspaceSystemIdUtils.createId(USER_B)
+
+        val personDao = recordsService.getRecordsDao(AuthorityType.PERSON.sourceId)
+            ?: error("Records source '${AuthorityType.PERSON.sourceId}' is not registered")
+        recordsService.unregister(AuthorityType.PERSON.sourceId)
+        try {
+            val idInWindow = AuthContext.runAsSystem { workspaceService.getWorkspaceIdBySystemId(userWsSysId) }
+            assertThat(idInWindow).isEmpty()
+        } finally {
+            recordsService.register(personDao)
+        }
+
+        val idAfter = AuthContext.runAsSystem { workspaceService.getWorkspaceIdBySystemId(userWsSysId) }
+        assertThat(idAfter).startsWith(USER_WORKSPACE_PREFIX)
+    }
+
+    /**
+     * COREDEV-550: the mapping reads 'workspace' through a proxy. A registered proxy whose target
+     * ('workspace-repo') is not registered yet answers with an empty result as well, so the guard
+     * must recognize that state too - otherwise the empty answer is cached as "not found".
+     */
+    @Test
+    fun lookupWhileProxyTargetIsNotRegisteredDoesNotFailAndIsNotCached() {
+
+        val wsId = createWorkspace(
+            "cache-test-ws-proxy-target",
+            listOf(managerMember("m0", AuthorityType.PERSON.getRef(USER_B)))
+        )
+        val wsSysId = AuthContext.runAsSystem { workspaceService.getSystemId(wsId) }
+        assertThat(wsSysId).doesNotStartWith(EmodelWorkspaceService.DELETED_WS_SYS_ID_PREFIX)
+        workspaceService.evictIdMappings(wsId, wsSysId)
+
+        val repoDao = recordsService.getRecordsDao(WORKSPACE_REPO_SOURCE_ID)
+            ?: error("Records source '$WORKSPACE_REPO_SOURCE_ID' is not registered")
+        recordsService.unregister(WORKSPACE_REPO_SOURCE_ID)
+        try {
+            assertThat(recordsService.getRecordsDao(WorkspaceDesc.SOURCE_ID)).describedAs("proxy stays").isNotNull
+            val sysIdInWindow = AuthContext.runAsSystem { workspaceService.getSystemId(wsId) }
+            assertThat(sysIdInWindow).startsWith(EmodelWorkspaceService.DELETED_WS_SYS_ID_PREFIX)
+            val idInWindow = AuthContext.runAsSystem { workspaceService.getWorkspaceIdBySystemId(wsSysId) }
+            assertThat(idInWindow).isEmpty()
+        } finally {
+            recordsService.register(repoDao)
+        }
+
+        assertThat(AuthContext.runAsSystem { workspaceService.getSystemId(wsId) }).isEqualTo(wsSysId)
+        assertThat(AuthContext.runAsSystem { workspaceService.getWorkspaceIdBySystemId(wsSysId) }).isEqualTo(wsId)
+    }
+
+    /**
+     * COREDEV-550: the registries which map workspace ids at startup must be initialized after the
+     * sources of the mapping are registered. The ordering is declared with @DependsOn and nothing
+     * else enforces it, so the declaration itself is guarded here.
+     */
+    @Test
+    fun registryInitializersDependOnMappingSourcesRegistrar() {
+        val beanFactory = applicationContext.beanFactory
+        for (type in listOf(TypesRegistryInitializer::class.java, NumRegistryInitializer::class.java)) {
+            val beanName = beanFactory.getBeanNamesForType(type).single()
+            val dependsOn = beanFactory.getBeanDefinition(beanName).dependsOn ?: emptyArray()
+            assertThat(dependsOn).describedAs(beanName).contains(WorkspaceIdMappingSourcesRegistrar.BEAN_NAME)
+        }
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.context.annotation.DependsOn
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import ru.citeck.ecos.commons.data.entity.EntityWithMeta
+import ru.citeck.ecos.model.domain.workspace.config.WorkspaceIdMappingSourcesRegistrar
 import ru.citeck.ecos.model.lib.workspace.*
 import ru.citeck.ecos.model.type.service.resolver.AspectsProvider
 import ru.citeck.ecos.model.type.service.resolver.TypeDefResolver
@@ -26,7 +27,9 @@ import java.time.Duration
 import java.util.concurrent.atomic.AtomicBoolean
 
 @Component
-@DependsOn("workspaceRepoDao")
+// Identifiers are mapped through the workspace system id at startup, and the sources of that
+// mapping must be registered by then, not merely created as beans (COREDEV-550)
+@DependsOn(WorkspaceIdMappingSourcesRegistrar.BEAN_NAME)
 class TypesRegistryInitializer(
     private val typesService: TypesService,
     private val resolver: TypeDefResolver,
