@@ -15,6 +15,7 @@ import ru.citeck.ecos.model.EcosModelApp
 import ru.citeck.ecos.model.lib.aspect.constants.AspectConstants
 import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
 import ru.citeck.ecos.model.service.validation.ModelAttColumnNameValidator.MAX_COLUMN_NAME_BYTES
+import ru.citeck.ecos.model.service.validation.ModelAttColumnNameValidator.MSG_ASPECT_ATT_INVALID_ID
 import ru.citeck.ecos.model.service.validation.ModelAttColumnNameValidator.MSG_ASPECT_ATT_TOO_LONG
 import ru.citeck.ecos.records2.RecordConstants
 import ru.citeck.ecos.records3.RecordsService
@@ -171,6 +172,73 @@ class AspectAttColumnNameValidationTest {
 
         assertThat(i18nCause(ex).messageArgs).containsEntry("attribute", "$prefix:$overflows")
         assertThat(attIds(aspectId, "attributes")).containsExactly("shortAtt")
+    }
+
+    @Test
+    fun attWithInvalidCharsIsRejectedUnderItsPrefix() {
+        val aspectId = "col-chars-dot"
+
+        val ex = assertThrows<Exception> {
+            saveAspect(aspect(aspectId, "ccd", listOf("with.dot")))
+        }
+
+        val i18n = i18nCause(ex)
+        assertThat(i18n.messageKey).isEqualTo(MSG_ASPECT_ATT_INVALID_ID)
+        assertThat(i18n.messageArgs).containsEntry("aspectId", aspectId)
+        assertThat(i18n.messageArgs).containsEntry("attribute", "ccd:with.dot")
+        assertThat(exists(aspectId)).isFalse()
+    }
+
+    @Test
+    fun systemAttWithInvalidCharsIsRejected() {
+        val aspectId = "col-chars-sys"
+
+        val ex = assertThrows<Exception> {
+            saveAspect(aspect(aspectId, "ccs", emptyList(), listOf("with.dot")))
+        }
+
+        assertThat(i18nCause(ex).messageKey).isEqualTo(MSG_ASPECT_ATT_INVALID_ID)
+        assertThat(exists(aspectId)).isFalse()
+    }
+
+    @Test
+    fun invalidPrefixPoisonsEveryAtt() {
+        // the prefix is part of the column name, so a dot in it breaks otherwise valid attributes
+        val aspectId = "col-chars-prefix"
+
+        val ex = assertThrows<Exception> {
+            saveAspect(aspect(aspectId, "bad.prefix", listOf("okAtt")))
+        }
+
+        assertThat(i18nCause(ex).messageArgs).containsEntry("attribute", "bad.prefix:okAtt")
+        assertThat(exists(aspectId)).isFalse()
+    }
+
+    @Test
+    fun attIdCharsAllowedAsAColumnNamePass() {
+        val aspectId = "col-chars-ok"
+
+        saveAspect(aspect(aspectId, "cco", listOf("plain", "with_us", "with-dash", "ns:col")))
+
+        assertThat(attIds(aspectId, "attributes"))
+            .containsExactly("plain", "with_us", "with-dash", "ns:col")
+    }
+
+    @Test
+    fun invalidIdMessageIsLocalized() {
+        val aspectId = "col-chars-i18n"
+
+        val ex = assertThrows<Exception> {
+            saveAspect(aspect(aspectId, "cci", listOf("with.dot")))
+        }
+
+        val i18n = i18nCause(ex)
+        val ru = I18nContext.getMessage(i18n.messageKey, I18nContext.RUSSIAN, i18n.messageArgs)
+        assertThat(ru).contains("недопустимый идентификатор")
+        assertThat(ru).contains("cci:with.dot")
+        val en = I18nContext.getMessage(i18n.messageKey, I18nContext.ENGLISH, i18n.messageArgs)
+        assertThat(en).contains("invalid id")
+        assertThat(en).contains("cci:with.dot")
     }
 
     @Test

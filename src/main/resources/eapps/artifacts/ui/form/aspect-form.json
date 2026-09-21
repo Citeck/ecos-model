@@ -279,7 +279,7 @@
                                     "key": "id",
                                     "validate": {
                                       "required": true,
-                                      "pattern": "(^$|[_a-zA-Z][_\\w-.:]*)"
+                                      "pattern": "(^$|[_a-zA-Z][\\w:-]*)"
                                     },
                                     "inputMasks": [
                                       {
@@ -609,7 +609,7 @@
                                     "key": "id",
                                     "validate": {
                                       "required": true,
-                                      "pattern": "(^$|[_a-zA-Z][_\\w-.:]*)"
+                                      "pattern": "(^$|[_a-zA-Z][\\w:-]*)"
                                     },
                                     "type": "textfield",
                                     "input": true
