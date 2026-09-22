@@ -17,6 +17,11 @@ interface TypeRepoDao {
 
     fun getChildrenIds(parentId: IdInWs): Set<IdInWs>
 
+    /**
+     * Types whose parent is one of [parentIds] (primary keys), from any workspace.
+     */
+    fun getChildrenByParentIds(parentIds: Collection<Long>): List<TypeEntity>
+
     fun findAll(predicate: Predicate, max: Int, skip: Int, sort: List<SortBy>): List<TypeEntity>
 
     fun count(predicate: Predicate): Long

@@ -51,6 +51,15 @@ interface TypesService {
 
     fun expandTypes(typeIds: Collection<IdInWs>): List<TypeDef>
 
+    /**
+     * Identifiers of [typeIds] together with the identifiers of every type inheriting from them,
+     * without loading and converting the definitions. Inheritance is taken from the parent link of
+     * every type, so a child is found wherever it lives - including a type in a workspace whose
+     * parent is a global type. [expandTypes], in contrast, collects children workspace by
+     * workspace and stops at that boundary.
+     */
+    fun expandTypeIds(typeIds: Collection<IdInWs>): Set<IdInWs>
+
     fun getInhAttributes(typeId: IdInWs): List<AttributeDef>
 
     fun delete(typeId: IdInWs)

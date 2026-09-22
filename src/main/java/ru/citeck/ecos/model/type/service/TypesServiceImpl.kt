@@ -188,6 +188,31 @@ class TypesServiceImpl(
         return result
     }
 
+    override fun expandTypeIds(typeIds: Collection<IdInWs>): Set<IdInWs> {
+        if (typeIds.isEmpty()) {
+            return emptySet()
+        }
+        // Descend level by level asking for the children of the previous level by the parent key,
+        // so only the types actually inheriting from [typeIds] are read. The link itself says what
+        // inherits from what - a child in a workspace under a global parent included - so nothing
+        // about workspaces has to be restated here.
+        val result = LinkedHashSet<IdInWs>()
+        val visited = HashSet<Long>()
+        var level: List<TypeEntity> = typeRepoDao.findAllByTypeIds(typeIds).toList()
+        while (level.isNotEmpty()) {
+            val parentIds = ArrayList<Long>(level.size)
+            for (type in level) {
+                val entityId = type.id ?: continue
+                if (visited.add(entityId)) {
+                    result.add(type.getTypeId())
+                    parentIds.add(entityId)
+                }
+            }
+            level = typeRepoDao.getChildrenByParentIds(parentIds)
+        }
+        return result
+    }
+
     override fun getInhAttributes(typeId: IdInWs): List<AttributeDef> {
         if (typeId.isEmpty()) {
             return emptyList()
@@ -396,10 +421,7 @@ class TypesServiceImpl(
             types.add(typeEntity.getTypeId())
         }
         if (desc) {
-            val visited = HashSet<IdInWs>()
-            for (typeId in typesId) {
-                forEachTypeInDescHierarchy(typeId, { visited.add(it.getTypeId()) }, action)
-            }
+            types.addAll(expandTypeIds(typesId))
         }
         if (asc) {
             val visited = HashSet<IdInWs>()
