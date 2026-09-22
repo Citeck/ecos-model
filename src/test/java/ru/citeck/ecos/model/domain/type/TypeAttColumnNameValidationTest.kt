@@ -10,12 +10,14 @@ import ru.citeck.ecos.model.lib.attributes.dto.AttributeDef
 import ru.citeck.ecos.model.lib.type.dto.TypeModelDef
 import ru.citeck.ecos.model.lib.workspace.IdInWs
 import ru.citeck.ecos.model.service.validation.ModelAttColumnNameValidator.MAX_COLUMN_NAME_BYTES
+import ru.citeck.ecos.model.service.validation.ModelAttColumnNameValidator.MSG_TYPE_ATT_INVALID_ID
 import ru.citeck.ecos.model.service.validation.ModelAttColumnNameValidator.MSG_TYPE_ATT_TOO_LONG
 import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 
 /**
  * A type whose attribute id can't be stored as a column is rejected on every save path that
- * reaches TypesServiceImpl.saveTypeDefImpl: records API, service, artifact deploy.
+ * reaches TypesServiceImpl.saveTypeDefImpl: records API, service, artifact deploy. Both reasons
+ * are covered: a name too long for PostgreSQL and a name with a character ecos-data would skip.
  */
 class TypeAttColumnNameValidationTest : TypeTestBase() {
 
@@ -89,6 +91,67 @@ class TypeAttColumnNameValidationTest : TypeTestBase() {
         }
         assertThat(i18nCause(ex).messageArgs).containsEntry("attribute", overflows)
         assertThat(typeService.getByIdOrNull(IdInWs.create("t-sys"))).isNull()
+    }
+
+    @Test
+    fun typeWithInvalidCharsInAttIdIsRejectedThroughRecords() {
+        val ex = assertThrows<Exception> {
+            records.create(
+                "emodel/types-repo",
+                ObjectData.create().set("id", "t-dot").set("model", modelJson("with.dot"))
+            )
+        }
+
+        val i18n = i18nCause(ex)
+        assertThat(i18n.messageKey).isEqualTo(MSG_TYPE_ATT_INVALID_ID)
+        assertThat(i18n.messageArgs).containsEntry("typeId", "t-dot")
+        assertThat(i18n.messageArgs).containsEntry("attribute", "with.dot")
+        assertThat(typeService.getByIdOrNull(IdInWs.create("t-dot"))).isNull()
+    }
+
+    @Test
+    fun attIdCharsAllowedAsAColumnNamePass() {
+        records.create(
+            "emodel/types-repo",
+            ObjectData.create().set("id", "t-chars").set("model", modelJson("plain", "with_us", "with-dash", "ns:col"))
+        )
+
+        val saved = typeService.getById(IdInWs.create("t-chars"))
+        assertThat(saved.model.attributes.map { it.id })
+            .containsExactly("plain", "with_us", "with-dash", "ns:col")
+    }
+
+    @Test
+    fun invalidCharsInSystemAttAreChecked() {
+        val ex = assertThrows<Exception> {
+            typeService.save(
+                TypeDef.create {
+                    withId("t-sys-dot")
+                    withModel(
+                        TypeModelDef.create {
+                            withSystemAttributes(listOf(AttributeDef.create { withId("with.dot") }))
+                        }
+                    )
+                }
+            )
+        }
+        assertThat(i18nCause(ex).messageKey).isEqualTo(MSG_TYPE_ATT_INVALID_ID)
+        assertThat(typeService.getByIdOrNull(IdInWs.create("t-sys-dot"))).isNull()
+    }
+
+    @Test
+    fun artifactDeployWithInvalidCharsIsChecked() {
+        val ex = assertThrows<Exception> {
+            artifactHandler.deployArtifact(
+                TypeDef.create {
+                    withId("t-deploy-dot")
+                    withModel(model("with.dot"))
+                },
+                ""
+            )
+        }
+        assertThat(i18nCause(ex).messageKey).isEqualTo(MSG_TYPE_ATT_INVALID_ID)
+        assertThat(typeService.getByIdOrNull(IdInWs.create("t-deploy-dot"))).isNull()
     }
 
     @Test
