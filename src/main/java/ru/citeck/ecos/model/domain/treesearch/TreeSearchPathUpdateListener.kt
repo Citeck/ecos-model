@@ -6,6 +6,7 @@ import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.events2.EventsService
 import ru.citeck.ecos.events2.listener.ListenerConfig
 import ru.citeck.ecos.events2.type.RecordChangedEvent
+import ru.citeck.ecos.events2.type.RecordCreatedEvent
 import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.records3.RecordsService
 import ru.citeck.ecos.records3.record.atts.dto.RecordAtts
@@ -76,6 +77,23 @@ class TreeSearchPathUpdateListener(
                                 Predicates.eq("diff._has.$it?bool", true)
                             }
                         )
+                    )
+                )
+                withAction { event -> processEvent(event, treeSearchComponent.treeLeafAssocs) }
+            }
+        )
+        // Records created with a leaf assoc in the same mutation produce only
+        // RecordCreatedEvent, so their path should be calculated here.
+        eventsService.addListener(
+            ListenerConfig.create<LeafAssocsChangedEvent> {
+                withEventType(RecordCreatedEvent.TYPE)
+                withTransactional(true)
+                withDataClass(LeafAssocsChangedEvent::class.java)
+                withFilter(
+                    Predicates.or(
+                        treeSearchComponent.treeLeafAspects.map {
+                            Predicates.eq("record._aspects._has.$it?bool", true)
+                        }
                     )
                 )
                 withAction { event -> processEvent(event, treeSearchComponent.treeLeafAssocs) }
