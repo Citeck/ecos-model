@@ -99,10 +99,14 @@ class TypesRegistryInitializer(
         aspectsRegistry.listenEvents { id, _, _ ->
             val key = this::class.java.simpleName + ".types-with-aspects-to-update"
             TxnContext.processSetAfterCommit(key, id) { changedAspects ->
-                val changedTypes = typesService.getAll().filter { rec ->
+                // getAll returns raw definitions, where 'aspects' holds only the aspects the type
+                // declares itself. Descendants inherit them while resolving (see
+                // TypeDefResolver.getResolvedByParentType), so they have to be re-resolved too -
+                // otherwise their model keeps the attributes the aspect had before the change.
+                val typesWithAspect = typesService.getAll().filter { rec ->
                     rec.aspects.any { changedAspects.contains(it.ref.getLocalId()) }
                 }.map { it.getTypeId() }
-                updateTypes(changedTypes)
+                updateTypes(typesService.expandTypeIds(typesWithAspect))
             }
         }
 

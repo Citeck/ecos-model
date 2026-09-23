@@ -57,6 +57,13 @@ class TypeRepoDaoImpl(
         }
     }
 
+    override fun getChildrenByParentIds(parentIds: Collection<Long>): List<TypeEntity> {
+        if (parentIds.isEmpty()) {
+            return emptyList()
+        }
+        return repo.getChildrenByParentIds(parentIds)
+    }
+
     override fun count(predicate: Predicate): Long {
         return searchConverter.getCount(repo, predicate)
     }

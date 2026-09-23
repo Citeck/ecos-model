@@ -49,6 +49,14 @@ class TypeRepoMock(recordsServiceFactory: RecordsServiceFactory) : TypeRepoDao {
             .toSet()
     }
 
+    override fun getChildrenByParentIds(parentIds: Collection<Long>): List<TypeEntity> {
+        if (parentIds.isEmpty()) {
+            return emptyList()
+        }
+        val parentIdsSet = parentIds.toHashSet()
+        return data.values.filter { parentIdsSet.contains(it.parent?.id) }
+    }
+
     override fun findAll(predicate: Predicate, max: Int, skip: Int, sort: List<SortBy>): List<TypeEntity> {
         return predicateService.filter(data.values, predicate)
     }

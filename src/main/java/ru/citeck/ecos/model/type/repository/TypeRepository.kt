@@ -21,4 +21,11 @@ interface TypeRepository :
 
     @Query("SELECT TYPE FROM TypeEntity TYPE WHERE TYPE.workspace = ?1 AND TYPE.parent.workspace = ?1 AND TYPE.parent.extId = ?2")
     fun getChildren(parentWorkspace: String, parentId: String): List<TypeEntity>
+
+    /**
+     * Every type inheriting from one of [parentIds], whatever workspace it belongs to. Asks by the
+     * parent's key, so a child is matched by the link itself and no rule has to be restated here.
+     */
+    @Query("SELECT TYPE FROM TypeEntity TYPE WHERE TYPE.parent.id IN ?1")
+    fun getChildrenByParentIds(parentIds: Collection<Long>): List<TypeEntity>
 }
