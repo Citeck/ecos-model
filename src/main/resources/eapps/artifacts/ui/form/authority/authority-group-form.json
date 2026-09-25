@@ -101,6 +101,7 @@
                         "reorder": false,
                         "allowedAuthorityType": "GROUP",
                         "allowedGroupType": "GROUP",
+                        "rootGroupName": "ALL",
                         "defaultValue": [],
                         "refreshOn": [],
                         "optionalWhenDisabled": false,
