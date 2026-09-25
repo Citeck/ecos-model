@@ -110,6 +110,7 @@ class NumTemplateRecordsDao(
 
         val dtoCtx = BeanTypeUtils.getTypeContext(dto::class.java)
         dtoCtx.applyData(dto, record.attributes)
+        dto.applyCtxWorkspace()
 
         require(dto.id.isNotBlank()) { "Attribute 'id' is mandatory" }
 
@@ -176,6 +177,8 @@ class NumTemplateRecordsDao(
 
         private val originalId = this.id
 
+        private var ctxWorkspace: String? = null
+
         constructor(model: NumTemplateWithMetaDto) : super(model) {
             modelAttributes = ArrayList(getAtts(this.counterKey))
         }
@@ -190,11 +193,31 @@ class NumTemplateRecordsDao(
 
         @JsonProperty(RecordConstants.ATT_WORKSPACE)
         fun setCtxWorkspace(workspace: String?) {
-            if (originalId != this.id) {
-                this.workspace = workspace ?: ""
-            } else {
-                this.workspace = workspaceService.getUpdatedWsInMutation(this.workspace, workspace)
+            // Resolved in applyCtxWorkspace after all attributes are applied,
+            // so the result does not depend on the order of 'id' and '_workspace'
+            this.ctxWorkspace = workspace
+        }
+
+        /**
+         * Resolves the workspace of the mutated record. Must be called after all mutation attributes are applied.
+         * Clients may send '_workspace' (and 'workspace') either as a local id or as a workspace ref
+         * (emodel/workspace@id), but templates are stored and checked by the local workspace id only.
+         */
+        fun applyCtxWorkspace() {
+            val ctxWs = ctxWorkspace?.let { toLocalWsId(it) }
+            if (ctxWs != null) {
+                if (originalId.isNotBlank() && originalId != this.id) {
+                    // existing template copied under a new id
+                    this.workspace = ctxWs
+                } else {
+                    this.workspace = workspaceService.getUpdatedWsInMutation(this.workspace, ctxWs)
+                }
             }
+            this.workspace = toLocalWsId(this.workspace)
+        }
+
+        private fun toLocalWsId(workspace: String): String {
+            return EntityRef.valueOf(workspace).getLocalId()
         }
 
         @AttName("?id")
