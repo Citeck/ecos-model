@@ -38,7 +38,7 @@
                     },
                     "isSkipSearchInWorkspace": true,
                     "allowedGroupType": "ROLE, BRANCH, GROUP",
-                    "rootGroupName": "ALL",
+                    "isSearchInAllGroups": true,
                     "defaultValue": [],
                     "refreshOn": [],
                     "optionalWhenDisabled": false,
