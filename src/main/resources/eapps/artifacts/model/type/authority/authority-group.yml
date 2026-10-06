@@ -41,6 +41,17 @@ model:
     - id: roleSubType
     - id: roleIsManager
       type: BOOLEAN
+  systemAttributes:
+    - id: ldapDn
+      name:
+        ru: Исходный DN группы LDAP
+        en: Original LDAP group DN
+    - id: ldapPresent
+      name:
+        ru: Группа присутствует в LDAP
+        en: Group present in LDAP
+      type: BOOLEAN
+
 aspects:
   - ref: emodel/aspect@import-data-config
     config:

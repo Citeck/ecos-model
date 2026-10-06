@@ -27,6 +27,16 @@ model:
       index:
         enabled: true
   systemAttributes:
+    - id: ldapGroups
+      name:
+        ru: Группы из LDAP
+        en: LDAP groups
+      type: ASSOC
+      multiple: true
+      config:
+        typeRef: emodel/type@authority-group
+      index:
+        enabled: true
     - id: managedBySync
       type: ASSOC
       name:
