@@ -18,15 +18,6 @@ To run this application the following applications from Citeck deployment are ne
 * rabbitmq
 * ecos-registry
 
-## Orgstructure selection in system forms
-
-Starting with ecos-model 2.43.1, the parent-group selector in `authority-group-form`
-and the authority selector in `workspace-member-form` set `isSearchInAllGroups: true`.
-With ecos-ui 2.30.2 or another UI version supporting this flag, a non-empty search
-includes groups and users outside the configured orgstructure root. Browsing without
-search text still starts at the configured root; authority filters and permissions
-remain in effect.
-
 ## Development
 
 To start your application in the dev profile, simply run:
