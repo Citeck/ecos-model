@@ -396,7 +396,7 @@ class DocLibRecords @Autowired constructor(
             if (parentId.entityRef == entityId.entityRef) {
                 error("Cyclic parent reference: ${parentId.entityRef}")
             }
-            attributes[RecordConstants.ATT_PARENT] = parentId.entityRef
+            attributes[RecordConstants.ATT_PARENT] = resolveParentForMutation(parentId, attributes)
             attributes[RecordConstants.ATT_PARENT_ATT] = ATT_CHILDREN
         }
         return recordsService.mutate(EntityRef.valueOf(entityId.entityRef), attributes)
@@ -421,6 +421,13 @@ class DocLibRecords @Autowired constructor(
             error("Invalid type '$newEntityTypeRef'. Allowed types: $allowedTypes")
         }
 
+        attributes[RecordConstants.ATT_PARENT] = resolveParentForMutation(parentId, attributes)
+        attributes[RecordConstants.ATT_PARENT_ATT] = ATT_CHILDREN
+
+        return recordsService.create(typeDefForNewEntity.sourceId, attributes)
+    }
+
+    private fun resolveParentForMutation(parentId: DocLibRecordId, attributes: ObjectData): EntityRef {
         if (parentId.entityRef.isEmpty()) {
             val dirInfo = dirSrcIdCache[parentId.typeId]
             var workspace = ""
@@ -441,13 +448,10 @@ class DocLibRecords @Autowired constructor(
                     .set(DocLibRecord.ATT_WORKSPACE, workspace)
                 recordsService.create(dirInfo.sourceId, rootAtts)
             }
-            attributes[RecordConstants.ATT_PARENT] = parentRef
+            return parentRef
         } else {
-            attributes[RecordConstants.ATT_PARENT] = parentId.entityRef
+            return parentId.entityRef
         }
-        attributes[RecordConstants.ATT_PARENT_ATT] = ATT_CHILDREN
-
-        return recordsService.create(typeDefForNewEntity.sourceId, attributes)
     }
 
     private fun getDocLibRootForType(typeId: String): EntityRef {
