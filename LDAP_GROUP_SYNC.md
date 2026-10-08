@@ -28,7 +28,8 @@ action uses the existing Write-permission evaluator and the DAO still requires
 system/admin rights. Removing a group manually does not remove it from LDAP; a
 subsequent full group read can recreate it.
 
-No release or deployment is implied by this document.
+The hotfix POM uses the release version `2.39.18` with enterprise `1.7.1`.
+Artifact publication and runtime deployment are separate operations.
 
 
 ## Verification
