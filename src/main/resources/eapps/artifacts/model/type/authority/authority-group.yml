@@ -17,6 +17,7 @@ sourceId: emodel/authority-group
 
 actions:
   - uiserv/action@edit-ext-users-info
+  - uiserv/action@delete
 
 model:
   attributes:
