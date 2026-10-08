@@ -39,6 +39,7 @@ import ru.citeck.ecos.webapp.lib.model.type.dto.TypeDef
 import ru.citeck.ecos.webapp.lib.registry.EcosRegistryProps
 import ru.citeck.ecos.webapp.lib.registry.MutableEcosRegistryDelegate
 import ru.citeck.ecos.webapp.lib.spring.test.extension.EcosSpringExtension
+import java.util.UUID
 
 @ExtendWith(EcosSpringExtension::class)
 @SpringBootTest(classes = [EcosModelApp::class])
@@ -428,10 +429,11 @@ class TypePermsWorkspaceTest {
     }
 
     @Test
-    fun globalTypeWithNamespaceKeepsItsDefaultMatrixIdTest(): Unit = AuthContext.runAsSystem {
+    fun globalTypeWithNamespaceGetsStableUuidMatrixIdTest(): Unit = AuthContext.runAsSystem {
         val type = ModelUtils.getTypeRef("namespace:contract")
         val saved = service.save(matrix("", "", type))
-        assertThat(saved.id).isEqualTo("namespace:contract")
+        assertThat(UUID.fromString(saved.id).toString()).isEqualTo(saved.id)
+        assertThat(service.save(matrix("", "", type))).isEqualTo(saved)
         assertThat(service.getWorkspace(saved)).isEmpty()
         assertThat(service.getPermsById(service.getId(saved))).isEqualTo(saved)
         assertThat(service.getPermsForType(type)).isEqualTo(saved)
@@ -496,24 +498,103 @@ class TypePermsWorkspaceTest {
     }
 
     @Test
-    fun namespacedWorkspaceIdsRoundtripEvenWhenNamespaceIsAnotherWorkspaceSystemIdTest() = manager {
+    fun namespacedWorkspaceTypesGetUuidMatrixIdsAndRoundtripTest() = manager {
         val knownPrefix = workspaces.addWsPrefixToId("typed-namespace", ws2)
         for (localId in listOf("namespace:typed-contract", knownPrefix)) {
             val typeRef = type(ws1, localId)
-            val id = IdInWs.create(ws1, localId)
             val saved = service.save(matrix(ws1, "", typeRef))
-            assertThat(saved.id).isEqualTo(localId)
+            assertThat(UUID.fromString(saved.id).toString()).isEqualTo(saved.id)
+            val id = IdInWs.create(ws1, saved.id)
             assertThat(service.getId(saved)).isEqualTo(id)
             assertThat(service.getRecordDataById(id)?.id).isEqualTo(id)
             assertThat(service.save(saved)).isEqualTo(saved)
             val ref = EntityRef.create("perms", workspaces.convertToStrId(id))
             val exported = records.getAtt(ref, "?json").asObjectData()
-            assertThat(exported.get("id").asText()).isEqualTo(localId)
+            assertThat(exported.get("id").asText()).isEqualTo(saved.id)
             assertThat(exported.get("typeRef").asText()).isEqualTo("emodel/type@CURRENT_WS:$localId")
             records.mutate(ref, ObjectData.create().set("_self", exported))
             assertThat(service.getPermsById(id)?.typeRef).isEqualTo(typeRef)
+            assertThat(registry.getPermissionsForType(typeRef)?.id).isEqualTo(saved.id)
+            assertThat(service.save(matrix(ws1, "", typeRef)).id).isEqualTo(saved.id)
+            artifacts.deleteArtifact(saved.id, ws1)
+            assertThat(service.getPermsById(id)).isNull()
+            assertThat(registry.getPermissionsForType(typeRef)).isNull()
+        }
+    }
+
+    @Test
+    fun newNamespacedMatrixIdsAreRejectedThroughServiceRecordsAndArtifactsTest(): Unit = AuthContext.runAsSystem {
+        for (workspace in listOf("", ws1)) {
+            val localId = "namespace:forbidden-matrix"
+            val typeRef = type(workspace, localId)
+            val def = matrix(workspace, localId, typeRef)
+            assertThatThrownBy { service.save(def) }.hasMessageContaining("Matrix local id must not contain ':'")
+            assertThatThrownBy {
+                records.create("perms", ObjectData.create().set("id", localId).set("typeRef", typeRef.toString()))
+            }.hasMessageContaining("Matrix local id must not contain ':'")
+            assertThatThrownBy { artifacts.deployArtifact(def, workspace) }
+                .hasMessageContaining("Matrix local id must not contain ':'")
+            assertThat(service.getPermsForType(typeRef)).isNull()
+            assertThat(registry.getPermissionsForType(typeRef)).isNull()
+        }
+        val prefixedId = workspaces.addWsPrefixToId("forbidden-prefixed-id", ws1)
+        val prefixedDef = matrix(ws1, prefixedId, type(ws1, "prefixed-artifact-target"))
+        assertThatThrownBy { artifacts.deployArtifact(prefixedDef, ws1) }
+            .hasMessageContaining("Matrix local id must not contain ':'")
+        assertThat(service.getPermsForType(prefixedDef.typeRef)).isNull()
+    }
+
+    @Test
+    fun validMatrixCannotBeRenamedToNamespacedIdTest() = manager {
+        val typeRef = type(ws1, "namespace:rename-target")
+        val saved = service.save(matrix(ws1, "rename-safe", typeRef))
+        val ref = EntityRef.create("perms", workspaces.convertToStrId(service.getId(saved)))
+        assertThatThrownBy {
+            records.mutate(ref, ObjectData.create().set("id", "namespace:rename-target"))
+        }.hasMessageContaining("Matrix local id must not contain ':'")
+        assertThat(service.getPermsForType(typeRef)).isEqualTo(saved)
+        assertThat(registry.getPermissionsForType(typeRef)).isEqualTo(saved)
+    }
+
+    @Test
+    fun workspacePrefixIsAcceptedWhenLocalMatrixIdHasNoColonTest() = manager {
+        val localId = "safe-local-id"
+        val refId = workspaces.addWsPrefixToId(localId, ws1)
+        val typeRef = type(ws1, "namespace:prefixed-target")
+        val ref = records.mutate(EntityRef.create("perms", refId), ObjectData.create().set("typeRef", typeRef.toString()))
+        assertThat(ref.getLocalId()).isEqualTo(refId)
+        assertThat(service.getPermsById(IdInWs.create(ws1, localId))?.typeRef).isEqualTo(typeRef)
+        assertThat(records.getAtt(ref, "?json").get("id").asText()).isEqualTo(localId)
+    }
+
+    @Test
+    fun existingNamespacedMatrixIdsRemainEditableExportableAndDeletableTest(): Unit = AuthContext.runAsSystem {
+        val cases = listOf(
+            "" to "namespace:legacy-colon-matrix",
+            ws1 to "namespace:legacy-colon-matrix",
+            ws1 to workspaces.addWsPrefixToId("legacy-colon-matrix", ws2)
+        )
+        for ((workspace, localId) in cases) {
+            val typeRef = type(workspace, localId)
+            val entity = TypePermsEntity()
+            entity.workspace = workspace
+            entity.extId = localId
+            entity.typeRef = typeRef.toString()
+            entity.permissions = "{}"
+            entity.attributes = "{}"
+            repository.saveAndFlush(entity)
+            val id = IdInWs.create(workspace, localId)
+            val saved = service.getPermsById(id)!!
+            assertThat(service.isApplicable(service.getRecordDataById(id)!!)).isTrue()
+            assertThat(service.save(saved)).isEqualTo(saved)
+            assertThat(service.save(matrix(workspace, "", typeRef))).isEqualTo(saved)
+            val ref = EntityRef.create("perms", workspaces.convertToStrId(id))
+            val exported = records.getAtt(ref, "?json").asObjectData()
+            assertThat(exported.get("id").asText()).isEqualTo(localId)
+            records.mutate(ref, ObjectData.create().set("_self", exported))
+            assertThat(service.getPermsById(id)?.typeRef).isEqualTo(typeRef)
             assertThat(registry.getPermissionsForType(typeRef)?.id).isEqualTo(localId)
-            artifacts.deleteArtifact(localId, ws1)
+            artifacts.deleteArtifact(localId, workspace)
             assertThat(service.getPermsById(id)).isNull()
             assertThat(registry.getPermissionsForType(typeRef)).isNull()
         }

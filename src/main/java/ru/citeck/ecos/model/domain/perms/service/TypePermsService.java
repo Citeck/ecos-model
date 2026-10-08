@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -186,13 +187,26 @@ public class TypePermsService {
             throw new IllegalStateException("TypeRef is a mandatory parameter!");
         }
 
+        boolean implicitId = StringUtils.isBlank(permissions.getId());
         permissions = normalize(permissions, expectedWorkspace);
-        IdInWs id = getId(permissions);
-        checkWrite(id.getWorkspace());
-        TypePermsEntity byId = findById(id);
+        String workspace = getWorkspace(permissions);
+        checkWrite(workspace);
         TypePermsEntity byType = repository.findByWorkspaceAndTypeRef(
-            id.getWorkspace(), permissions.getTypeRef().toString()
+            workspace, permissions.getTypeRef().toString()
         );
+        if (implicitId) {
+            String defaultId = byType != null ? byType.getExtId() : permissions.getId();
+            if (byType == null && defaultId.contains(":")) {
+                defaultId = UUID.randomUUID().toString();
+            }
+            permissions = permissions.copy().withId(defaultId).build();
+        }
+        IdInWs id = getId(permissions);
+        TypePermsEntity byId = findById(id);
+        // Keep existing legacy IDs editable, but never create or rename a matrix to a namespaced local ID.
+        if (id.getId().contains(":") && byId == null) {
+            throw new IllegalArgumentException("Matrix local id must not contain ':': " + id.getId());
+        }
         if (byId != null && byType != null && !byId.getId().equals(byType.getId())) {
             throw new IllegalArgumentException("Matrix id is already used for another type: " + permissions.getId());
         }
@@ -335,14 +349,7 @@ public class TypePermsService {
             // A namespaced default id is local in both global and workspace scopes.
             throw new IllegalArgumentException("Unknown workspace prefix in matrix id: " + def.getId());
         }
-        String localId;
-        if (StringUtils.isBlank(def.getId())) {
-            localId = typeId.getId();
-        } else if (isTypeDefaultId) {
-            localId = def.getId();
-        } else {
-            localId = matrixId.getId();
-        }
+        String localId = StringUtils.isBlank(def.getId()) ? typeId.getId() : def.getId();
         return def.copy().withId(localId).withTypeRef(typeRef).build();
     }
 
