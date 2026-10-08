@@ -15,7 +15,7 @@
     </parent>
 
     <properties>
-        <ecos-model-enterprise.version>1.7.0</ecos-model-enterprise.version>
+        <ecos-model-enterprise.version>1.7.1</ecos-model-enterprise.version>
     </properties>
 
     <dependencies>

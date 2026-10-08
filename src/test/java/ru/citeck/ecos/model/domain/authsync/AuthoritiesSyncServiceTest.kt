@@ -139,4 +139,48 @@ class AuthoritiesSyncServiceTest : AuthoritiesTestBase() {
             .isTrue()
         assertThat(personExists("sync-person-4")).isFalse()
     }
+
+    @Test
+    fun groupDeletionRemovesOwnedRecordAndAssociations() {
+        val sync = createSyncDef("test-sync-delete-group")
+        val parent = createGroup("delete-parent")
+        val group = createGroup("delete-owned", "managedBySync" to sync)
+        val person = createPerson("delete-member")
+        addAuthorityToGroup(group, parent)
+        addAuthorityToGroup(person, group)
+        AuthContext.runAsSystem { recordsService.mutateAtt(person, "ldapGroups", listOf(group)) }
+        testFactory.execution = { context ->
+            context.deleteAuthorities(AuthorityType.GROUP, listOf(group.getLocalId()))
+        }
+
+        runSync(sync.getLocalId())
+
+        assertThat(recordsService.getAtt(group, "_notExists").asBoolean()).isTrue()
+        assertStrListAtt(person, "authorityGroups", emptyList())
+        assertStrListAtt(person, "ldapGroups", emptyList())
+        assertThat(recordsService.getAtt(parent, "_notExists").asBoolean()).isFalse()
+        assertThat(recordsService.getAtt(person, "_notExists").asBoolean()).isFalse()
+    }
+
+    @Test
+    fun groupDeletionRejectsLocalForeignAndProtectedGroups() {
+        val sync = createSyncDef("test-sync-delete-guard")
+        val foreignSync = createSyncDef("test-sync-other-owner")
+        val local = createGroup("delete-local")
+        val foreign = createGroup("delete-foreign", "managedBySync" to foreignSync)
+        listOf(
+            local,
+            foreign,
+            AuthorityType.GROUP.getRef("ECOS_ADMINISTRATORS"),
+            AuthorityType.GROUP.getRef("ALFRESCO_ADMINISTRATORS"),
+            AuthorityType.GROUP.getRef("EVERYONE")
+        ).forEach { group ->
+            testFactory.execution = { context ->
+                context.deleteAuthorities(AuthorityType.GROUP, listOf(group.getLocalId()))
+            }
+            assertThrows<Exception> { runSync(sync.getLocalId()) }
+        }
+        assertThat(recordsService.getAtt(local, "_notExists").asBoolean()).isFalse()
+        assertThat(recordsService.getAtt(foreign, "_notExists").asBoolean()).isFalse()
+    }
 }

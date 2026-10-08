@@ -371,7 +371,6 @@ class AuthoritiesSyncService(
             }
 
             override fun deleteAuthorities(type: AuthorityType, authorities: List<String>) {
-                // TODO finish after implementing full deletion logic of authorities
                 authorities.forEach {
                     val idValue = it
                     if (idValue.isBlank()) {
@@ -386,6 +385,17 @@ class AuthoritiesSyncService(
                                 .set("personDisableReason", "Removed form AD (ldap sync)")
                         )
                         recordsService.mutate(personAtts)
+                    } else if (type == AuthorityType.GROUP) {
+                        check(idValue !in PROTECTED_FROM_SYNC_GROUPS && idValue != ALF_ADMINS) {
+                            "Synchronization must not delete protected group $idValue"
+                        }
+                        val current = recordsService.getAtts(authorityRef, CurrentAuthorityAtts::class.java)
+                        if (current.notExists != true) {
+                            check(current.managedBySync == syncRef) {
+                                "Group $idValue is not owned by synchronization $syncId"
+                            }
+                            recordsService.delete(authorityRef)
+                        }
                     }
                 }
             }

@@ -30,9 +30,12 @@ class TestAuthoritiesSyncFactory : AuthoritiesSyncFactory<TestSyncConfig, TestSy
     @Volatile
     var failAfterBatchIndex: Int? = null
 
+    var execution: ((AuthoritiesSyncContext<TestSyncState>) -> Unit)? = null
+
     val executedBatches = CopyOnWriteArrayList<Int>()
 
     fun reset() {
+        execution = null
         batches = emptyList()
         failAfterBatchIndex = null
         executedBatches.clear()
@@ -54,6 +57,7 @@ class TestAuthoritiesSyncFactory : AuthoritiesSyncFactory<TestSyncConfig, TestSy
     ) : AuthoritiesSync<TestSyncState> {
 
         override fun execute(state: TestSyncState?): Boolean {
+            execution?.invoke(context)
             batches.forEachIndexed { idx, batch ->
                 context.updateAuthorities(AuthorityType.PERSON, batch)
                 executedBatches.add(idx)
