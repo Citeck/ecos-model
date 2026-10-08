@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+    <changeSet author="citeck" id="20261007000000">
+        <addColumn tableName="type_permissions">
+            <column name="workspace" type="VARCHAR" defaultValue="">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <dropUniqueConstraint tableName="type_permissions" constraintName="type_permissions_ext_id_key" uniqueColumns="ext_id"/>
+        <addUniqueConstraint tableName="type_permissions" columnNames="workspace,ext_id"/>
+        <createIndex tableName="type_permissions" indexName="type_permissions_workspace_type_idx">
+            <column name="workspace"/>
+            <column name="type_ref"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

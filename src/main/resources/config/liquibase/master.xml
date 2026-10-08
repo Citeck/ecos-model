@@ -58,4 +58,5 @@
     <include file="changelog/20250908000000_update_ext_id_for_types.xml" relativeToChangelogFile="true"/>
     <include file="changelog/20250924000000_ws_scoped_num_templates.xml" relativeToChangelogFile="true"/>
     <include file="changelog/20260120000000_add_local_id_tpl_to_types.xml" relativeToChangelogFile="true"/>
+    <include file="changelog/20261007000000_ws_scoped_type_permissions.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

@@ -5,11 +5,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface TypePermsRepository extends JpaRepository<TypePermsEntity, Long>,
-            JpaSpecificationExecutor<TypePermsEntity> {
+    JpaSpecificationExecutor<TypePermsEntity> {
 
     @Nullable
-    TypePermsEntity findByExtId(String extId);
+    TypePermsEntity findByWorkspaceAndExtId(String workspace, String extId);
 
     @Nullable
-    TypePermsEntity findByTypeRef(String typeRef);
+    TypePermsEntity findByWorkspaceAndTypeRef(String workspace, String typeRef);
 }

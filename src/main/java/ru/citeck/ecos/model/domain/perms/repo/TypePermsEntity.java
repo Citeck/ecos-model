@@ -21,6 +21,7 @@ public class TypePermsEntity extends AbstractAuditingEntity {
     @SequenceGenerator(name = "hibernate_sequence")
     private Long id;
 
+    private String workspace = "";
     private String typeRef;
     private String extId;
     private String permissions;

@@ -32,3 +32,12 @@ config:
           type: JOURNAL
           config:
             recordRef: uiserv/journal@number-templates
+        - id: type-perms
+          label:
+            ru: Матрицы прав
+            en: Permission matrices
+          icon: ui/icon@i-leftmenu-tools
+          hidden: false
+          type: JOURNAL
+          config:
+            recordRef: uiserv/journal@type-perms
