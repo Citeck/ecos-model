@@ -206,9 +206,7 @@ class AuthoritiesSyncService(
                                 Schedules.fixedDelay(Duration.ofMinutes(1), repeatDelayDuration)
                             ) {
                                 AuthContext.runAsSystem {
-                                    TxnContext.doInTxn {
-                                        run(newInstance, true)
-                                    }
+                                    run(newInstance, true)
                                 }
                             }
                         }
