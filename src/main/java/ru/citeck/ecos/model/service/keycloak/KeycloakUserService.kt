@@ -27,6 +27,10 @@ class KeycloakUserService(
 ) {
     companion object {
         private val log = KotlinLogging.logger {}
+
+        internal fun isFederated(user: UserRepresentation): Boolean {
+            return !user.federationLink.isNullOrBlank()
+        }
     }
 
     private lateinit var keycloak: Keycloak
@@ -105,6 +109,13 @@ class KeycloakUserService(
         } else {
 
             val userToUpdate = users[0]
+            if (isFederated(userToUpdate)) {
+                log.debug {
+                    "Skip updating user '$userName' in Keycloak: " +
+                        "it belongs to federation provider '${userToUpdate.federationLink}'"
+                }
+                return
+            }
             userToUpdate.firstName = userAtts.firstName
             userToUpdate.lastName = userAtts.lastName
             userToUpdate.email = userAtts.email
@@ -126,8 +137,15 @@ class KeycloakUserService(
 
         val users = realmResource.users().search(userName, true)
         if (users.isNotEmpty()) {
-            val userId = users[0].id
-            realmResource.users().delete(userId)
+            val user = users[0]
+            if (isFederated(user)) {
+                log.info {
+                    "Skip deleting user '$userName' in Keycloak: " +
+                        "it belongs to federation provider '${user.federationLink}'"
+                }
+                return
+            }
+            realmResource.users().delete(user.id)
         }
     }
 
