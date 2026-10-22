@@ -12,7 +12,9 @@ import ru.citeck.ecos.model.domain.authorities.AuthoritiesTestBase
 import ru.citeck.ecos.model.domain.authsync.service.AuthoritiesSyncService
 import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.records2.RecordConstants
+import ru.citeck.ecos.txn.lib.TxnContext
 import ru.citeck.ecos.webapp.api.entity.EntityRef
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Covers [AuthoritiesSyncService] using a fake [TestAuthoritiesSyncFactory] instead of a real
@@ -49,7 +51,7 @@ class AuthoritiesSyncServiceTest : AuthoritiesTestBase() {
         AuthContext.runAsSystem { syncService.updateSynchronizations() }
     }
 
-    private fun createSyncDef(id: String, priority: Int = 0): EntityRef {
+    private fun createSyncDef(id: String, priority: Int = 0, version: Int = 0): EntityRef {
         val atts = ObjectData.create()
         atts["id"] = id
         atts["name"] = "Test sync $id"
@@ -59,7 +61,7 @@ class AuthoritiesSyncServiceTest : AuthoritiesTestBase() {
         atts["authorityType"] = AuthorityType.PERSON
         atts["manageNewAuthorities"] = false
         atts["repeatDelayDuration"] = ""
-        atts["version"] = 0
+        atts["version"] = version
         atts["config"] = ObjectData.create()
         val ref = AuthContext.runAsSystem {
             recordsService.create(AuthoritiesSyncService.SOURCE_ID, atts)
@@ -182,5 +184,41 @@ class AuthoritiesSyncServiceTest : AuthoritiesTestBase() {
         }
         assertThat(recordsService.getAtt(local, "_notExists").asBoolean()).isFalse()
         assertThat(recordsService.getAtt(foreign, "_notExists").asBoolean()).isFalse()
+    }
+
+    @Test
+    fun versionResetIsCommittedBeforeExecuteInsideOuterTransaction() {
+        // COREDEV-652: on 2.39 the scheduler runs a sync inside an outer transaction, and the LDAP
+        // group stage persists its state from a new transaction. A version reset left uncommitted in
+        // the outer transaction makes that write wait forever for the sync record row lock.
+        val ref = createSyncDef("test-sync-version-reset", version = 1)
+        val stateVersionSeenByNewTxn = AtomicInteger(-1)
+        testFactory.execution = { context ->
+            val stateVersion = TxnContext.doInNewTxn {
+                recordsService.getAtt(ref, "stateVersion?num").asInt()
+            }
+            stateVersionSeenByNewTxn.set(stateVersion)
+            // Fail fast instead of blocking forever on the row lock when the reset is not committed
+            check(stateVersion == 1) {
+                "Version reset is not committed before execute(): stateVersion=$stateVersion"
+            }
+            TxnContext.doInNewTxn {
+                context.setState(TestSyncState("written-in-new-txn"))
+            }
+        }
+
+        AuthContext.runAsSystem {
+            syncService.updateSynchronizations()
+            TxnContext.doInTxn {
+                syncService.runById(ref.getLocalId())
+            }
+        }
+
+        assertThat(stateVersionSeenByNewTxn.get()).isEqualTo(1)
+        AuthContext.runAsSystem {
+            val state = recordsService.getAtt(ref, "state?json")
+            assertThat(state["marker"].asText()).isEqualTo("written-in-new-txn")
+            assertThat(recordsService.getAtt(ref, "lastSync").asText()).isNotBlank()
+        }
     }
 }

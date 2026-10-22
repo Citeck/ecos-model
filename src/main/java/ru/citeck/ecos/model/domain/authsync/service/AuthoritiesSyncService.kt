@@ -274,13 +274,18 @@ class AuthoritiesSyncService(
 
         val stateData = recordsService.getAtts(ref, SyncStateAtts::class.java)
         val state = if (stateData.stateVersion < sync.config.version) {
-            recordsService.mutate(
-                ref,
-                mapOf(
-                    "state" to ObjectData.create(),
-                    "stateVersion" to sync.config.version
+            // Commit the reset before execute(): a sync may persist its state from a new transaction
+            // (LDAP group stage), which would otherwise wait forever for the sync record row lock
+            // held by the caller's transaction on the same thread (COREDEV-652).
+            TxnContext.doInNewTxn {
+                recordsService.mutate(
+                    ref,
+                    mapOf(
+                        "state" to ObjectData.create(),
+                        "stateVersion" to sync.config.version
+                    )
                 )
-            )
+            }
             null
         } else if (stateData.state != null && stateData.state.size() > 0) {
             stateData.state
