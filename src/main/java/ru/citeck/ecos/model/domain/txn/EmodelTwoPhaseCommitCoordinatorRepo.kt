@@ -23,7 +23,7 @@ import ru.citeck.ecos.records2.predicate.model.Predicates
 import ru.citeck.ecos.txn.lib.TxnContext
 import ru.citeck.ecos.txn.lib.commit.RecoveryData
 import ru.citeck.ecos.txn.lib.commit.TxnCommitData
-import ru.citeck.ecos.txn.lib.commit.repo.TwoPhaseCommitRepo
+import ru.citeck.ecos.txn.lib.commit.repo.AuthoritativeTwoPhaseCommitRepo
 import ru.citeck.ecos.txn.lib.commit.repo.TwoPhaseCommitStatus
 import ru.citeck.ecos.txn.lib.transaction.TxnId
 import ru.citeck.ecos.webapp.api.EcosWebAppApi
@@ -35,7 +35,7 @@ import java.time.Instant
 import kotlin.math.min
 
 @Component
-class EmodelTwoPhaseCommitCoordinatorRepo : TwoPhaseCommitRepo {
+class EmodelTwoPhaseCommitCoordinatorRepo : AuthoritativeTwoPhaseCommitRepo {
 
     companion object {
         private val log = KotlinLogging.logger {}
