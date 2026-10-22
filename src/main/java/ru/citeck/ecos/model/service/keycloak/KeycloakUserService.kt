@@ -22,6 +22,11 @@ class KeycloakUserService(
 
         private const val CREDENTIAL_TYPE_PASSWORD = "password"
         private const val REQUIRED_ACTION_UPDATE_PASSWORD = "UPDATE_PASSWORD"
+        private const val ATT_FEDERATION_LINK = "federationLink"
+
+        internal fun isFederated(user: ObjectNode): Boolean {
+            return user.path(ATT_FEDERATION_LINK).asText("").isNotBlank()
+        }
     }
 
     private var client: KeycloakAdminClient? = null
@@ -82,6 +87,13 @@ class KeycloakUserService(
             // Keep every field Keycloak sent us and change only ours, the way the admin
             // client did: a PUT with a partial representation can drop what it omits.
             val userToUpdate = users[0]
+            if (isFederated(userToUpdate)) {
+                log.debug {
+                    "Skip updating user '$userName' in Keycloak: " +
+                        "it belongs to federation provider '${userToUpdate.path(ATT_FEDERATION_LINK).asText()}'"
+                }
+                return
+            }
             val userId = userToUpdate.path("id").asText("")
             if (userId.isEmpty()) {
                 error("Keycloak returned a user without id for username '$userName'")
@@ -101,7 +113,15 @@ class KeycloakUserService(
 
         val users = client.findUsersByName(userName)
         if (users.isNotEmpty()) {
-            val userId = users[0].path("id").asText("")
+            val user = users[0]
+            if (isFederated(user)) {
+                log.info {
+                    "Skip deleting user '$userName' in Keycloak: " +
+                        "it belongs to federation provider '${user.path(ATT_FEDERATION_LINK).asText()}'"
+                }
+                return
+            }
+            val userId = user.path("id").asText("")
             if (userId.isEmpty()) {
                 error("Keycloak returned a user without id for username '$userName'")
             }
