@@ -5,7 +5,7 @@
 
     <groupId>ru.citeck.ecos.model</groupId>
     <artifactId>ecos-model</artifactId>
-    <version>2.39.20</version>
+    <version>2.39.21-SNAPSHOT</version>
     <name>Ecos Model</name>
 
     <parent>
