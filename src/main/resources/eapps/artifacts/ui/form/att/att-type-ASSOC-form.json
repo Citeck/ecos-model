@@ -32,6 +32,28 @@
         "optionalWhenDisabled": false,
         "type": "checkbox",
         "input": true
+      },
+      {
+        "label": {
+          "ru": "Сохранять дочерние записи",
+          "en": "Preserve child records"
+        },
+        "tooltip": {
+          "ru": "При удалении связи или родительской записи дочерние записи сохраняются. По умолчанию дочерние записи удаляются.",
+          "en": "Preserve child records when the association is removed or the parent record is deleted. By default, child records are deleted."
+        },
+        "key": "allowChildDetach",
+        "defaultValue": false,
+        "clearOnHide": true,
+        "refreshOn": [],
+        "optionalWhenDisabled": false,
+        "conditional": {
+          "show": "true",
+          "when": "child",
+          "eq": "true"
+        },
+        "type": "checkbox",
+        "input": true
       }
     ]
   },
