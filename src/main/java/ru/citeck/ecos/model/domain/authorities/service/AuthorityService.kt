@@ -19,6 +19,7 @@ import ru.citeck.ecos.records3.record.request.RequestContext
 import ru.citeck.ecos.txn.lib.TxnContext
 import ru.citeck.ecos.webapp.api.entity.EntityRef
 import java.util.LinkedList
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
 
 @Service
@@ -29,6 +30,7 @@ class AuthorityService(
 
     companion object {
         private const val PERSON_AUTHORITIES_CACHE_KEY = "person-authorities-cache"
+        private const val PERSON_AUTHORITIES_CACHE_LOCK_TIMEOUT_SECONDS = 30L
 
         private const val AUTH_GROUPS_TREE_VERSION_COUNTER_KEY = "auth-groups-tree-version-counter"
 
@@ -45,6 +47,9 @@ class AuthorityService(
     }
 
     private final val personAuthoritiesCache: IMap<String, Set<String>> = hazelcast.getMap(PERSON_AUTHORITIES_CACHE_KEY)
+
+    // Lock a separate map: Hazelcast clear() skips locked entries in the authorities data map.
+    private final val personAuthoritiesCacheLocks: IMap<String, Boolean> = hazelcast.getMap("$PERSON_AUTHORITIES_CACHE_KEY-locks")
 
     @Volatile
     private var authGroupsTree = AuthGroupsTree(-1)
@@ -69,8 +74,11 @@ class AuthorityService(
     }
 
     fun getAuthoritiesForPerson(personId: String): Set<String> {
-        return personAuthoritiesCache.computeIfAbsent(personId) {
-            getAuthoritiesForPersonImpl(personId)
+        personAuthoritiesCache[personId]?.let { return it }
+        return withPersonCacheLock(personId) {
+            personAuthoritiesCache.computeIfAbsent(personId) {
+                getAuthoritiesForPersonImpl(personId)
+            }
         }
     }
 
@@ -140,7 +148,52 @@ class AuthorityService(
     }
 
     fun resetPersonCache(personId: String) {
-        personAuthoritiesCache.remove(personId)
+        val resetAction: () -> Unit = {
+            // Best effort only: an in-flight loader may still publish after the unlocked removal.
+            withPersonCacheLock(personId, onTimeout = { personAuthoritiesCache.remove(personId) }) {
+                personAuthoritiesCache.remove(personId)
+            }
+        }
+        resetAction()
+        // Readers can refill the shared cache before the membership change commits.
+        TxnContext.doAfterCommit(-1000f, false, resetAction)
+        // A read in the writer's transaction can also cache membership that is later rolled back.
+        TxnContext.doAfterRollback(-1000f, false, resetAction)
+    }
+
+    private inline fun <T> withPersonCacheLock(personId: String, onTimeout: () -> Unit = {}, action: () -> T): T {
+        // Hazelcast computes this loader locally: a removal must wait for an in-flight load's putIfAbsent.
+        val locked = try {
+            personAuthoritiesCacheLocks.tryLock(personId, PERSON_AUTHORITIES_CACHE_LOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+        } catch (e: InterruptedException) {
+            Thread.currentThread().interrupt()
+            throw IllegalStateException("Interrupted while waiting for person authorities cache lock. Person: '$personId'", e)
+        }
+        try {
+            // Hazelcast may defer interruption until the remote lock invocation completes.
+            if (Thread.currentThread().isInterrupted) {
+                throw IllegalStateException(
+                    "Interrupted while waiting for person authorities cache lock. Person: '$personId'",
+                    InterruptedException()
+                )
+            }
+            if (!locked) {
+                val timeout = IllegalStateException(
+                    "Could not acquire person authorities cache lock within $PERSON_AUTHORITIES_CACHE_LOCK_TIMEOUT_SECONDS seconds. Person: '$personId'"
+                )
+                try {
+                    onTimeout()
+                } catch (onTimeoutError: Exception) {
+                    timeout.addSuppressed(onTimeoutError)
+                }
+                throw timeout
+            }
+            return action()
+        } finally {
+            if (locked) {
+                personAuthoritiesCacheLocks.unlock(personId)
+            }
+        }
     }
 
     fun resetGroupCache(groupId: String) {

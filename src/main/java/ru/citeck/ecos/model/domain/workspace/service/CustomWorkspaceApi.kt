@@ -1,6 +1,5 @@
 package ru.citeck.ecos.model.domain.workspace.service
 
-import com.github.benmanes.caffeine.cache.Caffeine
 import jakarta.annotation.PostConstruct
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Component
@@ -9,7 +8,6 @@ import ru.citeck.ecos.model.lib.authorities.AuthorityType
 import ru.citeck.ecos.model.lib.workspace.api.WorkspaceApi
 import ru.citeck.ecos.model.lib.workspace.api.WsMembershipType
 import ru.citeck.ecos.webapp.api.entity.EntityRef
-import java.time.Duration
 import java.util.Optional
 
 @Primary
@@ -19,30 +17,21 @@ class CustomWorkspaceApi(
     private val modelServiceFactory: ModelServiceFactory
 ) : WorkspaceApi {
 
-    private val userWorkspacesCache = Caffeine.newBuilder()
-        .expireAfterWrite(Duration.ofSeconds(30))
-        .maximumSize(1000)
-        .build<UserWorkspacesCacheKey, Set<String>> { key ->
-            workspaceService.getUserWorkspaces(
-                key.user,
-                key.membershipType,
-                sortByVisits = false
-            ).workspaces
-        }
+    private val userWorkspacesCache = WorkspaceLookupCache<UserWorkspacesCacheKey, Set<String>> { key ->
+        workspaceService.getUserWorkspaces(
+            key.user,
+            key.membershipType,
+            sortByVisits = false
+        ).workspaces
+    }
 
-    private val isUserManagerOfCache = Caffeine.newBuilder()
-        .expireAfterWrite(Duration.ofSeconds(30))
-        .maximumSize(1000)
-        .build<IsUserManagerOfKey, Boolean> { key ->
-            workspaceService.isUserManagerOf(key.user, key.workspace)
-        }
+    private val isUserManagerOfCache = WorkspaceLookupCache<IsUserManagerOfKey, Boolean> { key ->
+        workspaceService.isUserManagerOf(key.user, key.workspace)
+    }
 
-    private val workspaceManagersRefsCache = Caffeine.newBuilder()
-        .expireAfterWrite(Duration.ofSeconds(30))
-        .maximumSize(1000)
-        .build<String, Optional<Set<EntityRef>>> { workspaceId ->
-            Optional.ofNullable(workspaceService.getWorkspaceManagersRefs(workspaceId))
-        }
+    private val workspaceManagersRefsCache = WorkspaceLookupCache<String, Optional<Set<EntityRef>>> { workspaceId ->
+        Optional.ofNullable(workspaceService.getWorkspaceManagersRefs(workspaceId))
+    }
 
     @PostConstruct
     fun init() {
@@ -84,7 +73,7 @@ class CustomWorkspaceApi(
     }
 
     fun evictUserWorkspaces(userId: String) {
-        userWorkspacesCache.asMap().keys.removeIf { it.user == userId }
+        userWorkspacesCache.invalidateMatching { it.user == userId }
     }
 
     fun evictUserWorkspacesForAuthority(authorityRef: EntityRef) {
@@ -100,11 +89,11 @@ class CustomWorkspaceApi(
     }
 
     fun evictIsUserManagerOfForWorkspace(workspaceId: String) {
-        isUserManagerOfCache.asMap().keys.removeIf { it.workspace == workspaceId }
+        isUserManagerOfCache.invalidateMatching { it.workspace == workspaceId }
     }
 
     fun evictIsUserManagerOfForUser(userId: String) {
-        isUserManagerOfCache.asMap().keys.removeIf { it.user == userId }
+        isUserManagerOfCache.invalidateMatching { it.user == userId }
     }
 
     fun evictAllIsUserManagerOf() {
