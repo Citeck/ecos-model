@@ -147,3 +147,13 @@ Desktop.ini
 # Working docs
 ######################
 docs/
+
+# Pi
+/.pi/*
+
+!/.pi/settings.json
+!/.pi/AGENTS.md
+!/.pi/prompts/
+!/.pi/extensions/
+!/.pi/skills/
+!/.pi/themes/
