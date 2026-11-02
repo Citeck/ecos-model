@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component
 import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.model.domain.comments.api.extractor.CommentExtractor
 import ru.citeck.ecos.model.domain.comments.api.validator.CommentValidator
+import ru.citeck.ecos.model.domain.comments.config.CommentCreationPermissions
 import ru.citeck.ecos.model.domain.comments.config.CommentDesc
 import ru.citeck.ecos.model.lib.utils.ModelUtils
 import ru.citeck.ecos.records2.RecordConstants
@@ -28,7 +29,8 @@ private const val RECORD_READ_PERM_ATT = "hasReadRecordsPermissions"
 
 @Component
 class CommentsRecordsProxy(
-    private val commentExtractor: CommentExtractor
+    private val commentExtractor: CommentExtractor,
+    private val creationPermissions: CommentCreationPermissions
 ) : RecordsDaoProxy(
     COMMENT_DAO_ID,
     COMMENT_REPO_DAO_ID
@@ -45,6 +47,12 @@ class CommentsRecordsProxy(
     }
 
     override fun mutate(records: List<LocalRecordAtts>): List<String> {
+        // Validate the whole batch before creating attachments or updating parent associations.
+        for (record in records) {
+            if (record.id.isEmpty()) {
+                creationPermissions.checkCreate(record.getAtt(CommentDesc.ATT_RECORD).asText().toEntityRef())
+            }
+        }
         for (record in records) {
             val text = record.getAtt(CommentDesc.ATT_TEXT).asText()
             val hasDocs = isMutAttsHasDocs(record)

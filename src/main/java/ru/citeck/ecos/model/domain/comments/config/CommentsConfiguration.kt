@@ -41,7 +41,8 @@ class CommentsConfiguration(private val dbDomainFactory: DbDomainFactory) {
         dataSource: DataSource,
         commentsEmitEventsDbRecordsListener: CommentsEmitEventsDbRecordsListener,
         recordsService: RecordsService,
-        commentsMentionListener: CommentsMentionListener
+        commentsMentionListener: CommentsMentionListener,
+        creationPermissions: CommentCreationPermissions
     ): RecordsDao {
 
         val permsComponent = object : DbPermsComponent {
@@ -119,6 +120,7 @@ class CommentsConfiguration(private val dbDomainFactory: DbDomainFactory) {
             .withPermsComponent(permsComponent)
             .build()
 
+        dao.addListener(creationPermissions)
         dao.addListener(commentsEmitEventsDbRecordsListener)
         dao.addListener(commentsMentionListener)
         dao.addAttributesMixin(CommentsMixin())
