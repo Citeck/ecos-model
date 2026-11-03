@@ -22,7 +22,8 @@ class PrivateGroupsService(
     private val tasksApi: EcosTasksApi
 ) {
 
-    private val privateGroups = AtomicReference<Set<String>>()
+    // Each invalidation replaces the state, including when a cache miss is still loading.
+    private val privateGroups = AtomicReference(CacheState())
 
     @PostConstruct
     fun init() {
@@ -36,22 +37,21 @@ class PrivateGroupsService(
                 )
             )
             withExclusive(false)
-            withAction { privateGroups.set(null) }
+            withAction { privateGroups.set(CacheState()) }
         }
         tasksApi.getMainScheduler().schedule(
             "reset-private-groups-cache",
             Schedules.fixedDelay(Duration.ofMinutes(1))
         ) {
-            privateGroups.set(null)
+            privateGroups.set(CacheState())
         }
     }
 
-    @Synchronized
     fun getPrivateGroups(): Set<String> {
-        val groups = privateGroups.get()
-        if (groups != null) {
-            return groups
-        }
+        val state = privateGroups.get()
+        state.groups?.let { return it }
+        // Never wait for a Records/JDBC lookup under a shared cache lock. A caller may
+        // already own the last connection needed by another concurrent cache loader.
         val queryRes = AuthContext.runAsSystem {
             recordsService.query(
                 RecordsQuery.create()
@@ -63,7 +63,11 @@ class PrivateGroupsService(
         val newGroups = queryRes.getRecords().mapTo(LinkedHashSet()) {
             AuthGroup.PREFIX + it.getLocalId()
         }
-        this.privateGroups.set(newGroups)
+        // A load from before invalidation may finish for its caller, but cannot restore
+        // stale shared rights. Concurrent misses deliberately load in their own context.
+        privateGroups.compareAndSet(state, CacheState(newGroups))
         return newGroups
     }
+
+    private class CacheState(val groups: Set<String>? = null)
 }
