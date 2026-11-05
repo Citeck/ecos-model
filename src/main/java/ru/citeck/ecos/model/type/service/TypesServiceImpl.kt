@@ -44,7 +44,7 @@ class TypesServiceImpl(
             "doclib-file"
         )
         private val BASE_TYPES_WO_AUTO_CREATION = setOf("base", "user-base", "type")
-        private const val VALID_ID_PATTERN_TXT = "^[\\w\$:/.-]+\\w\$"
+        private const val VALID_ID_PATTERN_TXT = "^[\\w\$/.-]+\\w\$"
         private val VALID_ID_PATTERN = Pattern.compile(VALID_ID_PATTERN_TXT)
     }
 
