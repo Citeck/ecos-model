@@ -48,7 +48,8 @@
                             },
                             "key": "id",
                             "validate": {
-                              "required": true
+                              "required": true,
+                              "custom": "valid = true;\nif (_.get(instance, 'root.options.formMode') === 'CREATE' && input && input.indexOf(':') !== -1) {\n  valid = Citeck.helpers.getMLValue({\n    ru: 'Идентификатор типа не должен содержать двоеточие',\n    en: 'Type identifier must not contain a colon'\n  });\n}"
                             },
                             "defaultValue": "",
                             "refreshOn": [],
