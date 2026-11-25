@@ -38,8 +38,12 @@ class CommentCreationPermissionsTest {
     private lateinit var records: RecordsService
 
     private val parentsSource = "comment-permissions-parent-" + UUID.randomUUID()
+    private var missingParentReads = 0
     private val parents = object : InMemDataRecordsDao(parentsSource) {
         override fun getRecordAtts(recordId: String): Any? {
+            if (recordId == "missing") {
+                missingParentReads++
+            }
             val base = super.getRecordAtts(recordId) as? AttValue ?: return null
             return object : AttValueDelegate(base) {
                 override fun getAtt(name: String): Any? {
@@ -161,15 +165,22 @@ class CommentCreationPermissionsTest {
 
     @ParameterizedTest
     @ValueSource(strings = [COMMENT_DAO_ID, COMMENT_REPO_DAO_ID])
-    fun `system and admin cannot create comments on a missing record`(source: String) {
+    fun `system can create comments on a missing record`(source: String) {
         val missing = EntityRef.create(parentsSource, "missing")
-        AuthContext.runAsSystem {
-            assertThat(records.getAtt(missing, "_notExists?bool").asBoolean()).isTrue()
-            assertThrows<Exception> { createComment(source, missing) }
+        customParentRefs.add(missing)
+        val comment = AuthContext.runAsSystem { createComment(source, missing) }
+        assertThat(missingParentReads).isZero()
+        assertThat(commentsFor(missing).map { it.getLocalId() }).containsExactly(comment.getLocalId())
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = [COMMENT_DAO_ID, COMMENT_REPO_DAO_ID])
+    fun `admin cannot create comments on a missing record`(source: String) {
+        val missing = EntityRef.create(parentsSource, "missing")
+        val exception = assertThrows<Exception> {
+            AuthContext.runAs("commentAdmin", listOf(AuthRole.ADMIN)) { createComment(source, missing) }
         }
-        AuthContext.runAs("commentAdmin", listOf(AuthRole.ADMIN)) {
-            assertThrows<Exception> { createComment(source, missing) }
-        }
+        assertThat(exception).hasStackTraceContaining("cannot create a comment on a missing or inaccessible record")
         assertThat(commentsFor(missing)).isEmpty()
     }
 

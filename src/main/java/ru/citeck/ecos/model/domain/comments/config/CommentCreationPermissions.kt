@@ -1,6 +1,7 @@
 package ru.citeck.ecos.model.domain.comments.config
 
 import org.springframework.stereotype.Component
+import ru.citeck.ecos.context.lib.auth.AuthContext
 import ru.citeck.ecos.data.sql.records.listener.DbRecordCreatedEvent
 import ru.citeck.ecos.data.sql.records.listener.DbRecordsListenerAdapter
 import ru.citeck.ecos.records2.RecordConstants
@@ -12,6 +13,9 @@ import ru.citeck.ecos.webapp.api.entity.toEntityRef
 class CommentCreationPermissions(private val recordsService: RecordsService) : DbRecordsListenerAdapter() {
 
     fun checkCreate(parent: EntityRef) {
+        if (AuthContext.isRunAsSystem()) {
+            return
+        }
         // Custom DAOs need not expose permissions or _notExists. Only explicit non-existence denies creation.
         check(!recordsService.getAtt(parent, "${RecordConstants.ATT_NOT_EXISTS}?bool").asBoolean()) {
             "Permission denied: cannot create a comment on a missing or inaccessible record"
@@ -19,6 +23,9 @@ class CommentCreationPermissions(private val recordsService: RecordsService) : D
     }
 
     override fun onCreated(event: DbRecordCreatedEvent) {
+        if (AuthContext.isRunAsSystem()) {
+            return
+        }
         // Also protect direct comment-repo mutations. Listener failures roll back the creation.
         checkCreate(recordsService.getAtt(event.record, "${CommentDesc.ATT_RECORD}?id").asText().toEntityRef())
     }
